@@ -24,9 +24,10 @@ import MediaWiki
 main :: IO ()
 main = do
     (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
-    let (pages, failed) = partitionEithers $ map (eitherResult . toPage) $ filter isInteresting docs
+    let (failed, pages) = partitionEithers $ map (eitherResult . toPage) $ filter isInteresting docs
     mapM_ print $ take 5 $ pages
     BSL.writeFile "out" $ CBOR.toLazyByteString $ foldMap CBOR.encode pages
+    print failed
 
 eitherResult :: Result a -> Either String a
 eitherResult (Success a) = Right a
