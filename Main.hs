@@ -1,12 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 
 import Debug.Trace
+import Control.Monad
 import Data.Either
 import Data.Maybe
-import GHC.Generics
 import Data.Char (isSpace)
 
 import qualified Data.ByteString.Lazy as BSL
@@ -20,6 +19,7 @@ import Text.Trifecta
 
 import ParseDump
 import MediaWiki
+import Types
 
 main :: IO ()
 main = do
@@ -38,22 +38,6 @@ isInteresting WikiDoc{..} = not $
        "#REDIRECT" `BS.isInfixOf` BS.take 20 docText
     || "Talk:" `BS.isPrefixOf` docTitle
     -- || "Portal:" `BS.isPrefixOf` docTitle
-
-instance CBOR.Serialise PageName
-
-data PageSkeleton = Section !T.Text [PageSkeleton]
-                  | Para ![ParaBody]
-                  deriving (Show, Generic)
-instance CBOR.Serialise PageSkeleton
-
-data ParaBody = ParaText !T.Text
-              | ParaLink !PageName !T.Text
-              deriving (Show, Generic)
-instance CBOR.Serialise ParaBody
-
-data Page = Page { pageName :: PageName, pageSkeleton :: [PageSkeleton] }
-          deriving (Show, Generic)
-instance CBOR.Serialise Page
 
 toPage :: WikiDoc -> Result Page
 toPage WikiDoc{..} =
