@@ -11,3 +11,6 @@ You'll need `ghc >=8.0.1` and `cabal-install >=0.24`.
  2. Checkout the submodules: `git submodule update --init`
  3. Build it: `cabal new-build`
  4. Move the executables to `bin/`: `mkdir -p bin; for i in $(find dist-newstyle/build/ -executable -a -type f -a -! -iname '*.so'); do ln -fs $(pwd)/$i bin/$(basename $i); done`
+ 
+The `wiki-annotate` executable will be found in the `bin/` directory. You can
+either add this directory to `PATH` or invoke it with an absolute path.
