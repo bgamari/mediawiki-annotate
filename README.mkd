@@ -1,7 +1,9 @@
 # `mediawiki-annotate`
 
 This is a set of tools for extracting text and document structure from MediaWiki
-documents.
+documents. The `wiki-annotate` executable expects MediaWiki
+[XML dump data](https://www.mediawiki.org/wiki/Help:Export) on
+`stdin` and produces a stream of CBOR documents on `stdout`.
 
 ## Installation
 
