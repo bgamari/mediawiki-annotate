@@ -1,0 +1,3 @@
+[submodule "mediawiki-parser"]
+	path = mediawiki-parser
+	url = git://github.com/bgamari/mediawiki-parser
