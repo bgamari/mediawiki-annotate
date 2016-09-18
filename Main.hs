@@ -7,6 +7,7 @@ import Control.Monad
 import Data.Either
 import Data.Maybe
 import Data.Char (isSpace)
+import System.IO
 
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
@@ -25,9 +26,9 @@ main :: IO ()
 main = do
     (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
     let (failed, pages) = partitionEithers $ map (eitherResult . toPage) $ filter isInteresting docs
-    mapM_ print $ take 5 $ pages
-    BSL.writeFile "out" $ CBOR.toLazyByteString $ foldMap CBOR.encode pages
-    print failed
+    BSL.putStr $ CBOR.toLazyByteString $ foldMap CBOR.encode pages
+    hPutStrLn stderr "Failures:"
+    mapM_ (hPutStrLn stderr . show) failed
 
 eitherResult :: Result a -> Either String a
 eitherResult (Success a) = Right a
@@ -41,8 +42,7 @@ isInteresting WikiDoc{..} = not $
 
 toPage :: WikiDoc -> Result Page
 toPage WikiDoc{..} =
-    traceShow docTitle
-    (toPage' <$> parseByteString (many MediaWiki.doc) mempty docText)
+    toPage' <$> parseByteString (many MediaWiki.doc) mempty docText
   where
     toPage' contents =
         Page { pageName     = PageName docTitle
