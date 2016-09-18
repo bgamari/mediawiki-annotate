@@ -18,8 +18,8 @@ import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 import Text.Trifecta
 
-import ParseDump
-import MediaWiki
+import Data.MediaWiki.XmlDump
+import Data.MediaWiki.Markup as Markup
 import Types
 
 main :: IO ()
@@ -42,7 +42,7 @@ isInteresting WikiDoc{..} = not $
 
 toPage :: WikiDoc -> Result Page
 toPage WikiDoc{..} =
-    toPage' <$> parseByteString (many MediaWiki.doc) mempty docText
+    toPage' <$> parseByteString (many Markup.doc) mempty docText
   where
     toPage' contents =
         Page { pageName     = PageName docTitle

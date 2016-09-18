@@ -5,7 +5,7 @@ module Types where
 import GHC.Generics
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Text as T
-import MediaWiki
+import Data.MediaWiki.Markup
 
 instance CBOR.Serialise PageName
 
