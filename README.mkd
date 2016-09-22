@@ -16,3 +16,36 @@ You'll need `ghc >=8.0.1` and `cabal-install >=0.24`.
  
 The `wiki-annotate` executable will be found in the `bin/` directory. You can
 either add this directory to `PATH` or invoke it with an absolute path.
+
+## CBOR serialization
+
+The intermediate CBOR representation consists of a stream of packed CBOR objects of the form,
+
+```
+Page:
+    Int: 0
+    String: Page name
+    List[PageSkeleton]: Page content
+    
+PageSkeleton: Section | Para
+
+Section:
+    Int: 0
+    String: Section title
+    List[PageSkeleton]: Section contents
+    
+Para:
+    Int: 1
+    List[ParaBody]: Paragraph body
+    
+ParaBody: ParaText | ParaLink
+
+ParaText:
+    Int: 0
+    String: Text
+    
+ParaLink:
+    Int: 1
+    String: Page name
+    String: Anchor text
+```
