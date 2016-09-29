@@ -1,13 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import Debug.Trace
-import Control.Monad
 import Data.Either
 import Data.Maybe
 import Data.Monoid
-import Data.Char (isSpace)
 import System.IO
 
 import qualified Data.ByteString.Lazy as BSL
@@ -46,6 +43,7 @@ toPage WikiDoc{..} =
     toPage' <$> parseByteString (many Markup.doc) mempty docText
   where
     toPage' contents =
+        --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = PageName docTitle
              , pageSkeleton = toSkeleton
                             $ map fixTemplate
