@@ -61,18 +61,22 @@ dropRefs (XmlOpenClose "ref" : xs) = dropRefs xs
 dropRefs (x:xs) = x : dropRefs xs
 dropRefs [] = []
 
-toParaBody :: Doc -> Maybe ParaBody
-toParaBody (getText -> Just t)
-  | otherwise       = Just $ ParaText t
+-- | We need to make sure we handle cases like,
+-- @''[postwar tribunals]''@
+toParaBody :: Doc -> Maybe [ParaBody]
+toParaBody (Text x)        = Just [ParaText $ TE.decodeUtf8 x]
+toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
+toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
+toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (InternalLink page anchor)
   | PageName page' <- page
   , "File:" `BS.isPrefixOf` page'
   = Nothing
   | otherwise
-  = Just $ ParaLink page t
+  = Just [ParaLink page t]
   where t = T.concat $ mapMaybe getText anchor
 toParaBody (ExternalLink _url anchor)
-  = Just $ ParaText $ T.concat $ mapMaybe getText anchor
+  = Just [ParaText $ T.concat $ mapMaybe getText anchor]
 toParaBody _ = Nothing
 
 getText :: Doc -> Maybe T.Text
@@ -107,11 +111,10 @@ toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
   | (bodies@(_:_), docs') <- getPrefix toParaBody docs =
-        Para (toParas bodies) : toSkeleton docs'
+        Para (toParas $ concat bodies) : toSkeleton docs'
 toSkeleton (Header lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Header lvl' _) = lvl' <= lvl
         isParentHeader _               = False
-        childSkels = toSkeleton children
     in Section (TE.decodeUtf8 title) (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
