@@ -46,12 +46,23 @@ toPage WikiDoc{..} =
   where
     toPage' contents =
         Page { pageName     = PageName docTitle
-             , pageSkeleton = toSkeleton contents
+             , pageSkeleton = toSkeleton $ dropRefs contents
              }
+
+dropRefs :: [Doc] -> [Doc]
+dropRefs (XmlOpen "ref" : xs) =
+    case dropWhile (not . isClose) xs of
+      []   -> []
+      _:xs -> dropRefs xs
+  where
+    isClose (XmlClose "ref") = True
+    isClose _                = False
+dropRefs (XmlOpenClose "ref" : xs) = dropRefs xs
+dropRefs (x:xs) = x : dropRefs xs
+dropRefs [] = []
 
 toParaBody :: Doc -> Maybe ParaBody
 toParaBody (getText -> Just t)
-  | T.all isSpace t = Nothing
   | otherwise       = Just $ ParaText t
 toParaBody (InternalLink page anchor)
   | PageName page' <- page
