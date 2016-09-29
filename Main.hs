@@ -6,11 +6,12 @@ import Debug.Trace
 import Control.Monad
 import Data.Either
 import Data.Maybe
+import Data.Monoid
 import Data.Char (isSpace)
 import System.IO
 
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
@@ -46,7 +47,9 @@ toPage WikiDoc{..} =
   where
     toPage' contents =
         Page { pageName     = PageName docTitle
-             , pageSkeleton = toSkeleton $ dropRefs contents
+             , pageSkeleton = toSkeleton
+                            $ map fixTemplate
+                            $ dropRefs contents
              }
 
 dropRefs :: [Doc] -> [Doc]
@@ -60,6 +63,15 @@ dropRefs (XmlOpen "ref" : xs) =
 dropRefs (XmlOpenClose "ref" : xs) = dropRefs xs
 dropRefs (x:xs) = x : dropRefs xs
 dropRefs [] = []
+
+fixTemplate :: Doc -> Doc
+fixTemplate x@(Template tmpl args) =
+    case tmpl of
+      "convert"
+        | (Nothing, val) : (Nothing, unit) : _ <- args ->
+          Text $ val <> " " <> unit
+      _ -> x
+fixTemplate x = x
 
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
