@@ -23,17 +23,13 @@ import Types
 main :: IO ()
 main = do
     (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
-    mapM_ printResult $ map (eitherResult . toPage) $ filter isInteresting docs
+    mapM_ (printResult . toPage) $ filter isInteresting docs
 
-printResult :: Either String Page -> IO ()
-printResult (Right page) =
+printResult :: Result Page -> IO ()
+printResult (Success page) =
     BSL.putStr $ CBOR.toLazyByteString $ CBOR.encode page
-printResult (Left err) =
-    hPutStrLn stderr err
-
-eitherResult :: Result a -> Either String a
-eitherResult (Success a) = Right a
-eitherResult (Failure a) = Left $ show a
+printResult (Failure err) =
+    hPrint stderr $ _errDoc err
 
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
