@@ -15,6 +15,7 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 import Text.Trifecta
+import Text.Trifecta.Delta
 
 import Data.MediaWiki.XmlDump
 import Data.MediaWiki.Markup as Markup
@@ -39,8 +40,9 @@ isInteresting WikiDoc{..} = not $
 
 toPage :: WikiDoc -> Result Page
 toPage WikiDoc{..} =
-    toPage' <$> parseByteString (many Markup.doc) mempty docText
+    toPage' <$> parseByteString (many Markup.doc) delta docText
   where
+    delta = Directed docTitle 0 0 0 0
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = PageName docTitle
