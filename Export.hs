@@ -27,7 +27,7 @@ prettySkeleton = go 1
           <> map (go (n+1)) children
           <> [""]
     go _ (Para paras) =
-        unwords (map goPara paras) ++ "\n"
+        concatMap goPara paras ++ "\n"
 
     goPara (ParaText t) = T.unpack t
     goPara (ParaLink (PageName name) anchor) =
