@@ -3,6 +3,7 @@
 
 import Debug.Trace
 import Data.Either
+import Data.List
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -14,8 +15,6 @@ import qualified Data.Text.Encoding as TE
 
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
-import Text.Trifecta
-import Text.Trifecta.Delta
 
 import Data.MediaWiki.XmlDump
 import Data.MediaWiki.Markup as Markup
@@ -26,11 +25,12 @@ main = do
     (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
     mapM_ (printResult . toPage) $ filter isInteresting docs
 
-printResult :: Result Page -> IO ()
-printResult (Success page) =
+printResult :: Either String Page -> IO ()
+printResult (Right page) = do
     BSL.putStr $ CBOR.toLazyByteString $ CBOR.encode page
-printResult (Failure err) =
-    hPrint stderr $ _errDoc err
+    hPutStr stderr "."
+printResult (Left err) =
+    hPutStrLn stderr $ "\n"<>err
 
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
@@ -38,28 +38,27 @@ isInteresting WikiDoc{..} = not $
     || "Talk:" `BS.isPrefixOf` docTitle
     -- || "Portal:" `BS.isPrefixOf` docTitle
 
-toPage :: WikiDoc -> Result Page
+toPage :: WikiDoc -> Either String Page
 toPage WikiDoc{..} =
-    toPage' <$> parseByteString (many Markup.doc) delta docText
+    toPage' <$> Markup.parse (T.unpack $ TE.decodeUtf8 docText)
   where
-    delta = Directed docTitle 0 0 0 0
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
-        Page { pageName     = PageName docTitle
+        Page { pageName     = PageName $ T.unpack $ TE.decodeUtf8 docTitle
              , pageSkeleton = toSkeleton
                             $ map fixTemplate
                             $ dropRefs contents
              }
 
 dropRefs :: [Doc] -> [Doc]
-dropRefs (XmlOpen "ref" : xs) =
+dropRefs (XmlOpen "ref" _ : xs) =
     case dropWhile (not . isClose) xs of
       []   -> []
       _:xs -> dropRefs xs
   where
     isClose (XmlClose "ref") = True
     isClose _                = False
-dropRefs (XmlOpenClose "ref" : xs) = dropRefs xs
+dropRefs (XmlOpenClose "ref" _ : xs) = dropRefs xs
 dropRefs (x:xs) = x : dropRefs xs
 dropRefs [] = []
 
@@ -68,34 +67,43 @@ fixTemplate x@(Template tmpl args) =
     case tmpl of
       "convert"
         | (Nothing, val) : (Nothing, unit) : _ <- args ->
-          Text $ val <> " " <> unit
+          Text $ getAllText val <> " " <> getAllText unit
+      "lang"
+        | _ : (Nothing, text) : _ <- args ->
+          Text $ getAllText text
       _ -> x
 fixTemplate x = x
 
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: Doc -> Maybe [ParaBody]
-toParaBody (Text x)        = Just [ParaText $ TE.decodeUtf8 x]
+toParaBody (Text x)        = Just [ParaText $ T.pack x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
-toParaBody (InternalLink page anchor)
+toParaBody (InternalLink page parts)
   | PageName page' <- page
-  , "File:" `BS.isPrefixOf` page'
+  , "File:" `isPrefixOf` page'
   = Nothing
   | otherwise
   = Just [ParaLink page t]
-  where t = T.concat $ mapMaybe getText anchor
-toParaBody (ExternalLink _url anchor)
-  = Just [ParaText $ T.concat $ mapMaybe getText anchor]
+  where t = case parts of
+              [anchor] -> T.pack $ getAllText anchor
+              _        -> T.pack $ getPageName page
+toParaBody (ExternalLink _url (Just anchor))
+  = Just [ParaText $ T.pack anchor]
 toParaBody _ = Nothing
 
-getText :: Doc -> Maybe T.Text
-getText (Text x)        = Just $ TE.decodeUtf8 x
-getText (Bold xs)       = Just $ T.concat $ mapMaybe getText xs
-getText (Italic xs)     = Just $ T.concat $ mapMaybe getText xs
-getText (BoldItalic xs) = Just $ T.concat $ mapMaybe getText xs
+getText :: Doc -> Maybe String
+getText (Text x)        = Just $ x
+getText (Char c)        = Just $ [c]
+getText (Bold xs)       = Just $ getAllText xs
+getText (Italic xs)     = Just $ getAllText xs
+getText (BoldItalic xs) = Just $ getAllText xs
 getText _               = Nothing
+
+getAllText :: [Doc] -> String
+getAllText = concat . mapMaybe getText
 
 
 getPrefix :: (a -> Maybe b) -> [a] -> ([b], [a])
@@ -123,9 +131,9 @@ toSkeleton [] = []
 toSkeleton docs
   | (bodies@(_:_), docs') <- getPrefix toParaBody docs =
         Para (toParas $ concat bodies) : toSkeleton docs'
-toSkeleton (Header lvl title : docs) =
+toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
-        isParentHeader (Header lvl' _) = lvl' <= lvl
-        isParentHeader _               = False
-    in Section (TE.decodeUtf8 title) (toSkeleton children) : toSkeleton docs'
+        isParentHeader (Heading lvl' _) = lvl' <= lvl
+        isParentHeader _                = False
+    in Section (T.pack title) (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
