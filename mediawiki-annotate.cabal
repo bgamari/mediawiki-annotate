@@ -15,6 +15,7 @@ executable wiki-annotate
   main-is:             Main.hs
   other-modules:       Types
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
+  ghc-options:         -rtsopts
   build-depends:       base >=4.9 && <4.10,
                        binary-serialise-cbor >=0.1 && <0.2,
                        text >=1.2 && <1.3,

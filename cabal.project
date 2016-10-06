@@ -2,3 +2,4 @@ packages:
     ./
     binary-serialise-cbor/
     mediawiki-parser/
+    pipes-zlib/
