@@ -10,7 +10,12 @@ import Data.MediaWiki.Markup
 main :: IO ()
 main = do
     c <- readValues @Page <$> BSL.getContents
-    mapM_ (mapM_ (putStrLn . prettySkeleton) . pageSkeleton) c
+    mapM_ putPage c
+
+putPage :: Page -> IO ()
+putPage p = do
+    putStrLn $ "\n~~~~~~~~" ++ show (pageName p)
+    mapM_ (putStrLn . prettySkeleton) (pageSkeleton p)
 
 prettySkeleton :: PageSkeleton -> String
 prettySkeleton = go 1
