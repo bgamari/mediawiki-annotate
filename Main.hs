@@ -1,9 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import Debug.Trace
-import Data.Either
-import Data.List
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -44,7 +41,7 @@ toPage WikiDoc{..} =
   where
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
-        Page { pageName     = PageName $ T.unpack $ TE.decodeUtf8 docTitle
+        Page { pageName     = PageName $ TE.decodeUtf8 docTitle
              , pageSkeleton = toSkeleton
                             $ map fixTemplate
                             $ dropRefs contents
@@ -83,13 +80,13 @@ toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (InternalLink page parts)
   | PageName page' <- page
-  , "File:" `isPrefixOf` page'
+  , "File:" `T.isPrefixOf` page'
   = Nothing
   | otherwise
   = Just [ParaLink page t]
   where t = case parts of
               [anchor] -> T.pack $ getAllText anchor
-              _        -> T.pack $ getPageName page
+              _        -> getPageName page
 toParaBody (ExternalLink _url (Just anchor))
   = Just [ParaText $ T.pack anchor]
 toParaBody _ = Nothing

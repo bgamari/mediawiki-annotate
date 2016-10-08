@@ -31,4 +31,4 @@ prettySkeleton = go 1
 
     goPara (ParaText t) = T.unpack t
     goPara (ParaLink (PageName name) anchor) =
-        "["<>T.unpack anchor<>"]("<>name<>")"
+        "["<>T.unpack anchor<>"]("<>T.unpack name<>")"
