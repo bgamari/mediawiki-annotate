@@ -9,6 +9,7 @@ import qualified Data.Map.Strict as M
 import Data.MediaWiki.Markup
 import Types
 import Data.Aeson
+import Data.Aeson.Types
 
 type Offset = Int
 
@@ -52,4 +53,5 @@ main = do
     --mapM_ print pages
 
 instance ToJSON PageName
-instance ToJSONKey PageName
+instance ToJSONKey PageName where
+    toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
