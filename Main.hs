@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import Data.Char (isSpace)
+import Data.List (intersperse)
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -9,6 +11,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import qualified Data.HashMap.Strict as HM
 
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
@@ -43,7 +46,7 @@ toPage WikiDoc{..} =
         --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = PageName $ TE.decodeUtf8 docTitle
              , pageSkeleton = toSkeleton
-                            $ map fixTemplate
+                            $ concatMap resolveTemplate
                             $ dropRefs contents
              }
 
@@ -59,17 +62,97 @@ dropRefs (XmlOpenClose "ref" _ : xs) = dropRefs xs
 dropRefs (x:xs) = x : dropRefs xs
 dropRefs [] = []
 
-fixTemplate :: Doc -> Doc
-fixTemplate x@(Template tmpl args) =
-    case tmpl of
-      "convert"
-        | (Nothing, val) : (Nothing, unit) : _ <- args ->
-          Text $ getAllText val <> " " <> getAllText unit
-      "lang"
-        | _ : (Nothing, text) : _ <- args ->
-          Text $ getAllText text
-      _ -> x
-fixTemplate x = x
+resolveTemplate :: Doc -> [Doc]
+resolveTemplate (Template tmpl args)
+  | Just alt <- lookupNamed "alt" args = alt
+  | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
+  , Just res <- handler args = res
+resolveTemplate x = [x]
+
+templates :: HM.HashMap T.Text ([(Maybe String, [Doc])] -> Maybe [Doc])
+templates = HM.fromList $
+    map (.= listTemplate)
+    [ "bulleted list", "blist", "bulleted", "ulist", "unordered list"
+    , "unbulleted list", "ubl", "ubt", "ublist", "unbullet"
+    , "plainlist"
+    , "ordered list"
+    , "hlist"
+    , "flatlist"
+    ] ++
+    map (.= convertTemplate)
+    [ "cvt"
+    , "convert"
+    ] ++
+    [ "as of"            .= asOfTemplate
+    , "lang"             .= langTemplate
+    , "time ago"         .= timeAgoTemplate
+    , "cardinal to word" .= simpleTemplate
+    , "number to word"   .= simpleTemplate
+    , "ordinal to word"  .= simpleTemplate
+    , "nowrap"           .= simpleTemplate
+    , "small"            .= simpleTemplate
+    , "smaller"          .= simpleTemplate
+    , "midsize"          .= simpleTemplate
+    , "larger"           .= simpleTemplate
+    , "big"              .= simpleTemplate
+    , "large"            .= simpleTemplate
+    , "huge"             .= simpleTemplate
+    , "resize"           .= simpleTemplate
+    , "mvar"             .= simpleTemplate
+    ]
+  where
+    a .= b = (a,b)
+    justText :: String -> Maybe [Doc]
+    justText x = Just [Text x]
+
+    listTemplate args =
+        Just $ intersperse (Text ", ") $ concat $ mapMaybe isUnnamed args
+
+    convertTemplate ((Nothing, val) : (Nothing, unit) : _) =
+        justText $ getAllText val <> " " <> getAllText unit
+    convertTemplate _ = Nothing
+
+    langTemplate (_ : (Nothing, body) : _) = Just body
+    langTemplate _ = Nothing
+
+    asOfTemplate args =
+        case mapMaybe isUnnamed args of
+          [year, month, day] -> Just $ unwords' [[leader], day, month, year]
+          [year, month]      -> Just $ unwords' [[leader], month, year]
+          [year]             -> Just $ unwords' [[leader], year]
+          _                  -> Nothing
+      where
+        unwords' = concat . intersperse [Char ' ']
+        leader
+          | since, lowercase = Text "since"
+          | since            = Text "Since"
+          | lowercase        = Text "as of"
+          | otherwise        = Text "As of"
+        since = lookupNamed "since" args == Just [Text "y"]
+        lowercase = lookupNamed "lc" args == Just [Text "y"]
+
+    simpleTemplate ((Nothing, val) : _) = Just val
+    simpleTemplate _                    = Nothing
+
+    timeAgoTemplate ((Nothing, [Text time]) : _)
+      | '-':rest <- trimmed = justText $ rest ++ " ago"
+      | '+':rest <- trimmed = justText $ rest ++ "'s time'"
+      | otherwise           = justText $ "on " ++ time
+      where
+        trimmed = dropWhile isSpace time
+    timeAgoTemplate _ = Nothing
+
+lookupNamed :: String -> [(Maybe String, [Doc])] -> Maybe [Doc]
+lookupNamed key = listToMaybe . mapMaybe (isNamed key)
+
+isNamed :: String -> (Maybe String, [Doc]) -> Maybe [Doc]
+isNamed key (Just key', val)
+  | key == key'  = Just val
+isNamed _   _    = Nothing
+
+isUnnamed :: (Maybe String, [Doc]) -> Maybe [Doc]
+isUnnamed (Nothing, val) = Just val
+isUnnamed _              = Nothing
 
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
@@ -80,7 +163,7 @@ toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (InternalLink page parts)
   | PageName page' <- page
-  , "File:" `T.isPrefixOf` page'
+  , "file:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
   = Just [ParaLink page t]
