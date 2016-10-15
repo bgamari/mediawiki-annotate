@@ -2,7 +2,6 @@
 
 import Data.Monoid
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import Types
 import Data.MediaWiki.Markup

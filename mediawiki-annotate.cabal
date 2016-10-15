@@ -11,9 +11,20 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
+library
+  exposed-modules:     Types
+  default-language:    Haskell2010
+  hs-source-dirs:      src
+  build-depends:       base >=4.9 && <4.10,
+                       aeson >= 1.0,
+                       binary-serialise-cbor >=0.1 && <0.2,
+                       bytestring >= 0.10,
+                       hashable >= 1.2,
+                       text,
+                       mediawiki-parser >= 0.1
+
 executable wiki-annotate
   main-is:             Main.hs
-  other-modules:       Types
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall -rtsopts
   build-depends:       base >=4.9 && <4.10,
@@ -41,31 +52,32 @@ executable wiki-annotate
                        async >=2.1 && <2.2,
                        pipes-concurrency >=2.0 && <2.1,
                        postgresql-simple >=0.5 && <0.6,
+                       mediawiki-annotate,
                        mediawiki-parser
   default-language:    Haskell2010
 
 executable wiki-dump-annotations
   main-is:             Export.hs
-  other-modules:       Types
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
                        binary-serialise-cbor >=0.1 && <0.2,
                        bytestring >= 0.10,
                        text,
+                       mediawiki-annotate,
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
 
 executable wiki-build-toc
   main-is:             BuildToc.hs
-  other-modules:       Types
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
+                       aeson >= 1.0,
                        binary-serialise-cbor >=0.1 && <0.2,
                        bytestring >= 0.10,
                        containers,
-                       aeson >= 1.0,
                        text,
+                       mediawiki-annotate,
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010

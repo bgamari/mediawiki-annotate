@@ -7,8 +7,18 @@ import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import Data.MediaWiki.Markup
+import Data.Aeson.Types
+import Data.Hashable
 
+-- Orphans
 instance CBOR.Serialise PageName
+instance FromJSON PageName
+instance FromJSONKey PageName where
+    fromJSONKey = fmap PageName fromJSONKey
+instance ToJSON PageName
+instance ToJSONKey PageName where
+    toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
+instance Hashable PageName
 
 data PageSkeleton = Section !T.Text [PageSkeleton]
                   | Para ![ParaBody]

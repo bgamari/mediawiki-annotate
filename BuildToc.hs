@@ -6,10 +6,8 @@ import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as M
-import Data.MediaWiki.Markup
 import Types
 import Data.Aeson
-import Data.Aeson.Types
 
 type Offset = Int
 
@@ -51,7 +49,3 @@ main = do
         toc = foldl' addPage mempty pages
     BSL.putStr $ encode toc
     --mapM_ print pages
-
-instance ToJSON PageName
-instance ToJSONKey PageName where
-    toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
