@@ -176,6 +176,7 @@ isUnnamed _              = Nothing
 -- @''[postwar tribunals]''@
 toParaBody :: Doc -> Maybe [ParaBody]
 toParaBody (Text x)        = Just [ParaText $ T.pack x]
+toParaBody (Char x)        = Just [ParaText $ T.singleton x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
