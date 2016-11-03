@@ -72,6 +72,8 @@ resolveTemplate (Template tmpl args)
   | Just alt <- lookupNamed "alt" args = alt
   | "IPA-" `isPrefixOf` tmpl = []
   | "IPAc-" `isPrefixOf` tmpl = []
+  | "lang-" `isPrefixOf` tmpl
+  , ((Nothing, body):_) <- args = body
 
   | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
   , Just res <- handler args = res
