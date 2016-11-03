@@ -48,24 +48,30 @@ toPage WikiDoc{..} =
              , pageSkeleton = toSkeleton
                             $ concatMap resolveTemplate
                             $ filter (not . isComment)
-                            $ dropRefs contents
+                            $ dropXml "super"
+                            $ dropXml "sub"
+                            $ dropXml "ref"
+                            $ contents
              }
 
 isComment :: Doc -> Bool
 isComment (Comment{}) = True
 isComment _           = False
 
-dropRefs :: [Doc] -> [Doc]
-dropRefs (XmlOpen "ref" _ : xs) =
-    case dropWhile (not . isClose) xs of
+dropXml :: String -> [Doc] -> [Doc]
+dropXml tag (XmlOpen tag' _ : xs)
+  | tag == tag'
+  = case dropWhile (not . isClose) xs of
       []   -> []
-      _:xs -> dropRefs xs
+      _:xs -> dropXml tag xs
   where
-    isClose (XmlClose "ref") = True
+    isClose (XmlClose tag'') = tag == tag''
     isClose _                = False
-dropRefs (XmlOpenClose "ref" _ : xs) = dropRefs xs
-dropRefs (x:xs) = x : dropRefs xs
-dropRefs [] = []
+dropXml tag (XmlOpenClose tag' _ : xs)
+  | tag == tag'
+  = dropXml tag xs
+dropXml tag (x:xs) = x : dropXml tag xs
+dropXml _   [] = []
 
 resolveTemplate :: Doc -> [Doc]
 resolveTemplate (Template tmpl args)
