@@ -99,6 +99,7 @@ templates = HM.fromList $
     , "huge"             .= simpleTemplate
     , "resize"           .= simpleTemplate
     , "mvar"             .= simpleTemplate
+    , "format price"     .= simpleTemplate
     ]
   where
     a .= b = (a,b)
