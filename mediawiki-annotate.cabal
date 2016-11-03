@@ -32,6 +32,7 @@ library
 executable wiki-extract
   main-is:             Extract.hs
   ghc-options:         -Wall -rtsopts
+  default-language:    Haskell2010
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
                        text,
