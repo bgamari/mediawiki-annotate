@@ -9,6 +9,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import Network.URI
 
 import qualified Data.Binary.Serialise.CBOR as CBOR
 
@@ -39,12 +40,21 @@ data Relevance = Relevant | NonRelevant
 data Annotation = Annotation SectionPath ParagraphId Relevance
                 deriving (Show)
 
+escapeSectionPath :: SectionPath -> String
+escapeSectionPath (SectionPath pageName headings) =
+    escapeURIString isAllowedInURI
+    $ intercalate "/" $ (T.unpack $ getPageName pageName) : map sectionHeading headings
+  where
+    sectionHeading (SectionHeading h) = T.unpack h
+
 prettyAnnotation :: Annotation -> String
-prettyAnnotation (Annotation (SectionPath pageName headings) (ParagraphId paraId) rel) =
-    unwords [ T.unpack $ getPageName pageName
-            , intercalate "/" $ map (\(SectionHeading h) -> T.unpack h) headings
+prettyAnnotation (Annotation sectionPath (ParagraphId paraId) rel) =
+    unwords [ escapeSectionPath sectionPath
             , BS.unpack paraId
-            , show rel ]
+            , case rel of
+                Relevant    -> "1"
+                NonRelevant -> "0"
+            ]
 
 toStubSkeleton :: Page -> Stub
 toStubSkeleton (Page name skeleton) =

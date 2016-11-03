@@ -39,6 +39,7 @@ executable wiki-extract
                        pipes,
                        pipes-bytestring,
                        dlist,
+                       network-uri,
                        binary-serialise-cbor,
                        mediawiki-parser >= 0.1,
                        mediawiki-annotate
