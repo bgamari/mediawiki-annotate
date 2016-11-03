@@ -100,6 +100,7 @@ templates = HM.fromList $
     , "resize"           .= simpleTemplate
     , "mvar"             .= simpleTemplate
     , "format price"     .= simpleTemplate
+    , "inflation"        .= inflationTemplate
     ]
   where
     a .= b = (a,b)
@@ -142,6 +143,9 @@ templates = HM.fromList $
       where
         trimmed = dropWhile isSpace time
     timeAgoTemplate _ = Nothing
+
+    inflationTemplate (_ : (Nothing, [Text amount]) : _) = justText amount
+    inflationTemplate _ = Nothing
 
 lookupNamed :: String -> [(Maybe String, [Doc])] -> Maybe [Doc]
 lookupNamed key = listToMaybe . mapMaybe (isNamed key)
