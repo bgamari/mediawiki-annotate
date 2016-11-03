@@ -15,19 +15,3 @@ putPage :: Page -> IO ()
 putPage p = do
     putStrLn $ "\n~~~~~~~~" ++ show (pageName p)
     mapM_ (putStrLn . prettySkeleton) (pageSkeleton p)
-
-prettySkeleton :: PageSkeleton -> String
-prettySkeleton = go 1
-  where
-    go :: Int -> PageSkeleton -> String
-    go n (Section name children) =
-        unlines
-        $ [ replicate n '#' ++ " " ++ T.unpack name]
-          <> map (go (n+1)) children
-          <> [""]
-    go _ (Para paras) =
-        concatMap goPara paras ++ "\n"
-
-    goPara (ParaText t) = T.unpack t
-    goPara (ParaLink (PageName name) anchor) =
-        "["<>T.unpack anchor<>"]("<>T.unpack name<>")"

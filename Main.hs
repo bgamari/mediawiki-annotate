@@ -195,8 +195,8 @@ getPrefix f = go []
       | otherwise     = (reverse acc, x:xs)
 
 -- | Collapse consecutive 'ParaText' nodes.
-toParas :: [ParaBody] -> [ParaBody]
-toParas = go
+toParaBodies :: [ParaBody] -> [ParaBody]
+toParaBodies = go
   where
     go [] = []
     go xs
@@ -210,10 +210,12 @@ toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
   | (bodies@(_:_), docs') <- getPrefix toParaBody docs =
-        Para (toParas $ concat bodies) : toSkeleton docs'
+        let bodies' = toParaBodies $ concat bodies
+        in Para (Paragraph (toParagraphId bodies') bodies') : toSkeleton docs'
 toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-    in Section (T.pack title) (toSkeleton children) : toSkeleton docs'
+        heading = SectionHeading $ T.pack title
+    in Section heading (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
