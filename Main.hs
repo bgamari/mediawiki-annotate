@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Char (isSpace)
-import Data.List (intersperse)
+import Data.List (intersperse, isPrefixOf)
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -65,6 +65,9 @@ dropRefs [] = []
 resolveTemplate :: Doc -> [Doc]
 resolveTemplate (Template tmpl args)
   | Just alt <- lookupNamed "alt" args = alt
+  | "IPA-" `isPrefixOf` tmpl = []
+  | "IPAc-" `isPrefixOf` tmpl = []
+
   | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
   , Just res <- handler args = res
 resolveTemplate x = [x]
