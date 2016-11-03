@@ -47,8 +47,13 @@ toPage WikiDoc{..} =
         Page { pageName     = PageName $ TE.decodeUtf8 docTitle
              , pageSkeleton = toSkeleton
                             $ concatMap resolveTemplate
+                            $ filter (not . isComment)
                             $ dropRefs contents
              }
+
+isComment :: Doc -> Bool
+isComment (Comment{}) = True
+isComment _           = False
 
 dropRefs :: [Doc] -> [Doc]
 dropRefs (XmlOpen "ref" _ : xs) =
