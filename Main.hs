@@ -111,11 +111,14 @@ templates = HM.fromList $
     , "mvar"             .= simpleTemplate
     , "format price"     .= simpleTemplate
     , "inflation"        .= inflationTemplate
+    , "citation needed"  .= dropTemplate
     ]
   where
     a .= b = (a,b)
     justText :: String -> Maybe [Doc]
     justText x = Just [Text x]
+
+    dropTemplate _ = Nothing
 
     listTemplate args =
         Just $ intersperse (Text ", ") $ concat $ mapMaybe isUnnamed args
