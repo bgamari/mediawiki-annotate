@@ -131,7 +131,7 @@ templates = HM.fromList $
         since = lookupNamed "since" args == Just [Text "y"]
         lowercase = lookupNamed "lc" args == Just [Text "y"]
 
-    simpleTemplate ((Nothing, val) : _) = Just val
+    simpleTemplate ((Nothing, val) : _) = Just $ concatMap resolveTemplate val
     simpleTemplate _                    = Nothing
 
     timeAgoTemplate ((Nothing, [Text time]) : _)
