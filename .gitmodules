@@ -7,3 +7,6 @@
 [submodule "pipes-zlib"]
 	path = pipes-zlib
 	url = git://github.com/bgamari/pipes-zlib
+[submodule "b-tree"]
+	path = b-tree
+	url = git://github.com/bgamari/b-tree
