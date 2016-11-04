@@ -95,13 +95,13 @@ toParagraphs (Page name skeleton) =
 
 toAnnotations :: Page -> [Annotation]
 toAnnotations (Page name skeleton) =
-    concatMap (go []) skeleton
+    concatMap (go mempty) skeleton
   where
-    go :: [SectionHeading] -> PageSkeleton -> [Annotation]
+    go :: DList.DList SectionHeading -> PageSkeleton -> [Annotation]
     go parents (Section section children) =
-        let parents' = (section : parents)
+        let parents' = parents `DList.snoc` section
         in concatMap (go parents') children
     go parents (Para (Paragraph paraId body)) =
         [Annotation path paraId Relevant]
       where
-        path = SectionPath name (reverse parents)
+        path = SectionPath name (DList.toList parents)
