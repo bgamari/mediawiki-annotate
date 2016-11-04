@@ -2,7 +2,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Types where
+module CAR.Types where
 
 import Data.Foldable
 import GHC.Generics

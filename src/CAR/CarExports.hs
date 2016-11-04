@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module CarExports
+module CAR.CarExports
     ( ParaNumber(..)
     , PassageFile
       -- * Stubs
@@ -29,8 +29,7 @@ import Network.URI
 import qualified Data.Binary.Serialise.CBOR as CBOR
 
 import Data.MediaWiki.Markup (PageName(..))
-import Types
-import AnnotationsFile
+import CAR.Types
 
 -- General
 

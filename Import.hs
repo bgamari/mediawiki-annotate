@@ -18,7 +18,7 @@ import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 
 import Data.MediaWiki.XmlDump
 import Data.MediaWiki.Markup as Markup
-import Types
+import CAR.Types
 
 main :: IO ()
 main = do

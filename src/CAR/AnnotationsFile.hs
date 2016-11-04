@@ -1,14 +1,14 @@
-module AnnotationsFile where
+module CAR.AnnotationsFile where
 
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
 import System.FilePath
 import qualified Data.HashMap.Strict as HM
 import System.IO.MMap
-import Types
-import Data.MediaWiki.Markup
 import qualified Data.Aeson as JSON
 import qualified Data.Binary.Serialise.CBOR as CBOR
+import CAR.Types
+import Data.MediaWiki.Markup
 
 type Offset = Int
 data AnnotationsFile = AnnotationsFile BS.ByteString (HM.HashMap PageName Offset)

@@ -1,6 +1,6 @@
-import AnnotationsFile
-import Types
-import CarExports
+import CAR.AnnotationsFile
+import CAR.Types
+import CAR.CarExports
 
 main :: IO ()
 main = do

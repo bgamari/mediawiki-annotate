@@ -6,7 +6,7 @@ import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as M
-import Types
+import CAR.Types
 import Data.Aeson
 
 type Offset = Int
