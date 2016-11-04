@@ -14,6 +14,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Types
                        AnnotationsFile
+                       CarExports
   default-language:    Haskell2010
   hs-source-dirs:      src
   build-depends:       base >=4.9 && <4.10,
@@ -22,28 +23,14 @@ library
                        bytestring >= 0.10,
                        filepath >=1.4 && <1.5,
                        unordered-containers >=0.2 && <0.3,
+                       network-uri,
+                       dlist,
                        mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
                        text,
                        mediawiki-parser >= 0.1
-
-executable wiki-extract
-  main-is:             Extract.hs
-  ghc-options:         -Wall -rtsopts
-  default-language:    Haskell2010
-  build-depends:       base >=4.9 && <4.10,
-                       bytestring,
-                       text,
-                       unordered-containers >= 0.2,
-                       pipes,
-                       pipes-bytestring,
-                       dlist,
-                       network-uri,
-                       binary-serialise-cbor,
-                       mediawiki-parser >= 0.1,
-                       mediawiki-annotate
 
 executable wiki-annotate
   main-is:             Main.hs
@@ -78,7 +65,7 @@ executable wiki-annotate
                        mediawiki-parser
   default-language:    Haskell2010
 
-executable wiki-dump-annotations
+executable wiki-export
   main-is:             Export.hs
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall

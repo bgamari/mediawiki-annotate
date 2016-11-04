@@ -1,6 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE StandaloneDeriving #-}
+
+module CarExports
+    ( ParaNumber(..)
+    , PassageFile
+      -- * Stubs
+    , Stub(..)
+    , toStubSkeleton
+    , prettyStub
+      -- * Paragraphs
+    , toParagraphs
+      -- * Ground truth
+    , SectionPath(..)
+    , Relevance(..)
+    , Annotation(..)
+    , toAnnotations
+    , prettyAnnotation
+    ) where
 
 import Data.List (intercalate)
 import Data.Maybe
@@ -90,9 +105,3 @@ toAnnotations (Page name skeleton) =
         [Annotation path paraId Relevant]
       where
         path = SectionPath name (reverse parents)
-
-main :: IO ()
-main = do
-    let path = "hello.cbor"
-    anns <- openAnnotations path
-    return ()
