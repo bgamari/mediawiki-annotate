@@ -10,3 +10,6 @@
 [submodule "b-tree"]
 	path = b-tree
 	url = git://github.com/bgamari/b-tree
+[submodule "simplir"]
+	path = simplir
+	url = git@git.smart-cactus.org:ben/simpl-ir

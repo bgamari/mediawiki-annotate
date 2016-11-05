@@ -4,3 +4,6 @@ packages:
     mediawiki-parser/
     pipes-zlib/
     b-tree/
+    simplir/laura.cabal
+    simplir/*/*.cabal
+    simplir/vendor/*/*.cabal
