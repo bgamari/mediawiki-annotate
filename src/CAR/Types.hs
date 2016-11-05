@@ -60,11 +60,15 @@ instance CBOR.Serialise Page
 readValues :: CBOR.Serialise a => BSL.ByteString -> [a]
 readValues = start . BSL.toChunks
   where
-    start = go CBOR.deserialiseIncremental
+    start xs
+      | all BS.null xs = []
+      | otherwise      = go CBOR.deserialiseIncremental xs
+
+    go (CBOR.Partial f) [] = go (f Nothing) []
     go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
     go (CBOR.Done bs _ x) bss = x : start (bs : bss)
     go (CBOR.Fail rest _ err) _ = error $ show err
-    go _ [] = error "ran out of data"
+    go _ [] = error "readValues: Ran out of data"
 
 prettyPage :: Page -> String
 prettyPage (Page (PageName name) skeleton) =
