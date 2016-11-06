@@ -25,6 +25,7 @@ import qualified Pipes.Prelude as P.P
 import qualified Control.Foldl as Foldl
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
+import Options.Applicative
 
 instance Binary ParagraphId
 
@@ -40,7 +41,8 @@ paragraphTerms p =
 
 main :: IO ()
 main = do
-    buildIndex "hello.cbor"
+    s <- execParser $ info (helper <*> argument str (help "annotations file")) mempty
+    buildIndex s
 
 query :: DiskIdx.OnDiskIndex ParagraphId Int -> IO ()
 query diskIdx = do

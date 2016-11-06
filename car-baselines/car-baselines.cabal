@@ -23,5 +23,6 @@ executable car-test
                        foldl >=1.2 && <1.3,
                        pipes,
                        text,
-                       binary
+                       binary,
+                       optparse-applicative >= 0.12
   default-language:    Haskell2010
