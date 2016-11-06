@@ -40,7 +40,7 @@ data Paragraph = Paragraph { paraId :: ParagraphId, paraBody :: [ParaBody] }
 instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId BS.ByteString -- Hash
-                    deriving (Show, Generic)
+                    deriving (Show, Generic, Ord, Eq)
 instance CBOR.Serialise ParagraphId
 
 data PageSkeleton = Section !SectionHeading [PageSkeleton]
