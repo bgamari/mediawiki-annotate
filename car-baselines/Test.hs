@@ -43,7 +43,18 @@ type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
 
 modeIndex :: Parser (IO ())
 modeIndex =
-    buildIndex <$> argument str (help "annotations file")
+    go <$> option str (long "output" <> short 'o' <> help "Output index path")
+       <*> argument str (help "annotations file")
+  where
+    go outFile annotationsFile = do
+        anns <- openAnnotations annotationsFile
+        let paras = concatMap toParagraphs (pages anns)
+        Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
+                  $ fmap (\p -> let terms = paragraphTerms p
+                                in ((paraId p, DocLength $ sum terms), terms)
+                        ) paras
+
+        return ()
 
 modeMerge :: Parser (IO ())
 modeMerge =
@@ -100,14 +111,3 @@ scoreQuery smoothing idx query =
   where
     queryTf =
         fmap realToFrac $ M.unionsWith (+) $ map (`M.singleton` 1) query
-
-buildIndex :: FilePath -> IO ()
-buildIndex annotationsFile = do
-    anns <- openAnnotations annotationsFile
-    let paras = concatMap toParagraphs (pages anns)
-    Foldl.foldM (DiskIdx.buildIndex 100000 "paragraphs.index")
-              $ fmap (\p -> let terms = paragraphTerms p
-                            in ((paraId p, DocLength $ sum terms), terms)
-                     ) paras
-
-    return ()
