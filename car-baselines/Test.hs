@@ -39,12 +39,32 @@ paragraphTerms p =
     paraBodyTerms (ParaText t) = map (Term.fromText . T.toCaseFold) $ T.words t
     paraBodyTerms (ParaLink _ t) = map (Term.fromText . T.toCaseFold) $ T.words t
 
+type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
+
+modeIndex :: Parser (IO ())
+modeIndex =
+    buildIndex <$> argument str (help "annotations file")
+
+modeMerge :: Parser (IO ())
+modeMerge =
+    go
+      <$> option str (long "output" <> short 'o' <> help "Output path")
+      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (help "annotations file"))
+  where
+    go :: FilePath -> [CarDiskIndex] -> IO ()
+    go outPath parts = mapM DiskIdx.openOnDiskIndex parts >>= DiskIdx.merge outPath
+
+modes :: Parser (IO ())
+modes = subparser
+    $  command "index" (info modeIndex fullDesc)
+    <> command "merge" (info modeMerge fullDesc)
+
 main :: IO ()
 main = do
-    s <- execParser $ info (helper <*> argument str (help "annotations file")) mempty
-    buildIndex s
+    mode <- execParser $ info (helper <*> modes) fullDesc
+    mode
 
-query :: DiskIdx.OnDiskIndex ParagraphId Int -> IO ()
+query :: CarDiskIndex -> IO ()
 query diskIdx = do
     idx <- DiskIdx.openOnDiskIndex diskIdx
     let query = ["hello", "world"]
