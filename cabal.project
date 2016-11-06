@@ -7,3 +7,4 @@ packages:
     simplir/laura.cabal
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
+    car-baselines/
