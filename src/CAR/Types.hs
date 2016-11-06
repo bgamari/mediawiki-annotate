@@ -68,7 +68,6 @@ readValues = start . BSL.toChunks
     go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
     go (CBOR.Done bs _ x) bss = x : start (bs : bss)
     go (CBOR.Fail rest _ err) _ = error $ show err
-    go _ [] = error "readValues: Ran out of data"
 
 prettyPage :: Page -> String
 prettyPage (Page (PageName name) skeleton) =
