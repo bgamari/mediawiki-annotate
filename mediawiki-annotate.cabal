@@ -65,7 +65,7 @@ executable trec-car-import
                        mediawiki-parser
   default-language:    Haskell2010
 
-executable wiki-export
+executable trec-car-export
   main-is:             Export.hs
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall
@@ -79,7 +79,7 @@ executable wiki-export
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
 
-executable wiki-build-toc
+executable trec-car-build-toc
   main-is:             BuildToc.hs
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall
