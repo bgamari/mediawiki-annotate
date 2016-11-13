@@ -47,7 +47,7 @@ executable trec-car-import
                        pipes >=4.1 && <4.3,
                        pipes-bytestring >=2.1 && <2.2,
                        pipes-zlib >=0.4 && <0.5,
-                       optparse-applicative >=0.12 && <0.13,
+                       optparse-applicative >=0.12 && <0.14,
                        pipes-attoparsec >=0.5 && <0.6,
                        free >=4.12 && <4.13,
                        transformers >=0.5 && <0.6,
@@ -73,7 +73,7 @@ executable trec-car-export
                        binary-serialise-cbor >=0.1 && <0.2,
                        bytestring >= 0.10,
                        text,
-                       optparse-applicative >= 0.12,
+                       optparse-applicative,
                        filepath,
                        trec-car-tools,
                        mediawiki-parser >= 0.1
