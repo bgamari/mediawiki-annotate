@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
 
 module CAR.CarExports
     ( ParaNumber(..)
@@ -19,20 +19,17 @@ module CAR.CarExports
 
 import Data.List (intercalate)
 import Data.Maybe
-import Data.Foldable
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
 import Network.URI
-
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import Data.Binary.Serialise.CBOR
+import GHC.Generics
 
 import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types
 
 -- General
-
 newtype ParaNumber = ParaNumber Int -- Sequential index
                    deriving (Show)
 
@@ -42,7 +39,8 @@ type PassageFile = [Paragraph]
 -- Stub
 data Stub = Stub { stubName :: PageName
                  , stubSkeleton :: [PageSkeleton] }
-          deriving (Show)
+          deriving (Show, Generic)
+instance Serialise Stub
 
 -- Ground truth
 data SectionPath = SectionPath PageName [SectionHeading]
@@ -51,6 +49,7 @@ data SectionPath = SectionPath PageName [SectionHeading]
 data Relevance = Relevant | NonRelevant
                deriving (Show)
 
+-- | A relevance annotation of a paragraph in a section
 data Annotation = Annotation SectionPath ParagraphId Relevance
                 deriving (Show)
 
