@@ -30,4 +30,4 @@ pageNames (AnnotationsFile _ h) = HM.keys h
 
 pages :: AnnotationsFile -> [Page]
 pages (AnnotationsFile b _) =
-    readValues (LBS.fromStrict b)
+    decodeCborList (LBS.fromStrict b)

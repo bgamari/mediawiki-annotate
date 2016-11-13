@@ -8,8 +8,10 @@ import Data.Foldable
 import GHC.Generics
 import Data.Monoid
 import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Builder as BSB
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import Crypto.Hash.SHA1 as SHA
@@ -57,8 +59,8 @@ data Page = Page { pageName :: PageName, pageSkeleton :: [PageSkeleton] }
           deriving (Show, Generic)
 instance CBOR.Serialise Page
 
-readValues :: CBOR.Serialise a => BSL.ByteString -> [a]
-readValues = start . BSL.toChunks
+decodeCborList :: CBOR.Serialise a => BSL.ByteString -> [a]
+decodeCborList = start . BSL.toChunks
   where
     start xs
       | all BS.null xs = []
@@ -68,6 +70,9 @@ readValues = start . BSL.toChunks
     go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
     go (CBOR.Done bs _ x) bss = x : start (bs : bss)
     go (CBOR.Fail rest _ err) _ = error $ show err
+
+encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
+encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
 
 prettyPage :: Page -> String
 prettyPage (Page (PageName name) skeleton) =
