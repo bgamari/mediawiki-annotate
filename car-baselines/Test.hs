@@ -65,21 +65,28 @@ modeMerge =
     go :: FilePath -> [CarDiskIndex] -> IO ()
     go outPath parts = mapM DiskIdx.openOnDiskIndex parts >>= DiskIdx.merge outPath
 
+modeQuery :: Parser (IO ())
+modeQuery =
+    go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
+  where
+    go :: CarDiskIndex -> IO ()
+    go diskIdx = do
+        let query = map Term.fromString ["hello", "world"]
+            smoothing = NoSmoothing
+        idx <- DiskIdx.openOnDiskIndex diskIdx
+        results <- scoreQuery smoothing idx query
+        print results
+
 modes :: Parser (IO ())
 modes = subparser
     $  command "index" (info modeIndex fullDesc)
     <> command "merge" (info modeMerge fullDesc)
+    <> command "query" (info modeQuery fullDesc)
 
 main :: IO ()
 main = do
     mode <- execParser $ info (helper <*> modes) fullDesc
     mode
-
-query :: CarDiskIndex -> IO ()
-query diskIdx = do
-    idx <- DiskIdx.openOnDiskIndex diskIdx
-    let query = ["hello", "world"]
-    return ()
 
 termPostings :: (Monad m, Ord p, Binary p)
              => DiskIdx.DiskIndex docmeta p
