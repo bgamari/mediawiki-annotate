@@ -6,6 +6,7 @@ import Control.Monad.IO.Class
 import Data.Profunctor
 import Data.Bifunctor
 import Data.Maybe (fromMaybe)
+import Data.Monoid
 
 import CAR.Types
 import CAR.AnnotationsFile
