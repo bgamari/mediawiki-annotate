@@ -67,6 +67,18 @@ modeCorpusStats =
         BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) outFile
                                 (Pipes.each $ map toBLeaf $ M.assocs terms)
 
+openCorpusStats :: FilePath -> IO (BTree.LookupTree Term Int)
+openCorpusStats = fmap (either error id) . BTree.open
+
+modeMergeCorpusStats :: Parser (IO ())
+modeMergeCorpusStats =
+    go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
+       <*> many (argument str (help "corpus stats files"))
+  where
+    go outFile indexes = do
+        idxs <- mapM openCorpusStats indexes
+        BTree.mergeTrees (\a b -> pure $! a+b) 64 outFile idxs
+
 modeIndex :: Parser (IO ())
 modeIndex =
     go <$> option str (long "output" <> short 'o' <> help "output index path")
@@ -106,6 +118,7 @@ modeQuery =
 modes :: Parser (IO ())
 modes = subparser
     $  command "corpus-stats" (info modeCorpusStats fullDesc)
+    <> command "merge-corpus-stats" (info modeMergeCorpusStats fullDesc)
     <> command "index" (info modeIndex fullDesc)
     <> command "merge" (info modeMerge fullDesc)
     <> command "query" (info modeQuery fullDesc)
