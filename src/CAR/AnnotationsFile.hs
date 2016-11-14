@@ -16,8 +16,11 @@ data AnnotationsFile = AnnotationsFile BS.ByteString (HM.HashMap PageName Offset
 openAnnotations :: FilePath -> IO AnnotationsFile
 openAnnotations fname = do
     cbor <- mmapFileByteString fname Nothing
-    Just toc <- JSON.decode <$> LBS.readFile (fname <.> "json")
-    return $ AnnotationsFile cbor toc
+    mtoc <- JSON.decode <$> LBS.readFile (fname <.> "json")
+    case mtoc of
+      Just toc -> return $ AnnotationsFile cbor toc
+      Nothing  -> fail $ "openAnnotations: Failed to open TOC for "++fname
+
 
 lookupPage :: PageName -> AnnotationsFile -> Maybe Page
 lookupPage name (AnnotationsFile cbor toc) =
