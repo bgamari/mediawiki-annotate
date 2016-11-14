@@ -34,6 +34,7 @@ import qualified SimplIR.DiskIndex as DiskIdx
 
 import Pipes
 import qualified Pipes.Prelude as P.P
+import Pipes.Safe
 import qualified Control.Foldl as Foldl
 import Options.Applicative
 
@@ -113,7 +114,7 @@ modeIndex =
     go outFile annotationsFile = do
         anns <- openAnnotations annotationsFile
         let paras = concatMap toParagraphs (pages anns)
-        Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
+        runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
                   $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
                                 in ((paraId p, DocLength $ sum terms), terms)
                          ) paras

@@ -23,6 +23,7 @@ executable car-test
                        profunctors,
                        foldl >=1.2 && <1.3,
                        pipes,
+                       pipes-safe,
                        text,
                        binary,
                        b-tree,
