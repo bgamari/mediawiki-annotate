@@ -17,19 +17,19 @@ main = do
     (path) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
 
-    putStrLn "Writing stubs skeletons..."
+    putStr "Writing stub skeletons..."
     let skeletonFile = path <.> "skeletons"
     withFile skeletonFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ map toStubSkeleton (pages anns)
     putStrLn "done"
 
-    putStrLn "Writing paragraphs..."
+    putStr "Writing paragraphs..."
     let paragraphsFile = path <.> "paragraphs"
     withFile paragraphsFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ map toParagraphs (pages anns)
     putStrLn "done"
 
-    putStrLn "Writing relevance annotations..."
+    putStr "Writing relevance annotations..."
     let relsFile = path <.> "qrel"
     withFile relsFile WriteMode $ \h ->
           hPutStrLn h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations $ (pages anns)
