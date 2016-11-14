@@ -1,13 +1,22 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 import Control.Monad.IO.Class
+import Data.Foldable
 import Data.Profunctor
 import Data.Bifunctor
 import Data.Maybe (fromMaybe)
 import Data.Monoid
+import GHC.Generics
+import System.FilePath
+
+import Data.Binary
+import qualified Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.Text as T
 
 import qualified BTree
 import CAR.Types
@@ -22,19 +31,25 @@ import SimplIR.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
 import qualified SimplIR.DiskIndex as DiskIdx
-import Data.Binary
 
 import Pipes
 import qualified Pipes.Prelude as P.P
 import qualified Control.Foldl as Foldl
-import qualified Data.Map.Strict as M
-import qualified Data.Text as T
 import Options.Applicative
 
 instance Binary ParagraphId
 
 type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
 
+data CorpusStats = CorpusStats { corpusNTokens :: !Int }
+                 deriving (Generic)
+instance Monoid CorpusStats where
+    mempty = CorpusStats 0
+    a `mappend` b = CorpusStats { corpusNTokens = corpusNTokens a + corpusNTokens b }
+instance Aeson.FromJSON CorpusStats
+instance Aeson.ToJSON CorpusStats
+
+type TermFreqIndex = BTree.LookupTree Term Int
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
 instance Monoid BagOfWords where
@@ -65,11 +80,19 @@ modeCorpusStats =
         anns <- openAnnotations annotationsFile
         let BagOfWords terms = foldMap (foldMap skeletonTerms . pageSkeleton) (pages anns)
             toBLeaf (a,b) = BTree.BLeaf a b
-        BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) outFile
+        BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) (outFile <.> "terms")
                                 (Pipes.each $ map toBLeaf $ M.assocs terms)
+        writeCorpusStats outFile $ CorpusStats (sum terms)
 
-openCorpusStats :: FilePath -> IO (BTree.LookupTree Term Int)
-openCorpusStats = fmap (either error id) . BTree.open
+openTermFreqs :: FilePath -> IO TermFreqIndex
+openTermFreqs = fmap (either error id) . BTree.open . (<.> "terms")
+
+writeCorpusStats :: FilePath -> CorpusStats -> IO ()
+writeCorpusStats fname = BSL.writeFile fname . Aeson.encode
+
+readCorpusStats :: FilePath -> IO CorpusStats
+readCorpusStats fname =
+    fromMaybe (error "Error reading corpus statistics") . Aeson.decode <$> BSL.readFile fname
 
 modeMergeCorpusStats :: Parser (IO ())
 modeMergeCorpusStats =
@@ -77,8 +100,10 @@ modeMergeCorpusStats =
        <*> many (argument str (help "corpus stats files"))
   where
     go outFile indexes = do
-        idxs <- mapM openCorpusStats indexes
-        BTree.mergeTrees (\a b -> pure $! a+b) 64 outFile idxs
+        idxs <- mapM openTermFreqs indexes
+        BTree.mergeTrees (\a b -> pure $! a+b) 64 (outFile <.> "terms") idxs
+        stats <- mapM readCorpusStats indexes
+        writeCorpusStats outFile $ fold stats
 
 modeIndex :: Parser (IO ())
 modeIndex =
@@ -107,11 +132,16 @@ modeMerge =
 modeQuery :: Parser (IO ())
 modeQuery =
     go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
+       <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
   where
-    go :: CarDiskIndex -> IO ()
-    go diskIdx = do
+    go :: CarDiskIndex -> FilePath -> IO ()
+    go diskIdx corpusStatsFile = do
+        termFreqs <- openTermFreqs corpusStatsFile
+        corpusStats <- readCorpusStats corpusStatsFile
         let query = map Term.fromString ["hello", "world"]
-            smoothing = NoSmoothing
+            termFreq = realToFrac . fromMaybe 0 . BTree.lookup termFreqs
+            termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
+            smoothing = Dirichlet 1000 termProb
         idx <- DiskIdx.openOnDiskIndex diskIdx
         results <- scoreQuery smoothing idx query
         print results
