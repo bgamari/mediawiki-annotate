@@ -17,6 +17,7 @@ import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
+import SimplIR.Tokenise (killPunctuation)
 import SimplIR.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
@@ -44,7 +45,7 @@ oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
 
 tokenize :: T.Text -> BagOfWords
-tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold
+tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunctuation
 
 skeletonTerms :: PageSkeleton -> BagOfWords
 skeletonTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
