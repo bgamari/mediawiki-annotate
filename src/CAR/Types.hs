@@ -37,7 +37,7 @@ newtype SectionHeading = SectionHeading T.Text
 instance Hashable SectionHeading
 instance CBOR.Serialise SectionHeading
 
-data Paragraph = Paragraph { paraId :: ParagraphId, paraBody :: [ParaBody] }
+data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
                deriving (Show, Generic)
 instance CBOR.Serialise Paragraph
 

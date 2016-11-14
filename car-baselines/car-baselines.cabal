@@ -24,5 +24,6 @@ executable car-test
                        pipes,
                        text,
                        binary,
+                       b-tree,
                        optparse-applicative >= 0.12
   default-language:    Haskell2010

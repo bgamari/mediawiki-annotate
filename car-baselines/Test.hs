@@ -7,7 +7,9 @@ import Data.Profunctor
 import Data.Bifunctor
 import Data.Maybe (fromMaybe)
 import Data.Monoid
+import qualified Data.Map.Strict as M
 
+import qualified BTree
 import CAR.Types
 import CAR.AnnotationsFile
 import CAR.CarExports
@@ -30,37 +32,60 @@ import Options.Applicative
 
 instance Binary ParagraphId
 
-paragraphTerms :: Paragraph -> M.Map Term Int
-paragraphTerms p =
-    M.unionsWith (+)
-    $ map (`M.singleton` 1)
-    $ foldMap paraBodyTerms
-    $ paraBody p
-  where
-    paraBodyTerms (ParaText t) = map (Term.fromText . T.toCaseFold) $ T.words t
-    paraBodyTerms (ParaLink _ t) = map (Term.fromText . T.toCaseFold) $ T.words t
-
 type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
+
+newtype BagOfWords = BagOfWords (M.Map Term Int)
+
+instance Monoid BagOfWords where
+    mempty = BagOfWords mempty
+    BagOfWords a `mappend` BagOfWords b = BagOfWords (M.unionWith (+) a b)
+
+oneWord :: Term -> BagOfWords
+oneWord t = BagOfWords $ M.singleton t 1
+
+tokenize :: T.Text -> BagOfWords
+tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold
+
+skeletonTerms :: PageSkeleton -> BagOfWords
+skeletonTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
+skeletonTerms (Section (SectionHeading t) children) =
+    tokenize t <> foldMap skeletonTerms children
+
+paraBodyTerms :: ParaBody -> BagOfWords
+paraBodyTerms (ParaText t) = tokenize t
+paraBodyTerms (ParaLink _ anchor) = tokenize anchor
+
+modeCorpusStats :: Parser (IO ())
+modeCorpusStats =
+    go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
+       <*> argument str (help "annotations file")
+  where
+    go outFile annotationsFile = do
+        anns <- openAnnotations annotationsFile
+        let BagOfWords terms = foldMap (foldMap skeletonTerms . pageSkeleton) (pages anns)
+            toBLeaf (a,b) = BTree.BLeaf a b
+        BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) outFile
+                                (Pipes.each $ map toBLeaf $ M.assocs terms)
 
 modeIndex :: Parser (IO ())
 modeIndex =
-    go <$> option str (long "output" <> short 'o' <> help "Output index path")
+    go <$> option str (long "output" <> short 'o' <> help "output index path")
        <*> argument str (help "annotations file")
   where
     go outFile annotationsFile = do
         anns <- openAnnotations annotationsFile
         let paras = concatMap toParagraphs (pages anns)
         Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
-                  $ fmap (\p -> let terms = paragraphTerms p
+                  $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
                                 in ((paraId p, DocLength $ sum terms), terms)
-                        ) paras
+                         ) paras
 
         return ()
 
 modeMerge :: Parser (IO ())
 modeMerge =
     go
-      <$> option str (long "output" <> short 'o' <> help "Output path")
+      <$> option str (long "output" <> short 'o' <> help "output path")
       <*> many (argument (DiskIdx.OnDiskIndex <$> str) (help "annotations file"))
   where
     go :: FilePath -> [CarDiskIndex] -> IO ()
@@ -80,7 +105,8 @@ modeQuery =
 
 modes :: Parser (IO ())
 modes = subparser
-    $  command "index" (info modeIndex fullDesc)
+    $  command "corpus-stats" (info modeCorpusStats fullDesc)
+    <> command "index" (info modeIndex fullDesc)
     <> command "merge" (info modeMerge fullDesc)
     <> command "query" (info modeQuery fullDesc)
 
@@ -89,7 +115,7 @@ main = do
     mode <- execParser $ info (helper <*> modes) fullDesc
     mode
 
-termPostings :: (Monad m, Ord p, Binary p)
+termPostings :: (Monad m, Ord p, Binary docmeta, Binary p)
              => DiskIdx.DiskIndex docmeta p
              -> [Term]
              -> Producer (docmeta, [(Term, p)]) m ()
