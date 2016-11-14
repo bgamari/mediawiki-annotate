@@ -60,9 +60,11 @@ escapeSectionPath (SectionPath pageName headings) =
   where
     sectionHeading (SectionHeading h) = T.unpack h
 
+-- | In TREC @qrel@ format.
 prettyAnnotation :: Annotation -> String
 prettyAnnotation (Annotation sectionPath (ParagraphId paraId) rel) =
     unwords [ escapeSectionPath sectionPath
+            , "0"
             , BS.unpack paraId
             , case rel of
                 Relevant    -> "1"
