@@ -15,6 +15,7 @@ module CAR.CarExports
     , Annotation(..)
     , toAnnotations
     , prettyAnnotation
+    , escapeSectionPath
     ) where
 
 import Data.List (intercalate)

@@ -18,6 +18,8 @@ executable car-test
   build-depends:       base >=4.9 && <4.10,
                        filepath,
                        containers >=0.5 && <0.6,
+                       dlist >= 0.7,
+                       log-domain,
                        laura,
                        trec-car-tools,
                        profunctors,

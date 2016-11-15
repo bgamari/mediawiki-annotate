@@ -7,6 +7,8 @@ import Control.Monad.IO.Class
 import Data.Foldable
 import Data.Profunctor
 import Data.Bifunctor
+import Data.Functor.Identity
+import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
 import Data.Monoid
 import GHC.Generics
@@ -15,8 +17,12 @@ import System.FilePath
 import Data.Binary
 import qualified Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
-import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Builder as BSB
+import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
+import qualified Data.DList as DList
+import qualified Numeric.Log as Log
 
 import qualified BTree
 import CAR.Types
@@ -134,18 +140,65 @@ modeQuery :: Parser (IO ())
 modeQuery =
     go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
        <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
+       <*> option str (long "skeletons" <> short 'S' <> help "File containing page skeletons to predict (one per line)")
+       <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
   where
-    go :: CarDiskIndex -> FilePath -> IO ()
-    go diskIdx corpusStatsFile = do
+    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> IO ()
+    go diskIdx corpusStatsFile skeletonFile runName = do
         termFreqs <- openTermFreqs corpusStatsFile
+        skeletons <- decodeCborList <$> BSL.readFile skeletonFile
         corpusStats <- readCorpusStats corpusStatsFile
+        idx <- DiskIdx.openOnDiskIndex diskIdx
+
         let query = map Term.fromString ["hello", "world"]
             termFreq = realToFrac . fromMaybe 0 . BTree.lookup termFreqs
             termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
             smoothing = Dirichlet 1000 termProb
-        idx <- DiskIdx.openOnDiskIndex diskIdx
-        results <- scoreQuery smoothing idx query
-        print results
+
+        let predictStub :: Stub -> IO ()
+            predictStub = mapM_ (uncurry predictSection) . stubPaths
+
+            predictSection :: BagOfWords -> SectionPath -> IO ()
+            predictSection query sectionPath = do
+                let results = scoreQuery smoothing idx query
+                BSL.putStrLn $ BSB.toLazyByteString
+                    $ prettyTrecRun runName
+                      [ (sectionPath, paraId, score)
+                      | (paraId, score) <- results
+                      ]
+
+        mapM_ predictStub skeletons
+
+-- | Format results in the TREC run file format
+prettyTrecRun :: BS.ByteString -- ^ run ID
+              -> [(SectionPath, ParagraphId, Score)]
+              -> BSB.Builder
+prettyTrecRun runName =
+    mconcat . intersperse (BSB.char7 '\n') . zipWith entry [1..]
+  where
+    entry rank (path, ParagraphId paraId, score) =
+        mconcat $ intersperse (BSB.char8 ' ')
+        [ BSB.string8 $ escapeSectionPath path
+        , BSB.char7 '0' -- iteration
+        , BSB.byteString paraId
+        , BSB.intDec rank
+        , BSB.doubleDec $ Log.ln score
+        , BSB.byteString runName
+        ]
+
+stubPaths :: Stub -> [(BagOfWords, SectionPath)]
+stubPaths (Stub pageName skel) = foldMap (go mempty) skel
+  where
+    go :: DList.DList SectionHeading -> PageSkeleton -> [(BagOfWords, SectionPath)]
+    go _ (Para _) = [] -- this should really never happen
+    go parents (Section heading children) =
+        (terms, SectionPath pageName (toList me)) : foldMap (go me) children
+      where
+        terms = headingWords heading <> foldMap headingWords parents
+        me = parents `DList.snoc` heading
+
+    headingWords :: SectionHeading -> BagOfWords
+    headingWords (SectionHeading t) = tokenize t
 
 modes :: Parser (IO ())
 modes = subparser
@@ -174,19 +227,17 @@ termPostings idx terms =
               Just docMeta -> Just (docMeta, docTerms)
     in collectPostings postings >-> P.P.mapFoldable lookupMeta
 
-scoreQuery :: (Monad m)
-           => Smoothing Term
+scoreQuery :: Smoothing Term
            -> DiskIdx.DiskIndex (ParagraphId, DocumentLength) Int
-           -> [Term]
-           -> m [(ParagraphId, Score)]
-scoreQuery smoothing idx query =
-    foldProducer (Foldl.generalize $ topK 20)
-    $ termPostings idx query
+           -> BagOfWords
+           -> [(ParagraphId, Score)]
+scoreQuery smoothing idx (BagOfWords query) =
+       runIdentity
+     $ foldProducer (Foldl.generalize $ topK 20)
+     $ termPostings idx (M.keys query)
     >-> cat'                      @((ParagraphId, DocumentLength), [(Term, Int)])
     >-> P.P.map (\((paraId, docLen), docTf) ->
-                   let score = queryLikelihood smoothing (M.assocs queryTf) docLen $ map (second realToFrac) docTf
+                   let score = queryLikelihood smoothing (M.assocs queryReal) docLen $ map (second realToFrac) docTf
                    in (paraId, score))
     >-> cat'                      @(ParagraphId, Score)
-  where
-    queryTf =
-        fmap realToFrac $ M.unionsWith (+) $ map (`M.singleton` 1) query
+  where queryReal = fmap realToFrac query
