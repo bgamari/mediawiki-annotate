@@ -26,7 +26,7 @@ main = do
     putStr "Writing paragraphs..."
     let paragraphsFile = path <.> "paragraphs"
     withFile paragraphsFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ map toParagraphs (pages anns)
+        BSB.hPutBuilder h $ encodeCborList $ concatMap toParagraphs (pages anns)
     putStrLn "done"
 
     putStr "Writing relevance annotations..."
