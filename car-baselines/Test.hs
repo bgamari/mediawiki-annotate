@@ -142,9 +142,10 @@ modeQuery =
        <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
        <*> option str (long "skeletons" <> short 'S' <> help "File containing page skeletons to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
+       <*> option auto (long "count" <> short 'k' <> help "How many results to retrieve per query" <> value 1000)
   where
-    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> IO ()
-    go diskIdx corpusStatsFile skeletonFile runName = do
+    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> IO ()
+    go diskIdx corpusStatsFile skeletonFile runName k = do
         termFreqs <- openTermFreqs corpusStatsFile
         skeletons <- decodeCborList <$> BSL.readFile skeletonFile
         corpusStats <- readCorpusStats corpusStatsFile
@@ -160,7 +161,7 @@ modeQuery =
 
             predictSection :: BagOfWords -> SectionPath -> IO ()
             predictSection query sectionPath = do
-                let results = scoreQuery smoothing idx 20 query
+                let results = scoreQuery smoothing idx k query
                 BSL.putStrLn $ BSB.toLazyByteString
                     $ prettyTrecRun runName
                       [ (sectionPath, paraId, score)
