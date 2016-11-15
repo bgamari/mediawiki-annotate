@@ -160,7 +160,7 @@ modeQuery =
 
             predictSection :: BagOfWords -> SectionPath -> IO ()
             predictSection query sectionPath = do
-                let results = scoreQuery smoothing idx query
+                let results = scoreQuery smoothing idx 20 query
                 BSL.putStrLn $ BSB.toLazyByteString
                     $ prettyTrecRun runName
                       [ (sectionPath, paraId, score)
@@ -229,15 +229,17 @@ termPostings idx terms =
 
 scoreQuery :: Smoothing Term
            -> DiskIdx.DiskIndex (ParagraphId, DocumentLength) Int
+           -> Int
            -> BagOfWords
            -> [(ParagraphId, Score)]
-scoreQuery smoothing idx (BagOfWords query) =
-       runIdentity
-     $ foldProducer (Foldl.generalize $ topK 20)
+scoreQuery smoothing idx k (BagOfWords query) =
+       map (\(Entry a b) -> (b, a))
+     $ runIdentity
+     $ foldProducer (Foldl.generalize $ topK k)
      $ termPostings idx (M.keys query)
     >-> cat'                      @((ParagraphId, DocumentLength), [(Term, Int)])
     >-> P.P.map (\((paraId, docLen), docTf) ->
                    let score = queryLikelihood smoothing (M.assocs queryReal) docLen $ map (second realToFrac) docTf
-                   in (paraId, score))
-    >-> cat'                      @(ParagraphId, Score)
+                   in Entry score paraId)
+    >-> cat'                      @(Entry Score ParagraphId)
   where queryReal = fmap realToFrac query
