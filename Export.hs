@@ -32,7 +32,7 @@ main = do
     putStr "Writing relevance annotations..."
     let relsFile = path <.> "qrel"
     withFile relsFile WriteMode $ \h ->
-          hPutStrLn h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations $ (pages anns)
+          hPutStr h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations $ (pages anns)
     putStrLn "done"
 
     return ()
