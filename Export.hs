@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import Control.Monad
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -28,6 +29,13 @@ main = do
           | null names = pages anns
           | otherwise  = mapMaybe (`lookupPage` anns) names
         {-# INLINE pagesToExport #-}
+
+    when (not $ null names) $ do
+        putStr "Writing articles..."
+        let articleFile = path <.> "articles"
+        withFile articleFile WriteMode $ \h ->
+            BSB.hPutBuilder h $ encodeCborList pagesToExport
+        putStrLn "done"
 
     putStr "Writing stub skeletons..."
     let skeletonFile = path <.> "skeletons"
