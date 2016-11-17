@@ -39,10 +39,15 @@ class Page(object):
 
     @staticmethod
     def from_cbor(cbor):
-        return Page(cbor[1], map(PageSkeleton.from_cbor, cbor[2]))
+        assert cbor[0] == 0 # tag
+        assert cbor[1][0] == 0 # PageName tag
+        return Page(cbor[1][1], map(PageSkeleton.from_cbor, cbor[2]))
 
     def __str__(self):
         return "Page(%s)" % self.page_name
+
+    def to_string(self):
+        return self.page_name + '\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' + '\n'.join(str(s) for s in self.skeleton)
 
 class PageSkeleton(object):
     """ A minimal representation of the structure of a Wikipedia page. """
@@ -52,7 +57,9 @@ class PageSkeleton(object):
         if tag == 0:
             return Section(cbor[1], map(PageSkeleton.from_cbor, cbor[2]))
         elif tag == 1:
-            return Para(map(ParaBody.from_cbor, cbor[1]))
+            return Para(Paragraph.from_cbor(cbor[1]))
+        else:
+            assert(False)
 
 class Section(PageSkeleton):
     """
@@ -78,11 +85,27 @@ class Para(PageSkeleton):
     Attributes:
       para_bodies    The content of the paragraph (a list of ParaBodys)
     """
-    def __init__(self, para_bodies):
-        self.para_bodies = para_bodies
+    def __init__(self, paragraph):
+        self.paragraph = paragraph
 
     def __str__(self, level=None):
-        return "".join(b.__str__() for b in self.para_bodies)
+        return str(self.paragraph)
+
+class Paragraph(object):
+    """
+    A paragraph.
+    """
+    def __init__(self, para_id, bodies):
+        self.para_id = para_id
+        self.bodies = bodies
+
+    @staticmethod
+    def from_cbor(cbor):
+        assert cbor[0] == 0
+        return Paragraph(cbor[1], map(ParaBody.from_cbor, cbor[2]))
+
+    def __str__(self, level=None):
+        return ''.join(str(body) for body in self.bodies)
 
 class ParaBody(object):
     """
@@ -95,6 +118,8 @@ class ParaBody(object):
             return ParaText(cbor[1])
         elif tag == 1:
             return ParaLink(cbor[1][1], cbor[2])
+        else:
+            assert(False)
 
 class ParaText(ParaBody):
     """
@@ -123,3 +148,16 @@ class ParaLink(ParaBody):
 
     def __str__(self, level=None):
         return "[%s](%s)" % (self.anchor_text, self.page)
+
+
+def iter_annotations(file):
+    while True:
+        try:
+            yield Page.from_cbor(cbor.load(file))
+        except EOFError:
+            break
+
+def dump_annotations(file):
+    for page in iter_annotations(file):
+        print page.to_string()
+
