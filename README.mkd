@@ -10,7 +10,7 @@ documents. The `wiki-annotate` executable expects MediaWiki
 You'll need `ghc >=8.0.1` and `cabal-install >=0.24`.
 
  1. Checkout the repository: `git clone git://github.com/bgamari/mediawiki-annotate`
- 2. Checkout the submodules: `git submodule update --init`
+ 2. Checkout the submodules: `cd mediawiki-annotate; git submodule update --init`
  3. Build it: `cabal new-build`
  4. Move the executables to `bin/`: `mkdir -p bin; for i in $(find dist-newstyle/build/ -executable -a -type f -a -! -iname '*.so'); do ln -fs $(pwd)/$i bin/$(basename $i); done`
  
