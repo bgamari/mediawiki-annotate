@@ -85,6 +85,7 @@ resolveTemplate (Template tmpl args)
   | "IPAc-" `isPrefixOf` tmpl = []
   | "lang-" `isPrefixOf` tmpl
   , ((Nothing, body):_) <- args = body
+  | "Infobox" `isPrefixOf` tmpl = []
 
   | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
   , Just res <- handler args = res
@@ -122,8 +123,12 @@ templates = HM.fromList $
     , "mvar"             .= simpleTemplate
     , "format price"     .= simpleTemplate
     , "visible anchor"   .= simpleTemplate
+    , "cquote"           .= simpleTemplate
     , "inflation"        .= inflationTemplate
     , "citation needed"  .= dropTemplate
+    , "ref"              .= dropTemplate
+    , "r"                .= dropTemplate  -- synonym for ref
+    , "zh"               .= dropTemplate  -- "Chinese: "
     ]
   where
     a .= b = (a,b)
