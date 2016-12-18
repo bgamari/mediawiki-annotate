@@ -97,12 +97,20 @@ executable trec-car-filter
   main-is:             FilterPages.hs
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
-                       aeson >= 1.0,
-                       binary-serialise-cbor >=0.1 && <0.2,
-                       bytestring >= 0.10,
+                       bytestring,
                        unordered-containers,
                        text,
                        optparse-applicative >= 0.12,
                        hashable,
+                       trec-car-tools
+  default-language:    Haskell2010
+
+executable trec-car-dump
+  main-is:             DumpPages.hs
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.10,
+                       bytestring,
+                       text,
+                       optparse-applicative >= 0.12,
                        trec-car-tools
   default-language:    Haskell2010
