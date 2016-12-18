@@ -121,6 +121,7 @@ templates = HM.fromList $
     , "resize"           .= simpleTemplate
     , "mvar"             .= simpleTemplate
     , "format price"     .= simpleTemplate
+    , "visible anchor"   .= simpleTemplate
     , "inflation"        .= inflationTemplate
     , "citation needed"  .= dropTemplate
     ]
