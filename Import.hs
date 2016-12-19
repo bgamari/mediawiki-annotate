@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 import Data.Char (isSpace)
 import Data.List (intersperse, isPrefixOf)
@@ -16,21 +17,43 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 
+import qualified Data.Binary as B
+import Pipes
+import qualified Pipes.Prelude as PP
+import qualified ConcurrentMap as CM
+
 import Data.MediaWiki.XmlDump
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
 
+workers :: Int
+workers = 4
+
+newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
+
+instance (CBOR.Serialise a) => B.Binary (EncodedCbor a) where
+    get = EncodedCbor <$> B.get
+    put = B.put . getEncodedCbor
+
+encodedCbor :: CBOR.Serialise a => a -> EncodedCbor a
+encodedCbor = EncodedCbor . CBOR.toLazyByteString . CBOR.encode
+
+instance B.Binary NamespaceId
+instance B.Binary Format
+instance B.Binary PageId
+instance B.Binary WikiDoc
+
 main :: IO ()
 main = do
     (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
-    mapM_ (printResult . toPage) $ filter isInteresting docs
-
-printResult :: Either String Page -> IO ()
-printResult (Right page) = do
-    BSL.putStr $ CBOR.toLazyByteString $ CBOR.encode page
-    hPutStr stderr "."
-printResult (Left err) =
-    hPutStrLn stderr $ "\n"<>err
+    let parsed :: Producer (Either String (EncodedCbor Page)) IO ()
+        parsed =
+            CM.map (2*workers) workers
+                (fmap encodedCbor . toPage)
+                (each $ filter isInteresting docs)
+        putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
+        putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."
+    runEffect $ parsed >-> PP.mapM_ putParsed
 
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
