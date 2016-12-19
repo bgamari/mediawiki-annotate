@@ -3,7 +3,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 
 import Data.Char (isSpace)
-import Data.List (intersperse, isPrefixOf)
+import Data.List (intersperse)
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -11,6 +11,7 @@ import System.IO
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
+import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import qualified Data.HashMap.Strict as HM
 
@@ -58,6 +59,7 @@ main = do
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
        "#REDIRECT" `BS.isInfixOf` BS.take 20 docText
+    || "Category:" `BS.isPrefixOf` docTitle
     || "Talk:" `BS.isPrefixOf` docTitle
     || "File:" `BS.isPrefixOf` docTitle
     || "File talk:" `BS.isPrefixOf` docTitle
@@ -113,20 +115,22 @@ dropXml tag (XmlOpenClose tag' _ : xs)
 dropXml tag (x:xs) = x : dropXml tag xs
 dropXml _   [] = []
 
+type TemplateTag = Text
+
 resolveTemplate :: Doc -> [Doc]
 resolveTemplate (Template tmpl args)
   | Just alt <- lookupNamed "alt" args = alt
-  | "IPA-" `isPrefixOf` tmpl = []
-  | "IPAc-" `isPrefixOf` tmpl = []
-  | "lang-" `isPrefixOf` tmpl
-  , ((Nothing, body):_) <- args = body
-  | "Infobox" `isPrefixOf` tmpl = []
+  | "IPA-" `T.isPrefixOf` tmpl    = []
+  | "IPAc-" `T.isPrefixOf` tmpl   = []
+  | "lang-" `T.isPrefixOf` tmpl
+  , ((Nothing, body):_) <- args   = body
+  | "Infobox" `T.isPrefixOf` tmpl = []
 
-  | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
+  | Just handler <- HM.lookup (T.toCaseFold tmpl) templates
   , Just res <- handler args = concatMap resolveTemplate res
 resolveTemplate x = [x]
 
-templates :: HM.HashMap T.Text ([(Maybe String, [Doc])] -> Maybe [Doc])
+templates :: HM.HashMap TemplateTag ([(Maybe Text, [Doc])] -> Maybe [Doc])
 templates = HM.fromList $
     -- Lists
     map (.= listTemplate)
@@ -218,15 +222,15 @@ templates = HM.fromList $
     inflationTemplate (_ : (Nothing, [Text amount]) : _) = justText amount
     inflationTemplate _ = Nothing
 
-lookupNamed :: String -> [(Maybe String, [Doc])] -> Maybe [Doc]
+lookupNamed :: TemplateTag -> [(Maybe Text, [Doc])] -> Maybe [Doc]
 lookupNamed key = listToMaybe . mapMaybe (isNamed key)
 
-isNamed :: String -> (Maybe String, [Doc]) -> Maybe [Doc]
+isNamed :: TemplateTag -> (Maybe Text, [Doc]) -> Maybe [Doc]
 isNamed key (Just key', val)
   | key == key'  = Just val
 isNamed _   _    = Nothing
 
-isUnnamed :: (Maybe String, [Doc]) -> Maybe [Doc]
+isUnnamed :: (Maybe Text, [Doc]) -> Maybe [Doc]
 isUnnamed (Nothing, val) = Just val
 isUnnamed _              = Nothing
 
