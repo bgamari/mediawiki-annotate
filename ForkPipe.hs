@@ -13,18 +13,23 @@ module ForkPipe
 import Control.Exception
 import Data.Kind (Constraint)
 import GHC.Generics
+import System.IO
 
 import Pipes
 import Pipes.Safe as Safe
 import qualified Pipes.Internal as P
 import Data.Binary
-import System.Posix.Types (ProcessID)
 import System.Posix.Signals
 import System.Posix.Process
 import Control.Concurrent
 import Control.Concurrent.STM
 
+import qualified Data.ByteString.Char8 as BS
+
 import FifoChannel
+
+debug :: Bool
+debug = False
 
 -- | A request "inward" from the worker to the worker.
 data InwardMessage a' a b' b r
@@ -78,28 +83,33 @@ forkPipe runM pipe = do
     -- Ensure children are reaped
     exitCode <- liftIO newEmptyTMVarIO
     _ <- liftIO $ forkIO $ do
+        dbg $ "waiting on "++show pid
         mx <- getProcessStatus True False pid
-        print mx
+        dbg $ "pid "++show pid++" "++show mx
         case mx of
           Just code -> atomically $ putTMVar exitCode code
           Nothing   -> return ()
 
-    _ <- Safe.register $ liftIO $ do
-        signalProcess sigINT pid
+    rkey <- Safe.register $ liftIO $ do
+        let term _ = signalProcess sigINT pid
+        dbg $ "pid downing"
+        Safe.handleAll term $ send sendA MasterDone
+        mx <- getProcessStatus True False pid
+        dbg $ "pid "++show pid++" "++show mx
 
     let checkExited exc = liftIO $ do
+            dbg $ "checking exited "++show pid
             mcode <- atomically $ tryTakeTMVar exitCode
             case mcode of
               Just code -> throwM $ WorkerKilled code
               Nothing -> throwM exc
-    return $ handleAll checkExited $ master pid recvB sendA
+    return $ handleAll checkExited $ master rkey recvB sendA
   where
-    master :: ProcessID
+    master :: Safe.ReleaseKey
            -> ReceiveChan (OutwardMessage a' a b' b r)
            -> SendChan (InwardMessage a' a b' b r)
            -> Proxy a' a b' b n r
-    master _workerPid recvC sendC = go
-    -- TODO: Catch worker killed
+    master rkey recvC sendC = go
       where
         go = do
             req <- liftIO $ receive recvC
@@ -107,17 +117,20 @@ forkPipe runM pipe = do
             case req of
               WorkerUpRequest   a' -> P.Request a' goRequest
               WorkerDownRespond b  -> P.Respond b  goRespond
-              WorkerDone        r  -> pure r
-              WorkerFail        e  -> throwM $ WorkerFailed e
+              WorkerDone        r  -> Safe.release rkey >> pure r
+              WorkerFail        e  -> Safe.release rkey >> throwM (WorkerFailed e)
         goRequest a  = liftIO (send sendC (MasterUpRespond a)) >> go
         goRespond b' = liftIO (send sendC (MasterDownRequest b')) >> go
 
     worker :: ReceiveChan (InwardMessage a' a b' b r)
            -> SendChan (OutwardMessage a' a b' b r)
            -> IO ()
-    worker recvC sendC = Safe.handle onError $ runM $ go pipe
+    worker recvC sendC = do
+        setNumCapabilities 1
+        Safe.handle onError $ runM $ go pipe
       where
-        onError (SomeException e) =
+        onError (SomeException e) = do
+            liftIO $ dbg $ "Worker: "++show e
             send sendC (WorkerFail $ show e)
 
         go (P.Request a' cont) = do
@@ -142,4 +155,5 @@ forkPipe runM pipe = do
         go (P.Pure r) = liftIO $ send sendC (WorkerDone r)
 
 dbg :: MonadIO m => String -> m ()
+dbg x | debug = liftIO $ BS.hPutStrLn stderr $ BS.pack x
 dbg _ = return ()
