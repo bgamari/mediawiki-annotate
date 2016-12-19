@@ -94,6 +94,7 @@ resolveTemplate x = [x]
 
 templates :: HM.HashMap T.Text ([(Maybe String, [Doc])] -> Maybe [Doc])
 templates = HM.fromList $
+    -- Lists
     map (.= listTemplate)
     [ "bulleted list", "blist", "bulleted", "ulist", "unordered list"
     , "unbulleted list", "ubl", "ubt", "ublist", "unbullet"
@@ -102,10 +103,17 @@ templates = HM.fromList $
     , "hlist"
     , "flatlist"
     ] ++
+    -- Text styling
+    map (.= simpleTemplate)
+    [ "small" , "smaller" , "midsize" , "larger" , "big" , "large" , "huge" , "resize"
+    , "smallcaps", "sc1", "smallcaps2", "sc2", "sc", "allcaps", "caps", "nocaps"
+    ] ++
+    -- Unit conversion
     map (.= convertTemplate)
     [ "cvt"
     , "convert"
     ] ++
+    -- Other
     [ "as of"            .= asOfTemplate
     , "lang"             .= langTemplate
     , "rtl-lang"         .= langTemplate
@@ -115,14 +123,6 @@ templates = HM.fromList $
     , "number to word"   .= simpleTemplate
     , "ordinal to word"  .= simpleTemplate
     , "nowrap"           .= simpleTemplate
-    , "small"            .= simpleTemplate
-    , "smaller"          .= simpleTemplate
-    , "midsize"          .= simpleTemplate
-    , "larger"           .= simpleTemplate
-    , "big"              .= simpleTemplate
-    , "large"            .= simpleTemplate
-    , "huge"             .= simpleTemplate
-    , "resize"           .= simpleTemplate
     , "mvar"             .= simpleTemplate
     , "format price"     .= simpleTemplate
     , "visible anchor"   .= simpleTemplate
@@ -130,10 +130,12 @@ templates = HM.fromList $
     , "cquote"           .= simpleTemplate
     , "inflation"        .= inflationTemplate
     , "citation needed"  .= dropTemplate
+    , "respell"          .= dropTemplate
     , "ref"              .= dropTemplate
     , "refn"             .= dropTemplate
     , "r"                .= dropTemplate  -- synonym for ref
     , "zh"               .= dropTemplate  -- "Chinese: "
+    , "sfn"              .= dropTemplate  -- shortened footnote
     ]
   where
     a .= b = (a,b)
