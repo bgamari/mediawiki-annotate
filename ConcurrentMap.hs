@@ -1,8 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ConstraintKinds #-}
 
 module ConcurrentMap where
@@ -25,7 +22,6 @@ map queueDepth nMappers f xs =
   where
     run :: IO (PC.Input b)
     run = do
-        putStrLn "proc"
         (workOut, workIn, workSeal) <- PC.spawn' $ PC.bounded queueDepth
         (resultOut, resultIn, resultSeal) <- PC.spawn' $ PC.bounded queueDepth
 
@@ -37,7 +33,6 @@ map queueDepth nMappers f xs =
         -- Feeds mappers
         mappers <- replicateM nMappers $ async $ runSafeT $ do
             pipe <- forkPipe id $ PP.map f
-            liftIO $ putStrLn "proc1"
             runEffect $ PC.fromInput workIn >-> pipe >-> PC.toOutput resultOut
 
         -- Seals result queue

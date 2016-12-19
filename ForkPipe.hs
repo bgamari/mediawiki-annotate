@@ -11,7 +11,6 @@ module ForkPipe
     ) where
 
 import Control.Exception
-import System.Exit
 import Data.Kind (Constraint)
 import GHC.Generics
 
@@ -24,7 +23,6 @@ import System.Posix.Signals
 import System.Posix.Process
 import Control.Concurrent
 import Control.Concurrent.STM
-import Control.Concurrent.Async
 
 import FifoChannel
 
@@ -79,8 +77,7 @@ forkPipe runM pipe = do
 
     -- Ensure children are reaped
     exitCode <- liftIO newEmptyTMVarIO
-    liftIO $ forkIO $ do
-        putStrLn "reaping"
+    _ <- liftIO $ forkIO $ do
         mx <- getProcessStatus True False pid
         print mx
         case mx of
