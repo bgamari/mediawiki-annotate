@@ -51,15 +51,19 @@ toPage WikiDoc{..} =
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = PageName $ TE.decodeUtf8 docTitle
-             , pageSkeleton = toSkeleton
-                            $ filter (not . isTemplate)
-                            $ concatMap resolveTemplate
-                            $ filter (not . isComment)
-                            $ dropXml "super"
-                            $ dropXml "sub"
-                            $ dropXml "ref"
-                            $ contents
+             , pageSkeleton = docsToSkeletons contents
              }
+
+docsToSkeletons :: [Doc] -> [PageSkeleton]
+docsToSkeletons =
+      toSkeleton
+    . filter (not . isTemplate) -- drop unknown templates here so they don't
+                                -- break up paragraphs
+    . concatMap resolveTemplate
+    . filter (not . isComment)
+    . dropXml "super"
+    . dropXml "sub"
+    . dropXml "ref"
 
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
