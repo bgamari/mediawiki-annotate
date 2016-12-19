@@ -52,6 +52,7 @@ toPage WikiDoc{..} =
         --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = PageName $ TE.decodeUtf8 docTitle
              , pageSkeleton = toSkeleton
+                            $ filter (not . isTemplate)
                             $ concatMap resolveTemplate
                             $ filter (not . isComment)
                             $ dropXml "super"
@@ -59,6 +60,10 @@ toPage WikiDoc{..} =
                             $ dropXml "ref"
                             $ contents
              }
+
+isTemplate :: Doc -> Bool
+isTemplate (Template{}) = True
+isTemplate _            = False
 
 isComment :: Doc -> Bool
 isComment (Comment{}) = True
