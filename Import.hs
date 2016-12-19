@@ -108,6 +108,7 @@ templates = HM.fromList $
     ] ++
     [ "as of"            .= asOfTemplate
     , "lang"             .= langTemplate
+    , "rtl-lang"         .= langTemplate
     , "time ago"         .= timeAgoTemplate
     , "linktext"         .= simpleTemplate
     , "cardinal to word" .= simpleTemplate
