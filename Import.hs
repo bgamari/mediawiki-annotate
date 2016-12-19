@@ -69,6 +69,7 @@ isInteresting WikiDoc{..} = not $
     || "Wikipedia talk:" `BS.isPrefixOf` docTitle
     || "Wikipedia:" `BS.isPrefixOf` docTitle
     || "Template:" `BS.isPrefixOf` docTitle
+    || "Template talk:" `BS.isPrefixOf` docTitle
     -- || "Portal:" `BS.isPrefixOf` docTitle
 
 toPage :: WikiDoc -> Either String Page
