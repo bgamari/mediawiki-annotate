@@ -11,7 +11,7 @@ import CAR.Types
 opts :: Parser (FilePath, FilePath, IO (Page -> Bool))
 opts =
     (,,)
-    <$> argument str (help "input file")
+    <$> argument str (help "input file" <> metavar "FILE")
     <*> option str (short 'o' <> long "output")
     <*> predicate
   where
