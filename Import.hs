@@ -89,7 +89,7 @@ resolveTemplate (Template tmpl args)
   | "Infobox" `isPrefixOf` tmpl = []
 
   | Just handler <- HM.lookup (T.toCaseFold $ T.pack tmpl) templates
-  , Just res <- handler args = res
+  , Just res <- handler args = concatMap resolveTemplate res
 resolveTemplate x = [x]
 
 templates :: HM.HashMap T.Text ([(Maybe String, [Doc])] -> Maybe [Doc])
