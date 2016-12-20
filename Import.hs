@@ -248,7 +248,7 @@ toParaBody (InternalLink page parts)
   , "file:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | PageName page' <- page
-  , "Image:" `T.isPrefixOf` T.toCaseFold page'
+  , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
   = Just [ParaLink page t]
