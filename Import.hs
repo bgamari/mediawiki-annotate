@@ -320,6 +320,6 @@ toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-        heading = SectionHeading $ T.pack title
+        heading = SectionHeading $ T.pack (getAllText title)
     in Section heading (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
