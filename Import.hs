@@ -60,6 +60,7 @@ isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
        "#REDIRECT" `BS.isInfixOf` BS.take 20 docText
     || "Category:" `BS.isPrefixOf` docTitle
+    || "Category talk:" `BS.isPrefixOf` docTitle
     || "Talk:" `BS.isPrefixOf` docTitle
     || "File:" `BS.isPrefixOf` docTitle
     || "File talk:" `BS.isPrefixOf` docTitle
