@@ -302,22 +302,28 @@ getPrefix f = go []
 
 -- | Collapse consecutive 'ParaText' nodes.
 toParaBodies :: [ParaBody] -> [ParaBody]
-toParaBodies = go
+toParaBodies = filter (not . isEmptyText) . go
   where
     go [] = []
     go xs
       | (ys@(_:_), xs') <- getPrefix isText xs
       = ParaText (T.concat ys) : go xs'
     go (x:xs) = x : go xs
+
     isText (ParaText t) = Just t
     isText _ = Nothing
+
+    isEmptyText (ParaText t) = T.null t
+    isEmptyText _            = False
 
 toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
-  | (bodies@(_:_), docs') <- getPrefix toParaBody docs =
-        let bodies' = toParaBodies $ concat bodies
-        in Para (Paragraph (toParagraphId bodies') bodies') : toSkeleton docs'
+  | (bodies@(_:_), docs') <- getPrefix toParaBody docs
+  , let bodies' = toParaBodies $ concat bodies
+  , not $ null bodies'
+  = Para (Paragraph (toParagraphId bodies') bodies') : toSkeleton docs'
+  where
 toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
