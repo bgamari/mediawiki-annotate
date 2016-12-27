@@ -94,6 +94,7 @@ docsToSkeletons =
     . dropXml "sup"
     . dropXml "sub"
     . dropXml "ref"
+    . dropXml "timeline"
 
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
