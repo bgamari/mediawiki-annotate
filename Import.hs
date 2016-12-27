@@ -90,7 +90,8 @@ docsToSkeletons =
                                 -- break up paragraphs
     . concatMap resolveTemplate
     . filter (not . isComment)
-    . dropXml "super"
+    . takeXml "code"
+    . dropXml "sup"
     . dropXml "sub"
     . dropXml "ref"
     . dropXml "timeline"
@@ -103,20 +104,38 @@ isComment :: Doc -> Bool
 isComment (Comment{}) = True
 isComment _           = False
 
-dropXml :: String -> [Doc] -> [Doc]
-dropXml tag (XmlOpen tag' _ : xs)
+takeXml :: String -> [Doc] -> [Doc]
+takeXml tag (XmlOpen tag' _ : xs)
   | tag == tag'
-  = case dropWhile (not . isClose) xs of
-      []   -> []
-      _:xs -> dropXml tag xs
+  = case break isClose xs of
+      (body, [])     -> body
+      (body, _:rest) -> body ++ takeXml tag rest
   where
     isClose (XmlClose tag'') = tag == tag''
     isClose _                = False
-dropXml tag (XmlOpenClose tag' _ : xs)
+takeXml tag (XmlOpenClose tag' _ : xs)
   | tag == tag'
-  = dropXml tag xs
-dropXml tag (x:xs) = x : dropXml tag xs
-dropXml _   [] = []
+  = takeXml tag xs
+takeXml tag (x:xs) = x : takeXml tag xs
+takeXml _   [] = []
+
+dropXml :: String -> [Doc] -> [Doc]
+dropXml = replaceXml []
+
+replaceXml :: [Doc] -> String -> [Doc] -> [Doc]
+replaceXml sub tag (XmlOpen tag' _ : xs)
+  | tag == tag'
+  = case dropWhile (not . isClose) xs of
+      []   -> sub
+      _:xs -> sub ++ dropXml tag xs
+  where
+    isClose (XmlClose tag'') = tag == tag''
+    isClose _                = False
+replaceXml sub tag (XmlOpenClose tag' _ : xs)
+  | tag == tag'
+  = replaceXml sub tag xs
+replaceXml sub tag (x:xs) = x : replaceXml sub tag xs
+replaceXml _   _   [] = []
 
 type TemplateTag = Text
 
@@ -303,6 +322,6 @@ toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-        heading = SectionHeading $ T.pack title
+        heading = SectionHeading $ T.pack (getAllText title)
     in Section heading (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
