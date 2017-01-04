@@ -286,6 +286,8 @@ getText (Char c)        = Just $ [c]
 getText (Bold xs)       = Just $ getAllText xs
 getText (Italic xs)     = Just $ getAllText xs
 getText (BoldItalic xs) = Just $ getAllText xs
+getText (InternalLink _ (xs:_))   = Just $ getAllText xs
+getText (ExternalLink _ (Just s)) = Just s
 getText _               = Nothing
 
 getAllText :: [Doc] -> String
