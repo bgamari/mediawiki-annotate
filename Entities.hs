@@ -1,17 +1,27 @@
 module Entities (resolveEntities) where
 
+import Data.Char
+import Numeric
 import qualified Data.HashMap.Strict as M
 
 resolveEntities :: String -> String
 resolveEntities ('&' : rest)
   | Just c <- M.lookup ent entities
-  = c : resolveEntities (tail $ dropWhile (/= ';') rest)
-  where ent = takeWhile (/= ';') $ take longestEntity rest
+  = c : resolveEntities after
+
+  | '#' : 'x' : rest' <- rest
+  , (n, ";") : _ <- readHex rest'
+  = chr n : resolveEntities after
+
+  | '#' : rest' <- rest
+  , (n, ";") : _ <- readDec rest'
+  = chr n : resolveEntities after
+  where
+    ent = takeWhile (/= ';') $ take 8 rest
+    after = tail $ dropWhile (/= ';') rest
 resolveEntities (c : rest) = c : resolveEntities rest
 resolveEntities [] = []
 
-longestEntity :: Int
-longestEntity = maximum (map (length . fst) allEntities) + 1
 
 entities :: M.HashMap String Char
 entities = M.fromList allEntities
