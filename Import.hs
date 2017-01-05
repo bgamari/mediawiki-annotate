@@ -220,7 +220,7 @@ templates = HM.fromList $
     dropTemplate _ = Nothing
 
     listTemplate args =
-        Just $ intersperse (Text ", ") $ concat $ mapMaybe isUnnamed args
+        Just $ concat $ [Text " "] : intersperse [Text ", "] (mapMaybe isUnnamed args)
 
     convertTemplate ((Nothing, val) : (Nothing, unit) : _) =
         justText $ getAllText val <> " " <> getAllText unit
