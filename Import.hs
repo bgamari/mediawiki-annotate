@@ -151,13 +151,13 @@ type TemplateTag = Text
 
 resolveTemplate :: Doc -> [Doc]
 resolveTemplate (Template tmpl args)
-  | Just alt <- lookupNamed "alt" args = alt
   | "IPA-" `T.isPrefixOf` tmpl    = []
   | "IPAc-" `T.isPrefixOf` tmpl   = []
   | "lang-" `T.isPrefixOf` tmpl
   , ((Nothing, body):_) <- args   = body
-  | "Infobox" `T.isPrefixOf` tmpl = []
+  | "Infobox" `T.isPrefixOf` tmpl = [] -- don't show infoboxes, even with alt
 
+  | Just alt <- lookupNamed "alt" args = alt
   | Just handler <- HM.lookup (T.toCaseFold tmpl) templates
   , Just res <- handler args = concatMap resolveTemplate res
 resolveTemplate x = [x]
