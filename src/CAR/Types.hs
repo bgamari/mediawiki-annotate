@@ -46,7 +46,7 @@ urlEncodeText :: String -> SBS.ShortByteString
 urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
 
 -- Orphans
-instance CBOR.Serialise PageName
+deriving instance CBOR.Serialise PageName
 deriving instance IsString PageName
 instance FromJSON PageName
 instance FromJSONKey PageName where
@@ -62,9 +62,8 @@ instance CBOR.Serialise SBS.ShortByteString where
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId SBS.ShortByteString
-               deriving (Show, Eq, Ord, Generic)
+               deriving (Show, Eq, Ord, Generic, CBOR.Serialise)
 instance Hashable PageId
-instance CBOR.Serialise PageId
 
 pageNameToId :: PageName -> PageId
 pageNameToId (PageName n) = PageId $ urlEncodeText $ T.unpack n
@@ -91,8 +90,7 @@ data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
 instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
-                    deriving (Show, Generic, Ord, Eq)
-instance CBOR.Serialise ParagraphId
+                    deriving (Show, Generic, Ord, Eq, CBOR.Serialise)
 
 unpackParagraphId :: ParagraphId -> String
 unpackParagraphId (ParagraphId s) = unpackSBS s
