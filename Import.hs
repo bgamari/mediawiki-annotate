@@ -23,7 +23,8 @@ import Pipes
 import qualified Pipes.Prelude as PP
 import qualified ConcurrentMap as CM
 
-import Data.MediaWiki.XmlDump
+import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
+import qualified Data.MediaWiki.XmlDump as XmlDump
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
 
@@ -42,6 +43,7 @@ encodedCbor = EncodedCbor . CBOR.toLazyByteString . CBOR.encode
 instance B.Binary NamespaceId
 instance B.Binary Format
 instance B.Binary PageId
+instance B.Binary XmlDump.PageId
 instance B.Binary WikiDoc
 
 main :: IO ()
@@ -79,9 +81,11 @@ toPage WikiDoc{..} =
   where
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
-        Page { pageName     = PageName $ TE.decodeUtf8 docTitle
+        Page { pageName     = name
+             , pageId       = pageNameToId name
              , pageSkeleton = docsToSkeletons contents
              }
+      where name = PageName $ TE.decodeUtf8 docTitle
 
 docsToSkeletons :: [Doc] -> [PageSkeleton]
 docsToSkeletons =
@@ -318,18 +322,19 @@ toParaBodies = filter (not . isEmptyText) . go
     isEmptyText (ParaText t) = T.null t
     isEmptyText _            = False
 
+
 toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
   | (bodies@(_:_), docs') <- getPrefix toParaBody docs
   , let bodies' = toParaBodies $ concat bodies
   , not $ null bodies'
-  = Para (Paragraph (toParagraphId bodies') bodies') : toSkeleton docs'
+  = Para (Paragraph (paraBodiesToId bodies') bodies') : toSkeleton docs'
   where
 toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-        heading = SectionHeading $ T.pack (getAllText title)
-    in Section heading (toSkeleton children) : toSkeleton docs'
+        heading = SectionHeading $ T.pack $ getAllText title
+    in Section heading (sectionHeadingToId heading) (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs

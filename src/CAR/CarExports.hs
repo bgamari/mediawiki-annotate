@@ -23,7 +23,6 @@ import Data.Maybe
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
 import qualified Data.Text as T
-import Network.URI
 import Data.Binary.Serialise.CBOR
 import GHC.Generics
 
@@ -38,13 +37,14 @@ newtype ParaNumber = ParaNumber Int -- Sequential index
 type PassageFile = [Paragraph]
 
 -- Stub
-data Stub = Stub { stubName :: PageName
+data Stub = Stub { stubName     :: PageName
+                 , stubPageId   :: PageId
                  , stubSkeleton :: [PageSkeleton] }
           deriving (Show, Generic)
 instance Serialise Stub
 
 -- Ground truth
-data SectionPath = SectionPath PageName [SectionHeading]
+data SectionPath = SectionPath PageId [HeadingId]
                deriving (Show)
 
 data Relevance = Relevant | NonRelevant
@@ -55,54 +55,51 @@ data Annotation = Annotation SectionPath ParagraphId Relevance
                 deriving (Show)
 
 escapeSectionPath :: SectionPath -> String
-escapeSectionPath (SectionPath pageName headings) =
-    escapeURIString isAllowedInURI
-    $ intercalate "/" $ (T.unpack $ getPageName pageName) : map sectionHeading headings
-  where
-    sectionHeading (SectionHeading h) = T.unpack h
+escapeSectionPath (SectionPath page headings) =
+    intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
 
 -- | In TREC @qrel@ format.
 prettyAnnotation :: Annotation -> String
-prettyAnnotation (Annotation sectionPath (ParagraphId paraId) rel) =
+prettyAnnotation (Annotation sectionPath paraId rel) =
     unwords [ escapeSectionPath sectionPath
             , "0"
-            , BS.unpack paraId
+            , unpackParagraphId paraId
             , case rel of
                 Relevant    -> "1"
                 NonRelevant -> "0"
             ]
 
 toStubSkeleton :: Page -> Stub
-toStubSkeleton (Page name skeleton) =
-    Stub name (mapMaybe go skeleton)
+toStubSkeleton (Page name pageId skeleton) =
+    Stub name pageId (mapMaybe go skeleton)
   where
     go :: PageSkeleton -> Maybe PageSkeleton
-    go (Section heading children) =
-        Just $ Section heading (mapMaybe go children)
+    go (Section heading headingId children) =
+        Just $ Section heading headingId (mapMaybe go children)
     go (Para _) = Nothing
 
 prettyStub :: Stub -> String
-prettyStub (Stub (PageName name) skeleton) =
+prettyStub (Stub (PageName name) _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
            ++ map prettySkeleton skeleton
 
 toParagraphs :: Page -> [Paragraph]
-toParagraphs (Page name skeleton) =
+toParagraphs (Page name _ skeleton) =
     concatMap go skeleton
   where
     go :: PageSkeleton -> [Paragraph]
-    go (Section _ children) = concatMap go children
+    go (Section _ _ children) = concatMap go children
     go (Para para) = [para]
 
 toAnnotations :: Page -> [Annotation]
-toAnnotations (Page name skeleton) =
+toAnnotations (Page _ pageId skeleton) =
     concatMap (go mempty) skeleton
   where
-    go :: DList.DList SectionHeading -> PageSkeleton -> [Annotation]
-    go parents (Section section children) =
+    go :: DList.DList HeadingId -> PageSkeleton -> [Annotation]
+    go parents (Section _ section children) =
         let parents' = parents `DList.snoc` section
         in concatMap (go parents') children
     go parents (Para (Paragraph paraId body)) =
         [Annotation path paraId Relevant]
       where
-        path = SectionPath name (DList.toList parents)
+        path = SectionPath pageId (DList.toList parents)
