@@ -30,7 +30,7 @@ import CAR.Types
 import Entities
 
 workers :: Int
-workers = 4
+workers = 16
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
 
