@@ -31,10 +31,10 @@ resolveEntities = TL.toStrict . go
       = TL.singleton (chr n) <> after
 
       | otherwise
-      = TL.singleton '&' <> go s
+      = "&" <> go s
       where
         s     = T.tail s' -- drop &
-        ent   = T.dropEnd 1 $ T.dropWhileEnd (/= ';') $ T.take 8 s
+        ent   = T.takeWhile (/= ';') $ T.take 8 s
         after = go $ T.drop 1 $ T.dropWhile (/= ';') s
 
 entities :: M.HashMap T.Text Char
