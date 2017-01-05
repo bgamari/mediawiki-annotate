@@ -27,6 +27,7 @@ import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
 import qualified Data.MediaWiki.XmlDump as XmlDump
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
+import Entities
 
 workers :: Int
 workers = 4
@@ -270,7 +271,7 @@ isUnnamed _              = Nothing
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: Doc -> Maybe [ParaBody]
-toParaBody (Text x)        = Just [ParaText $ T.pack x]
+toParaBody (Text x)        = Just [ParaText $ T.pack $ resolveEntities x]
 toParaBody (Char x)        = Just [ParaText $ T.singleton x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
