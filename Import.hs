@@ -322,7 +322,6 @@ toParaBodies = filter (not . isEmptyText) . go
     isEmptyText (ParaText t) = T.null t
     isEmptyText _            = False
 
-
 toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
