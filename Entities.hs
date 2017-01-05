@@ -1,38 +1,53 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Entities (resolveEntities) where
 
+import Data.Monoid
 import Data.Char
 import Numeric
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.HashMap.Strict as M
 
-resolveEntities :: String -> String
-resolveEntities ('&' : rest)
-  | Just c <- M.lookup ent entities
-  = c : resolveEntities after
-
-  | '#' : 'x' : rest' <- rest
-  , (n, ";") : _ <- readHex rest'
-  = chr n : resolveEntities after
-
-  | '#' : rest' <- rest
-  , (n, ";") : _ <- readDec rest'
-  = chr n : resolveEntities after
+resolveEntities :: T.Text -> T.Text
+resolveEntities = TL.toStrict . go
   where
-    ent = takeWhile (/= ';') $ take 8 rest
-    after = tail $ dropWhile (/= ';') rest
-resolveEntities (c : rest) = c : resolveEntities rest
-resolveEntities [] = []
+    go s
+      | T.null s = ""
+      | '&' /= T.head s
+      = let (s', cand) = T.breakOn "&" s
+        in TL.fromStrict s' <> go cand
+    -- we have a candidate entity
+    go s'
+      | Just c <- M.lookup ent entities
+      = TL.singleton c <> after
 
-entities :: M.HashMap String Char
+      | Just rest <- "#x" `T.stripPrefix` ent
+      , (n, "") : _ <- readHex $ T.unpack rest
+      = TL.singleton (chr n) <> after
+
+      | Just rest <- "#" `T.stripPrefix` ent
+      , (n, "") : _ <- readDec $ T.unpack rest
+      = TL.singleton (chr n) <> after
+
+      | otherwise
+      = TL.singleton '&' <> go s
+      where
+        s     = T.tail s' -- drop &
+        ent   = T.dropEnd 1 $ T.dropWhileEnd (/= ';') $ T.take 8 s
+        after = go $ T.drop 1 $ T.dropWhile (/= ';') s
+
+entities :: M.HashMap T.Text Char
 entities = M.fromList allEntities
 
-allEntities :: [(String, Char)]
+allEntities :: [(T.Text, Char)]
 allEntities =
     [ "quot"     .=    '"'
     , "amp"      .=    '&'
     , "apos"     .=    '\''
     , "lt"       .=    '<'
     , "gt"       .=    '>'
-    , "nbsp"     .=    'U'
+    , "nbsp"     .=    ' '
     , "iexcl"    .=    '¡'
     , "cent"     .=    '¢'
     , "pound"    .=    '£'

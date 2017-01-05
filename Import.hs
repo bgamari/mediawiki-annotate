@@ -101,6 +101,10 @@ docsToSkeletons =
     . dropXml "ref"
     . dropXml "timeline"
 
+-- | For testing.
+parseSkeleton :: String -> Either String [PageSkeleton]
+parseSkeleton = fmap docsToSkeletons . Markup.parse
+
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
 isTemplate _            = False
@@ -271,7 +275,7 @@ isUnnamed _              = Nothing
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: Doc -> Maybe [ParaBody]
-toParaBody (Text x)        = Just [ParaText $ T.pack $ resolveEntities x]
+toParaBody (Text x)        = Just [ParaText $ T.pack x]
 toParaBody (Char x)        = Just [ParaText $ T.singleton x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
@@ -284,7 +288,7 @@ toParaBody (InternalLink page parts)
   , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
-  = Just [ParaLink page t]
+  = Just [ParaLink page (resolveEntities t)]
   where t = case parts of
               [anchor] -> T.pack $ getAllText anchor
               _        -> getPageName page
@@ -321,7 +325,7 @@ toParaBodies = filter (not . isEmptyText) . go
     go [] = []
     go xs
       | (ys@(_:_), xs') <- getPrefix isText xs
-      = ParaText (T.concat ys) : go xs'
+      = ParaText (resolveEntities $ T.concat ys) : go xs'
     go (x:xs) = x : go xs
 
     isText (ParaText t) = Just t
@@ -342,6 +346,6 @@ toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-        heading = SectionHeading $ T.pack $ getAllText title
+        heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
     in Section heading (sectionHeadingToId heading) (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
