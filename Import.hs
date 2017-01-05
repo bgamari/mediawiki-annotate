@@ -156,7 +156,9 @@ resolveTemplate (Template tmpl args)
   , Just res <- handler args = concatMap resolveTemplate res
 resolveTemplate x = [x]
 
-templates :: HM.HashMap TemplateTag ([(Maybe Text, [Doc])] -> Maybe [Doc])
+type TemplateHandler = [(Maybe Text, [Doc])] -> Maybe [Doc]
+
+templates :: HM.HashMap TemplateTag TemplateHandler
 templates = HM.fromList $
     -- Lists
     map (.= listTemplate)
@@ -182,6 +184,7 @@ templates = HM.fromList $
     , "lang"             .= langTemplate
     , "rtl-lang"         .= langTemplate
     , "time ago"         .= timeAgoTemplate
+    , "angbr"            .= sandwichTemplate [Text "⟨"] [Text "⟩"]
     , "linktext"         .= simpleTemplate
     , "cardinal to word" .= simpleTemplate
     , "number to word"   .= simpleTemplate
@@ -244,6 +247,10 @@ templates = HM.fromList $
       where
         trimmed = dropWhile isSpace time
     timeAgoTemplate _ = Nothing
+
+    sandwichTemplate :: [Doc] -> [Doc] -> TemplateHandler
+    sandwichTemplate before after [(Nothing, xs)] = Just $ before ++ xs ++ after
+    sandwichTemplate _      _     _               = Nothing
 
     inflationTemplate (_ : (Nothing, [Text amount]) : _) = justText amount
     inflationTemplate _ = Nothing
