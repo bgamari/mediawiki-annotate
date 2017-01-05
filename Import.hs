@@ -101,6 +101,10 @@ docsToSkeletons =
     . dropXml "ref"
     . dropXml "timeline"
 
+-- | For testing.
+parseSkeleton :: String -> Either String [PageSkeleton]
+parseSkeleton = fmap docsToSkeletons . Markup.parse
+
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
 isTemplate _            = False
@@ -284,7 +288,7 @@ toParaBody (InternalLink page parts)
   , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
-  = Just [ParaLink page t]
+  = Just [ParaLink page (resolveEntities t)]
   where t = case parts of
               [anchor] -> T.pack $ getAllText anchor
               _        -> getPageName page
@@ -342,6 +346,6 @@ toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
         isParentHeader _                = False
-        heading = SectionHeading $ T.pack $ getAllText title
+        heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
     in Section heading (sectionHeadingToId heading) (toSkeleton children) : toSkeleton docs'
 toSkeleton (_ : docs)                = toSkeleton docs
