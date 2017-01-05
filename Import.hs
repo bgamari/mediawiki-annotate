@@ -96,6 +96,7 @@ docsToSkeletons =
     . concatMap resolveTemplate
     . filter (not . isComment)
     . takeXml "code"
+    . dropXml "gallery"
     . dropXml "sup"
     . dropXml "sub"
     . dropXml "ref"
