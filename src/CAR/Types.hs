@@ -8,7 +8,7 @@ module CAR.Types
     , PageId(..), unpackPageId, pageNameToId
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
-    , ParagraphId, unpackParagraphId
+    , ParagraphId(..), unpackParagraphId
       -- * Documents
     , Paragraph(..), prettyParagraph
     , ParaBody(..), paraBodiesToId

@@ -71,7 +71,7 @@ tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunc
 
 skeletonTerms :: PageSkeleton -> BagOfWords
 skeletonTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
-skeletonTerms (Section (SectionHeading t) children) =
+skeletonTerms (Section (SectionHeading t) _ children) =
     tokenize t <> foldMap skeletonTerms children
 
 paraBodyTerms :: ParaBody -> BagOfWords
@@ -181,22 +181,22 @@ prettyTrecRun runName =
         mconcat $ intersperse (BSB.char8 ' ')
         [ BSB.string8 $ escapeSectionPath path
         , BSB.char7 '0' -- iteration
-        , BSB.byteString paraId
+        , BSB.shortByteString paraId
         , BSB.intDec rank
         , BSB.doubleDec $ Log.ln score
         , BSB.byteString runName
         ]
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
-stubPaths (Stub pageName skel) = foldMap (go mempty) skel
+stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
   where
-    go :: DList.DList SectionHeading -> PageSkeleton -> [(BagOfWords, SectionPath)]
-    go _ (Para _) = [] -- this should really never happen
-    go parents (Section heading children) =
-        (terms, SectionPath pageName (toList me)) : foldMap (go me) children
+    go :: DList.DList HeadingId -> BagOfWords -> PageSkeleton -> [(BagOfWords, SectionPath)]
+    go _ _ (Para _) = [] -- this should really never happen
+    go parents parentTerms (Section heading headingId children) =
+        (terms, SectionPath pageId (toList me)) : foldMap (go me terms) children
       where
-        terms = headingWords heading <> foldMap headingWords parents
-        me = parents `DList.snoc` heading
+        terms = parentTerms <> headingWords heading
+        me = parents `DList.snoc` headingId
 
     headingWords :: SectionHeading -> BagOfWords
     headingWords (SectionHeading t) = tokenize t
