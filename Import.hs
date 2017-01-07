@@ -116,38 +116,43 @@ isComment :: Doc -> Bool
 isComment (Comment{}) = True
 isComment _           = False
 
-takeXml :: String -> [Doc] -> [Doc]
-takeXml tag (XmlOpen tag' _ : xs)
-  | tag == tag'
-  = case break isClose xs of
+takeXml :: T.Text -> [Doc] -> [Doc]
+takeXml tag (doc : xs)
+  | isXmlOpen tag doc
+  = case break (isXmlClose tag) xs of
       (body, [])     -> body
       (body, _:rest) -> body ++ takeXml tag rest
-  where
-    isClose (XmlClose tag'') = tag == tag''
-    isClose _                = False
-takeXml tag (XmlOpenClose tag' _ : xs)
-  | tag == tag'
+  | isXmlOpenClose tag doc
   = takeXml tag xs
 takeXml tag (x:xs) = x : takeXml tag xs
 takeXml _   [] = []
 
-dropXml :: String -> [Doc] -> [Doc]
+dropXml :: T.Text -> [Doc] -> [Doc]
 dropXml = replaceXml []
 
-replaceXml :: [Doc] -> String -> [Doc] -> [Doc]
-replaceXml sub tag (XmlOpen tag' _ : xs)
-  | tag == tag'
-  = case dropWhile (not . isClose) xs of
+replaceXml :: [Doc] -> T.Text -> [Doc] -> [Doc]
+replaceXml sub tag (doc : xs)
+  | isXmlOpen tag doc
+  = case dropWhile (not . isXmlClose tag) xs of
       []   -> sub
       _:xs -> sub ++ dropXml tag xs
-  where
-    isClose (XmlClose tag'') = tag == tag''
-    isClose _                = False
-replaceXml sub tag (XmlOpenClose tag' _ : xs)
-  | tag == tag'
+  | isXmlOpenClose tag doc
   = replaceXml sub tag xs
 replaceXml sub tag (x:xs) = x : replaceXml sub tag xs
 replaceXml _   _   [] = []
+
+isXmlOpenClose, isXmlOpen, isXmlClose :: T.Text -> Doc -> Bool
+isXmlOpenClose tag (XmlOpenClose tag' _)   =
+    T.toCaseFold tag == T.toCaseFold tag'
+isXmlOpenClose _   _                     = False
+
+isXmlOpen tag (XmlOpen tag' _) =
+    T.toCaseFold tag == T.toCaseFold tag'
+isXmlOpen _   _              = False
+
+isXmlClose tag (XmlClose tag') =
+    T.toCaseFold tag == T.toCaseFold tag'
+isXmlClose _   _               = False
 
 type TemplateTag = Text
 
