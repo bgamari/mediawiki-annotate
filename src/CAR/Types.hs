@@ -23,8 +23,10 @@ import Data.Foldable
 import Data.Char (ord, chr)
 import GHC.Generics
 import Data.Monoid
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Data.Binary.Get as Bin
+import qualified Data.Binary.Serialise.CBOR.Class as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
+import qualified Data.Binary.Serialise.CBOR.Read as CBOR
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
@@ -117,12 +119,12 @@ decodeCborList = start . BSL.toChunks
   where
     start xs
       | all BS.null xs = []
-      | otherwise      = go CBOR.deserialiseIncremental xs
+      | otherwise      = go (CBOR.deserialiseIncremental CBOR.decode) xs
 
-    go (CBOR.Partial f) [] = go (f Nothing) []
-    go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
-    go (CBOR.Done bs _ x) bss = x : start (bs : bss)
-    go (CBOR.Fail rest _ err) _ = error $ show err
+    go (Bin.Partial f) [] = go (f Nothing) []
+    go (Bin.Partial f) (bs : bss) = go (f (Just bs)) bss
+    go (Bin.Done bs _ x) bss = x : start (bs : bss)
+    go (Bin.Fail rest _ err) _ = error $ show err
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode

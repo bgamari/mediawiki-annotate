@@ -2,6 +2,7 @@
 {-# LANGUAGE BangPatterns #-}
 
 import Data.Foldable
+import qualified Data.Binary.Get as Bin
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
@@ -24,22 +25,22 @@ readValuesWithOffsets = start 0 . BSL.toChunks
 
     go :: Offset          -- ^ offset of beginning of current chunk
        -> Offset          -- ^ start offset of thing currently being decoded
-       -> CBOR.IDecode a
+       -> Bin.Decoder a
        -> [BS.ByteString] -- ^ remaining chunks
        -> [(Offset, a)]
-    go !currOff !startOff (CBOR.Partial f)   [] =
+    go !currOff !startOff (Bin.Partial f)   [] =
         go currOff startOff (f Nothing) []
 
-    go currOff  startOff (CBOR.Partial f)   (bs:bss) =
+    go currOff  startOff (Bin.Partial f)   (bs:bss) =
         go currOff startOff (f (Just bs)) bss
 
-    go currOff  startOff (CBOR.Done bs off x) bss =
+    go currOff  startOff (Bin.Done bs off x) bss =
         let !currOff' = currOff + fromIntegral off
             bss' | BS.null bs = bss
                  | otherwise  = bs : bss
         in (startOff, x) : start currOff' bss'
 
-    go _currOff _startOff (CBOR.Fail _rest _ err) _ =
+    go _currOff _startOff (Bin.Fail _rest _ err) _ =
         error $ show err
 
 main :: IO ()

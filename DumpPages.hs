@@ -1,24 +1,43 @@
+import Control.Monad
+import Data.Maybe
+import Data.Monoid
+
+import qualified Data.Set as S
+import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Options.Applicative
 import qualified Data.ByteString.Lazy as BSL
+
+import CAR.AnnotationsFile
 import CAR.Types
 
-opts :: Parser (FilePath, Page -> IO ())
-opts =
-    (,)
-    <$> argument str (help "input file")
-    <*> what
+opts :: Parser (IO ())
+opts = subparser
+    $  command "titles" (info dumpTitles fullDesc)
+    <> command "pages" (info  dumpPages fullDesc)
   where
-    what :: Parser (Page -> IO ())
-    what = dumpTitles <|> dumpAll
+    dumpTitles =
+        f <$> argument str (help "input file" <> metavar "FILE")
+      where
+        f inputFile = do
+            pages <- decodeCborList <$> BSL.readFile inputFile
+            mapM_ (T.putStrLn . getPageName . pageName) pages
 
-    dumpTitles = flag' f (long "titles")
-      where f = T.putStrLn . getPageName . pageName
-    dumpAll = flag' f (long "all")
-      where f = putStrLn . prettyPage
+    dumpPages =
+        f <$> argument str (help "input file" <> metavar "FILE")
+          <*> fmap S.fromList (many (argument (PageName . T.pack <$> str)
+                                      (metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+      where
+        f :: FilePath -> S.Set PageName -> IO ()
+        f inputFile pageNames
+          | S.null pageNames = do
+                pages <- decodeCborList <$> BSL.readFile inputFile
+                mapM_ printPage pages
+          | otherwise = do
+                anns <- openAnnotations inputFile
+                mapM_ printPage $ mapMaybe (`lookupPage` anns) (S.toList pageNames)
+
+        printPage = putStrLn . prettyPage
 
 main :: IO ()
-main = do
-    (inputFile, dumpIt) <- execParser $ info (helper <*> opts) mempty
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    mapM_ dumpIt pages
+main = join $ execParser $ info (helper <*> opts) mempty

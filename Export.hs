@@ -17,9 +17,11 @@ import CAR.CarExports as Exports
 
 options :: Parser (FilePath, [PageName])
 options =
-    (,) <$> argument str (help "annotations file")
+    (,) <$> argument str (help "annotations file" <> metavar "FILE")
         <*> many (option (PageName . T.pack <$> str)
-                         (short 'p' <> long "page" <> help "Export only this page"))
+                         (short 'p' <> long "page"
+                          <> metavar "PAGE NAME" <> help "Export only this page"))
+
 
 main :: IO ()
 main = do
