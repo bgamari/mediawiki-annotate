@@ -5,3 +5,6 @@ packages:
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
     car-baselines/
+
+package mediawiki-parser
+    tests: True
