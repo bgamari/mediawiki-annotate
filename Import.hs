@@ -74,7 +74,13 @@ isInteresting WikiDoc{..} = not $
     || "Wikipedia:" `BS.isPrefixOf` docTitle
     || "Template:" `BS.isPrefixOf` docTitle
     || "Template talk:" `BS.isPrefixOf` docTitle
-    -- || "Portal:" `BS.isPrefixOf` docTitle
+    || "Portal:" `BS.isPrefixOf` docTitle
+    || "Module:" `BS.isPrefixOf` docTitle
+    || "Draft:" `BS.isPrefixOf` docTitle
+    || "Help:" `BS.isPrefixOf` docTitle
+    || "Book:" `BS.isPrefixOf` docTitle
+    || "TimedText:" `BS.isPrefixOf` docTitle
+    || "MediaWiki:" `BS.isPrefixOf` docTitle
 
 toPage :: WikiDoc -> Either String Page
 toPage WikiDoc{..} =
