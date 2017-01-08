@@ -11,7 +11,7 @@ import CAR.Types
 opts :: Parser (FilePath, FilePath, IO (Page -> Bool))
 opts =
     (,,)
-    <$> argument str (help "input file" <> metavar "FILE")
+    <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output")
     <*> predicate
   where
@@ -21,10 +21,35 @@ opts =
       where f = pure $ even . hash . pageName
     trainPred = flag' f (long "train")
       where f = pure $ odd . hash . pageName
-    namePred = option (f <$> str) (long "name-set")
+    namePred = option (f <$> str) (long "name-set" <> metavar "FILE"
+                                   <> help "file containing names to be matched")
       where f fname = do
                 pages <- HS.fromList . map (PageName . T.pack) . lines <$> readFile fname
-                return $ (`HS.member` pages) . pageName
+                return $ \page -> (pageName page) `HS.member` pages
+    categoryPred =
+        f <$> option str (long "category-substring" <> metavar "STRING"
+                          <> help "category substring to match")
+          <*> flag id not (long "not" <> help "negate match")
+      where f fname polarity  = do
+                patterns <-  map (T.toCaseFold . T.pack) . lines <$> readFile fname
+                let matches cat = any (\p ->  p `T.isInfixOf` cat) patterns
+                return $ \page -> any (\cat -> polarity $ matches $ T.toCaseFold cat) (pageCategories page)
+
+pageCategories :: Page -> [T.Text]
+pageCategories page =
+    mapMaybe isCategoryTag $ skeletonLinks $ pageSkeleton page
+  where
+    skeletonLinks :: PageSkeleton -> [PageName]
+    skeletonLinks (Section _ _ children) = foldMap skeletonLinks children
+    skeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
+
+    paraBodyLinks :: ParaBody -> [PageName]
+    paraBodyLinks (ParaLink pageName _ ) = [pageName]
+    paraBodyLinks (ParaText _ ) = []
+
+    isCategoryTag :: PageName -> Maybe T.Text
+    isCategoryTag (PageName pageName) = "Category:" `T.stripPrefix` pageName
+
 
 main :: IO ()
 main = do
