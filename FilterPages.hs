@@ -39,7 +39,7 @@ opts =
       where f fname polarity  = do
                 patterns <-  map (T.toCaseFold . T.pack) . lines <$> readFile fname
                 let matches cat = any (\p ->  p `T.isInfixOf` cat) patterns
-                return $ \page -> any (\cat -> polarity $ matches $ T.toCaseFold cat) (pageCategories page)
+                return $ \page -> polarity $ any (\cat -> matches $ T.toCaseFold cat) (pageCategories page)
 
 pageCategories :: Page -> [T.Text]
 pageCategories page =
