@@ -9,11 +9,12 @@ import qualified Data.ByteString.Builder as BSB
 import Data.Hashable
 import CAR.Types
 
-opts :: Parser (FilePath, FilePath, IO (Page -> Bool))
+opts :: Parser (FilePath, FilePath, Bool -> Bool, IO (Page -> Bool))
 opts =
-    (,,)
+    (,,,)
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output")
+    <*> flag id not (long "not" <> help "negate match")
     <*> predicate
   where
     predicate :: Parser (IO (Page -> Bool))
@@ -35,11 +36,10 @@ opts =
     categoryPred =
         f <$> option str (long "category-substring" <> metavar "STRING"
                           <> help "category substring to match")
-          <*> flag id not (long "not" <> help "negate match")
-      where f fname polarity  = do
+      where f fname = do
                 patterns <-  map (T.toCaseFold . T.pack) . lines <$> readFile fname
                 let matches cat = any (\p ->  p `T.isInfixOf` cat) patterns
-                return $ \page -> polarity $ any (\cat -> matches $ T.toCaseFold cat) (pageCategories page)
+                return $ \page -> any (\cat -> matches $ T.toCaseFold cat) (pageCategories page)
 
 pageCategories :: Page -> [T.Text]
 pageCategories page =
@@ -60,8 +60,8 @@ pageCategories page =
 
 main :: IO ()
 main = do
-    (inputFile, outputFile, getPredicate) <- execParser $ info (helper <*> opts) mempty
-    predicate <- getPredicate
+    (inputFile, outputFile, polarity, getPredicate) <- execParser $ info (helper <*> opts) mempty
+    predicate <- (polarity .) <$> getPredicate
     pages <- decodeCborList <$> BSL.readFile inputFile
     withFile outputFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ filter predicate pages
