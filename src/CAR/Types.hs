@@ -84,7 +84,7 @@ unpackHeadingId :: HeadingId -> String
 unpackHeadingId (HeadingId s) = unpackSBS s
 
 -- | The text of a section heading.
-newtype SectionHeading = SectionHeading T.Text
+newtype SectionHeading = SectionHeading { getSectionHeading :: T.Text }
                        deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise)
 
 data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }

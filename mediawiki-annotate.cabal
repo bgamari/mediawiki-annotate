@@ -118,6 +118,7 @@ executable trec-car-dump
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
                        containers,
+                       unordered-containers,
                        text,
                        optparse-applicative >= 0.12,
                        trec-car-tools
