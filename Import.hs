@@ -343,14 +343,17 @@ toParaBodies = filter (not . isEmptyText) . go
     isEmptyText (ParaText t) = T.null t
     isEmptyText _            = False
 
+nullParaBody :: ParaBody -> Bool
+nullParaBody (ParaText t) = T.null $ T.strip t
+nullParaBody _            = False
+
 toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
   | (bodies@(_:_), docs') <- getPrefix toParaBody docs
   , let bodies' = toParaBodies $ concat bodies
-  , not $ null bodies'
+  , not $ all nullParaBody bodies'
   = Para (Paragraph (paraBodiesToId bodies') bodies') : toSkeleton docs'
-  where
 toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl
