@@ -1,3 +1,4 @@
+import Data.Maybe
 import Data.Monoid
 import qualified Data.Text as T
 import System.IO
@@ -16,16 +17,21 @@ opts =
     <*> predicate
   where
     predicate :: Parser (IO (Page -> Bool))
-    predicate = testPred <|> trainPred <|> namePred
+    predicate =
+        testPred <|> trainPred <|> namePred <|> categoryPred
+
     testPred = flag' f (long "test")
       where f = pure $ even . hash . pageName
+
     trainPred = flag' f (long "train")
       where f = pure $ odd . hash . pageName
+
     namePred = option (f <$> str) (long "name-set" <> metavar "FILE"
                                    <> help "file containing names to be matched")
       where f fname = do
                 pages <- HS.fromList . map (PageName . T.pack) . lines <$> readFile fname
                 return $ \page -> (pageName page) `HS.member` pages
+
     categoryPred =
         f <$> option str (long "category-substring" <> metavar "STRING"
                           <> help "category substring to match")
@@ -37,7 +43,7 @@ opts =
 
 pageCategories :: Page -> [T.Text]
 pageCategories page =
-    mapMaybe isCategoryTag $ skeletonLinks $ pageSkeleton page
+    mapMaybe isCategoryTag $ foldMap skeletonLinks $ pageSkeleton page
   where
     skeletonLinks :: PageSkeleton -> [PageName]
     skeletonLinks (Section _ _ children) = foldMap skeletonLinks children
@@ -48,7 +54,8 @@ pageCategories page =
     paraBodyLinks (ParaText _ ) = []
 
     isCategoryTag :: PageName -> Maybe T.Text
-    isCategoryTag (PageName pageName) = "Category:" `T.stripPrefix` pageName
+    isCategoryTag (PageName pageName) =
+        T.pack "Category:" `T.stripPrefix` pageName
 
 
 main :: IO ()
