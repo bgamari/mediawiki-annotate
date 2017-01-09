@@ -10,6 +10,7 @@ import qualified Data.ByteString.Builder as BSB
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Text.PrettyPrint.ANSI.Leijen ((<+>), (<$$>))
 import Data.Maybe
+import Data.Char
 
 import CAR.Types
 
@@ -33,7 +34,7 @@ opts =
 
 forbiddenHeadings = HS.fromList ["see also", "references", "external links", "notes",
     "bibliography", "gallery", "publications", "further reading", "track listing", "sources",
-    "cast", "discography", "awards"]
+    "cast", "discography", "awards", "other"]
 
 isLead :: PageSkeleton -> Bool
 isLead (Para _) = True
@@ -41,7 +42,9 @@ isLead (Section _ _ _) = False
 
 isForbiddenSection :: PageSkeleton -> Bool
 isForbiddenSection (Section heading _ _) =
-    ( T.toCaseFold (getSectionHeading heading) `HS.member` forbiddenHeadings)
+    ( T.toCaseFold (getSectionHeading heading) `HS.member` forbiddenHeadings )  ||  -- excluded
+    T.length (T.filter isAlpha (getSectionHeading heading)) < 3 ||                      -- not enough letters
+    T.length (getSectionHeading heading) > 100                                          -- too long, probably parse error
 isForbiddenSection x = False
 
 recurseDropForbiddenSections :: PageSkeleton -> Maybe PageSkeleton
