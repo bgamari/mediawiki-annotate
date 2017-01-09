@@ -71,4 +71,4 @@ main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
     pages <- decodeCborList <$> BSL.readFile inputFile
     withFile outputFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ map transformContent $ pages
+        BSB.hPutBuilder h $ encodeCborList $ mapMaybe transformContent $ pages
