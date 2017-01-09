@@ -19,6 +19,7 @@ import CAR.Types
 import CAR.Utils
 
 data Pred a = NameContains T.Text
+            | NameHasPrefix T.Text
             | NameInSet (HS.HashSet PageName)
             | HasCategoryContaining T.Text
             | PageHashMod Int Int -- ^ for training/test split
@@ -31,8 +32,9 @@ data Pred a = NameContains T.Text
             deriving (Show, Functor, Foldable, Traversable)
 
 runPred :: Applicative m => (a -> m (Pred b)) -> Pred a -> m (Pred b)
-runPred _ (NameContains x) = pure $ NameContains x
-runPred _ (NameInSet x)    = pure $ NameInSet x
+runPred _ (NameContains x)     = pure $ NameContains x
+runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
+runPred _ (NameInSet x)        = pure $ NameInSet x
 runPred _ (HasCategoryContaining x)    = pure $ HasCategoryContaining x
 runPred _ (PageHashMod x y)    = pure $ PageHashMod x y
 runPred _ IsRedirect    = pure IsRedirect
@@ -63,16 +65,24 @@ pred inj = term
 
     simple =
         asum [ nameContains, nameInSet, hasCategoryContaining, pageHashMod
-             , testSet, trainSet, isRedirect, Pure <$> inj
+             , testSet, trainSet, isRedirect, isDisambiguation
+             , Pure <$> inj
              ]
 
     trainSet = textSymbol "train-set" >> pure (PageHashMod 2 0)
     testSet  = textSymbol "test-set"  >> pure (PageHashMod 2 1)
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
+    isDisambiguation = do
+        textSymbol "is-disambiguation"
+        pure (NameContains " (disambiguation)")
 
     nameContains = do
         textSymbol "name-contains"
         NameContains . T.toCaseFold <$> string
+
+    nameHasPrefix = do
+        textSymbol "name-has-prefix"
+        NameHasPrefix <$> string
 
     nameInSet = do
         textSymbol "name-in-set"
@@ -83,8 +93,9 @@ pred inj = term
         HasCategoryContaining . T.toCaseFold <$> string
 
     pageHashMod = do
-        textSymbol "page-hash"
+        textSymbol "page-hash-mod"
         let natural' = fmap fromIntegral natural
+        -- todo fail if k > n
         PageHashMod <$> natural' <*> natural'
 
     listOf :: Parser a -> Parser [a]
@@ -93,6 +104,7 @@ pred inj = term
     string :: Parser T.Text
     string = fmap T.pack $ stringLiteral <|> (many alphaNum <* whiteSpace)
 
+-- todo fix this - currently not called, and does not apply recursively
 normalize :: Pred a -> Pred a
 normalize (Any [xs, Any ys]) = Any (xs:ys)
 normalize (Any [Any xs, ys]) = Any (ys:xs)
@@ -102,12 +114,13 @@ normalize x                  = x
 
 interpret :: Pred Void -> Page -> Bool
 interpret (NameContains t)  page = t `T.isInfixOf` T.toCaseFold (getPageName (pageName page))
+interpret (NameHasPrefix prefix) page = prefix `T.isPrefixOf` getPageName (pageName page)
 interpret (NameInSet names) page = pageName page `HS.member` names
 interpret (HasCategoryContaining s) page =
     any (s `T.isInfixOf`) $ map T.toCaseFold $ pageCategories page
-interpret (PageHashMod n m) page =
+interpret (PageHashMod n k) page =
     let h = hash $ pageName page
-    in h `mod` n == m
+    in h `mod` n == k
 interpret  IsRedirect page = pageIsRedirect page
 interpret (Any preds) page = any (`interpret` page) preds
 interpret (All preds) page = all (`interpret` page) preds

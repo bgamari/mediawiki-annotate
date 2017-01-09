@@ -109,6 +109,7 @@ executable trec-car-filter
                        unordered-containers,
                        trifecta >= 1.5,
                        parsers >= 0.12,
+                       ansi-wl-pprint,
                        text,
                        optparse-applicative >= 0.12,
                        hashable,
