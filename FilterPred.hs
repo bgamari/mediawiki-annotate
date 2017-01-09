@@ -64,7 +64,7 @@ pred inj = term
     term = parens expr <|> simple
 
     simple =
-        asum [ nameContains, nameInSet, hasCategoryContaining, pageHashMod
+        asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
              , testSet, trainSet, isRedirect, isDisambiguation
              , Pure <$> inj
              ]
