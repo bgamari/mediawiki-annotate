@@ -24,7 +24,7 @@ opts =
         s <- str
         case Tri.parseString (FilterPred.pred predFromFile <* Tri.eof) mempty s of
           Tri.Success p -> return p
-          Tri.Failure e -> fail $ show e
+          Tri.Failure e -> fail $ show $ Tri._errDoc e
 
 data PredFromFile = NameSetFromFile FilePath
                   | HasCategoryContainingFromFile FilePath
