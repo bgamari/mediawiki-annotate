@@ -116,6 +116,21 @@ executable trec-car-filter
                        trec-car-tools
   default-language:    Haskell2010
 
+executable trec-car-transform-content
+  main-is:             TransformContent.hs
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.10,
+                       bytestring,
+                       unordered-containers,
+                       trifecta >= 1.5,
+                       parsers >= 0.12,
+                       ansi-wl-pprint,
+                       text,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 executable trec-car-dump
   main-is:             DumpPages.hs
   ghc-options:         -Wall
