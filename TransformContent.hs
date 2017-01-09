@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Monoid hiding (All, Any)
-import Data.Void
 import System.IO
 import Options.Applicative
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
-import qualified Text.Trifecta as Tri
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Text.PrettyPrint.ANSI.Leijen ((<+>), (<$$>))
 import Data.Maybe
@@ -50,7 +48,7 @@ recurseDropForbiddenSections :: PageSkeleton -> Maybe PageSkeleton
 recurseDropForbiddenSections (Section heading id children)
     | null children' = Nothing
     | otherwise =  Just (Section heading id children')
-    where children' = mapMaybe recurseDropForbiddenSections $ filter isForbiddenSection children
+  where children' = mapMaybe recurseDropForbiddenSections $ filter (not . isForbiddenSection) children
 recurseDropForbiddenSections x = Just x
 
 
@@ -61,8 +59,8 @@ transformContent (Page pageName pageId pageSkeleta)
   | otherwise = Nothing
   where
     pageSkeleta'=
-          mapMaybe recurseDropForbiddenSections
-        $ filter (\skel -> not (isForbiddenSection skel) &&  not (isLead skel)) pageSkeleta
+         mapMaybe recurseDropForbiddenSections
+         $ filter (\skel -> not (isForbiddenSection skel) &&  not (isLead skel)) pageSkeleta
 
 
 
