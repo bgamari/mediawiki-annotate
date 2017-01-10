@@ -10,7 +10,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
 import qualified Text.Trifecta as Tri
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
-import Text.PrettyPrint.ANSI.Leijen ((<+>), (<$$>))
+import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 
 import CAR.Types
 import FilterPred
@@ -23,6 +23,7 @@ helpDescr =
     opts = PP.vsep
       [ cmd "train-set"                        "matches pages in the training set",
         cmd "test-set"                         "matches pages in the test set",
+        cmd "fold K"                           "matches pages in fold k (k in 0..4)",
         cmd "is-redirect"                      "matches redirect pages",
         cmd "is-disambiguation"                "matches disambiguation pages",
         cmd "page-hash-mod N K"                "matches pages where the page id mod N == K, for N > K ",

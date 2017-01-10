@@ -65,12 +65,15 @@ pred inj = term
 
     simple =
         asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
-             , testSet, trainSet, isRedirect, isDisambiguation
+             , testSet, trainSet, fold, isRedirect, isDisambiguation
              , Pure <$> inj
              ]
 
     trainSet = textSymbol "train-set" >> pure (PageHashMod 2 0)
     testSet  = textSymbol "test-set"  >> pure (PageHashMod 2 1)
+    fold     = do textSymbol "fold"
+                  k <- fmap fromIntegral natural
+                  pure $ Any [ PageHashMod 10 (2*k), PageHashMod 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
     isDisambiguation = do
         textSymbol "is-disambiguation"
