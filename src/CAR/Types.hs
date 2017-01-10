@@ -9,6 +9,7 @@ module CAR.Types
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
     , ParagraphId(..), unpackParagraphId
+    , SectionPath(..)
       -- * Documents
     , Paragraph(..), prettyParagraph
     , ParaBody(..), paraBodiesToId
@@ -113,6 +114,10 @@ data Page = Page { pageName     :: !PageName
                  }
           deriving (Show, Generic)
 instance CBOR.Serialise Page
+
+data SectionPath = SectionPath PageId [HeadingId]
+               deriving (Show)
+
 
 decodeCborList :: CBOR.Serialise a => BSL.ByteString -> [a]
 decodeCborList = start . BSL.toChunks

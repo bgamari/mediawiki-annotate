@@ -40,8 +40,8 @@ main = do
             BSB.hPutBuilder h $ encodeCborList pagesToExport
         putStrLn "done"
 
-    putStr "Writing stub skeletons..."
-    let skeletonFile = path <.> "skeletons"
+    putStr "Writing outlines..."
+    let skeletonFile = path <.> "outlines"
     withFile skeletonFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ map toStubSkeleton pagesToExport
     putStrLn "done"
@@ -53,10 +53,26 @@ main = do
         BSB.hPutBuilder h $ encodeCborList $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
-    putStr "Writing relevance annotations..."
-    let relsFile = path <.> "qrel"
+    putStr "Writing section relevance annotations..."
+    let relsFile = path <.> "hierarchical.qrels"
     withFile relsFile WriteMode $ \h ->
           hPutStr h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations pagesToExport
+    putStrLn "done"
+
+    putStr "Writing article relevance annotations..."
+    let relsFile = path <.> "article.qrels"
+    withFile relsFile WriteMode $ \h ->
+        let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
+              Annotation (SectionPath pageId mempty) paraId rel
+        in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toAnnotations pagesToExport
+    putStrLn "done"
+
+    putStr "Writing top level section relevance annotations..."
+    let relsFile = path <.> "toplevel.qrels"
+    withFile relsFile WriteMode $ \h ->
+          let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
+               Annotation (SectionPath pageId (take 1 headinglist)) paraId rel
+          in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toAnnotations pagesToExport
     putStrLn "done"
 
     return ()

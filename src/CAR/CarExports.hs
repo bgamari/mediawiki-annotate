@@ -10,7 +10,6 @@ module CAR.CarExports
       -- * Paragraphs
     , toParagraphs
       -- * Ground truth
-    , SectionPath(..)
     , Relevance(..)
     , Annotation(..)
     , toAnnotations
@@ -44,9 +43,6 @@ data Stub = Stub { stubName     :: PageName
 instance Serialise Stub
 
 -- Ground truth
-data SectionPath = SectionPath PageId [HeadingId]
-               deriving (Show)
-
 data Relevance = Relevant | NonRelevant
                deriving (Show)
 
@@ -93,13 +89,14 @@ toParagraphs (Page name _ skeleton) =
 
 toAnnotations :: Page -> [Annotation]
 toAnnotations (Page _ pageId skeleton) =
+    -- recurse into sections, recursively collect section path, emit one annotation per paragraph
     concatMap (go mempty) skeleton
   where
     go :: DList.DList HeadingId -> PageSkeleton -> [Annotation]
-    go parents (Section _ section children) =
-        let parents' = parents `DList.snoc` section
-        in concatMap (go parents') children
-    go parents (Para (Paragraph paraId body)) =
-        [Annotation path paraId Relevant]
+    go parentIds (Section _ sectionId children) =
+        let parentIds' = parentIds `DList.snoc` sectionId
+        in concatMap (go parentIds') children
+    go parentIds (Para (Paragraph paraId body)) =
+        [Annotation sectionPath paraId Relevant]
       where
-        path = SectionPath pageId (DList.toList parents)
+        sectionPath = SectionPath pageId (DList.toList parentIds)
