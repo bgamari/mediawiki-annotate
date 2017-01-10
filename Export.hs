@@ -6,6 +6,7 @@ import Data.Monoid
 import System.IO
 
 import qualified Data.Text as T
+import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Builder as BSB
 import System.FilePath
 
@@ -47,8 +48,9 @@ main = do
 
     putStr "Writing paragraphs..."
     let paragraphsFile = path <.> "paragraphs"
+    let sortIt = map snd . M.toAscList . foldMap (\para -> M.singleton (paraId para) para)
     withFile paragraphsFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ concatMap toParagraphs pagesToExport
+        BSB.hPutBuilder h $ encodeCborList $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
     putStr "Writing relevance annotations..."

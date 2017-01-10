@@ -79,6 +79,7 @@ executable trec-car-export
   build-depends:       base >=4.9 && <4.10,
                        binary-serialise-cbor >=0.1 && <0.2,
                        bytestring >= 0.10,
+                       containers,
                        text,
                        optparse-applicative,
                        filepath,
