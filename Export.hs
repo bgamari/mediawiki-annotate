@@ -16,9 +16,10 @@ import CAR.AnnotationsFile
 import CAR.Types
 import CAR.CarExports as Exports
 
-options :: Parser (FilePath, [PageName])
+options :: Parser (FilePath, FilePath, [PageName])
 options =
-    (,) <$> argument str (help "annotations file" <> metavar "FILE")
+    (,,) <$> argument str (help "annotations file" <> metavar "FILE")
+        <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
         <*> many (option (PageName . T.pack <$> str)
                          (short 'p' <> long "page"
                           <> metavar "PAGE NAME" <> help "Export only this page"))
@@ -26,7 +27,7 @@ options =
 
 main :: IO ()
 main = do
-    (path, names) <- execParser $ info (helper <*> options) mempty
+    (path, outpath, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
     let pagesToExport
           | null names = pages anns
@@ -35,32 +36,32 @@ main = do
 
     when (not $ null names) $ do
         putStr "Writing articles..."
-        let articleFile = path <.> "articles"
+        let articleFile = outpath <.> "articles"
         withFile articleFile WriteMode $ \h ->
             BSB.hPutBuilder h $ encodeCborList pagesToExport
         putStrLn "done"
 
     putStr "Writing outlines..."
-    let skeletonFile = path <.> "outlines"
+    let skeletonFile = outpath <.> "outlines"
     withFile skeletonFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ map toStubSkeleton pagesToExport
     putStrLn "done"
 
     putStr "Writing paragraphs..."
-    let paragraphsFile = path <.> "paragraphs"
+    let paragraphsFile = outpath <.> "paragraphs"
     let sortIt = map snd . M.toAscList . foldMap (\para -> M.singleton (paraId para) para)
     withFile paragraphsFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
     putStr "Writing section relevance annotations..."
-    let relsFile = path <.> "hierarchical.qrels"
+    let relsFile = outpath <.> "hierarchical.qrels"
     withFile relsFile WriteMode $ \h ->
           hPutStr h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations pagesToExport
     putStrLn "done"
 
     putStr "Writing article relevance annotations..."
-    let relsFile = path <.> "article.qrels"
+    let relsFile = outpath <.> "article.qrels"
     withFile relsFile WriteMode $ \h ->
         let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
               Annotation (SectionPath pageId mempty) paraId rel
@@ -68,7 +69,7 @@ main = do
     putStrLn "done"
 
     putStr "Writing top level section relevance annotations..."
-    let relsFile = path <.> "toplevel.qrels"
+    let relsFile = outpath <.> "toplevel.qrels"
     withFile relsFile WriteMode $ \h ->
           let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
                Annotation (SectionPath pageId (take 1 headinglist)) paraId rel
