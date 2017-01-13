@@ -93,7 +93,7 @@ data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
 instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
-                    deriving (Show, Generic, Ord, Eq, CBOR.Serialise)
+                    deriving (Show, Generic, Ord, Eq, CBOR.Serialise, Hashable)
 
 unpackParagraphId :: ParagraphId -> String
 unpackParagraphId (ParagraphId s) = unpackSBS s
