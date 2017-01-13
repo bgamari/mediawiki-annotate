@@ -116,7 +116,7 @@ data Page = Page { pageName     :: !PageName
 instance CBOR.Serialise Page
 
 data SectionPath = SectionPath PageId [HeadingId]
-               deriving (Show)
+               deriving (Show, Eq, Ord)
 
 
 decodeCborList :: CBOR.Serialise a => BSL.ByteString -> [a]

@@ -17,7 +17,7 @@ module CAR.CarExports
     , escapeSectionPath
     ) where
 
-import Data.List (intercalate)
+import Data.List (intercalate, nub, sort)
 import Data.Maybe
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
@@ -44,11 +44,11 @@ instance Serialise Stub
 
 -- Ground truth
 data Relevance = Relevant | NonRelevant
-               deriving (Show)
+               deriving (Show, Eq, Ord)
 
 -- | A relevance annotation of a paragraph in a section
 data Annotation = Annotation SectionPath ParagraphId Relevance
-                deriving (Show)
+                deriving (Show, Eq, Ord)
 
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
@@ -90,7 +90,7 @@ toParagraphs (Page name _ skeleton) =
 toAnnotations :: Page -> [Annotation]
 toAnnotations (Page _ pageId skeleton) =
     -- recurse into sections, recursively collect section path, emit one annotation per paragraph
-    concatMap (go mempty) skeleton
+    nub $ sort $ concatMap (go mempty) skeleton
   where
     go :: DList.DList HeadingId -> PageSkeleton -> [Annotation]
     go parentIds (Section _ sectionId children) =
