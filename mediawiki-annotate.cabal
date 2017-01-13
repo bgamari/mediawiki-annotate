@@ -143,3 +143,15 @@ executable trec-car-dump
                        optparse-applicative >= 0.12,
                        trec-car-tools
   default-language:    Haskell2010
+
+executable detect-duplicate-paragraphs 
+  main-is:             DetectDuplicateParagraphs.hs
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.10,
+                       bytestring,
+                       containers,
+                       unordered-containers,
+                       text,
+                       optparse-applicative >= 0.12,
+                       trec-car-tools
+  default-language:    Haskell2010
