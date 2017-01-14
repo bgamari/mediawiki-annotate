@@ -9,6 +9,12 @@ pageIsRedirect (Page {pageSkeleton=[Para (Paragraph _ (ParaText t:_))]}) =
     T.pack "#redirect" `T.isPrefixOf` T.toCaseFold (T.stripStart t)
 pageIsRedirect _ = False
 
+pageIsDisambiguation :: Page -> Bool
+pageIsDisambiguation (Page { pageName = PageName t }) =
+    (T.pack " (disambiguation)") `T.isInfixOf` t
+
+
+
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
   where
@@ -32,6 +38,18 @@ pageLinkTargets = foldMap skeletonLinks . pageSkeleton
     skeletonLinks (Section _ _ children) = foldMap skeletonLinks children
     skeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 
-    paraBodyLinks :: ParaBody -> [PageName]
-    paraBodyLinks (ParaLink pageName _) = [pageName]
-    paraBodyLinks (ParaText _ ) = []
+paraBodyLinks :: ParaBody -> [PageName]
+paraBodyLinks (ParaText text) = []
+paraBodyLinks (ParaLink (PageName target) _) = [normTarget]
+  where normTarget = PageName $ normFirst $ T.takeWhile (/= '#') target
+          where normFirst link = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 link
+
+paraToText :: Paragraph -> T.Text
+paraToText (Paragraph  _ bodies) =
+    T.concat $ fmap toText bodies
+  where toText (ParaText text) = text
+        toText (ParaLink _ text) = text
+
+paraToLinks :: Paragraph -> [PageName]
+paraToLinks (Paragraph _ bodies) =
+    foldMap paraBodyLinks bodies

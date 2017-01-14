@@ -24,6 +24,7 @@ data Pred a = NameContains T.Text
             | HasCategoryContaining T.Text
             | PageHashMod Int Int -- ^ for training/test split
             | IsRedirect
+            | IsDisambiguation
 
             | Any [Pred a]
             | All [Pred a]
@@ -37,7 +38,8 @@ runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
 runPred _ (NameInSet x)        = pure $ NameInSet x
 runPred _ (HasCategoryContaining x)    = pure $ HasCategoryContaining x
 runPred _ (PageHashMod x y)    = pure $ PageHashMod x y
-runPred _ IsRedirect    = pure IsRedirect
+runPred _ IsRedirect           = pure IsRedirect
+runPred _ IsDisambiguation     = pure IsDisambiguation
 runPred f (Any x)     = Any <$> traverse (runPred f) x
 runPred f (All x)     = All <$> traverse (runPred f) x
 runPred f (Negate x)  = Negate <$> runPred f x
@@ -75,9 +77,8 @@ pred inj = term
                   k <- fmap fromIntegral natural
                   pure $ Any [ PageHashMod 10 (2*k), PageHashMod 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
-    isDisambiguation = do
-        textSymbol "is-disambiguation"
-        pure (NameContains " (disambiguation)")
+    isDisambiguation = textSymbol "is-disambiguation" >> pure IsDisambiguation
+
 
     nameContains = do
         textSymbol "name-contains"
@@ -124,7 +125,8 @@ interpret (HasCategoryContaining s) page =
 interpret (PageHashMod n k) page =
     let h = hash $ pageName page
     in h `mod` n == k
-interpret  IsRedirect page = pageIsRedirect page
+interpret  IsRedirect page       = pageIsRedirect page
+interpret  IsDisambiguation page = pageIsDisambiguation page
 interpret (Any preds) page = any (`interpret` page) preds
 interpret (All preds) page = all (`interpret` page) preds
 interpret (Negate pred) page = not $ interpret pred page
