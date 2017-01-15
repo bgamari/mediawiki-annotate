@@ -2,6 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
+import Control.Exception (assert)
 import Data.Foldable (foldl')
 import Data.Monoid hiding (All, Any)
 import System.IO
@@ -36,17 +37,8 @@ data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocOutLinks :: [PageName]
                    }
 
-data InlinkInfo = InlinkInfo { anchorName :: [ T.Text ]
-                             , disambiguationName :: [ PageName ]
-                             , redirectName :: [ PageName ]
-                             }
-
-instance Monoid InlinkInfo where
-    mempty = InlinkInfo [] [] []
-    InlinkInfo a b c `mappend` InlinkInfo a' b' c' =
-      InlinkInfo (a <> a') (b <> b') (c <> c')
-
-data InlinkCounts = InlinkCounts { anchorCount ::  !(HM.HashMap T.Text Int)
+data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to link to this document.
+                                   anchorCount ::  !(HM.HashMap T.Text Int)
                                  , disambiguationCount :: !(HM.HashMap PageName Int)
                                  , redirectCount :: !(HM.HashMap PageName Int)
                                  }
@@ -58,48 +50,41 @@ instance Monoid InlinkCounts where
                      (HM.unionWith (+) b b')
                      (HM.unionWith (+) c c')
 
-
 ---  sourcepage targetpage anchortext => attach anchortext to targetpage
 ---  redirect sourcepage targetpage   => attach sourcepage to targetpage
 --   similar for disambiguation
+resolveRedirects :: (HM.HashMap PageName InlinkCounts) -> InlinkCounts -> InlinkCounts
+resolveRedirects inlinkInfoMap inlinkCounts =
+    inlinkCounts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage inlinkInfoMap
+                            | (rpage, n) <- HM.toList $ redirectCount inlinkCounts]
 
-collectInlinkInfo :: [Page] -> HM.HashMap PageName InlinkInfo
+
+-- | Given a set of documents, build a map from target document to its 'InlinkCounts'
+collectInlinkInfo :: [Page] -> HM.HashMap PageName InlinkCounts
 collectInlinkInfo = foldl' (\acc -> HM.unionWith mappend acc . pageInlinkInfo) mempty
   where
-    pageInlinkInfo :: Page -> HM.HashMap PageName InlinkInfo
+    one :: Hashable a => a -> HM.HashMap a Int
+    one x = HM.singleton x 1
+
+    pageInlinkInfo :: Page -> HM.HashMap PageName InlinkCounts
     pageInlinkInfo page
       | Just linkTarget <- pageRedirect page  =
-            HM.singleton linkTarget (mempty { redirectName = [ pageName page ] })
+            HM.singleton linkTarget (mempty { redirectCount = one $ pageName page })
 
       | pageIsDisambiguation page  =
             let toInlinkInfo (linkTarget, anchorText) =
-                    HM.singleton linkTarget (mempty { disambiguationName = [ pageName page ] })
+                    HM.singleton linkTarget (mempty { disambiguationCount = one $ pageName page })
             in unions $ map toInlinkInfo (pageLinks page)
 
       | otherwise  =
             let toInlinkInfo (linkTarget, anchorText) =
-                   HM.singleton linkTarget (mempty { anchorName = [ anchorText ] })
+                   HM.singleton linkTarget (mempty { anchorCount = one $ anchorText })
             in unions $ map toInlinkInfo (pageLinks page)
       where
         unions = foldl' (HM.unionWith mappend) mempty
 
-
-linkCount :: InlinkInfo -> InlinkCounts
-linkCount inlinkInfo =
-    InlinkCounts { anchorCount = histo $ anchorName $ inlinkInfo
-                 , disambiguationCount = histo $ disambiguationName $ inlinkInfo
-                 , redirectCount = histo $ redirectName $ inlinkInfo
-                 }
-  where
-    histo :: (Hashable a, Eq a) => [a] -> HM.HashMap a Int
-    histo list = HM.fromListWith (+) $ map (\name -> (name, 1)) $ list
-
-linkStatistics :: HM.HashMap PageName InlinkInfo -> InlinkCounts
-linkStatistics inlinkInfoMap =
-     foldMap linkCount $ inlinkInfoMap
-
 -- #(anchor, target) / #(anchor, *)
-transformContent :: HM.HashMap PageName InlinkInfo -> Page -> Maybe KbDoc
+transformContent :: HM.HashMap PageName InlinkCounts -> Page -> Maybe KbDoc
 transformContent inlinkInfoMap (Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
@@ -110,17 +95,20 @@ transformContent inlinkInfoMap (Page pageName pageId pageSkeleta) =
 
       inlinkInfo = fromMaybe mempty $ HM.lookup pageName inlinkInfoMap
 
-      kbDocAnchorNames = anchorName inlinkInfo -- todo consolidate multiple occurrences of the same name
-      disambiguationNames = disambiguationName inlinkInfo
-      redirectNames = redirectName inlinkInfo
+      kbDocAnchorNames = anchorCount inlinkInfo -- todo consolidate multiple occurrences of the same name
+      disambiguationNames = disambiguationCount inlinkInfo
+      redirectNames = redirectCount inlinkInfo
   in Just KbDoc {..}
 
-toGalagoDoc :: HM.HashMap PageName InlinkInfo -> InlinkCounts -> KbDoc -> Galago.Document
+toGalagoDoc :: HM.HashMap PageName InlinkCounts -> InlinkCounts -> KbDoc -> Galago.Document
 toGalagoDoc inlinkInfoMap linkStats kbDoc =
     let meta = M.fromList []
         phrase x = (TL.fromStrict x, Galago.DoNotTokenize)
         naturalText x = (TL.fromStrict x, Galago.DoTokenize)
         inlinkInfo = fromMaybe mempty $ HM.lookup (kbDocCanonicalName kbDoc) inlinkInfoMap
+        repeated :: HM.HashMap a Int -> [a]
+        repeated = foldMap f . HM.toList
+          where f (x,n) = replicate n x
     in Galago.Document { docId       = Galago.DocumentId $ T.pack $ unpackPageId $ kbDocPageId kbDoc
                        , docMetadata = meta
                        , docFields   = M.fromList
@@ -128,9 +116,9 @@ toGalagoDoc inlinkInfoMap linkStats kbDoc =
                           , ("links",               map (phrase . getPageName) $ kbDocOutLinks kbDoc)
                           , ("categories",          map phrase $ kbDocCategories kbDoc)
                           , ("lead",                [naturalText $ T.unlines $ kbDocLeadText kbDoc])
-                          , ("anchornames",         map phrase $ anchorName $ inlinkInfo)
-                          , ("disambiguationnames", map (phrase . getPageName) $ disambiguationName $ inlinkInfo)
-                          , ("redirectnames",       map (phrase . getPageName) $ redirectName $ inlinkInfo )
+                          , ("anchornames",         map phrase $ repeated $ anchorCount $ inlinkInfo)
+                          , ("disambiguationnames", map (phrase . getPageName) $ repeated $ disambiguationCount $ inlinkInfo)
+                          , ("redirectnames",       map (phrase . getPageName) $ repeated $ redirectCount $ inlinkInfo )
                           ]
                        }
 
@@ -138,9 +126,11 @@ main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
     pages <- decodeCborList <$> BSL.readFile inputFile
-    let inlinkInfo = collectInlinkInfo pages
-        linkStats = linkStatistics inlinkInfo
+    let inlinkInfoNoRedirects = collectInlinkInfo pages
+        inlinkInfo = fmap (resolveRedirects inlinkInfoNoRedirects) inlinkInfoNoRedirects
+        linkStats = mconcat $ HM.elems inlinkInfo
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
             $ map (toGalagoDoc inlinkInfo linkStats)
             $ mapMaybe (transformContent inlinkInfo) $ pages
+
