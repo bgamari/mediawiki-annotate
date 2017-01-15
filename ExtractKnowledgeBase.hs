@@ -3,13 +3,13 @@
 {-# LANGUAGE TupleSections #-}
 
 import Control.Exception (assert)
-import Data.Foldable (foldl')
 import Data.Monoid hiding (All, Any)
 import System.IO
 
 import Options.Applicative
 import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -37,6 +37,15 @@ data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocOutLinks :: [PageName]
                    }
 
+data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageName InlinkCounts)
+                             , redirectPages   :: !(HS.HashSet PageName)
+                             }
+
+instance Monoid InlinkInfo where
+    mempty = InlinkInfo mempty mempty
+    InlinkInfo a b `mappend` InlinkInfo a' b' =
+        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+
 data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to link to this document.
                                    anchorCount ::  !(HM.HashMap T.Text Int)
                                  , disambiguationCount :: !(HM.HashMap PageName Int)
@@ -53,35 +62,46 @@ instance Monoid InlinkCounts where
 ---  sourcepage targetpage anchortext => attach anchortext to targetpage
 ---  redirect sourcepage targetpage   => attach sourcepage to targetpage
 --   similar for disambiguation
-resolveRedirects :: (HM.HashMap PageName InlinkCounts) -> InlinkCounts -> InlinkCounts
-resolveRedirects inlinkInfoMap inlinkCounts =
-    inlinkCounts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage inlinkInfoMap
-                            | (rpage, n) <- HM.toList $ redirectCount inlinkCounts]
+resolveRedirects :: InlinkInfo -> HM.HashMap PageName InlinkCounts
+resolveRedirects (InlinkInfo {..}) =
+    fmap resolve $ HM.filterWithKey isRedirect documentInlinks
+  where
+    isRedirect k _ = not $ k `HS.member` redirectPages
+
+    resolve :: InlinkCounts -> InlinkCounts
+    resolve counts =
+        counts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage documentInlinks
+                          | (rpage, n) <- HM.toList $ redirectCount counts ]
 
 
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: [Page] -> HM.HashMap PageName InlinkCounts
-collectInlinkInfo = foldl' (\acc -> HM.unionWith mappend acc . pageInlinkInfo) mempty
+collectInlinkInfo :: [Page] -> InlinkInfo
+collectInlinkInfo = foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1
 
-    pageInlinkInfo :: Page -> HM.HashMap PageName InlinkCounts
+    pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just linkTarget <- pageRedirect page  =
-            HM.singleton linkTarget (mempty { redirectCount = one $ pageName page })
+            mempty { documentInlinks = HM.singleton linkTarget
+                                       $ mempty { redirectCount = one $ pageName page }
+                   , redirectPages = HS.singleton (pageName page)
+                   }
 
       | pageIsDisambiguation page  =
             let toInlinkInfo (linkTarget, anchorText) =
-                    HM.singleton linkTarget (mempty { disambiguationCount = one $ pageName page })
-            in unions $ map toInlinkInfo (pageLinks page)
+                    mempty { documentInlinks = HM.singleton linkTarget
+                                               $ mempty { disambiguationCount = one $ pageName page }
+                           }
+            in foldMap toInlinkInfo (pageLinks page)
 
       | otherwise  =
             let toInlinkInfo (linkTarget, anchorText) =
-                   HM.singleton linkTarget (mempty { anchorCount = one $ anchorText })
-            in unions $ map toInlinkInfo (pageLinks page)
-      where
-        unions = foldl' (HM.unionWith mappend) mempty
+                   mempty { documentInlinks = HM.singleton linkTarget
+                                              $ mempty { anchorCount = one $ anchorText }
+                          }
+            in foldMap toInlinkInfo (pageLinks page)
 
 -- #(anchor, target) / #(anchor, *)
 transformContent :: HM.HashMap PageName InlinkCounts -> Page -> Maybe KbDoc
@@ -126,8 +146,7 @@ main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
     pages <- decodeCborList <$> BSL.readFile inputFile
-    let inlinkInfoNoRedirects = collectInlinkInfo pages
-        inlinkInfo = fmap (resolveRedirects inlinkInfoNoRedirects) inlinkInfoNoRedirects
+    let inlinkInfo = resolveRedirects $ collectInlinkInfo pages
         linkStats = mconcat $ HM.elems inlinkInfo
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
