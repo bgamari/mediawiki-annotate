@@ -132,6 +132,20 @@ executable trec-car-transform-content
                        trec-car-tools
   default-language:    Haskell2010
 
+executable trec-car-extract-kb
+  main-is:             ExtractKnowledgeBase.hs
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.10,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       containers,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 executable trec-car-dump
   main-is:             DumpPages.hs
   ghc-options:         -Wall

@@ -3,6 +3,7 @@
 
 module FilterPred where
 
+import Data.Maybe
 import Data.Void
 import Control.Applicative
 import Control.Monad (void)
@@ -125,7 +126,7 @@ interpret (HasCategoryContaining s) page =
 interpret (PageHashMod n k) page =
     let h = hash $ pageName page
     in h `mod` n == k
-interpret  IsRedirect page       = pageIsRedirect page
+interpret  IsRedirect page       = isJust $ pageRedirect page
 interpret  IsDisambiguation page = pageIsDisambiguation page
 interpret (Any preds) page = any (`interpret` page) preds
 interpret (All preds) page = all (`interpret` page) preds
