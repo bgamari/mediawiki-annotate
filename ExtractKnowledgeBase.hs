@@ -42,9 +42,9 @@ data KbDoc = KbDoc { kbDocPageId :: PageId
                    }
 
 wikiAnchorStopwords = [ "more....", "wikipedia article", "source: wikipedia", "here", "wiki", "wikipedia"]
-wikiAnchorStopphrases [ "wikipedia the free encyclopedia", "en.wikipedia.org", "full article at wikipedia.org",
-                        "wikipedia the free encyclopedia", "wikipedia, the free encyclopedia",
-                        "http://en.wikipedia.org/wiki/", "wikipedia"]
+wikiAnchorStopphrases = [ "wikipedia the free encyclopedia", "en.wikipedia.org", "full article at wikipedia.org"
+                        , "wikipedia the free encyclopedia", "wikipedia, the free encyclopedia"
+                        , "http://en.wikipedia.org/wiki/", "wikipedia"]
 
 
 skeletonToXml :: [PageSkeleton] -> TB.Builder
