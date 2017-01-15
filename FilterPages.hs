@@ -41,11 +41,12 @@ helpDescr =
         cmd "! PRED"                           "Boolean NOT, inverts the predicate PRED"
       ]
 
-opts :: Parser (FilePath, FilePath, Pred PredFromFile)
+opts :: Parser (FilePath, FilePath, Maybe Int, Pred PredFromFile)
 opts =
-    (,,)
+    (,,,)
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+    <*> option (Just <$> auto) (short 'n' <> long "take" <> metavar "N" <> help "Take the first N pages")
     <*> argument predicate (metavar "PRED" <> help "Predicate")
   where
     predicate = do
@@ -80,8 +81,10 @@ runPredFromFile = runPred go
 
 main :: IO ()
 main = do
-    (inputFile, outputFile, predicate) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
+    (inputFile, outputFile, takeN, predicate) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
     pages <- decodeCborList <$> BSL.readFile inputFile
     predicate' <- runPredFromFile predicate
     withFile outputFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ filter (interpret predicate') pages
+        BSB.hPutBuilder h $ encodeCborList
+            $ maybe id take takeN
+            $ filter (interpret predicate') pages
