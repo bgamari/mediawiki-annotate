@@ -12,7 +12,7 @@ pageRedirect _ = Nothing
 
 pageIsDisambiguation :: Page -> Bool
 pageIsDisambiguation (Page { pageName = PageName t }) =
-    (T.pack " (disambiguation)") `T.isInfixOf` t
+    (T.pack " (disambiguation)") `T.isInfixOf` T.toCaseFold t
 
 
 
