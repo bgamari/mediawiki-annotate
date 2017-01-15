@@ -156,19 +156,17 @@ modeQuery =
             termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
             smoothing = Dirichlet 1000 termProb
 
-        let predictStub :: Stub -> IO ()
-            predictStub = mapM_ (uncurry predictSection) . stubPaths
+        let predictStub :: Stub -> BSB.Builder
+            predictStub = foldMap (uncurry predictSection) . stubPaths
 
-            predictSection :: BagOfWords -> SectionPath -> IO ()
-            predictSection query sectionPath = do
-                let results = scoreQuery smoothing idx k query
-                BSL.putStrLn $ BSB.toLazyByteString
-                    $ prettyTrecRun runName
-                      [ (sectionPath, paraId, score)
-                      | (paraId, score) <- results
-                      ]
+            predictSection :: BagOfWords -> SectionPath -> BSB.Builder
+            predictSection query sectionPath =
+                prettyTrecRun runName
+                    [ (sectionPath, paraId, score)
+                    | (paraId, score) <- scoreQuery smoothing idx k query
+                    ]
 
-        mapM_ predictStub skeletons
+        BSL.putStrLn $ BSB.toLazyByteString $ foldMap predictStub skeletons
 
 -- | Format results in the TREC run file format
 prettyTrecRun :: BS.ByteString -- ^ run ID
