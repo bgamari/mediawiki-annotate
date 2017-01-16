@@ -30,6 +30,7 @@ data Pred a = NameContains T.Text
             | Any [Pred a]
             | All [Pred a]
             | Negate (Pred a)
+            | TruePred
             | Pure a
             deriving (Show, Functor, Foldable, Traversable)
 
@@ -44,6 +45,7 @@ runPred _ IsDisambiguation     = pure IsDisambiguation
 runPred f (Any x)     = Any <$> traverse (runPred f) x
 runPred f (All x)     = All <$> traverse (runPred f) x
 runPred f (Negate x)  = Negate <$> runPred f x
+runPred _ TruePred    = pure TruePred
 runPred f (Pure x)    = f x
 
 pred :: Parser a -> Parser (Pred a)
@@ -68,10 +70,11 @@ pred inj = term
 
     simple =
         asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
-             , testSet, trainSet, fold, isRedirect, isDisambiguation
+             , testSet, trainSet, fold, isRedirect, isDisambiguation, truePred
              , Pure <$> inj
              ]
 
+    truePred = textSymbol "true" >> pure TruePred
     trainSet = textSymbol "train-set" >> pure (PageHashMod 2 0)
     testSet  = textSymbol "test-set"  >> pure (PageHashMod 2 1)
     fold     = do textSymbol "fold"
@@ -131,4 +134,5 @@ interpret  IsDisambiguation page = pageIsDisambiguation page
 interpret (Any preds) page = any (`interpret` page) preds
 interpret (All preds) page = all (`interpret` page) preds
 interpret (Negate pred) page = not $ interpret pred page
+interpret TruePred _ = True
 interpret (Pure _) _ = error "Impossible"

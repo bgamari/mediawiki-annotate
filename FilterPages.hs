@@ -36,6 +36,7 @@ helpDescr =
         cmd "category-contains-from-file FILE" "like category-contain but loads SUBSTRs from FILE",
         cmd "name-set-from-file FILE"          "like name-in-set but loads NAMEs from FILE",
         "",
+        cmd "true"                             "always true",
         cmd "PRED1 | PRED2"                    "Boolean OR, matches predicate PRED1 or PRED2",
         cmd "PRED1 & PRED2"                    "Boolean AND, matches predicate PRED1 and PRED2",
         cmd "! PRED"                           "Boolean NOT, inverts the predicate PRED"
