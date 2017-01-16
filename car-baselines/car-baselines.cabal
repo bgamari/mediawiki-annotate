@@ -20,7 +20,7 @@ executable car-test
                        containers >=0.5 && <0.6,
                        dlist >= 0.7,
                        log-domain,
-                       laura,
+                       simplir,
                        trec-car-tools,
                        profunctors,
                        foldl >=1.2 && <1.3,
