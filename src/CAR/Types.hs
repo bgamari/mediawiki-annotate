@@ -13,8 +13,13 @@ module CAR.Types
       -- * Documents
     , Paragraph(..), prettyParagraph
     , ParaBody(..), paraBodiesToId
-    , PageSkeleton(..), prettySkeleton, prettySkeletonWithLinks
+    , PageSkeleton(..)
     , Page(..), prettyPage
+      -- * Pretty printing
+    , prettyPage, prettySkeleton
+      -- ** Link styles
+    , LinkStyle
+    , withLink, anchorOnly
       -- * Miscellaneous Utilities
     , decodeCborList
     , encodeCborList
@@ -132,14 +137,15 @@ decodeCborList = start . BSL.toChunks
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
 
-prettyPage :: Page -> String
-prettyPage (Page (PageName name) _ skeleton) =
+prettyPage :: LinkStyle -> Page -> String
+prettyPage linkStyle (Page (PageName name) _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
-            ++ map prettySkeleton skeleton
+            ++ map (prettySkeleton linkStyle) skeleton
 
 type LinkStyle = PageName -> T.Text -> String
-prettySkeleton' :: LinkStyle -> PageSkeleton -> String
-prettySkeleton' renderLink = go 1
+
+prettySkeleton :: LinkStyle -> PageSkeleton -> String
+prettySkeleton renderLink = go 1
   where
     go :: Int -> PageSkeleton -> String
     go n (Section (SectionHeading name) _ children) =
@@ -155,12 +161,6 @@ prettyParagraph renderLink (Paragraph paraId bodies) =
   where
     go (ParaText t) = T.unpack t
     go (ParaLink name anchor) = renderLink name anchor
-
-prettySkeletonWithLinks :: PageSkeleton -> String
-prettySkeletonWithLinks = prettySkeleton' withLink
-
-prettySkeleton :: PageSkeleton -> String
-prettySkeleton = prettySkeleton' anchorOnly
 
 withLink :: LinkStyle
 withLink (PageName name) anchor = "["<>T.unpack anchor<>"]("<>T.unpack name<>")"

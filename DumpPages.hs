@@ -33,9 +33,10 @@ opts = subparser
         f <$> argument str (help "input file" <> metavar "FILE")
           <*> fmap S.fromList (many (argument (PageName . T.pack <$> str)
                                       (metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+          <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
       where
-        f :: FilePath -> S.Set PageName -> IO ()
-        f inputFile pageNames
+        f :: FilePath -> S.Set PageName -> LinkStyle -> IO ()
+        f inputFile pageNames linkStyle
           | S.null pageNames = do
                 pages <- decodeCborList <$> BSL.readFile inputFile
                 mapM_ printPage pages
@@ -43,7 +44,7 @@ opts = subparser
                 anns <- openAnnotations inputFile
                 mapM_ printPage $ mapMaybe (`lookupPage` anns) (S.toList pageNames)
 
-        printPage = putStrLn . prettyPage
+          where printPage = putStrLn . prettyPage linkStyle
 
     histogramHeadings =
         f <$> argument str (help "input file" <> metavar "FILE")

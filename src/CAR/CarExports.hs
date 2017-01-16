@@ -93,7 +93,7 @@ toStubSkeleton (Page name pageId skeleton) =
 prettyStub :: Stub -> String
 prettyStub (Stub (PageName name) _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
-           ++ map prettySkeleton skeleton
+           ++ map (prettySkeleton anchorOnly) skeleton
 
 toParagraphs :: Page -> [Paragraph]
 toParagraphs (Page name _ skeleton) =
