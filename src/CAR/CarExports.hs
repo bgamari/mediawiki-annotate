@@ -54,7 +54,7 @@ data Relevance = Relevant | NonRelevant
 data Annotation = Annotation SectionPath ParagraphId Relevance
                 deriving (Show, Eq, Ord)
 
-data EntityAnnotation = EntityAnnotation SectionPath PageName Relevance
+data EntityAnnotation = EntityAnnotation SectionPath PageId Relevance
                 deriving (Show, Eq, Ord)
 
 escapeSectionPath :: SectionPath -> String
@@ -75,7 +75,7 @@ prettyEntityAnnotation :: EntityAnnotation -> String
 prettyEntityAnnotation (EntityAnnotation sectionPath entityId rel) =
     unwords [ escapeSectionPath sectionPath
             , "0"
-            , T.unpack $ getPageName entityId
+            , unpackPageId entityId
             , case rel of
                 Relevant    -> "1"
                 NonRelevant -> "0"
@@ -128,6 +128,6 @@ toEntityAnnotations (Page _ pageId skeleton) =
         in concatMap (go parentIds') children
     go parentIds (Para paragraph) =
         let entities =  fmap fst $ paraLinks paragraph
-        in [EntityAnnotation sectionPath entityId Relevant | entityId <- entities]
+        in [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
