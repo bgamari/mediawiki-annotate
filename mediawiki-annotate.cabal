@@ -104,6 +104,7 @@ executable trec-car-build-toc
 
 executable trec-car-filter
   main-is:             FilterPages.hs
+  other-modules:       FilterPred
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
                        bytestring,

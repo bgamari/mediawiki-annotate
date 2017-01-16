@@ -2,6 +2,7 @@
 
 import Data.Monoid hiding (All, Any)
 import Data.Void
+import Control.Monad (void)
 import System.IO
 import Options.Applicative
 import qualified Data.HashSet as HS
@@ -65,11 +66,11 @@ predFromFile =
     nameSet <|> hasCategoryContaining
   where
     nameSet = do
-        Tri.textSymbol "name-set-from-file"
+        void $ Tri.textSymbol "name-set-from-file"
         NameSetFromFile <$> Tri.stringLiteral
 
     hasCategoryContaining = do
-        Tri.textSymbol "category-contains-from-file"
+        void $ Tri.textSymbol "category-contains-from-file"
         HasCategoryContainingFromFile <$> Tri.stringLiteral
 
 runPredFromFile :: Pred PredFromFile -> IO (Pred Void)

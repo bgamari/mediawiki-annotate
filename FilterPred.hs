@@ -70,14 +70,14 @@ pred inj = term
 
     simple =
         asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
-             , testSet, trainSet, fold, isRedirect, isDisambiguation, truePred
+             , testSet, trainSet, foldPred, isRedirect, isDisambiguation, truePred
              , Pure <$> inj
              ]
 
     truePred = textSymbol "true" >> pure TruePred
     trainSet = textSymbol "train-set" >> pure (PageHashMod 2 0)
     testSet  = textSymbol "test-set"  >> pure (PageHashMod 2 1)
-    fold     = do textSymbol "fold"
+    foldPred = do void $ textSymbol "fold"
                   k <- fmap fromIntegral natural
                   pure $ Any [ PageHashMod 10 (2*k), PageHashMod 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
@@ -85,15 +85,15 @@ pred inj = term
 
 
     nameContains = do
-        textSymbol "name-contains"
+        void $ textSymbol "name-contains"
         NameContains . T.toCaseFold <$> string
 
     nameHasPrefix = do
-        textSymbol "name-has-prefix"
+        void $ textSymbol "name-has-prefix"
         NameHasPrefix <$> string
 
     nameInSet = do
-        textSymbol "name-in-set"
+        void $ textSymbol "name-in-set"
         NameInSet . HS.fromList . map PageName <$> listOf string
 
     hasCategoryContaining = do
@@ -101,7 +101,7 @@ pred inj = term
         HasCategoryContaining . T.toCaseFold <$> string
 
     pageHashMod = do
-        textSymbol "page-hash-mod"
+        void $ textSymbol "page-hash-mod"
         let natural' = fmap fromIntegral natural
         -- todo fail if k > n
         PageHashMod <$> natural' <*> natural'
