@@ -49,7 +49,7 @@ wikiAnchorStopphrases = [ "wikipedia the free encyclopedia", "en.wikipedia.org",
 
 skeletonToXml :: [PageSkeleton] -> TB.Builder
 skeletonToXml list =
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<articles loadtime=\"0 sec\" rendertime=\"0.06 sec\" totaltime=\"0.06 sec\"><article> "
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><articles loadtime=\"0 sec\" rendertime=\"0.06 sec\" totaltime=\"0.06 sec\"><article> "
     <> foldMap skelToXml list
     <>" </article></articles>"
   where

@@ -12,8 +12,11 @@ module CAR.CarExports
       -- * Ground truth
     , Relevance(..)
     , Annotation(..)
+    , EntityAnnotation(..)
     , toAnnotations
+    , toEntityAnnotations
     , prettyAnnotation
+    , prettyEntityAnnotation
     , escapeSectionPath
     ) where
 
@@ -27,6 +30,7 @@ import GHC.Generics
 
 import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types
+import CAR.Utils
 
 -- General
 newtype ParaNumber = ParaNumber Int -- Sequential index
@@ -50,6 +54,9 @@ data Relevance = Relevant | NonRelevant
 data Annotation = Annotation SectionPath ParagraphId Relevance
                 deriving (Show, Eq, Ord)
 
+data EntityAnnotation = EntityAnnotation SectionPath PageName Relevance
+                deriving (Show, Eq, Ord)
+
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
@@ -60,6 +67,15 @@ prettyAnnotation (Annotation sectionPath paraId rel) =
     unwords [ escapeSectionPath sectionPath
             , "0"
             , unpackParagraphId paraId
+            , case rel of
+                Relevant    -> "1"
+                NonRelevant -> "0"
+            ]
+prettyEntityAnnotation :: EntityAnnotation -> String
+prettyEntityAnnotation (EntityAnnotation sectionPath entityId rel) =
+    unwords [ escapeSectionPath sectionPath
+            , "0"
+            , T.unpack $ getPageName entityId
             , case rel of
                 Relevant    -> "1"
                 NonRelevant -> "0"
@@ -98,5 +114,20 @@ toAnnotations (Page _ pageId skeleton) =
         in concatMap (go parentIds') children
     go parentIds (Para (Paragraph paraId body)) =
         [Annotation sectionPath paraId Relevant]
+      where
+        sectionPath = SectionPath pageId (DList.toList parentIds)
+
+toEntityAnnotations :: Page -> [EntityAnnotation]
+toEntityAnnotations (Page _ pageId skeleton) =
+    -- recurse into sections, recursively collect section path, emit one entity annotation per link
+    nub $ sort $ concatMap (go mempty) skeleton
+  where
+    go :: DList.DList HeadingId -> PageSkeleton -> [EntityAnnotation]
+    go parentIds (Section _ sectionId children) =
+        let parentIds' = parentIds `DList.snoc` sectionId
+        in concatMap (go parentIds') children
+    go parentIds (Para paragraph) =
+        let entities =  fmap fst $ paraLinks paragraph
+        in [EntityAnnotation sectionPath entityId Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
