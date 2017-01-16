@@ -17,10 +17,9 @@ module CAR.CarExports
     , toEntityAnnotations
     , prettyAnnotation
     , prettyEntityAnnotation
-    , escapeSectionPath
     ) where
 
-import Data.List (intercalate, nub, sort)
+import Data.List (nub, sort)
 import Data.Maybe
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
@@ -56,10 +55,6 @@ data Annotation = Annotation SectionPath ParagraphId Relevance
 
 data EntityAnnotation = EntityAnnotation SectionPath PageId Relevance
                 deriving (Show, Eq, Ord)
-
-escapeSectionPath :: SectionPath -> String
-escapeSectionPath (SectionPath page headings) =
-    intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
 
 -- | In TREC @qrel@ format.
 prettyAnnotation :: Annotation -> String

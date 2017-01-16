@@ -9,12 +9,12 @@ module CAR.Types
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
     , ParagraphId(..), unpackParagraphId
-    , SectionPath(..)
+    , SectionPath(..), escapeSectionPath
       -- * Documents
     , Paragraph(..), prettyParagraph
     , ParaBody(..), paraBodiesToId
     , PageSkeleton(..)
-    , Page(..), prettyPage
+    , Page(..)
       -- * Pretty printing
     , prettyPage, prettySkeleton
       -- ** Link styles
@@ -27,6 +27,7 @@ module CAR.Types
 
 import Data.Foldable
 import Data.Char (ord, chr)
+import Data.List (intercalate)
 import GHC.Generics
 import Data.Monoid
 import qualified Data.Binary.Get as Bin
@@ -121,6 +122,9 @@ instance CBOR.Serialise Page
 data SectionPath = SectionPath PageId [HeadingId]
                deriving (Show, Eq, Ord)
 
+escapeSectionPath :: SectionPath -> String
+escapeSectionPath (SectionPath page headings) =
+    intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
 
 decodeCborList :: CBOR.Serialise a => BSL.ByteString -> [a]
 decodeCborList = start . BSL.toChunks
