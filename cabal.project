@@ -1,7 +1,7 @@
 packages:
     ./
     mediawiki-parser/
-    simplir/laura.cabal
+    simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
     car-baselines/
