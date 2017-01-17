@@ -21,31 +21,18 @@ either add this directory to `PATH` or invoke it with an absolute path.
 
 The intermediate CBOR representation consists of a stream of packed CBOR objects of the form,
 
-```
-Page:
-    Int: 0
-    String: Page name
-    List[PageSkeleton]: Page content
-    
-PageSkeleton: Section | Para
+TODO
 
-Section:
-    Int: 0
-    String: Section title
-    List[PageSkeleton]: Section contents
-    
-Para:
-    Int: 1
-    List[ParaBody]: Paragraph body
-    
-ParaBody: ParaText | ParaLink
 
-ParaText:
-    Int: 0
-    String: Text
-    
-ParaLink:
-    Int: 1
-    String: Page name
-    String: Anchor text
-```
+## Utilities
+
+* `trec-car-import`: Produce a CBOR annotations file from a Mediawiki
+  XML dump file.
+* `trec-car-build-toc`: Builds a JSON table-of-contents file from a CBOR
+  annotations file, enabling random access by page name
+* `trec-car-dump`: Dumps the contents (e.g. pages or titles) from a CBOR
+  annotations file.
+* `trec-car-filter`: Selects a subset of documents from a CBOR
+  annotations file, producing a new CBOR file.
+* `trec-car-export`: Produces the paragraphs, outline, and qrels files
+  from a CBOR annotation file.

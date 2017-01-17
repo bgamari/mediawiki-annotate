@@ -61,8 +61,7 @@ main = do
 
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
-       "#REDIRECT" `BS.isInfixOf` BS.take 20 docText
-    || "Category:" `BS.isPrefixOf` docTitle
+       "Category:" `BS.isPrefixOf` docTitle
     || "Category talk:" `BS.isPrefixOf` docTitle
     || "Talk:" `BS.isPrefixOf` docTitle
     || "File:" `BS.isPrefixOf` docTitle
@@ -123,11 +122,10 @@ isComment (Comment{}) = True
 isComment _           = False
 
 takeXml :: T.Text -> [Doc] -> [Doc]
+takeXml tag (XmlTag tag' _ children : xs)
+  | T.toCaseFold tag == T.toCaseFold tag'
+  = children ++ takeXml tag xs
 takeXml tag (doc : xs)
-  | isXmlOpen tag doc
-  = case break (isXmlClose tag) xs of
-      (body, [])     -> body
-      (body, _:rest) -> body ++ takeXml tag rest
   | isXmlOpenClose tag doc
   = takeXml tag xs
 takeXml tag (x:xs) = x : takeXml tag xs
@@ -138,27 +136,19 @@ dropXml = replaceXml []
 
 replaceXml :: [Doc] -> T.Text -> [Doc] -> [Doc]
 replaceXml sub tag (doc : xs)
-  | isXmlOpen tag doc
-  = case dropWhile (not . isXmlClose tag) xs of
-      []   -> sub
-      _:xs -> sub ++ dropXml tag xs
-  | isXmlOpenClose tag doc
-  = replaceXml sub tag xs
+  | isXml tag doc          = sub ++ replaceXml sub tag xs
+  | isXmlOpenClose tag doc = sub ++ replaceXml sub tag xs
 replaceXml sub tag (x:xs) = x : replaceXml sub tag xs
 replaceXml _   _   [] = []
 
-isXmlOpenClose, isXmlOpen, isXmlClose :: T.Text -> Doc -> Bool
+isXmlOpenClose, isXml :: T.Text -> Doc -> Bool
 isXmlOpenClose tag (XmlOpenClose tag' _)   =
     T.toCaseFold tag == T.toCaseFold tag'
 isXmlOpenClose _   _                     = False
 
-isXmlOpen tag (XmlOpen tag' _) =
+isXml tag (XmlTag tag' _ _) =
     T.toCaseFold tag == T.toCaseFold tag'
-isXmlOpen _   _              = False
-
-isXmlClose tag (XmlClose tag') =
-    T.toCaseFold tag == T.toCaseFold tag'
-isXmlClose _   _               = False
+isXml _   _              = False
 
 type TemplateTag = Text
 
