@@ -46,11 +46,15 @@ paraLinks :: Paragraph -> [(PageName, T.Text)]
 paraLinks (Paragraph _ bodies) =
     foldMap paraBodyLinks bodies
 
-paraBodyLinks :: ParaBody -> [(PageName, T.Text)]
+paraBodyLinks :: ParaBody -> [(PageName, T.Text)]         -- todo T.Text should be PageName
 paraBodyLinks (ParaText text) = []
-paraBodyLinks (ParaLink (PageName target) anchor) = [(normTarget, anchor)]
-  where normTarget = PageName $ normFirst $ T.takeWhile (/= '#') target
-          where normFirst link = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 link
+paraBodyLinks (ParaLink target anchor) = [(normTargetPageName target, anchor)]
+
+
+normTargetPageName :: PageName -> PageName -- todo move normalization to import
+normTargetPageName (PageName target) =
+    PageName $ normFirst $ T.takeWhile (/= '#') target
+  where normFirst link = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 link
 
 pageSkeletonText :: PageSkeleton -> [T.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children

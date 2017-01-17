@@ -108,7 +108,9 @@ data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
 instance CBOR.Serialise PageSkeleton
 
 data ParaBody = ParaText !T.Text
-              | ParaLink !PageName !T.Text
+              | ParaLink { paraLinkTarget :: !PageName
+                         , paraLinkAnchor :: !T.Text
+                         }
               deriving (Show, Generic)
 instance CBOR.Serialise ParaBody
 
@@ -119,7 +121,9 @@ data Page = Page { pageName     :: !PageName
           deriving (Show, Generic)
 instance CBOR.Serialise Page
 
-data SectionPath = SectionPath PageId [HeadingId]
+data SectionPath = SectionPath { sectionPathPageId :: PageId
+                               , sectionPathHeadings :: [HeadingId]
+                               }
                deriving (Show, Eq, Ord)
 
 escapeSectionPath :: SectionPath -> String
