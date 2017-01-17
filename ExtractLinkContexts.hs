@@ -43,7 +43,7 @@ data KbDoc = KbDoc { kbDocParagraphId :: ParagraphId
                    , kbDocSourceEntityId :: PageId
                    , kbDocSectionPath :: SectionPath'
                    , kbDocCategories :: [T.Text]
-                   , kbDocParagraph :: Pa:ragraph
+                   , kbDocParagraph :: Paragraph
                    , kbDocOutlinks ::  [(PageName, T.Text)]
                    , kbDocOutlinkIds ::  [PageId]
                    }
