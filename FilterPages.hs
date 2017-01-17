@@ -48,7 +48,7 @@ opts =
     (,,,)
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-    <*> option (Just <$> auto) (short 'n' <> long "take" <> metavar "N" <> help "Take the first N pages")
+    <*> optional (option auto  (short 'n' <> long "take" <> metavar "N" <> help "Take the first N pages"))
     <*> argument predicate (metavar "PRED" <> help "Predicate")
   where
     predicate = do
