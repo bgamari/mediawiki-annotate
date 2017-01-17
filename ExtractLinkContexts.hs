@@ -43,7 +43,7 @@ data KbDoc = KbDoc { kbDocParagraphId :: ParagraphId
                    , kbDocSourceEntityId :: PageId
                    , kbDocSectionPath :: SectionPath'
                    , kbDocCategories :: [T.Text]
-                   , kbDocParagraph :: Paragraph
+                   , kbDocParagraph :: Pa:ragraph
                    , kbDocOutlinks ::  [(PageName, T.Text)]
                    , kbDocOutlinkIds ::  [PageId]
                    }
@@ -85,18 +85,17 @@ transformContent (Page pageName' pageId pageSkeleta) =
 toGalagoDoc :: KbDoc -> Galago.Document
 toGalagoDoc kbDoc =
     let galagoDocId = T.pack $ (unpackPageId $ kbDocArticleId $ kbDoc) ++ "/" ++ (unpackParagraphId $ paraId $ kbDocParagraph $ kbDoc)
-        sectionPath = T.unwords
-                      $ fmap getSectionHeading
+        sectionPath = fmap getSectionHeading
                       $ sectionPath'Headings
                       $ kbDocSectionPath
                       $ kbDoc
         meta = M.fromList [ ("paragraphId", T.pack $ unpackParagraphId $ kbDocParagraphId $ kbDoc)
                           , ("articleId", T.pack $ unpackPageId $ kbDocArticleId $ kbDoc)
                           , ("sourceEntity", T.pack $ unpackPageId $ kbDocSourceEntityId $ kbDoc)
-                          , ("sectionpath", sectionPath)
-                          , ("categories", T.intercalate ", " $ kbDocCategories $ kbDoc)
-                          , ("targetEntities", T.intercalate ", " $ map (T.pack . unpackPageId) $ kbDocOutlinkIds $ kbDoc)
-                          , ("targetEntityAnchors", T.intercalate ", " $ fmap snd $ kbDocOutlinks $ kbDoc )
+                          , ("sectionpath", T.intercalate " / " $ sectionPath)
+                          , ("categories", T.intercalate " " $ kbDocCategories $ kbDoc)
+                          , ("targetEntities", T.intercalate " " $ map (T.pack . unpackPageId) $ kbDocOutlinkIds $ kbDoc)
+                          , ("targetEntityAnchors", T.intercalate " " $ fmap snd $ kbDocOutlinks $ kbDoc )
                           ]
         phrase x = (TL.fromStrict x, Galago.DoNotTokenize)
         naturalText x = (TL.fromStrict x, Galago.DoTokenize)
@@ -106,8 +105,8 @@ toGalagoDoc kbDoc =
                           [ ("sourceentity",         [naturalText $ getPageName $ kbDocSourceEntity kbDoc])
                           , ("sourceentity-exact",   [phrase $ getPageName $ kbDocSourceEntity kbDoc])
                           , ("category",             map phrase $ kbDocCategories kbDoc)
-                          , ("section",              [naturalText $ sectionPath])
-                          , ("section-exact",        [phrase $ sectionPath])
+                          , ("section",              [naturalText $ T.unwords $ sectionPath])
+                          , ("section-exact",        [phrase $ T.unwords $ sectionPath])
                           , ("paragraph",            [naturalText $ paraToText $ kbDocParagraph kbDoc])
                           , ("targetentity",         fmap (naturalText . getPageName . fst) $ kbDocOutlinks $ kbDoc)
                           , ("targetentity-exact",   fmap (phrase . getPageName . fst) $ kbDocOutlinks $ kbDoc)
