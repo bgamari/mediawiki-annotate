@@ -135,12 +135,15 @@ main = do
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
             $ map toGalagoDoc
-            $ foldMap (nubKbDocs . transformContent)
+            $ foldMap (nubKbDocs . dropKbDocsNoLinks . transformContent)
             $ pages
   where
     nubKbDocs :: [KbDoc] -> [KbDoc]
     nubKbDocs kbDocs =
-      HM.elems $ HM.fromList $ fmap (\kbDoc -> (key kbDoc, kbDoc)) $ kbDocs
+        HM.elems $ HM.fromList $ fmap (\kbDoc -> (key kbDoc, kbDoc)) $ kbDocs
       where
         key kbDoc = kbDocParagraphId $ kbDoc
 --         key kbDoc = (kbDocParagraphId $ kbDoc, kbDocArticleId $ kbDoc)   -- if you nub across multiple articles
+    dropKbDocsNoLinks :: [KbDoc] -> [KbDoc]
+    dropKbDocsNoLinks =
+        filter (\kbDoc -> not ( null (kbDocOutlinkIds $kbDoc)))
