@@ -2,14 +2,18 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
+import Data.List (sortBy)
+import Data.Ord (comparing)
 import Data.Monoid hiding (All, Any)
-import Options.Applicative
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
+import Data.Coerce
+import Options.Applicative
+
+import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
+import qualified Data.ByteString.Lazy as BSL
 
 import Dijkstra
 import PageRank
@@ -159,14 +163,17 @@ main = do
 
     putStrLn "\n\n\n"
     let graph = wHyperGraphToGraph wHyperGraph
-    mapM_ print [ (n1, n2, shortestPaths (dijkstra graph n1) n2)
+    mapM_ print [ (n1, n2, shortestPaths (dijkstra (coerce graph :: Graph PageId (Sum Double)) n1) n2)
                 | n1 <- toList seeds
                 , n2 <- toList seeds
                 ]
 
+    let pr = (!! 100)  $ PageRank.pageRank 0.15 graph
+    putStrLn $ "PageRank: " <> unlines (map show $ sortBy (flip $ comparing snd) $ PageRank.toEntries $ pr)
 
+--
+-- shortestPathsToNodeRanking ::
 
-
-wHyperGraphToGraph :: WHyperGraph -> Graph PageId (Sum Double)
+wHyperGraphToGraph :: WHyperGraph -> Graph PageId Double
 wHyperGraphToGraph =
-    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ Sum . recip . realToFrac) $ HM.toList x)
+    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)

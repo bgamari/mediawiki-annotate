@@ -198,7 +198,6 @@ executable trec-car-graph-expansion
                        unordered-containers,
                        text,
                        array,
-                       random,
                        containers,
                        simplir-galago,
                        optparse-applicative >= 0.12,

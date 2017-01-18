@@ -5,6 +5,7 @@
 
 module PageRank
    ( Eigenvector
+   , toHashMap
    , toEntries
    , pageRank
    ) where
@@ -17,7 +18,6 @@ import Data.Hashable
 import Data.Ix
 import Data.Maybe
 import Data.Bifunctor
-import System.Random
 
 import Dijkstra (Graph(..))
 
@@ -28,12 +28,9 @@ data Eigenvector n a = Eigenvector (n -> NodeId) (NodeId -> n) (A.UArray NodeId 
 -- | A transition matrix
 type Transition = A.UArray (NodeId, NodeId)
 
-toMap :: (A.IArray A.UArray a, Hashable n, Eq n)
-      => Eigenvector n a -> HM.HashMap n a
-toMap (Eigenvector _ toNode arr) =
-    HM.fromList [ (toNode n, w)
-                | (n, w) <- A.assocs arr
-                ]
+toHashMap :: (A.IArray A.UArray a, Hashable n, Eq n)
+          => Eigenvector n a -> HM.HashMap n a
+toHashMap = HM.fromList . toEntries
 
 toEntries :: (A.IArray A.UArray a)
           => Eigenvector n a -> [(n, a)]
@@ -52,16 +49,15 @@ relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
     delta = sum $ map square $ zipWith (-) (A.elems a) (A.elems b)
 
 
-pageRank :: forall n a g. (RealFrac a, RandomGen g, Random a, A.IArray A.UArray a, Eq n, Hashable n)
-         => g -> a -> Graph n a -> [Eigenvector n a]
-pageRank gen teleportation graph =
+pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n)
+         => a -> Graph n a -> [Eigenvector n a]
+pageRank teleportation graph =
     let (adj, nodeRange, toNode, fromNode) = weightedAdjacency graph
         numNodes = rangeSize nodeRange
         mat = addTeleportation nodeRange teleportation
               $ normRows nodeRange
               $ adj
 
-        --initial = normalize $ A.listArray nodeRange (randoms gen) -- Todo uniform vector perturbed with random
         initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRange []
 
         mult :: A.UArray NodeId a -> A.UArray NodeId a
