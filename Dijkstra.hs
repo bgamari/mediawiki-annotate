@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE MultiWayIf #-}
 
 module Dijkstra
@@ -18,7 +19,8 @@ import qualified Data.HashPSQ as PSQ
 import qualified Data.HashMap.Strict as HM
 import Control.Monad.Trans.State.Strict
 
-data Graph n e = Graph (HM.HashMap n [(n,e)])
+data Graph n e = Graph { getGraph :: HM.HashMap n [(n,e)] }
+               deriving (Functor)
 
 getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> [(n,e)]
