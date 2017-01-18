@@ -14,6 +14,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Lazy as BSL
+import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
 
@@ -37,8 +38,31 @@ data KbDoc = KbDoc { kbDocParagraphId :: ParagraphId
                    }
            deriving Show
 
-type GraphEdges = HM.HashMap PageId [KbDoc]
-type Graph = HM.HashMap PageId (HS.HashSet PageId)
+--
+-- newtype Graph' = Graph' HashSet Edge'
+--                | Graph' HashSet Edges'
+-- newtype Edge' =  Edge' SourceNode  TargetNode Weight
+--
+-- newtype Edges' = Edges' SourceNode (Map TargetNode Weight)
+
+
+newtype OutwardEdges = OutwardEdges (HM.HashMap PageId Int)     -- ^ a set of outward edges and their weights
+        deriving Show
+data Edges = Edges PageId OutwardEdges  -- ^ sourceNode and its outward edges
+        deriving Show
+newtype Subgraph = Subgraph [Edges]
+        deriving Show
+
+
+singleGraphEdge :: PageId -> OutwardEdges
+singleGraphEdge target = OutwardEdges $ HM.singleton target 1
+
+type Graph = HM.HashMap PageId OutwardEdges
+
+instance Monoid OutwardEdges where
+    mempty = OutwardEdges mempty
+    OutwardEdges a `mappend` OutwardEdges b = OutwardEdges (HM.unionWith (+) a b)
+
 
 transformContent :: Page -> [KbDoc]
 transformContent (Page pageName' pageId pageSkeleta) =
@@ -61,6 +85,14 @@ transformContent (Page pageName' pageId pageSkeleta) =
         kbDocOutlinkIds     = fmap (pageNameToId . fst) $ kbDocOutlinks
       in KbDoc {..}
 
+
+
+countEdges :: [KbDoc] -> OutwardEdges
+countEdges kbDocs =
+      foldMap (singleGraphEdge . kbDocSourceEntityId) kbDocs
+   <> foldMap (foldMap singleGraphEdge . kbDocOutlinkIds) kbDocs
+
+
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
@@ -68,23 +100,33 @@ main = do
 --     withFile outputFile WriteMode $ \h ->
 --         BSL.hPutStr h $ Galago.toWarc
 --             $ map toGalagoDoc
-    let graphEdges :: GraphEdges
-        graphEdges = HM.fromListWith (++) $ foldMap hashEdgeNodes
-              $ foldMap ( dropKbDocsNoLinks . transformContent)
-              $ pages
+    let outwardEdges :: HM.HashMap PageId [KbDoc]
+        outwardEdges = HM.fromListWith (++)
+                   $ foldMap hashEdgeNodes
+                   $ foldMap (dropKbDocsNoLinks . transformContent)
+                   $ pages
     let graph :: Graph
-        graph = fmap (foldMap (\kbDoc -> HS.fromList $ [kbDocSourceEntityId $ kbDoc] ++ (kbDocOutlinkIds $kbDoc))) $ graphEdges
+        graph = fmap  countEdges $ outwardEdges
 
-    let seeds :: HS.HashSet PageId
-        seeds = HS.fromList [ "Thorium", "Plutonium",  "Burnup"]
-    print $ expandNodesK graph seeds 3
+    let seeds :: [PageId]
+        seeds =  [ "Thorium", "Plutonium",  "Burnup"]
+    print $ expandNodes graph seeds
   where
-    expandNodes :: Graph -> HS.HashSet PageId -> HS.HashSet PageId
-    expandNodes graph seeds =
-      seeds <> foldMap (fromMaybe mempty . (`HM.lookup` graph)) seeds
+    lookupNeighbors :: Graph -> PageId -> OutwardEdges
+    lookupNeighbors graph source =
+        fromMaybe mempty $ HM.lookup source graph
 
-    expandNodesK graph seeds k =
-      iterate (expandNodes graph) seeds !! k
+
+    expandNodes :: Graph -> [PageId] -> Subgraph
+    expandNodes graph seeds =
+       Subgraph $ fmap (\seed -> Edges seed (lookupNeighbors graph seed)) seeds
+
+--     expandNodes graph seeds =
+--       seeds <> foldMap (fromMaybe mempty . (`HM.lookup` graph)) seeds
+--       seeds `UnionWith +` foldMap
+--
+--     expandNodesK graph seeds k =
+--       iterate (expandNodes graph) seeds !! k
 
     dropKbDocsNoLinks :: [KbDoc] -> [KbDoc]
     dropKbDocsNoLinks =
