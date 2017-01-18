@@ -20,7 +20,7 @@ import qualified Data.HashMap.Strict as HM
 import Control.Monad.Trans.State.Strict
 
 data Graph n e = Graph { getGraph :: HM.HashMap n [(n,e)] }
-               deriving (Functor)
+               deriving (Functor, Show)
 
 getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> [(n,e)]
