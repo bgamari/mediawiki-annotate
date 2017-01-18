@@ -18,9 +18,9 @@ import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
 
+import Dijkstra
 import CAR.Utils
 import CAR.Types
-
 
 
 opts :: Parser (FilePath, FilePath)
@@ -28,7 +28,6 @@ opts =
     (,)
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-
 
 
 data KbDoc = KbDoc { kbDocParagraphId :: ParagraphId
@@ -95,11 +94,10 @@ expandNodesK binarySymmetricGraph seeds k =
 
 -- ------------------------------------------------
 
+-- | Outward weighted hyper-edges
 newtype OutWHyperEdges = OutWHyperEdges (HM.HashMap PageId Int)     -- ^ a set of outward wHyperEdges and their weights
         deriving Show
 data WHyperEdges = WHyperEdges PageId OutWHyperEdges  -- ^ sourceNode and its outward wHyperEdges
-        deriving Show
-newtype HyperSubgraph = HyperSubgraph [WHyperEdges]
         deriving Show
 
 
@@ -111,7 +109,6 @@ type WHyperGraph = HM.HashMap PageId OutWHyperEdges
 instance Monoid OutWHyperEdges where
     mempty = OutWHyperEdges mempty
     OutWHyperEdges a `mappend` OutWHyperEdges b = OutWHyperEdges (HM.unionWith (+) a b)
-
 
 
 
@@ -129,12 +126,6 @@ lookupNeighbors graph node =
 subsetOfUniverseGraph :: UniverseGraph -> [PageId] -> UniverseGraph
 subsetOfUniverseGraph universe nodeset =
     foldMap (\node -> HM.singleton node (universe `lookupNeighbors` node) ) $ nodeset
-
-
--- todo delete?
-expandHyperNodes :: WHyperGraph -> [PageId] -> HyperSubgraph
-expandHyperNodes wHyperGraph seeds =
-   HyperSubgraph $ fmap (\seed -> WHyperEdges seed (lookupNeighbors wHyperGraph seed)) seeds
 
 
 main :: IO ()
@@ -171,7 +162,15 @@ main = do
     print    $ nodeSet
     putStrLn $ "\nhyper graph:"
     print    $ wHyperGraph
-  where
+
+    putStrLn "\n\n\n"
+    let graph = wHyperGraphToGraph wHyperGraph
+    mapM_ print [ (n1, n2, shortestPaths (dijkstra graph n1) n2)
+                | n1 <- toList seeds
+                , n2 <- toList seeds
+                ]
 
 
-
+wHyperGraphToGraph :: WHyperGraph -> Graph PageId (Sum Double)
+wHyperGraphToGraph =
+    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ Sum . recip . realToFrac) $ HM.toList x)

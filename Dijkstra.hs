@@ -10,14 +10,13 @@ module Dijkstra
    , test
    ) where
 
-import Data.Ix
+import Data.Foldable
 import Data.Monoid
 import Data.Maybe
 import Data.Hashable
 import qualified Data.HashPSQ as PSQ
 import qualified Data.HashMap.Strict as HM
-import Control.Monad.State.Strict
-import Control.Monad.Trans.Class
+import Control.Monad.Trans.State.Strict
 
 data Graph n e = Graph (HM.HashMap n [(n,e)])
 
@@ -53,7 +52,7 @@ popS = do
 -- | Compute the shortest path lengths and predecessor nodes from the given source node.
 -- By convention the source node has itself as a predecessor.
 dijkstra :: forall n e.
-            ( Hashable n, Ix n, Monoid e, Ord e )
+            ( Hashable n, Monoid e, Ord e, Ord n )
          => Graph n e -> n -> HM.HashMap n (Distance e, [n])
 dijkstra graph =
     \src -> let s0 = S { sAccum = HM.singleton src (Finite mempty, [src])
