@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 import Data.List (sortBy)
 import Data.Ord (comparing)
@@ -14,6 +16,7 @@ import Options.Applicative
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.Sequence as Seq
 
 import Dijkstra
 import PageRank
@@ -93,24 +96,24 @@ expandNodesK binarySymmetricGraph seeds k =
 -- ------------------------------------------------
 
 -- | Outward weighted hyper-edges
-newtype OutWHyperEdges = OutWHyperEdges (HM.HashMap PageId Int)     -- ^ a set of outward wHyperEdges and their weights
-        deriving Show
-data WHyperEdges = WHyperEdges PageId OutWHyperEdges  -- ^ sourceNode and its outward wHyperEdges
-        deriving Show
+newtype OutWHyperEdges weight = OutWHyperEdges (HM.HashMap PageId weight)     -- ^ a set of outward wHyperEdges and their weights
+        deriving (Show, Functor)
+data WHyperEdges weight = WHyperEdges PageId (OutWHyperEdges weight) -- ^ sourceNode and its outward wHyperEdges
+        deriving (Show, Functor)
 
 
-singleWHyperEdge :: PageId -> OutWHyperEdges
+singleWHyperEdge :: Num weight => PageId -> OutWHyperEdges weight
 singleWHyperEdge target = OutWHyperEdges $ HM.singleton target 1
 
-type WHyperGraph = HM.HashMap PageId OutWHyperEdges
+type WHyperGraph weight = HM.HashMap PageId (OutWHyperEdges weight)
 
-instance Monoid OutWHyperEdges where
+instance Num weight => Monoid (OutWHyperEdges weight) where
     mempty = OutWHyperEdges mempty
     OutWHyperEdges a `mappend` OutWHyperEdges b = OutWHyperEdges (HM.unionWith (+) a b)
 
 
 
-countEdges :: [KbDoc] -> OutWHyperEdges
+countEdges :: (Num weight) => [KbDoc] -> OutWHyperEdges weight
 countEdges kbDocs =
       foldMap (singleWHyperEdge . kbDocSourceEntityId) kbDocs
    <> foldMap (foldMap singleWHyperEdge . kbDocOutlinkIds) kbDocs
@@ -153,27 +156,83 @@ main = do
         -- filter universe to nodeSet
         -- then turn into Hyperedges
 
-    let wHyperGraph :: WHyperGraph
+    let wHyperGraph :: WHyperGraph Double
         wHyperGraph = fmap countEdges $ universeSubset
+
+        unwGraph =
+            fmap (fmap (const 1)) $ wHyperGraph
+--             [ (sourceId, [ (targetId, 1)
+--                          | (targetId, w) <- outEdges
+--                          ]
+--               )
+--             | (sourceId, outEdges) <- wHyperGraph
+--             ]
+
 
     putStrLn $ "\nnode set:"
     print    $ nodeSet
     putStrLn $ "\nhyper graph:"
     print    $ wHyperGraph
 
-    putStrLn "\n\n\n"
     let graph = wHyperGraphToGraph wHyperGraph
-    mapM_ print [ (n1, n2, shortestPaths (dijkstra (coerce graph :: Graph PageId (Sum Double)) n1) n2)
-                | n1 <- toList seeds
-                , n2 <- toList seeds
-                ]
 
-    let pr = (!! 100)  $ PageRank.pageRank 0.15 graph
-    putStrLn $ "PageRank: " <> unlines (map show $ sortBy (flip $ comparing snd) $ PageRank.toEntries $ pr)
 
---
--- shortestPathsToNodeRanking ::
+    putStrLn $ "\n\nPageRank on weighted graph: \n" <> unlines (take 20 $ map show $ rankByPageRank graph 0.15 20)
 
-wHyperGraphToGraph :: WHyperGraph -> Graph PageId Double
+    putStrLn $ "\n\nPageRank unweighted: \n" <> unlines (take 20 $ map show $ rankByPageRank (wHyperGraphToGraph unwGraph) 0.15 20)
+
+    putStrLn $ "\n\nshortest path ranking: \n" <> unlines (take 20 $ map show $ rankByShortestPaths (coerce graph) (toList seeds) )
+
+    putStrLn $ "\n\nunweighted shortest path: \n" <> unlines (take 20 $ map show $ rankByShortestPaths (coerce $ wHyperGraphToGraph unwGraph) (toList seeds) )
+
+
+rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
+rankByPageRank graph teleport iterations =
+  let pr = (!! iterations)  $ PageRank.pageRank teleport graph
+      prRanking  = toRanking $ PageRank.toEntries $ pr
+  in prRanking
+
+
+rankByShortestPaths :: Dijkstra.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
+rankByShortestPaths graph seeds =
+    let shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
+                         | n1 <- toList seeds
+                         , let paths = Dijkstra.dijkstra (graph) n1
+                         , n2 <- toList seeds
+                         ]
+
+        pathRanking = toRanking $ shortestPathsToNodeScores shortestPaths
+    in pathRanking
+
+
+toRanking ::  [(PageId, Double)] -> [(PageId, Double)]
+toRanking =
+    sortBy (flip $ comparing snd)
+
+takeMiddle :: Seq.Seq a -> Seq.Seq a
+takeMiddle s =
+    case Seq.viewl s of
+      Seq.EmptyL  -> mempty
+      _ Seq.:< s' ->
+       case Seq.viewr s' of
+         Seq.EmptyR   -> mempty
+         s'' Seq.:> _ -> s''
+
+shortestPathsToNodeScores :: [(PageId, PageId, [Dijkstra.Path PageId])] -> [(PageId, Double)]
+shortestPathsToNodeScores paths =
+    let innerPaths :: [Seq.Seq PageId]
+        innerPaths = fmap takeMiddle [ Seq.fromList path
+                                     | (_, _, pathList) <- paths
+                                     , path <- pathList
+                                     ]
+
+        numPaths = realToFrac $ length innerPaths
+    in HM.toList
+     $ HM.fromListWith (+) [ (elem, 1 / numPaths)
+                           | path <- innerPaths
+                           , elem <- toList path
+                           ]
+
+wHyperGraphToGraph :: WHyperGraph Double -> Graph PageId Double
 wHyperGraphToGraph =
     Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)

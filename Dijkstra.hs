@@ -6,6 +6,7 @@
 module Dijkstra
    ( Graph(..)
    , Distance(..)
+   , Path
    , dijkstra
    , shortestPaths
    , test
