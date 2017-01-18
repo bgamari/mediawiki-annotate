@@ -85,18 +85,17 @@ transformContent (Page pageName' pageId pageSkeleta) =
 toGalagoDoc :: KbDoc -> Galago.Document
 toGalagoDoc kbDoc =
     let galagoDocId = T.pack $ (unpackPageId $ kbDocArticleId $ kbDoc) ++ "/" ++ (unpackParagraphId $ paraId $ kbDocParagraph $ kbDoc)
-        sectionPath = T.unwords
-                      $ fmap getSectionHeading
+        sectionPath = fmap getSectionHeading
                       $ sectionPath'Headings
                       $ kbDocSectionPath
                       $ kbDoc
         meta = M.fromList [ ("paragraphId", T.pack $ unpackParagraphId $ kbDocParagraphId $ kbDoc)
                           , ("articleId", T.pack $ unpackPageId $ kbDocArticleId $ kbDoc)
                           , ("sourceEntity", T.pack $ unpackPageId $ kbDocSourceEntityId $ kbDoc)
-                          , ("sectionpath", sectionPath)
-                          , ("categories", T.intercalate ", " $ kbDocCategories $ kbDoc)
-                          , ("targetEntities", T.intercalate ", " $ map (T.pack . unpackPageId) $ kbDocOutlinkIds $ kbDoc)
-                          , ("targetEntityAnchors", T.intercalate ", " $ fmap snd $ kbDocOutlinks $ kbDoc )
+                          , ("sectionpath", T.intercalate " / " $ sectionPath)
+                          , ("categories", T.intercalate " " $ kbDocCategories $ kbDoc)
+                          , ("targetEntities", T.intercalate " " $ map (T.pack . unpackPageId) $ kbDocOutlinkIds $ kbDoc)
+                          , ("targetEntityAnchors", T.intercalate " " $ fmap snd $ kbDocOutlinks $ kbDoc )
                           ]
         phrase x = (TL.fromStrict x, Galago.DoNotTokenize)
         naturalText x = (TL.fromStrict x, Galago.DoTokenize)
@@ -106,8 +105,8 @@ toGalagoDoc kbDoc =
                           [ ("sourceentity",         [naturalText $ getPageName $ kbDocSourceEntity kbDoc])
                           , ("sourceentity-exact",   [phrase $ getPageName $ kbDocSourceEntity kbDoc])
                           , ("category",             map phrase $ kbDocCategories kbDoc)
-                          , ("section",              [naturalText $ sectionPath])
-                          , ("section-exact",        [phrase $ sectionPath])
+                          , ("section",              [naturalText $ T.unwords $ sectionPath])
+                          , ("section-exact",        [phrase $ T.unwords $ sectionPath])
                           , ("paragraph",            [naturalText $ paraToText $ kbDocParagraph kbDoc])
                           , ("targetentity",         fmap (naturalText . getPageName . fst) $ kbDocOutlinks $ kbDoc)
                           , ("targetentity-exact",   fmap (phrase . getPageName . fst) $ kbDocOutlinks $ kbDoc)
@@ -136,12 +135,15 @@ main = do
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
             $ map toGalagoDoc
-            $ foldMap (nubKbDocs . transformContent)
+            $ foldMap (nubKbDocs . dropKbDocsNoLinks . transformContent)
             $ pages
   where
     nubKbDocs :: [KbDoc] -> [KbDoc]
     nubKbDocs kbDocs =
-      HM.elems $ HM.fromList $ fmap (\kbDoc -> (key kbDoc, kbDoc)) $ kbDocs
+        HM.elems $ HM.fromList $ fmap (\kbDoc -> (key kbDoc, kbDoc)) $ kbDocs
       where
         key kbDoc = kbDocParagraphId $ kbDoc
 --         key kbDoc = (kbDocParagraphId $ kbDoc, kbDocArticleId $ kbDoc)   -- if you nub across multiple articles
+    dropKbDocsNoLinks :: [KbDoc] -> [KbDoc]
+    dropKbDocsNoLinks =
+        filter (\kbDoc -> not ( null (kbDocOutlinkIds $kbDoc)))

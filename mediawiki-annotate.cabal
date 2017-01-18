@@ -186,3 +186,23 @@ executable trec-car-extract-link-contexts
                        trec-car-tools,
                        dlist
   default-language:    Haskell2010
+
+
+executable trec-car-graph-expansion
+  main-is:             GraphExpansion.hs
+  other-modules:       Dijkstra
+                       PageRank
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.10,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       array,
+                       containers,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       psqueues,
+                       transformers,
+                       trec-car-tools
+  default-language:    Haskell2010

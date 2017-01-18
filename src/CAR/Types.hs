@@ -69,7 +69,7 @@ instance CBOR.Serialise SBS.ShortByteString where
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId SBS.ShortByteString
-               deriving (Show, Eq, Ord, Generic, CBOR.Serialise)
+               deriving (Show, Eq, Ord, Generic, CBOR.Serialise, IsString)
 instance Hashable PageId
 
 pageNameToId :: PageName -> PageId
