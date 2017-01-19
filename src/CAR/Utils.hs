@@ -33,22 +33,22 @@ pageCategories = mapMaybe isCategoryTag . pageLinkTargets
         T.pack "Category:" `T.stripPrefix` pageName
 
 pageLinkTargets :: Page -> [PageName]
-pageLinkTargets = map fst . pageLinks
+pageLinkTargets = map linkTarget . pageLinks
 
-pageLinks :: Page -> [(PageName, T.Text)]
+pageLinks :: Page -> [Link]
 pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 
-pageSkeletonLinks :: PageSkeleton -> [(PageName, T.Text)]
+pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 
-paraLinks :: Paragraph -> [(PageName, T.Text)]
+paraLinks :: Paragraph -> [Link]
 paraLinks (Paragraph _ bodies) =
     foldMap paraBodyLinks bodies
 
-paraBodyLinks :: ParaBody -> [(PageName, T.Text)]
+paraBodyLinks :: ParaBody -> [Link]
 paraBodyLinks (ParaText text) = []
-paraBodyLinks (ParaLink link) = [(linkTarget link, linkAnchor link)]
+paraBodyLinks (ParaLink link) = [link]
 
 pageSkeletonText :: PageSkeleton -> [T.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children

@@ -93,16 +93,17 @@ collectInlinkInfo = foldMap pageInlinkInfo
                    }
 
       | pageIsDisambiguation page  =
-            let toInlinkInfo (linkTarget, anchorText) =
-                    mempty { documentInlinks = HM.singleton linkTarget
+            let toInlinkInfo link =
+                    mempty { documentInlinks = HM.singleton (linkTarget link)
                                                $ mempty { disambiguationCount = one $ pageName page }
                            }
             in foldMap toInlinkInfo (pageLinks page)
 
       | otherwise  =
-            let toInlinkInfo (linkTarget, anchorText) =
-                   mempty { documentInlinks = HM.singleton linkTarget
-                                              $ mempty { anchorCount = one $ anchorText, inLinkCounts = one $ linkTarget }
+            let toInlinkInfo link =
+                   mempty { documentInlinks = HM.singleton (linkTarget link)
+                                              $ mempty { anchorCount = one $ linkAnchor link
+                                                       , inLinkCounts = one $ linkTarget link }
                           }
             in foldMap toInlinkInfo (pageLinks page)
 
@@ -112,8 +113,8 @@ transformContent inlinkInfoMap (Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
       kbDocLeadText = foldMap pageSkeletonText $ leadParas
-      kbDocOutLinks = fmap fst $ foldMap pageSkeletonLinks $ leadParas
-      kbDocOutMentions = fmap snd $ foldMap pageSkeletonLinks $ leadParas
+      kbDocOutLinks = fmap linkTarget $ foldMap pageSkeletonLinks $ leadParas
+      kbDocOutMentions = fmap linkAnchor $ foldMap pageSkeletonLinks $ leadParas
       kbDocLeadPara = leadParas
       kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
       kbDocCanonicalName = pageName

@@ -123,7 +123,7 @@ toEntityAnnotations (Page _ pageId skeleton) =
         let parentIds' = parentIds `DList.snoc` sectionId
         in foldMap (go parentIds') children
     go parentIds (Para paragraph) =
-        let entities =  fmap fst $ paraLinks paragraph
+        let entities =  fmap linkTarget $ paraLinks paragraph
         in S.fromList $  [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
