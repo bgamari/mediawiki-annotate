@@ -57,7 +57,6 @@ urlEncodeText :: String -> SBS.ShortByteString
 urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
 
 -- Orphans
-instance CBOR.Serialise LinkTarget
 deriving instance CBOR.Serialise PageName
 instance FromJSON PageName
 instance FromJSONKey PageName where
