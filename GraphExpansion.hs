@@ -22,6 +22,8 @@ import PageRank
 import CAR.Utils
 import CAR.Types
 
+-- import ExtractKnowledgeBase as KB
+
 import WriteRanking
 
 opts :: Parser (FilePath, FilePath, FilePath)
@@ -130,10 +132,57 @@ subsetOfUniverseGraph universe nodeset =
     foldMap (\node -> HM.singleton node (universe `lookupNeighbors` node) ) $ nodeset
 
 
+rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
+rankByPageRank graph teleport iterations =
+  let pr = (!! iterations)  $ PageRank.pageRank teleport graph
+      prRanking  =  PageRank.toEntries $ pr
+  in prRanking
+
+
+rankByShortestPaths :: Dijkstra.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
+rankByShortestPaths graph seeds =
+    let shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
+                         | n1 <- toList seeds
+                         , let paths = Dijkstra.dijkstra (graph) n1
+                         , n2 <- toList seeds
+                         ]
+
+        pathRanking = shortestPathsToNodeScores shortestPaths
+    in pathRanking
+takeMiddle :: Seq.Seq a -> Seq.Seq a
+takeMiddle s =
+    case Seq.viewl s of
+      Seq.EmptyL  -> mempty
+      _ Seq.:< s' ->
+       case Seq.viewr s' of
+         Seq.EmptyR   -> mempty
+         s'' Seq.:> _ -> s''
+
+shortestPathsToNodeScores :: [(PageId, PageId, [Dijkstra.Path PageId])] -> [(PageId, Double)]
+shortestPathsToNodeScores paths =
+    let innerPaths :: [Seq.Seq PageId]
+        innerPaths = fmap takeMiddle [ Seq.fromList path
+                                     | (_, _, pathList) <- paths
+                                     , path <- pathList
+                                     ]
+
+        numPaths = realToFrac $ length innerPaths
+    in HM.toList
+     $ HM.fromListWith (+) [ (elem, 1 / numPaths)
+                           | path <- innerPaths
+                           , elem <- toList path
+                           ]
+
+wHyperGraphToGraph :: WHyperGraph Double -> Graph PageId Double
+wHyperGraphToGraph =
+    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)
+
+
+
 main :: IO ()
 main = do
     (articlesFile, outlinesFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
-    pages <- decodeCborList <$> BSL.readFile inputFile
+    pages <- decodeCborList <$> BSL.readFile articlesFile
 
 
     let universeGraph :: UniverseGraph
@@ -194,48 +243,3 @@ main = do
     write "w-path"     $ rankByShortestPaths (coerce graph) (toList seeds)
     write "u-path"     $ rankByShortestPaths (coerce ugraph) (toList seeds)
 
-
-rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
-rankByPageRank graph teleport iterations =
-  let pr = (!! iterations)  $ PageRank.pageRank teleport graph
-      prRanking  =  PageRank.toEntries $ pr
-  in prRanking
-
-
-rankByShortestPaths :: Dijkstra.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
-rankByShortestPaths graph seeds =
-    let shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
-                         | n1 <- toList seeds
-                         , let paths = Dijkstra.dijkstra (graph) n1
-                         , n2 <- toList seeds
-                         ]
-
-        pathRanking = shortestPathsToNodeScores shortestPaths
-    in pathRanking
-takeMiddle :: Seq.Seq a -> Seq.Seq a
-takeMiddle s =
-    case Seq.viewl s of
-      Seq.EmptyL  -> mempty
-      _ Seq.:< s' ->
-       case Seq.viewr s' of
-         Seq.EmptyR   -> mempty
-         s'' Seq.:> _ -> s''
-
-shortestPathsToNodeScores :: [(PageId, PageId, [Dijkstra.Path PageId])] -> [(PageId, Double)]
-shortestPathsToNodeScores paths =
-    let innerPaths :: [Seq.Seq PageId]
-        innerPaths = fmap takeMiddle [ Seq.fromList path
-                                     | (_, _, pathList) <- paths
-                                     , path <- pathList
-                                     ]
-
-        numPaths = realToFrac $ length innerPaths
-    in HM.toList
-     $ HM.fromListWith (+) [ (elem, 1 / numPaths)
-                           | path <- innerPaths
-                           , elem <- toList path
-                           ]
-
-wHyperGraphToGraph :: WHyperGraph Double -> Graph PageId Double
-wHyperGraphToGraph =
-    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)
