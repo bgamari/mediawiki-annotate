@@ -22,8 +22,7 @@ import CAR.Types
 
 data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        , edgeDocArticleId       :: PageId
-                       , edgeDocSourceEntityId  :: PageId
-                       , edgeDocOutlinkIds      :: [PageId]
+                       , edgeDocNeighbors       :: [PageId]
                        }
            deriving Show
 
@@ -43,33 +42,36 @@ transformContent (Page pageName pageId pageSkeleta) =
       let
         edgeDocParagraphId    = paraId $ paragraph
         edgeDocArticleId      = pageId
-        edgeDocSourceEntityId = pageNameToId pageName
-        edgeDocOutlinks       = paraLinks $ paragraph
-        edgeDocOutlinkIds     = fmap (pageNameToId . fst) $ edgeDocOutlinks
+        edgeDocNeighbors      = [pageId] ++ (fmap linkTargetId $ paraLinks $ paragraph)
       in EdgeDoc {..}
 
 
 dropEdgeDocsNoLinks :: [EdgeDoc] -> [EdgeDoc]
 dropEdgeDocsNoLinks =
-    filter (\edgeDoc -> not ( null (edgeDocOutlinkIds $edgeDoc)))
-
-hashEdgeNodes :: EdgeDoc -> [(PageId, [EdgeDoc])]
-hashEdgeNodes edgeDoc =
-  [(edgeDocSourceEntityId $edgeDoc, [edgeDoc])] ++ [(target, [edgeDoc])  | target <- edgeDocOutlinkIds $edgeDoc]
+    filter (\edgeDoc -> not ( lengthOne (edgeDocNeighbors $ edgeDoc)))
+  where lengthOne [_] = True   -- list with one element
+        lengthOne _   = False
 
 type UniverseGraph = HM.HashMap PageId [EdgeDoc]
-hashUniverseGraph :: [Page] -> UniverseGraph
-hashUniverseGraph pages = HM.fromListWith (++) $ foldMap hashEdgeNodes
-      $ foldMap ( dropEdgeDocsNoLinks . transformContent)
-      $ pages
 
+hashUniverseGraph :: [Page] -> UniverseGraph
+hashUniverseGraph pages =
+    HM.fromListWith (++)
+    $ foldMap symmetrizeEdge
+    $ foldMap (dropEdgeDocsNoLinks . transformContent)
+    $ pages
+  where
+    symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
+    symmetrizeEdge edgeDoc =
+           [ (target, [edgeDoc])
+           | target <- edgeDocNeighbors edgeDoc]
 
 -- ------------------------------------------------
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
 
 universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
 universeToBinaryGraph universeGraph =
-  fmap (foldMap (\edgeDoc -> HS.fromList $ [edgeDocSourceEntityId $ edgeDoc] ++ (edgeDocOutlinkIds $edgeDoc))) $ universeGraph
+  fmap (foldMap (\edgeDoc -> HS.fromList $ (edgeDocNeighbors $edgeDoc))) $ universeGraph
 
 
 expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
@@ -103,8 +105,7 @@ instance Num weight => Monoid (OutWHyperEdges weight) where
 
 countEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
 countEdges edgeDocs =
-      foldMap (singleWHyperEdge . edgeDocSourceEntityId) edgeDocs
-   <> foldMap (foldMap singleWHyperEdge . edgeDocOutlinkIds) edgeDocs
+      foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
 
 
 lookupNeighbors :: Monoid v =>  HM.HashMap PageId v -> PageId -> v
@@ -118,7 +119,7 @@ subsetOfUniverseGraph universe nodeset =
   where
     -- Throw out neighbors not in our subgraph
     pruneEdges :: EdgeDoc -> EdgeDoc
-    pruneEdges edoc = edoc { edgeDocOutlinkIds = filter (`HS.member` nodeset) (edgeDocOutlinkIds edoc) }
+    pruneEdges edoc = edoc { edgeDocNeighbors = filter (`HS.member` nodeset) (edgeDocNeighbors edoc) }
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations =
