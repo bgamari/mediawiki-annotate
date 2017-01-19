@@ -7,6 +7,7 @@
 module Dijkstra
    ( Graph(..)
    , Distance(..)
+   , Path
    , dijkstra
    , lazyDijkstra
    , shortestPaths

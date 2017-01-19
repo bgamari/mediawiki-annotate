@@ -25,6 +25,7 @@ library
                        bytestring >= 0.10,
                        filepath >=1.4 && <1.5,
                        unordered-containers >=0.2 && <0.3,
+                       containers,
                        network-uri,
                        dlist,
                        mmap,
@@ -134,8 +135,9 @@ executable trec-car-transform-content
   default-language:    Haskell2010
 
 executable trec-car-extract-kb
-  main-is:             ExtractKnowledgeBase.hs
+  main-is:             ExtractKnowledgeBaseMain.hs
   ghc-options:         -Wall
+  other-modules:       ExtractKnowledgeBase
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
                        unordered-containers,
@@ -189,9 +191,11 @@ executable trec-car-extract-link-contexts
 
 
 executable trec-car-graph-expansion
-  main-is:             GraphExpansion.hs
-  other-modules:       Dijkstra
+  main-is:             GraphExpansionMain.hs
+  other-modules:       GraphExpansion
+                       Dijkstra
                        PageRank
+                       WriteRanking
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
                        bytestring,

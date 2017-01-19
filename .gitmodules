@@ -1,6 +1,6 @@
 [submodule "mediawiki-parser"]
 	path = mediawiki-parser
-	url = git://git.smart-cactus.org/ben/mediawiki-parser
+	url = git@git.smart-cactus.org:ben/mediawiki-parser
 [submodule "binary-serialise-cbor"]
 	path = binary-serialise-cbor
 	url = git://github.com/well-typed/binary-serialise-cbor
