@@ -80,7 +80,7 @@ computeRankingsForQuery queryDoc radius universeGraph binarySymmetricGraph =
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
-        universeSubset = subsetOfUniverseGraph universeGraph $ HS.toList nodeSet
+        universeSubset = subsetOfUniverseGraph universeGraph nodeSet
         -- filter universe to nodeSet
         -- then turn into Hyperedges
 

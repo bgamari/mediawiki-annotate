@@ -20,11 +20,11 @@ import PageRank
 import CAR.Utils
 import CAR.Types
 
-data EdgeDoc = EdgeDoc { edgeDocParagraphId :: ParagraphId
-                   , edgeDocArticleId :: PageId
-                   , edgeDocSourceEntityId :: PageId
-                   , edgeDocOutlinkIds ::  [PageId]
-                   }
+data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
+                       , edgeDocArticleId       :: PageId
+                       , edgeDocSourceEntityId  :: PageId
+                       , edgeDocOutlinkIds      :: [PageId]
+                       }
            deriving Show
 
 
@@ -113,10 +113,13 @@ lookupNeighbors graph node =
     fromMaybe mempty $ HM.lookup node graph
 
 
-subsetOfUniverseGraph :: UniverseGraph -> [PageId] -> UniverseGraph
+subsetOfUniverseGraph :: UniverseGraph -> HS.HashSet PageId -> UniverseGraph
 subsetOfUniverseGraph universe nodeset =
-    foldMap (\node -> HM.singleton node (universe `lookupNeighbors` node) ) $ nodeset
-
+    foldMap (\node -> HM.singleton node (map pruneEdges $ universe `lookupNeighbors` node) ) $ nodeset
+  where
+    -- Throw out neighbors not in our subgraph
+    pruneEdges :: EdgeDoc -> EdgeDoc
+    pruneEdges edoc = edoc { edgeDocOutlinkIds = filter (`HS.member` nodeset) (edgeDocOutlinkIds edoc) }
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations =
@@ -135,6 +138,7 @@ rankByShortestPaths graph seeds =
 
         pathRanking = shortestPathsToNodeScores shortestPaths
     in pathRanking
+
 takeMiddle :: Seq.Seq a -> Seq.Seq a
 takeMiddle s =
     case Seq.viewl s of
