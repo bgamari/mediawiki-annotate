@@ -14,6 +14,7 @@ import Data.Bifunctor
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
+import qualified Data.Text as T
 
 import Dijkstra
 import PageRank
@@ -23,27 +24,37 @@ import CAR.Types
 data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        , edgeDocArticleId       :: PageId
                        , edgeDocNeighbors       :: [PageId]
+                       , edgeDocContent         :: T.Text
                        }
            deriving Show
 
 
 transformContent :: Page -> [EdgeDoc]
 transformContent (Page pageName pageId pageSkeleta) =
-    foldMap go pageSkeleta
+    foldMap (go mempty) pageSkeleta
   where
-    go :: PageSkeleton -> [EdgeDoc]
-    go (Section heading _ children) =
-       concatMap go  children
-    go (Para paragraph) =
-      [convertPara paragraph ]
+    go :: [SectionHeading] -> PageSkeleton -> [EdgeDoc]
+    go headings (Section heading _ children) =
+        concatMap (go (heading : headings)) $ children
+    go headings (Para paragraph) =
+      [convertPara paragraph headings]
 
-    convertPara :: Paragraph -> EdgeDoc
-    convertPara paragraph =
+    convertPara :: Paragraph -> [SectionHeading] -> EdgeDoc
+    convertPara paragraph headings=
       let
         edgeDocParagraphId    = paraId $ paragraph
         edgeDocArticleId      = pageId
         edgeDocNeighbors      = [pageId] ++ (fmap linkTargetId $ paraLinks $ paragraph)
+        edgeDocContent        = paragraphContent paragraph headings
       in EdgeDoc {..}
+      where paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
+            paragraphContent paragraph headings =
+              (paraToText $ paragraph)
+              <> (T.intercalate " " $ fmap getSectionHeading $ headings)
+              <> (getPageName pageName)
+
+
+
 
 
 dropEdgeDocsNoLinks :: [EdgeDoc] -> [EdgeDoc]
@@ -95,6 +106,9 @@ data WHyperEdges weight = WHyperEdges PageId (OutWHyperEdges weight) -- ^ source
 singleWHyperEdge :: Num weight => PageId -> OutWHyperEdges weight
 singleWHyperEdge target = OutWHyperEdges $ HM.singleton target 1
 
+singleWHyperEdgeWithWeight :: Num weight => PageId -> weight -> OutWHyperEdges weight
+singleWHyperEdgeWithWeight target weight = OutWHyperEdges $ HM.singleton target weight
+
 type WHyperGraph weight = HM.HashMap PageId (OutWHyperEdges weight)
 
 instance Num weight => Monoid (OutWHyperEdges weight) where
@@ -103,9 +117,6 @@ instance Num weight => Monoid (OutWHyperEdges weight) where
 
 
 
-countEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
-countEdges edgeDocs =
-      foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
 
 
 lookupNeighbors :: Monoid v =>  HM.HashMap PageId v -> PageId -> v

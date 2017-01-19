@@ -70,6 +70,20 @@ methodNames = Methods { pageRankU = "page-rank-u"
                       , pathW     = "path-w"
                       }
 
+
+countEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
+countEdges edgeDocs =
+      foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
+
+
+-- todo interface with simpler and use for graph filtering
+rankEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
+rankEdges edgeDocs =
+      foldMap (singleWHyperEdge w . edgeDocSourceEntityId) edgeDocs
+   <> foldMap (foldMap singleWHyperEdge . edgeDocOutlinkIds) edgeDocs
+
+
+
 computeRankingsForQuery :: QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> (PageId, Methods [(PageId, Double)])
 computeRankingsForQuery queryDoc radius universeGraph binarySymmetricGraph =
