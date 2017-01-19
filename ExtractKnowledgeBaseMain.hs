@@ -2,12 +2,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
-import Control.Exception (assert)
 import Data.Monoid hiding (All, Any)
 import System.IO
 
 import Options.Applicative
-import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Map.Strict as M
@@ -18,7 +16,6 @@ import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.ByteString.Lazy as BSL
 import Data.Maybe
 
-import CAR.Utils
 import CAR.Types
 import SimplIR.Galago as Galago
 
