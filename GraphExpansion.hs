@@ -24,10 +24,11 @@ import CAR.Types
 
 import WriteRanking
 
-opts :: Parser (FilePath, FilePath)
+opts :: Parser (FilePath, FilePath, FilePath)
 opts =
-    (,)
-    <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
+    (,,)
+    <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
+    <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
 
 
@@ -131,7 +132,7 @@ subsetOfUniverseGraph universe nodeset =
 
 main :: IO ()
 main = do
-    (inputFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
+    (articlesFile, outlinesFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
     pages <- decodeCborList <$> BSL.readFile inputFile
 
 
