@@ -4,8 +4,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveFunctor #-}
 
-import Data.List (sortBy)
-import Data.Ord (comparing)
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
@@ -17,12 +15,14 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Sequence as Seq
+import qualified Data.Text as T
 
 import Dijkstra
 import PageRank
 import CAR.Utils
 import CAR.Types
 
+import WriteRanking
 
 opts :: Parser (FilePath, FilePath)
 opts =
@@ -131,11 +131,9 @@ subsetOfUniverseGraph universe nodeset =
 
 main :: IO ()
 main = do
-    (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
+    (inputFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
     pages <- decodeCborList <$> BSL.readFile inputFile
---     withFile outputFile WriteMode $ \h ->
---         BSL.hPutStr h $ Galago.toWarc
---             $ map toGalagoDoc
+
 
     let universeGraph :: UniverseGraph
         universeGraph = hashUniverseGraph pages
@@ -164,7 +162,7 @@ main = do
 --             [ (sourceId, [ (targetId, 1)
 --                          | (targetId, w) <- outEdges
 --                          ]
---               )
+--             queryId)  )
 --             | (sourceId, outEdges) <- wHyperGraph
 --             ]
 
@@ -177,19 +175,29 @@ main = do
     let graph = wHyperGraphToGraph wHyperGraph
 
 
-    putStrLn $ "\n\nPageRank on weighted graph: \n" <> unlines (take 20 $ map show $ rankByPageRank graph 0.15 20)
+--     putStrLn $ "\n\nPageRank on weighted graph: \n" <> unlines (take 20 $ map show $ toRanking $ rankByPageRank graph 0.15 20)
+--
+--     putStrLn $ "\n\nPageRank unweighted: \n" <> unlines (take 20 $ map show $ toRanking $ rankByPageRank (wHyperGraphToGraph unwGraph) 0.15 20)
+--
+--     putStrLn $ "\n\nshortest path ranking: \n" <> unlines (take 20 $ map show $ toRanking $ rankByShortestPaths (coerce graph) (toList seeds) )
+--
+--     putStrLn $ "\n\nunweighted shortest path: \n" <> unlines (take 20 $ map show $ toRanking $ rankByShortestPaths (coerce $ wHyperGraphToGraph unwGraph) (toList seeds) )
 
-    putStrLn $ "\n\nPageRank unweighted: \n" <> unlines (take 20 $ map show $ rankByPageRank (wHyperGraphToGraph unwGraph) 0.15 20)
+    let write runname ranking =
+          writeEntityRanking (outputFilePrefix ++ runname ++ ".run") (T.pack runname) (T.pack "Spent%20nuclear%20fuel") $ ranking
 
-    putStrLn $ "\n\nshortest path ranking: \n" <> unlines (take 20 $ map show $ rankByShortestPaths (coerce graph) (toList seeds) )
+        ugraph = wHyperGraphToGraph unwGraph
 
-    putStrLn $ "\n\nunweighted shortest path: \n" <> unlines (take 20 $ map show $ rankByShortestPaths (coerce $ wHyperGraphToGraph unwGraph) (toList seeds) )
+    write "w-pageRank" $ rankByPageRank graph 0.15 20
+    write "u-pageRank" $ rankByPageRank ugraph 0.15 20
+    write "w-path"     $ rankByShortestPaths (coerce graph) (toList seeds)
+    write "u-path"     $ rankByShortestPaths (coerce ugraph) (toList seeds)
 
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations =
   let pr = (!! iterations)  $ PageRank.pageRank teleport graph
-      prRanking  = toRanking $ PageRank.toEntries $ pr
+      prRanking  =  PageRank.toEntries $ pr
   in prRanking
 
 
@@ -201,14 +209,8 @@ rankByShortestPaths graph seeds =
                          , n2 <- toList seeds
                          ]
 
-        pathRanking = toRanking $ shortestPathsToNodeScores shortestPaths
+        pathRanking = shortestPathsToNodeScores shortestPaths
     in pathRanking
-
-
-toRanking ::  [(PageId, Double)] -> [(PageId, Double)]
-toRanking =
-    sortBy (flip $ comparing snd)
-
 takeMiddle :: Seq.Seq a -> Seq.Seq a
 takeMiddle s =
     case Seq.viewl s of

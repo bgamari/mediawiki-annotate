@@ -192,6 +192,7 @@ executable trec-car-graph-expansion
   main-is:             GraphExpansion.hs
   other-modules:       Dijkstra
                        PageRank
+                       WriteRanking
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
