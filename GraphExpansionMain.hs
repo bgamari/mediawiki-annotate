@@ -4,7 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveTraversable #-}
 
-
+import Control.Monad (when)
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Coerce
@@ -119,6 +119,9 @@ main = do
     handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) methodNames
 
     forM_ queriesToSeedEntities $ \query -> do
+        when (null $ queryDocLeadEntities query) $
+            putStrLn $ "Query with no lead entities: "++show query
+
         let (queryId, rankings) = computeRankingsForQuery query 3 universeGraph binarySymmetricGraph
             formattedRankings :: Methods TL.Text
             formattedRankings =
@@ -132,4 +135,7 @@ main = do
                  TL.hPutStr
              <$> handles
              <*> formattedRankings
+
         sequence_ actions
+
+    mapM_ hClose handles
