@@ -7,18 +7,11 @@ module ExtractKnowledgeBase where
 
 import Control.Exception (assert)
 import Data.Monoid hiding (All, Any)
-import System.IO
 
-import Options.Applicative
 import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.Map.Strict as M
 import qualified Data.Text as T
--- import qualified Data.Text.Lazy as TL
--- import qualified Data.Text.Lazy.Encoding as TL
--- import qualified Data.Text.Lazy.Builder as TB
--- import qualified Data.ByteString.Lazy as BSL
 import Data.Maybe
 
 import CAR.Utils
