@@ -24,6 +24,7 @@ import Data.Maybe
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
 import qualified Data.Text as T
+import qualified Data.Set as S
 import Data.Binary.Serialise.CBOR
 import GHC.Generics
 

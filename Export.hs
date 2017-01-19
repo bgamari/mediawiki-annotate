@@ -7,6 +7,7 @@ import System.IO
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import qualified Data.ByteString.Builder as BSB
 import System.FilePath
 
