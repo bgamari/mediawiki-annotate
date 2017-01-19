@@ -26,48 +26,48 @@ import CAR.Types
 
 import WriteRanking
 
-data KbDoc = KbDoc { kbDocParagraphId :: ParagraphId
-                   , kbDocArticleId :: PageId
-                   , kbDocSourceEntityId :: PageId
-                   , kbDocOutlinkIds ::  [PageId]
+data EdgeDoc = EdgeDoc { edgeDocParagraphId :: ParagraphId
+                   , edgeDocArticleId :: PageId
+                   , edgeDocSourceEntityId :: PageId
+                   , edgeDocOutlinkIds ::  [PageId]
                    }
            deriving Show
 
 
-transformContent :: Page -> [KbDoc]
+transformContent :: Page -> [EdgeDoc]
 transformContent (Page pageName' pageId pageSkeleta) =
     foldMap go pageSkeleta
   where
     pageName = normTargetPageName pageName'
-    go :: PageSkeleton -> [KbDoc]
+    go :: PageSkeleton -> [EdgeDoc]
     go (Section heading _ children) =
        concatMap go  children
     go (Para paragraph) =
       [convertPara paragraph ]
 
-    convertPara :: Paragraph -> KbDoc
+    convertPara :: Paragraph -> EdgeDoc
     convertPara paragraph =
       let
-        kbDocParagraphId    = paraId $ paragraph
-        kbDocArticleId      = pageId
-        kbDocSourceEntityId = pageNameToId pageName
-        kbDocOutlinks       = fmap (first normTargetPageName) $ paraLinks $ paragraph
-        kbDocOutlinkIds     = fmap (pageNameToId . fst) $ kbDocOutlinks
-      in KbDoc {..}
+        edgeDocParagraphId    = paraId $ paragraph
+        edgeDocArticleId      = pageId
+        edgeDocSourceEntityId = pageNameToId pageName
+        edgeDocOutlinks       = fmap (first normTargetPageName) $ paraLinks $ paragraph
+        edgeDocOutlinkIds     = fmap (pageNameToId . fst) $ edgeDocOutlinks
+      in EdgeDoc {..}
 
 
-dropKbDocsNoLinks :: [KbDoc] -> [KbDoc]
-dropKbDocsNoLinks =
-    filter (\kbDoc -> not ( null (kbDocOutlinkIds $kbDoc)))
+dropEdgeDocsNoLinks :: [EdgeDoc] -> [EdgeDoc]
+dropEdgeDocsNoLinks =
+    filter (\edgeDoc -> not ( null (edgeDocOutlinkIds $edgeDoc)))
 
-hashEdgeNodes :: KbDoc -> [(PageId, [KbDoc])]
-hashEdgeNodes kbDoc =
-  [(kbDocSourceEntityId $kbDoc, [kbDoc])] ++ [(target, [kbDoc])  | target <- kbDocOutlinkIds $kbDoc]
+hashEdgeNodes :: EdgeDoc -> [(PageId, [EdgeDoc])]
+hashEdgeNodes edgeDoc =
+  [(edgeDocSourceEntityId $edgeDoc, [edgeDoc])] ++ [(target, [edgeDoc])  | target <- edgeDocOutlinkIds $edgeDoc]
 
-type UniverseGraph = HM.HashMap PageId [KbDoc]
+type UniverseGraph = HM.HashMap PageId [EdgeDoc]
 hashUniverseGraph :: [Page] -> UniverseGraph
 hashUniverseGraph pages = HM.fromListWith (++) $ foldMap hashEdgeNodes
-      $ foldMap ( dropKbDocsNoLinks . transformContent)
+      $ foldMap ( dropEdgeDocsNoLinks . transformContent)
       $ pages
 
 
@@ -76,7 +76,7 @@ type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
 
 universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
 universeToBinaryGraph universeGraph =
-  fmap (foldMap (\kbDoc -> HS.fromList $ [kbDocSourceEntityId $ kbDoc] ++ (kbDocOutlinkIds $kbDoc))) $ universeGraph
+  fmap (foldMap (\edgeDoc -> HS.fromList $ [edgeDocSourceEntityId $ edgeDoc] ++ (edgeDocOutlinkIds $edgeDoc))) $ universeGraph
 
 
 expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
@@ -108,10 +108,10 @@ instance Num weight => Monoid (OutWHyperEdges weight) where
 
 
 
-countEdges :: (Num weight) => [KbDoc] -> OutWHyperEdges weight
-countEdges kbDocs =
-      foldMap (singleWHyperEdge . kbDocSourceEntityId) kbDocs
-   <> foldMap (foldMap singleWHyperEdge . kbDocOutlinkIds) kbDocs
+countEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
+countEdges edgeDocs =
+      foldMap (singleWHyperEdge . edgeDocSourceEntityId) edgeDocs
+   <> foldMap (foldMap singleWHyperEdge . edgeDocOutlinkIds) edgeDocs
 
 
 lookupNeighbors :: Monoid v =>  HM.HashMap PageId v -> PageId -> v

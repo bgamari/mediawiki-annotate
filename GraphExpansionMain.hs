@@ -2,26 +2,24 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveTraversable #-}
 
 
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
-import Data.Maybe
-import Data.Bifunctor
 import Data.Coerce
 import Options.Applicative
+import System.IO
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.Sequence as Seq
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+import qualified Data.Text.Lazy.IO as TL
 
-import Dijkstra
-import PageRank
-import CAR.Utils
 import CAR.Types
+import qualified ExtractKnowledgeBase as KB
 
 import WriteRanking
 
@@ -36,67 +34,102 @@ opts =
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
 
 
-main :: IO ()
-main = do
-    (articlesFile, outlinesFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
-    pages <- decodeCborList <$> BSL.readFile articlesFile
+data QueryDoc = QueryDoc { queryDocQueryId :: PageId
+                         , queryDocQueryText :: PageName
+                         , queryDocLeadEntities ::  HS.HashSet PageId
+                         }
+           deriving Show
 
+pagesToLeadEntities :: [Page] -> [QueryDoc]
+pagesToLeadEntities pages =
+        map (\page -> let kbDoc = KB.transformContent inlinkCounts page
+                      in QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
+                                  , queryDocQueryText    = pageName page
+                                  , queryDocLeadEntities = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
+                                  }
+            )
 
-    let universeGraph :: UniverseGraph
-        universeGraph = hashUniverseGraph pages
+        $ pages
+      where
+        inlinkInfo   = KB.collectInlinkInfo pages
+        inlinkCounts = KB.resolveRedirects inlinkInfo
+        inlinkTotals = mconcat $ HM.elems inlinkCounts
 
-    let binarySymmetricGraph :: BinarySymmetricGraph
-        binarySymmetricGraph = universeToBinaryGraph universeGraph
+data Methods a = Methods { pageRankU, pageRankW, pathU, pathW :: a }
+               deriving (Show, Functor, Foldable, Traversable)
 
-    -- Todo do for each query:
+instance Applicative Methods where
+    pure x = Methods x x x x
+    Methods a b c d <*> Methods w x y z =
+        Methods (a w) (b x) (c y) (d z)
+
+methodNames :: Methods String
+methodNames = Methods { pageRankU = "page-rank-u"
+                      , pageRankW = "page-rank-w"
+                      , pathU     = "path-u"
+                      , pathW     = "path-w"
+                      }
+
+computeRankingsForQuery :: QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
+                        -> (PageId, Methods [(PageId, Double)])
+computeRankingsForQuery queryDoc radius universeGraph binarySymmetricGraph =
     let seeds :: HS.HashSet PageId
-        seeds = HS.fromList [ "Thorium", "Plutonium",  "Burnup"]
---         seeds = HS.fromList [ "Cladding%20(nuclear%20fuel)"]
+        seeds = queryDocLeadEntities $ queryDoc
+        queryId = queryDocQueryId $ queryDoc
 
-    let nodeSet = expandNodesK binarySymmetricGraph seeds 1
+        nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
-
-    let universeSubset ::  HM.HashMap PageId [KbDoc]
+        universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset =  subsetOfUniverseGraph universeGraph $ HS.toList nodeSet
         -- filter universe to nodeSet
         -- then turn into Hyperedges
 
-    let wHyperGraph :: WHyperGraph Double
+        wHyperGraph :: WHyperGraph Double
         wHyperGraph = fmap countEdges $ universeSubset
 
         unwGraph =
             fmap (fmap (const 1)) $ wHyperGraph
---             [ (sourceId, [ (targetId, 1)
---                          | (targetId, w) <- outEdges
---                          ]
---             queryId)  )
---             | (sourceId, outEdges) <- wHyperGraph
---             ]
 
 
-    putStrLn $ "\nnode set:"
-    print    $ nodeSet
-    putStrLn $ "\nhyper graph:"
-    print    $ wHyperGraph
-
-    let graph = wHyperGraphToGraph wHyperGraph
-
-
---     putStrLn $ "\n\nPageRank on weighted graph: \n" <> unlines (take 20 $ map show $ toRanking $ rankByPageRank graph 0.15 20)
---
---     putStrLn $ "\n\nPageRank unweighted: \n" <> unlines (take 20 $ map show $ toRanking $ rankByPageRank (wHyperGraphToGraph unwGraph) 0.15 20)
---
---     putStrLn $ "\n\nshortest path ranking: \n" <> unlines (take 20 $ map show $ toRanking $ rankByShortestPaths (coerce graph) (toList seeds) )
---
---     putStrLn $ "\n\nunweighted shortest path: \n" <> unlines (take 20 $ map show $ toRanking $ rankByShortestPaths (coerce $ wHyperGraphToGraph unwGraph) (toList seeds) )
-
-    let write runname ranking =
-          writeEntityRanking (outputFilePrefix ++ runname ++ ".run") (T.pack runname) (T.pack "Spent%20nuclear%20fuel") $ ranking
-
+        graph = wHyperGraphToGraph wHyperGraph
         ugraph = wHyperGraphToGraph unwGraph
 
-    write "w-pageRank" $ rankByPageRank graph 0.15 20
-    write "u-pageRank" $ rankByPageRank ugraph 0.15 20
-    write "w-path"     $ rankByShortestPaths (coerce graph) (toList seeds)
-    write "u-path"     $ rankByShortestPaths (coerce ugraph) (toList seeds)
+        rankings = Methods { pageRankW = rankByPageRank graph 0.15 20
+                           , pageRankU = rankByPageRank ugraph 0.15 20
+                           , pathW     = rankByShortestPaths (coerce graph) (toList seeds)
+                           , pathU     = rankByShortestPaths (coerce ugraph) (toList seeds)
+                           }
 
+    in (queryId, rankings)
+
+main :: IO ()
+main = do
+    (articlesFile, queryFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
+    pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
+
+    let universeGraph :: UniverseGraph
+        universeGraph = hashUniverseGraph pagesForLinkExtraction
+
+    let binarySymmetricGraph :: BinarySymmetricGraph
+        binarySymmetricGraph = universeToBinaryGraph universeGraph
+
+
+    queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
+
+    handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) methodNames
+
+    forM_ queriesToSeedEntities $ \query -> do
+        let (queryId, rankings) = computeRankingsForQuery query 3 universeGraph binarySymmetricGraph
+            formattedRankings :: Methods TL.Text
+            formattedRankings =
+                WriteRanking.formatEntityRankings
+                    <$> fmap T.pack methodNames
+                    <*> pure (T.pack $ unpackPageId queryId)
+                    <*> rankings
+
+            actions :: Methods (IO ())
+            actions =
+                 TL.hPutStr
+             <$> handles
+             <*> formattedRankings
+        sequence_ actions

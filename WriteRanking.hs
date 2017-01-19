@@ -6,7 +6,7 @@ import Data.Ord (comparing)
 import Data.List (sortBy, intersperse)
 
 import qualified Data.Text as T
-import qualified Data.Text.Lazy.IO as TL
+import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Text.Lazy.Builder.RealFloat as TB
 import qualified Data.Text.Lazy.Builder.Int as TB
@@ -15,16 +15,15 @@ import CAR.Types
 
 rankingLength = 100
 
-writeEntityRanking :: FilePath -> T.Text -> T.Text -> [(PageId, Double)] -> IO ()
-writeEntityRanking outputFile runName queryId scoredItems =
-    TL.writeFile outputFile
-        $ TB.toLazyText
-        $ mconcat
-        $ intersperse "\n"
-        $ zipWith formatEntry [1..]
-        $ take rankingLength
-        $ toRanking
-        $ scoredItems
+formatEntityRankings :: T.Text -> T.Text -> [(PageId, Double)] -> TL.Text
+formatEntityRankings runName queryId scoredItems =
+      TB.toLazyText
+    $ mconcat
+    $ intersperse "\n"
+    $ zipWith formatEntry [1..]
+    $ take rankingLength
+    $ toRanking
+    $ scoredItems
   where formatEntry :: Int -> (PageId, Double) -> TB.Builder
         formatEntry rank (element, score) =
             mconcat
