@@ -50,21 +50,33 @@ relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
 
 pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n)
          => a -> Graph n a -> [Eigenvector n a]
-pageRank teleportation graph =
-    let (adj, nodeRange, toNode, fromNode) = weightedAdjacency graph
+pageRank alpha graph@(Graph nodeMap) =
+    let (nodeRange, toNode, fromNode) = computeNodeMapping graph
         numNodes = rangeSize nodeRange
-        mat = addTeleportation nodeRange teleportation
-              $ normRows nodeRange
-              $ adj
 
         initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRange []
 
+        -- normalized flow of nodes flowing into each node
+        inbound :: A.Array NodeId [(NodeId, a)]
+        inbound = A.accumArray (++) [] nodeRange
+                  [ (fromNode v, [(fromNode u, weightUV / weightUSum)])
+                  | (u, outEdges) <- HM.toList nodeMap
+                  , let !weightUSum = sum $ map snd outEdges
+                  , (v, weightUV) <- outEdges
+                  ]
+
         mult :: A.UArray NodeId a -> A.UArray NodeId a
         mult arr = A.accumArray (+) 0 nodeRange
-                   [ (i, (mat A.! (j,i)) * (arr A.! j))
-                   | i <- range nodeRange
-                   , j <- range nodeRange
+                   [ (v, teleportationSum + sumU)
+                   | (v, inEdges) <- A.assocs inbound
+                   , let sumU = sum [ aU * normWeight * (1 - alpha)
+                                    | (u, normWeight) <- inEdges
+                                    , let aU = arr A.! u
+                                    ]
+                         teleportationSum = alpha / realToFrac numNodes * c
                    ]
+          where
+            !c = sum $ A.elems arr
 
     in map (Eigenvector fromNode toNode)
        $ initial : iterate (mult) initial  -- normalization should be optional, but we are paranoid.
@@ -111,14 +123,14 @@ normRows nodeRange trans =
              ]
 
 
-weightedAdjacency :: forall n a. (A.IArray A.UArray a, Eq n, Hashable n, Num a)
-          => Graph n a
-          -> ( Transition a
-             , (NodeId, NodeId)
-             , NodeId -> n
-             , n -> NodeId )
-weightedAdjacency g@(Graph nodeMap) =
-    (arr, nodeRange, toNode, fromNode)
+computeNodeMapping
+    :: forall n a. (A.IArray A.UArray a, Eq n, Hashable n, Num a)
+    => Graph n a
+    -> ( (NodeId, NodeId)
+       , NodeId -> n
+       , n -> NodeId )
+computeNodeMapping g@(Graph nodeMap) =
+    (nodeRange, toNode, fromNode)
   where
     allNodes = nodes g
     minNodeId = NodeId 0
@@ -132,27 +144,6 @@ weightedAdjacency g@(Graph nodeMap) =
 
     toNode = (toNodeMap A.!)
     fromNode n = fromMaybe (error "PageRank.adjacency.fromNode") $ HM.lookup n fromNodeMap
-
-    g' :: HM.HashMap n (HM.HashMap n a)
-    g' = fmap HM.fromList nodeMap
-    !arr = A.array ((minNodeId, minNodeId), (maxNodeId, maxNodeId))
-                   [ ((i,j), weightIJ)
-                   | (i, nodeI) <- zip [minNodeId..maxNodeId] (HS.toList allNodes)
-                   , (j, nodeJ) <- zip [minNodeId..maxNodeId] (HS.toList allNodes)
-                   , let weightIJ = fromMaybe 0 $ HM.lookup nodeI g' >>= HM.lookup nodeJ  --  get the weight of edge i -> j
-                   -- HM.lookup nodeI g' ..  means out-edges of node i  -- as a hashmap
-                   -- then lookup nodeJ in that hashmap to get the weights
-                   ]
-    -- spelling out the >>= stuff would result in this:
---     getWeight :: n -> n -> a
---     getWeight nodeI nodeJ =
---         case  HM.lookup nodeI g' of
---           Just outedges ->
---             case HM.lookup nodeJ outedges of
---               Just weight -> weight
---               Nothing -> 0
---           Nothing -> 0
-
 
 
 test :: Graph Char Double
