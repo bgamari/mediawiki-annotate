@@ -55,10 +55,9 @@ data LinkDoc = LinkDoc { linkDocParagraphId :: ParagraphId
 -- todo handle links to Disambiguation pages and redirects
 
 transformContent :: Page -> [LinkDoc]
-transformContent (Page pageName' pageId pageSkeleta) =
+transformContent (Page pageName pageId pageSkeleta) =
     foldMap (go mempty) pageSkeleta
   where
-    pageName = normTargetPageName pageName'
     go :: DList.DList SectionHeading -> PageSkeleton -> [LinkDoc]
     go parentHeadings (Section heading _ children) =
       let parentHeadings' = parentHeadings `DList.snoc` heading
@@ -77,7 +76,7 @@ transformContent (Page pageName' pageId pageSkeleta) =
         linkDocSectionPath    = sectionPath
         linkDocCategories     = pageCategories (Page pageName pageId pageSkeleta)
         linkDocParagraph      = paragraph
-        linkDocOutlinks       = fmap (first normTargetPageName) $ paraLinks $ paragraph
+        linkDocOutlinks       = paraLinks $ paragraph
         linkDocOutlinkIds     = fmap (pageNameToId . fst) $ linkDocOutlinks
       in LinkDoc {..}
 

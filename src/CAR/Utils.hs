@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module CAR.Utils where
 
 import Data.Maybe
@@ -7,7 +9,7 @@ import CAR.Types
 pageRedirect :: Page -> Maybe PageName
 pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : rest)) : _})
   | T.pack "#redirect" `T.isPrefixOf` T.toCaseFold (T.stripStart t)
-  , (ParaLink target _ _) : _ <- rest = Just $ linkTargetPage target
+  , (ParaLink {..}) : _ <- rest = Just paraLinkTarget
 pageRedirect _ = Nothing
 
 pageIsDisambiguation :: Page -> Bool
@@ -20,8 +22,8 @@ pageContainsText str = any goSkeleton . pageSkeleton
     goSkeleton (Section _ _ children) = any goSkeleton children
     goSkeleton (Para (Paragraph _ bodies)) = any goParaBody bodies
 
-    goParaBody (ParaLink _ _ t) = str `T.isInfixOf` t
-    goParaBody (ParaText t)     = str `T.isInfixOf` t
+    goParaBody (ParaLink {..}) = str `T.isInfixOf` paraLinkAnchor
+    goParaBody (ParaText t)    = str `T.isInfixOf` t
 
 pageCategories :: Page -> [T.Text]
 pageCategories = mapMaybe isCategoryTag . pageLinkTargets
@@ -46,7 +48,7 @@ paraLinks (Paragraph _ bodies) =
 
 paraBodyLinks :: ParaBody -> [(PageName, T.Text)]         -- todo T.Text should be PageName
 paraBodyLinks (ParaText text) = []
-paraBodyLinks (ParaLink target _ anchor) = [(linkTargetPage target, anchor)]
+paraBodyLinks (ParaLink {..}) = [(paraLinkTarget, paraLinkAnchor)]
 
 pageSkeletonText :: PageSkeleton -> [T.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
@@ -55,5 +57,5 @@ pageSkeletonText (Para para) = [ paraToText para ]
 paraToText :: Paragraph -> T.Text
 paraToText (Paragraph  _ bodies) =
     T.concat $ fmap toText bodies
-  where toText (ParaText text)     = text
-        toText (ParaLink _ _ text) = text
+  where toText (ParaText text)       = text
+        toText (ParaLink _ _ _ text) = text

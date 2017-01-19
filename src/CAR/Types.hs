@@ -110,7 +110,8 @@ data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
 instance CBOR.Serialise PageSkeleton
 
 data ParaBody = ParaText !T.Text
-              | ParaLink { paraLinkTarget   :: !LinkTarget
+              | ParaLink { paraLinkTarget   :: !PageName
+                         , paraLinkSection  :: !(Maybe T.Text)
                          , paraLinkTargetId :: !PageId
                          , paraLinkAnchor   :: !T.Text
                          }
@@ -153,7 +154,7 @@ prettyPage linkStyle (Page (PageName name) _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
             ++ map (prettySkeleton linkStyle) skeleton
 
-type LinkStyle = LinkTarget -> T.Text -> String
+type LinkStyle = PageName -> Maybe T.Text -> T.Text -> String
 
 prettySkeleton :: LinkStyle -> PageSkeleton -> String
 prettySkeleton renderLink = go 1
@@ -171,10 +172,10 @@ prettyParagraph renderLink (Paragraph paraId bodies) =
     "{" ++ unpackParagraphId paraId ++ "} " ++ concatMap go bodies ++ "\n"
   where
     go (ParaText t) = T.unpack t
-    go (ParaLink name section anchor) = renderLink name anchor
+    go (ParaLink name section _ anchor) = renderLink name section anchor
 
 withLink :: LinkStyle
-withLink (LinkTarget (PageName name) section) anchor =
+withLink (PageName name) section anchor =
     "["<>T.unpack anchor<>"]("<>T.unpack name<>msection<>")"
   where
     msection
@@ -182,11 +183,11 @@ withLink (LinkTarget (PageName name) section) anchor =
       | otherwise         = mempty
 
 anchorOnly :: LinkStyle
-anchorOnly _ anchor = T.unpack anchor
+anchorOnly _ _ anchor = T.unpack anchor
 
 paraBodiesToId :: [ParaBody] -> ParagraphId
 paraBodiesToId =
     ParagraphId . SBS.toShort . Base16.encode . SHA.finalize . foldl' SHA.update SHA.init . map toBS
   where
-    toBS (ParaText t)     = TE.encodeUtf8 t
-    toBS (ParaLink _ _ t) = TE.encodeUtf8 t
+    toBS (ParaText t)       = TE.encodeUtf8 t
+    toBS (ParaLink _ _ _ t) = TE.encodeUtf8 t

@@ -91,7 +91,7 @@ toPage WikiDoc{..} =
              , pageId       = pageNameToId name
              , pageSkeleton = docsToSkeletons contents
              }
-      where name = PageName $ TE.decodeUtf8 docTitle
+      where name = normPageName $ PageName $ TE.decodeUtf8 docTitle
 
 docsToSkeletons :: [Doc] -> [PageSkeleton]
 docsToSkeletons =
@@ -299,9 +299,11 @@ toParaBody (InternalLink target parts)
   , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
-  = let target' = target { linkTargetPage = normPageName $ linkTargetPage target }
-        targetId = pageNameToId $ linkTargetPage target'
-    in Just [ParaLink target' targetId (resolveEntities t)]
+  = let paraLinkTarget   = normPageName page
+        paraLinkSection  = linkTargetAnchor target
+        paraLinkTargetId = pageNameToId paraLinkTarget
+        paraLinkAnchor   = resolveEntities t
+    in Just [ParaLink {..}]
   where
     page = linkTargetPage target
     t = case parts of
