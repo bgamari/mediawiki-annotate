@@ -13,7 +13,6 @@ module PageRank
 import qualified Data.Array.Unboxed as A
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.IntMap as IntMap
 import Data.Hashable
 import Data.Ix
 import Data.Maybe
@@ -126,10 +125,12 @@ weightedAdjacency g@(Graph nodeMap) =
     maxNodeId = NodeId $ HS.size allNodes - 1
     nodeRange = (minNodeId, maxNodeId)
 
-    toNodeMap = IntMap.fromList $ zip [0..] (HS.toList allNodes)
+    toNodeMap :: A.Array NodeId n
+    toNodeMap = A.listArray nodeRange (HS.toList allNodes)
+    fromNodeMap :: HM.HashMap n NodeId
     fromNodeMap = HM.fromList $ zip (HS.toList allNodes) [NodeId 0..]
 
-    toNode (NodeId n) = fromMaybe (error "PageRank.adjacency.toNode") $ IntMap.lookup n toNodeMap
+    toNode = (toNodeMap A.!)
     fromNode n = fromMaybe (error "PageRank.adjacency.fromNode") $ HM.lookup n fromNodeMap
 
     g' :: HM.HashMap n (HM.HashMap n a)
