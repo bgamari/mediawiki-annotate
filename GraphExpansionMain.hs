@@ -7,6 +7,7 @@
 import Control.Monad (when)
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
+import Data.Coerce
 import Options.Applicative
 import System.IO
 
