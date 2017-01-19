@@ -29,10 +29,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
 
 
 transformContent :: Page -> [EdgeDoc]
-transformContent (Page pageName' pageId pageSkeleta) =
+transformContent (Page pageName pageId pageSkeleta) =
     foldMap go pageSkeleta
   where
-    pageName = normTargetPageName pageName'
     go :: PageSkeleton -> [EdgeDoc]
     go (Section heading _ children) =
        concatMap go  children
@@ -45,7 +44,7 @@ transformContent (Page pageName' pageId pageSkeleta) =
         edgeDocParagraphId    = paraId $ paragraph
         edgeDocArticleId      = pageId
         edgeDocSourceEntityId = pageNameToId pageName
-        edgeDocOutlinks       = fmap (first normTargetPageName) $ paraLinks $ paragraph
+        edgeDocOutlinks       = paraLinks $ paragraph
         edgeDocOutlinkIds     = fmap (pageNameToId . fst) $ edgeDocOutlinks
       in EdgeDoc {..}
 
