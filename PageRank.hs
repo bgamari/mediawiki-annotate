@@ -69,6 +69,7 @@ pageRank teleportation graph =
 
     in map (Eigenvector fromNode toNode)
        $ initial : iterate (mult) initial  -- normalization should be optional, but we are paranoid.
+{-# SPECIALISE pageRank :: (Eq n, Hashable n) => Double -> Graph n Double -> [Eigenvector n Double] #-}
 
 nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
 nodes = foldMap (HS.fromList . map fst) . getGraph
