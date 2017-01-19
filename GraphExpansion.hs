@@ -10,21 +10,15 @@ import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
-import Data.Coerce
-import Options.Applicative
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Sequence as Seq
-import qualified Data.Text as T
 
 import Dijkstra
 import PageRank
 import CAR.Utils
 import CAR.Types
-
-import WriteRanking
 
 data EdgeDoc = EdgeDoc { edgeDocParagraphId :: ParagraphId
                    , edgeDocArticleId :: PageId
