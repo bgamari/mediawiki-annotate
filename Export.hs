@@ -63,7 +63,7 @@ main = do
             let cutAnnotation (Annotation sectionPath paraId rel) =
                   Annotation (cutSectionPath sectionPath) paraId rel
             withFile relsFile WriteMode $ \h ->
-                  hPutStr h $ unlines $ map prettyAnnotation $ map cutAnnotation $ concatMap Exports.toAnnotations pagesToExport
+                  hPutStr h $ unlines $ map prettyAnnotation $ S.toList $ S.map cutAnnotation $ foldMap Exports.toAnnotations pagesToExport
             putStrLn "done"
 
 
@@ -74,7 +74,7 @@ main = do
             let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
                   EntityAnnotation (cutSectionPath sectionPath) entityId rel
             withFile relsFile WriteMode $ \h ->
-                  hPutStr h $ unlines $ map prettyEntityAnnotation $ map cutAnnotation $ concatMap Exports.toEntityAnnotations pagesToExport
+                  hPutStr h $ unlines $ map prettyEntityAnnotation $ S.toList $ S.map cutAnnotation $ foldMap Exports.toEntityAnnotations pagesToExport
             putStrLn "done"
 
 
@@ -92,53 +92,5 @@ main = do
     writeEntityAnnotations  (outpath <.> "toplevel.entity.qrels")  pagesToExport cutSectionPathTopLevel
 
 
-
---
---
---     putStr "Writing section relevance annotations..."
---     let relsFile = outpath <.> "hierarchical.qrels"
---     withFile relsFile WriteMode $ \h ->
---           hPutStr h $ unlines $ map prettyAnnotation $ concatMap Exports.toAnnotations pagesToExport
---     putStrLn "done"
---
---     putStr "Writing article relevance annotations..."
---     let relsFile = outpath <.> "article.qrels"
---     withFile relsFile WriteMode $ \h ->
---         let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
---               Annotation (SectionPath pageId mempty) paraId rel
---         in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toAnnotations pagesToExport
---     putStrLn "done"
---
---     putStr "Writing top level section relevance annotations..."
---     let relsFile = outpath <.> "toplevel.qrels"
---     withFile relsFile WriteMode $ \h ->
---           let cutSectionPath (Annotation (SectionPath pageId headinglist) paraId rel) =
---                Annotation (SectionPath pageId (take 1 headinglist)) paraId rel
---           in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toAnnotations pagesToExport
---     putStrLn "done"
---
---
---
---     putStr "Writing section relevance entity annotations..."
---     let relsFile = outpath <.> "hierarchical.entity.qrels"
---     withFile relsFile WriteMode $ \h ->
---           hPutStr h $ unlines $ map prettyAnnotation $ concatMap Exports.toEntityAnnotations pagesToExport
---     putStrLn "done"
---
---     putStr "Writing article relevance entity annotations..."
---     let relsFile = outpath <.> "article.entity.qrels"
---     withFile relsFile WriteMode $ \h ->
---         let cutSectionPath (EntityAnnotation (SectionPath pageId headinglist) entityId rel) =
---               EntityAnnotation (SectionPath pageId mempty) entityId rel
---         in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toEntityAnnotations pagesToExport
---     putStrLn "done"
---
---     putStr "Writing top level section entity relevance annotations..."
---     let relsFile = outpath <.> "toplevel.entity.qrels"
---     withFile relsFile WriteMode $ \h ->
---           let cutSectionPath (EntityAnnotation (SectionPath pageId headinglist) entityId rel) =
---                EntityAnnotation (SectionPath pageId (take 1 headinglist)) entityId rel
---           in hPutStr h $ unlines $ map prettyAnnotation $ map cutSectionPath $ concatMap Exports.toEntityAnnotations pagesToExport
---     putStrLn "done"
 
     return ()

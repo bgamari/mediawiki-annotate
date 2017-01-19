@@ -98,31 +98,31 @@ toParagraphs (Page name _ skeleton) =
     go (Section _ _ children) = concatMap go children
     go (Para para) = [para]
 
-toAnnotations :: Page -> [Annotation]
+toAnnotations :: Page -> S.Set Annotation
 toAnnotations (Page _ pageId skeleton) =
     -- recurse into sections, recursively collect section path, emit one annotation per paragraph
-    nub $ sort $ concatMap (go mempty) skeleton
+    foldMap (go mempty) skeleton
   where
-    go :: DList.DList HeadingId -> PageSkeleton -> [Annotation]
+    go :: DList.DList HeadingId -> PageSkeleton -> S.Set Annotation
     go parentIds (Section _ sectionId children) =
         let parentIds' = parentIds `DList.snoc` sectionId
-        in concatMap (go parentIds') children
+        in foldMap (go parentIds') children
     go parentIds (Para (Paragraph paraId body)) =
-        [Annotation sectionPath paraId Relevant]
+        S.singleton $ Annotation sectionPath paraId Relevant
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
 
-toEntityAnnotations :: Page -> [EntityAnnotation]
+toEntityAnnotations :: Page -> S.Set EntityAnnotation
 toEntityAnnotations (Page _ pageId skeleton) =
     -- recurse into sections, recursively collect section path, emit one entity annotation per link
-    nub $ sort $ concatMap (go mempty) skeleton
+    foldMap (go mempty) skeleton
   where
-    go :: DList.DList HeadingId -> PageSkeleton -> [EntityAnnotation]
+    go :: DList.DList HeadingId -> PageSkeleton -> S.Set EntityAnnotation
     go parentIds (Section _ sectionId children) =
         let parentIds' = parentIds `DList.snoc` sectionId
-        in concatMap (go parentIds') children
+        in foldMap (go parentIds') children
     go parentIds (Para paragraph) =
         let entities =  fmap fst $ paraLinks paragraph
-        in [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
+        in S.fromList $  [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
