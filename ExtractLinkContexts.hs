@@ -14,7 +14,6 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Lazy as BSL
 import Data.Maybe
-import Data.Bifunctor
 
 import CAR.Utils
 import CAR.Types
@@ -34,19 +33,19 @@ opts =
 data SectionPath' = SectionPath' { sectionPath'PageName :: PageName
                                  , sectionPath'Headings :: [SectionHeading]
                                  }
-               deriving (Show, Eq, Ord)
+               deriving (Show, Eq, Ord
+               )
 
 
-data LinkDoc = LinkDoc { linkDocParagraphId :: ParagraphId
-                   , linkDocArticleId :: PageId
-                   , linkDocSourceEntity :: PageName
-                   , linkDocSourceEntityId :: PageId
-                   , linkDocSectionPath :: SectionPath'
-                   , linkDocCategories :: [T.Text]
-                   , linkDocParagraph :: Paragraph
-                   , linkDocOutlinks ::  [(PageName, T.Text)]
-                   , linkDocOutlinkIds ::  [PageId]
-                   }
+data LinkDoc = LinkDoc { linkDocParagraphId    :: ParagraphId
+                       , linkDocArticleId      :: PageId
+                       , linkDocSourceEntity   :: PageName
+                       , linkDocSourceEntityId :: PageId
+                       , linkDocSectionPath    :: SectionPath'
+                       , linkDocCategories     :: [T.Text]
+                       , linkDocParagraph      :: Paragraph
+                       , linkDocOutlinks       ::  [Link]
+                       }
 
 -- pageNameToEntity :: PageName -> Entity
 -- pageNameToEntity pageName =
@@ -55,10 +54,9 @@ data LinkDoc = LinkDoc { linkDocParagraphId :: ParagraphId
 -- todo handle links to Disambiguation pages and redirects
 
 transformContent :: Page -> [LinkDoc]
-transformContent (Page pageName' pageId pageSkeleta) =
+transformContent (Page pageName pageId pageSkeleta) =
     foldMap (go mempty) pageSkeleta
   where
-    pageName = normTargetPageName pageName'
     go :: DList.DList SectionHeading -> PageSkeleton -> [LinkDoc]
     go parentHeadings (Section heading _ children) =
       let parentHeadings' = parentHeadings `DList.snoc` heading
@@ -77,8 +75,7 @@ transformContent (Page pageName' pageId pageSkeleta) =
         linkDocSectionPath    = sectionPath
         linkDocCategories     = pageCategories (Page pageName pageId pageSkeleta)
         linkDocParagraph      = paragraph
-        linkDocOutlinks       = fmap (first normTargetPageName) $ paraLinks $ paragraph
-        linkDocOutlinkIds     = fmap (pageNameToId . fst) $ linkDocOutlinks
+        linkDocOutlinks       = paraLinks $ paragraph
       in LinkDoc {..}
 
 
@@ -94,8 +91,8 @@ toGalagoDoc linkDoc =
                           , ("sourceEntity", T.pack $ unpackPageId $ linkDocSourceEntityId $ linkDoc)
                           , ("sectionpath", T.intercalate " / " $ sectionPath)
                           , ("categories", T.intercalate " " $ linkDocCategories $ linkDoc)
-                          , ("targetEntities", T.intercalate " " $ map (T.pack . unpackPageId) $ linkDocOutlinkIds $ linkDoc)
-                          , ("targetEntityAnchors", T.intercalate " " $ fmap snd $ linkDocOutlinks $ linkDoc )
+                          , ("targetEntities", T.intercalate " " $ map (T.pack . unpackPageId . linkTargetId) $ linkDocOutlinks $ linkDoc)
+                          , ("targetEntityAnchors", T.intercalate " " $ fmap linkAnchor $ linkDocOutlinks $ linkDoc )
                           ]
         phrase x = (TL.fromStrict x, Galago.DoNotTokenize)
         naturalText x = (TL.fromStrict x, Galago.DoTokenize)
@@ -108,10 +105,10 @@ toGalagoDoc linkDoc =
                           , ("section",              [naturalText $ T.unwords $ sectionPath])
                           , ("section-exact",        [phrase $ T.unwords $ sectionPath])
                           , ("paragraph",            [naturalText $ paraToText $ linkDocParagraph linkDoc])
-                          , ("targetentity",         fmap (naturalText . getPageName . fst) $ linkDocOutlinks $ linkDoc)
-                          , ("targetentity-exact",   fmap (phrase . getPageName . fst) $ linkDocOutlinks $ linkDoc)
-                          , ("anchor",               fmap (naturalText . T.unwords . T.lines . snd) $ linkDocOutlinks $ linkDoc)
-                          , ("anchor-exact",         fmap (phrase . T.unwords . T.lines . snd) $ linkDocOutlinks $ linkDoc)
+                          , ("targetentity",         fmap (naturalText . getPageName . linkTarget) $ linkDocOutlinks $ linkDoc)
+                          , ("targetentity-exact",   fmap (phrase . getPageName . linkTarget) $ linkDocOutlinks $ linkDoc)
+                          , ("anchor",               fmap (naturalText . T.unwords . T.lines . linkAnchor) $ linkDocOutlinks $ linkDoc)
+                          , ("anchor-exact",         fmap (phrase . T.unwords . T.lines . linkAnchor) $ linkDocOutlinks $ linkDoc)
                           ]
                        }
 
@@ -146,4 +143,4 @@ main = do
 --         key linkDoc = (linkDocParagraphId $ linkDoc, linkDocArticleId $ linkDoc)   -- if you nub across multiple articles
     dropLinkDocsNoLinks :: [LinkDoc] -> [LinkDoc]
     dropLinkDocsNoLinks =
-        filter (\linkDoc -> not ( null (linkDocOutlinkIds $linkDoc)))
+        filter (\linkDoc -> not ( null (linkDocOutlinks $ linkDoc)))

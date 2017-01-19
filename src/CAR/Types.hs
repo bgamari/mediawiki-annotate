@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module CAR.Types
     ( -- * Identifiers
       PageName(..)
+    , Link(..)
     , PageId(..), unpackPageId, pageNameToId
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
@@ -107,10 +109,23 @@ data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 
+data Link = Link { linkTarget   :: !PageName
+                 , linkSection  :: !(Maybe T.Text)
+                 , linkTargetId :: !PageId
+                 , linkAnchor   :: !T.Text
+                 }
+          deriving (Show, Generic)
+
+instance CBOR.Serialise Link where
+    encode (Link{..}) =
+           CBOR.encode linkTarget
+        <> CBOR.encode linkSection
+        <> CBOR.encode linkTargetId
+        <> CBOR.encode linkAnchor
+    decode = Link <$> CBOR.decode <*> CBOR.decode <*> CBOR.decode <*> CBOR.decode
+
 data ParaBody = ParaText !T.Text
-              | ParaLink { paraLinkTarget :: !PageName
-                         , paraLinkAnchor :: !T.Text
-                         }
+              | ParaLink !Link
               deriving (Show, Generic)
 instance CBOR.Serialise ParaBody
 
@@ -150,7 +165,7 @@ prettyPage linkStyle (Page (PageName name) _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
             ++ map (prettySkeleton linkStyle) skeleton
 
-type LinkStyle = PageName -> T.Text -> String
+type LinkStyle = Link -> String
 
 prettySkeleton :: LinkStyle -> PageSkeleton -> String
 prettySkeleton renderLink = go 1
@@ -168,17 +183,22 @@ prettyParagraph renderLink (Paragraph paraId bodies) =
     "{" ++ unpackParagraphId paraId ++ "} " ++ concatMap go bodies ++ "\n"
   where
     go (ParaText t) = T.unpack t
-    go (ParaLink name anchor) = renderLink name anchor
+    go (ParaLink l) = renderLink l
 
 withLink :: LinkStyle
-withLink (PageName name) anchor = "["<>T.unpack anchor<>"]("<>T.unpack name<>")"
+withLink (Link (PageName name) section _ anchor) =
+    "["<>T.unpack anchor<>"]("<>T.unpack name<>msection<>")"
+  where
+    msection
+      | Just s <- section = "#"<>T.unpack s
+      | otherwise         = mempty
 
 anchorOnly :: LinkStyle
-anchorOnly _ anchor = T.unpack anchor
+anchorOnly l = T.unpack $ linkAnchor l
 
 paraBodiesToId :: [ParaBody] -> ParagraphId
 paraBodiesToId =
     ParagraphId . SBS.toShort . Base16.encode . SHA.finalize . foldl' SHA.update SHA.init . map toBS
   where
-    toBS (ParaText t)   = TE.encodeUtf8 t
-    toBS (ParaLink _ t) = TE.encodeUtf8 t
+    toBS (ParaText t)  = TE.encodeUtf8 t
+    toBS (ParaLink l)  = TE.encodeUtf8 $ linkAnchor l

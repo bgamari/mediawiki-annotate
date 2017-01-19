@@ -49,7 +49,7 @@ instance B.Binary WikiDoc
 
 main :: IO ()
 main = do
-    (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
+    (_namespaces, docs) <- parseWikiDocs <$> BSL.getContents
     let parsed :: Producer (Either String (EncodedCbor Page)) IO ()
         parsed =
             CM.map (2*workers) workers
@@ -91,7 +91,7 @@ toPage WikiDoc{..} =
              , pageId       = pageNameToId name
              , pageSkeleton = docsToSkeletons contents
              }
-      where name = PageName $ TE.decodeUtf8 docTitle
+      where name = normPageName $ PageName $ TE.decodeUtf8 docTitle
 
 docsToSkeletons :: [Doc] -> [PageSkeleton]
 docsToSkeletons =
@@ -149,6 +149,12 @@ isXmlOpenClose _   _                     = False
 isXml tag (XmlTag tag' _ _) =
     T.toCaseFold tag == T.toCaseFold tag'
 isXml _   _              = False
+
+normPageName :: PageName -> PageName
+normPageName (PageName target) =
+    PageName $ normFirst target
+  where
+    normFirst t = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 t
 
 type TemplateTag = Text
 
@@ -285,7 +291,7 @@ toParaBody (Char x)        = Just [ParaText $ T.singleton x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
-toParaBody (InternalLink page parts)
+toParaBody (InternalLink target parts)
   | PageName page' <- page
   , "file:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
@@ -293,10 +299,16 @@ toParaBody (InternalLink page parts)
   , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
-  = Just [ParaLink page (resolveEntities t)]
-  where t = case parts of
-              [anchor] -> T.pack $ getAllText anchor
-              _        -> getPageName page
+  = let linkTarget   = normPageName page
+        linkSection  = linkTargetAnchor target
+        linkTargetId = pageNameToId linkTarget
+        linkAnchor   = resolveEntities t
+    in Just [ParaLink $ Link {..}]
+  where
+    page = linkTargetPage target
+    t = case parts of
+          [anchor] -> T.pack $ getAllText anchor
+          _        -> getPageName page
 toParaBody (ExternalLink _url (Just anchor))
   = Just [ParaText $ T.pack anchor]
 toParaBody _ = Nothing
@@ -307,7 +319,7 @@ getText (Char c)        = Just $ [c]
 getText (Bold xs)       = Just $ getAllText xs
 getText (Italic xs)     = Just $ getAllText xs
 getText (BoldItalic xs) = Just $ getAllText xs
-getText (InternalLink page [])    = Just $ T.unpack $ getPageName page
+getText (InternalLink target [])  = Just $ T.unpack $ getPageName $ linkTargetPage target
 getText (InternalLink _ (xs:_))   = Just $ getAllText xs
 getText (ExternalLink _ (Just s)) = Just s
 getText _               = Nothing
