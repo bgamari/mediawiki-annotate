@@ -53,8 +53,8 @@ skeletonToXml list =
 
     bodyToXml :: ParaBody -> TB.Builder
     bodyToXml (ParaText text) = " " <> TB.fromText (T.replace "\n" " " text) <> " "
-    bodyToXml (ParaLink (PageName pagename) anchor) =
-        " <link><target> "<>TB.fromText pagename<>" </target></link> "
+    bodyToXml (ParaLink link) =
+        " <link><target> "<>TB.fromText (getPageName $ linkTarget link)<>" </target></link> "
 
 
 

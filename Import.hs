@@ -299,11 +299,11 @@ toParaBody (InternalLink target parts)
   , "image:" `T.isPrefixOf` T.toCaseFold page'
   = Nothing
   | otherwise
-  = let paraLinkTarget   = normPageName page
-        paraLinkSection  = linkTargetAnchor target
-        paraLinkTargetId = pageNameToId paraLinkTarget
-        paraLinkAnchor   = resolveEntities t
-    in Just [ParaLink {..}]
+  = let linkTarget   = normPageName page
+        linkSection  = linkTargetAnchor target
+        linkTargetId = pageNameToId linkTarget
+        linkAnchor   = resolveEntities t
+    in Just [ParaLink $ Link {..}]
   where
     page = linkTargetPage target
     t = case parts of
