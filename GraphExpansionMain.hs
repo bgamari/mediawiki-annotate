@@ -138,8 +138,23 @@ top5Edges rankDocs query edgeDocs =
 
 
 -- | (source, target) edgeweight = sum _kbdocs rscore(kbdoc)
-rankWeightEdgeDocs :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
-rankWeightEdgeDocs rankDocs query edgeDocs =
+rankWeightEdgeDocsRecipRank :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
+rankWeightEdgeDocsRecipRank rankDocs query edgeDocs =
+      let !ranking = rankDocs query
+                  $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
+                  $ edgeDocs
+      in fold [ singleWHyperEdgeWithWeight (1.0/realToFrac rank) target
+              | ((edgeDoc, score), rank) <- zip ranking [(1::Int)..]
+              , target <- edgeDocNeighbors edgeDoc ]
+
+-- Todo clean up this mess
+
+rankWeightEdgeDocs = rankWeightEdgeDocsRecipRank
+
+
+-- | (source, target) edgeweight = sum _kbdocs rscore(kbdoc)
+rankWeightEdgeDocsScore :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
+rankWeightEdgeDocsScore rankDocs query edgeDocs =
       let !ranking = rankDocs query
                   $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
                   $ edgeDocs
@@ -203,7 +218,7 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
         methods :: Methods (Graph PageId Double -> [(PageId, Double)])
         methods = Methods { pageRank = \graph -> rankByPageRank graph 0.15 20
-                          , path     = \graph -> rankByShortestPaths (coerce graph) (toList seeds)
+                          , path     = \graph -> rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce graph) (toList seeds)
                           }
 
         rankings :: Rankings [(PageId, Double)]
