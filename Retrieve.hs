@@ -2,17 +2,19 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveFoldable #-}
 module Retrieve
-    ( Score
+    ( Term
     , TermCounts
     , Doc(..)
     , computeTermCounts
     , retrieve
+    , textToTokens'
     ) where
 
 import Numeric.Log (ln)
 import Data.Function (on)
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
+import Data.Monoid
 import Data.Functor.Identity
 import Data.Binary
 import Pipes
@@ -26,6 +28,7 @@ import SimplIR.TopK
 import SimplIR.Term as Term
 import SimplIR.Tokenise
 import SimplIR.Utils
+import SimplIR.Types
 
 newtype TermCounts = TermCounts (HM.HashMap Term Int)
                     deriving (Show)
@@ -58,22 +61,23 @@ textToTokens' = map Term.fromText . tokenise
 textToTokens :: TermFilter -> T.Text -> TermCounts
 textToTokens termFilter = foldMap oneTerm . filter termFilter . textToTokens'
 
-computeTermCounts :: T.Text -> [Doc doc T.Text] -> TermCounts
-computeTermCounts queryTerms = foldMap (foldMap $ textToTokens termFilter)
+computeTermCounts :: [Term] -> [Doc doc T.Text] -> TermCounts
+computeTermCounts queryTerms docs =
+    foldMap (foldMap $ textToTokens termFilter) docs
+    <> foldMap oneTerm queryTerms
   where
-    queryTermSet = HS.fromList $ map Term.fromText $ tokenise queryTerms
+    queryTermSet = HS.fromList $  queryTerms
     termFilter = (`HS.member` queryTermSet)
 
-retrieve :: TermCounts -> T.Text -> [Doc doc T.Text]
+retrieve :: TermCounts -> [Term] -> [Doc doc T.Text]
          -> [Doc doc Double]
-retrieve stats query docs =
+retrieve stats queryTerms docs =
         runIdentity
      $  foldProducer (Foldl.generalize $ topK 100)
      $  each docs
     >-> P.P.map (fmap $ textToTokens termFilter)
     >-> P.P.map (fmap (scoreDoc stats queryTerms))
   where
-    queryTerms = textToTokens' query
     queryTermSet = HS.fromList queryTerms
     termFilter = (`HS.member` queryTermSet)
 
@@ -81,14 +85,16 @@ retrieve stats query docs =
 scoreDoc :: TermCounts -> [Term] -> TermCounts
          -> Double
 scoreDoc (TermCounts stats) queryTerms =
-    \ (TermCounts tokens) ->
-      let docLength = toEnum $ sum tokens
-      in score docLength $ map (second realToFrac) $ HM.toList tokens
+    \ (TermCounts docTokens) ->
+      let docLength = toEnum $ sum docTokens
+      in score docLength $ map (second realToFrac) $ HM.toList docTokens
   where
-    score docLen = ln . queryLikelihood smoothing (zip queryTerms (repeat 1)) docLen
+    score :: DocumentLength -> [ (Term, Double) ] -> Double
+    score docLen docTerms =
+      ln $ queryLikelihood smoothing (zip queryTerms (repeat 1)) docLen docTerms
 
-    total = realToFrac $ sum stats
+    collectionLen = realToFrac $ sum stats
     termProb term =
-        maybe (error "didn't see term") (\x -> realToFrac x / total) $ HM.lookup term stats
+        maybe (error $ "didn't see term " ++ show term) (\x -> realToFrac x / collectionLen) $ HM.lookup term stats
     smoothing = Dirichlet 100 termProb
 

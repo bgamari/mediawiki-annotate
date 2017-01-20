@@ -38,15 +38,17 @@ opts =
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
                          , queryDocQueryText :: PageName
                          , queryDocLeadEntities ::  HS.HashSet PageId
+                         , queryDocRawTerms :: [Term]
                          }
            deriving Show
 
 pagesToLeadEntities :: [Page] -> [QueryDoc]
 pagesToLeadEntities pages =
         map (\page -> let kbDoc = KB.transformContent inlinkCounts page
-                      in QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
-                                  , queryDocQueryText    = pageName page
-                                  , queryDocLeadEntities = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
+                      in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
+                                  , queryDocQueryText      = pageName page
+                                  , queryDocLeadEntities   = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
+                                  , queryDocRawTerms       = textToTokens' $ getPageName $ pageName page
                                   }
             )
 
@@ -80,7 +82,7 @@ countEdges _rankDocs edgeDocs =
 
 -- | Only consider top 5 edgeDocs by query likelihood
 -- | Then: weight edges by number of (source, target) occurrences in edgeDocs
-top5Edges :: RankingFunction -> T.Text -> [EdgeDoc] -> OutWHyperEdges Double
+top5Edges :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
 top5Edges rankDocs query edgeDocs =
       foldMap (foldMap singleWHyperEdge . edgeDocNeighbors)
       $ fmap fst
@@ -91,7 +93,7 @@ top5Edges rankDocs query edgeDocs =
 
 
 -- | (source, target) edgeweight = sum _kbdocs rscore(kbdoc)
-rankWeightEdgeDocs :: RankingFunction -> T.Text -> [EdgeDoc] -> OutWHyperEdges Double
+rankWeightEdgeDocs :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
 rankWeightEdgeDocs rankDocs query edgeDocs =
       let ranking = rankDocs query
                   $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
@@ -104,7 +106,7 @@ rankWeightEdgeDocs rankDocs query edgeDocs =
 
 -- | Filter the whole graph by only considering edgeDocs in the top of the ranking
 rankFilterGraph :: RankingFunction
-                -> T.Text -> HM.HashMap PageId [EdgeDoc] -> HM.HashMap PageId [EdgeDoc]
+                -> [Term] -> HM.HashMap PageId [EdgeDoc] -> HM.HashMap PageId [EdgeDoc]
 rankFilterGraph rankDocs query graph =
     let edgeDocs = HS.toList $ HS.fromList $ fold graph -- all kbdocs in this graph
         topRankingEdgeDocs = fmap fst
@@ -115,7 +117,7 @@ rankFilterGraph rankDocs query graph =
 
     in edgeDocsToUniverseGraph topRankingEdgeDocs
 
-type RankingFunction = forall elem. T.Text -> [(elem, T.Text)] -> [(elem, Double)]
+type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
 
 computeRankingsForQuery :: RankingFunction
                         -> QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
@@ -124,7 +126,7 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
     let seeds :: HS.HashSet PageId
         seeds = queryDocLeadEntities $ queryDoc
         queryId = queryDocQueryId $ queryDoc
-        queryText =  getPageName $ queryDocQueryText $ queryDoc
+        queryTerms =  queryDocRawTerms $ queryDoc
 
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
@@ -138,9 +140,9 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
         -- then turn into Hyperedges
 
         wHyperGraph :: WHyperGraph Double
---         wHyperGraph = fmap countEdges $ rankFilterGraph queryText universeSubset  -- Todo Which one to use?
-        wHyperGraph = fmap (top5Edges rankDocs queryText) universeSubset                          -- Todo Which one to use?
---         wHyperGraph = rankWeightEdgeDocs queryText universeSubset                 -- Todo Which one to use?
+--         wHyperGraph = fmap countEdges $ rankFilterGraph queryTerms universeSubset  -- Todo Which one to use?
+        wHyperGraph = fmap (top5Edges rankDocs queryTerms) universeSubset                          -- Todo Which one to use?
+--         wHyperGraph = rankWeightEdgeDocs queryTerms universeSubset                 -- Todo Which one to use?
 
 
         unwGraph =
@@ -172,11 +174,16 @@ main = do
 
     queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
 
-    let queryTexts = T.unwords $ map (getPageName . queryDocQueryText) $ queriesToSeedEntities
-    let corpusStatistics = Retrieve.computeTermCounts queryTexts
+    let queryTermsAll = foldMap (queryDocRawTerms) $ queriesToSeedEntities
+    putStrLn $ "queryTermsAll " ++ show queryTermsAll
+
+    let corpusStatistics = Retrieve.computeTermCounts queryTermsAll
                           $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
                           $ emitEdgeDocs pagesForLinkExtraction
-        rankDoc q docs =
+
+    putStrLn $ "corpus statistics " ++ show corpusStatistics
+
+    let rankDoc q docs =
             map (\(Doc a b) -> (a,b))
             $ Retrieve.retrieve corpusStatistics q
             $ map (uncurry Doc) docs
@@ -187,6 +194,7 @@ main = do
         when (null $ queryDocLeadEntities query) $
             putStrLn $ "Query with no lead entities: "++show query
 
+        putStrLn $ "Processing query "++ show query
         let (queryId, rankings) = computeRankingsForQuery rankDoc query 3
                                   universeGraph binarySymmetricGraph
             formattedRankings :: Methods TL.Text
