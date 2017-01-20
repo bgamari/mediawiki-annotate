@@ -78,7 +78,9 @@ dijkstra graph =
               forM_ (getNeighbors graph u) $ \(v, len) -> do
                   distV <- lookupDistance v
                   let alt = distU <> Finite len
-                  if | alt < distV -> do
+                  if -- sanity check
+                     | alt < distU -> error "dijkstra: Saw decrease in distance"
+                     | alt < distV -> do
                          modify $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
                                           , sPSQ   = PSQ.insert v alt () (sPSQ s)
                                           }
@@ -136,17 +138,22 @@ lazyDijkstra graph =
         -- | Probe a neighbor @v@ of @u@
         tryNeighbor :: (n, Distance e) -> LS n e -> (n, e) -> LS n e
         tryNeighbor (u, distU) s (v, len)
+          | alt < distU
+          = error "lazyDijkstra: Saw decrease in distance"
+
           | alt < distV
           = s { lsAccum = HM.insert v (alt, [u]) (lsAccum s)
               , lsEmit  = PSQ.insert v alt [u] (lsEmit s)
               , lsTodo  = PSQ.insert v alt () (lsTodo s)
               }
+
           | alt == distV
           = let f (Just (_, ns)) = Just (alt, u:ns)
                 f Nothing        = error "lazyDijkstra: impossible"
             in s { lsAccum = HM.alter f v (lsAccum s)
                  , lsEmit  = snd $ PSQ.alter (((),) . f) v (lsEmit s)
                  }
+
           | otherwise
           = s
           where
