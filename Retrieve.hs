@@ -2,7 +2,8 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveFoldable #-}
 module Retrieve
-    ( Term
+    ( Score
+    ,Term
     , TermCounts
     , Doc(..)
     , computeTermCounts
@@ -17,8 +18,6 @@ import Data.Bifunctor
 import Data.Monoid
 import Data.Functor.Identity
 import Data.Binary
-import Pipes
-import qualified Pipes.Prelude as P.P
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
@@ -72,11 +71,10 @@ computeTermCounts queryTerms docs =
 retrieve :: TermCounts -> [Term] -> [Doc doc T.Text]
          -> [Doc doc Double]
 retrieve stats queryTerms docs =
-        runIdentity
-     $  foldProducer (Foldl.generalize $ topK 100)
-     $  each docs
-    >-> P.P.map (fmap $ textToTokens termFilter)
-    >-> P.P.map (fmap (scoreDoc stats queryTerms))
+    Foldl.fold (topK 100)
+    $ map (fmap (scoreDoc stats queryTerms))
+    $ map (fmap $ textToTokens termFilter)
+    $ docs
   where
     queryTermSet = HS.fromList queryTerms
     termFilter = (`HS.member` queryTermSet)
