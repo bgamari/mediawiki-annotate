@@ -13,10 +13,7 @@ import Numeric.Log (ln)
 import Data.Function (on)
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
-import Data.Functor.Identity
 import Data.Binary
-import Pipes
-import qualified Pipes.Prelude as P.P
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
@@ -25,7 +22,6 @@ import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Term as Term
 import SimplIR.Tokenise
-import SimplIR.Utils
 
 newtype TermCounts = TermCounts (HM.HashMap Term Int)
                     deriving (Show)
@@ -67,11 +63,10 @@ computeTermCounts queryTerms = foldMap (foldMap $ textToTokens termFilter)
 retrieve :: TermCounts -> T.Text -> [Doc doc T.Text]
          -> [Doc doc Double]
 retrieve stats query docs =
-        runIdentity
-     $  foldProducer (Foldl.generalize $ topK 100)
-     $  each docs
-    >-> P.P.map (fmap $ textToTokens termFilter)
-    >-> P.P.map (fmap (scoreDoc stats queryTerms))
+    Foldl.fold (topK 100)
+    $ map (fmap (scoreDoc stats queryTerms))
+    $ map (fmap $ textToTokens termFilter)
+    $ docs
   where
     queryTerms = textToTokens' query
     queryTermSet = HS.fromList queryTerms
@@ -91,4 +86,3 @@ scoreDoc (TermCounts stats) queryTerms =
     termProb term =
         maybe (error "didn't see term") (\x -> realToFrac x / total) $ HM.lookup term stats
     smoothing = Dirichlet 100 termProb
-
