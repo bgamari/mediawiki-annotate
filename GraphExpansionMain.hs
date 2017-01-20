@@ -202,8 +202,8 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                              , unweighted = wHyperGraphToGraph . fmap (fmap (const 1)) }
 
         methods :: Methods (Graph PageId Double -> [(PageId, Double)])
-        methods = Methods { pageRank = \graph -> trace "s1" $ rankByPageRank graph 0.15 20
-                          , path     = \graph -> trace "s3" $ rankByShortestPaths (coerce graph) (toList seeds)
+        methods = Methods { pageRank = \graph -> rankByPageRank graph 0.15 20
+                          , path     = \graph -> rankByShortestPaths (coerce graph) (toList seeds)
                           }
 
         rankings :: Rankings [(PageId, Double)]
