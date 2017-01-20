@@ -196,6 +196,7 @@ executable trec-car-graph-expansion
                        Dijkstra
                        PageRank
                        WriteRanking
+                       Retrieve
   ghc-options:         -Wall
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
@@ -208,5 +209,10 @@ executable trec-car-graph-expansion
                        hashable,
                        psqueues,
                        transformers,
+                       simplir,
+                       pipes,
+                       binary,
+                       log-domain,
+                       foldl,
                        trec-car-tools
   default-language:    Haskell2010
