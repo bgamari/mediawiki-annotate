@@ -13,7 +13,6 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Lazy as BSL
-import Data.Maybe
 
 import CAR.Utils
 import CAR.Types
