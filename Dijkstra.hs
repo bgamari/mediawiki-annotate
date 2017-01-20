@@ -79,7 +79,7 @@ dijkstra graph =
                   distV <- lookupDistance v
                   let alt = distU <> Finite len
                   if -- sanity check
-                     | alt < distU -> error "dijkstra: Saw decrease in distance"
+                     | alt <= distU -> error "dijkstra: Non-increasing distance"
                      | alt < distV -> do
                          modify $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
                                           , sPSQ   = PSQ.insert v alt () (sPSQ s)
@@ -138,8 +138,8 @@ lazyDijkstra graph =
         -- | Probe a neighbor @v@ of @u@
         tryNeighbor :: (n, Distance e) -> LS n e -> (n, e) -> LS n e
         tryNeighbor (u, distU) s (v, len)
-          | alt < distU
-          = error "lazyDijkstra: Saw decrease in distance"
+          | alt <= distU
+          = error "lazyDijkstra: Non-increasing distance"
 
           | alt < distV
           = s { lsAccum = HM.insert v (alt, [u]) (lsAccum s)
