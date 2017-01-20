@@ -1,12 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 
+import Debug.Trace
+
 import Control.Monad (when)
 import Data.Monoid hiding (All, Any)
+import Data.Functor.Compose
 import Data.Foldable
 import Data.Coerce
 import Options.Applicative
@@ -25,6 +30,7 @@ import qualified ExtractKnowledgeBase as KB
 import WriteRanking
 import Retrieve
 import GraphExpansion
+import Dijkstra (Graph)
 
 
 opts :: Parser (FilePath, FilePath, FilePath)
@@ -58,24 +64,63 @@ pagesToLeadEntities pages =
         inlinkCounts = KB.resolveRedirects inlinkInfo
         inlinkTotals = mconcat $ HM.elems inlinkCounts
 
-data Methods a = Methods { pageRankU, pageRankW, pathU, pathW :: a }
+type (:.) f g = Compose f g
+
+type Rankings = Methods :. (Weighted :. Graphs)
+
+liftMethods :: Methods a -> Rankings a
+liftMethods = Compose . fmap pure
+
+liftWeighteds :: Weighted a -> Rankings a
+liftWeighteds = Compose . pure . Compose . fmap pure
+
+liftGraphs :: Graphs a -> Rankings a
+liftGraphs = Compose . pure . Compose . pure
+
+data Methods a = Methods { pageRank, path :: a }
                deriving (Show, Functor, Foldable, Traversable)
 
 instance Applicative Methods where
-    pure x = Methods x x x x
-    Methods a b c d <*> Methods w x y z =
-        Methods (a w) (b x) (c y) (d z)
+    pure x = Methods x x
+    Methods a b <*> Methods w x = Methods (a w) (b x)
 
 methodNames :: Methods String
-methodNames = Methods { pageRankU = "page-rank-u"
-                      , pageRankW = "page-rank-w"
-                      , pathU     = "path-u"
-                      , pathW     = "path-w"
+methodNames = Methods { pageRank = "pr"
+                      , path     = "path"
                       }
 
+
+data Graphs a = Graphs { merelyCountEdges, countTop100Edges, top5 , rank100EdgesInGraph  :: a}
+                deriving (Show, Functor, Foldable, Traversable)
+
+
+instance Applicative Graphs where
+    pure x = Graphs x x x x
+    Graphs a b c d <*> Graphs w x y z =
+        Graphs (a w) (b x) (c y) (d z)
+
+graphNames :: Graphs String
+graphNames = Graphs { merelyCountEdges = "countEdges"
+                    , countTop100Edges = "countTop100Edges"
+                    , top5 = "top5"
+                    , rank100EdgesInGraph = "rank100EdgesInGraph"
+                    }
+
+data Weighted a = Weighted { weighted, unweighted :: a }
+                deriving (Show, Functor, Foldable, Traversable)
+
+
+instance Applicative Weighted where
+    pure x = Weighted x x
+    Weighted a b  <*> Weighted w x =
+        Weighted (a w) (b x)
+
+weightedNames :: Weighted String
+weightedNames = Weighted "weighted" "unweighted"
+
 -- | weight edges by number of (source,target) occurrences in edgeDocs
-countEdges :: RankingFunction -> [EdgeDoc] -> OutWHyperEdges Double
-countEdges _rankDocs edgeDocs =
+countEdges ::  [EdgeDoc] -> OutWHyperEdges Double
+countEdges edgeDocs =
       foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
 
 
@@ -95,7 +140,7 @@ top5Edges rankDocs query edgeDocs =
 -- | (source, target) edgeweight = sum _kbdocs rscore(kbdoc)
 rankWeightEdgeDocs :: RankingFunction -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
 rankWeightEdgeDocs rankDocs query edgeDocs =
-      let ranking = rankDocs query
+      let !ranking = rankDocs query
                   $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
                   $ edgeDocs
       in fold [ singleWHyperEdgeWithWeight score target
@@ -121,7 +166,7 @@ type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double
 
 computeRankingsForQuery :: RankingFunction
                         -> QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
-                        -> (PageId, Methods [(PageId, Double)])
+                        -> (PageId, Rankings [(PageId, Double)])
 computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGraph =
     let seeds :: HS.HashSet PageId
         seeds = queryDocLeadEntities $ queryDoc
@@ -140,24 +185,29 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
         -- then turn into Hyperedges
 
         wHyperGraph :: WHyperGraph Double
---         wHyperGraph = fmap countEdges $ rankFilterGraph queryTerms universeSubset  -- Todo Which one to use?
-        wHyperGraph = fmap (top5Edges rankDocs queryTerms) universeSubset                          -- Todo Which one to use?
---         wHyperGraph = rankWeightEdgeDocs queryTerms universeSubset                 -- Todo Which one to use?
+        wHyperGraph = fmap countEdges $  universeSubset  -- Todo Which one to use?
+--         wHyperGraph = fmap countEdges $ rankFilterGraph rankDocs queryTerms universeSubset  -- Todo Which one to use?
+--         wHyperGraph = fmap (top5Edges rankDocs queryTerms) universeSubset                          -- Todo Which one to use?
+        --wHyperGraph = trace ("subset size = "++show (fmap length universeSubset)) $ fmap (rankWeightEdgeDocs rankDocs queryTerms) universeSubset                 -- Todo Which one to use?
 
+        graphs :: Graphs (WHyperGraph Double)
+        graphs = Graphs { merelyCountEdges    = fmap countEdges $ universeSubset
+                        , countTop100Edges    = fmap countEdges $ rankFilterGraph rankDocs queryTerms universeSubset
+                        , top5                = fmap (top5Edges rankDocs queryTerms) universeSubset
+                        , rank100EdgesInGraph = fmap (rankWeightEdgeDocs rankDocs queryTerms) universeSubset
+                        }
 
-        unwGraph =
-            fmap (fmap (const 1)) $ wHyperGraph
+        weighteds :: Weighted (WHyperGraph Double -> Graph PageId Double)
+        weighteds = Weighted { weighted   = wHyperGraphToGraph
+                             , unweighted = wHyperGraphToGraph . fmap (fmap (const 1)) }
 
+        methods :: Methods (Graph PageId Double -> [(PageId, Double)])
+        methods = Methods { pageRank = \graph -> trace "s1" $ rankByPageRank graph 0.15 20
+                          , path     = \graph -> trace "s3" $ rankByShortestPaths (coerce graph) (toList seeds)
+                          }
 
-        graph = wHyperGraphToGraph wHyperGraph
-        ugraph = wHyperGraphToGraph unwGraph
-
-        rankings = Methods { pageRankW = rankByPageRank graph 0.15 20
-                           , pageRankU = rankByPageRank ugraph 0.15 20
-                           , pathW     = rankByShortestPaths (coerce graph) (toList seeds)
-                           , pathU     = rankByShortestPaths (coerce ugraph) (toList seeds)
-                           }
-
+        rankings :: Rankings [(PageId, Double)]
+        rankings = liftMethods methods <*> (liftWeighteds weighteds <*> liftGraphs graphs)
     in (queryId, rankings)
 
 main :: IO ()
@@ -188,7 +238,13 @@ main = do
             $ Retrieve.retrieve corpusStatistics q
             $ map (uncurry Doc) docs
 
-    handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) methodNames
+    let rankingNames :: Rankings String
+        rankingNames = (\weighted graph method -> concat [weighted,"-",graph,"-",method,"-"])
+                    <$> liftWeighteds weightedNames
+                    <*> liftGraphs graphNames
+                    <*> liftMethods methodNames
+
+    handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) rankingNames
 
     forM_ queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
@@ -197,14 +253,14 @@ main = do
         putStrLn $ "Processing query "++ show query
         let (queryId, rankings) = computeRankingsForQuery rankDoc query 3
                                   universeGraph binarySymmetricGraph
-            formattedRankings :: Methods TL.Text
+            formattedRankings :: Rankings TL.Text
             formattedRankings =
                 WriteRanking.formatEntityRankings
-                    <$> fmap T.pack methodNames
+                    <$> fmap T.pack rankingNames
                     <*> pure (T.pack $ unpackPageId queryId)
                     <*> rankings
 
-            actions :: Methods (IO ())
+            actions :: Rankings (IO ())
             actions =
                  TL.hPutStr
              <$> handles
