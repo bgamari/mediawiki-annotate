@@ -4,13 +4,16 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveFunctor #-}
 
+
 module GraphExpansion where
 
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
+import Data.Function
 
+import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
@@ -28,6 +31,11 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        }
            deriving Show
 
+instance Eq EdgeDoc where
+    (==) = (==) `on` edgeDocParagraphId
+
+instance Hashable EdgeDoc where
+    hashWithSalt salt = hashWithSalt salt . edgeDocParagraphId
 
 transformContent :: Page -> [EdgeDoc]
 transformContent (Page pageName pageId pageSkeleta) =
@@ -65,17 +73,30 @@ dropEdgeDocsNoLinks =
 
 type UniverseGraph = HM.HashMap PageId [EdgeDoc]
 
-hashUniverseGraph :: [Page] -> UniverseGraph
-hashUniverseGraph pages =
+edgeDocsToUniverseGraph :: [EdgeDoc] -> UniverseGraph
+edgeDocsToUniverseGraph edgeDocs =
     HM.fromListWith (++)
-    $ foldMap symmetrizeEdge
-    $ foldMap (dropEdgeDocsNoLinks . transformContent)
+    $ foldMap symmetrizeEdge edgeDocs
+  where
+    symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
+    symmetrizeEdge edgeDoc =
+           [ (target, [edgeDoc])
+           | target <- edgeDocNeighbors edgeDoc]
+
+
+emitEdgeDocs :: [Page] -> [EdgeDoc]
+emitEdgeDocs pages =
+    foldMap (dropEdgeDocsNoLinks . transformContent)
     $ pages
   where
     symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
     symmetrizeEdge edgeDoc =
            [ (target, [edgeDoc])
            | target <- edgeDocNeighbors edgeDoc]
+
+
+
+
 
 -- ------------------------------------------------
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
@@ -106,8 +127,8 @@ data WHyperEdges weight = WHyperEdges PageId (OutWHyperEdges weight) -- ^ source
 singleWHyperEdge :: Num weight => PageId -> OutWHyperEdges weight
 singleWHyperEdge target = OutWHyperEdges $ HM.singleton target 1
 
-singleWHyperEdgeWithWeight :: Num weight => PageId -> weight -> OutWHyperEdges weight
-singleWHyperEdgeWithWeight target weight = OutWHyperEdges $ HM.singleton target weight
+singleWHyperEdgeWithWeight :: Num weight => weight -> PageId -> OutWHyperEdges weight
+singleWHyperEdgeWithWeight weight target  = OutWHyperEdges $ HM.singleton target weight
 
 type WHyperGraph weight = HM.HashMap PageId (OutWHyperEdges weight)
 

@@ -70,18 +70,54 @@ methodNames = Methods { pageRankU = "page-rank-u"
                       , pathW     = "path-w"
                       }
 
-
+-- | weight edges by number of (source,target) occurrences in edgeDocs
 countEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
 countEdges edgeDocs =
       foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
 
 
--- todo interface with simpler and use for graph filtering
-rankEdges :: (Num weight) => [EdgeDoc] -> OutWHyperEdges weight
-rankEdges edgeDocs =
-      foldMap (singleWHyperEdge w . edgeDocSourceEntityId) edgeDocs
-   <> foldMap (foldMap singleWHyperEdge . edgeDocOutlinkIds) edgeDocs
 
+-- | Only consider top 5 edgeDocs by query likelihood
+-- | Then: weight edges by number of (source, target) occurrences in edgeDocs
+top5Edges :: (Num weight) => T.Text -> [EdgeDoc] -> OutWHyperEdges weight
+top5Edges query edgeDocs =
+      foldMap (foldMap singleWHyperEdge . edgeDocNeighbors)
+      $ fmap fst
+      $ take 5
+      $ rankDocsWith query
+      $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
+      $ edgeDocs
+
+
+-- | (source, target) edgeweight = sum _kbdocs rscore(kbdoc)
+rankWeightEdgeDocs :: (Num weight) => T.Text -> [EdgeDoc] -> OutWHyperEdges weight
+rankWeightEdgeDocs query edgeDocs =
+      let ranking = rankDocsWith query
+                  $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
+                  $ edgeDocs
+      in fold [singleWHyperEdgeWithWeight score target
+              | (edgeDoc, score) <- ranking
+              , target <- edgeDocNeighbors edgeDoc ]
+
+
+
+-- | Filter the whole graph by only considering edgeDocs in the top of the ranking
+rankFilterGraph :: T.Text -> HM.HashMap PageId [EdgeDoc] -> HM.HashMap PageId [EdgeDoc]
+rankFilterGraph query graph =
+    let edgeDocs = HS.toList $ HS.fromList $ fold graph -- all kbdocs in this graph
+        topRankingEdgeDocs = fmap fst
+                           $ take 100
+                           $ rankDocsWith query
+                           $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent $ edgeDoc))
+                           $ edgeDocs
+
+    in edgeDocsToUniverseGraph topRankingEdgeDocs
+
+
+-- todo interface with simpler and use for graph filtering
+
+rankDocsWith :: (Num rankScore) => T.Text ->  [(elem, T.Text)] -> [(elem, rankScore)]
+rankDocsWith query elemsWithText  = undefined
 
 
 computeRankingsForQuery :: QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
@@ -90,16 +126,24 @@ computeRankingsForQuery queryDoc radius universeGraph binarySymmetricGraph =
     let seeds :: HS.HashSet PageId
         seeds = queryDocLeadEntities $ queryDoc
         queryId = queryDocQueryId $ queryDoc
+        queryText =  getPageName $ queryDocQueryText $ queryDoc
 
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset = subsetOfUniverseGraph universeGraph nodeSet
+--         universeSubset = foldMap top5Edges universeSubset'  -- Todo This actually belongs up here
+--         universeSubset = foldMap rankWeightEdgeDocs universeSubset'  -- Todo which one to use?
+--         universeSubset = rankFilterGraph universeSubset'
+
         -- filter universe to nodeSet
         -- then turn into Hyperedges
 
         wHyperGraph :: WHyperGraph Double
-        wHyperGraph = fmap countEdges $ universeSubset
+--         wHyperGraph = fmap countEdges $ rankFilterGraph queryText universeSubset  -- Todo Which one to use?
+        wHyperGraph = fmap (top5Edges queryText) universeSubset                          -- Todo Which one to use?
+--         wHyperGraph = rankWeightEdgeDocs queryText universeSubset                 -- Todo Which one to use?
+
 
         unwGraph =
             fmap (fmap (const 1)) $ wHyperGraph
@@ -122,7 +166,7 @@ main = do
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
 
     let universeGraph :: UniverseGraph
-        universeGraph = hashUniverseGraph pagesForLinkExtraction
+        universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
 
     let binarySymmetricGraph :: BinarySymmetricGraph
         binarySymmetricGraph = universeToBinaryGraph universeGraph
