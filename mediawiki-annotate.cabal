@@ -214,5 +214,6 @@ executable trec-car-graph-expansion
                        binary,
                        log-domain,
                        foldl,
+                       time,
                        trec-car-tools
   default-language:    Haskell2010

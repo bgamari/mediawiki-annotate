@@ -16,6 +16,7 @@ import Data.Foldable
 import Data.Coerce
 import Options.Applicative
 import System.IO
+import Data.Time.Clock
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -275,10 +276,21 @@ main = do
                     <*> pure (T.pack $ unpackPageId queryId)
                     <*> rankings
 
+            writeRanking :: Handle -> String -> TL.Text -> IO ()
+            writeRanking hdl name content = do
+                putStrLn $ "Writing ranking "++name
+                t0 <- getCurrentTime
+                TL.hPutStr hdl content
+                t1 <- getCurrentTime
+                let dt = t1 `diffUTCTime` t0
+                putStrLn $ "Wrote ranking "++name++" in "++show (realToFrac dt / 60 :: Double)++" minutes"
+
+
             actions :: Rankings (IO ())
             actions =
-                 TL.hPutStr
+                 writeRanking
              <$> handles
+             <*> rankingNames
              <*> formattedRankings
 
         sequence_ actions
