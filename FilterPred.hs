@@ -86,19 +86,19 @@ pred inj = term
 
     nameContains = do
         void $ textSymbol "name-contains"
-        NameContains . T.toCaseFold <$> string
+        NameContains . T.toCaseFold <$> string'
 
     nameHasPrefix = do
         void $ textSymbol "name-has-prefix"
-        NameHasPrefix <$> string
+        NameHasPrefix <$> string'
 
     nameInSet = do
         void $ textSymbol "name-in-set"
-        NameInSet . HS.fromList . map PageName <$> listOf string
+        NameInSet . HS.fromList . map PageName <$> listOf string'
 
     hasCategoryContaining = do
         void $ textSymbol "category-contains"
-        HasCategoryContaining . T.toCaseFold <$> string
+        HasCategoryContaining . T.toCaseFold <$> string'
 
     pageHashMod = do
         void $ textSymbol "page-hash-mod"
@@ -109,8 +109,8 @@ pred inj = term
     listOf :: Parser a -> Parser [a]
     listOf element = brackets $ commaSep element
 
-    string :: Parser T.Text
-    string = fmap T.pack $ stringLiteral <|> (many alphaNum <* whiteSpace)
+    string' :: Parser T.Text
+    string' = fmap T.pack $ stringLiteral <|> (many alphaNum <* whiteSpace)
 
 -- todo fix this - currently not called, and does not apply recursively
 normalize :: Pred a -> Pred a
@@ -133,6 +133,6 @@ interpret  IsRedirect page       = isJust $ pageRedirect page
 interpret  IsDisambiguation page = pageIsDisambiguation page
 interpret (Any preds) page = any (`interpret` page) preds
 interpret (All preds) page = all (`interpret` page) preds
-interpret (Negate pred) page = not $ interpret pred page
+interpret (Negate p)  page = not $ interpret p page
 interpret TruePred _ = True
 interpret (Pure _) _ = error "Impossible"

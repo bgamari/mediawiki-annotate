@@ -18,10 +18,10 @@ import FilterPred
 
 helpDescr :: PP.Doc
 helpDescr =
-    "Predicate options:" <$$> PP.indent 4 opts
+    "Predicate syntax:" <$$> PP.indent 4 predicateHelp
   where
     cmd a b = PP.nest 8 (a <$$> b)
-    opts = PP.vsep
+    predicateHelp = PP.vsep
       [ cmd "train-set"                        "matches pages in the training set",
         cmd "test-set"                         "matches pages in the test set",
         cmd "fold K"                           "matches pages in fold k (k in 0..4)",
