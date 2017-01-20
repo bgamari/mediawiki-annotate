@@ -174,6 +174,14 @@ main = do
 
     queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
 
+    let queryTexts = map queryDocQueryText $ queriesToSeedEntities
+    let corpusStatistics = computeStatistics queryTexts
+                          $ map (\edgeDoc -> (edgeDoc , edgeDocContent edgeDoc))
+                          $ emitEdgeDocs pagesForLinkExtraction
+
+    let computeStatistics :: [T.Text] -> [(EdgeDoc, T.Text)] -> Unicorns
+        computeStatistics queries docTexts = undefined
+
     handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) methodNames
 
     forM_ queriesToSeedEntities $ \query -> do
