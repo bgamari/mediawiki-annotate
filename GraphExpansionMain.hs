@@ -239,13 +239,13 @@ main = do
     queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
 
     let queryTermsAll = foldMap (queryDocRawTerms) $ queriesToSeedEntities
-    putStrLn $ "queryTermsAll " ++ show queryTermsAll
+    putStrLn $ "# queryTermsAll " ++ show queryTermsAll
 
     let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
                           $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
                           $ emitEdgeDocs pagesForLinkExtraction
 
-    putStrLn $ "corpus statistics " ++ show corpusStatistics
+    putStrLn $ "# corpus statistics " ++ show corpusStatistics
 
     let rankDoc q docs =
             map (\(Doc a b) -> (a,b))
@@ -263,9 +263,9 @@ main = do
 
     forM_ queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
-            putStrLn $ "Query with no lead entities: "++show query
+            putStrLn $ "# Query with no lead entities: "++show query
 
-        putStrLn $ "Processing query "++ show query
+        putStrLn $ "# Processing query "++ show query
         let queryId = queryDocQueryId query
             (graphs, computeRankings) =
                 computeRankingsForQuery rankDoc query 3
@@ -288,6 +288,7 @@ main = do
                 logTimed "evaluating graph" $ evaluate $ rnf graph
                 logMsg $ "graph size: "++show (graphSize graph)
                 ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
+                logMsg $ "ranking entries="++show (length ranking)
                 let formatted = WriteRanking.formatEntityRankings
                                 (T.pack methodName)
                                 (T.pack $ unpackPageId queryId)
