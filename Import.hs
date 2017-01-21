@@ -21,7 +21,7 @@ import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 import qualified Data.Binary as B
 import Pipes
 import qualified Pipes.Prelude as PP
-import qualified ConcurrentMap as CM
+import qualified Control.Concurrent.ForkMap as CM
 
 import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
 import qualified Data.MediaWiki.XmlDump as XmlDump

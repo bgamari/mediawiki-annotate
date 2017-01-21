@@ -9,7 +9,7 @@
 
 import Control.Exception (evaluate)
 import Control.DeepSeq
-import Control.Monad (when)
+import Control.Monad (when, void)
 import Control.Concurrent.Async
 import Data.Monoid hiding (All, Any)
 import Data.Functor.Compose
@@ -30,6 +30,7 @@ import qualified Data.Text.Lazy.IO as TL
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB
 
+import qualified Control.Concurrent.ForkMap as ForkMap
 import WriteRanking
 import Retrieve
 import GraphExpansion
@@ -283,7 +284,10 @@ main = do
     handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) rankingNames
         :: IO (Rankings Handle)
 
-    forConcurrently_ queriesToSeedEntities $ \query -> do
+    let --forM_' = forM_
+        forM_' = forConcurrently_
+        --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
+    forM_' queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
             putStrLn $ "# Query with no lead entities: "++show query
 

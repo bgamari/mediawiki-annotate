@@ -5,7 +5,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ConstraintKinds #-}
 
-module ForkPipe
+module Control.Concurrent.ForkMap.ForkPipe
     ( forkPipe
     , WorkerFailException(..)
     ) where
@@ -26,7 +26,7 @@ import Control.Concurrent.STM
 
 import qualified Data.ByteString.Char8 as BS
 
-import FifoChannel
+import Control.Concurrent.ForkMap.FifoChannel
 
 debug :: Bool
 debug = False

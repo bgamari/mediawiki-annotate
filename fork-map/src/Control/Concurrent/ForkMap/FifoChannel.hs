@@ -1,4 +1,4 @@
-module FifoChannel
+module Control.Concurrent.ForkMap.FifoChannel
     ( ReceiveChan
     , SendChan
     , newPipeChannel
