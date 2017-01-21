@@ -7,8 +7,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 
-import Debug.Trace
-
 import Control.Exception (evaluate)
 import Control.DeepSeq
 import Control.Monad (when)
@@ -25,7 +23,6 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
@@ -66,7 +63,6 @@ pagesToLeadEntities pages =
       where
         inlinkInfo   = KB.collectInlinkInfo pages
         inlinkCounts = KB.resolveRedirects inlinkInfo
-        inlinkTotals = mconcat $ HM.elems inlinkCounts
 
 type (:.) f g = Compose f g
 
@@ -123,6 +119,7 @@ weightedNames :: Weighted String
 weightedNames = Weighted "weighted" "unweighted"
 
 data GraphStats = GraphStats { nNodes, nEdges :: !Int }
+                deriving (Show)
 
 graphSize :: WHyperGraph Double -> GraphStats
 graphSize graph =
@@ -156,11 +153,12 @@ rankWeightEdgeDocsRecipRank rankDocs query edgeDocs =
                   $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent edgeDoc ))
                   $ edgeDocs
       in fold [ singleWHyperEdgeWithWeight (1.0/realToFrac rank) target
-              | ((edgeDoc, score), rank) <- zip ranking [(1::Int)..]
+              | ((edgeDoc, _score), rank) <- zip ranking [(1::Int)..]
               , target <- edgeDocNeighbors edgeDoc ]
 
 -- Todo clean up this mess
-
+rankWeightEdgeDocs :: RankingFunction
+                   -> [Term] -> [EdgeDoc] -> OutWHyperEdges Double
 rankWeightEdgeDocs = rankWeightEdgeDocsRecipRank
 
 
@@ -205,19 +203,6 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset = subsetOfUniverseGraph universeGraph nodeSet
---         universeSubset = foldMap top5Edges universeSubset'  -- Todo This actually belongs up here
---         universeSubset = foldMap rankWeightEdgeDocs universeSubset'  -- Todo which one to use?
---         universeSubset = rankFilterGraph universeSubset'
-
-        -- filter universe to nodeSet
-        -- then turn into Hyperedges
-
-        wHyperGraph :: WHyperGraph Double
-        wHyperGraph = fmap countEdges $  universeSubset  -- Todo Which one to use?
---         wHyperGraph = fmap countEdges $ rankFilterGraph rankDocs queryTerms universeSubset  -- Todo Which one to use?
---         wHyperGraph = fmap (top5Edges rankDocs queryTerms) universeSubset                          -- Todo Which one to use?
-        --wHyperGraph = trace ("subset size = "++show (fmap length universeSubset)) $ fmap (rankWeightEdgeDocs rankDocs queryTerms) universeSubset                 -- Todo Which one to use?
-
 
         graphs :: Graphs (WHyperGraph Double)
         graphs = Graphs { merelyCountEdges    = fmap countEdges $ universeSubset
@@ -290,17 +275,18 @@ main = do
                       -> (WHyperGraph Double -> [(PageId, Double)])
                       -> IO ()
             runMethod hdl methodName graph computeRanking = do
-                let log t = putStrLn $ methodName++": "++t
-                    logTimed t action = do
-                        log t
+                let logMsg t = putStrLn $ methodName++": "++t
+                    logTimed t doIt = do
+                        logMsg t
                         t0 <- getCurrentTime
-                        !r <- action
+                        !r <- doIt
                         t1 <- getCurrentTime
                         let dt = t1 `diffUTCTime` t0
-                        log $ "time="++(showFFloat (Just 2) (realToFrac dt / 60 :: Double) "")
+                        logMsg $ "time="++(showFFloat (Just 2) (realToFrac dt / 60 :: Double) "")
                         return r
 
                 logTimed "evaluating graph" $ evaluate $ rnf graph
+                logMsg $ "graph size: "++show (graphSize graph)
                 ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
                 let formatted = WriteRanking.formatEntityRankings
                                 (T.pack methodName)
