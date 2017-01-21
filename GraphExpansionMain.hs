@@ -19,15 +19,12 @@ import System.IO
 import Data.Time.Clock
 import Numeric
 
-
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
-
-
 
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB

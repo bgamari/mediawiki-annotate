@@ -3,8 +3,8 @@
 {-# LANGUAGE DeriveFoldable #-}
 module Retrieve
     ( Score
-    ,Term
-    , TermCounts
+    , Term
+    , TermCounts(..)
     , Doc(..)
     , computeTermCounts
     , retrieve
@@ -13,10 +13,10 @@ module Retrieve
 
 import Numeric.Log (ln)
 import Data.Function (on)
+import Data.List (sortBy)
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
 import Data.Monoid
-import Data.Functor.Identity
 import Data.Binary
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -32,13 +32,14 @@ import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Term as Term
 import SimplIR.Tokenise
-import SimplIR.Utils
 import SimplIR.Types
 import SimplIR.StopWords
 
 
-newtype TermCounts = TermCounts (HM.HashMap Term Int)
-                    deriving (Show)
+newtype TermCounts = TermCounts { getTermCounts :: HM.HashMap Term Int }
+
+instance Show TermCounts where
+    showsPrec _ = shows . sortBy (flip (compare `on` snd)) . HM.toList . getTermCounts
 
 instance Binary TermCounts where
     get = TermCounts . HM.fromList <$> get
