@@ -289,9 +289,9 @@ main = do
         --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
     forM_' queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
-            putStrLn $ "# Query with no lead entities: "++show query
+            T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
-        putStrLn $ "# Processing query "++ show query
+        T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
             (graphs, computeRankings) =
                 computeRankingsForQuery rankDoc query 3
@@ -301,7 +301,7 @@ main = do
                       -> (WHyperGraph Double -> [(PageId, Double)])
                       -> IO ()
             runMethod hdl methodName graph computeRanking = do
-                let logMsg t = T.putStrLn $ T.pack $ unpackPageId queryId++"\t"++methodName++"\t"++t
+                let logMsg t = T.putStr $ T.pack $ unpackPageId queryId++"\t"++methodName++"\t"++t++"\n"
                     logTimed t doIt = do
                         logMsg t
                         t0 <- getCurrentTime
