@@ -21,6 +21,12 @@ import Data.Binary
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
+import qualified Data.CharSet as CS
+import qualified Data.CharSet.Common as CS
+
+import Debug.Trace
+
+import NLP.Snowball
 
 import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
@@ -28,6 +34,8 @@ import SimplIR.Term as Term
 import SimplIR.Tokenise
 import SimplIR.Utils
 import SimplIR.Types
+import SimplIR.StopWords
+
 
 newtype TermCounts = TermCounts (HM.HashMap Term Int)
                     deriving (Show)
@@ -54,8 +62,38 @@ oneTerm t = TermCounts $ HM.singleton t 1
 
 type TermFilter = Term -> Bool
 
+
+--
+-- bothStemAndOrig :: Term -> [Term]
+-- bothStemAndOrig term =
+--     [stems English [term], term]
+
 textToTokens' :: T.Text -> [Term]
-textToTokens' = map Term.fromText . tokenise
+-- textToTokens' = map Term.fromText .  bothStemAndOrig . killStopwords enInquery . tokenise
+textToTokens' text =
+    let acronyms = fmap (T.filter (`CS.member` acronymPunctuation))
+                   $ filter isAcronym
+                   $ T.words
+                   $ text
+        rawterms = T.words
+                   $ T.filter (/='\'')
+                   $ T.filter (/='"')
+                   $ T.toCaseFold text
+        terms =    T.words
+                   $ killCharSet notLatin1Letters  -- replaces with space
+                   $ T.filter (/='\'')             -- drop chars without substitution
+                   $ T.toCaseFold text
+        stemmedTerms = stems English terms
+    in fmap Term.fromText --trace ("terms: "++show terms ++ "\nrawterms: "++ show rawterms ++ "\nacronyms: "++ show acronyms)
+       $ nub
+       $ filter (\t -> T.length t > 1)
+       $ killStopwords enInquery
+       $ acronyms ++ rawterms ++ terms ++ stemmedTerms
+    where isAcronym  =
+            T.all (`CS.member` CS.upper)
+            . T.filter (`CS.member` acronymPunctuation)
+          acronymPunctuation = CS.fromList ".-"
+          nub = HS.toList . HS.fromList
 
 textToTokens :: TermFilter -> T.Text -> TermCounts
 textToTokens termFilter = foldMap oneTerm . filter termFilter . textToTokens'
