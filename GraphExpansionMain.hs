@@ -17,6 +17,8 @@ import Data.Coerce
 import Options.Applicative
 import System.IO
 import Data.Time.Clock
+import Numeric
+
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -24,6 +26,8 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
+
+
 
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB
@@ -206,6 +210,7 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 --         wHyperGraph = fmap (top5Edges rankDocs queryTerms) universeSubset                          -- Todo Which one to use?
         --wHyperGraph = trace ("subset size = "++show (fmap length universeSubset)) $ fmap (rankWeightEdgeDocs rankDocs queryTerms) universeSubset                 -- Todo Which one to use?
 
+
         graphs :: Graphs (WHyperGraph Double)
         graphs = Graphs { merelyCountEdges    = fmap countEdges $ universeSubset
                         , countTop100Edges    = fmap countEdges $ rankFilterGraph rankDocs queryTerms universeSubset
@@ -224,7 +229,20 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
         rankings :: Rankings [(PageId, Double)]
         rankings = liftMethods methods <*> (liftWeighteds weighteds <*> liftGraphs graphs)
-    in (queryId, rankings)
+
+
+        graphSize :: WHyperGraph Double -> (Int, Int)
+        graphSize graph =
+          let
+              nodes = HM.size graph
+              edges = sum $ fmap (\(OutWHyperEdges g) -> HM.size g) graph
+          in (nodes, edges)
+
+        nodes = HM.size universeSubset
+        edges = HS.size $ HS.fromList $ fold universeSubset
+
+        graphsizes = fmap graphSize graphs
+   in trace ("universeSubset size = Nodes:" ++ show nodes ++ " Edges: "++show edges++ "\n derived graph sizes:" ++ show graphsizes) (queryId, rankings)
 
 main :: IO ()
 main = do
@@ -232,10 +250,10 @@ main = do
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
 
     let universeGraph :: UniverseGraph
-        universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
+        !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
 
     let binarySymmetricGraph :: BinarySymmetricGraph
-        binarySymmetricGraph = universeToBinaryGraph universeGraph
+        !binarySymmetricGraph = universeToBinaryGraph universeGraph
 
 
     queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
@@ -243,7 +261,7 @@ main = do
     let queryTermsAll = foldMap (queryDocRawTerms) $ queriesToSeedEntities
     putStrLn $ "queryTermsAll " ++ show queryTermsAll
 
-    let corpusStatistics = Retrieve.computeTermCounts queryTermsAll
+    let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
                           $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
                           $ emitEdgeDocs pagesForLinkExtraction
 
@@ -255,7 +273,7 @@ main = do
             $ map (uncurry Doc) docs
 
     let rankingNames :: Rankings String
-        rankingNames = (\weighted graph method -> concat [weighted,"-",graph,"-",method,"-"])
+        !rankingNames = (\weighted graph method -> concat [weighted,"-",graph,"-",method,"-"])
                     <$> liftWeighteds weightedNames
                     <*> liftGraphs graphNames
                     <*> liftMethods methodNames
@@ -283,7 +301,7 @@ main = do
                 TL.hPutStr hdl content
                 t1 <- getCurrentTime
                 let dt = t1 `diffUTCTime` t0
-                putStrLn $ "Wrote ranking "++name++" in "++show (realToFrac dt / 60 :: Double)++" minutes"
+                putStrLn $ (showFFloat (Just 2) (realToFrac dt / 60 :: Double) "") ++ " minutes for ranking "++name
 
 
             actions :: Rankings (IO ())
