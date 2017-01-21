@@ -24,10 +24,7 @@ import qualified Data.Text as T
 import qualified Data.CharSet as CS
 import qualified Data.CharSet.Common as CS
 
-import Debug.Trace
-
 import NLP.Snowball
-
 import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Term as Term
