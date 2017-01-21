@@ -30,6 +30,7 @@ module CAR.Types
 import Data.Foldable
 import Data.Char (ord, chr)
 import Data.List (intercalate)
+import Control.DeepSeq
 import GHC.Generics
 import Data.Monoid
 import qualified Data.Binary.Get as Bin
@@ -71,7 +72,7 @@ instance CBOR.Serialise SBS.ShortByteString where
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId SBS.ShortByteString
-               deriving (Show, Eq, Ord, Generic, CBOR.Serialise, IsString)
+               deriving (Show, Eq, Ord, Generic, CBOR.Serialise, IsString, NFData)
 instance Hashable PageId
 
 pageNameToId :: PageName -> PageId

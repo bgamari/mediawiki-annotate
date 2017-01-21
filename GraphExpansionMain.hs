@@ -9,6 +9,8 @@
 
 import Debug.Trace
 
+import Control.Exception (evaluate)
+import Control.DeepSeq
 import Control.Monad (when)
 import Data.Monoid hiding (All, Any)
 import Data.Functor.Compose
@@ -68,16 +70,16 @@ pagesToLeadEntities pages =
 
 type (:.) f g = Compose f g
 
-type Rankings = Methods :. (Weighted :. Graphs)
+type Rankings = Graphs :. (Methods :. Weighted)
 
 liftMethods :: Methods a -> Rankings a
-liftMethods = Compose . fmap pure
+liftMethods = Compose . pure . Compose . fmap pure
 
 liftWeighteds :: Weighted a -> Rankings a
-liftWeighteds = Compose . pure . Compose . fmap pure
+liftWeighteds = Compose . pure . Compose . pure
 
 liftGraphs :: Graphs a -> Rankings a
-liftGraphs = Compose . pure . Compose . pure
+liftGraphs = Compose . fmap pure
 
 data Methods a = Methods { pageRank, path :: a }
                deriving (Show, Functor, Foldable, Traversable)
@@ -119,6 +121,14 @@ instance Applicative Weighted where
 
 weightedNames :: Weighted String
 weightedNames = Weighted "weighted" "unweighted"
+
+data GraphStats = GraphStats { nNodes, nEdges :: !Int }
+
+graphSize :: WHyperGraph Double -> GraphStats
+graphSize graph =
+    GraphStats { nNodes = HM.size graph
+               , nEdges = getSum $ foldMap (\(OutWHyperEdges g) -> Sum $ HM.size g) graph
+               }
 
 -- | weight edges by number of (source,target) occurrences in edgeDocs
 countEdges ::  [EdgeDoc] -> OutWHyperEdges Double
@@ -183,11 +193,12 @@ type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double
 
 computeRankingsForQuery :: RankingFunction
                         -> QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
-                        -> (PageId, Rankings [(PageId, Double)])
+                        -> ( Graphs (WHyperGraph Double)
+                           , Rankings (WHyperGraph Double -> [(PageId, Double)])
+                           )
 computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGraph =
     let seeds :: HS.HashSet PageId
         seeds = queryDocLeadEntities $ queryDoc
-        queryId = queryDocQueryId $ queryDoc
         queryTerms =  queryDocRawTerms $ queryDoc
 
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
@@ -224,22 +235,9 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                           , path     = \graph -> rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce graph) (toList seeds)
                           }
 
-        rankings :: Rankings [(PageId, Double)]
-        rankings = liftMethods methods <*> (liftWeighteds weighteds <*> liftGraphs graphs)
-
-
-        graphSize :: WHyperGraph Double -> (Int, Int)
-        graphSize graph =
-          let
-              nodes = HM.size graph
-              edges = sum $ fmap (\(OutWHyperEdges g) -> HM.size g) graph
-          in (nodes, edges)
-
-        nodes = HM.size universeSubset
-        edges = HS.size $ HS.fromList $ fold universeSubset
-
-        graphsizes = fmap graphSize graphs
-   in trace ("universeSubset size = Nodes:" ++ show nodes ++ " Edges: "++show edges++ "\n derived graph sizes:" ++ show graphsizes) (queryId, rankings)
+        computeRankings :: Rankings (WHyperGraph Double -> [(PageId, Double)])
+        computeRankings = (.) <$> liftMethods methods <*> liftWeighteds weighteds
+    in (graphs, computeRankings)
 
 main :: IO ()
 main = do
@@ -270,44 +268,56 @@ main = do
             $ map (uncurry Doc) docs
 
     let rankingNames :: Rankings String
-        !rankingNames = (\weighted graph method -> concat [weighted,"-",graph,"-",method,"-"])
+        !rankingNames = (\weighted graph method -> concat [weighted,"-",graph,"-",method])
                     <$> liftWeighteds weightedNames
                     <*> liftGraphs graphNames
                     <*> liftMethods methodNames
 
     handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) rankingNames
+        :: IO (Rankings Handle)
 
     forM_ queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
             putStrLn $ "Query with no lead entities: "++show query
 
         putStrLn $ "Processing query "++ show query
-        let (queryId, rankings) = computeRankingsForQuery rankDoc query 3
+        let queryId = queryDocQueryId query
+            (graphs, computeRankings) =
+                computeRankingsForQuery rankDoc query 3
                                   universeGraph binarySymmetricGraph
-            formattedRankings :: Rankings TL.Text
-            formattedRankings =
-                WriteRanking.formatEntityRankings
-                    <$> fmap T.pack rankingNames
-                    <*> pure (T.pack $ unpackPageId queryId)
-                    <*> rankings
 
-            writeRanking :: Handle -> String -> TL.Text -> IO ()
-            writeRanking hdl name content = do
-                putStrLn $ "Writing ranking "++name
-                t0 <- getCurrentTime
-                TL.hPutStr hdl content
-                t1 <- getCurrentTime
-                let dt = t1 `diffUTCTime` t0
-                putStrLn $ (showFFloat (Just 2) (realToFrac dt / 60 :: Double) "") ++ " minutes for ranking "++name
+            runMethod :: Handle -> String -> WHyperGraph Double
+                      -> (WHyperGraph Double -> [(PageId, Double)])
+                      -> IO ()
+            runMethod hdl methodName graph computeRanking = do
+                let log t = putStrLn $ methodName++": "++t
+                    logTimed t action = do
+                        log t
+                        t0 <- getCurrentTime
+                        !r <- action
+                        t1 <- getCurrentTime
+                        let dt = t1 `diffUTCTime` t0
+                        log $ "time="++(showFFloat (Just 2) (realToFrac dt / 60 :: Double) "")
+                        return r
 
+                logTimed "evaluating graph" $ evaluate $ rnf graph
+                ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
+                let formatted = WriteRanking.formatEntityRankings
+                                (T.pack methodName)
+                                (T.pack $ unpackPageId queryId)
+                                ranking
+                logTimed "writing ranking" $ TL.hPutStr hdl formatted
 
             actions :: Rankings (IO ())
             actions =
-                 writeRanking
-             <$> handles
-             <*> rankingNames
-             <*> formattedRankings
+                   runMethod
+               <$> handles
+               <*> rankingNames
+               <*> f graphs
+               <*> computeRankings
 
+            f :: Graphs a -> Rankings a
+            f = Compose . fmap pure
         sequence_ actions
 
     mapM_ hClose handles

@@ -3,15 +3,17 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveFunctor #-}
-
+{-# LANGUAGE DeriveGeneric #-}
 
 module GraphExpansion where
 
+import Control.DeepSeq
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
 import Data.Function
+import GHC.Generics
 
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
@@ -119,9 +121,10 @@ expandNodesK binarySymmetricGraph seeds k =
 
 -- | Outward weighted hyper-edges
 newtype OutWHyperEdges weight = OutWHyperEdges (HM.HashMap PageId weight)     -- ^ a set of outward wHyperEdges and their weights
-        deriving (Show, Functor)
+        deriving (Show, Functor, NFData)
 data WHyperEdges weight = WHyperEdges PageId (OutWHyperEdges weight) -- ^ sourceNode and its outward wHyperEdges
-        deriving (Show, Functor)
+        deriving (Show, Functor, Generic)
+instance NFData weight => NFData (WHyperEdges weight)
 
 
 singleWHyperEdge :: Num weight => PageId -> OutWHyperEdges weight
