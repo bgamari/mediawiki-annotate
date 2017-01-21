@@ -275,14 +275,14 @@ main = do
                       -> (WHyperGraph Double -> [(PageId, Double)])
                       -> IO ()
             runMethod hdl methodName graph computeRanking = do
-                let logMsg t = putStrLn $ methodName++": "++t
+                let logMsg t = putStrLn $ unpackPageId queryId++"\t"++methodName++"\t"++t
                     logTimed t doIt = do
                         logMsg t
                         t0 <- getCurrentTime
                         !r <- doIt
                         t1 <- getCurrentTime
                         let dt = t1 `diffUTCTime` t0
-                        logMsg $ "time="++(showFFloat (Just 2) (realToFrac dt / 60 :: Double) "")
+                        logMsg $ t++"\ttime="++(showFFloat (Just 3) (realToFrac dt / 60 :: Double) "")
                         return r
 
                 logTimed "evaluating graph" $ evaluate $ rnf graph
