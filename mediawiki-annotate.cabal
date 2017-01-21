@@ -198,7 +198,7 @@ executable trec-car-graph-expansion
                        PageRank
                        WriteRanking
                        Retrieve
-  ghc-options:         -Wall
+  ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
                        async,
                        bytestring,
