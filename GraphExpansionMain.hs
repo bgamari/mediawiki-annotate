@@ -10,6 +10,7 @@
 import Control.Exception (evaluate)
 import Control.DeepSeq
 import Control.Monad (when)
+import Control.Concurrent.Async
 import Data.Monoid hiding (All, Any)
 import Data.Functor.Compose
 import Data.Foldable
@@ -23,6 +24,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
@@ -281,7 +283,7 @@ main = do
     handles <- mapM (\name -> openFile (outputFilePrefix ++ name ++ ".run") WriteMode) rankingNames
         :: IO (Rankings Handle)
 
-    forM_ queriesToSeedEntities $ \query -> do
+    forConcurrently_ queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
             putStrLn $ "# Query with no lead entities: "++show query
 
@@ -295,7 +297,7 @@ main = do
                       -> (WHyperGraph Double -> [(PageId, Double)])
                       -> IO ()
             runMethod hdl methodName graph computeRanking = do
-                let logMsg t = putStrLn $ unpackPageId queryId++"\t"++methodName++"\t"++t
+                let logMsg t = T.putStrLn $ T.pack $ unpackPageId queryId++"\t"++methodName++"\t"++t
                     logTimed t doIt = do
                         logMsg t
                         t0 <- getCurrentTime
