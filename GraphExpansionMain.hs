@@ -90,20 +90,22 @@ methodNames = Methods { pageRank = "pr"
                       }
 
 
-data Graphs a = Graphs { merelyCountEdges, countTop100Edges, top5 , rank100EdgesInGraph  :: a}
+data Graphs a = Graphs { merelyCountEdges, countTop100Edges, countRandom100Edges, top5 , recipRankWeightsEdgesInGraph, recipRankWeightsEdgesInGraphTop100Edges  :: a}
                 deriving (Show, Functor, Foldable, Traversable)
 
 
 instance Applicative Graphs where
-    pure x = Graphs x x x x
-    Graphs a b c d <*> Graphs w x y z =
-        Graphs (a w) (b x) (c y) (d z)
+    pure x = Graphs x x x x x x
+    Graphs x1 x2 x3 x4 x5 x6 <*> Graphs y1 y2 y3 y4 y5 y6 =
+        Graphs (x1 y1) (x2 y2) (x3 y3) (x4 y4) (x5 y5) (x6 y6)
 
 graphNames :: Graphs String
 graphNames = Graphs { merelyCountEdges = "countEdges"
                     , countTop100Edges = "countTop100Edges"
+                    , countRandom100Edges = "countRandom100Edges"
                     , top5 = "top5"
-                    , rank100EdgesInGraph = "rank100EdgesInGraph"
+                    , recipRankWeightsEdgesInGraph = "recipRankWeightsEdgesInGraph"
+                    , recipRankWeightsEdgesInGraphTop100Edges = "recipRankWeightsEdgesInGraphTop100Edges"
                     }
 
 data Weighted a = Weighted { weighted, unweighted :: a }
@@ -132,7 +134,12 @@ countEdges ::  [EdgeDoc] -> OutWHyperEdges Double
 countEdges edgeDocs =
       foldMap (foldMap singleWHyperEdge . edgeDocNeighbors) edgeDocs
 
-
+sumEdges :: [(EdgeDoc, Double)] ->  OutWHyperEdges Double
+sumEdges edgeDocs =
+      foldMap (\(edgeDoc, score) ->
+                        foldMap (singleWHyperEdgeWithWeight score)
+                        $ edgeDocNeighbors edgeDoc
+              ) edgeDocs
 
 -- | Only consider top 5 edgeDocs by query likelihood
 -- | Then: weight edges by number of (source, target) occurrences in edgeDocs
@@ -187,6 +194,17 @@ rankFilterGraph rankDocs query graph =
 
     in edgeDocsToUniverseGraph topRankingEdgeDocs
 
+
+-- | Filter the whole graph by only considering edgeDocs in the top of the ranking
+randomFilterGraph :: RankingFunction
+                -> [Term] -> HM.HashMap PageId [EdgeDoc] -> HM.HashMap PageId [EdgeDoc]
+randomFilterGraph rankDocs query graph =
+    let edgeDocs = HS.toList $ HS.fromList $ fold graph -- all kbdocs in this graph
+        randomEdgeDocs = take 100   -- relying on hashset giving us a relatively randomly ordered list
+                         $ edgeDocs
+
+    in edgeDocsToUniverseGraph randomEdgeDocs
+
 type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
 
 computeRankingsForQuery :: RankingFunction
@@ -207,8 +225,10 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
         graphs :: Graphs (WHyperGraph Double)
         graphs = Graphs { merelyCountEdges    = fmap countEdges $ universeSubset
                         , countTop100Edges    = fmap countEdges $ rankFilterGraph rankDocs queryTerms universeSubset
+                        , countRandom100Edges    = fmap countEdges $ randomFilterGraph rankDocs queryTerms universeSubset
                         , top5                = fmap (top5Edges rankDocs queryTerms) universeSubset
-                        , rank100EdgesInGraph = fmap (rankWeightEdgeDocs rankDocs queryTerms) universeSubset
+                        , recipRankWeightsEdgesInGraph = fmap (rankWeightEdgeDocsRecipRank rankDocs queryTerms) universeSubset
+                        , recipRankWeightsEdgesInGraphTop100Edges    = fmap (rankWeightEdgeDocsRecipRank rankDocs queryTerms) $ rankFilterGraph rankDocs queryTerms universeSubset
                         }
 
         weighteds :: Weighted (WHyperGraph Double -> Graph PageId Double)
