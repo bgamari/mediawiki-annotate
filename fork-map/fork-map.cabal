@@ -1,0 +1,35 @@
+name:                fork-map
+version:             0.1.0.0
+synopsis:            Convenient and efficient concurrent mapping
+-- description:         
+homepage:            http://github.com/bgamari/fork-map
+license:             BSD3
+license-file:        LICENSE
+author:              Ben Gamari
+maintainer:          ben@smart-cactus.org
+copyright:           (c) 2017 Ben Gamari
+category:            Concurrency
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Control.Concurrent.ForkMap
+                       Control.Concurrent.ForkMap.FifoChannel
+                       Control.Concurrent.ForkMap.ForkPipe
+  other-extensions:    ScopedTypeVariables,
+                       RankNTypes,
+                       ConstraintKinds,
+                       FlexibleContexts,
+                       DeriveGeneric,
+                       KindSignatures
+  build-depends:       base >=4.9 && <4.10,
+                       async >=2.1 && <2.2,
+                       stm >=2.4 && <2.5,
+                       binary >=0.8 && <0.9,
+                       pipes-safe >=2.2 && <2.3,
+                       pipes-concurrency >=2.0 && <2.1,
+                       pipes >=4.1 && <4.5,
+                       unix >=2.7 && <2.8,
+                       bytestring >=0.10 && <0.11
+  hs-source-dirs:      src
+  default-language:    Haskell2010
