@@ -143,11 +143,20 @@ rankByPageRank graph teleport iterations =
   in prRanking
 
 
+filterEdges :: (PageId -> PageId -> Bool) -> Dijkstra.Graph PageId w -> Dijkstra.Graph PageId w
+filterEdges pred (Dijkstra.Graph graph ) =
+    Dijkstra.Graph $ HM.mapWithKey f $ graph
+  where f :: PageId -> [(PageId, w)] -> [(PageId, w) ]
+        f source =
+          filter (\(target, _) -> pred source target)
+
 rankByShortestPaths :: Dijkstra.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
 rankByShortestPaths graph seeds =
-    let shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
+    let seeds' = HS.fromList seeds
+        graph' = filterEdges (\s t -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph
+        shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
                          | n1 <- toList seeds
-                         , let paths = Dijkstra.dijkstra (graph) n1
+                         , let paths = Dijkstra.dijkstra (graph') n1
                          , n2 <- toList seeds
                          ]
 
