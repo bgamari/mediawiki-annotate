@@ -49,7 +49,7 @@ relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
     delta = sum $ map square $ zipWith (-) (A.elems a) (A.elems b)
 
 
-pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n)
+pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
          => a -> Graph n a -> [Eigenvector n a]
 pageRank alpha graph@(Graph nodeMap) =
     let (nodeRange, toNode, fromNode) = computeNodeMapping graph
@@ -81,7 +81,8 @@ pageRank alpha graph@(Graph nodeMap) =
 
     in map (Eigenvector fromNode toNode)
        $ initial : iterate (mult) initial  -- normalization should be optional, but we are paranoid.
-{-# SPECIALISE pageRank :: (Eq n, Hashable n) => Double -> Graph n Double -> [Eigenvector n Double] #-}
+{-# SPECIALISE pageRank :: (Eq n, Hashable n, Show n)
+                        => Double -> Graph n Double -> [Eigenvector n Double] #-}
 
 nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
 nodes (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g
@@ -125,7 +126,7 @@ normRows nodeRange trans =
 
 
 computeNodeMapping
-    :: forall n a. (A.IArray A.UArray a, Eq n, Hashable n, Num a)
+    :: forall n a. (A.IArray A.UArray a, Eq n, Hashable n, Num a, Show n)
     => Graph n a
     -> ( (NodeId, NodeId)
        , NodeId -> n
@@ -144,7 +145,7 @@ computeNodeMapping g@(Graph nodeMap) =
     fromNodeMap = HM.fromList $ zip (HS.toList allNodes) [NodeId 0..]
 
     toNode = (toNodeMap A.!)
-    fromNode n = fromMaybe (error "PageRank.adjacency.fromNode") $ HM.lookup n fromNodeMap
+    fromNode n = fromMaybe (error $ "PageRank.adjacency.fromNode: "++show n) $ HM.lookup n fromNodeMap
 
 
 test :: Graph Char Double

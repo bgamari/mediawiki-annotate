@@ -11,7 +11,6 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 
 
-import Control.Exception (evaluate)
 import Control.DeepSeq
 import Control.Monad (when, void)
 import Control.Concurrent.Async
