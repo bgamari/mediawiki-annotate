@@ -64,7 +64,6 @@ executable trec-car-import
                        parallel >=3.2 && <3.3,
                        async >=2.1 && <2.2,
                        binary,
-                       --pipes-safe,
                        fork-map,
                        stm,
                        unix >= 2.7,

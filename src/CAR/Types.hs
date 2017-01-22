@@ -154,10 +154,10 @@ decodeCborList = start . BSL.toChunks
       | all BS.null xs = []
       | otherwise      = go (CBOR.deserialiseIncremental CBOR.decode) xs
 
-    go (Bin.Partial f) [] = go (f Nothing) []
-    go (Bin.Partial f) (bs : bss) = go (f (Just bs)) bss
-    go (Bin.Done bs _ x) bss = x : start (bs : bss)
-    go (Bin.Fail rest _ err) _ = error $ show err
+    go (CBOR.Partial f) []         = go (f Nothing) []
+    go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
+    go (CBOR.Done bs _ x) bss      = x : start (bs : bss)
+    go (CBOR.Fail rest _ err) _    = error $ show err
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
