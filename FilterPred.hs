@@ -6,7 +6,7 @@ module FilterPred where
 import Data.Maybe
 import Data.Void
 import Control.Applicative
-import Control.Monad (void)
+import Control.Monad (void, when)
 import Data.Foldable
 import Data.Hashable
 import qualified Data.Text as T
@@ -23,7 +23,7 @@ data Pred a = NameContains T.Text
             | NameHasPrefix T.Text
             | NameInSet (HS.HashSet PageName)
             | HasCategoryContaining T.Text
-            | PageHashMod Int Int -- ^ for training/test split
+            | PageHashMod Int Int Int -- ^ for training/test split
             | IsRedirect
             | IsDisambiguation
 
@@ -39,7 +39,7 @@ runPred _ (NameContains x)     = pure $ NameContains x
 runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
 runPred _ (NameInSet x)        = pure $ NameInSet x
 runPred _ (HasCategoryContaining x)    = pure $ HasCategoryContaining x
-runPred _ (PageHashMod x y)    = pure $ PageHashMod x y
+runPred _ (PageHashMod s x y)  = pure $ PageHashMod s x y
 runPred _ IsRedirect           = pure IsRedirect
 runPred _ IsDisambiguation     = pure IsDisambiguation
 runPred f (Any x)     = Any <$> traverse (runPred f) x
@@ -75,14 +75,13 @@ pred inj = term
              ]
 
     truePred = textSymbol "true" >> pure TruePred
-    trainSet = textSymbol "train-set" >> pure (PageHashMod 2 0)
-    testSet  = textSymbol "test-set"  >> pure (PageHashMod 2 1)
+    trainSet = textSymbol "train-set" >> pure (PageHashMod 1 2 0)
+    testSet  = textSymbol "test-set"  >> pure (PageHashMod 1 2 1)
     foldPred = do void $ textSymbol "fold"
                   k <- fmap fromIntegral natural
-                  pure $ Any [ PageHashMod 10 (2*k), PageHashMod 10 (2*k+1) ]
+                  pure $ Any [ PageHashMod 2 10 (2*k), PageHashMod 2 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
     isDisambiguation = textSymbol "is-disambiguation" >> pure IsDisambiguation
-
 
     nameContains = do
         void $ textSymbol "name-contains"
@@ -103,8 +102,11 @@ pred inj = term
     pageHashMod = do
         void $ textSymbol "page-hash-mod"
         let natural' = fmap fromIntegral natural
-        -- todo fail if k > n
-        PageHashMod <$> natural' <*> natural'
+        salt <- natural'
+        k <- natural'
+        n <- natural'
+        when (k > n) $ fail "pageHashMod: k > n"
+        return $ PageHashMod salt k n
 
     listOf :: Parser a -> Parser [a]
     listOf element = brackets $ commaSep element
@@ -126,8 +128,8 @@ interpret (NameHasPrefix prefix) page = prefix `T.isPrefixOf` getPageName (pageN
 interpret (NameInSet names) page = pageName page `HS.member` names
 interpret (HasCategoryContaining s) page =
     any (s `T.isInfixOf`) $ map T.toCaseFold $ pageCategories page
-interpret (PageHashMod n k) page =
-    let h = hash $ pageName page
+interpret (PageHashMod salt n k) page =
+    let h = hashWithSalt salt $ pageName page
     in h `mod` n == k
 interpret  IsRedirect page       = isJust $ pageRedirect page
 interpret  IsDisambiguation page = pageIsDisambiguation page
