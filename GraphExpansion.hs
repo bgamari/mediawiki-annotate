@@ -121,28 +121,6 @@ expandNodesK binarySymmetricGraph seeds k =
 
 -- ------------------------------------------------
 
--- | Outward weighted hyper-edges
-newtype OutWHyperEdges weight = OutWHyperEdges (HM.HashMap PageId weight)     -- ^ a set of outward wHyperEdges and their weights
-        deriving (Show, Functor, NFData)
-data WHyperEdges weight = WHyperEdges PageId (OutWHyperEdges weight) -- ^ sourceNode and its outward wHyperEdges
-        deriving (Show, Functor, Generic)
-instance NFData weight => NFData (WHyperEdges weight)
-
-
-singleWHyperEdge :: Num weight => PageId -> OutWHyperEdges weight
-singleWHyperEdge target = OutWHyperEdges $ HM.singleton target 1
-
-singleWHyperEdgeWithWeight :: Num weight => weight -> PageId -> OutWHyperEdges weight
-singleWHyperEdgeWithWeight weight target  = OutWHyperEdges $ HM.singleton target weight
-
-type WHyperGraph weight = HM.HashMap PageId (OutWHyperEdges weight)
-
-instance Num weight => Monoid (OutWHyperEdges weight) where
-    mempty = OutWHyperEdges mempty
-    OutWHyperEdges a `mappend` OutWHyperEdges b = OutWHyperEdges (HM.unionWith (+) a b)
-
-
-
 
 
 lookupNeighbors :: Monoid v =>  HM.HashMap PageId v -> PageId -> v
@@ -201,12 +179,7 @@ shortestPathsToNodeScores paths =
                            ]
 
 
--- Todo delete !
-wHyperGraphToGraph :: WHyperGraph Double -> Graph PageId Double
-wHyperGraphToGraph =
-    Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)
 
-
-hypergraphToGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Graph PageId Double
-hypergraphToGraph graph =
+toGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Graph PageId Double
+toGraph graph =
     Graph $ fmap HM.toList graph

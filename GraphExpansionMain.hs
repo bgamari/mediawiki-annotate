@@ -26,6 +26,7 @@ import Numeric
 import GHC.Generics
 
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
@@ -41,12 +42,17 @@ import WriteRanking
 import Retrieve
 import GraphExpansion
 
-opts :: Parser (FilePath, FilePath, FilePath)
+opts :: Parser (FilePath, FilePath, FilePath, [Method])
 opts =
-    (,,)
+    (,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+    <*> (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run")
+         <|> pure allMethods)
+    where
+      method = (methodMap M.!) <$> str
+      methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
 
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
@@ -75,11 +81,7 @@ type Name = String
 data GraphStats = GraphStats { nNodes, nEdges :: !Int }
                 deriving (Show)
 
-graphSize :: WHyperGraph Double -> GraphStats
-graphSize graph =
-    GraphStats { nNodes = HM.size graph
-               , nEdges = getSum $ foldMap (\(OutWHyperEdges g) -> Sum $ HM.size g) graph
-               }
+
 
 -- ----------------------------------------------------------------------
 
@@ -90,7 +92,6 @@ data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
                                            }
            deriving (Show, Generic)
 instance NFData EdgeDocWithScores
-
 
 
 rankNormDocs :: RankingFunction -> Int -> Int -> [Term] -> [EdgeDoc] -> [EdgeDocWithScores]
@@ -117,7 +118,7 @@ filterGraphByTop100GraphEdges rankDocs query edgeDocs =
             edges  = rankNormDocs rankDocs 100 100 query edgeDocs
         in HM.fromListWith (++) $ foldMap groupByEntity $ edges
   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
-        groupByEntity elem@(EdgeDocWithScores edgeDoc count score reciprank) =
+        groupByEntity elem@(EdgeDocWithScores edgeDoc _ _ _) =
                   [ (entity, [elem])
                   | entity <- edgeDocNeighbors $ edgeDoc]
 
@@ -136,19 +137,8 @@ filterGraphByTop5NodeEdges rankDocs query edgeDocs =
                   [ (entity, [edgeDoc])
                   | entity <- edgeDocNeighbors $ edgeDoc]
         filterNode :: [EdgeDoc] -> [EdgeDocWithScores]
-        filterNode edgeDocs =
-            rankNormDocs rankDocs 5 5 query edgeDocs
-
-
-noFilter :: [EdgeDoc] ->  HM.HashMap PageId [EdgeDoc]
-noFilter edgeDocs =
-  let perNodeEdges :: HM.HashMap PageId [EdgeDoc]
-      perNodeEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs
-  in perNodeEdges
-  where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
-        groupByEntity edgeDoc =
-                  [ (entity, [edgeDoc])
-                  | entity <- edgeDocNeighbors $ edgeDoc]
+        filterNode edgeDocs' =
+            rankNormDocs rankDocs 5 5 query edgeDocs'
 
 
 noFilterTwice :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
@@ -162,6 +152,18 @@ noFilterTwice edgeDocs =
                   [ (entity, [edgeDoc])
                   | entity <- edgeDocNeighbors $ edgeDoc]
 
+
+random100Filter :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
+random100Filter edgeDocs =
+  let edgeDocs' = take 100 $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
+      perSourceEdges :: HM.HashMap PageId [EdgeDoc]
+      perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
+      perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByEntity edgeDocs' ) $ perSourceEdges
+  in perTargetEdges
+  where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
+        groupByEntity edgeDoc =
+                  [ (entity, [edgeDoc])
+                  | entity <- edgeDocNeighbors $ edgeDoc]
 
 
 accumulateEdgeWeights :: forall w. Num w => HM.HashMap PageId [EdgeDocWithScores] -> (EdgeDocWithScores -> w) ->   HM.HashMap PageId (HM.HashMap PageId w)
@@ -179,7 +181,7 @@ accumulateEdgeWeights sourceToEdgeDocsWithScores by=
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -192,6 +194,12 @@ instance Show Method where
 showMethodName:: Method -> String
 showMethodName (Method a b c) = intercalate "-" [show a, show b, show c]
 
+allMethods :: [Method]
+allMethods = [ Method gName wName rName
+             | gName <- [minBound :: GraphNames .. maxBound]
+             , wName <- [minBound :: WeightingNames .. maxBound]
+             , rName <- [minBound :: GraphRankingNames .. maxBound]
+             ]
 
 instance NFData GraphNames
 instance NFData WeightingNames
@@ -223,8 +231,10 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                       ,(Top100PerGraph,  filterGraphByTop100GraphEdges rankDocs query $ edgeDocsSubset)
                       ]
 
-        simpleGraphs ::  [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
-        simpleGraphs = [(SimpleGraph, noFilterTwice $ edgeDocsSubset)]
+        simpleGraphs :: [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
+        simpleGraphs =  [(SimpleGraph, noFilterTwice $ edgeDocsSubset)
+                        ,(RandomGraph, random100Filter $ edgeDocsSubset)
+                        ]
 
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count,  realToFrac . withScoreCount)
@@ -233,9 +243,9 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                       ]
 
         graphRankings :: [(GraphRankingNames, (HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]))]
-        graphRankings = [(PageRank, \graph ->  let wgraph = hypergraphToGraph graph
+        graphRankings = [(PageRank, \graph ->  let wgraph = toGraph graph
                                                in rankByPageRank wgraph 0.15 20)
-                        ,(ShortPath, \graph -> let wgraph = hypergraphToGraph graph
+                        ,(ShortPath, \graph -> let wgraph = toGraph graph
                                                in rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce wgraph) (toList seeds))
                         ]
 
@@ -264,8 +274,10 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
 main :: IO ()
 main = do
-    (articlesFile, queryFile, outputFilePrefix) <- execParser $ info (helper <*> opts) mempty
+    (articlesFile, queryFile, outputFilePrefix, runMethods) <- execParser $ info (helper <*> opts) mempty
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
+    putStrLn $ "# Running methods: " ++ show runMethods
+
 
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
@@ -290,24 +302,13 @@ main = do
             $ Retrieve.retrieve corpusStatistics q
             $ map (uncurry Doc) docs
 
-
-    let allMethods = [ Method gName wName rName
-                     | gName <- [minBound :: GraphNames .. maxBound]
-                     , wName <- [minBound :: WeightingNames .. maxBound]
-                     , rName <- [minBound :: GraphRankingNames .. maxBound]
-                     ]
-
-    let enumAll :: (Enum a, Bounded a) => [a]
-        enumAll = [minBound .. maxBound]
-
-
     handles <- sequence $ M.fromList
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode)
-      | method <- allMethods ]
+      | method <- runMethods ]
         :: IO (M.Map Method Handle)
 
-    let --forM_' = forM_
-        forM_' = forConcurrently_
+    let forM_' = forM_
+        --forM_' = forConcurrently_
         --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
     forM_' queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
@@ -321,6 +322,7 @@ main = do
             runMethod :: Method -> [(PageId, Double)] -> IO ()
             runMethod method ranking = do
                 let hdl = handles M.! method
+
                 let logMsg t = T.putStr $ T.pack $ unpackPageId queryId++"\t"++showMethodName method++"\t"++t++"\n"
                     logTimed t doIt = do
                         logMsg t
@@ -331,6 +333,7 @@ main = do
                         logMsg $ t++"\ttime="++(showFFloat (Just 3) (realToFrac dt / 60 :: Double) "")
                         return r
 
+                logMsg $ "evaluating"
                 --logTimed "evaluating graph" $ evaluate $ rnf graph
                 --logMsg $ "graph size: "++show (graphSize graph)
                 --ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
@@ -341,5 +344,8 @@ main = do
                                 ranking
                 logTimed "writing ranking" $ TL.hPutStr hdl formatted
 
-        mapM_ (uncurry runMethod) rankings
+        let badMethods = S.fromList (map fst rankings) `S.difference` M.keysSet handles
+        when (not $ S.null badMethods) $ fail $ "unknown methods: "++show badMethods
+        mapM_ (uncurry runMethod) $ filter (\(m,_) -> m `elem` runMethods) rankings
+
     mapM_ hClose handles
