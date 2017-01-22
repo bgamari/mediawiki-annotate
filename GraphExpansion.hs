@@ -31,7 +31,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        , edgeDocNeighbors       :: [PageId]
                        , edgeDocContent         :: T.Text
                        }
-           deriving Show
+           deriving (Show, Generic)
+
+instance NFData EdgeDoc
 
 instance Eq EdgeDoc where
     (==) = (==) `on` edgeDocParagraphId
@@ -198,8 +200,13 @@ shortestPathsToNodeScores paths =
                            , elem <- toList path
                            ]
 
+
+-- Todo delete !
 wHyperGraphToGraph :: WHyperGraph Double -> Graph PageId Double
 wHyperGraphToGraph =
     Graph . fmap (\(OutWHyperEdges x) -> fmap (fmap $ recip . realToFrac) $ HM.toList x)
 
 
+hypergraphToGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Graph PageId Double
+hypergraphToGraph graph =
+    Graph $ fmap HM.toList graph

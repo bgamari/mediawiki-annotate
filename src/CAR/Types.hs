@@ -101,6 +101,7 @@ instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
                     deriving (Show, Generic, Ord, Eq, CBOR.Serialise, Hashable)
+instance NFData ParagraphId
 
 unpackParagraphId :: ParagraphId -> String
 unpackParagraphId (ParagraphId s) = unpackSBS s
