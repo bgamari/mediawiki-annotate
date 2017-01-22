@@ -15,6 +15,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Hashable
 import Data.Ix
+import Data.Monoid
 import Data.Maybe
 import Data.Bifunctor
 
@@ -83,7 +84,7 @@ pageRank alpha graph@(Graph nodeMap) =
 {-# SPECIALISE pageRank :: (Eq n, Hashable n) => Double -> Graph n Double -> [Eigenvector n Double] #-}
 
 nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
-nodes = foldMap (HS.fromList . map fst) . getGraph
+nodes (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g
 
 newtype NodeId = NodeId Int
                deriving (Eq, Ord, Show, Enum, Ix)
