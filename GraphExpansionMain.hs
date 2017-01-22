@@ -307,8 +307,8 @@ main = do
       | method <- runMethods ]
         :: IO (M.Map Method Handle)
 
-    let forM_' = forM_
-        --forM_' = forConcurrently_
+    let --forM_' = forM_
+        forM_' = forConcurrently_
         --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
     forM_' queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
