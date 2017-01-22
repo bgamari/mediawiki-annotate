@@ -25,7 +25,7 @@ readValuesWithOffsets = start 0 . BSL.toChunks
 
     go :: Offset          -- ^ offset of beginning of current chunk
        -> Offset          -- ^ start offset of thing currently being decoded
-       -> CBOR.Decoder a
+       -> CBOR.IDecode a
        -> [BS.ByteString] -- ^ remaining chunks
        -> [(Offset, a)]
     go !currOff !startOff (CBOR.Partial f)   [] =
