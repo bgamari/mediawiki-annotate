@@ -11,9 +11,13 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 
 
+import Control.Exception (bracket)
 import Control.DeepSeq
-import Control.Monad (when, void)
+import Control.Monad (when)
+import Control.Concurrent
 import Control.Concurrent.Async
+import Control.Concurrent.STM
+import Control.Concurrent.STM.TSem
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Coerce
@@ -319,8 +323,9 @@ main = do
       | method <- runMethods ]
         :: IO (M.Map Method Handle)
 
+    ncaps <- getNumCapabilities
     let --forM_' = forM_
-        forM_' = forConcurrently_
+        forM_' = forConcurrentlyN_ ncaps
         --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
     forM_' queriesToSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
@@ -361,3 +366,9 @@ main = do
         mapM_ (uncurry runMethod) $ filter (\(m,_) -> m `elem` runMethods) rankings
 
     mapM_ hClose handles
+
+forConcurrentlyN_ :: Foldable f => Int -> f a -> (a -> IO ()) -> IO ()
+forConcurrentlyN_ n xs f = do
+    sem <- atomically $ newTSem n
+    let run x = bracket (atomically $ waitTSem sem) (const $ atomically $ signalTSem sem) (const $ f x)
+    forConcurrently_ xs run
