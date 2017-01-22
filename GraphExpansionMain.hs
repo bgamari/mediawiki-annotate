@@ -178,13 +178,25 @@ accumulateEdgeWeights sourceToEdgeDocsWithScores by=
               , targetNode /= sourceNode
               ]
 
+
+
+-- Marginalized over second argument in edges, e.g. Map source (Map target weight_{st}) -> Map source weight_{s*}
+marginalizeEdges :: HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]
+marginalizeEdges graph =
+    HM.toList $ fmap marginalizeMap $ graph
+  where marginalizeMap :: HM.HashMap PageId Double -> Double
+        marginalizeMap map =
+            sum $ fmap snd $ HM.toList $ map
+
+
+
 -- ----------------------------------------------------------------------
 
 data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data GraphRankingNames = PageRank | ShortPath
+data GraphRankingNames = PageRank | ShortPath | MargEdges
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data Method = Method GraphNames WeightingNames GraphRankingNames
     deriving ( Ord, Eq, Generic)
@@ -246,6 +258,7 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                                                in rankByPageRank wgraph 0.15 20)
                         ,(ShortPath, \graph -> let wgraph = toGraph graph
                                                in rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce wgraph) (toList seeds))
+                        ,(MargEdges, \graph -> marginalizeEdges graph)
                         ]
 
         fancyWeightedGraphs ::  [((GraphNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
@@ -301,7 +314,7 @@ main = do
             $ Retrieve.retrieve corpusStatistics q
             $ map (uncurry Doc) docs
 
-    handles <- sequence $ M.fromList
+    handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode)
       | method <- runMethods ]
         :: IO (M.Map Method Handle)
