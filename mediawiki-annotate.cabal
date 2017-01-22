@@ -205,6 +205,7 @@ executable trec-car-graph-expansion
                        text,
                        array,
                        containers,
+                       stm,
                        deepseq,
                        simplir-galago,
                        optparse-applicative >= 0.12,
