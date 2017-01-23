@@ -91,7 +91,7 @@ data GraphStats = GraphStats { nNodes, nEdges :: !Int }
 data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
                                            , withScoreCount     :: Int
                                            , withScoreScore     :: Double
-                                           , withScoreRecipRank :: Double
+                                           , withScoreRank      :: Int
                                            }
            deriving (Show, Generic)
 instance NFData EdgeDocWithScores
@@ -109,7 +109,7 @@ rankNormDocs rankDocs normRank cutoffRank query edgeDocs =
           | not (null rankedEdgeDocs)         = last rankedEdgeDocs
           | otherwise                         = error "rankNormDocs: ranking empty"
 
-        cutRankedEdgeDocs =  fmap (\(rank, (edgeDoc, score))  -> (EdgeDocWithScores edgeDoc 1 (exp (score - normScore)) (1.0/(realToFrac rank))))
+        cutRankedEdgeDocs =  fmap (\(rank, (edgeDoc, score))  -> (EdgeDocWithScores edgeDoc 1 (exp (score - normScore)) (rank)))
                            $ zip [1::Int ..]
                            $ rankedEdgeDocs
     in cutRankedEdgeDocs
@@ -177,7 +177,6 @@ accumulateEdgeWeights sourceToEdgeDocsWithScores by=
             HM.fromListWith (+)
               [ (targetNode, by edgeDocsWithScore)
               | edgeDocsWithScore <- edgeDocsWithScores
---               | (EdgeDocWithScores edgeDoc count _ _) <- edgeDocsWithScores
               , targetNode <- edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
               , targetNode /= sourceNode
               ]
@@ -198,7 +197,7 @@ marginalizeEdges graph =
 
 data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data WeightingNames = Count | Binary | Score | RecipRank
+data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data GraphRankingNames = PageRank | ShortPath | MargEdges
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -254,7 +253,13 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count,  realToFrac . withScoreCount)
                       , (Score, withScoreScore)
-                      , (RecipRank, withScoreRecipRank)
+                      , (RecipRank,   (\edge ->  1.0 / (realToFrac $ withScoreRank edge )))
+                      , (LinearRank,  (\edge -> realToFrac (101 - (withScoreRank edge))))
+                      , (BucketRank,  (\edge ->  let rank = withScoreRank $ edge
+                                                 in if rank <= 5 then 3.0 else
+                                                    if rank <= 20 then 2.0 else
+                                                    1.0
+                                      ))
                       ]
 
         graphRankings :: [(GraphRankingNames, (HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]))]
