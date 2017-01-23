@@ -117,14 +117,7 @@ data Link = Link { linkTarget   :: !PageName
                  , linkAnchor   :: !T.Text
                  }
           deriving (Show, Generic)
-
-instance CBOR.Serialise Link where
-    encode (Link{..}) =
-           CBOR.encode linkTarget
-        <> CBOR.encode linkSection
-        <> CBOR.encode linkTargetId
-        <> CBOR.encode linkAnchor
-    decode = Link <$> CBOR.decode <*> CBOR.decode <*> CBOR.decode <*> CBOR.decode
+instance CBOR.Serialise Link
 
 data ParaBody = ParaText !T.Text
               | ParaLink !Link
