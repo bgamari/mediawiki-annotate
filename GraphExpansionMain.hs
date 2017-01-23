@@ -291,7 +291,8 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
               (rname, graphRanking) <- graphRankings
             ]
 
-    in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
+--     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
+    in computeRankings'
 
 main :: IO ()
 main = do
