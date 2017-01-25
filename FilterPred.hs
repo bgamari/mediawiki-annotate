@@ -19,6 +19,10 @@ import Text.Parser.Token.Style
 import CAR.Types
 import CAR.Utils
 
+-- | Salt used by @hashable-1.2.5.0@
+defaultSalt :: Int
+defaultSalt = -2578643520546668380  -- 0xdc36d1615b7400a4
+
 data Pred a = NameContains T.Text
             | NameHasPrefix T.Text
             | NameInSet (HS.HashSet PageName)
