@@ -79,13 +79,15 @@ pred inj = term
              ]
 
     truePred = textSymbol "true" >> pure TruePred
-    trainSet = textSymbol "train-set" >> pure (PageHashMod 1 2 0)
-    testSet  = textSymbol "test-set"  >> pure (PageHashMod 1 2 1)
+    trainSet = textSymbol "train-set" >> pure (PageHashMod defaultSalt 2 0)
+    testSet  = textSymbol "test-set"  >> pure (PageHashMod defaultSalt 2 1)
     foldPred = do void $ textSymbol "fold"
                   k <- fmap fromIntegral natural
-                  pure $ Any [ PageHashMod 2 10 (2*k), PageHashMod 2 10 (2*k+1) ]
+                  pure $ Any [ PageHashMod defaultSalt 10 (2*k)
+                             , PageHashMod defaultSalt 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
     isDisambiguation = textSymbol "is-disambiguation" >> pure IsDisambiguation
+
 
     nameContains = do
         void $ textSymbol "name-contains"
@@ -106,10 +108,10 @@ pred inj = term
     pageHashMod = do
         void $ textSymbol "page-hash-mod"
         let natural' = fmap fromIntegral natural
-        salt <- natural'
-        k <- natural'
         n <- natural'
+        k <- natural'
         when (k > n) $ fail "pageHashMod: k > n"
+        salt <- natural' <|> pure defaultSalt
         return $ PageHashMod salt k n
 
     listOf :: Parser a -> Parser [a]

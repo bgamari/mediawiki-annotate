@@ -27,7 +27,7 @@ helpDescr =
         cmd "fold K"                           "matches pages in fold k (k in 0..4)",
         cmd "is-redirect"                      "matches redirect pages",
         cmd "is-disambiguation"                "matches disambiguation pages",
-        cmd "page-hash-mod N K"                "matches pages where the page id mod N == K, for N > K ",
+        cmd "page-hash-mod N K [SALT]"         "matches pages where the page id mod N == K, for N > K ",
         "",
         cmd "name-contains SUBSTR"             "matches pages where the page name contains the SUBSTR (case insensitive)",
         cmd "name-has-prefix PREFIX"           "matches pages where the page name starts with PREFIX (case sensitive)",
