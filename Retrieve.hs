@@ -83,7 +83,6 @@ textToTokens' text =
                    $ T.toCaseFold text
         stemmedTerms = stems English terms
     in fmap Term.fromText --trace ("terms: "++show terms ++ "\nrawterms: "++ show rawterms ++ "\nacronyms: "++ show acronyms)
-       $ nub
        $ filter (\t -> T.length t > 1)
        $ killStopwords enInquery
        $ acronyms ++ rawterms ++ terms ++ stemmedTerms
