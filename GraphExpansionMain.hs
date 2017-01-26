@@ -300,7 +300,6 @@ main = do
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
 
-
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
 
@@ -367,7 +366,9 @@ main = do
                                 ranking
                 logTimed "writing ranking" $ TL.hPutStr hdl formatted
 
-        let badMethods = S.fromList (map fst rankings) `S.difference` M.keysSet handles
+        let  methodsRequested = M.keysSet handles
+             methodsAvailable = S.fromList (map fst rankings)
+             badMethods = methodsRequested `S.difference` methodsAvailable
         when (not $ S.null badMethods) $ fail $ "unknown methods: "++show badMethods
         mapM_ (uncurry runMethod) $ filter (\(m,_) -> m `elem` runMethods) rankings
 
