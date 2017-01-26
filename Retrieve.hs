@@ -90,7 +90,6 @@ textToTokens' text =
             T.all (`CS.member` CS.upper)
             . T.filter (`CS.member` acronymPunctuation)
           acronymPunctuation = CS.fromList ".-"
-          nub = HS.toList . HS.fromList
 
 textToTokens :: TermFilter -> T.Text -> TermCounts
 textToTokens termFilter = foldMap oneTerm . filter termFilter . textToTokens'
