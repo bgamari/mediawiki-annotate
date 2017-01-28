@@ -18,6 +18,7 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
+import Data.Maybe
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Coerce
@@ -45,14 +46,13 @@ import WriteRanking
 import Retrieve
 import GraphExpansion
 
-opts :: Parser (FilePath, FilePath, FilePath, [Method])
+opts :: Parser (FilePath, FilePath, FilePath, Maybe [Method])
 opts =
     (,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-    <*> (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run")
-         <|> pure allMethods)
+    <*> optional (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run"))
     where
       method = (methodMap M.!) <$> str
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
@@ -296,7 +296,8 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
 main :: IO ()
 main = do
-    (articlesFile, queryFile, outputFilePrefix, runMethods) <- execParser $ info (helper <*> opts) mempty
+    (articlesFile, queryFile, outputFilePrefix, runMethods) <-
+        execParser $ info (helper <*> opts) mempty
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
 
@@ -325,7 +326,7 @@ main = do
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode)
-      | method <- runMethods ]
+      | method <- fromMaybe allMethods runMethods ]
         :: IO (M.Map Method Handle)
 
     ncaps <- getNumCapabilities
@@ -366,11 +367,15 @@ main = do
                                 ranking
                 logTimed "writing ranking" $ TL.hPutStr hdl formatted
 
-        let  methodsRequested = M.keysSet handles
-             methodsAvailable = S.fromList (map fst rankings)
-             badMethods = methodsRequested `S.difference` methodsAvailable
+        let methodsAvailable = S.fromList (map fst rankings)
+            badMethods
+              | Just ms <- runMethods = S.fromList ms `S.difference` methodsAvailable
+              | otherwise             = S.empty
+            filterMethods
+              | Just ms <- runMethods = (`elem` ms)
+              | otherwise             = const True
         when (not $ S.null badMethods) $ fail $ "unknown methods: "++show badMethods
-        mapM_ (uncurry runMethod) $ filter (\(m,_) -> m `elem` runMethods) rankings
+        mapM_ (uncurry runMethod) $ filter (filterMethods . fst) rankings
 
     mapM_ hClose handles
 
