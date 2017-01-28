@@ -64,7 +64,12 @@ main = do
             let cutAnnotation (Annotation sectionPath paraId rel) =
                   Annotation (cutSectionPath sectionPath) paraId rel
             withFile relsFile WriteMode $ \h ->
-                  hPutStr h $ unlines $ map prettyAnnotation $ S.toList $ S.map cutAnnotation $ foldMap Exports.toAnnotations pagesToExport
+                  hPutStr h
+                  $ unlines
+                  $ map prettyAnnotation
+                  $ S.toList
+                  $ S.map cutAnnotation
+                  $ foldMap Exports.toAnnotations pagesToExport
             putStrLn "done"
 
 
@@ -75,7 +80,12 @@ main = do
             let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
                   EntityAnnotation (cutSectionPath sectionPath) entityId rel
             withFile relsFile WriteMode $ \h ->
-                  hPutStr h $ unlines $ map prettyEntityAnnotation $ S.toList $ S.map cutAnnotation $ foldMap Exports.toEntityAnnotations pagesToExport
+                  hPutStr h
+                  $ unlines
+                  $ map prettyEntityAnnotation
+                  $ S.toList
+                  $ S.map cutAnnotation
+                  $ foldMap Exports.toEntityAnnotations pagesToExport
             putStrLn "done"
 
 
