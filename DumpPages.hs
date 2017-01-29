@@ -35,11 +35,11 @@ opts = subparser
       where
         f inputFile = do
             pages <- decodeCborList <$> BSL.readFile inputFile
-            mapM_ (\p -> putStrLn
-                        $ unlines
-                        $ fmap escapeSectionPath
-                        $ listSections p
-                  ) pages
+            let sectionpathlist p = fmap escapeSectionPath
+                                  $ listSections p
+            let pageNameStr p = (T.unpack $ getPageName $ pageName p)
+
+            mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
         listSections :: Page -> [SectionPath]
         listSections (Page _ pageId skeleton) =
              fmap (\sp -> (SectionPath pageId sp) )
