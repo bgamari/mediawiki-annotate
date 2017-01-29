@@ -20,6 +20,7 @@ opts :: Parser (IO ())
 opts = subparser
     $  command "titles" (info dumpTitles fullDesc)
     <> command "pages" (info  dumpPages fullDesc)
+    <> command "sections" (info dumpSections fullDesc)
     <> command "hist-headings" (info  histogramHeadings fullDesc)
   where
     dumpTitles =
@@ -28,6 +29,29 @@ opts = subparser
         f inputFile = do
             pages <- decodeCborList <$> BSL.readFile inputFile
             mapM_ (T.putStrLn . getPageName . pageName) pages
+
+    dumpSections =
+        f <$> argument str (help "input file" <> metavar "FILE")
+      where
+        f inputFile = do
+            pages <- decodeCborList <$> BSL.readFile inputFile
+            mapM_ (\p -> putStrLn
+                        $ unlines
+                        $ fmap escapeSectionPath
+                        $ listSections p
+                  ) pages
+        listSections :: Page -> [SectionPath]
+        listSections (Page _ pageId skeleton) =
+             fmap (\sp -> (SectionPath pageId sp) )
+             $ foldMap go skeleton
+          where
+            go :: PageSkeleton -> [[HeadingId]]
+            go (Section _ sectionId children) =
+                let childSectionPaths = foldMap go children
+                in if null childSectionPaths
+                then [[sectionId]]
+                else fmap (\childPath -> sectionId : childPath)  childSectionPaths
+            go (Para {}) = []
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")
