@@ -50,10 +50,11 @@ relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
 
 
 pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
-         => a -> Graph n a -> [Eigenvector n a]
-pageRank alpha graph@(Graph nodeMap) =
+         => a -> a -> HS.HashSet n -> Graph n a -> [Eigenvector n a]
+pageRank alpha beta seeds graph@(Graph nodeMap) =
     let (nodeRange, toNode, fromNode) = computeNodeMapping graph
         numNodes = rangeSize nodeRange
+        numSeeds = length nodeRange
 
         initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRange []
 
@@ -66,23 +67,29 @@ pageRank alpha graph@(Graph nodeMap) =
                   , (v, weightUV) <- outEdges
                   ]
 
-        mult :: A.UArray NodeId a -> A.UArray NodeId a
-        mult arr = A.accumArray (+) 0 nodeRange
-                   [ (v, teleportationSum + sumU)
+        nextiter :: A.UArray NodeId a -> A.UArray NodeId a
+        nextiter pagerank = A.accumArray (+) 0 nodeRange
+                   [ (v, teleportationSum + outlinkSum + seedTeleportSum)
                    | (v, inEdges) <- A.assocs inbound
-                   , let sumU = sum [ aU * normWeight * (1 - alpha)
+                   , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
                                     | (u, normWeight) <- inEdges
-                                    , let aU = arr A.! u
+                                    , let uPR = pagerank A.! u
                                     ]
                          teleportationSum = alpha / realToFrac numNodes * c
+                         seedTeleportSum
+                             | (toNode v) `HS.member` seeds = c * beta
+                             | otherwise = 0
+                         beta'
+                           | (toNode v) `HS.member` seeds = beta
+                           | otherwise = 0
                    ]
           where
-            !c = sum $ A.elems arr
+            !c = sum $ A.elems pagerank
 
     in map (Eigenvector fromNode toNode)
-       $ initial : iterate (mult) initial  -- normalization should be optional, but we are paranoid.
+       $ initial : iterate (nextiter) initial  -- normalization should be optional, but we are paranoid.
 {-# SPECIALISE pageRank :: (Eq n, Hashable n, Show n)
-                        => Double -> Graph n Double -> [Eigenvector n Double] #-}
+                        => Double -> Double -> HS.HashSet n -> Graph n Double -> [Eigenvector n Double] #-}
 
 nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
 nodes (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g

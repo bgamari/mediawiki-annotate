@@ -138,7 +138,13 @@ subsetOfUniverseGraph universe nodeset =
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations =
-  let pr = (!! iterations)  $ PageRank.pageRank teleport graph
+  let pr = (!! iterations)  $ PageRank.pageRank teleport 0 HS.empty graph
+      prRanking  =  PageRank.toEntries $ pr
+  in prRanking
+
+rankByPersonalizedPageRank :: Graph PageId Double -> Double -> HS.HashSet PageId -> Int -> [(PageId, Double)]
+rankByPersonalizedPageRank graph teleport seeds iterations =
+  let pr = (!! iterations)  $ PageRank.pageRank 0 teleport seeds graph
       prRanking  =  PageRank.toEntries $ pr
   in prRanking
 

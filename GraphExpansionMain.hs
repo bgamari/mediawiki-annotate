@@ -199,7 +199,7 @@ data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data GraphRankingNames = PageRank | ShortPath | MargEdges
+data GraphRankingNames = PageRank | PersPageRank | ShortPath | MargEdges
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data Method = Method GraphNames WeightingNames GraphRankingNames
     deriving ( Ord, Eq, Generic)
@@ -265,6 +265,8 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
         graphRankings :: [(GraphRankingNames, (HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]))]
         graphRankings = [(PageRank, \graph ->  let wgraph = toGraph graph
                                                in rankByPageRank wgraph 0.15 20)
+                        ,(PersPageRank, \graph ->  let wgraph = toGraph graph
+                                               in rankByPersonalizedPageRank wgraph 0.15 seeds 20)
                         ,(ShortPath, \graph -> let wgraph = toGraph graph
                                                in rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce wgraph) (toList seeds))
                         ,(MargEdges, \graph -> marginalizeEdges graph)
