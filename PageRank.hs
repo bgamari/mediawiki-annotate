@@ -8,6 +8,7 @@ module PageRank
    , toHashMap
    , toEntries
    , pageRank
+   , pageRankWithSeeds
    ) where
 
 import qualified Data.Array.Unboxed as A
@@ -48,13 +49,47 @@ relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
   where
     delta = sum $ map square $ zipWith (-) (A.elems a) (A.elems b)
 
+-- | Plain PageRank with uniform teleportation.
+--
+-- Solving for the principle eigenvector of the transport operator,
+-- \[
+-- a_{ij} =  (1-\alpha) \frac{e_{ij}}{\sum_j e_{ij}} + \frac{\alpha}{N}
+-- \]
+-- given a graph with edge weights \(e_{ij}\).
+pageRank
+    :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
+    => a                  -- ^ teleportation probability \(\alpha\)
+    -> Graph n a          -- ^ the graph
+    -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+pageRank alpha = pageRankWithSeeds alpha 0 HS.empty
 
-pageRank :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
-         => a -> a -> HS.HashSet n -> Graph n a -> [Eigenvector n a]
-pageRank alpha beta seeds graph@(Graph nodeMap) =
+-- | Personalized PageRank.
+--
+-- Solving for the principle eigenvector of the transport operator,
+-- \[
+-- a_{ij} =  (1-\alpha-\beta) \frac{e_{ij}}{\sum_j e_{ij}} + \frac{\alpha}{N} + b_j
+-- \]
+-- where
+-- \[
+-- b_j =
+-- \begin{cases}
+--   \frac{\beta}{\vert \mathcal{S}\vert} & \mathrm{if} j \in \mathcal{S} \\
+--   0 & \mathrm{otherwise}
+-- \end{cases}
+-- \]
+-- given a graph with edge weights \(e_{ij}\) and a seed node set
+-- \(\mathcal{S}\).
+pageRankWithSeeds
+    :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
+    => a                  -- ^ uniform teleportation probability \(\alpha\)
+    -> a                  -- ^ seed teleportation probability \(\beta\)
+    -> HS.HashSet n       -- ^ seed node set
+    -> Graph n a          -- ^ the graph
+    -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
     let (nodeRange, toNode, fromNode) = computeNodeMapping graph
         numNodes = rangeSize nodeRange
-        numSeeds = length nodeRange
+        numSeeds = HS.size seeds
 
         initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRange []
 
@@ -72,24 +107,24 @@ pageRank alpha beta seeds graph@(Graph nodeMap) =
                    [ (v, teleportationSum + outlinkSum + seedTeleportSum)
                    | (v, inEdges) <- A.assocs inbound
                    , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
-                                    | (u, normWeight) <- inEdges
-                                    , let uPR = pagerank A.! u
-                                    ]
+                                          | (u, normWeight) <- inEdges
+                                          , let uPR = pagerank A.! u
+                                          ]
                          teleportationSum = alpha / realToFrac numNodes * c
-                         seedTeleportSum
-                             | (toNode v) `HS.member` seeds = c * beta
-                             | otherwise = 0
+                         seedTeleportSum = beta' / realToFrac numSeeds * c
                          beta'
-                           | (toNode v) `HS.member` seeds = beta
+                           | toNode v `HS.member` seeds = beta
                            | otherwise = 0
                    ]
           where
             !c = sum $ A.elems pagerank
 
     in map (Eigenvector fromNode toNode)
-       $ initial : iterate (nextiter) initial  -- normalization should be optional, but we are paranoid.
-{-# SPECIALISE pageRank :: (Eq n, Hashable n, Show n)
-                        => Double -> Double -> HS.HashSet n -> Graph n Double -> [Eigenvector n Double] #-}
+       $ initial : iterate nextiter initial
+{-# SPECIALISE pageRankWithSeeds
+                   :: (Eq n, Hashable n, Show n)
+                   => Double -> Double -> HS.HashSet n
+                   -> Graph n Double -> [Eigenvector n Double] #-}
 
 nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
 nodes (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g
