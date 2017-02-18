@@ -46,15 +46,16 @@ import WriteRanking
 import Retrieve
 import GraphExpansion
 
-opts :: Parser (FilePath, FilePath, FilePath, Maybe [Method])
+opts :: Parser (FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
-    (,,,)
+    (,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> optional (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run"))
+    <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     where
-      method = (methodMap M.!) <$> str
+      method = fmap (methodMap M.!) str
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
 
@@ -298,7 +299,7 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
 
 main :: IO ()
 main = do
-    (articlesFile, queryFile, outputFilePrefix, runMethods) <-
+    (articlesFile, queryFile, outputFilePrefix, runMethods, expansionHops) <-
         execParser $ info (helper <*> opts) mempty
     pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
@@ -341,7 +342,7 @@ main = do
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
-            rankings = computeRankingsForQuery rankDoc query 3
+            rankings = computeRankingsForQuery rankDoc query expansionHops
                                   universeGraph binarySymmetricGraph
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
