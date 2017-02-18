@@ -1,4 +1,4 @@
-allow-newer: vector
+allow-newer: vector, aws, xml-conduit
 
 packages:
     ./
@@ -6,6 +6,7 @@ packages:
     simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
+    simplir/vendor/xml/xml-conduit
     car-baselines/
     fork-map/
 
