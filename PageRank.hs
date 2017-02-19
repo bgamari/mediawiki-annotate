@@ -86,6 +86,10 @@ pageRankWithSeeds
     -> HS.HashSet n       -- ^ seed node set
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+pageRankWithSeeds _ beta seeds _
+  | beta /= 0
+  , HS.null seeds =
+    error "pageRankWithSeeds: empty seed set"
 pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
     let (nodeRange, toNode, fromNode) = computeNodeMapping graph
         numNodes = rangeSize nodeRange
@@ -111,7 +115,9 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                                           , let uPR = pagerank A.! u
                                           ]
                          teleportationSum = alpha / realToFrac numNodes * c
-                         seedTeleportSum = beta' / realToFrac numSeeds * c
+                         seedTeleportSum
+                           | beta == 0 = 0
+                           | otherwise = beta' / realToFrac numSeeds * c
                          beta'
                            | toNode v `HS.member` seeds = beta
                            | otherwise = 0
