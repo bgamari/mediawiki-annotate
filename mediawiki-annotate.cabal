@@ -198,6 +198,7 @@ executable trec-car-graph-expansion
                        PageRank
                        Graph
                        AttriRank
+                       GloveEmbedding
                        ZScore
                        WriteRanking
                        Retrieve
