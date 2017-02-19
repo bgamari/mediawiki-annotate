@@ -19,7 +19,7 @@ import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
 import Data.Maybe
-import Data.Monoid hiding (All, Any)
+import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
 import Data.Coerce
 import Data.List (intercalate)
@@ -28,6 +28,7 @@ import System.IO
 import Data.Time.Clock
 import Numeric
 import GHC.Generics
+import GHC.TypeLits
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -39,12 +40,15 @@ import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
+import CAR.AnnotationsFile as AnnsFile
 import qualified ExtractKnowledgeBase as KB
 
 --import qualified Control.Concurrent.ForkMap as ForkMap
 import WriteRanking
 import Retrieve
 import GraphExpansion
+import GloveEmbedding
+import ZScore (Attributes(..))
 
 opts :: Parser (FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
@@ -79,8 +83,6 @@ pagesToLeadEntities pages =
       where
         inlinkInfo   = KB.collectInlinkInfo pages
         inlinkCounts = KB.resolveRedirects inlinkInfo
-
-type Name = String
 
 data GraphStats = GraphStats { nNodes, nEdges :: !Int }
                 deriving (Show)
@@ -189,8 +191,7 @@ marginalizeEdges :: HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Do
 marginalizeEdges graph =
     HM.toList $ fmap marginalizeMap $ graph
   where marginalizeMap :: HM.HashMap PageId Double -> Double
-        marginalizeMap map =
-            sum $ fmap snd $ HM.toList $ map
+        marginalizeMap = sum . fmap snd . HM.toList
 
 
 
@@ -200,7 +201,7 @@ data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data GraphRankingNames = PageRank | PersPageRank | ShortPath | MargEdges
+data GraphRankingNames = PageRank | PersPageRank | AttriRank | ShortPath | MargEdges
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data Method = Method GraphNames WeightingNames GraphRankingNames
     deriving ( Ord, Eq, Generic)
@@ -223,16 +224,28 @@ instance NFData GraphRankingNames
 
 type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
 
-computeRankingsForQuery :: RankingFunction
+computeRankingsForQuery :: forall n. (KnownNat n)
+                        => RankingFunction
+                        -> AnnotationsFile
                         -> QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
-                           -> [(Method, [(PageId, Double)])]
+                        -> WordEmbedding n
+                        -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGraph =
+computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySymmetricGraph wordEmbedding =
     let seeds :: HS.HashSet PageId
         seeds = queryDocLeadEntities $ queryDoc
-        query =  queryDocRawTerms $ queryDoc
+        query = queryDocRawTerms $ queryDoc
 
+        nodeSet :: HS.HashSet PageId
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
+
+        nodeToAttributes :: HM.HashMap PageId (Attributes (EmbeddingDim n))
+        nodeToAttributes = foldMap (\pid -> HM.singleton pid $ toWordVec pid) (toList nodeSet)
+          where
+            toWordVec pid =
+                pageTextEmbeddingAttributes wordEmbedding
+                $ fromMaybe (error $ "computeRankingsForQuery: failed to find page: "++show pid)
+                $ AnnsFile.lookupPage pid annsFile
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset = subsetOfUniverseGraph universeGraph nodeSet
@@ -263,11 +276,17 @@ computeRankingsForQuery rankDocs queryDoc radius universeGraph binarySymmetricGr
                                       ))
                       ]
 
+
+                     --rankByAttriPageRank graph teleport numAttrs nodeAttrs iterations =
+
         graphRankings :: [(GraphRankingNames, (HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]))]
         graphRankings = [(PageRank, \graph ->  let wgraph = toGraph graph
                                                in rankByPageRank wgraph 0.15 20)
-                        ,(PersPageRank, \graph ->  let wgraph = toGraph graph
-                                               in rankByPersonalizedPageRank wgraph 0.15 seeds 20)
+                        ,(PersPageRank, \graph -> let wgraph = toGraph graph
+                                                  in rankByPersonalizedPageRank wgraph 0.15 seeds 20)
+                        ,(AttriRank, \graph ->  let wgraph = toGraph graph
+                                                    numAttrs = wordEmbeddingDim wordEmbedding
+                                                in rankByAttriPageRank wgraph 0.15 numAttrs nodeToAttributes 20)
                         ,(ShortPath, \graph -> let wgraph = toGraph graph
                                                in rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce wgraph) (toList seeds))
                         ,(MargEdges, \graph -> marginalizeEdges graph)
@@ -301,11 +320,13 @@ main :: IO ()
 main = do
     (articlesFile, queryFile, outputFilePrefix, runMethods, expansionHops) <-
         execParser $ info (helper <*> opts) mempty
-    pagesForLinkExtraction <- decodeCborList <$> BSL.readFile articlesFile
+    annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
 
+    SomeWordEmbedding wordEmbeddings <- parseGlove "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
+
     let universeGraph :: UniverseGraph
-        !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs pagesForLinkExtraction
+        !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
 
     let binarySymmetricGraph :: BinarySymmetricGraph
         !binarySymmetricGraph = universeToBinaryGraph universeGraph
@@ -318,7 +339,7 @@ main = do
 
     let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
                           $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
-                          $ emitEdgeDocs pagesForLinkExtraction
+                          $ emitEdgeDocs $ AnnsFile.pages annsFile
 
     putStrLn $ "# corpus statistics " ++ show corpusStatistics
 
@@ -342,8 +363,8 @@ main = do
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
-            rankings = computeRankingsForQuery rankDoc query expansionHops
-                                  universeGraph binarySymmetricGraph
+            rankings = computeRankingsForQuery rankDoc annsFile query expansionHops
+                                  universeGraph binarySymmetricGraph wordEmbeddings
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
             runMethod method ranking = do

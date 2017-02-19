@@ -11,6 +11,7 @@
 --
 module AttriRank
    ( Attributes(..)
+   , DDist(..)
    , attriRank
    ) where
 
@@ -27,6 +28,7 @@ import Prelude hiding (pi)
 import ZScore
 import DenseMapping
 import Graph
+import PageRank (Eigenvector(..))
 
 data DDist = Uniform
            | Beta Double Double
@@ -36,7 +38,7 @@ attriRank :: forall n t a. (a ~ Double, Show n, Eq n, Hashable n, Ix t)
           -> DDist -- ^ distribution over \(d\).
           -> HM.HashMap n (Attributes t)
           -> Graph n a
-          -> [(a, A.UArray (DenseId n) a)]
+          -> [(a, Eigenvector n a)]
 attriRank _ _ attrs _ | HM.null attrs = error "attriRank: No attributes"
 attriRank gamma dDist nodeAttrs graph =
     -- See Algorithm 1
@@ -106,7 +108,7 @@ attriRank gamma dDist nodeAttrs graph =
                    | Edge i j v <- p
                    , let rhoJ = rho A.! j
                    ]
-    in (norm pi0, pi0) : go 1 pi0 pi0
+    in map (second $ Eigenvector mapping) $ (norm pi0, pi0) : go 1 pi0 pi0
 
 data Edge n = Edge !(DenseId n) !(DenseId n) !Double
 

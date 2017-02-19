@@ -4,7 +4,7 @@
 {-# LANGUAGE BangPatterns #-}
 
 module PageRank
-   ( Eigenvector
+   ( Eigenvector(..)
    , toHashMap
    , toEntries
    , pageRank

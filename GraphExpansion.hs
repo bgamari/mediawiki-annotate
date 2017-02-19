@@ -13,9 +13,12 @@ import Data.Foldable
 import Data.Maybe
 import Data.Bifunctor
 import Data.Function
+import Data.Ix
 import GHC.Generics
+import GHC.TypeLits
 
 import Data.Hashable
+import qualified Data.Array.Unboxed as A
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
@@ -26,6 +29,14 @@ import Dijkstra
 import PageRank
 import CAR.Utils
 import CAR.Types
+
+import qualified SimplIR.Term as Term
+import AttriRank
+import ZScore
+import Retrieve
+import GloveEmbedding
+import ZScore (Attributes(..))
+
 
 data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        , edgeDocArticleId       :: PageId
@@ -100,8 +111,25 @@ emitEdgeDocs pages =
            | target <- edgeDocNeighbors edgeDoc]
 
 
+computeTextEmbedding :: KnownNat n => WordEmbedding n -> T.Text -> WordVec n
+computeTextEmbedding wordEmbedding text =
+    mconcat $ mapMaybe toWordVec
+    $ fmap Term.toText $ textToTokens' text
+  where
+    toWordVec x = x `HM.lookup` wordEmbedding
 
+wordVecToAttributes :: WordVec n -> Attributes (EmbeddingDim n)
+wordVecToAttributes = Attrs . A.amap realToFrac . unWordVec
 
+pageTextEmbeddingAttributes :: KnownNat n => WordEmbedding n -> Page
+                            -> Attributes (EmbeddingDim n)
+pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId pageSkeleta) =
+     wordVecToAttributes
+     $ mconcat  -- merge wordvectors per skeleton
+     $ fmap (computeTextEmbedding wordEmbedding)
+     $ mconcat $ pageText
+    where
+      pageText = fmap pageSkeletonText pageSkeleta
 
 -- ------------------------------------------------
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
@@ -115,6 +143,7 @@ expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
 expandNodes binarySymmetricGraph seeds =
   seeds <> foldMap (fromMaybe mempty . (`HM.lookup` binarySymmetricGraph)) seeds
 
+expandNodesK :: BinarySymmetricGraph -> HS.HashSet PageId -> Int -> HS.HashSet PageId
 expandNodesK binarySymmetricGraph seeds k =
   iterate (expandNodes binarySymmetricGraph) seeds !! k
 
@@ -145,7 +174,16 @@ rankByPageRank graph teleport iterations =
 
 rankByPersonalizedPageRank :: Graph PageId Double -> Double -> HS.HashSet PageId -> Int -> [(PageId, Double)]
 rankByPersonalizedPageRank graph teleport seeds iterations =
-  let pr = (!! iterations)  $ PageRank.pageRankWithSeeds 0 teleport seeds graph
+  let pr = (!! iterations) $ PageRank.pageRankWithSeeds 0 teleport seeds graph
+      prRanking  =  PageRank.toEntries $ pr
+  in prRanking
+
+-- gamma dDist nodeAttrs graph
+rankByAttriPageRank :: Ix t
+                    => Graph PageId Double -> Double -> Int -> HM.HashMap PageId (Attributes t) -> Int -> [(PageId, Double)]
+rankByAttriPageRank graph teleport numAttrs nodeAttrs iterations =
+  let gamma = 1/(realToFrac numAttrs)
+      pr = snd $ (!! iterations) $ AttriRank.attriRank gamma AttriRank.Uniform nodeAttrs graph
       prRanking  =  PageRank.toEntries $ pr
   in prRanking
 
