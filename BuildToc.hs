@@ -2,7 +2,6 @@
 {-# LANGUAGE BangPatterns #-}
 
 import Data.Foldable
-import qualified Data.Binary.Get as Bin
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
