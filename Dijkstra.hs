@@ -1,12 +1,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE MultiWayIf #-}
 
 module Dijkstra
-   ( Graph(..)
-   , Distance(..)
+   ( Distance(..)
    , Path
    , dijkstra
    , lazyDijkstra
@@ -16,7 +14,6 @@ module Dijkstra
    ) where
 
 import Data.Foldable
-import Data.Function
 import Data.Monoid
 import Data.Maybe
 import Data.Hashable
@@ -26,13 +23,7 @@ import qualified Data.Sequence as Seq
 import qualified Data.Heap as H
 import Control.Monad.Trans.State.Strict
 
--- | For each node, its outgoing neighbors.
-data Graph n e = Graph { getGraph :: HM.HashMap n [(n,e)] }
-               deriving (Functor, Show)
-
-getNeighbors :: (Eq n, Hashable n)
-             => Graph n e -> n -> [(n,e)]
-getNeighbors (Graph ns) n = fromMaybe [] $ HM.lookup n ns
+import Graph
 
 data Distance e = Finite !e | Infinite
                 deriving (Show, Eq, Ord)
