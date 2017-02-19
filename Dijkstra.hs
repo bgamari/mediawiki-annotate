@@ -26,6 +26,7 @@ import qualified Data.Sequence as Seq
 import qualified Data.Heap as H
 import Control.Monad.Trans.State.Strict
 
+-- | For each node, its outgoing neighbors.
 data Graph n e = Graph { getGraph :: HM.HashMap n [(n,e)] }
                deriving (Functor, Show)
 
