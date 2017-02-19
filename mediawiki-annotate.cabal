@@ -196,6 +196,8 @@ executable trec-car-graph-expansion
                        Dijkstra
                        NodeMapping
                        PageRank
+                       AttriRank
+                       ZScore
                        WriteRanking
                        Retrieve
   ghc-options:         -Wall -threaded -rtsopts
