@@ -16,15 +16,12 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Hashable
 import Data.Ix
-import Data.Monoid
-import Data.Maybe
 import Data.Bifunctor
 
+import NodeMapping
 import Dijkstra (Graph(..))
 
-data Matrix
-
-data Eigenvector n a = Eigenvector (n -> NodeId) (NodeId -> n) (A.UArray NodeId a)
+data Eigenvector n a = Eigenvector (NodeMapping n) (A.UArray NodeId a)
 
 -- | A transition matrix
 type Transition = A.UArray (NodeId, NodeId)
@@ -35,8 +32,8 @@ toHashMap = HM.fromList . toEntries
 
 toEntries :: (A.IArray A.UArray a)
           => Eigenvector n a -> [(n, a)]
-toEntries (Eigenvector _ fromNode arr) =
-    map (first fromNode) (A.assocs arr)
+toEntries (Eigenvector mapping arr) =
+    map (first $ toNode mapping) (A.assocs arr)
 
 square x = x * x
 norm arr = sum $ map square $ A.elems arr
@@ -44,7 +41,7 @@ normalize arr = let n = norm arr in A.amap (/ n) arr
 
 relChange :: (A.IArray A.UArray a, RealFrac a)
           => Eigenvector n a -> Eigenvector n a -> a
-relChange (Eigenvector _ _ a) (Eigenvector _ _ b) =
+relChange (Eigenvector _ a) (Eigenvector _ b) =
     delta / norm a
   where
     delta = sum $ map square $ zipWith (-) (A.elems a) (A.elems b)
@@ -91,23 +88,26 @@ pageRankWithSeeds _ beta seeds _
   , HS.null seeds =
     error "pageRankWithSeeds: empty seed set"
 pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
-    let (nodeRange, toNode, fromNode) = computeNodeMapping graph
-        numNodes = rangeSize nodeRange
+    let mapping  = mkNodeMapping graph
+        nodeRng  = nodeRange mapping
+        numNodes = rangeSize nodeRng
         numSeeds = HS.size seeds
 
-        initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRange []
+        initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRng []
 
         -- normalized flow of nodes flowing into each node
         inbound :: A.Array NodeId [(NodeId, a)]
-        inbound = A.accumArray (++) [] nodeRange
-                  [ (fromNode v, [(fromNode u, weightUV / weightUSum)])
+        inbound = A.accumArray (++) [] nodeRng
+                  [ ( fromNode mapping v,
+                      [(fromNode mapping u, weightUV / weightUSum)]
+                    )
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum $ map snd outEdges
                   , (v, weightUV) <- outEdges
                   ]
 
         nextiter :: A.UArray NodeId a -> A.UArray NodeId a
-        nextiter pagerank = A.accumArray (+) 0 nodeRange
+        nextiter pagerank = A.accumArray (+) 0 nodeRng
                    [ (v, teleportationSum + outlinkSum + seedTeleportSum)
                    | (v, inEdges) <- A.assocs inbound
                    , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
@@ -119,24 +119,18 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                            | beta == 0 = 0
                            | otherwise = beta' / realToFrac numSeeds * c
                          beta'
-                           | toNode v `HS.member` seeds = beta
+                           | toNode mapping v `HS.member` seeds = beta
                            | otherwise = 0
                    ]
           where
             !c = sum $ A.elems pagerank
 
-    in map (Eigenvector fromNode toNode)
+    in map (Eigenvector mapping)
        $ initial : iterate nextiter initial
 {-# SPECIALISE pageRankWithSeeds
                    :: (Eq n, Hashable n, Show n)
                    => Double -> Double -> HS.HashSet n
                    -> Graph n Double -> [Eigenvector n Double] #-}
-
-nodes :: (Hashable n, Eq n) => Graph n a -> HS.HashSet n
-nodes (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g
-
-newtype NodeId = NodeId Int
-               deriving (Eq, Ord, Show, Enum, Ix)
 
 
 -- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
@@ -171,30 +165,6 @@ normRows nodeRange trans =
              , j <- range nodeRange
              , let w = trans A.! (i,j)
              ]
-
-
-computeNodeMapping
-    :: forall n a. (A.IArray A.UArray a, Eq n, Hashable n, Num a, Show n)
-    => Graph n a
-    -> ( (NodeId, NodeId)
-       , NodeId -> n
-       , n -> NodeId )
-computeNodeMapping g@(Graph nodeMap) =
-    (nodeRange, toNode, fromNode)
-  where
-    allNodes = nodes g
-    minNodeId = NodeId 0
-    maxNodeId = NodeId $ HS.size allNodes - 1
-    nodeRange = (minNodeId, maxNodeId)
-
-    toNodeMap :: A.Array NodeId n
-    toNodeMap = A.listArray nodeRange (HS.toList allNodes)
-    fromNodeMap :: HM.HashMap n NodeId
-    fromNodeMap = HM.fromList $ zip (HS.toList allNodes) [NodeId 0..]
-
-    toNode = (toNodeMap A.!)
-    fromNode n = fromMaybe (error $ "PageRank.adjacency.fromNode: "++show n) $ HM.lookup n fromNodeMap
-
 
 test :: Graph Char Double
 test = Graph $ HM.fromList

@@ -194,7 +194,10 @@ executable trec-car-graph-expansion
   main-is:             GraphExpansionMain.hs
   other-modules:       GraphExpansion
                        Dijkstra
+                       NodeMapping
                        PageRank
+                       AttriRank
+                       ZScore
                        WriteRanking
                        Retrieve
   ghc-options:         -Wall -threaded -rtsopts
