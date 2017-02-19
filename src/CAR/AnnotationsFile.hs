@@ -8,7 +8,6 @@ import System.IO.MMap
 import qualified Data.Aeson as JSON
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import CAR.Types
-import Data.MediaWiki.Markup
 
 type Offset = Int
 data AnnotationsFile = AnnotationsFile BS.ByteString (HM.HashMap PageId Offset)
@@ -16,10 +15,10 @@ data AnnotationsFile = AnnotationsFile BS.ByteString (HM.HashMap PageId Offset)
 openAnnotations :: FilePath -> IO AnnotationsFile
 openAnnotations fname = do
     cbor <- mmapFileByteString fname Nothing
-    mtoc <- JSON.decode <$> LBS.readFile (fname <.> "json")
+    mtoc <- JSON.eitherDecode <$> LBS.readFile (fname <.> "json")
     case mtoc of
-      Just toc -> return $ AnnotationsFile cbor toc
-      Nothing  -> fail $ "openAnnotations: Failed to open TOC for "++fname
+      Right toc -> return $ AnnotationsFile cbor toc
+      Left err  -> fail $ "openAnnotations: Failed to open TOC for "++fname++": "++err
 
 lookupPage :: PageId -> AnnotationsFile -> Maybe Page
 lookupPage name (AnnotationsFile cbor toc) =
