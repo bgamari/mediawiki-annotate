@@ -1,7 +1,14 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE BangPatterns #-}
 
-module GloveEmbedding where
+module GloveEmbedding
+    ( GloveDim
+    , WordVec
+    , WordEmbedding
+    , wordEmbeddingDim
+    , parseGlove
+    , parseGlove'
+    ) where
 
 import Data.Ix
 import qualified Data.Text as T
@@ -18,17 +25,23 @@ newtype GloveDim = GloveDim Int
 -- | A GloVe word vector.
 type WordVec = A.UArray GloveDim Float
 
+-- | A GloVe word embedding.
+type WordEmbedding = HM.HashMap T.Text WordVec
+
+wordEmbeddingDim :: WordEmbedding -> Int
+wordEmbeddingDim = rangeSize . A.bounds . head . HM.elems
+
 -- | Parse GloVe word embeddings from file.
-parseGlove :: FilePath
-           -> IO (HM.HashMap T.Text WordVec)
+parseGlove :: FilePath -> IO WordEmbedding
 parseGlove path = parseGlove' <$> TL.readFile path
 
 -- | Parse GloVe word embeddings.
-parseGlove' :: TL.Text -> HM.HashMap T.Text WordVec
+parseGlove' :: TL.Text -> WordEmbedding
 parseGlove' contents = mconcat $ map parse xs
   where
     xs = TL.lines contents
-    !dim = length (TL.words $ head xs) - 1
+    !dim | x:_ <- xs = length (TL.words x) - 1
+         | otherwise = error "GloveEmbedding.parseGlove': Empty embeddings"
     dimRange = (GloveDim 0, GloveDim (dim-1))
 
     parse :: TL.Text -> HM.HashMap T.Text WordVec
