@@ -46,7 +46,7 @@ readValuesWithOffsets = start 0 . BSL.toChunks
 main :: IO ()
 main = do
     pages <- readValuesWithOffsets <$> BSL.getContents
-    let addPage acc (offset, page) = M.insert (pageName page) offset acc
+    let addPage acc (offset, page) = M.insert (pageId page) offset acc
         toc = foldl' addPage mempty pages
     BSL.putStr $ encode toc
     --mapM_ print pages

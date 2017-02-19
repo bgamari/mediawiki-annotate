@@ -17,6 +17,7 @@ library
                        CAR.CarExports
                        CAR.Utils
   default-language:    Haskell2010
+  ghc-options:         -Wall
   hs-source-dirs:      src
   build-depends:       base >=4.9 && <4.10,
                        aeson >= 1.0,

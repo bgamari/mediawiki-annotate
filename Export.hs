@@ -17,13 +17,16 @@ import CAR.AnnotationsFile
 import CAR.Types
 import CAR.CarExports as Exports
 
-options :: Parser (FilePath, FilePath, [PageName])
+options :: Parser (FilePath, FilePath, [PageId])
 options =
     (,,) <$> argument str (help "annotations file" <> metavar "FILE")
         <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-        <*> many (option (PageName . T.pack <$> str)
+        <*> many (option (pageNameToId . PageName . T.pack <$> str)
                          (short 'p' <> long "page"
-                          <> metavar "PAGE NAME" <> help "Export only this page"))
+                          <> metavar "PAGE NAME" <> help "Export only this page")
+              <|> option (packPageId <$> str)
+                         (short 'P' <> long "page-id"
+                          <> metavar "PAGE ID" <> help "Export only this page"))
 
 
 main :: IO ()

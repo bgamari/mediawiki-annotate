@@ -7,7 +7,7 @@ module CAR.Types
     ( -- * Identifiers
       PageName(..)
     , Link(..)
-    , PageId(..), unpackPageId, pageNameToId
+    , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
     , ParagraphId(..), unpackParagraphId
@@ -33,7 +33,6 @@ import Data.List (intercalate)
 import Control.DeepSeq
 import GHC.Generics
 import Data.Monoid
-import qualified Data.Binary.Get as Bin
 import qualified Data.Binary.Serialise.CBOR.Class as CBOR
 import qualified Data.Binary.Serialise.CBOR.Write as CBOR
 import qualified Data.Binary.Serialise.CBOR.Read as CBOR
@@ -79,11 +78,14 @@ newtype PageId = PageId Utf8.SmallUtf8
                          FromJSON, FromJSONKey, ToJSON, ToJSONKey)
 instance Hashable PageId
 instance CBOR.Serialise PageId where
-    encode (PageId p) = CBOR.encode $ Utf8.toText p
-    decode = PageId . Utf8.fromText <$> CBOR.decode
+    encode (PageId p) = CBOR.encode (Utf8.toByteString p)
+    decode = PageId . Utf8.unsafeFromByteString <$> CBOR.decode
 
 pageNameToId :: PageName -> PageId
 pageNameToId (PageName n) = PageId $ Utf8.unsafeFromShortByteString $ urlEncodeText $ T.unpack n
+
+packPageId :: String -> PageId
+packPageId = PageId . Utf8.fromString
 
 unpackPageId :: PageId -> String
 unpackPageId (PageId s) = Utf8.toString s
