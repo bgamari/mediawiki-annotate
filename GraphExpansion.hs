@@ -21,6 +21,7 @@ import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
 import qualified Data.Text as T
 
+import Graph
 import Dijkstra
 import PageRank
 import CAR.Utils
@@ -149,14 +150,15 @@ rankByPersonalizedPageRank graph teleport seeds iterations =
   in prRanking
 
 
-filterEdges :: (PageId -> PageId -> Bool) -> Dijkstra.Graph PageId w -> Dijkstra.Graph PageId w
-filterEdges pred (Dijkstra.Graph graph ) =
-    Dijkstra.Graph $ HM.mapWithKey f $ graph
+filterEdges :: (PageId -> PageId -> Bool)
+            -> Graph.Graph PageId w -> Graph.Graph PageId w
+filterEdges pred (Graph.Graph graph ) =
+    Graph.Graph $ HM.mapWithKey f $ graph
   where f :: PageId -> [(PageId, w)] -> [(PageId, w) ]
         f source =
           filter (\(target, _) -> pred source target)
 
-rankByShortestPaths :: Dijkstra.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
+rankByShortestPaths :: Graph.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
 rankByShortestPaths graph seeds =
     let seeds' = HS.fromList seeds
         graph' = filterEdges (\s t -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph

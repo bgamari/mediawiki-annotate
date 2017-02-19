@@ -25,8 +25,8 @@ import Data.Bifunctor
 import Prelude hiding (pi)
 
 import ZScore
-import NodeMapping
-import Dijkstra (Graph(..))
+import DenseMapping
+import Graph
 
 data DDist = Uniform
            | Beta Double Double
@@ -36,27 +36,25 @@ attriRank :: forall n t a. (a ~ Double, Show n, Eq n, Hashable n, Ix t)
           -> DDist -- ^ distribution over \(d\).
           -> HM.HashMap n (Attributes t)
           -> Graph n a
-          -> [(a, A.UArray NodeId a)]
+          -> [(a, A.UArray (DenseId n) a)]
 attriRank _ _ attrs _ | HM.null attrs = error "attriRank: No attributes"
 attriRank gamma dDist nodeAttrs graph =
     -- See Algorithm 1
-    let mapping = mkNodeMapping graph
+    let mapping = mkDenseMapping (nodeSet graph)
         attrRange@(attr0,attr1) = A.bounds $ getAttrs $ head $ HM.elems nodeAttrs
         nNodes = rangeSize attrRange
-        --ws :: HM.HashMap n a
-        --ws = fmap (\(Attrs attr) -> exp $ negate $ gamma * quadrance attr) attrs
-        ws :: A.UArray NodeId a
-        ws = A.array (nodeRange mapping)
+        ws :: A.UArray (DenseId n) a
+        ws = A.array (denseRange mapping)
              [ (i, exp $ negate $ gamma * quadrance attr)
              | (n, Attrs attr) <- HM.toList nodeAttrs
-             , let i = fromNode mapping n ]
+             , let i = toDense mapping n ]
         !a = sum $ A.elems ws
         b :: A.UArray t Double
         b = (2 * gamma) *^
             A.accumArray (+) 0 attrRange
             [ (attr, v * wj)
             | (j, Attrs attrs) <- HM.toList nodeAttrs
-            , let wj = ws A.! fromNode mapping j
+            , let wj = ws A.! toDense mapping j
             , (attr, v) <- A.assocs attrs
             ]
         c :: A.UArray (t,t) a
@@ -64,27 +62,27 @@ attriRank gamma dDist nodeAttrs graph =
             A.accumArray (+) 0 ((attr0,attr0), (attr1,attr1))
             [ ((n,m), wj * xn * xm)
             | (j, Attrs xj) <- HM.toList nodeAttrs
-            , let wj = ws A.! fromNode mapping j
+            , let wj = ws A.! toDense mapping j
             , (n, xn) <- A.assocs xj
             , (m, xm) <- A.assocs xj
             ]
-        rs :: A.UArray NodeId a
-        rs = A.array (nodeRange mapping)
+        rs :: A.UArray (DenseId n) a
+        rs = A.array (denseRange mapping)
              [ (i, wi * (a + xi ^*^ b + xi ^*^ (c !*^ xi)))
              | (i, wi) <- A.assocs ws
-             , let Just (Attrs xi) = HM.lookup (toNode mapping i) nodeAttrs
+             , let Just (Attrs xi) = HM.lookup (fromDense mapping i) nodeAttrs
              ]
-        rVec :: A.UArray NodeId a
+        rVec :: A.UArray (DenseId n) a
         rVec = let z = foldl' (+) 0 (A.elems rs) in z *^ rs
 
         -- generate P matrix
         outDegree :: HM.HashMap n Int
         outDegree = fmap length (getGraph graph)
 
-        p :: [Edge]
-        p = [ Edge i' (fromNode mapping j) v
+        p :: [Edge n]
+        p = [ Edge i' (toDense mapping j) v
             | (i, js) <- HM.toList (getGraph graph)
-            , let i' = fromNode mapping i
+            , let i' = toDense mapping i
             , (j, _) <- js
             , let v = case fromMaybe 0 $ HM.lookup j outDegree of
                         0  -> 1 / realToFrac nNodes
@@ -94,8 +92,8 @@ attriRank gamma dDist nodeAttrs graph =
                 Uniform         -> 0.5 *^ rVec
                 Beta alpha beta -> (beta / (alpha + beta)) *^ rVec
 
-        go :: Int -> A.UArray NodeId a -> A.UArray NodeId a
-           -> [(Double, A.UArray NodeId a)]
+        go :: Int -> A.UArray (DenseId n) a -> A.UArray (DenseId n) a
+           -> [(Double, A.UArray (DenseId n) a)]
         go k rho pi = (norm rho, pi')  : go (k+1) rho' pi'
           where
             k' = realToFrac k
@@ -103,14 +101,14 @@ attriRank gamma dDist nodeAttrs graph =
                      Uniform         -> (k' / (k'+2)) *^ pRho
                      Beta alpha beta -> ((k'+alpha-1) / (k'+alpha+beta)) *^ pRho
             pi' = pi ^+^ rho'
-            pRho = A.accumArray (+) 0 (nodeRange mapping)
+            pRho = A.accumArray (+) 0 (denseRange mapping)
                    [ (i, v * rhoJ)
                    | Edge i j v <- p
                    , let rhoJ = rho A.! j
                    ]
     in (norm pi0, pi0) : go 1 pi0 pi0
 
-data Edge = Edge !NodeId !NodeId !Double
+data Edge n = Edge !(DenseId n) !(DenseId n) !Double
 
 (^+^) :: (Num a, Ix i, A.IArray arr a) => arr i a -> arr i a -> arr i a
 x ^+^ y =

@@ -18,13 +18,13 @@ import Data.Hashable
 import Data.Ix
 import Data.Bifunctor
 
-import NodeMapping
-import Dijkstra (Graph(..))
+import DenseMapping
+import Graph
 
-data Eigenvector n a = Eigenvector (NodeMapping n) (A.UArray NodeId a)
+data Eigenvector n a = Eigenvector (DenseMapping n) (A.UArray (DenseId n) a)
 
 -- | A transition matrix
-type Transition = A.UArray (NodeId, NodeId)
+type Transition n = A.UArray (DenseId n, DenseId n)
 
 toHashMap :: (A.IArray A.UArray a, Hashable n, Eq n)
           => Eigenvector n a -> HM.HashMap n a
@@ -33,7 +33,7 @@ toHashMap = HM.fromList . toEntries
 toEntries :: (A.IArray A.UArray a)
           => Eigenvector n a -> [(n, a)]
 toEntries (Eigenvector mapping arr) =
-    map (first $ toNode mapping) (A.assocs arr)
+    map (first $ fromDense mapping) (A.assocs arr)
 
 square x = x * x
 norm arr = sum $ map square $ A.elems arr
@@ -88,25 +88,25 @@ pageRankWithSeeds _ beta seeds _
   , HS.null seeds =
     error "pageRankWithSeeds: empty seed set"
 pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
-    let mapping  = mkNodeMapping graph
-        nodeRng  = nodeRange mapping
+    let mapping  = mkDenseMapping (nodeSet graph)
+        nodeRng  = denseRange mapping
         numNodes = rangeSize nodeRng
         numSeeds = HS.size seeds
 
         initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRng []
 
         -- normalized flow of nodes flowing into each node
-        inbound :: A.Array NodeId [(NodeId, a)]
+        inbound :: A.Array (DenseId n) [(DenseId n, a)]
         inbound = A.accumArray (++) [] nodeRng
-                  [ ( fromNode mapping v,
-                      [(fromNode mapping u, weightUV / weightUSum)]
+                  [ ( toDense mapping v,
+                      [(toDense mapping u, weightUV / weightUSum)]
                     )
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum $ map snd outEdges
                   , (v, weightUV) <- outEdges
                   ]
 
-        nextiter :: A.UArray NodeId a -> A.UArray NodeId a
+        nextiter :: A.UArray (DenseId n) a -> A.UArray (DenseId n) a
         nextiter pagerank = A.accumArray (+) 0 nodeRng
                    [ (v, teleportationSum + outlinkSum + seedTeleportSum)
                    | (v, inEdges) <- A.assocs inbound
@@ -119,7 +119,7 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                            | beta == 0 = 0
                            | otherwise = beta' / realToFrac numSeeds * c
                          beta'
-                           | toNode mapping v `HS.member` seeds = beta
+                           | fromDense mapping v `HS.member` seeds = beta
                            | otherwise = 0
                    ]
           where
@@ -135,7 +135,8 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
 
 -- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
 addTeleportation :: (RealFrac a, A.IArray A.UArray a)
-                 => (NodeId, NodeId) -> a -> Transition a -> Transition a
+                 => (DenseId n, DenseId n) -> a
+                 -> Transition n a -> Transition n a
 addTeleportation nodeRange teleportation =
     A.amap (\w -> (1-teleportation) * w  + teleportation / realToFrac numNodes)
   where numNodes = rangeSize nodeRange
@@ -148,8 +149,8 @@ iamap f arr =
     bounds = A.bounds arr
 
 -- | normalize rows to sum to one (also handle case of no outedges)
-normRows :: forall a. (RealFrac a, A.IArray A.UArray a)
-         => (NodeId, NodeId) -> Transition a -> Transition a
+normRows :: forall a n. (RealFrac a, A.IArray A.UArray a)
+         => (DenseId n, DenseId n) -> Transition n a -> Transition n a
 normRows nodeRange trans =
     iamap (\(i,j) w ->
         let total = totals A.! i
@@ -158,7 +159,7 @@ normRows nodeRange trans =
              else w / total                             -- outedges are normalized to sum to one
         ) trans
   where
-    totals :: A.UArray NodeId a
+    totals :: A.UArray (DenseId n) a
     totals = A.accumArray (+) 0 nodeRange
              [ (i, w)
              | i <- range nodeRange
