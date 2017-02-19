@@ -34,6 +34,7 @@ library
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
                        text,
+                       simplir,
                        mediawiki-parser >= 0.1
 
 executable trec-car-import

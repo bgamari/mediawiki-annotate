@@ -51,6 +51,9 @@ import Data.Aeson.Types
 import Data.Hashable
 import Data.String
 
+-- SimplIR
+import qualified Data.SmallUtf8 as Utf8
+
 unpackSBS :: SBS.ShortByteString -> String
 unpackSBS = map (chr . fromIntegral) . SBS.unpack
 
@@ -68,18 +71,22 @@ instance ToJSONKey PageName where
 
 instance CBOR.Serialise SBS.ShortByteString where
     encode = CBOR.encode . SBS.fromShort
-    decode = SBS.toShort <$> CBOR.decode
+    decode = SBS.toShort <$> CBOR.decode   -- FIXME: copy
 
 -- | An ASCII-only form of a page name.
-newtype PageId = PageId SBS.ShortByteString
-               deriving (Show, Eq, Ord, Generic, CBOR.Serialise, IsString, NFData)
+newtype PageId = PageId Utf8.SmallUtf8
+               deriving (Show, Eq, Ord, Generic, IsString, NFData,
+                         FromJSON, FromJSONKey, ToJSON, ToJSONKey)
 instance Hashable PageId
+instance CBOR.Serialise PageId where
+    encode (PageId p) = CBOR.encode $ Utf8.toText p
+    decode = PageId . Utf8.fromText <$> CBOR.decode
 
 pageNameToId :: PageName -> PageId
-pageNameToId (PageName n) = PageId $ urlEncodeText $ T.unpack n
+pageNameToId (PageName n) = PageId $ Utf8.unsafeFromShortByteString $ urlEncodeText $ T.unpack n
 
 unpackPageId :: PageId -> String
-unpackPageId (PageId s) = unpackSBS s
+unpackPageId (PageId s) = Utf8.toString s
 
 -- | An ASCII-only form of a section heading.
 newtype HeadingId = HeadingId SBS.ShortByteString
