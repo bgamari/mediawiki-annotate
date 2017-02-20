@@ -244,8 +244,8 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
         nodeToAttributes = foldMap (\pid -> HM.singleton pid $ toWordVec pid) (toList nodeSet)
           where
             toWordVec pid =
-                pageTextEmbeddingAttributes wordEmbedding
-                $ fromMaybe (error $ "computeRankingsForQuery: failed to find page: "++show pid)
+                wordVecToAttributes
+                $ maybe mempty (pageTextEmbeddingAttributes wordEmbedding)
                 $ AnnsFile.lookupPage pid annsFile
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
