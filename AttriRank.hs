@@ -48,8 +48,9 @@ attriRank gamma dDist nodeAttrs graph =
         ws :: A.UArray (DenseId n) a
         ws = A.array (denseRange mapping)
              [ (i, exp $ negate $ gamma * quadrance attr)
-             | (n, Attrs attr) <- HM.toList nodeAttrs
-             , let i = toDense mapping n ]
+             | i <- range (denseRange mapping)
+             , let n = fromDense mapping i
+             , Just (Attrs attr) <- pure $ HM.lookup n nodeAttrs ]
         !a = sum $ A.elems ws
         b :: A.UArray t Double
         b = (2 * gamma) *^
