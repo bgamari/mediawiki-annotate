@@ -10,7 +10,7 @@ import qualified Data.Array.Unboxed as A
 import Data.Foldable as F
 import Data.Ix
 
-newtype Attributes a = Attrs { getAttrs :: A.UArray a Double }
+newtype Attributes a = Attrs { unAttrs :: A.UArray a Double }
                      deriving (Show)
 
 zScoreStandardize :: forall a f. (Ix a, Functor f, Foldable f)
@@ -18,7 +18,7 @@ zScoreStandardize :: forall a f. (Ix a, Functor f, Foldable f)
 zScoreStandardize attrs
   | n == 0 = attrs
   | otherwise =
-      let attrRng = A.bounds $ getAttrs $ head $ toList attrs
+      let attrRng = A.bounds $ unAttrs $ head $ toList attrs
 
           vsum :: A.UArray a Double
           vsum = A.accumArray (+) 0 attrRng
@@ -30,7 +30,7 @@ zScoreStandardize attrs
 
           vsumSqr :: A.UArray a Double
           vsumSqr = A.accumArray (+) 0 attrRng
-                    [ (i, (v - mu)^2)
+                    [ (i, (v - mu)^(2::Int))
                     | Attrs x <- toList attrs
                     , (i, v) <- A.assocs x
                     , let mu = mean A.! i

@@ -179,10 +179,13 @@ rankByPersonalizedPageRank graph teleport seeds iterations =
 
 -- gamma dDist nodeAttrs graph
 rankByAttriPageRank :: Ix t
-                    => Graph PageId Double -> Double -> Int -> HM.HashMap PageId (Attributes t) -> Int -> [(PageId, Double)]
+                    => Graph PageId Double -> Double -> Int
+                    -> HM.HashMap PageId (Attributes t) -> Int -> [(PageId, Double)]
 rankByAttriPageRank graph teleport numAttrs nodeAttrs iterations =
   let gamma = 1/(realToFrac numAttrs)
-      pr = snd $ (!! iterations) $ AttriRank.attriRank gamma AttriRank.Uniform nodeAttrs graph
+      getAttr n = fromMaybe (error $ "rankByAttriPageRank: no attributes for "++show n)
+                  $ HM.lookup n nodeAttrs
+      pr = snd $ (!! iterations) $ AttriRank.attriRank gamma AttriRank.Uniform getAttr graph
       prRanking  =  PageRank.toEntries $ pr
   in prRanking
 

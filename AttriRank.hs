@@ -16,7 +16,9 @@ module AttriRank
    ) where
 
 import Control.Exception (assert)
-import qualified Data.Array.Unboxed as A
+import qualified Data.Array as A (Array)
+import qualified Data.Array.IArray as A
+import qualified Data.Array.Unboxed as A (UArray)
 import qualified Data.HashMap.Strict as HM
 import Data.Foldable as F
 import Data.Hashable
@@ -36,36 +38,41 @@ data DDist = Uniform
 attriRank :: forall n t a. (a ~ Double, Show n, Eq n, Hashable n, Ix t)
           => a     -- ^ the RBF kernel parameter, \(\gamma\)
           -> DDist -- ^ distribution over \(d\).
-          -> HM.HashMap n (Attributes t)
+          -> (n -> Attributes t)
           -> Graph n a
           -> [(a, Eigenvector n a)]
-attriRank _ _ attrs _ | HM.null attrs = error "attriRank: No attributes"
-attriRank gamma dDist nodeAttrs graph =
+attriRank gamma dDist getAttrs graph =
     -- See Algorithm 1
-    let mapping = mkDenseMapping (nodeSet graph)
-        attrRange@(attr0,attr1) = A.bounds $ getAttrs $ head $ HM.elems nodeAttrs
-        nNodes = rangeSize attrRange
+    let mapping :: DenseMapping n
+        mapping = mkDenseMapping (nodeSet graph)
+        nNodes = rangeSize (denseRange mapping)
+
+        attrRange :: (t, t)
+        attrRange@(attr0,attr1) = A.bounds $ unAttrs $ getAttrs $ head $ elems mapping
+
+        attrs :: A.Array (DenseId n) (Attributes t)
+        attrs = A.listArray (denseRange mapping) $ map getAttrs $ elems mapping
+
         ws :: A.UArray (DenseId n) a
         ws = A.array (denseRange mapping)
              [ (i, exp $ negate $ gamma * quadrance attr)
              | i <- range (denseRange mapping)
-             , let n = fromDense mapping i
-             , Just (Attrs attr) <- pure $ HM.lookup n nodeAttrs ]
+             , let Attrs attr = attrs A.! i ]
         !a = sum $ A.elems ws
         b :: A.UArray t Double
         b = (2 * gamma) *^
             A.accumArray (+) 0 attrRange
             [ (attr, v * wj)
-            | (j, Attrs attrs) <- HM.toList nodeAttrs
-            , let wj = ws A.! toDense mapping j
+            | (j, Attrs attrs) <- A.assocs attrs
+            , let wj = ws A.! j
             , (attr, v) <- A.assocs attrs
             ]
         c :: A.UArray (t,t) a
         c = (2 * squared gamma) *!
             A.accumArray (+) 0 ((attr0,attr0), (attr1,attr1))
             [ ((n,m), wj * xn * xm)
-            | (j, Attrs xj) <- HM.toList nodeAttrs
-            , let wj = ws A.! toDense mapping j
+            | (j, Attrs xj) <- A.assocs attrs
+            , let wj = ws A.! j
             , (n, xn) <- A.assocs xj
             , (m, xm) <- A.assocs xj
             ]
@@ -73,7 +80,7 @@ attriRank gamma dDist nodeAttrs graph =
         rs = A.array (denseRange mapping)
              [ (i, wi * (a + xi ^*^ b + xi ^*^ (c !*^ xi)))
              | (i, wi) <- A.assocs ws
-             , let Just (Attrs xi) = HM.lookup (fromDense mapping i) nodeAttrs
+             , let Attrs xi = attrs A.! i
              ]
         rVec :: A.UArray (DenseId n) a
         rVec = let z = foldl' (+) 0 (A.elems rs) in z *^ rs

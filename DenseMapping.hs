@@ -8,6 +8,7 @@ module DenseMapping
       -- * Mapping to index space
     , DenseMapping
     , denseRange
+    , assocs
     , elems
     , toDense
     , fromDense
@@ -28,8 +29,11 @@ data DenseMapping a = DenseMapping { denseRange :: (DenseId a, DenseId a)
                                    , toDenseMap :: HM.HashMap a (DenseId a)
                                    }
 
-elems :: DenseMapping a -> [(DenseId a, a)]
-elems = A.assocs . fromDenseArr
+assocs :: DenseMapping a -> [(DenseId a, a)]
+assocs = A.assocs . fromDenseArr
+
+elems :: DenseMapping a -> [a]
+elems = map snd . assocs
 
 -- | A dense node index.
 newtype DenseId a = DenseId Int
