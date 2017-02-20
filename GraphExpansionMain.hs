@@ -50,12 +50,13 @@ import GraphExpansion
 import GloveEmbedding
 import ZScore (Attributes(..))
 
-opts :: Parser (FilePath, FilePath, FilePath, Maybe [Method], Int)
+opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
-    (,,,,)
+    (,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+    <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
     <*> optional (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run"))
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     where
@@ -318,12 +319,12 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
 
 main :: IO ()
 main = do
-    (articlesFile, queryFile, outputFilePrefix, runMethods, expansionHops) <-
+    (articlesFile, queryFile, outputFilePrefix, embeddingsFile, runMethods, expansionHops) <-
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
 
-    SomeWordEmbedding wordEmbeddings <- parseGlove "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
+    SomeWordEmbedding wordEmbeddings <- parseGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
