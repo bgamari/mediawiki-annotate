@@ -50,6 +50,8 @@ import GraphExpansion
 import GloveEmbedding
 import ZScore
 
+import Debug.Trace
+
 opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
     (,,,,,)
@@ -251,7 +253,7 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
                 $ AnnsFile.lookupPage pid annsFile
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
-        universeSubset = subsetOfUniverseGraph universeGraph nodeSet
+        universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
 
 
         edgeDocsSubset :: [EdgeDoc]
