@@ -11,7 +11,6 @@ import Control.DeepSeq
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
-import Data.Bifunctor
 import Data.Function
 import Data.Ix
 import GHC.Generics
@@ -32,7 +31,6 @@ import CAR.Types
 
 import qualified SimplIR.Term as Term
 import AttriRank
-import ZScore
 import Retrieve
 import GloveEmbedding
 import ZScore (Attributes(..))

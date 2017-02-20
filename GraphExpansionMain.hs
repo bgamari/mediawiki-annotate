@@ -48,7 +48,7 @@ import WriteRanking
 import Retrieve
 import GraphExpansion
 import GloveEmbedding
-import ZScore (Attributes(..))
+import ZScore
 
 opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
@@ -241,7 +241,9 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
         nodeToAttributes :: HM.HashMap PageId (Attributes (EmbeddingDim n))
-        nodeToAttributes = foldMap (\pid -> HM.singleton pid $ toWordVec pid) (toList nodeSet)
+        nodeToAttributes =
+            zScoreStandardize
+            $ foldMap (\pid -> HM.singleton pid $ toWordVec pid) (toList nodeSet)
           where
             toWordVec pid =
                 wordVecToAttributes
