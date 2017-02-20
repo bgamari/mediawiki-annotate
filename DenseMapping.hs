@@ -20,6 +20,7 @@ import qualified Data.HashSet as HS
 import Data.Hashable
 import Data.Ix
 import Data.Maybe
+import GHC.Stack
 
 -- | A mapping of a 'Hashable' type to a dense index space ('DenseId').
 data DenseMapping a = DenseMapping { denseRange :: (DenseId a, DenseId a)
@@ -37,11 +38,12 @@ newtype DenseId a = DenseId Int
 fromDense :: DenseMapping a -> DenseId a -> a
 fromDense m = (fromDenseArr m A.!)
 
-toDense :: (Eq a, Hashable a, Show a)
+toDense :: (HasCallStack, Eq a, Hashable a, Show a)
         => DenseMapping a -> a -> DenseId a
 toDense m x =
     fromMaybe (error $ "DenseMapping.toDense: "++show x)
     $ HM.lookup x (toDenseMap m)
+{-# INLINE toDense #-}
 
 mkDenseMapping
     :: forall a. (Eq a, Hashable a)
