@@ -253,7 +253,8 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
                 $ AnnsFile.lookupPage pid annsFile
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
-        universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
+--         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
+        universeSubset = subsetOfUniverseGraph universeGraph nodeSet
 
 
         edgeDocsSubset :: [EdgeDoc]
