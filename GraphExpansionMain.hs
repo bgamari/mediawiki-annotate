@@ -12,7 +12,7 @@
 
 
 import Control.Exception (bracket)
-import Control.DeepSeq
+-- import Control.DeepSeq
 import Control.Monad (when)
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -27,7 +27,7 @@ import Options.Applicative
 import System.IO
 import Data.Time.Clock
 import Numeric
-import GHC.Generics
+-- import GHC.Generics
 import GHC.TypeLits
 
 import qualified Data.Map.Strict as M
@@ -41,7 +41,7 @@ import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
-import qualified ExtractKnowledgeBase as KB
+-- import qualified ExtractKnowledgeBase as KB
 
 --import qualified Control.Concurrent.ForkMap as ForkMap
 import WriteRanking
@@ -51,7 +51,7 @@ import GraphExpansionExperiments
 import GloveEmbedding
 import ZScore
 
-import Debug.Trace
+-- import Debug.Trace
 
 opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =

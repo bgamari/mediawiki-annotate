@@ -15,13 +15,7 @@ module GraphExpansionExperiments where
 
 
 
-import Control.Exception (bracket)
 import Control.DeepSeq
-import Control.Monad (when)
-import Control.Concurrent
-import Control.Concurrent.Async
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TSem
 import Data.Maybe
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
