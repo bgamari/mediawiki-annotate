@@ -105,10 +105,10 @@ rankNormDocs rankDocs normRank cutoffRank query edgeDocs =
     in cutRankedEdgeDocs
 
 
-filterGraphByTop100GraphEdges :: RankingFunction -> [Term] -> [EdgeDoc] ->  HM.HashMap PageId [EdgeDocWithScores]
-filterGraphByTop100GraphEdges rankDocs query edgeDocs =
+filterGraphByTopNGraphEdges :: RankingFunction -> Int ->  [Term] -> [EdgeDoc] ->   HM.HashMap PageId [EdgeDocWithScores]
+filterGraphByTopNGraphEdges rankDocs topN query edgeDocs  =
         let edges :: [EdgeDocWithScores]
-            edges  = rankNormDocs rankDocs 100 100 query edgeDocs
+            edges  = rankNormDocs rankDocs topN topN query edgeDocs
         in HM.fromListWith (++) $ foldMap groupByEntity $ edges
   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
         groupByEntity elem@(EdgeDocWithScores edgeDoc _ _ _) =
@@ -186,10 +186,9 @@ marginalizeEdges graph =
         marginalizeMap = sum . fmap snd . HM.toList
 
 
-
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -204,9 +203,16 @@ showMethodName (Method a b c) = intercalate "-" [show a, show b, show c]
 
 allMethods :: [Method]
 allMethods = [ Method gName wName rName
-             | gName <- [minBound :: GraphNames .. maxBound]
+             | gName <- [Top5PerNode , Top100PerGraph , SimpleGraph , RandomGraph ]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
+             ]
+
+topNPerGraphMethods :: [Method]
+topNPerGraphMethods = [ Method gName wName rName
+             | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
+             , wName <- [Count, Score]
+             , rName <- [PersPageRank, PageRank, ShortPath, MargEdges]
              ]
 
 

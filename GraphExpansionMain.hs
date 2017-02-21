@@ -60,10 +60,21 @@ opts =
     <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
-    <*> optional (some (option method $ short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run"))
+    <*> optional methods
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     where
+      methods :: Parser [Method]
+      methods = fmap concat $ some
+          $ option (fmap (\x->[x]) method) (short 'm' <> long "method" <> metavar "METHOD" <> help "Methods to run")
+        <|> option (str >>= methodSet) (long "method-set" <> metavar "METHODSET" <> help "Set of methods to run")
+
+      method :: ReadM Method
       method = fmap (methodMap M.!) str
+
+      methodSet :: String -> ReadM [Method]
+      methodSet "all"  = pure allMethods
+      methodSet "topn" = pure topNPerGraphMethods
+      methodSet _      = fail "unknown method set"
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
 
@@ -104,7 +115,10 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
 
         fancyGraphs :: [(GraphNames, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = [(Top5PerNode,  filterGraphByTop5NodeEdges rankDocs query $ edgeDocsSubset)
-                      ,(Top100PerGraph,  filterGraphByTop100GraphEdges rankDocs query $ edgeDocsSubset)
+                      ,(Top100PerGraph,  filterGraphByTopNGraphEdges rankDocs 100 query $ edgeDocsSubset)
+                      ,(Top10PerGraph,  filterGraphByTopNGraphEdges rankDocs 10 query  $ edgeDocsSubset)
+                      ,(Top50PerGraph,  filterGraphByTopNGraphEdges rankDocs 50 query  $ edgeDocsSubset)
+                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges rankDocs 200 query  $ edgeDocsSubset)
                       ]
 
         simpleGraphs :: [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
