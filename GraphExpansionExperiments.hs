@@ -188,7 +188,7 @@ marginalizeEdges graph =
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -210,8 +210,8 @@ allMethods = [ Method gName wName rName
 
 topNPerGraphMethods :: [Method]
 topNPerGraphMethods = [ Method gName wName rName
-             | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
-             , wName <- [Count, Score]
+             | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph, Top2000PerGraph, RandomGraph]
+             , wName <- [Count, Score, RecipRank, LinearRank, BucketRank]
              , rName <- [PersPageRank, PageRank, ShortPath, MargEdges]
              ]
 

@@ -118,7 +118,8 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
                       ,(Top100PerGraph,  filterGraphByTopNGraphEdges rankDocs 100 query $ edgeDocsSubset)
                       ,(Top10PerGraph,  filterGraphByTopNGraphEdges rankDocs 10 query  $ edgeDocsSubset)
                       ,(Top50PerGraph,  filterGraphByTopNGraphEdges rankDocs 50 query  $ edgeDocsSubset)
-                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges rankDocs 200 query  $ edgeDocsSubset)
+                      ,(Top50PerGraph,  filterGraphByTopNGraphEdges rankDocs 50 query  $ edgeDocsSubset)
+                      ,(Top2000PerGraph,  filterGraphByTopNGraphEdges rankDocs 2000 query  $ edgeDocsSubset)
                       ]
 
         simpleGraphs :: [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
