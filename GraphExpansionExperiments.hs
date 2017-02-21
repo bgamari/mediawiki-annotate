@@ -210,7 +210,7 @@ allMethods = [ Method gName wName rName
 
 topNPerGraphMethods :: [Method]
 topNPerGraphMethods = [ Method gName wName rName
-             | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph, Top2000PerGraph, RandomGraph]
+             | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph, Top2000PerGraph]
              , wName <- [Count, Score, RecipRank, LinearRank, BucketRank]
              , rName <- [PersPageRank, PageRank, ShortPath, MargEdges]
              ]
