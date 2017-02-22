@@ -235,7 +235,7 @@ coreMethods = [ Method gName eName wName rName
              | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [Count, Score]
-             , rName <- [PersPageRank, MargEdges]
+             , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
              ]
 
 
