@@ -41,6 +41,7 @@ attriRank :: forall n t a. (a ~ Double, Show n, Eq n, Hashable n, Ix t)
           -> (n -> Attributes t)
           -> Graph n a
           -> [(a, Eigenvector n a)]
+attriRank _ _ _ graph | nullGraph graph = error "attriRank: null graph"
 attriRank gamma dDist getAttrs graph =
     -- See Algorithm 1
     let mapping :: DenseMapping n
