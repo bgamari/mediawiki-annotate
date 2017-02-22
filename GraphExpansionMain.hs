@@ -208,7 +208,7 @@ main = do
 
     let rankDoc q docs =
             map (\(Doc a b) -> (a,b))
-            $ Retrieve.retrieve corpusStatistics q
+            $ Retrieve.retrieve corpusStatistics 2000 q
             $ map (uncurry Doc) docs
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
