@@ -46,10 +46,13 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
 instance NFData EdgeDoc
 
 instance Eq EdgeDoc where
-    (==) = (==) `on` edgeDocParagraphId
+    x == y =
+           edgeDocParagraphId x == edgeDocParagraphId y
+        && edgeDocArticleId x == edgeDocArticleId y
 
 instance Hashable EdgeDoc where
-    hashWithSalt salt = hashWithSalt salt . edgeDocParagraphId
+    hashWithSalt salt x =
+        hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
 
 transformContent :: Page -> [EdgeDoc]
 transformContent (Page pageName pageId pageSkeleta) =

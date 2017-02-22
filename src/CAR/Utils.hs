@@ -6,6 +6,7 @@ import Data.Maybe
 import qualified Data.Text as T
 import CAR.Types
 
+
 pageRedirect :: Page -> Maybe PageName
 pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : rest)) : _})
   | T.pack "#redirect" `T.isPrefixOf` T.toCaseFold (T.stripStart t)
@@ -59,3 +60,4 @@ paraToText (Paragraph  _ bodies) =
     T.concat $ fmap toText bodies
   where toText (ParaText text) = text
         toText (ParaLink link) = linkAnchor link
+

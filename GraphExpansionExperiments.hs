@@ -27,7 +27,10 @@ import Data.Time.Clock
 import Numeric
 import GHC.Generics
 import GHC.TypeLits
+import Data.Tuple
 
+import Data.Bifunctor
+import Data.Hashable
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
@@ -49,6 +52,24 @@ import GloveEmbedding
 import ZScore
 
 import Debug.Trace
+
+
+
+
+
+
+
+mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v
+mapKeys f = HM.fromList . map (first f) . HM.toList
+
+unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.HashMap k v
+unionsWith f = foldl' (HM.unionWith f) mempty
+
+
+
+
+
+
 
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
                          , queryDocQueryText :: PageName
@@ -142,13 +163,44 @@ filterGraphByTop5NodeEdges rankDocs query edgeDocs =
 noFilterTwice :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
 noFilterTwice edgeDocs =
   let perSourceEdges :: HM.HashMap PageId [EdgeDoc]
-      perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs
-      perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByEntity edgeDocs' ) $ perSourceEdges
+      perSourceEdges = HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs
+      perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs' ) $ perSourceEdges
   in perTargetEdges
-  where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
-        groupByEntity edgeDoc =
+  where groupByIncidentEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
+        groupByIncidentEntity edgeDoc =
                   [ (entity, [edgeDoc])
                   | entity <- edgeDocNeighbors $ edgeDoc]
+
+
+
+-- mapKeys f == HM.fromList . map (first f) . HM.toList
+-- unionsWith f = foldl' (HM.unionWith f) mempty
+
+onlySymmetricEdges :: [EdgeDoc] -> [EdgeDoc]
+onlySymmetricEdges edgeDocs =
+  let fromTo :: HM.HashMap (PageId, PageId) [EdgeDoc]
+      fromTo = unionsWith (++)
+          [ HM.singleton (edgeDocArticleId edoc, neigh) [edoc]
+          | edoc <- edgeDocs
+          , neigh <- edgeDocNeighbors edoc
+          ]
+      fromToFiltered :: HM.HashMap (PageId, PageId) [EdgeDoc]
+      fromToFiltered = HM.intersectionWith (++) fromTo (mapKeys swap fromTo)
+
+      filteredIncidentNodes :: HM.HashMap EdgeDoc (HS.HashSet PageId)
+      filteredIncidentNodes = unionsWith mappend
+          [ HM.singleton edoc (HS.fromList [a,b])
+          | ((a,b), edocs) <- HM.toList fromToFiltered
+          , edoc <- edocs
+          ]
+
+      edgeDocs' :: [EdgeDoc]
+      edgeDocs' =
+          [ edoc { edgeDocNeighbors = HS.toList v }
+          | (edoc, v) <- HM.toList filteredIncidentNodes
+          ]
+
+  in edgeDocs'
 
 
 random100Filter :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
@@ -188,7 +240,7 @@ marginalizeEdges graph =
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph | SymmetricGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)

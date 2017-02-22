@@ -124,6 +124,7 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
 
         simpleGraphs :: [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
         simpleGraphs =  [(SimpleGraph, noFilterTwice $ edgeDocsSubset)
+                        ,(SymmetricGraph, noFilterTwice $ onlySymmetricEdges $ edgeDocsSubset)
                         ,(RandomGraph, random100Filter $ edgeDocsSubset)
                         ]
 
