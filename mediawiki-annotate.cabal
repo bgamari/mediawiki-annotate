@@ -204,6 +204,7 @@ executable trec-car-graph-expansion
                        ZScore
                        WriteRanking
                        Retrieve
+                       GraphExpansionExperiments
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
                        async,
