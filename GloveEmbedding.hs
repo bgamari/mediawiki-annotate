@@ -44,7 +44,7 @@ wordVecDim :: WordVec n -> Int
 wordVecDim = rangeSize . A.bounds . unWordVec
 
 bounds :: forall (n :: Nat). KnownNat n => (EmbeddingDim n, EmbeddingDim n)
-bounds = (EmbeddingDim 0, EmbeddingDim $ fromIntegral $ natVal (Proxy @n))
+bounds = (EmbeddingDim 0, EmbeddingDim $ fromIntegral (natVal (Proxy @n)) - 1)
 
 instance KnownNat n => Monoid (WordVec n) where
     mempty = WordVec $ A.accumArray (+) 0 (bounds @n) []

@@ -2,6 +2,7 @@
 
 module Graph
     ( Graph(..)
+    , nullGraph
     , nodeSet
     , getNeighbors
     ) where
@@ -15,6 +16,9 @@ import qualified Data.HashSet as HS
 -- | For each node, its outgoing neighbors.
 data Graph n e = Graph { getGraph :: HM.HashMap n [(n,e)] }
                deriving (Functor, Show)
+
+nullGraph :: Graph n e -> Bool
+nullGraph = HM.null . getGraph
 
 nodeSet :: (Hashable a, Eq a) => Graph a e -> HS.HashSet a
 nodeSet (Graph g) = HS.fromList (HM.keys g) <> foldMap (HS.fromList . map fst) g
