@@ -212,9 +212,9 @@ main = do
             $ map (uncurry Doc) docs
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
-      [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode)
+      [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)
       | method <- fromMaybe allMethods runMethods ]
-        :: IO (M.Map Method Handle)
+        :: IO (M.Map Method (MVar Handle))
 
     ncaps <- getNumCapabilities
     let --forM_' = forM_
@@ -252,7 +252,8 @@ main = do
                                 (T.pack $ show method)
                                 (T.pack $ unpackPageId queryId)
                                 ranking
-                logTimed "writing ranking" $ TL.hPutStr hdl formatted
+                bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
+                    logTimed "writing ranking" $ TL.hPutStr h formatted
 
         let methodsAvailable = S.fromList (map fst rankings)
             badMethods
@@ -264,7 +265,7 @@ main = do
         when (not $ S.null badMethods) $ fail $ "unknown methods: "++show badMethods
         mapM_ (uncurry runMethod) $ filter (filterMethods . fst) rankings
 
-    mapM_ hClose handles
+    mapM_ (\h -> takeMVar h >>= hClose) handles
 
 forConcurrentlyN_ :: Foldable f => Int -> f a -> (a -> IO ()) -> IO ()
 forConcurrentlyN_ n xs f = do
