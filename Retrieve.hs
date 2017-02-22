@@ -102,10 +102,10 @@ computeTermCounts queryTerms docs =
     queryTermSet = HS.fromList $  queryTerms
     termFilter = (`HS.member` queryTermSet)
 
-retrieve :: TermCounts -> [Term] -> [Doc doc T.Text]
+retrieve :: TermCounts -> Int -> [Term] -> [Doc doc T.Text]
          -> [Doc doc Double]
-retrieve stats queryTerms docs =
-    Foldl.fold (topK 100)
+retrieve stats resultLength queryTerms docs =
+    Foldl.fold (topK resultLength)
     $ map (fmap (scoreDoc stats queryTerms))
     $ map (fmap $ textToTokens termFilter)
     $ docs
