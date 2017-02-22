@@ -12,7 +12,6 @@
 
 
 import Control.Exception (bracket)
--- import Control.DeepSeq
 import Control.Monad (when)
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -22,12 +21,10 @@ import Data.Maybe
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
 import Data.Coerce
-import Data.List (intercalate)
 import Options.Applicative
 import System.IO
 import Data.Time.Clock
 import Numeric
--- import GHC.Generics
 import GHC.TypeLits
 
 import qualified Data.Map.Strict as M
@@ -41,17 +38,13 @@ import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
--- import qualified ExtractKnowledgeBase as KB
 
---import qualified Control.Concurrent.ForkMap as ForkMap
 import WriteRanking
 import Retrieve
 import GraphExpansion
 import GraphExpansionExperiments
 import GloveEmbedding
 import ZScore
-
--- import Debug.Trace
 
 opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
 opts =
@@ -74,6 +67,7 @@ opts =
       methodSet :: String -> ReadM [Method]
       methodSet "all"  = pure allMethods
       methodSet "topn" = pure topNPerGraphMethods
+      methodSet "core" = pure coreMethods
       methodSet _      = fail "unknown method set"
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
@@ -113,19 +107,23 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
         edgeDocsSubset :: [EdgeDoc]
         edgeDocsSubset = HS.toList $ HS.fromList $ concat $ HM.elems universeSubset
 
-        fancyGraphs :: [(GraphNames, HM.HashMap PageId [EdgeDocWithScores])]
-        fancyGraphs = [(Top5PerNode,  filterGraphByTop5NodeEdges rankDocs query $ edgeDocsSubset)
-                      ,(Top100PerGraph,  filterGraphByTopNGraphEdges rankDocs 100 query $ edgeDocsSubset)
-                      ,(Top10PerGraph,  filterGraphByTopNGraphEdges rankDocs 10 query  $ edgeDocsSubset)
-                      ,(Top50PerGraph,  filterGraphByTopNGraphEdges rankDocs 50 query  $ edgeDocsSubset)
-                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges rankDocs 200 query  $ edgeDocsSubset)
-                      ,(Top2000PerGraph,  filterGraphByTopNGraphEdges rankDocs 2000 query  $ edgeDocsSubset)
+        edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
+        edgeFilters = [(BidiFiltered,  onlySymmetricEdges)
+                      ,(Unfiltered,    id)
                       ]
 
-        simpleGraphs :: [(GraphNames, HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
-        simpleGraphs =  [(SimpleGraph, noFilterTwice $ edgeDocsSubset)
-                        ,(SymmetricGraph, noFilterTwice $ onlySymmetricEdges $ edgeDocsSubset)
-                        ,(RandomGraph, random100Filter $ edgeDocsSubset)
+        fancyGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId [EdgeDocWithScores])]
+        fancyGraphs = [(Top5PerNode,     filterGraphByTop5NodeEdges  rankDocs      query)
+                      ,(Top100PerGraph,  filterGraphByTopNGraphEdges rankDocs 100  query)
+                      ,(Top10PerGraph,   filterGraphByTopNGraphEdges rankDocs 10   query)
+                      ,(Top50PerGraph,   filterGraphByTopNGraphEdges rankDocs 50   query)
+                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges rankDocs 200  query)
+                      ,(Top2000PerGraph, filterGraphByTopNGraphEdges rankDocs 2000 query)
+                      ]
+
+        simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
+        simpleGraphs =  [(SimpleGraph, noFilterTwice )
+                        ,(RandomGraph, random100Filter)
                         ]
 
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
@@ -156,24 +154,27 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
                         ,(MargEdges, \graph -> marginalizeEdges graph)
                         ]
 
-        fancyWeightedGraphs ::  [((GraphNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
-        fancyWeightedGraphs =  [((gname, wname), accumulateEdgeWeights graph weighting)
-                               | (gname, graph) <- fancyGraphs
+        fancyWeightedGraphs ::  [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
+        fancyWeightedGraphs =  [((gname, ename, wname), accumulateEdgeWeights graph weighting)
+                               | (ename, edgeFilter) <- edgeFilters
+                               , (gname, mkGraph) <- fancyGraphs
                                , (wname, weighting) <- weightings
+                               , let graph = mkGraph $ edgeFilter edgeDocsSubset
                                ]
 
-        simpleWeightedGraphs :: [((GraphNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
-        simpleWeightedGraphs = concat [
-                                         [ ((gname, Count), fmap (fmap (realToFrac . length) )  $ graph)
-                                         , ((gname, Binary),      fmap (fmap (const 1))         $ graph)
-                                         ]
-                                      | (gname, graph) <- simpleGraphs]
-
+        simpleWeightedGraphs :: [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
+        simpleWeightedGraphs = concat [ [ ((gname, ename, Count),  fmap (fmap (realToFrac . length)) graph)
+                                        , ((gname, ename, Binary), fmap (fmap (const 1))             graph)
+                                        ]
+                                      | (ename, edgeFilter) <- edgeFilters
+                                      , (gname, mkGraph) <- simpleGraphs
+                                      , let graph = mkGraph $ edgeFilter edgeDocsSubset
+                                      ]
 
         computeRankings' :: [(Method,  [(PageId, Double)])]
         computeRankings' =
-            [ (Method gname wname rname,  graphRanking (graph) )
-            | ((gname, wname), graph) <- fancyWeightedGraphs ++ simpleWeightedGraphs,
+            [ (Method gname ename wname rname,  graphRanking graph )
+            | ((gname, ename, wname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
               (rname, graphRanking) <- graphRankings
             ]
 

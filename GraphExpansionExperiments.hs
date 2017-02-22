@@ -13,50 +13,23 @@
 
 module GraphExpansionExperiments where
 
-
-
 import Control.DeepSeq
-import Data.Maybe
-import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
-import Data.Coerce
 import Data.List (intercalate)
-import Options.Applicative
-import System.IO
-import Data.Time.Clock
-import Numeric
 import GHC.Generics
-import GHC.TypeLits
 import Data.Tuple
 
 import Data.Bifunctor
 import Data.Hashable
-import qualified Data.Map.Strict as M
-import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
-import CAR.AnnotationsFile as AnnsFile
 import qualified ExtractKnowledgeBase as KB
 
---import qualified Control.Concurrent.ForkMap as ForkMap
-import WriteRanking
 import Retrieve
 import GraphExpansion
-import GloveEmbedding
-import ZScore
-
-import Debug.Trace
-
-
-
-
-
 
 
 mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v
@@ -64,12 +37,6 @@ mapKeys f = HM.fromList . map (first f) . HM.toList
 
 unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.HashMap k v
 unionsWith f = foldl' (HM.unionWith f) mempty
-
-
-
-
-
-
 
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
                          , queryDocQueryText :: PageName
@@ -246,23 +213,37 @@ data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRan
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data GraphRankingNames = PageRank | PersPageRank | AttriRank | ShortPath | MargEdges
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data Method = Method GraphNames WeightingNames GraphRankingNames
+data EdgeFilteringNames = Unfiltered | BidiFiltered
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames
     deriving ( Ord, Eq, Generic)
 instance Show Method where
     show = showMethodName
 showMethodName:: Method -> String
-showMethodName (Method a b c) = intercalate "-" [show a, show b, show c]
+showMethodName (Method a b c d) = intercalate "-" [show a, show b, show c, show d]
 
 allMethods :: [Method]
-allMethods = [ Method gName wName rName
+allMethods = [ Method gName eName wName rName
              | gName <- [Top5PerNode , Top100PerGraph , SimpleGraph , RandomGraph ]
+             , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
              ]
 
+coreMethods :: [Method]
+coreMethods = [ Method gName eName wName rName
+             | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
+             , eName <- [minBound :: EdgeFilteringNames .. maxBound]
+             , wName <- [Count, Score]
+             , rName <- [PersPageRank, MargEdges]
+             ]
+
+
+
 topNPerGraphMethods :: [Method]
-topNPerGraphMethods = [ Method gName wName rName
+topNPerGraphMethods = [ Method gName eName wName rName
              | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph, Top2000PerGraph]
+             , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [Count, Score, RecipRank]
              , rName <- [PersPageRank, PageRank, ShortPath, MargEdges]
              ]
