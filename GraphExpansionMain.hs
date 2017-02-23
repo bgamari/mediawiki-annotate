@@ -264,7 +264,7 @@ main = do
             filterMethods
               | Just ms <- runMethods = (`elem` ms)
               | otherwise             = const True
-        when (not $ S.null badMethods) $ fail $ "unknown methods: "++show badMethods
+        when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
         mapM_ (uncurry runMethod) $ filter (filterMethods . fst) rankings
 
     mapM_ (\h -> takeMVar h >>= hClose) handles
