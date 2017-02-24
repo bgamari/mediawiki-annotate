@@ -76,7 +76,7 @@ skeletonTerms (Section (SectionHeading t) _ children) =
 
 paraBodyTerms :: ParaBody -> BagOfWords
 paraBodyTerms (ParaText t) = tokenize t
-paraBodyTerms (ParaLink _ anchor) = tokenize anchor
+paraBodyTerms (ParaLink l) = tokenize $ linkAnchor l
 
 modeCorpusStats :: Parser (IO ())
 modeCorpusStats =
