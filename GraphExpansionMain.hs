@@ -68,7 +68,14 @@ opts =
       methodSet "all"  = pure allMethods
       methodSet "topn" = pure topNPerGraphMethods
       methodSet "core" = pure coreMethods
+      methodSet "prio1" = pure prio1Methods
+      methodSet "prio2" = pure prio2Methods
+      methodSet "prio3" = pure prio3Methods
+      methodSet "prio4" = pure prio4Methods
+      methodSet "test" = pure testMethods
       methodSet _      = fail "unknown method set"
+
+
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
 

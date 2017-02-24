@@ -207,7 +207,7 @@ marginalizeEdges graph =
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph | SymmetricGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -238,7 +238,43 @@ coreMethods = [ Method gName eName wName rName
              , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
              ]
 
+prio1Methods :: [Method]
+prio1Methods = [ Method gName eName wName rName
+                          | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
+                          , eName <- [Unfiltered]
+                          , wName <- [Count, Score]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          ]
 
+prio2Methods :: [Method]
+prio2Methods = [ Method gName eName wName rName
+                          | gName <- [SimpleGraph, Top5PerNode ]
+                          , eName <- [Unfiltered]
+                          , wName <- [Count, Score]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          ]
+prio3Methods :: [Method]
+prio3Methods = [ Method gName eName wName rName
+                          | gName <- [Top10PerGraph, Top50PerGraph, Top200PerGraph ]
+                          , eName <- [Unfiltered]
+                          , wName <- [Count, Score]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          ]
+
+prio4Methods :: [Method]
+prio4Methods = [ Method gName eName wName rName
+                          | gName <- [minBound :: GraphNames .. maxBound]
+                          , eName <- [Unfiltered]
+                          , wName <- [Binary, RecipRank, LinearRank, BucketRank]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          ]
+testMethods :: [Method]
+testMethods = [ Method gName eName wName rName
+                          | gName <- [minBound :: GraphNames .. maxBound]
+                          , eName <- [Unfiltered]
+                          , wName <- [Binary, Score]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, ShortPath]
+                          ]
 
 topNPerGraphMethods :: [Method]
 topNPerGraphMethods = [ Method gName eName wName rName
