@@ -262,7 +262,7 @@ main = do
                                 (T.pack $ unpackPageId queryId)
                                 ranking
                 bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
-                    logTimed "writing ranking" $ TL.hPutStr h formatted
+                    logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
         let methodsAvailable = S.fromList (map fst rankings)
             badMethods
