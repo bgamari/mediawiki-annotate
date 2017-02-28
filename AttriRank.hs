@@ -87,17 +87,17 @@ attriRank gamma dDist getAttrs graph =
         rVec = let z = foldl' (+) 0 (A.elems rs) in z *^ rs
 
         -- generate P matrix
-        outDegree :: HM.HashMap n Int
-        outDegree = fmap length (getGraph graph)
+        outDegree :: HM.HashMap n Double
+        outDegree = fmap (sum . map snd) (getGraph graph)
 
         p :: [Edge n]
         p = [ Edge i' (toDense mapping j) v
             | (i, js) <- HM.toList (getGraph graph)
             , let i' = toDense mapping i
-            , (j, _) <- js
-            , let v = case fromMaybe 0 $ HM.lookup j outDegree of
-                        0  -> 1 / realToFrac nNodes
-                        n  -> 1 / realToFrac n
+            , (j, edgeW) <- js
+            , let v = case HM.lookup j outDegree of
+                        Nothing     -> 1 / realToFrac nNodes
+                        Just outDeg -> edgeW / outDeg
             ]
         pi0 = case dDist of
                 Uniform         -> 0.5 *^ rVec
