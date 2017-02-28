@@ -72,6 +72,8 @@ opts =
       methodSet "prio2" = pure prio2Methods
       methodSet "prio3" = pure prio3Methods
       methodSet "prio4" = pure prio4Methods
+      methodSet "fix1" = pure fix1Methods
+      methodSet "fix2" = pure fix2Methods
       methodSet "test" = pure testMethods
       methodSet _      = fail "unknown method set"
 
@@ -130,7 +132,8 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
         simpleGraphs =  [(SimpleGraph, noFilterTwice )
-                        ,(RandomGraph, random100Filter)
+                        ,(RandomGraph, randomFilter 100)
+                        ,(Random2000Graph, randomFilter 2000)
                         ]
 
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
