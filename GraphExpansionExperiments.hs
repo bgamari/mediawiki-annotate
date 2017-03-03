@@ -40,9 +40,8 @@ unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.Hash
 unionsWith f = foldl' (HM.unionWith f) mempty
 
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
-                         , queryDocQueryText :: PageName
+                         , queryDocQueryText :: T.Text
                          , queryDocLeadEntities ::  HS.HashSet PageId
-                         , queryDocRawTerms :: [Term]
                          }
            deriving (Show, Generic)
 instance FromJSON QueryDoc
@@ -58,15 +57,17 @@ pagesToLeadEntities :: [Page] -> [QueryDoc]
 pagesToLeadEntities pages =
         map (\page -> let kbDoc = KB.transformContent inlinkCounts page
                       in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
-                                  , queryDocQueryText      = pageName page
+                                  , queryDocQueryText      = getPageName $ pageName page
                                   , queryDocLeadEntities   = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
-                                  , queryDocRawTerms       = textToTokens' $ getPageName $ pageName page
                                   }
             )
         $ pages
       where
         inlinkInfo   = KB.collectInlinkInfo pages
         inlinkCounts = KB.resolveRedirects inlinkInfo
+
+queryDocRawTerms :: QueryDoc -> [Term]
+queryDocRawTerms = textToTokens' . queryDocQueryText
 
 data GraphStats = GraphStats { nNodes, nEdges :: !Int }
                 deriving (Show)
