@@ -26,6 +26,7 @@ import System.IO
 import Data.Time.Clock
 import Numeric
 import GHC.TypeLits
+import Data.Aeson
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -46,13 +47,17 @@ import GraphExpansionExperiments
 import GloveEmbedding
 import ZScore
 
-opts :: Parser (FilePath, FilePath, FilePath, FilePath, Maybe [Method], Int)
+data QuerySource = QueriesFromCbor FilePath
+                 | QueriesFromJson FilePath
+
+
+opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int)
 opts =
     (,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
-    <*> option str (short 'q' <> long "outlines file" <> metavar "FILE" <> help "Outline file (queries)")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
+    <*> querySource
     <*> optional methods
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     where
@@ -80,22 +85,21 @@ opts =
 
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
+      querySource =
+              option (fmap QueriesFromCbor str) (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+          <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
 
 
 
 computeRankingsForQuery :: forall n. (KnownNat n)
                         => RankingFunction
                         -> AnnotationsFile
-                        -> QueryDoc -> Int -> UniverseGraph -> BinarySymmetricGraph
+                        -> [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
                         -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySymmetricGraph wordEmbedding =
-    let seeds :: HS.HashSet PageId
-        seeds = queryDocLeadEntities $ queryDoc
-        query = queryDocRawTerms $ queryDoc
-
-        nodeSet :: HS.HashSet PageId
+computeRankingsForQuery rankDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding =
+    let nodeSet :: HS.HashSet PageId
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
         nodeToAttributes :: HM.HashMap PageId (Attributes (EmbeddingDim n))
@@ -193,7 +197,7 @@ computeRankingsForQuery rankDocs annsFile queryDoc radius universeGraph binarySy
 
 main :: IO ()
 main = do
-    (articlesFile, queryFile, outputFilePrefix, embeddingsFile, runMethods, expansionHops) <-
+    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops) <-
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
@@ -206,10 +210,14 @@ main = do
     let binarySymmetricGraph :: BinarySymmetricGraph
         !binarySymmetricGraph = universeToBinaryGraph universeGraph
 
+    queriesWithSeedEntities <-
+        case querySrc of
+          QueriesFromCbor queryFile -> pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
+          QueriesFromJson queryFile -> do
+              Just (QueryDocList queriesWithSeedEntities) <- Data.Aeson.decode <$> BSL.readFile queryFile
+              return queriesWithSeedEntities
 
-    queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
-
-    let queryTermsAll = foldMap (queryDocRawTerms) $ queriesToSeedEntities
+    let queryTermsAll = foldMap (queryDocRawTerms) $ queriesWithSeedEntities
     putStrLn $ "# queryTermsAll " ++ show queryTermsAll
 
     let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
@@ -232,13 +240,13 @@ main = do
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
         --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
-    forM_' queriesToSeedEntities $ \query -> do
+    forM_' queriesWithSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
             T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
-            rankings = computeRankingsForQuery rankDoc annsFile query expansionHops
+            rankings = computeRankingsForQuery rankDoc annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
                                   universeGraph binarySymmetricGraph wordEmbeddings
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()

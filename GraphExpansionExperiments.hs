@@ -24,6 +24,7 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
+import Data.Aeson
 
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB
@@ -43,7 +44,15 @@ data QueryDoc = QueryDoc { queryDocQueryId :: PageId
                          , queryDocLeadEntities ::  HS.HashSet PageId
                          , queryDocRawTerms :: [Term]
                          }
-           deriving Show
+           deriving (Show, Generic)
+instance FromJSON QueryDoc
+instance ToJSON QueryDoc
+
+data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
+           deriving Generic
+
+instance FromJSON QueryDocList
+instance ToJSON QueryDocList
 
 pagesToLeadEntities :: [Page] -> [QueryDoc]
 pagesToLeadEntities pages =
