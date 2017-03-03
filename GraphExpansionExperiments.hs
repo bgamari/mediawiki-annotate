@@ -224,7 +224,7 @@ showMethodName (Method a b c d) = intercalate "-" [show a, show b, show c, show 
 
 allMethods :: [Method]
 allMethods = [ Method gName eName wName rName
-             | gName <- [Top5PerNode , Top100PerGraph , SimpleGraph , RandomGraph ]
+             | gName <- [minBound :: GraphNames .. maxBound ]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
