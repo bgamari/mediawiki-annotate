@@ -61,10 +61,10 @@ urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedI
 
 -- Orphans
 deriving instance CBOR.Serialise PageName
-instance FromJSON PageName
+deriving instance FromJSON PageName
 instance FromJSONKey PageName where
     fromJSONKey = fmap PageName fromJSONKey
-instance ToJSON PageName
+deriving instance ToJSON PageName
 instance ToJSONKey PageName where
     toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
 
