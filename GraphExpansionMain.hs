@@ -214,7 +214,7 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile -> pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
-              Just (QueryDocList queriesWithSeedEntities) <- Data.Aeson.decode <$> BSL.readFile queryFile
+              QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
 
     let queryTermsAll = foldMap (queryDocRawTerms) $ queriesWithSeedEntities
