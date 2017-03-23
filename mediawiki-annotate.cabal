@@ -278,3 +278,48 @@ executable trec-car-seeds
                        time,
                        trec-car-tools
   default-language:    Haskell2010
+
+executable trec-car-annotation-export
+  main-is:             EntityPassagesToAnnotationMain.hs
+  other-modules:       AnnotationExport
+                       GraphExpansion
+                       Dijkstra
+                       DenseMapping
+                       PageRank
+                       Graph
+                       AttriRank
+                       GloveEmbedding
+                       ZScore
+                       WriteRanking
+                       Retrieve
+                       GraphExpansionExperiments
+  ghc-options:         -Wall -threaded -rtsopts
+  build-depends:       base >=4.9 && <4.10,
+                       blaze-html,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       array,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       aeson,
+                       transformers,
+                       simplir,
+                       pipes,
+                       binary,
+                       log-domain,
+                       charset,
+                       snowball >= 1.0 && <1.1,
+                       foldl,
+                       unix,
+                       fork-map,
+                       time,
+                       trec-car-tools
+  default-language:    Haskell2010
