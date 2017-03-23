@@ -1,0 +1,23 @@
+name:                trec-car-annotation-interface
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Ben Gamari
+maintainer:          ben@smart-cactus.org
+copyright:           (c) 2017 Ben Gamari
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable trec-car-annotation-interface
+  main-is:             Generate.hs
+  build-depends:       base >=4.9 && <4.10,
+                       filepath >= 1.4,
+                       trec-car-tools >=0.1 && <0.2,
+                       unordered-containers >=0.2 && <0.3,
+                       bytestring >=0.10 && <0.11,
+                       blaze-html >=0.8 && <0.9,
+                       text >= 1.2,
+                       simplir
+  default-language:    Haskell2010
