@@ -24,6 +24,7 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
+import Data.Aeson
 
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB
@@ -39,25 +40,34 @@ unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.Hash
 unionsWith f = foldl' (HM.unionWith f) mempty
 
 data QueryDoc = QueryDoc { queryDocQueryId :: PageId
-                         , queryDocQueryText :: PageName
+                         , queryDocQueryText :: T.Text
                          , queryDocLeadEntities ::  HS.HashSet PageId
-                         , queryDocRawTerms :: [Term]
                          }
-           deriving Show
+           deriving (Show, Generic)
+instance FromJSON QueryDoc
+instance ToJSON QueryDoc
+
+data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
+           deriving Generic
+
+instance FromJSON QueryDocList
+instance ToJSON QueryDocList
 
 pagesToLeadEntities :: [Page] -> [QueryDoc]
 pagesToLeadEntities pages =
         map (\page -> let kbDoc = KB.transformContent inlinkCounts page
                       in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
-                                  , queryDocQueryText      = pageName page
+                                  , queryDocQueryText      = getPageName $ pageName page
                                   , queryDocLeadEntities   = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
-                                  , queryDocRawTerms       = textToTokens' $ getPageName $ pageName page
                                   }
             )
         $ pages
       where
         inlinkInfo   = KB.collectInlinkInfo pages
         inlinkCounts = KB.resolveRedirects inlinkInfo
+
+queryDocRawTerms :: QueryDoc -> [Term]
+queryDocRawTerms = textToTokens' . queryDocQueryText
 
 data GraphStats = GraphStats { nNodes, nEdges :: !Int }
                 deriving (Show)
@@ -170,9 +180,9 @@ onlySymmetricEdges edgeDocs =
   in edgeDocs'
 
 
-random100Filter :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
-random100Filter edgeDocs =
-  let edgeDocs' = take 100 $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
+randomFilter :: Int -> [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
+randomFilter topN edgeDocs =
+  let edgeDocs' = take topN $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
       perSourceEdges :: HM.HashMap PageId [EdgeDoc]
       perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
       perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByEntity edgeDocs' ) $ perSourceEdges
@@ -207,7 +217,7 @@ marginalizeEdges graph =
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph | Random2000Graph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -224,7 +234,7 @@ showMethodName (Method a b c d) = intercalate "-" [show a, show b, show c, show 
 
 allMethods :: [Method]
 allMethods = [ Method gName eName wName rName
-             | gName <- [Top5PerNode , Top100PerGraph , SimpleGraph , RandomGraph ]
+             | gName <- [minBound :: GraphNames .. maxBound ]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
@@ -263,11 +273,29 @@ prio3Methods = [ Method gName eName wName rName
 
 prio4Methods :: [Method]
 prio4Methods = [ Method gName eName wName rName
-                          | gName <- [minBound :: GraphNames .. maxBound]
+                          | gName <- [Top100PerGraph, Top2000PerGraph, Random2000Graph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
                           , eName <- [Unfiltered]
-                          , wName <- [Binary, RecipRank, LinearRank, BucketRank]
+                          , wName <- [Count, Score, RecipRank, LinearRank, BucketRank]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
                           ]
+
+fix1Methods :: [Method]
+fix1Methods = [ Method gName eName wName rName
+                          | gName <- [Top100PerGraph, Top2000PerGraph ]
+                          , eName <- [Unfiltered]
+                          , wName <- [Count, Score]
+                          , rName <- [AttriRank]
+                          ]
+
+fix2Methods :: [Method]
+fix2Methods = [ Method gName eName wName rName
+                          | gName <- [Random2000Graph ]
+                          , eName <- [Unfiltered]
+                          , wName <- [Count, Score]
+                          , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          ]
+
+
 testMethods :: [Method]
 testMethods = [ Method gName eName wName rName
                           | gName <- [minBound :: GraphNames .. maxBound]
