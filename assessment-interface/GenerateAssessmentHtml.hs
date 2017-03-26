@@ -64,10 +64,13 @@ main = do
             createDirectoryIfMissing True dirPath
             return $ dirPath </> sectionfilename <.> "html"
           where
-            sectionfilename = case headings of
-                                [] -> "index-article"
-                                _ ->  (intercalate "-" $ map unpackHeadingId headings)
-
+            sectionfilename =
+              case headings of
+                [] -> "index-article"
+                _ ->  intercalate "-" $ map (map replaceChars . unpackHeadingId) headings
+              where
+                replaceChars '/' = '-'
+                replaceChars c   = c
 
 
     outlines <- decodeCborList <$> BSL.readFile outlinesFile

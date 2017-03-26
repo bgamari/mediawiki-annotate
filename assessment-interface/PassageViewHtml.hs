@@ -26,11 +26,6 @@ data SectionPathWithName = SectionPathWithName { sprQueryId      :: SectionPath
                                                , sprHeadingPath  :: [SectionHeading]
                                                }
 
--- data SectionPathResults = SectionPathResults { sprQueryId      :: SectionPath
---                                              , sprPageName     :: PageName
---                                              , sprHeadingPath  :: [SectionHeading]
---                                              , sprRanking      :: [RankingEntry]
---                                              }
 
 data RankingEntry = RankingEntry { entryParagraph :: Paragraph
                                  , entryScore     :: Run.Score
