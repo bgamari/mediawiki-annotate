@@ -3,7 +3,9 @@
 
 import Data.Monoid
 import Data.Traversable
+import Data.List
 import Data.Maybe
+import Data.Foldable
 import System.FilePath
 import System.Directory
 
@@ -23,7 +25,6 @@ import PassageViewHtml
 import qualified SimplIR.Format.TrecRunFile as Run
 
 import System.Environment
-
 
 main ::  IO ()
 main = do
@@ -58,10 +59,14 @@ main = do
      -- done, only need resultMap after this point
 
     let toFilename :: SectionPath -> IO FilePath
-        toFilename sectionPath = do
-          let dirPath = dest </> escapeSectionPath sectionPath
-          createDirectoryIfMissing True dirPath
-          return $ dirPath </> "index.html"
+        toFilename (SectionPath page headings) = do
+            let dirPath = dest </> (unpackPageId page)
+            createDirectoryIfMissing True dirPath
+            return $ dirPath </> sectionfilename <.> "html"
+          where
+            sectionfilename = case headings of
+                                [] -> "index-article"
+                                _ ->  (intercalate "-" $ map unpackHeadingId headings)
 
 
 
@@ -76,9 +81,10 @@ main = do
              Nothing -> do
                  putStrLn $ "no results for section path "++show sectionPath
                  return Nothing
+
              Just rankingEntries -> do
                 -- createFilenameForSectionPath
-                 let pageHtml = PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries
+                 let pageHtml =PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries
 
                  outFile <- toFilename sectionPath
 
@@ -87,6 +93,8 @@ main = do
                  BSL.writeFile outFile $ H.renderHtml pageHtml
                  return $ Just outFile
       :: IO [FilePath]
+
+    print $ fold files
 
     return ()
 --     let queryListHtml = undefined
@@ -111,8 +119,7 @@ main = do
 --       where accum' = accum ++ [sectionId]
 --     go accum (Para _) = []
 
-
-pageSkeletonToSectionPathsWithName :: Stub ->  [PassageViewHtml.SectionPathWithName]
+pageSkeletonToSectionPathsWithName :: Stub -> [PassageViewHtml.SectionPathWithName]
 pageSkeletonToSectionPathsWithName Stub{..} = foldMap (go empty) stubSkeleton
     where
       empty = PassageViewHtml.SectionPathWithName
@@ -124,13 +131,13 @@ pageSkeletonToSectionPathsWithName Stub{..} = foldMap (go empty) stubSkeleton
       append :: PassageViewHtml.SectionPathWithName -> HeadingId -> SectionHeading -> PassageViewHtml.SectionPathWithName
       append spn headingId sectionHeading =
            spn
-              { sprQueryId=(sprQueryId spn) {sectionPathHeadings = headingId : sectionPathHeadings (sprQueryId spn)}
-              , sprHeadingPath = sectionHeading : sprHeadingPath spn
+              { sprQueryId=(sprQueryId spn) {sectionPathHeadings = sectionPathHeadings (sprQueryId spn) ++ [headingId] }
+              , sprHeadingPath = sprHeadingPath spn ++ [sectionHeading]
               }
 
       go :: PassageViewHtml.SectionPathWithName -> PageSkeleton -> [PassageViewHtml.SectionPathWithName]
       go sectionPathWithName (Section sectionHeading sectionId children) =
-          sectionPathWithName : foldMap (go sectionPathWithName') children
+          sectionPathWithName' : foldMap (go sectionPathWithName') children
         where
           sectionPathWithName' = append sectionPathWithName sectionId sectionHeading
       go sectionPathWithName (Para _) = []

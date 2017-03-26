@@ -43,13 +43,15 @@ passageRankingToHtml SectionPathWithName {..} sprRanking = H.docTypeHtml $ do
     H.body $ do
       H.div ! HA.class_ "overview-heading-query" $ do
         H.h1 $ "Query "
-                    <> toHtml (getPageName sprPageName)
-                    <> " // "
-                    <> toHtml (T.intercalate " // " $ map getSectionHeading sprHeadingPath)
-        H.p $ "(" <> toHtml (escapeSectionPath sprQueryId) <> ") "
+            <> toHtml (T.intercalate " // "
+                       (getPageName sprPageName : map getSectionHeading sprHeadingPath)
+                       )
+        H.p $ " (" <> toHtml (escapeSectionPath sprQueryId) <> ") "
+
+      H.div $ do
         H.p $ do
-                "Back to "
-                H.a ! HA.href ".." $ "Query List"
+              "Back to "
+              H.a ! HA.href ".." $ "Query List"
 
         H.p ! HA.class_ "entity-snippet-intro" $ "Select relevant / non-relevant paragraphs for this section."
 
