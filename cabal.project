@@ -9,6 +9,7 @@ packages:
     simplir/vendor/xml/xml-conduit
     car-baselines/
     fork-map/
+    assessment-interface/
 
 package mediawiki-parser
     tests: True

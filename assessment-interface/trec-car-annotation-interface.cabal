@@ -11,9 +11,11 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable trec-car-annotation-interface
-  main-is:             Generate.hs
+  main-is:             GenerateAssessmentHtml.hs
+  other-modules:       PassageViewHtml
   build-depends:       base >=4.9 && <4.10,
                        filepath >= 1.4,
+                       directory,
                        trec-car-tools >=0.1 && <0.2,
                        unordered-containers >=0.2 && <0.3,
                        bytestring >=0.10 && <0.11,

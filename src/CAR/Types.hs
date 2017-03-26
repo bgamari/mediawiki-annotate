@@ -10,7 +10,7 @@ module CAR.Types
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, sectionHeadingToId
-    , ParagraphId(..), unpackParagraphId
+    , ParagraphId(..), unpackParagraphId, packParagraphId
     , SectionPath(..), escapeSectionPath
       -- * Documents
     , Paragraph(..), prettyParagraph
@@ -114,6 +114,10 @@ instance NFData ParagraphId
 
 unpackParagraphId :: ParagraphId -> String
 unpackParagraphId (ParagraphId s) = unpackSBS s
+
+-- | Not generally safe.
+packParagraphId :: String -> ParagraphId
+packParagraphId = ParagraphId . SBS.pack . map (fromIntegral . ord)
 
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
