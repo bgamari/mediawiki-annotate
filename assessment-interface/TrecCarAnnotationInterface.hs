@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+
+import Options.Applicative
+
 import Data.Monoid
 import Data.Traversable
 import Data.List
@@ -8,6 +11,11 @@ import Data.Maybe
 import Data.Foldable
 import System.FilePath
 import System.Directory
+
+import System.Random
+import System.Random.Shuffle
+import Control.Monad.Random
+
 
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
@@ -22,14 +30,70 @@ import CAR.Types
 import CAR.CarExports
 import qualified CAR.TocFile as TocFile
 import PassageViewHtml
-import qualified SimplIR.Format.TrecRunFile as Run
+import qualified SimplIR.Format.TrecRunFile as TrecRun
+
+import TrecCarRenderHtml
 
 import System.Environment
 
+data Opts = Opts { outlinesFile :: FilePath
+                 , paragraphFile :: FilePath
+                 , optsDest :: FilePath
+                 , optsShuffle :: Bool
+                 , optsTopK :: Int
+                 , optsTrecRunFiles :: [FilePath]
+                  }
+
+
+
+trecResultUnionOfRankedParagraphs :: (ParagraphId -> Paragraph) -> Int -> Bool -> [FilePath]
+                                  -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry])
+trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle trecRunFiles = do
+
+    let --resultsToTopkMap :: _ -> (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry])
+        resultsToTopkMap trecRankingContents =
+            let resultMap :: HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry]
+                resultMap = HM.fromListWith (++) $
+                  [ ( TrecRun.queryId entry
+                    , [RankingEntry { entryParagraph = loadParagraph $ packParagraphId $ T.unpack $ TrecRun.documentName entry
+                                    , entryScore = TrecRun.documentScore entry
+                                    }]
+                    )
+                  | entry <- trecRankingContents
+                  ]
+            in fmap (take optsTopK) resultMap
+
+
+
+    files <- mapM TrecRun.readRunFile trecRunFiles
+    let unionResultMap = evalRandIO $ mapM condShuffleStuffNub $ foldl' (HM.unionWith (++)) mempty $ fmap resultsToTopkMap files
+          where
+            condShuffleStuffNub :: [TrecCarRenderHtml.RankingEntry] -> Rand StdGen [TrecCarRenderHtml.RankingEntry]
+            condShuffleStuffNub rankElements
+              | optsShuffle = shuffleM $ nubByParaId rankElements
+              | otherwise   = return $ nubByParaId rankElements
+            nubByParaId = HM.elems . HM.fromList . fmap (\rankElem -> (paraId $ entryParagraph $ rankElem, rankElem))
+    unionResultMap
+
+
+
+opts :: Parser Opts
+opts =
+    Opts
+    <$> argument str (help "outline collection file" <> metavar "CBOR FILE")
+    <*> argument str (help "paragraph collection file" <> metavar "CBOR FILE")
+    <*> option str (short 'd' <> long "destdir" <> help "destination directory for generated HTML" <> metavar "DIR")
+    <*> switch (short 's' <> long "shuffle results")
+    <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
+    <*> some (argument str (help "trec compatible run file(s)" <> metavar "FILE"))
+
 main ::  IO ()
 main = do
-    let dest = "annotations-html"
-    outlinesFile : paragraphFile : trecRunFile : _ <- getArgs
+    Opts{..} <- execParser $ info (helper <*> opts) mempty
+
+    let trecRunFile : _ = optsTrecRunFiles
+
+    -- ======== basic loading ===========
 
     -- load trec run files and merge with paragraph (in a lazy hashmap)
     paragraphIndex <- TocFile.open $ TocFile.IndexedCborPath paragraphFile
@@ -39,28 +103,30 @@ main = do
           fromMaybe (error $ "Can't find paragraph: "++ show pid ++ " in file "++ paragraphFile)
            $ TocFile.lookup pid paragraphIndex
 
-    trecRankingContents <- Run.readRunFile trecRunFile
-    let resultMap :: HM.Lazy.HashMap Run.QueryId [PassageViewHtml.RankingEntry]
-        resultMap = HM.fromListWith (++) $
-          [ ( Run.queryId entry
-            , [RankingEntry { entryParagraph = loadParagraph $ packParagraphId $ T.unpack $ Run.documentName entry
-                            , entryScore = Run.documentScore entry
-                            }]
-            )
-          | entry <- trecRankingContents
-          ]
 
-        lookupResult :: SectionPath -> Maybe [PassageViewHtml.RankingEntry]
+
+
+    -- ========== low-level renderer ============
+
+
+
+
+    -- ========= view renderer ==============
+
+    trecResultMap <- trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle optsTrecRunFiles
+
+    let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.RankingEntry]
         lookupResult sectionPath =
-            let queryId = T.pack $ escapeSectionPath sectionPath
-            in queryId  `HM.lookup` resultMap
+          let queryId = T.pack $ escapeSectionPath sectionPath
+          in queryId  `HM.lookup` trecResultMap
 
+    -- =======================
 
      -- done, only need resultMap after this point
 
     let toFilename :: SectionPath -> IO FilePath
         toFilename (SectionPath page headings) = do
-            let dirPath = dest </> (unpackPageId page)
+            let dirPath = optsDest </> (unpackPageId page)
             createDirectoryIfMissing True dirPath
             return $ dirPath </> sectionfilename <.> "html"
           where
@@ -122,23 +188,23 @@ main = do
 --       where accum' = accum ++ [sectionId]
 --     go accum (Para _) = []
 
-pageSkeletonToSectionPathsWithName :: Stub -> [PassageViewHtml.SectionPathWithName]
+pageSkeletonToSectionPathsWithName :: Stub -> [TrecCarRenderHtml.SectionPathWithName]
 pageSkeletonToSectionPathsWithName Stub{..} = foldMap (go empty) stubSkeleton
     where
-      empty = PassageViewHtml.SectionPathWithName
+      empty = TrecCarRenderHtml.SectionPathWithName
                   { sprQueryId     = SectionPath{sectionPathPageId=stubPageId, sectionPathHeadings=mempty}
                   , sprPageName    = stubName
                   , sprHeadingPath = mempty
                   }
 
-      append :: PassageViewHtml.SectionPathWithName -> HeadingId -> SectionHeading -> PassageViewHtml.SectionPathWithName
+      append :: TrecCarRenderHtml.SectionPathWithName -> HeadingId -> SectionHeading -> TrecCarRenderHtml.SectionPathWithName
       append spn headingId sectionHeading =
            spn
               { sprQueryId=(sprQueryId spn) {sectionPathHeadings = sectionPathHeadings (sprQueryId spn) ++ [headingId] }
               , sprHeadingPath = sprHeadingPath spn ++ [sectionHeading]
               }
 
-      go :: PassageViewHtml.SectionPathWithName -> PageSkeleton -> [PassageViewHtml.SectionPathWithName]
+      go :: TrecCarRenderHtml.SectionPathWithName -> PageSkeleton -> [TrecCarRenderHtml.SectionPathWithName]
       go sectionPathWithName (Section sectionHeading sectionId children) =
           sectionPathWithName' : foldMap (go sectionPathWithName') children
         where
