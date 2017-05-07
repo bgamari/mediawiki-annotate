@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 
+-- | TrecCarAnnotationInterface: Commandline argument reading, trec run loading, merging, shuffling, nubbing
+module Main where
 
 import Options.Applicative
 
@@ -16,7 +19,6 @@ import System.Random
 import System.Random.Shuffle
 import Control.Monad.Random
 
-
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.ByteString.Lazy as BSL
@@ -30,19 +32,22 @@ import CAR.Types
 import CAR.CarExports
 import qualified CAR.TocFile as TocFile
 import PassageViewHtml
+import OutlineViewHtml
 import qualified SimplIR.Format.TrecRunFile as TrecRun
 
 import TrecCarRenderHtml
+import FileNameLookup
 
-import System.Environment
+import Debug.Trace
 
 data Opts = Opts { outlinesFile :: FilePath
                  , paragraphFile :: FilePath
                  , optsDest :: FilePath
                  , optsShuffle :: Bool
                  , optsTopK :: Int
+                 , optsOutlineId :: Maybe String
                  , optsTrecRunFiles :: [FilePath]
-                  }
+                 }
 
 
 
@@ -50,7 +55,7 @@ trecResultUnionOfRankedParagraphs :: (ParagraphId -> Paragraph) -> Int -> Bool -
                                   -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry])
 trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle trecRunFiles = do
 
-    let --resultsToTopkMap :: _ -> (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry])
+    let resultsToTopkMap ::  [TrecRun.RankingEntry] -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry]
         resultsToTopkMap trecRankingContents =
             let resultMap :: HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry]
                 resultMap = HM.fromListWith (++) $
@@ -62,8 +67,6 @@ trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle trecRunFile
                   | entry <- trecRankingContents
                   ]
             in fmap (take optsTopK) resultMap
-
-
 
     files <- mapM TrecRun.readRunFile trecRunFiles
     let unionResultMap = evalRandIO $ mapM condShuffleStuffNub $ foldl' (HM.unionWith (++)) mempty $ fmap resultsToTopkMap files
@@ -85,14 +88,14 @@ opts =
     <*> option str (short 'd' <> long "destdir" <> help "destination directory for generated HTML" <> metavar "DIR")
     <*> switch (short 's' <> long "shuffle results")
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
+    <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
     <*> some (argument str (help "trec compatible run file(s)" <> metavar "FILE"))
+
+
 
 main ::  IO ()
 main = do
     Opts{..} <- execParser $ info (helper <*> opts) mempty
-
-    let trecRunFile : _ = optsTrecRunFiles
-
     -- ======== basic loading ===========
 
     -- load trec run files and merge with paragraph (in a lazy hashmap)
@@ -103,14 +106,6 @@ main = do
           fromMaybe (error $ "Can't find paragraph: "++ show pid ++ " in file "++ paragraphFile)
            $ TocFile.lookup pid paragraphIndex
 
-
-
-
-    -- ========== low-level renderer ============
-
-
-
-
     -- ========= view renderer ==============
 
     trecResultMap <- trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle optsTrecRunFiles
@@ -120,76 +115,61 @@ main = do
           let queryId = T.pack $ escapeSectionPath sectionPath
           in queryId  `HM.lookup` trecResultMap
 
-    -- =======================
+    let fileNameLookup = fileNameLookupFactory existResultsForSectionpath
+         where
+           existResultsForSectionpath :: SectionPath -> Bool
+           existResultsForSectionpath =
+              isJust . lookupResult
 
-     -- done, only need resultMap after this point
-
-    let toFilename :: SectionPath -> IO FilePath
-        toFilename (SectionPath page headings) = do
-            let dirPath = optsDest </> (unpackPageId page)
-            createDirectoryIfMissing True dirPath
-            return $ dirPath </> sectionfilename <.> "html"
-          where
-            sectionfilename =
-              case headings of
-                [] -> "index-article"
-                _ ->  intercalate "-" $ map (map replaceChars . unpackHeadingId) headings
-              where
-                replaceChars '/' = '-'
-                replaceChars c   = c
+    let wrapDestDir :: FilePath -> IO FilePath
+        wrapDestDir filePath = do
+         let filePath' = optsDest </> filePath
+         createDirectoryIfMissing True (takeDirectory filePath')
+         pure filePath'
 
 
-    outlines <- decodeCborList <$> BSL.readFile outlinesFile
+    -- ======= Main bits ================
+
+    outlinesAll <- decodeCborList <$> BSL.readFile outlinesFile
         :: IO [Stub]
 
-    files <- forM outlines $ \outline -> do
-         let sectionPathWithNamess = pageSkeletonToSectionPathsWithName outline
-         fmap catMaybes $ forM sectionPathWithNamess $ \sectionPathWithNames -> do
+    let outlines = case optsOutlineId of
+                     Just outlineId -> filter (\out -> (unpackPageId $ stubPageId out) == outlineId ) outlinesAll
+                     Nothing -> outlinesAll
+
+    let createPassageView :: FileNameLookup -> TrecCarRenderHtml.SectionPathWithName -> IO ()
+        createPassageView FileNameLookup{..} sectionPathWithNames = do
            let sectionPath = sprQueryId $ sectionPathWithNames
-           case lookupResult sectionPath of
-             Nothing -> do
+               sectionResults = lookupResult sectionPath
+               maybeFilePath = passageViewPathname sectionPath
+           case (sectionResults, maybeFilePath) of
+             (Just rankingEntries, Just filePath) -> do
+                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries
+                 passageFile <- wrapDestDir filePath
+                 BSL.writeFile passageFile $ H.renderHtml pageHtml
+             (Just rankingEntries, Nothing) -> do
+                 error $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+             _  -> do
                  putStrLn $ "no results for section path "++show sectionPath
-                 return Nothing
 
-             Just rankingEntries -> do
-                -- createFilenameForSectionPath
-                 let pageHtml =PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries
+    let outlineToFiles fileNameLookup@FileNameLookup{..} outline = do
+            outlineFile <- wrapDestDir $ outlinePathname outline
+            let pageHtml = OutlineViewHtml.outlineToHtml fileNameLookup outline
+            BSL.writeFile outlineFile $ H.renderHtml pageHtml
+            return outlineFile
 
-                 outFile <- toFilename sectionPath
 
-        -- for every section create a file as well
-
-                 BSL.writeFile outFile $ H.renderHtml pageHtml
-                 return $ Just outFile
+    passageFiles <- mapM (outlineToFiles fileNameLookup) outlines
       :: IO [FilePath]
+    forM_ outlines $ \outline -> do
+        let sectionPathWithNamess = pageSkeletonToSectionPathsWithName outline
+        forM_ sectionPathWithNamess (createPassageView fileNameLookup)
 
-    print $ fold files
+    -- ======== get sectionpaths out of a stub ===============
 
-    return ()
---     let queryListHtml = undefined
---     BSL.writeFile (dest </> "index.html") queryListHtml
-
-
-    -- makeAnnotationInterface "." queries
-
--- writeQuery :: FilePath -> Query -> IO ()
--- writeQuery dest query = do
---     BSL.writeFile (dest </> unpackHeadingId (queryId query) </> "index.html")
---         $ H.renderHtml $ queryToHtml query
-
--- pageSkeletonSections :: Stub -> [PassageViewHtml.SectionPathWithName]
--- pageSkeletonSections Stub{..} = foldMap (go []) stubSkeleton
---   where
---     go :: PassageViewHtml.SectionPathWithName -> Section -> [PassageViewHtml.SectionPathWithName]
---     go accum (Section sectionId sectionHeading children) =
---         let sectionPath = SectionPath stubPageId (accum')
---             sectionPathWithName = PassageViewHtml.SectionPathWithName sectionPath sectionHeadings stubName
---         in sectionPathWithName  : foldMap (go accum') children
---       where accum' = accum ++ [sectionId]
---     go accum (Para _) = []
 
 pageSkeletonToSectionPathsWithName :: Stub -> [TrecCarRenderHtml.SectionPathWithName]
-pageSkeletonToSectionPathsWithName Stub{..} = foldMap (go empty) stubSkeleton
+pageSkeletonToSectionPathsWithName Stub{..}  = foldMap (go empty) stubSkeleton
     where
       empty = TrecCarRenderHtml.SectionPathWithName
                   { sprQueryId     = SectionPath{sectionPathPageId=stubPageId, sectionPathHeadings=mempty}

@@ -39,7 +39,7 @@ newtype ParaNumber = ParaNumber Int -- Sequential index
 -- Passage file
 type PassageFile = [Paragraph]
 
--- Stub
+-- | Stub is like Page, but with the guarantee that there are no paragraphs in the page skeleton
 data Stub = Stub { stubName     :: PageName
                  , stubPageId   :: PageId
                  , stubSkeleton :: [PageSkeleton] }

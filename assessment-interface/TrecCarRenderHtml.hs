@@ -1,5 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+
+
+-- | Types and reusable HTML rendering
 module TrecCarRenderHtml where
 
 import Control.Monad
@@ -29,6 +32,7 @@ data SectionPathWithName = SectionPathWithName { sprQueryId      :: SectionPath
                                                , sprPageName     :: PageName
                                                , sprHeadingPath  :: [SectionHeading]
                                                }
+      deriving Show
 
 
 -- ========= Annotation Control, does not care what it is annotating   =============

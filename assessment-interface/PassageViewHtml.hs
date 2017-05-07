@@ -1,5 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+
+
+-- | Construct passage views
 module PassageViewHtml where
 
 import Control.Monad
@@ -16,8 +19,7 @@ import CAR.Types
 import qualified SimplIR.Format.TrecRunFile as Run
 
 import TrecCarRenderHtml
-
-
+import FileNameLookup
 
 passageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.RankingEntry] -> H.Html
 passageRankingToHtml SectionPathWithName {..} sprRanking = H.docTypeHtml $ do

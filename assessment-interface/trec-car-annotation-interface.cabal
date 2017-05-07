@@ -13,7 +13,10 @@ cabal-version:       >=1.10
 executable trec-car-annotation-interface
   main-is:             TrecCarAnnotationInterface.hs
   other-modules:       PassageViewHtml,
-                       TrecCarRenderHtml
+                       TrecCarRenderHtml,
+                       OutlineViewHtml,
+                       FileNameLookup
+  ghc-options:         -Wincomplete-patterns
   build-depends:       base >=4.9 && <4.10,
                        filepath >= 1.4,
                        directory,
@@ -26,5 +29,6 @@ executable trec-car-annotation-interface
                        simplir,
                        random,
                        random-shuffle,
-                       MonadRandom
+                       MonadRandom,
+                       network-uri
   default-language:    Haskell2010
