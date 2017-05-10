@@ -91,7 +91,8 @@ toPage WikiDoc{..} =
              , pageId       = pageNameToId name
              , pageSkeleton = docsToSkeletons contents
              }
-      where name = normPageName $ PageName $ TE.decodeUtf8 docTitle
+      where
+        name = normPageName $ PageName $ TE.decodeUtf8 docTitle
 
 docsToSkeletons :: [Doc] -> [PageSkeleton]
 docsToSkeletons =
@@ -283,6 +284,20 @@ isUnnamed :: (Maybe Text, [Doc]) -> Maybe [Doc]
 isUnnamed (Nothing, val) = Just val
 isUnnamed _              = Nothing
 
+-- | Is a 'Doc' an image element?
+isImage :: Doc -> Maybe (T.Text, [Doc])
+isImage (InternalLink target parts)
+  | Just name <- "file:" `T.stripPrefix` page
+  = image name
+  | Just name <- "image:" `T.stripPrefix` page
+  = image name
+  where
+    page = T.toCaseFold $ getPageName $ linkTargetPage target
+    image name
+      | [] <- parts = Just (name, [])
+      | otherwise   = Just (name, last parts)
+isImage _ = Nothing
+
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: Doc -> Maybe [ParaBody]
@@ -291,12 +306,8 @@ toParaBody (Char x)        = Just [ParaText $ T.singleton x]
 toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
 toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
-toParaBody (InternalLink target parts)
-  | PageName page' <- page
-  , "file:" `T.isPrefixOf` T.toCaseFold page'
-  = Nothing
-  | PageName page' <- page
-  , "image:" `T.isPrefixOf` T.toCaseFold page'
+toParaBody doc@(InternalLink target parts)
+  | Just _ <- isImage doc
   = Nothing
   | otherwise
   = let linkTarget   = normPageName page
@@ -337,8 +348,8 @@ getPrefix f = go []
       | otherwise     = (reverse acc, x:xs)
 
 -- | Collapse consecutive 'ParaText' nodes.
-toParaBodies :: [ParaBody] -> [ParaBody]
-toParaBodies = filter (not . isEmptyText) . go
+collapseParaBodies :: [ParaBody] -> [ParaBody]
+collapseParaBodies = filter (not . isEmptyText) . go
   where
     go [] = []
     go xs
@@ -356,13 +367,28 @@ nullParaBody :: ParaBody -> Bool
 nullParaBody (ParaText t) = T.null $ T.strip t
 nullParaBody _            = False
 
+mkParagraph :: [ParaBody] -> Paragraph
+mkParagraph bodies = Paragraph (paraBodiesToId bodies) bodies
+
+-- | Does the @[Doc]@ begin with a paragraph? If so, return it and the remaining
+-- 'Doc's.
+splitParagraph :: [Doc] -> Maybe (Paragraph, [Doc])
+splitParagraph docs
+  | (bodies@(_:_), rest) <- getPrefix toParaBody docs
+  , let bodies' = collapseParaBodies $ concat bodies
+  , not $ all nullParaBody bodies'
+  = Just (mkParagraph bodies', rest)
+  | otherwise
+  = Nothing
+
 toSkeleton :: [Doc] -> [PageSkeleton]
 toSkeleton [] = []
 toSkeleton docs
-  | (bodies@(_:_), docs') <- getPrefix toParaBody docs
-  , let bodies' = toParaBodies $ concat bodies
-  , not $ all nullParaBody bodies'
-  = Para (Paragraph (paraBodiesToId bodies') bodies') : toSkeleton docs'
+  | Just (para, rest) <- splitParagraph docs
+  = Para para : toSkeleton rest
+toSkeleton (doc : docs)
+  | Just (target, caption) <- isImage doc
+  = Image target (toSkeleton caption) : toSkeleton docs
 toSkeleton (Heading lvl title : docs) =
     let (children, docs') = break isParentHeader docs
         isParentHeader (Heading lvl' _) = lvl' <= lvl

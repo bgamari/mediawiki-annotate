@@ -117,6 +117,7 @@ unpackParagraphId (ParagraphId s) = unpackSBS s
 
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
+                  | Image T.Text [PageSkeleton]
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 
@@ -181,6 +182,8 @@ prettySkeleton renderLink = go 1
           <> map (go (n+1)) children
           <> [""]
     go _ (Para para) = prettyParagraph renderLink para
+    go _ (Image target children) =
+        "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
 prettyParagraph renderLink (Paragraph paraId bodies) =

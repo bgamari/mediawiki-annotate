@@ -22,6 +22,7 @@ pageContainsText str = any goSkeleton . pageSkeleton
   where
     goSkeleton (Section _ _ children) = any goSkeleton children
     goSkeleton (Para (Paragraph _ bodies)) = any goParaBody bodies
+    goSkeleton (Image _ caption) = any goSkeleton caption
 
     goParaBody (ParaLink l) = str `T.isInfixOf` linkAnchor l
     goParaBody (ParaText t) = str `T.isInfixOf` t
@@ -42,18 +43,20 @@ pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
+pageSkeletonLinks (Image _ caption) = foldMap pageSkeletonLinks caption
 
 paraLinks :: Paragraph -> [Link]
 paraLinks (Paragraph _ bodies) =
     foldMap paraBodyLinks bodies
 
 paraBodyLinks :: ParaBody -> [Link]
-paraBodyLinks (ParaText text) = []
-paraBodyLinks (ParaLink link) = [link]
+paraBodyLinks (ParaText _text) = []
+paraBodyLinks (ParaLink link)  = [link]
 
 pageSkeletonText :: PageSkeleton -> [T.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
 pageSkeletonText (Para para) = [ paraToText para ]
+pageSkeletonText (Image _ _) = []
 
 paraToText :: Paragraph -> T.Text
 paraToText (Paragraph  _ bodies) =
