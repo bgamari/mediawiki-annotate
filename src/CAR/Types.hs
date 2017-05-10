@@ -160,7 +160,7 @@ decodeCborList = start . BSL.toChunks
     go (CBOR.Partial f) []         = go (f Nothing) []
     go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
     go (CBOR.Done bs _ x) bss      = x : start (bs : bss)
-    go (CBOR.Fail rest _ err) _    = error $ show err
+    go (CBOR.Fail _rest _ err) _   = error $ show err
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode

@@ -19,9 +19,7 @@ module CAR.CarExports
     , prettyEntityAnnotation
     ) where
 
-import Data.List (nub, sort)
 import Data.Maybe
-import qualified Data.ByteString.Char8 as BS
 import qualified Data.DList as DList
 import qualified Data.Text as T
 import qualified Data.Set as S
@@ -93,7 +91,7 @@ prettyStub (Stub (PageName name) _ skeleton) =
            ++ map (prettySkeleton anchorOnly) skeleton
 
 toParagraphs :: Page -> [Paragraph]
-toParagraphs (Page name _ skeleton) =
+toParagraphs (Page _name _ skeleton) =
     concatMap go skeleton
   where
     go :: PageSkeleton -> [Paragraph]
@@ -128,7 +126,7 @@ toEntityAnnotations (Page _ pageId skeleton) =
     go parentIds (Para paragraph) =
         let entities =  fmap linkTarget $ paraLinks paragraph
         in S.fromList
-            $ filter (\(EntityAnnotation _ id _) -> (length (unpackPageId id)) > 0)
+            $ filter (\(EntityAnnotation _ pageId _) -> (length (unpackPageId pageId)) > 0)
             $  [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
