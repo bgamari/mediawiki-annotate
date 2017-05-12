@@ -50,7 +50,6 @@ import ZScore
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
-
 opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int)
 opts =
     (,,,,,)
@@ -67,7 +66,12 @@ opts =
         <|> option (str >>= methodSet) (long "method-set" <> metavar "METHODSET" <> help "Set of methods to run")
 
       method :: ReadM Method
-      method = fmap (methodMap M.!) str
+      method = do name <- str
+                  case M.lookup name methodMap of
+                    Just method -> return method
+                    Nothing -> fail $ unlines $ [ "unknown method "++name
+                                                , "known methods:"
+                                                ] ++ map ("  "++) (M.keys methodMap)
 
       methodSet :: String -> ReadM [Method]
       methodSet "all"  = pure allMethods
@@ -81,7 +85,6 @@ opts =
       methodSet "fix2" = pure fix2Methods
       methodSet "test" = pure testMethods
       methodSet _      = fail "unknown method set"
-
 
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
@@ -251,7 +254,7 @@ main = do
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
             runMethod method ranking = do
-                let hdl = handles M.! method
+                let Just hdl = M.lookup method handles
 
                 let logMsg t = T.putStr $ T.pack $ unpackPageId queryId++"\t"++showMethodName method++"\t"++t++"\n"
                     logTimed t doIt = do
