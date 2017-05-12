@@ -21,7 +21,7 @@ formatEntityRankings runName queryId scoredItems =
     $ mconcat
     $ intersperse "\n"
     $ zipWith formatEntry [1..]
-    $ take rankingLength
+ --   $ take rankingLength
     $ toRanking
     $ scoredItems
   where formatEntry :: Int -> (PageId, Double) -> TB.Builder
