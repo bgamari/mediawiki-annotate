@@ -226,11 +226,13 @@ data GraphRankingNames = PageRank | PersPageRank | AttriRank | ShortPath | MargE
 data EdgeFilteringNames = Unfiltered | BidiFiltered
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames
+            | CandidateSet
     deriving ( Ord, Eq, Generic)
 instance Show Method where
     show = showMethodName
 showMethodName:: Method -> String
 showMethodName (Method a b c d) = intercalate "-" [show a, show b, show c, show d]
+showMethodName (CandidateSet ) = "CandidateSet"
 
 allMethods :: [Method]
 allMethods = [ Method gName eName wName rName
@@ -238,7 +240,7 @@ allMethods = [ Method gName eName wName rName
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
-             ]
+             ] ++ [CandidateSet]
 
 coreMethods :: [Method]
 coreMethods = [ Method gName eName wName rName

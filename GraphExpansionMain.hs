@@ -84,6 +84,7 @@ opts =
       methodSet "fix1" = pure fix1Methods
       methodSet "fix2" = pure fix2Methods
       methodSet "test" = pure testMethods
+      methodSet "candidateset" = pure [CandidateSet]
       methodSet _      = fail "unknown method set"
 
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
@@ -91,6 +92,14 @@ opts =
       querySource =
               option (fmap QueriesFromCbor str) (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
           <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
+
+
+candidateSetList :: HS.HashSet PageId -> Int -> BinarySymmetricGraph
+                ->  [(PageId, Double)]
+candidateSetList seeds radius binarySymmetricGraph  =
+    let nodeSet :: HS.HashSet PageId
+        nodeSet = expandNodesK binarySymmetricGraph seeds radius
+   in [ (pageId, 1.0) | pageId <- HS.toList nodeSet]
 
 
 
@@ -193,7 +202,7 @@ computeRankingsForQuery rankDocs annsFile query seeds radius universeGraph binar
             [ (Method gname ename wname rname,  graphRanking graph )
             | ((gname, ename, wname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
               (rname, graphRanking) <- graphRankings
-            ]
+            ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
 
 --     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
     in computeRankings'
