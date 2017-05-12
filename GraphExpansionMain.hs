@@ -221,8 +221,10 @@ main = do
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
 
+    putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
+
     let binarySymmetricGraph :: BinarySymmetricGraph
-        !binarySymmetricGraph = trace ("nodes in KB = " <> show (HM.size universeGraph)) $ universeToBinaryGraph universeGraph
+        !binarySymmetricGraph = universeToBinaryGraph universeGraph
 
     queriesWithSeedEntities <-
         case querySrc of
