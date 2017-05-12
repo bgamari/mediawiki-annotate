@@ -11,6 +11,8 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 
 
+import Debug.Trace
+
 import Control.Exception (bracket)
 import Control.Monad (when)
 import Control.Concurrent
@@ -220,7 +222,7 @@ main = do
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
 
     let binarySymmetricGraph :: BinarySymmetricGraph
-        !binarySymmetricGraph = universeToBinaryGraph universeGraph
+        !binarySymmetricGraph = trace ("nodes in KB = " <> show (HM.size universeGraph)) $ universeToBinaryGraph universeGraph
 
     queriesWithSeedEntities <-
         case querySrc of
