@@ -33,3 +33,11 @@ library
                        bytestring >=0.10 && <0.11
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+executable fork-map-test
+  main-is:             Test.hs
+  ghc-options:         -threaded -rtsopts -debug
+  build-depends:       base,
+                       pipes,
+                       fork-map
+  default-language:    Haskell2010
