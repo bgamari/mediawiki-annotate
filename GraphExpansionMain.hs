@@ -10,9 +10,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 
-
-import Debug.Trace
-
 import Control.Exception (bracket)
 import Control.Monad (when)
 import Control.Concurrent
@@ -70,7 +67,7 @@ opts =
       method :: ReadM Method
       method = do name <- str
                   case M.lookup name methodMap of
-                    Just method -> return method
+                    Just m  -> return m
                     Nothing -> fail $ unlines $ [ "unknown method "++name
                                                 , "known methods:"
                                                 ] ++ map ("  "++) (M.keys methodMap)
