@@ -13,6 +13,7 @@ import qualified Data.Text.Lazy.Builder.Int as TB
 
 import CAR.Types
 
+rankingLength :: Int
 rankingLength = 100
 
 formatEntityRankings :: T.Text -> T.Text -> [(PageId, Double)] -> TL.Text
