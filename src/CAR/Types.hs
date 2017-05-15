@@ -121,6 +121,7 @@ packParagraphId = ParagraphId . SBS.pack . map (fromIntegral . ord)
 
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
+                  | Image T.Text [PageSkeleton]
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 
@@ -163,7 +164,7 @@ decodeCborList = start . BSL.toChunks
     go (CBOR.Partial f) []         = go (f Nothing) []
     go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
     go (CBOR.Done bs _ x) bss      = x : start (bs : bss)
-    go (CBOR.Fail rest _ err) _    = error $ show err
+    go (CBOR.Fail _rest _ err) _   = error $ show err
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
@@ -185,6 +186,8 @@ prettySkeleton renderLink = go 1
           <> map (go (n+1)) children
           <> [""]
     go _ (Para para) = prettyParagraph renderLink para
+    go _ (Image target children) =
+        "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
 prettyParagraph renderLink (Paragraph paraId bodies) =
