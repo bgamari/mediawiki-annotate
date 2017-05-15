@@ -14,6 +14,8 @@ module CAR.TocFile
     , keys
     ) where
 
+import Control.Monad.ST
+import Control.Monad.ST.Unsafe
 import Data.Foldable hiding (toList)
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
@@ -29,34 +31,32 @@ type Offset = Int
 
 readValuesWithOffsets :: forall a. CBOR.Serialise a
                       => BSL.ByteString -> [(Offset, a)]
-readValuesWithOffsets = start 0 . BSL.toChunks
+readValuesWithOffsets = \bs -> runST $ start 0 $ BSL.toChunks bs
   where
     start :: Offset  -- ^ current offset
           -> [BS.ByteString]
-          -> [(Offset, a)]
-    start _offset []  = []
+          -> ST s [(Offset, a)]
+    start _offset []  = return []
     start offset  bss =
         go offset offset CBOR.deserialiseIncremental bss
 
     go :: Offset          -- ^ offset of beginning of current chunk
        -> Offset          -- ^ start offset of thing currently being decoded
-       -> CBOR.IDecode a
+       -> ST s (CBOR.IDecode s a)
        -> [BS.ByteString] -- ^ remaining chunks
-       -> [(Offset, a)]
-    go !currOff !startOff (CBOR.Partial f)   [] =
-        go currOff startOff (f Nothing) []
-
-    go currOff  startOff (CBOR.Partial f)   (bs:bss) =
-        go currOff startOff (f (Just bs)) bss
-
-    go currOff  startOff (CBOR.Done bs off x) bss =
-        let !currOff' = currOff + fromIntegral off
-            bss' | BS.null bs = bss
-                 | otherwise  = bs : bss
-        in (startOff, x) : start currOff' bss'
-
-    go _currOff _startOff (CBOR.Fail _rest _ err) _ =
-        error $ show err
+       -> ST s [(Offset, a)]
+    go !currOff !startOff decoder bss0 = do
+        r <- decoder
+        case (r, bss0) of
+          (CBOR.Partial f,     [])     -> go currOff startOff (f Nothing) []
+          (CBOR.Partial f,     bs:bss) -> go currOff startOff (f (Just bs)) bss
+          (CBOR.Done bs off x, bss)    -> do
+              let !currOff' = currOff + fromIntegral off
+                  bss' | BS.null bs = bss
+                       | otherwise  = bs : bss
+              rest <- unsafeInterleaveST $ start currOff' bss'
+              return $ (startOff, x) : rest
+          (CBOR.Fail _rest _ err, _)   -> error $ show err
 
 data IndexedCborPath i a = IndexedCborPath FilePath
                          deriving (Show)

@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -30,6 +31,8 @@ module CAR.Types
 import Data.Foldable
 import Data.Char (ord, chr)
 import Data.List (intercalate)
+import Control.Monad.ST
+import Control.Monad.ST.Unsafe
 import Control.DeepSeq
 import GHC.Generics
 import Data.Monoid
@@ -154,17 +157,23 @@ escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
 
-decodeCborList :: CBOR.Serialise a => BSL.ByteString -> [a]
-decodeCborList = start . BSL.toChunks
+decodeCborList :: forall a. CBOR.Serialise a => BSL.ByteString -> [a]
+decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
   where
     start xs
-      | all BS.null xs = []
+      | all BS.null xs = return []
       | otherwise      = go (CBOR.deserialiseIncremental CBOR.decode) xs
 
-    go (CBOR.Partial f) []         = go (f Nothing) []
-    go (CBOR.Partial f) (bs : bss) = go (f (Just bs)) bss
-    go (CBOR.Done bs _ x) bss      = x : start (bs : bss)
-    go (CBOR.Fail _rest _ err) _   = error $ show err
+    go :: ST s (CBOR.IDecode s a) -> [BS.ByteString] -> ST s [a]
+    go action xs = do
+        r <- action
+        case (r, xs) of
+          (CBOR.Partial f, [])       -> go (f Nothing) []
+          (CBOR.Partial f, bs : bss) -> go (f (Just bs)) bss
+          (CBOR.Done bs _ x, bss)    -> do
+              rest <- unsafeInterleaveST $ start (bs : bss)
+              return (x : rest)
+          (CBOR.Fail _rest _ err, _) -> error $ show err
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
