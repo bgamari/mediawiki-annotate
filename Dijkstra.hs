@@ -138,18 +138,18 @@ lazyDijkstra' collect graph =
             in go s0
   where
     go :: LS n e acc -> [(n, Distance e, acc)]
-    go s
-      | Just (u, distU, _predsU, todo') <- PSQ.minView $ lsTodo s =
-          let (emitted, lsEmit') = splitLessThan distU (lsEmit s)
-              s' = s { lsTodo = todo'
-                     , lsEmit = lsEmit'
-                     }
+    go s0
+      | Just (u, distU, _predsU, todo') <- PSQ.minView $ lsTodo s0 =
+          let (emitted, lsEmit') = splitLessThan distU (lsEmit s0)
+              s' = s0 { lsTodo = todo'
+                      , lsEmit = lsEmit'
+                      }
               s'' = foldl' (tryNeighbor (u, distU)) s' (getNeighbors graph u)
           in emitted ++ go s''
-      | otherwise = PSQ.toList (lsEmit s)
+      | otherwise = PSQ.toList (lsEmit s0)
       where
         lookupDist :: n -> Distance e
-        lookupDist n = fromMaybe Infinite $ HM.lookup n (lsAccum s)
+        lookupDist n = fromMaybe Infinite $ HM.lookup n (lsAccum s0)
 
         -- | Probe a neighbor @v@ of @u@
         tryNeighbor :: (n, Distance e) -> LS n e acc -> (n, e) -> LS n e acc
