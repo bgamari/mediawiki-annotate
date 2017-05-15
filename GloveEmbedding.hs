@@ -90,7 +90,20 @@ parseGlove' :: TL.Text -> SomeWordEmbedding
 parseGlove' contents =
     case someNatVal $ fromIntegral dim of
       Just (SomeNat (Proxy :: Proxy n)) ->
-          SomeWordEmbedding $
+          let parse :: KnownNat n => TL.Text -> HM.HashMap T.Text (WordVec n)
+              parse line =
+                case TL.words line of
+                  []     -> mempty
+                  w : ws -> HM.singleton (TL.toStrict w)
+                                         (WordVec $ A.listArray dimRange $ map parseFloat ws)
+
+              dimRange :: (EmbeddingDim n, EmbeddingDim n)
+              dimRange = (EmbeddingDim 0, EmbeddingDim (dim-1))
+
+              parseFloat :: TL.Text -> Float
+              parseFloat = either err (realToFrac . fst) . TR.double . TL.toStrict
+                where err msg = error $ "GloveEmbedding.parseGlove: parse error: "++msg
+          in SomeWordEmbedding $
               let vecs :: KnownNat n => WordEmbedding n
                   vecs = mconcat $ map parse $ TL.lines contents
               in vecs
@@ -98,15 +111,3 @@ parseGlove' contents =
   where
     !dim | x:_ <- TL.lines contents = length (TL.words x) - 1
          | otherwise = error "GloveEmbedding.parseGlove': Empty embeddings"
-    dimRange = (EmbeddingDim 0, EmbeddingDim (dim-1))
-
-    parse :: KnownNat n => TL.Text -> HM.HashMap T.Text (WordVec n)
-    parse line =
-      case TL.words line of
-        [] -> mempty
-        w : ws -> HM.singleton (TL.toStrict w)
-                               (WordVec $ A.listArray dimRange $ map parseFloat ws)
-
-    parseFloat :: TL.Text -> Float
-    parseFloat = either err (realToFrac . fst) . TR.double . TL.toStrict
-      where err msg = error $ "GloveEmbedding.parseGlove: parse error: "++msg
