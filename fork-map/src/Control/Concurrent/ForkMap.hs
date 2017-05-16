@@ -1,11 +1,19 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE StaticPointers #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 -- | Concurrently map over a structure
+--
+-- You will need @-XStaticPointers@.
 module Control.Concurrent.ForkMap
     ( map
     , mapIO
+      -- * Convenient reexports
+    , Serializable
+    , Dict(..)
     ) where
 
 import Control.Monad
@@ -17,17 +25,23 @@ import Pipes
 import qualified Pipes.Prelude as PP
 import Pipes.Concurrent as PC
 import Control.Concurrent.ForkMap.ForkPipe
+import Control.Distributed.Closure
+import Data.Typeable (Typeable)
 import Prelude hiding (map)
 
-map :: forall a b. (Binary a, Binary b)
-    => Int -> Int
-    -> (a -> b) -> Producer a IO () -> Producer b IO ()
-map queueDepth nMappers f = mapIO queueDepth nMappers (pure . f)
+instance Static (MonadIO IO) where closureDict = static Dict
 
-mapIO :: forall a b. (Binary a, Binary b)
+map :: forall a b. (Serializable a, Serializable b)
+    => Int -> Int
+    -> Closure (Dicts () a () b IO ()) -- ^ just pass @static 'Dict'@
+    -> Closure (a -> b) -> Producer a IO () -> Producer b IO ()
+map queueDepth nMappers dicts f = mapIO queueDepth nMappers dicts (static (pure .) `cap` f)
+
+mapIO :: forall a b. (Serializable a, Serializable b)
       => Int -> Int
-      -> (a -> IO b) -> Producer a IO () -> Producer b IO ()
-mapIO queueDepth nMappers f xs =
+      -> Closure (Dicts () a () b IO ()) -- ^ just pass @static 'Dict'@
+      -> Closure (a -> IO b) -> Producer a IO () -> Producer b IO ()
+mapIO queueDepth nMappers dicts f xs =
     liftIO run >>= PC.fromInput
   where
     run :: IO (PC.Input b)
@@ -42,7 +56,7 @@ mapIO queueDepth nMappers f xs =
 
         -- Feeds mappers
         mappers <- replicateM nMappers $ async $ runSafeT $ do
-            pipe <- forkPipe id $ PP.mapM f
+            pipe <- forkPipe dicts (static (RunAction id)) (static PP.mapM `cap` f)
             runEffect $ PC.fromInput workIn >-> pipe >-> PC.toOutput resultOut
 
         -- Seals result queue
