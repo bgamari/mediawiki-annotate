@@ -10,6 +10,7 @@ packages:
     car-baselines/
     fork-map/
     assessment-interface/
+    assessment-interface/annotation/server
 
 package mediawiki-parser
     tests: True
