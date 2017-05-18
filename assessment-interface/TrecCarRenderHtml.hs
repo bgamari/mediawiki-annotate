@@ -105,7 +105,7 @@ prettySectionPath SectionPathWithName{..} =
 toNestedList :: [H.Html] -> H.Html
 toNestedList [] = mempty
 toNestedList (x:xs) =
-    H.ol $ H.li $ x <> toNestedList xs
+    H.ul $ H.li $ x <> toNestedList xs
 
 
 
@@ -138,6 +138,6 @@ prologue = do
     H.meta ! HA.charset "utf-8"
     H.script ! HA.src "http://code.jquery.com/jquery-1.11.0.min.js" $ mempty
     H.script ! HA.src "/annotate.js" $ mempty
-    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "http://smart-cactus.org/~dietz/knowledgeportfolios/css/bootstrap.min.css"
-    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "http://smart-cactus.org/~dietz/knowledgeportfolios/annotate.css"
-    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "http://smart-cactus.org/~dietz/knowledgeportfolios/qipidia.css"
+    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "/annotate.css"
+    H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "/assessment-interface-v1.css"
