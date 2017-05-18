@@ -30,7 +30,9 @@ passageRankingToHtml SectionPathWithName {..} sprRanking = H.docTypeHtml $ do
             <> toHtml (T.intercalate " // "
                        (getPageName sprPageName : map getSectionHeading sprHeadingPath)
                        )
-        H.p $ " (" <> toHtml (escapeSectionPath sprQueryId) <> ") "
+        H.div $ do
+            H.span "Passage ID: "
+            H.code $ toHtml (escapeSectionPath sprQueryId)
 
       H.div $ do
         H.p $ do
