@@ -41,8 +41,8 @@ passageRankingToHtml SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docT
 
         H.p ! HA.class_ "entity-snippet-intro" $ "Select relevant / non-relevant paragraphs for this section."
 
-        let renderHtml TrecCarRenderHtml.RankingEntry {..} =
-                paragraphToAnnotationHtml queryId entryParagraph Nothing
+        let renderHtml e =
+                paragraphToAnnotationHtml queryId (entryParagraph e) Nothing
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
@@ -54,10 +54,6 @@ passageRankingToHtml SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docT
                 Just sprTruths -> do
                     H.h1 "GroundTruth"
                     H.ol $ mapM_ renderHtml sprTruths
-                      where
-                        renderHtml TrecCarRenderHtml.RankingEntry {..} =
-                            paragraphToAnnotationHtml queryId entryParagraph Nothing
-                          where queryId = sectionPathToQueryId sprQueryId
                 Nothing -> mempty
 
 
