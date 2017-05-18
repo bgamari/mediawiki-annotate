@@ -82,17 +82,18 @@ trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle trecRunFile
     unionResultMap
 
 
-trecQrelParagraphs :: (ParagraphId -> Paragraph) -> FilePath -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry] )
-trecQrelParagraphs loadParagraph qrelfile  = do
+trecQrelParagraphs :: (ParagraphId -> Maybe Paragraph) -> FilePath -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry] )
+trecQrelParagraphs loadParagraphMaybe qrelfile  = do
     qrelEntries <- TrecQrel.readQRel qrelfile
     let qrelMap =   HM.fromListWith (++)
                     $  [ ( TrecQrel.queryId entry
-                        , [QrelEntry { entryParagraph = loadParagraph $ packParagraphId $ T.unpack $ TrecQrel.documentName entry
+                        , [QrelEntry { entryParagraph = paragraph -- loadParagraph $ packParagraphId $ T.unpack $ TrecQrel.documentName entry
                                         , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
                                         }]
                         )
                       | entry <- qrelEntries
                       ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
+                      ,Just paragraph <- pure $ loadParagraphMaybe $ packParagraphId $ T.unpack $ TrecQrel.documentName entry
                       ]
     return qrelMap
 
@@ -123,10 +124,15 @@ main = do
           fromMaybe (error $ "Can't find paragraph: "++ show pid ++ " in file "++ paragraphFile)
            $ TocFile.lookup pid paragraphIndex
 
+    let loadParagraphMaybe :: ParagraphId -> Maybe Paragraph
+        loadParagraphMaybe pid =
+         TocFile.lookup pid paragraphIndex
+
+
     -- ========= view renderer ==============
 
     trecResultMap <- trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle optsTrecRunFiles
-    trecQrelsMap <-  trecQrelParagraphs loadParagraph optsQrelFile
+    trecQrelsMap <-  trecQrelParagraphs loadParagraphMaybe optsQrelFile
 
 
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.RankingEntry]
