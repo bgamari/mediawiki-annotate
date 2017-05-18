@@ -97,6 +97,17 @@ paragraphToAnnotationHtml' queryId p groundTruthLabel contentHtml =
 paragraphToAnnotationHtml queryId p groundTruthLabel =  paragraphToAnnotationHtml' queryId p groundTruthLabel paragraphToHtml
 
 
+-- === Pretty section Path ====
+prettySectionPath :: SectionPathWithName -> H.Html
+prettySectionPath SectionPathWithName{..} =
+    toNestedList (toHtml (getPageName sprPageName) : map (toHtml . getSectionHeading) sprHeadingPath)
+
+toNestedList :: [H.Html] -> H.Html
+toNestedList [] = mempty
+toNestedList (x:xs) =
+    H.ol $ H.li $ x <> toNestedList xs
+
+
 
 -- ===== Renders Trec Car data types as (plain) Html ===========
 

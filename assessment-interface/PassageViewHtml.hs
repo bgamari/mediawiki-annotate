@@ -22,16 +22,18 @@ import TrecCarRenderHtml
 import FileNameLookup
 
 passageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.RankingEntry] -> Maybe [TrecCarRenderHtml.RankingEntry] -> H.Html
-passageRankingToHtml SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
+passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
     H.head prologue
     H.body $ do
       H.div ! HA.class_ "overview-heading-query" $ do
-        H.h1 $ "Query "
-            <> toHtml (T.intercalate " // "
-                       (getPageName sprPageName : map getSectionHeading sprHeadingPath)
-                       )
+--         H.h1 $ "Query "
+--             <> toHtml (T.intercalate ""
+--                        (getPageName sprPageName : map getSectionHeading sprHeadingPath)
+--                        )
+        prettySectionPath spr
+
         H.div $ do
-            H.span "Passage ID: "
+            H.span "Query ID: "
             H.code $ toHtml (escapeSectionPath sprQueryId)
 
       H.div $ do
@@ -52,7 +54,7 @@ passageRankingToHtml SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docT
 
             case sprTruthsMaybe of
                 Just sprTruths -> do
-                    H.h1 "GroundTruth"
+                    H.h1 "Automatic Ground Truth"
                     H.ol $ mapM_ renderHtml sprTruths
                 Nothing -> mempty
 
