@@ -99,14 +99,14 @@ trecQrelParagraphs loadParagraph qrelfile  = do
 opts :: Parser Opts
 opts =
     Opts
-    <$> argument str (help "outline collection file" <> metavar "CBOR FILE")
-    <*> argument str (help "paragraph collection file" <> metavar "CBOR FILE")
+    <$> argument str (help "outline collection file" <> metavar "OutlineCbor")
+    <*> argument str (help "paragraph collection file" <> metavar "ParagraphsCbor")
     <*> option str (short 'd' <> long "destdir" <> help "destination directory for generated HTML" <> metavar "DIR")
     <*> switch (short 's' <> long "shuffle results")
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
-    <*> option auto (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "FILE")
-    <*> some (argument str (help "trec compatible run file(s)" <> metavar "FILE"))
+    <*> option auto (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "QRELS")
+    <*> some (argument str (help "trec compatible run file(s)" <> metavar "Trec-run-FILE(s)"))
 
 
 
