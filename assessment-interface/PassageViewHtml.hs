@@ -21,8 +21,8 @@ import qualified SimplIR.Format.TrecRunFile as Run
 import TrecCarRenderHtml
 import FileNameLookup
 
-passageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.RankingEntry] -> H.Html
-passageRankingToHtml SectionPathWithName {..} sprRanking = H.docTypeHtml $ do
+passageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.RankingEntry] -> Maybe [TrecCarRenderHtml.RankingEntry] -> H.Html
+passageRankingToHtml SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
     H.head prologue
     H.body $ do
       H.div ! HA.class_ "overview-heading-query" $ do
@@ -41,10 +41,24 @@ passageRankingToHtml SectionPathWithName {..} sprRanking = H.docTypeHtml $ do
 
         H.p ! HA.class_ "entity-snippet-intro" $ "Select relevant / non-relevant paragraphs for this section."
 
+        let renderHtml TrecCarRenderHtml.RankingEntry {..} =
+                paragraphToAnnotationHtml queryId entryParagraph Nothing
+              where queryId = sectionPathToQueryId sprQueryId
+
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
             H.h1 "Paragraphs"
             H.ol $ mapM_ renderHtml sprRanking
-              where
-                renderHtml TrecCarRenderHtml.RankingEntry {..} =
-                    paragraphToAnnotationHtml queryId entryParagraph Nothing
-                  where queryId = sectionPathToQueryId sprQueryId
+
+
+            case sprTruthsMaybe of
+                Just sprTruths -> do
+                    H.h1 "GroundTruth"
+                    H.ol $ mapM_ renderHtml sprTruths
+                      where
+                        renderHtml TrecCarRenderHtml.RankingEntry {..} =
+                            paragraphToAnnotationHtml queryId entryParagraph Nothing
+                          where queryId = sectionPathToQueryId sprQueryId
+                Nothing -> mempty
+
+
+

@@ -18,11 +18,15 @@ import CAR.Utils
 import CAR.Types
 
 import qualified SimplIR.Format.TrecRunFile as TrecRun
+import qualified SimplIR.Format.QRel as TrecQrel
 
 
 data RankingEntry = RankingEntry { entryParagraph :: Paragraph
                                  , entryScore     :: TrecRun.Score
                                  }
+                   | QrelEntry { entryParagraph :: Paragraph
+                               , entryLabel     :: IsRelevant}
+
 
 
 
@@ -59,6 +63,11 @@ newtype ItemId = ItemId H.AttributeValue
 data IsRelevant = NotRelevant | Relevant
                 deriving (Ord, Eq, Show)
 
+fromBinaryRelevance :: TrecQrel.IsRelevant -> IsRelevant
+fromBinaryRelevance simplirRelevance =
+    case simplirRelevance of
+      TrecQrel.Relevant -> Relevant
+      TrecQrel.NotRelevant -> NotRelevant
 
 
 

@@ -35,6 +35,8 @@ import PassageViewHtml
 import OutlineViewHtml
 import qualified SimplIR.Format.TrecRunFile as TrecRun
 
+import qualified SimplIR.Format.QRel as TrecQrel
+
 import TrecCarRenderHtml
 import FileNameLookup
 
@@ -46,6 +48,7 @@ data Opts = Opts { outlinesFile :: FilePath
                  , optsShuffle :: Bool
                  , optsTopK :: Int
                  , optsOutlineId :: Maybe String
+                 , optsQrelFile :: FilePath
                  , optsTrecRunFiles :: [FilePath]
                  }
 
@@ -79,6 +82,19 @@ trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle trecRunFile
     unionResultMap
 
 
+trecQrelParagraphs :: (ParagraphId -> Paragraph) -> FilePath -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry] )
+trecQrelParagraphs loadParagraph qrelfile  = do
+    qrelEntries <- TrecQrel.readQRel qrelfile
+    let qrelMap =   HM.fromListWith (++)
+                    $  [ ( TrecQrel.queryId entry
+                        , [QrelEntry { entryParagraph = loadParagraph $ packParagraphId $ T.unpack $ TrecQrel.documentName entry
+                                        , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
+                                        }]
+                        )
+                      | entry <- qrelEntries
+                      ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
+                      ]
+    return qrelMap
 
 opts :: Parser Opts
 opts =
@@ -89,6 +105,7 @@ opts =
     <*> switch (short 's' <> long "shuffle results")
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
+    <*> option auto (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "FILE")
     <*> some (argument str (help "trec compatible run file(s)" <> metavar "FILE"))
 
 
@@ -109,11 +126,20 @@ main = do
     -- ========= view renderer ==============
 
     trecResultMap <- trecResultUnionOfRankedParagraphs loadParagraph optsTopK optsShuffle optsTrecRunFiles
+    trecQrelsMap <-  trecQrelParagraphs loadParagraph optsQrelFile
+
 
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.RankingEntry]
         lookupResult sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
           in queryId  `HM.lookup` trecResultMap
+
+    let lookupTruth :: SectionPath -> Maybe [TrecCarRenderHtml.RankingEntry]
+        lookupTruth sectionPath =
+          let queryId = T.pack $ escapeSectionPath sectionPath
+          in queryId  `HM.lookup` trecQrelsMap
+
+
 
     let fileNameLookup = fileNameLookupFactory existResultsForSectionpath
          where
@@ -141,10 +167,11 @@ main = do
         createPassageView FileNameLookup{..} sectionPathWithNames = do
            let sectionPath = sprQueryId $ sectionPathWithNames
                sectionResults = lookupResult sectionPath
+               sectionTruthsMaybe = lookupTruth sectionPath
                maybeFilePath = passageViewPathname sectionPath
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
-                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries
+                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just rankingEntries, Nothing) -> do
@@ -190,3 +217,5 @@ pageSkeletonToSectionPathsWithName Stub{..}  = foldMap (go empty) stubSkeleton
         where
           sectionPathWithName' = append sectionPathWithName sectionId sectionHeading
       go sectionPathWithName (Para _) = []
+      go sectionPathWithName (Image _ _) = []
+
