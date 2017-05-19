@@ -18,6 +18,7 @@ import Data.Foldable
 import Data.Hashable
 import System.FilePath
 import System.Directory
+import System.FilePath.Glob
 
 import System.Random
 import System.Random.Shuffle
@@ -55,8 +56,8 @@ data Opts = Opts { outlinesFile :: FilePath
                  , optsTopK :: Int
                  , optsOutlineId :: Maybe String
                  , optsQrelFile :: FilePath
-                 , optsTrecPsgRunFiles :: [FilePath]
-                 , optsTrecEntityRunFiles :: [FilePath]
+                 , optsTrecPsgRunGlobs :: [FilePath]
+                 , optsTrecEntityRunGlobs :: [FilePath]
                  }
 
 
@@ -134,6 +135,8 @@ opts =
 main ::  IO ()
 main = do
     Opts{..} <- execParser $ info (helper <*> opts) mempty
+    trecPsgRunFiles <- concat <$> mapM glob optsTrecPsgRunGlobs
+    trecEntityRunFiles <- concat <$> mapM glob optsTrecEntityRunGlobs
     -- ======== basic loading ===========
 
     -- load trec run files and merge with paragraph (in a lazy hashmap)
@@ -169,7 +172,7 @@ main = do
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemPara getNubKeyPara optsTopK optsShuffle optsTrecPsgRunFiles
+        in trecResultUnionOfRankedItems trecRunItemToEntryItemPara getNubKeyPara optsTopK optsShuffle trecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems  trecRunItemToEntryItemMaybePara optsQrelFile
@@ -197,7 +200,7 @@ main = do
             getNubKeyEntity :: EntityRankingEntry -> PageId
             getNubKeyEntity = entityPageId . entryItem
 
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle optsTrecEntityRunFiles
+        in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
     trecQrelsMapEntity <-
         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe Entity
             trecRunItemToEntryItemMaybeEntity = loadEntityMaybe . (pageIdToName . packPageId) .  T.unpack
