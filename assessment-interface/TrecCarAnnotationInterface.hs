@@ -207,6 +207,8 @@ main = do
         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
 
 
+    putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
+
     let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityRankingEntry]
         lookupResultEntity sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath

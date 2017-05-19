@@ -26,6 +26,7 @@ data RankingEntry item = RankingEntry { entryItem  :: item
                                       }
                        | QrelEntry { entryItem  :: item
                                    , entryLabel :: IsRelevant}
+     deriving Show
 
 
 type EntityRankingEntry = RankingEntry Entity
