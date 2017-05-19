@@ -229,8 +229,8 @@ main = do
     let fileNameLookup = fileNameLookupFactory existResultsForSectionpath
          where
            existResultsForSectionpath :: SectionPath -> Bool
-           existResultsForSectionpath =
-              isJust . lookupResult
+           existResultsForSectionpath path =
+              isJust $ lookupResult path <|> lookupResultEntity path
 
     let wrapDestDir :: FilePath -> IO FilePath
         wrapDestDir filePath = do
