@@ -24,6 +24,8 @@ import qualified SimplIR.Format.TrecRunFile as Run
 import TrecCarRenderHtml
 import FileNameLookup
 
+-- todo generate links to both passageView and entityView  (separate page for ground truth?)
+
 outlineToHtml :: FileNameLookup -> Stub -> H.Html
 outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docTypeHtml $ do
     H.head prologue

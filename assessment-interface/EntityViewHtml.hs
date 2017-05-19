@@ -3,7 +3,7 @@
 
 
 -- | Construct passage views
-module PassageViewHtml where
+module EntityViewHtml where
 
 import Control.Monad
 import Data.Monoid
@@ -21,8 +21,8 @@ import qualified SimplIR.Format.TrecRunFile as Run
 import TrecCarRenderHtml
 import FileNameLookup
 
-passageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.PassageRankingEntry] -> Maybe [TrecCarRenderHtml.PassageRankingEntry] -> H.Html
-passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
+entityRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.EntityRankingEntry] -> Maybe [TrecCarRenderHtml.EntityRankingEntry] -> H.Html
+entityRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
     H.head prologue
     H.body $ do
         viewHeader spr
@@ -30,11 +30,11 @@ passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.
         H.p ! HA.class_ "entity-snippet-intro" $ "Select relevant / non-relevant paragraphs for this section."
 
         let renderHtml entry =
-                paragraphToAnnotationHtml queryId (entryItem entry) Nothing  -- todo prio2 : pass in relevance label instead of Nothing
+                entityToAnnotationHtml queryId (entryItem entry) Nothing   -- todo prio2 pass in relevance label instead of Nothing
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
-            H.h1 "Paragraphs"
+            H.h1 "Entities"
             H.ol $ mapM_ renderHtml sprRanking
 
 
@@ -43,6 +43,7 @@ passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.
                     H.h1 "Automatic Ground Truth"
                     H.ol $ mapM_ renderHtml sprTruths
                 Nothing -> mempty
+
 
 
 
