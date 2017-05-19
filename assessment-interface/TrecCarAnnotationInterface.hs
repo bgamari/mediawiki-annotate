@@ -55,7 +55,8 @@ data Opts = Opts { outlinesFile :: FilePath
                  , optsTopK :: Int
                  , optsOutlineId :: Maybe String
                  , optsQrelFile :: FilePath
-                 , optsTrecRunFiles :: [FilePath]
+                 , optsTrecPsgRunFiles :: [FilePath]
+                 , optsTrecEntityRunFiles :: [FilePath]
                  }
 
 
@@ -125,7 +126,8 @@ opts =
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
     <*> option str (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "QRELS")
-    <*> some (argument str (help "trec compatible run file(s)" <> metavar "Trec-run-FILE(s)"))
+    <*> many (option str (short 'p' <> long "psg-runs" <> help "trec compatible passage run file(s)" <> metavar "Trec-psg-run-FILE(s)"))
+    <*> many (option str (short 'e' <> long "entity-runs" <> help "trec compatible entity run file(s)" <> metavar "Trec-entity-run-FILE(s)"))
 
 
 
@@ -167,7 +169,7 @@ main = do
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemPara getNubKeyPara optsTopK optsShuffle optsTrecRunFiles
+        in trecResultUnionOfRankedItems trecRunItemToEntryItemPara getNubKeyPara optsTopK optsShuffle optsTrecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems  trecRunItemToEntryItemMaybePara optsQrelFile
@@ -195,7 +197,7 @@ main = do
             getNubKeyEntity :: EntityRankingEntry -> PageId
             getNubKeyEntity = entityPageId . entryItem
 
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle optsTrecRunFiles
+        in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle optsTrecEntityRunFiles
     trecQrelsMapEntity <-
         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe Entity
             trecRunItemToEntryItemMaybeEntity = loadEntityMaybe . (pageIdToName . packPageId) .  T.unpack
