@@ -230,7 +230,7 @@ main = do
          where
            existResultsForSectionpath :: SectionPath -> Bool
            existResultsForSectionpath path =
-              isJust $ lookupResult path <|> lookupResultEntity path
+              isJust (lookupResult path) || isJust (lookupResultEntity path)
 
     let wrapDestDir :: FilePath -> IO FilePath
         wrapDestDir filePath = do
