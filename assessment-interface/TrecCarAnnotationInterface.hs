@@ -155,7 +155,7 @@ main = do
 
 
     putStrLn "deserializing articles.."
-    entityIndex <- TocFile.open $ TocFile.IndexedCborPath entityFile
+    entityIndex <- TocFile.open (TocFile.IndexedCborPath entityFile :: TocFile.IndexedCborPath PageName Page)
     putStrLn "...done deserializing articles"
 
     -- todo prio2 index article cbors on PageId rather than PageName
@@ -165,9 +165,9 @@ main = do
            $ loadEntityMaybe pid
 
         loadEntityMaybe :: PageName -> Maybe Entity
-        loadEntityMaybe pid =
-         TocFile.lookup pid entityIndex
-
+        loadEntityMaybe pid = do
+            fmap toEntity $ TocFile.lookup pid entityIndex
+          where toEntity page = Entity (pageName page) (pageId page)
 
     -- ========= view renderer Paragraphs ==============
     trecResultMap <-
@@ -295,7 +295,10 @@ main = do
       :: IO [FilePath]
     forM_ outlines $ \outline -> do
         let sectionPathWithNamess = pageSkeletonToSectionPathsWithName outline
-        forM_ sectionPathWithNamess (createPassageView fileNameLookup)
+        forM_ sectionPathWithNamess (\spwn ->
+                                    createPassageView fileNameLookup spwn >>
+                                    createEntityView fileNameLookup spwn
+                                    )
 
     -- ======== get sectionpaths out of a stub ===============
 
