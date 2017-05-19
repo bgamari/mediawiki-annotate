@@ -155,16 +155,15 @@ main = do
 
 
     putStrLn "deserializing articles.."
-    entityIndex <- TocFile.open (TocFile.IndexedCborPath entityFile :: TocFile.IndexedCborPath PageName Page)
+    entityIndex <- TocFile.open (TocFile.IndexedCborPath entityFile :: TocFile.IndexedCborPath PageId Page)
     putStrLn "...done deserializing articles"
 
-    -- todo prio2 index article cbors on PageId rather than PageName
-    let loadEntity :: PageName -> Entity
+    let loadEntity :: PageId -> Entity
         loadEntity pid =
           fromMaybe (error $ "Can't find entity: "++ show pid ++ " in file "++ entityFile)
            $ loadEntityMaybe pid
 
-        loadEntityMaybe :: PageName -> Maybe Entity
+        loadEntityMaybe :: PageId -> Maybe Entity
         loadEntityMaybe pid = do
             fmap toEntity $ TocFile.lookup pid entityIndex
           where toEntity page = Entity (pageName page) (pageId page)
@@ -198,8 +197,8 @@ main = do
 --
 
     trecResultMapEntity <-
-        let trecRunItemToEntryItemEntity ::  TrecRun.DocumentName -> Entity
-            trecRunItemToEntryItemEntity = loadEntity . PageName
+        let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Entity
+            trecRunItemToEntryItemEntity = loadEntity . packPageId . T.unpack
 
             getNubKeyEntity :: EntityRankingEntry -> PageId
             getNubKeyEntity = entityPageId . entryItem
@@ -207,7 +206,7 @@ main = do
         in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
     trecQrelsMapEntity <-
         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe Entity
-            trecRunItemToEntryItemMaybeEntity = loadEntityMaybe . (pageIdToName . packPageId) .  T.unpack
+            trecRunItemToEntryItemMaybeEntity = loadEntityMaybe . packPageId .  T.unpack
         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
 
 
