@@ -293,7 +293,7 @@ main = do
 
 
 pageSkeletonToSectionPathsWithName :: Stub -> [TrecCarRenderHtml.SectionPathWithName]
-pageSkeletonToSectionPathsWithName Stub{..}  = foldMap (go empty) stubSkeleton
+pageSkeletonToSectionPathsWithName Stub{..}  = [empty] ++ foldMap (go empty) stubSkeleton
     where
       empty = TrecCarRenderHtml.SectionPathWithName
                   { sprQueryId     = SectionPath{sectionPathPageId=stubPageId, sectionPathHeadings=mempty}
