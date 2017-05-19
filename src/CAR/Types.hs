@@ -18,6 +18,8 @@ module CAR.Types
     , ParaBody(..), paraBodiesToId
     , PageSkeleton(..)
     , Page(..)
+      -- * Entity
+    , Entity(..)
       -- * Pretty printing
     , prettyPage, prettySkeleton
       -- ** Link styles
@@ -141,6 +143,13 @@ data ParaBody = ParaText !T.Text
               deriving (Show, Generic)
 instance CBOR.Serialise ParaBody
 
+-- | A logical entity of a knowledge base
+data Entity = Entity { entityPageName :: !PageName
+                     , entityPageId   :: !PageId
+                     }
+
+
+-- | A page on Wikipedia (which coincides with an Entity in this case)
 data Page = Page { pageName     :: !PageName
                  , pageId       :: !PageId
                  , pageSkeleton :: [PageSkeleton]
@@ -148,6 +157,7 @@ data Page = Page { pageName     :: !PageName
           deriving (Show, Generic)
 instance CBOR.Serialise Page
 
+-- | Path from heading to page title in a page outline
 data SectionPath = SectionPath { sectionPathPageId :: PageId
                                , sectionPathHeadings :: [HeadingId]
                                }
