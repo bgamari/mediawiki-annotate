@@ -29,8 +29,8 @@ mode = subparser
         filterRankings docNameToTocKey
             <$> argument (IndexedCborPath @PageId @Page <$> str)
                          (help "pages file" <> metavar "FILE")
-            <*> outputRunFile
             <*> inputRunFile
+            <*> outputRunFile
       where docNameToTocKey =
               packPageId .  T.unpack
 
@@ -38,8 +38,8 @@ mode = subparser
         filterRankings docNameToTocKey
             <$> argument (IndexedCborPath @ParagraphId @Paragraph <$> str)
                          (help "paragraphs file" <> metavar "FILE")
-            <*> outputRunFile
             <*> inputRunFile
+            <*> outputRunFile
       where docNameToTocKey =
               packParagraphId . T.unpack
 
