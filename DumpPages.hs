@@ -18,11 +18,12 @@ import CAR.Types
 
 opts :: Parser (IO ())
 opts = subparser
-    $  command "titles" (info dumpTitles fullDesc)
-    <> command "pages" (info  dumpPages fullDesc)
-    <> command "sections" (info dumpSections fullDesc)
-    <> command "hist-headings" (info  histogramHeadings fullDesc)
+    $  cmd "titles"        dumpTitles
+    <> cmd "pages"         dumpPages
+    <> cmd "sections"      dumpSections
+    <> cmd "hist-headings" histogramHeadings
   where
+    cmd name action = command name (info (helper <*> action) fullDesc)
     dumpTitles =
         f <$> argument str (help "input file" <> metavar "FILE")
       where

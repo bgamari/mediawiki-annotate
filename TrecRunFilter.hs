@@ -20,8 +20,8 @@ import SimplIR.Format.TrecRunFile as TrecRunFile
 
 mode :: Parser (IO ())
 mode = subparser
-    $  command "pages" (info indexPages fullDesc)
-    <> command "paragraphs" (info indexParagraphs fullDesc)
+    $  command "pages" (info (helper <*> indexPages) fullDesc)
+    <> command "paragraphs" (info (helper <*> indexParagraphs) fullDesc)
   where
     outputRunFile = option str (long "output" <> short 'o' <> help "Output run file" <> metavar "RUNFILE")
     inputRunFile = argument str (help "Input run file" <> metavar "RUNFILE")
