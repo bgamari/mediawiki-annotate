@@ -79,8 +79,13 @@ open :: (Hashable i, Eq i, CBOR.Serialise i)
      => IndexedCborPath i a -> IO (IndexedCbor i a)
 open (IndexedCborPath fname) = do
     cbor <- mmapFileByteString fname Nothing
-    toc <- CBOR.deserialise <$> BSL.readFile (fname <.> "toc")
+    toc <- either onError id . CBOR.Read.deserialiseFromBytes CBOR.decode
+           <$> BSL.readFile tocName
     return $ IndexedCbor toc cbor fname
+  where
+    onError err =
+        error $ "Deserialisation error while deserialising TOC "++show tocName++": "++show err
+    tocName = fname <.> "toc"
 
 lookup :: (Hashable i, Eq i, CBOR.Serialise a)
        => i -> IndexedCbor i a -> Maybe a
