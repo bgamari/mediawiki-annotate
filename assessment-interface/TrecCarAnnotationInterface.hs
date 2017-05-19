@@ -140,7 +140,9 @@ main = do
     -- ======== basic loading ===========
 
     -- load trec run files and merge with paragraph (in a lazy hashmap)
+    putStrLn "deserializing paragraphs.."
     paragraphIndex <- TocFile.open $ TocFile.IndexedCborPath paragraphFile
+    putStrLn "...done deserializing paragraphs"
 
     let loadParagraph :: ParagraphId -> Paragraph
         loadParagraph pid =
@@ -152,7 +154,9 @@ main = do
          TocFile.lookup pid paragraphIndex
 
 
+    putStrLn "deserializing articles.."
     entityIndex <- TocFile.open $ TocFile.IndexedCborPath entityFile
+    putStrLn "...done deserializing articles"
 
     -- todo prio2 index article cbors on PageId rather than PageName
     let loadEntity :: PageName -> Entity
@@ -238,8 +242,10 @@ main = do
 
     -- ======= Main bits ================
 
+    putStrLn "deserializing outlines.."
     outlinesAll <- decodeCborList <$> BSL.readFile outlinesFile
         :: IO [Stub]
+    putStrLn ".. done deserializing outlines"
 
     let outlines = case optsOutlineId of
                      Just outlineId -> filter (\out -> (unpackPageId $ stubPageId out) == outlineId ) outlinesAll
