@@ -14,9 +14,11 @@ module CAR.TocFile
     , keys
     ) where
 
+import Control.Exception (Exception, throw)
 import Control.Monad.ST
 import Control.Monad.ST.Unsafe
 import Data.Foldable hiding (toList)
+import qualified Data.Binary.Serialise.CBOR.Read as CBOR.Read
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
@@ -71,22 +73,34 @@ buildIndex toIndex path = do
     BSL.writeFile tocPath $ CBOR.serialise toc
     return $ IndexedCborPath path
 
-data IndexedCbor i a = IndexedCbor (HM.HashMap i Offset) BS.ByteString
+data IndexedCbor i a = IndexedCbor (HM.HashMap i Offset) BS.ByteString String
 
 open :: (Hashable i, Eq i, CBOR.Serialise i)
      => IndexedCborPath i a -> IO (IndexedCbor i a)
 open (IndexedCborPath fname) = do
     cbor <- mmapFileByteString fname Nothing
-    toc <- CBOR.deserialise <$> BSL.readFile (fname <.> "toc")
-    return $ IndexedCbor toc cbor
+    toc <- either onError id . CBOR.Read.deserialiseFromBytes CBOR.decode
+           <$> BSL.readFile tocName
+    return $ IndexedCbor toc cbor fname
+  where
+    onError err =
+        error $ "Deserialisation error while deserialising TOC "++show tocName++": "++show err
+    tocName = fname <.> "toc"
 
 lookup :: (Hashable i, Eq i, CBOR.Serialise a)
        => i -> IndexedCbor i a -> Maybe a
-lookup i (IndexedCbor toc bs) = deser <$> HM.lookup i toc
-  where deser offset = CBOR.deserialise $ BSL.fromStrict $ BS.drop offset bs
+lookup i (IndexedCbor toc bs source) = deser <$> HM.lookup i toc
+  where deser offset =
+          case CBOR.Read.deserialiseFromBytes CBOR.decode $ BSL.fromStrict $ BS.drop offset bs of
+            Left err -> throw $ DeserialiseFailure source err
+            Right x -> x
+
+data DeserialiseFailure = DeserialiseFailure String CBOR.DeserialiseFailure
+                        deriving (Show)
+instance Exception DeserialiseFailure
 
 toList :: (CBOR.Serialise a) => IndexedCbor i a -> [a]
-toList (IndexedCbor _ bs) = decodeCborList $ BSL.fromStrict bs
+toList (IndexedCbor _ bs _) = decodeCborList $ BSL.fromStrict bs
 
 keys :: IndexedCbor i a -> [i]
-keys (IndexedCbor toc _) = HM.keys toc
+keys (IndexedCbor toc _ _) = HM.keys toc

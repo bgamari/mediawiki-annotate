@@ -18,6 +18,8 @@ module CAR.Types
     , ParaBody(..), paraBodiesToId
     , PageSkeleton(..)
     , Page(..)
+      -- * Entity
+    , Entity(..), pageIdToName
       -- * Pretty printing
     , prettyPage, prettySkeleton
       -- ** Link styles
@@ -62,6 +64,7 @@ unpackSBS = map (chr . fromIntegral) . SBS.unpack
 urlEncodeText :: String -> SBS.ShortByteString
 urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
 
+
 -- Orphans
 deriving instance CBOR.Serialise PageName
 deriving instance FromJSON PageName
@@ -86,6 +89,9 @@ instance CBOR.Serialise PageId where
 
 pageNameToId :: PageName -> PageId
 pageNameToId (PageName n) = PageId $ Utf8.unsafeFromShortByteString $ urlEncodeText $ T.unpack n
+
+pageIdToName :: PageId -> PageName
+pageIdToName (PageId pid) = PageName $  T.pack  $ unEscapeString $  Utf8.toString pid
 
 packPageId :: String -> PageId
 packPageId = PageId . Utf8.fromString
@@ -141,6 +147,15 @@ data ParaBody = ParaText !T.Text
               deriving (Show, Generic)
 instance CBOR.Serialise ParaBody
 
+-- | A logical entity of a knowledge base
+data Entity = Entity { entityPageName :: !PageName
+                     , entityPageId   :: !PageId
+                     }
+            deriving (Show, Generic)
+instance CBOR.Serialise Entity
+
+
+-- | A page on Wikipedia (which coincides with an Entity in this case)
 data Page = Page { pageName     :: !PageName
                  , pageId       :: !PageId
                  , pageSkeleton :: [PageSkeleton]
@@ -148,6 +163,7 @@ data Page = Page { pageName     :: !PageName
           deriving (Show, Generic)
 instance CBOR.Serialise Page
 
+-- | Path from heading to page title in a page outline
 data SectionPath = SectionPath { sectionPathPageId :: PageId
                                , sectionPathHeadings :: [HeadingId]
                                }

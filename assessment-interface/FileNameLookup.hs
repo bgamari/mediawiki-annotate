@@ -30,6 +30,7 @@ import qualified SimplIR.Format.TrecRunFile as TrecRun
 data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              , outlineURL :: Stub -> FilePath
                              , passageViewPathname :: SectionPath -> Maybe FilePath
+                             , entityViewPathname :: SectionPath -> Maybe FilePath
                              , viewURL :: FilePath -> String
                              , maybePassageViewUrl :: SectionPath -> Maybe FilePath
                              }
@@ -39,17 +40,22 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"
+       (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
         escapeURIString isUnreserved (outlinePathname stub)
 
-
-
     passageViewPathname :: SectionPath -> Maybe FilePath
-    passageViewPathname sectionPath@(SectionPath page headings)
-        | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> "html")
+    passageViewPathname = viewPathname "psg"
+
+    entityViewPathname :: SectionPath -> Maybe FilePath
+    entityViewPathname = viewPathname "entity"
+
+
+    viewPathname ::  String -> SectionPath -> Maybe FilePath
+    viewPathname suffix sectionPath@(SectionPath page headings)
+        | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> suffix <.> "html")
         | otherwise = Nothing
       where
         sectionfilename =
@@ -66,3 +72,4 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
 
     maybePassageViewUrl sectionPath = fmap viewURL (passageViewPathname sectionPath)
+    maybeEntityViewUrl sectionPath = fmap viewURL (entityViewPathname sectionPath)

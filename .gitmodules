@@ -16,3 +16,6 @@
 [submodule "vendor/xml"]
 	path = vendor/xml
 	url = git://github.com/snoyberg/xml
+[submodule "assessment-interface/annotation"]
+	path = assessment-interface/annotation
+	url = git://github.com/bgamari/annotation

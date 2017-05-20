@@ -280,3 +280,15 @@ executable trec-car-seeds
                        time,
                        trec-car-tools
   default-language:    Haskell2010
+
+executable trec-car-trec-run-filter
+  main-is:             TrecRunFilter.hs
+  ghc-options:         -Wall -threaded -rtsopts
+  build-depends:       base >=4.9 && <4.10,
+                       trec-car-tools,
+                       optparse-applicative,
+                       simplir,
+                       text,
+                       hashable,
+                       binary-serialise-cbor
+  default-language:    Haskell2010
