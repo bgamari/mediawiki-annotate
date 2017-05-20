@@ -6,7 +6,6 @@ packages:
     simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
-    simplir/vendor/xml/xml-conduit
     car-baselines/
     fork-map/
     assessment-interface/
