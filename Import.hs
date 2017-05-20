@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StaticPointers #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 import Data.Char (isSpace)
 import Data.List (intersperse)
