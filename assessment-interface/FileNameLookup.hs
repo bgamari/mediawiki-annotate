@@ -40,11 +40,12 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
+       unEscapeString $  (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
-        escapeURIString isUnreserved (outlinePathname stub)
+--         escapeURIString isUnreserved (outlinePathname stub)  -- todo remove
+      outlinePathname stub
 
     passageViewPathname :: SectionPath -> Maybe FilePath
     passageViewPathname = viewPathname "psg"
@@ -55,7 +56,7 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewPathname ::  String -> SectionPath -> Maybe FilePath
     viewPathname suffix sectionPath@(SectionPath page headings)
-        | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> suffix <.> "html")
+co        | existResultsForSectionpath sectionPath = Just (unEscapeString $ unpackPageId page </> sectionfilename <.> suffix <.> "html")
         | otherwise = Nothing
       where
         sectionfilename =
@@ -68,8 +69,8 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewURL :: FilePath -> String
     viewURL inputFile =
-        escapeURIString isUnreserved inputFile
-
+--         escapeURIString isUnreserved inputFile    -- todo remove
+           inputFile
 
     maybePassageViewUrl sectionPath = fmap viewURL (passageViewPathname sectionPath)
     maybeEntityViewUrl sectionPath = fmap viewURL (entityViewPathname sectionPath)
