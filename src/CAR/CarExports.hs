@@ -1,4 +1,6 @@
-{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module CAR.CarExports
     ( ParaNumber(..)
@@ -27,7 +29,7 @@ import Data.Binary.Serialise.CBOR
 import GHC.Generics
 
 import Data.MediaWiki.Markup (PageName(..))
-import CAR.Types
+import CAR.Types hiding (paraId)
 import CAR.Utils
 
 -- General
@@ -105,10 +107,10 @@ toAnnotations (Page _ pageId skeleton) =
     foldMap (go mempty) skeleton
   where
     go :: DList.DList HeadingId -> PageSkeleton -> S.Set Annotation
-    go parentIds (Section _ sectionId children) =
-        let parentIds' = parentIds `DList.snoc` sectionId
+    go parentIds (Section _ sectId children) =
+        let parentIds' = parentIds `DList.snoc` sectId
         in foldMap (go parentIds') children
-    go parentIds (Para (Paragraph paraId body)) =
+    go parentIds (Para (Paragraph paraId _)) =
         S.singleton $ Annotation sectionPath paraId Relevant
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
@@ -126,7 +128,7 @@ toEntityAnnotations (Page _ pageId skeleton) =
     go parentIds (Para paragraph) =
         let entities =  fmap linkTarget $ paraLinks paragraph
         in S.fromList
-            $ filter (\(EntityAnnotation _ pageId _) -> (length (unpackPageId pageId)) > 0)
+            $ filter (\(EntityAnnotation _ pageId' _) -> (length (unpackPageId pageId')) > 0)
             $  [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)

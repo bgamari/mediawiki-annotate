@@ -11,7 +11,6 @@ import Control.DeepSeq
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
-import Data.Function
 import Data.Ix
 import GHC.Generics
 import GHC.TypeLits
@@ -63,6 +62,7 @@ transformContent (Page pageName pageId pageSkeleta) =
         concatMap (go (heading : headings)) $ children
     go headings (Para paragraph) =
       [convertPara paragraph headings]
+    go headings (Image{}) = []
 
     convertPara :: Paragraph -> [SectionHeading] -> EdgeDoc
     convertPara paragraph headings=

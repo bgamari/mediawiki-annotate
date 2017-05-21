@@ -19,8 +19,9 @@ import CAR.Types
 
 -- | actually: isPara
 isLead :: PageSkeleton -> Bool
-isLead (Para _) = True
-isLead (Section _ _ _) = False
+isLead (Para{}) = True
+isLead (Section{}) = False
+isLead (Image{}) = False
 
 data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocCanonicalName :: PageName

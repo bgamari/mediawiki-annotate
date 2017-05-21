@@ -53,6 +53,7 @@ opts = subparser
                 then [[sectionId]]
                 else fmap (\childPath -> sectionId : childPath)  childSectionPaths
             go (Para {}) = []
+            go (Image {}) = []
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")
@@ -82,12 +83,13 @@ opts = subparser
                 $ map (\(SectionHeading h, n) -> TB.decimal n<>TB.singleton '\t'<>TB.fromText h)
                 $ HM.toList
                 $ HM.fromListWith (+)
-                $ map (\h -> (h,1))
+                $ map (\h -> (h,1::Int))
                 $ foldMap sectionHeadings pages
 
 sectionHeadings :: PageSkeleton -> [SectionHeading]
 sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children
 sectionHeadings (Para _) = []
+sectionHeadings (Image{}) = []
 
 main :: IO ()
 main = join $ execParser $ info (helper <*> opts) mempty

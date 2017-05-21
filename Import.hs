@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE StaticPointers #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 import Data.Char (isSpace)
 import Data.List (intersperse)
@@ -53,7 +55,8 @@ main = do
     let parsed :: Producer (Either String (EncodedCbor Page)) IO ()
         parsed =
             CM.map (2*workers) workers
-                (fmap encodedCbor . toPage)
+                (static CM.Dict)
+                (static (fmap encodedCbor . toPage))
                 (each $ filter isInteresting docs)
         putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
         putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."

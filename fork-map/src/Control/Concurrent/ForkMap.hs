@@ -31,12 +31,14 @@ import Prelude hiding (map)
 
 instance Static (MonadIO IO) where closureDict = static Dict
 
+-- | Map over a producer of elements with a pure function (not order-preserving).
 map :: forall a b. (Serializable a, Serializable b)
     => Int -> Int
     -> Closure (Dicts () a () b IO ()) -- ^ just pass @static 'Dict'@
     -> Closure (a -> b) -> Producer a IO () -> Producer b IO ()
 map queueDepth nMappers dicts f = mapIO queueDepth nMappers dicts (static (pure .) `cap` f)
 
+-- | Map over a producer of elements with an effectful function (not order-preserving).
 mapIO :: forall a b. (Serializable a, Serializable b)
       => Int -> Int
       -> Closure (Dicts () a () b IO ()) -- ^ just pass @static 'Dict'@
