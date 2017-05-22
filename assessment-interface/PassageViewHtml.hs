@@ -28,8 +28,9 @@ passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.
         viewHeader spr
 
         H.p ! HA.class_ "entity-snippet-intro" $ "Assess relevance of passages for this section/article."
+        H.p ! HA.class_ "entity-snippet-intro" $ "Assessment scale:"
         H.p ! HA.class_ "entity-snippet-intro" $ H.ol $ do
-            H.li "Assessment scale:Must: Must be mentioned"
+            H.li "Must: Must be mentioned"
             H.li "Should: Should be mentioned"
             H.li "Can: Can be mentioned"
             H.li "No: Not relevant for this section"
