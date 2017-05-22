@@ -134,7 +134,9 @@ viewHeader spr@SectionPathWithName{..} = do
       H.div $ do
         H.p $ do
               "Back to "
-              H.a ! HA.href "../index.html" $ "Query List"
+              H.a ! HA.href "./" $ "Outline"
+              " / "
+              H.a ! HA.href "../" $ "Topic List"
 
 
 prettySectionPath :: SectionPathWithName -> H.Html

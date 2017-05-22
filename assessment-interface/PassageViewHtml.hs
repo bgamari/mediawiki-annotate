@@ -27,7 +27,8 @@ passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.
     H.body $ do
         viewHeader spr
 
-        H.p ! HA.class_ "entity-snippet-intro" $ "Select relevant / non-relevant paragraphs for this section."
+        H.p ! HA.class_ "entity-snippet-intro" $ "Assess relevance of passages for this section/article."
+        H.p ! HA.class_ "entity-snippet-intro" $ "Assessment scale: <br> Must: Must be mentioned <br> Should: Should be mentioned <br> Can: Can be mentioned <br> No: Not relevant for this section <br> Trash: Low-quality passage that is not useful for any section <br> Perfect: reserved for a passage that by itself says everything there needs to be said about this section <br> Eraser: delete assessment"
 
         let renderHtml entry =
                 paragraphToAnnotationHtml queryId (entryItem entry) Nothing  -- todo prio2 : pass in relevance label instead of Nothing
