@@ -40,7 +40,7 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
+       (unpacgit kPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
