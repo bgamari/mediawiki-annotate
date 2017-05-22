@@ -56,7 +56,7 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewPathname ::  String -> SectionPath -> Maybe FilePath
     viewPathname suffix sectionPath@(SectionPath page headings)
-co        | existResultsForSectionpath sectionPath = Just (unEscapeString $ unpackPageId page </> sectionfilename <.> suffix <.> "html")
+        | existResultsForSectionpath sectionPath = Just (unEscapeString $ unpackPageId page </> sectionfilename <.> suffix <.> "html")
         | otherwise = Nothing
       where
         sectionfilename =
