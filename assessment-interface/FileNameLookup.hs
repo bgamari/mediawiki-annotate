@@ -40,12 +40,12 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub _ pageId _) =
-       unEscapeString $  (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
+       (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
 --         escapeURIString isUnreserved (outlinePathname stub)  -- todo remove
-      outlinePathname stub
+      outlinePathname stub  -- do not percent encode filename, we leave this to the browser
 
     passageViewPathname :: SectionPath -> Maybe FilePath
     passageViewPathname = viewPathname "psg"
@@ -56,7 +56,8 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewPathname ::  String -> SectionPath -> Maybe FilePath
     viewPathname suffix sectionPath@(SectionPath page headings)
-        | existResultsForSectionpath sectionPath = Just (unEscapeString $ unpackPageId page </> sectionfilename <.> suffix <.> "html")
+        | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> suffix <.> "html")
+        -- do not percent encode filename, we leave this to the browser
         | otherwise = Nothing
       where
         sectionfilename =
