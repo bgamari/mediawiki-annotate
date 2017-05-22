@@ -54,7 +54,7 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
     renderHtml headingPath (Para _) = mempty
     renderHtml headingPath (Image _ _) = mempty
     renderHtml headingPath (Section sectionHeading headingId children)  =  do
-        let headingPath' = (headingPath ++ [headingId])
+        let headingPath' = headingPath ++ [headingId]
         let sectionPath = SectionPath pageId headingPath'
         let maybeFileURL = maybePassageViewUrl sectionPath
 

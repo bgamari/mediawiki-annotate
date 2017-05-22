@@ -71,6 +71,7 @@ tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunc
 
 skeletonTerms :: PageSkeleton -> BagOfWords
 skeletonTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
+skeletonTerms (Image {}) = mempty
 skeletonTerms (Section (SectionHeading t) _ children) =
     tokenize t <> foldMap skeletonTerms children
 
@@ -190,6 +191,7 @@ stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
   where
     go :: DList.DList HeadingId -> BagOfWords -> PageSkeleton -> [(BagOfWords, SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen
+    go _ _ (Image {}) = [] -- this should really never happen
     go parents parentTerms (Section heading headingId children) =
         (terms, SectionPath pageId (toList me)) : foldMap (go me terms) children
       where
