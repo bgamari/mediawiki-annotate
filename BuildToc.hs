@@ -11,13 +11,13 @@ import CAR.TocFile as Toc
 
 mode :: Parser (IO ())
 mode = subparser
-    $  command "pages" (info indexPages fullDesc)
-    <> command "paragraphs" (info indexParagraphs fullDesc)
+    $  command "pages" (info (helper <*> indexPages) fullDesc)
+    <> command "paragraphs" (info (helper <*> indexParagraphs) fullDesc)
   where
     indexPages =
-        void . Toc.buildIndex pageId <$> argument str (help "pages file" <> metavar "FILE")
+        void . Toc.buildIndex pageId <$> argument str (help "articles cbor file" <> metavar "FILE")
     indexParagraphs =
-        void . Toc.buildIndex paraId <$> argument str (help "paragraphs file" <> metavar "FILE")
+        void . Toc.buildIndex paraId <$> argument str (help "paragraphs cbor file" <> metavar "FILE")
 
 
 main :: IO ()
