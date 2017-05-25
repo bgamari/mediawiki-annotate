@@ -2,6 +2,7 @@ import Data.Ord
 import Data.Bits
 import Data.Char
 import Data.Maybe
+import Data.Monoid
 import Data.List
 import Numeric
 
@@ -24,12 +25,14 @@ import qualified Data.ByteString.Lazy as BSL
 type Term = T.Text
 type Bloom = Integer
 
-opts :: Parser FilePath
-opts = argument str (help "paragraphs file")
+opts :: Parser (Double, FilePath)
+opts = (,)
+    <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
+    <*> argument str (help "paragraphs file")
 
 main :: IO ()
 main = do
-    parasFile <- execParser $ info (helper <*> opts) mempty
+    (thresh, parasFile) <- execParser $ info (helper <*> opts) mempty
     paras <- decodeCborList <$> BSL.readFile parasFile
 
     let textToBloom :: [Term] -> Bloom
@@ -45,7 +48,6 @@ main = do
             , let toks = tokenise $ paraToText para
             ]
 
-    let thresh = 0.5
     mapM_ print [ (pidA, pidB, j, j')
                 | (pidA, bodyA, bloomA) <- paras'
                 , (pidB, bodyB, bloomB) <- paras'
