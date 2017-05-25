@@ -26,23 +26,12 @@ type Bloom = Integer
 main :: IO ()
 main = do
     let parasFile = "train.test200.cbor.paragraphs"
-    stats <- toCorpusStats . decodeCborList <$> BSL.readFile parasFile
-    let nPairs = HM.size stats
-        sortedStats :: [((Term, Term), Int)]
-        sortedStats =
-            sortBy (flip $ comparing snd) $ HM.toList stats
-
-        mostFreq :: HS.HashSet (Term, Term)
-        mostFreq = HS.fromList [] -- $ map fst $ take (nPairs `div` 2) sortedStats
-    putStrLn $ unlines $ map show $ HS.toList mostFreq
-
     paras <- decodeCborList <$> BSL.readFile parasFile
 
     let textToBloom :: [Term] -> Bloom
         textToBloom toks =
             toBloom [ pair
                     | pair <- toBigrams toks
-                    --, not $ pair `HS.member` mostFreq
                     ]
 
     let paras' :: [(ParagraphId, [Term], Bloom)]
@@ -96,11 +85,6 @@ jaccard xs ys
   where
     num = realToFrac $ HS.size (xs `HS.intersection` ys)
     denom = realToFrac $ HS.size (xs `HS.union` ys)
-
-toCorpusStats :: [Paragraph] -> HM.HashMap (Term, Term) Int
-toCorpusStats paras =
-    HM.fromListWith (+)
-    [ (x,1) | para <- paras, x <- toBigrams $ tokenise $ paraToText para ]
 
 tokenise :: TL.Text -> [Term]
 tokenise =
