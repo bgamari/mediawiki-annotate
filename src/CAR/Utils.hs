@@ -4,6 +4,7 @@ module CAR.Utils where
 
 import Data.Maybe
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import CAR.Types
 
 
@@ -53,14 +54,14 @@ paraBodyLinks :: ParaBody -> [Link]
 paraBodyLinks (ParaText _text) = []
 paraBodyLinks (ParaLink link)  = [link]
 
-pageSkeletonText :: PageSkeleton -> [T.Text]
+pageSkeletonText :: PageSkeleton -> [TL.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
 pageSkeletonText (Para para) = [ paraToText para ]
 pageSkeletonText (Image _ _) = []
 
-paraToText :: Paragraph -> T.Text
+paraToText :: Paragraph -> TL.Text
 paraToText (Paragraph  _ bodies) =
-    T.concat $ fmap toText bodies
-  where toText (ParaText text) = text
-        toText (ParaLink link) = linkAnchor link
+    TL.concat $ fmap toText bodies
+  where toText (ParaText text) = TL.fromStrict text
+        toText (ParaLink link) = TL.fromStrict $ linkAnchor link
 

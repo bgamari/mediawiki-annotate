@@ -95,6 +95,7 @@ toGalagoDoc linkDoc =
                           ]
         phrase x = (TL.fromStrict x, Galago.DoNotTokenize)
         naturalText x = (TL.fromStrict x, Galago.DoTokenize)
+        naturalLazyText x = (x, Galago.DoTokenize)
     in Galago.Document { docId       = Galago.DocumentId $ galagoDocId
                        , docMetadata = fmap (BSL.fromStrict . T.encodeUtf8) meta
                        , docFields   = M.fromList
@@ -103,7 +104,7 @@ toGalagoDoc linkDoc =
                           , ("category",             map phrase $ linkDocCategories linkDoc)
                           , ("section",              [naturalText $ T.unwords $ sectionPath])
                           , ("section-exact",        [phrase $ T.unwords $ sectionPath])
-                          , ("paragraph",            [naturalText $ paraToText $ linkDocParagraph linkDoc])
+                          , ("paragraph",            [naturalLazyText $ paraToText $ linkDocParagraph linkDoc])
                           , ("targetentity",         fmap (naturalText . getPageName . linkTarget) $ linkDocOutlinks $ linkDoc)
                           , ("targetentity-exact",   fmap (phrase . getPageName . linkTarget) $ linkDocOutlinks $ linkDoc)
                           , ("anchor",               fmap (naturalText . T.unwords . T.lines . linkAnchor) $ linkDocOutlinks $ linkDoc)

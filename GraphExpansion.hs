@@ -21,6 +21,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 
 import Graph
 import Dijkstra
@@ -74,7 +75,7 @@ transformContent (Page pageName pageId pageSkeleta) =
       in EdgeDoc {..}
       where paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
             paragraphContent paragraph headings =
-              (paraToText $ paragraph)
+              TL.toStrict (paraToText $ paragraph)
               <> (T.intercalate " " $ fmap getSectionHeading $ headings)
               <> (getPageName pageName)
 
@@ -129,7 +130,7 @@ pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId pageSkeleta) =
      $ fmap (computeTextEmbedding wordEmbedding)
      $ mconcat $ pageText
     where
-      pageText = fmap pageSkeletonText pageSkeleta
+      pageText = fmap (map TL.toStrict . pageSkeletonText) pageSkeleta
 
 -- ------------------------------------------------
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
