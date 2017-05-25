@@ -49,7 +49,7 @@ skeletonToXml list =
         <> " </sentence></paragraph> "
     skelToXml (Section (SectionHeading heading) _ parabodies )  =
         " <heading level=\"1\"> "<> TB.fromText (T.replace "\n" " " heading) <>" </heading> "  -- id = 1
-
+    skelToXml (Image {} )  = mempty
 
     bodyToXml :: ParaBody -> TB.Builder
     bodyToXml (ParaText text) = " " <> TB.fromText (T.replace "\n" " " text) <> " "

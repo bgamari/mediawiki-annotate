@@ -63,6 +63,8 @@ transformContent (Page pageName pageId pageSkeleta) =
     go parentHeadings (Para paragraph) =
       let sectionPath = SectionPath' pageName (DList.toList parentHeadings)
       in [convertPara paragraph sectionPath]
+    go parentHeadings (Image {}) =
+      mempty
 
     convertPara :: Paragraph -> SectionPath' -> LinkDoc
     convertPara paragraph sectionPath =

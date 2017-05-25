@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 executable trec-car-annotation-interface
   main-is:             TrecCarAnnotationInterface.hs
   other-modules:       PassageViewHtml,
+                       EntityViewHtml
                        TrecCarRenderHtml,
                        OutlineViewHtml,
                        FileNameLookup

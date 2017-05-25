@@ -36,8 +36,15 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
 
         H.div $ do
             H.p $ do
+                  "List article "
+                  H.a ! HA.href "index-article.entity.html" $ "entities"
+                  " / "
+                  H.a ! HA.href "index-article.psg.html" $ "passages"
+            H.p $ do
                   "Back to "
-                  H.a ! HA.href ".." $ "Query List"
+                  H.a ! HA.href "../" $ "Topic List"
+            H.p "Click on heading for passage-level assessments."
+
 
         H.div $ do
             H.ol $ mapM_ (H.li . (renderHtml [])) skeleta
@@ -47,7 +54,7 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
     renderHtml headingPath (Para _) = mempty
     renderHtml headingPath (Image _ _) = mempty
     renderHtml headingPath (Section sectionHeading headingId children)  =  do
-        let headingPath' = (headingPath ++ [headingId])
+        let headingPath' = headingPath ++ [headingId]
         let sectionPath = SectionPath pageId headingPath'
         let maybeFileURL = maybePassageViewUrl sectionPath
 

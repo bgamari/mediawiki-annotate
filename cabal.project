@@ -1,4 +1,7 @@
-allow-newer: vector, aws, xml-conduit
+allow-newer:
+    vector, aws, xml-conduit
+
+    base, time, directory, template-haskell, ghc-prim
 
 packages:
     ./
@@ -10,6 +13,7 @@ packages:
     fork-map/
     assessment-interface/
     assessment-interface/annotation/server
+    filter-duplicates/
 
 package mediawiki-parser
     tests: True

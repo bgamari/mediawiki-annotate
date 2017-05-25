@@ -44,7 +44,8 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
-        escapeURIString isUnreserved (outlinePathname stub)
+--         escapeURIString isUnreserved (outlinePathname stub)  -- todo remove
+      outlinePathname stub  -- do not percent encode filename, we leave this to the browser
 
     passageViewPathname :: SectionPath -> Maybe FilePath
     passageViewPathname = viewPathname "psg"
@@ -56,6 +57,7 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
     viewPathname ::  String -> SectionPath -> Maybe FilePath
     viewPathname suffix sectionPath@(SectionPath page headings)
         | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> suffix <.> "html")
+        -- do not percent encode filename, we leave this to the browser
         | otherwise = Nothing
       where
         sectionfilename =
@@ -68,8 +70,8 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewURL :: FilePath -> String
     viewURL inputFile =
-        escapeURIString isUnreserved inputFile
-
+--         escapeURIString isUnreserved inputFile    -- todo remove
+           inputFile
 
     maybePassageViewUrl sectionPath = fmap viewURL (passageViewPathname sectionPath)
     maybeEntityViewUrl sectionPath = fmap viewURL (entityViewPathname sectionPath)
