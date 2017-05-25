@@ -12,6 +12,7 @@ import qualified Data.Vector as V
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Vector.Algorithms.Heap as Sort
+import Options.Applicative
 
 import SimplIR.StopWords
 import NLP.Snowball
@@ -23,9 +24,12 @@ import qualified Data.ByteString.Lazy as BSL
 type Term = T.Text
 type Bloom = Integer
 
+opts :: Parser FilePath
+opts = argument str (help "paragraphs file")
+
 main :: IO ()
 main = do
-    let parasFile = "train.test200.cbor.paragraphs"
+    parasFile <- execParser $ info (helper <*> opts) mempty
     paras <- decodeCborList <$> BSL.readFile parasFile
 
     let textToBloom :: [Term] -> Bloom
