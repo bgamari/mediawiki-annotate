@@ -41,26 +41,6 @@ main = do
             , let toks = tokenise $ paraToText para
             ]
 
-    --mapM_ print [ (pidA, pidB, j)
-    --            | (pidA, bodyA) <- paras'
-    --            , (pidB, bodyB) <- paras'
-    --            , pidA < pidB
-    --            , let pairsA = HS.fromList $ toBigrams $ bodyA
-    --            , let pairsB = HS.fromList $ toBigrams $ bodyB
-    --            , let j = jaccard pairsA pairsB
-    --            , j >= 0.95
-    --            ]
-
-    {-
-    mapM_ print [ (pidA, j, j', showHex bloomA "", bodyA)
-                | (pidA, bodyA) <- paras'
-                , let bloomA = textToBloom bodyA
-                , let j' = bloomJaccard bloomA bloomA
-                , let pairsA = HS.fromList $ toBigrams $ bodyA
-                      j = jaccard pairsA pairsA
-                ]
--}
-
     let thresh = 0.5
     mapM_ print [ (pidA, pidB, j, j')
                 | (pidA, bodyA, bloomA) <- paras'
