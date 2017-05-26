@@ -12,8 +12,8 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable filter-duplicates
-  main-is:             Laura.hs
+executable find-duplicates
+  main-is:             FindDuplicates.hs
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
   build-depends:       base >=4.9 && <4.10,
                        hashable >=1.2 && <1.3,
