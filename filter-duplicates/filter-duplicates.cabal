@@ -1,4 +1,4 @@
-name:                filter-duplicates
+name:                trec-car-filter-duplicates
 version:             0.1.0.0
 -- synopsis:            
 -- description:         
@@ -12,7 +12,7 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable find-duplicates
+executable trec-car-find-duplicates
   main-is:             FindDuplicates.hs
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
   build-depends:       base >=4.9 && <4.10,
@@ -31,7 +31,7 @@ executable find-duplicates
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
 
-executable rewrite-duplicates
+executable trec-car-rewrite-duplicates
   main-is:             RewriteDuplicates.hs
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
   build-depends:       base >=4.9 && <4.10,

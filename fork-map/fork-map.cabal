@@ -16,7 +16,6 @@ library
   exposed-modules:     Control.Concurrent.ForkMap
                        Control.Concurrent.ForkMap.FifoChannel
                        Control.Concurrent.ForkMap.ForkPipe
-  other-modules:       Paths_fork_map
   other-extensions:    ScopedTypeVariables,
                        RankNTypes,
                        ConstraintKinds,
@@ -30,24 +29,15 @@ library
                        pipes-safe >=2.2 && <2.3,
                        pipes-concurrency >=2.0 && <2.1,
                        pipes >=4.1 && <4.5,
-                       distributed-closure >= 0.3 && < 0.4,
-                       filepath >= 1.4,
                        unix >=2.7 && <2.8,
-                       process >= 1.4,
                        bytestring >=0.10 && <0.11
   hs-source-dirs:      src
   default-language:    Haskell2010
 
 executable fork-map-test
   main-is:             Test.hs
-  ghc-options:         -threaded -rtsopts -debug -optlc=-fpie -dynamic -rdynamic -pie
+  ghc-options:         -threaded -rtsopts -debug
   build-depends:       base,
                        pipes,
                        fork-map
-  default-language:    Haskell2010
-
-executable fork-map-wrapper
-  main-is:             Wrapper.hs
-  ghc-options:         -optlc=-pie -dynamic
-  build-depends:       base, fork-map
   default-language:    Haskell2010
