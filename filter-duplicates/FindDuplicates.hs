@@ -1,13 +1,9 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 import Data.Ord
 import Data.Bits
 import Data.Char
 import Data.Maybe
 import Data.Monoid
 import Data.List
-import Numeric
-import Control.Parallel.Strategies
 
 import Data.Hashable
 import qualified Data.Text as T
@@ -15,6 +11,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Vector as V
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
+import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Vector.Algorithms.Heap as Sort
 import Options.Applicative
 import Control.Parallel.Strategies
@@ -22,17 +19,12 @@ import Control.Parallel.Strategies
 import SimplIR.StopWords
 import NLP.Snowball
 
+import Bloom.Naive
 import CAR.Types
 import CAR.Utils
-import qualified Data.ByteString.Lazy as BSL
 
 
 type Term = T.Text
-newtype Bloom = Bloom Integer
-              deriving (Eq, Num, Bits)
-
-instance Show Bloom where
-    showsPrec _ (Bloom b) = showHex b
 
 opts :: Parser (Double, FilePath, FilePath)
 opts = (,,)
@@ -128,8 +120,7 @@ treeSearch thresh paras = do
         go (Node b children)
           | approxJaccard > thresh
           = foldMap go children
-          where
-            approxJaccard = realToFrac (popCount (b .&. b0)) / realToFrac (popCount b0)
+          where approxJaccard = boundedJaccard b0 b
         go _ = []
 
 bruteForce :: Double -> V.Vector DedupPara
@@ -145,9 +136,6 @@ bruteForce thresh paras =
            , j' >= thresh
            ]
 
-bloomJaccard :: Bloom -> Bloom -> Double
-bloomJaccard a b =
-    realToFrac (popCount (a .&. b)) / realToFrac (popCount (a .|. b))
 
 jaccard :: HS.HashSet (Term, Term) -> HS.HashSet (Term, Term) -> Double
 jaccard xs ys
@@ -165,13 +153,6 @@ tokenise =
     . TL.words
     . TL.toCaseFold
     . TL.filter (not . isPunctuation)
-
-unionBlooms :: [Bloom] -> Bloom
-unionBlooms = foldl' (.|.) 0
-
-toBloom :: Hashable a => [a] -> Bloom
-toBloom = foldl' (.|.) 0 . map toBit
-  where toBit x = bit $ hash x .&. 1023
 
 toBigrams :: [Term] -> [(Term, Term)]
 toBigrams = mapMaybe f . tails

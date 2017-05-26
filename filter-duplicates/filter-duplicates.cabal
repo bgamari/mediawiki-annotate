@@ -14,6 +14,7 @@ cabal-version:       >=1.10
 
 executable trec-car-find-duplicates
   main-is:             FindDuplicates.hs
+  other-modules:       Bloom.Naive
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
   build-depends:       base >=4.9 && <4.10,
                        hashable >=1.2 && <1.3,
