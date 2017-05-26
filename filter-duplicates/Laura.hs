@@ -7,6 +7,7 @@ import Data.Maybe
 import Data.Monoid
 import Data.List
 import Numeric
+import Control.Parallel.Strategies
 
 import Data.Hashable
 import qualified Data.Text as T
@@ -98,14 +99,17 @@ main = do
     putStrLn "ich habe fertig"
 
 treeSearch :: Double -> V.Vector DedupPara -> IO ()
-treeSearch thresh paras =
-    mapM_ print [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
-                | para <- V.toList paras
-                , (dup, j) <- duplicates para tree
-                ]
+treeSearch thresh paras = do
+    tree <- mkCompact $! parasToBloomTree 64 paras
+    putStrLn "Running"
+    mapM_ print
+        $ withStrategy (parBuffer 16 rdeepseq)
+        [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
+        | para <- V.toList paras
+        , (dup, j) <- duplicates para tree
+        ]
   where
-    tree :: BloomTree
-    tree = parasToBloomTree 64 paras
+    mkCompact = return
 
     duplicates :: DedupPara -> BloomTree -> [(DedupPara, Double)]
     duplicates (DedupPara pid0 b0 terms0) = go
