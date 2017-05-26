@@ -12,6 +12,7 @@ import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import Data.Maybe
 
 import CAR.Utils
@@ -106,7 +107,7 @@ transformContent :: HM.HashMap PageName InlinkCounts -> Page -> KbDoc
 transformContent inlinkInfoMap (Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
-      kbDocLeadText = foldMap pageSkeletonText $ leadParas
+      kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
       kbDocOutLinks = fmap linkTarget $ foldMap pageSkeletonLinks $ leadParas
       kbDocOutMentions = fmap linkAnchor $ foldMap pageSkeletonLinks $ leadParas
       kbDocLeadPara = leadParas
