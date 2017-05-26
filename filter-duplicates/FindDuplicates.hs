@@ -93,18 +93,19 @@ main = do
             ]
 
     putStrLn "running"
-    bruteForce thresh paras'
+    --bruteForce thresh paras'
     putStrLn "ich habe fertig"
-    treeSearch thresh paras'
+    xs <- treeSearch thresh paras'
+    writeFile "duplicates" $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
 
-treeSearch :: Double -> V.Vector DedupPara -> IO ()
+treeSearch :: Double -> V.Vector DedupPara -> IO [(ParagraphId, ParagraphId, Double)]
 treeSearch thresh paras = do
     tree <- mkCompact $! parasToBloomTree 64 paras
     putStrLn "Running"
-    mapM_ print
+    return
         $ withStrategy (parBuffer 16 rdeepseq)
-        [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
+        [ (dedupParaId para, dedupParaId dup, j) --, dedupParaTokens para, dedupParaTokens dup)
         | para <- V.toList paras
         , (dup, j) <- duplicates para tree
         ]
@@ -130,17 +131,18 @@ treeSearch thresh paras = do
             approxJaccard = realToFrac (popCount (b .&. b0)) / realToFrac (popCount b0)
         go _ = []
 
-bruteForce :: Double -> V.Vector DedupPara -> IO ()
+bruteForce :: Double -> V.Vector DedupPara
+           -> IO [(ParagraphId, ParagraphId, Double, Double)]
 bruteForce thresh paras =
-    mapM_ print [ (pidA, pidB, j, j')
-                | DedupPara pidA bloomA bodyA <- V.toList paras
-                , DedupPara pidB bloomB bodyB <- V.toList paras
-                , pidA < pidB
-                , let j = bloomJaccard bloomA bloomB
-                , let j' = jaccard (HS.fromList $ toBigrams bodyA) (HS.fromList $ toBigrams bodyB)
-                , j >= thresh
-                , j' >= thresh
-                ]
+    return [ (pidA, pidB, j, j')
+           | DedupPara pidA bloomA bodyA <- V.toList paras
+           , DedupPara pidB bloomB bodyB <- V.toList paras
+           , pidA < pidB
+           , let j = bloomJaccard bloomA bloomB
+           , let j' = jaccard (HS.fromList $ toBigrams bodyA) (HS.fromList $ toBigrams bodyB)
+           , j >= thresh
+           , j' >= thresh
+           ]
 
 bloomJaccard :: Bloom -> Bloom -> Double
 bloomJaccard a b =
