@@ -37,7 +37,7 @@ instance Show Bloom where
 opts :: Parser (Double, FilePath)
 opts = (,)
     <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
-    <*> argument str (help "paragraphs file")
+    <*> argument str (help "pages file" <> metavar "PAGES")
 
 data BloomTree = Node !Bloom !(V.Vector BloomTree)
                | Leaf !DedupPara

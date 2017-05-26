@@ -15,7 +15,7 @@ opts :: Parser (FilePath, FilePath, FilePath)
 opts = (,,)
     <$> option str (short 'o' <> long "output" <> help "output pages file")
     <*> option str (short 'd' <> long "duplicates" <> help "duplicates file")
-    <*> argument str (help "input pages file")
+    <*> argument str (help "input pages file" <> metavar "PAGES")
 
 main :: IO ()
 main = do
