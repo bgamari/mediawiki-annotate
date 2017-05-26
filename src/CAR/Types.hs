@@ -29,6 +29,7 @@ module CAR.Types
       -- * Miscellaneous Utilities
     , decodeCborList
     , encodeCborList
+    , writeCborList
     ) where
 
 import Data.Foldable
@@ -55,6 +56,7 @@ import Data.MediaWiki.Markup
 import Data.Aeson.Types
 import Data.Hashable
 import Data.String
+import System.IO
 
 -- SimplIR
 import qualified Data.SmallUtf8 as Utf8
@@ -119,7 +121,7 @@ data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
 instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
-                    deriving (Show, Generic, Ord, Eq, CBOR.Serialise, Hashable)
+                    deriving (Show, Read, Generic, Ord, Eq, CBOR.Serialise, Hashable)
 instance NFData ParagraphId
 
 unpackParagraphId :: ParagraphId -> String
@@ -194,6 +196,11 @@ decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
+
+writeCborList :: CBOR.Serialise a => FilePath -> [a] -> IO ()
+writeCborList out xs =
+    withFile out WriteMode $ \h -> do
+    BSB.hPutBuilder h $ encodeCborList xs
 
 prettyPage :: LinkStyle -> Page -> String
 prettyPage linkStyle (Page (PageName name) _ skeleton) =
