@@ -20,6 +20,7 @@ opts :: Parser (IO ())
 opts = subparser
     $  cmd "titles"        dumpTitles
     <> cmd "pages"         dumpPages
+    <> cmd "paragraphs"    dumpParagraphs
     <> cmd "sections"      dumpSections
     <> cmd "hist-headings" histogramHeadings
   where
@@ -71,6 +72,17 @@ opts = subparser
                 mapM_ printPage $ mapMaybe (`lookupPage` anns) (S.toList pageNames)
 
           where printPage = putStrLn . prettyPage linkStyle
+
+    dumpParagraphs =
+        f <$> argument str (help "input paragraph file" <> metavar "FILE")
+          <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
+      where
+        f :: FilePath -> LinkStyle -> IO ()
+        f inputFile linkStyle = do
+                paragraphs <- decodeCborList <$> BSL.readFile inputFile
+                mapM_ printParagraph paragraphs
+
+          where printParagraph = putStrLn . prettyParagraph linkStyle
 
     histogramHeadings =
         f <$> argument str (help "input file" <> metavar "FILE")
