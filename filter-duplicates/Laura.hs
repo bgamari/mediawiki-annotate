@@ -17,6 +17,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Vector.Algorithms.Heap as Sort
 import Options.Applicative
+import Control.Parallel.Strategies
 
 import SimplIR.StopWords
 import NLP.Snowball
@@ -93,7 +94,7 @@ main = do
             ]
 
     putStrLn "running"
-    bruteForce thresh paras'
+    --bruteForce thresh paras'
     putStrLn "ich habe fertig"
     treeSearch thresh paras'
     putStrLn "ich habe fertig"
@@ -101,13 +102,12 @@ main = do
 treeSearch :: Double -> V.Vector DedupPara -> IO ()
 treeSearch thresh paras = do
     tree <- mkCompact $! parasToBloomTree 64 paras
-    putStrLn "Running"
+    putStrLn "Built tree"
     mapM_ print
-        $ withStrategy (parBuffer 16 rdeepseq)
-        [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
-        | para <- V.toList paras
-        , (dup, j) <- duplicates para tree
-        ]
+      $ foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
+                                  | (dup, j) <- dups ])
+      $ withStrategy (parBuffer 64 $ evalTuple2 rseq $ evalList rseq)
+      $ map (\para -> (para, para `duplicates` tree)) (V.toList paras)
   where
     mkCompact = return
 
