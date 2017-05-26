@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 import Data.Ord
 import Data.Bits
 import Data.Char
@@ -22,13 +24,53 @@ import CAR.Types
 import CAR.Utils
 import qualified Data.ByteString.Lazy as BSL
 
+
 type Term = T.Text
-type Bloom = Integer
+newtype Bloom = Bloom Integer
+              deriving (Eq, Num, Bits)
+
+instance Show Bloom where
+    showsPrec _ (Bloom b) = showHex b
 
 opts :: Parser (Double, FilePath)
 opts = (,)
     <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
     <*> argument str (help "paragraphs file")
+
+data BloomTree = Node !Bloom !(V.Vector BloomTree)
+               | Leaf !DedupPara
+               deriving (Show)
+
+data DedupPara = DedupPara { dedupParaId     :: !ParagraphId
+                           , dedupParaBloom  :: !Bloom
+                           , dedupParaTokens :: [Term]
+                           }
+               deriving (Show)
+
+parasToBloomTree :: Int -> V.Vector DedupPara -> BloomTree
+parasToBloomTree fanout = go . V.map Leaf
+  where
+    go :: V.Vector BloomTree -> BloomTree
+    go xs
+      | V.length xs <= fanout = toNode xs
+      | otherwise =
+          go $ V.fromList $ map toNode $ chunksOf fanout xs
+
+    toNode :: V.Vector BloomTree -> BloomTree
+    toNode xs = Node (unionBlooms $ map treeBloom $ V.toList xs) xs
+
+treeBloom :: BloomTree -> Bloom
+treeBloom (Node b _) = b
+treeBloom (Leaf (DedupPara _ b _)) = b
+
+chunksOf :: Int -> V.Vector a -> [V.Vector a]
+chunksOf n = go
+  where
+    go xs
+      | V.length xs < n = [xs]
+      | otherwise       =
+        let (a,b) = V.splitAt n xs
+        in a : go b
 
 main :: IO ()
 main = do
@@ -41,24 +83,60 @@ main = do
                     | pair <- toBigrams toks
                     ]
 
-    let paras' :: [(ParagraphId, [Term], Bloom)]
+    let paras' :: V.Vector DedupPara
         paras' =
-            [ (paraId para, toks, textToBloom toks)
+            V.fromList
+            [ DedupPara (paraId para) (textToBloom toks) toks
             | para <- paras
             , let toks = tokenise $ paraToText para
             ]
 
+    putStrLn "running"
+    bruteForce thresh paras'
+    putStrLn "ich habe fertig"
+    treeSearch thresh paras'
+    putStrLn "ich habe fertig"
+
+treeSearch :: Double -> V.Vector DedupPara -> IO ()
+treeSearch thresh paras =
+    mapM_ print [ (dedupParaId para, dedupParaId dup, j, dedupParaTokens para, dedupParaTokens dup)
+                | para <- V.toList paras
+                , (dup, j) <- duplicates para tree
+                ]
+  where
+    tree :: BloomTree
+    tree = parasToBloomTree 64 paras
+
+    duplicates :: DedupPara -> BloomTree -> [(DedupPara, Double)]
+    duplicates (DedupPara pid0 b0 terms0) = go
+      where
+        bigrams0 = HS.fromList $ toBigrams terms0
+
+        go :: BloomTree -> [(DedupPara, Double)]
+        go (Leaf p@(DedupPara pid b terms))
+          | bloomJaccard b0 b > thresh
+          , pid0 < pid
+          , let j = jaccard bigrams0 (HS.fromList $ toBigrams terms)
+          , j > thresh
+          = [(p, j)]
+        go (Node b children)
+          | approxJaccard > thresh
+          = foldMap go children
+          where
+            approxJaccard = realToFrac (popCount (b .&. b0)) / realToFrac (popCount b0)
+        go _ = []
+
+bruteForce :: Double -> V.Vector DedupPara -> IO ()
+bruteForce thresh paras =
     mapM_ print [ (pidA, pidB, j, j')
-                | (pidA, bodyA, bloomA) <- paras'
-                , (pidB, bodyB, bloomB) <- paras'
+                | DedupPara pidA bloomA bodyA <- V.toList paras
+                , DedupPara pidB bloomB bodyB <- V.toList paras
                 , pidA < pidB
                 , let j = bloomJaccard bloomA bloomB
                 , let j' = jaccard (HS.fromList $ toBigrams bodyA) (HS.fromList $ toBigrams bodyB)
                 , j >= thresh
                 , j' >= thresh
                 ]
-
-    putStrLn "ich habe fertig"
 
 bloomJaccard :: Bloom -> Bloom -> Double
 bloomJaccard a b =
@@ -80,6 +158,9 @@ tokenise =
     . TL.words
     . TL.toCaseFold
     . TL.filter (not . isPunctuation)
+
+unionBlooms :: [Bloom] -> Bloom
+unionBlooms = foldl' (.|.) 0
 
 toBloom :: Hashable a => [a] -> Bloom
 toBloom = foldl' (.|.) 0 . map toBit
