@@ -41,21 +41,18 @@ main = do
     when (not $ null names) $ do
         putStr "Writing articles..."
         let articleFile = outpath <.> "articles"
-        withFile articleFile WriteMode $ \h ->
-            BSB.hPutBuilder h $ encodeCborList pagesToExport
+        writeCborList articleFile pagesToExport
         putStrLn "done"
 
     putStr "Writing outlines..."
     let skeletonFile = outpath <.> "outlines"
-    withFile skeletonFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ map toStubSkeleton pagesToExport
+    writeCborList skeletonFile $ map toStubSkeleton pagesToExport
     putStrLn "done"
 
     putStr "Writing paragraphs..."
     let paragraphsFile = outpath <.> "paragraphs"
     let sortIt = map snd . M.toAscList . foldMap (\para -> M.singleton (paraId para) para)
-    withFile paragraphsFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ sortIt $ concatMap toParagraphs pagesToExport
+    writeCborList paragraphsFile $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
 

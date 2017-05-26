@@ -43,18 +43,19 @@ isLead (Para{})    = True
 isLead (Section{}) = False
 isLead (Image{})   = False
 
-isForbiddenSection :: PageSkeleton -> Bool
-isForbiddenSection (Section heading _ _) =
+isForbiddenSkeleton :: PageSkeleton -> Bool
+isForbiddenSkeleton (Section heading _ _) =
     ( T.toCaseFold (getSectionHeading heading) `HS.member` forbiddenHeadings )  ||  -- excluded
     T.length (T.filter isAlpha (getSectionHeading heading)) < 3 ||                      -- not enough letters
     T.length (getSectionHeading heading) > 100                                          -- too long, probably parse error
-isForbiddenSection _ = False
+isForbiddenSkeleton (Image _ _) = True
+isForbiddenSkeleton _ = False
 
 recurseDropForbiddenSections :: PageSkeleton -> Maybe PageSkeleton
 recurseDropForbiddenSections (Section heading sectionId children)
     | null children' = Nothing
     | otherwise =  Just (Section heading sectionId children')
-  where children' = mapMaybe recurseDropForbiddenSections $ filter (not . isForbiddenSection) children
+  where children' = mapMaybe recurseDropForbiddenSections $ filter (not . isForbiddenSkeleton) children
 recurseDropForbiddenSections x = Just x
 
 
@@ -66,7 +67,7 @@ transformContent (Page {pageName, pageId, pageSkeleton=pageSkeleta})
   where
     pageSkeleta'=
          mapMaybe recurseDropForbiddenSections
-         $ filter (\skel -> not (isForbiddenSection skel) &&  not (isLead skel)) pageSkeleta
+         $ filter (\skel -> not (isForbiddenSkeleton skel) &&  not (isLead skel)) pageSkeleta
 
 
 
