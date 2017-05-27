@@ -1,18 +1,13 @@
-import Data.Ord
-import Data.Bits
 import Data.Char
 import Data.Maybe
 import Data.Monoid
 import Data.List
 
-import Data.Hashable
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Vector as V
-import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.Vector.Algorithms.Heap as Sort
 import Options.Applicative
 import Control.Parallel.Strategies
 
@@ -20,6 +15,7 @@ import SimplIR.StopWords
 import NLP.Snowball
 
 import Bloom.Naive
+--import Bloom.Opt
 import CAR.Types
 import CAR.Utils
 
