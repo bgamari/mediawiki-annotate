@@ -34,9 +34,9 @@ fromBits :: [Int] -> Word1024
 fromBits xs = runST $ do
     ba <- newWord1024Buf
     let f x rest = do
-            let (byteN,bitN) = (x `mod` word1024Bytes) `divMod` 64
-            n <- readByteArray ba byteN
-            writeByteArray ba byteN (n .|. (bit bitN :: Word64))
+            let (wordN, bitN) = x `divMod` 64
+            n <- readByteArray ba wordN
+            writeByteArray ba wordN (n .|. (bit bitN :: Word64))
             rest
     foldr f (Word1024 <$> unsafeFreezeByteArray ba) xs
 {-# INLINEABLE fromBits #-}
