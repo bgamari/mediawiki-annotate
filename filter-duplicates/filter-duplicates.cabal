@@ -14,7 +14,7 @@ cabal-version:       >=1.10
 
 executable trec-car-find-duplicates
   main-is:             FindDuplicates.hs
-  other-modules:       Bloom.Naive, Bloom.Opt, Word1024
+  other-modules:       Bloom.IntSet, Bloom.Naive, Bloom.Opt, Word1024
   c-sources:           cbits/bloom.c
   cc-options:          -march=haswell
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
@@ -29,6 +29,7 @@ executable trec-car-find-duplicates
                        primitive >=0.6 && <0.7,
                        optparse-applicative >= 0.13,
                        parallel >= 3.2,
+                       intset,
                        simplir,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded -with-rtsopts=-N -with-rtsopts=-A64M
