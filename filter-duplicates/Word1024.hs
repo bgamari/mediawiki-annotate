@@ -11,28 +11,38 @@ import GHC.Exts
 import Data.Primitive
 import Control.Monad.ST
 import Control.Monad.ST.Unsafe
+import Numeric
 
 data Word1024 = Word1024 ByteArray
 
 instance Show Word1024 where
-    show = show . word1024ToInteger
+    showsPrec _ = showHex . word1024ToInteger
 
 word1024ToInteger :: Word1024 -> Integer
-word1024ToInteger (Word1024 ba) = go 0 (word1024Bytes `div` 8)
+word1024ToInteger (Word1024 ba) = go 0 (word1024Bytes `div` 8 - 1)
   where
-    go accum 0 = accum
+    go accum (-1) = accum
     go accum b =
-        let accum' = accum .|. fromIntegral (indexByteArray ba b :: Word64)
-        in go accum' (b+1)
+        let accum' = accum .|. (fromIntegral (indexByteArray ba b :: Word64) `shiftL` (64*b))
+        in go accum' (b-1)
 
 word1024Bytes = 1024 `div` 8
 
 newWord1024Buf :: ST s (MutableByteArray s)
-newWord1024Buf = newAlignedPinnedByteArray 64 word1024Bytes
+newWord1024Buf = do
+    ba <- newAlignedPinnedByteArray 64 word1024Bytes
+    return ba
+
+fillZeros :: MutableByteArray s -> ST s ()
+fillZeros ba = fillByteArray ba 0 word1024Bytes 0
+
+fillOnes :: MutableByteArray s -> ST s ()
+fillOnes ba = fillByteArray ba 0 word1024Bytes 0xff
 
 fromBits :: [Int] -> Word1024
 fromBits xs = runST $ do
     ba <- newWord1024Buf
+    fillZeros ba
     let f x rest = do
             let (wordN, bitN) = x `divMod` 64
             n <- readByteArray ba wordN
@@ -44,13 +54,15 @@ fromBits xs = runST $ do
 orWord1024s :: [Word1024] -> Word1024
 orWord1024s xs = runST $ do
     ba <- newWord1024Buf
+    fillZeros ba
     let f x rest = doUpdate c_orWord1024 ba x >> rest
     foldr f (Word1024 <$> unsafeFreezeByteArray ba) xs
 
 andWord1024s :: [Word1024] -> Word1024
 andWord1024s xs = runST $ do
     ba <- newWord1024Buf
-    let f x rest = doUpdate c_orWord1024 ba x >> rest
+    fillOnes ba
+    let f x rest = doUpdate c_andWord1024 ba x >> rest
     foldr f (Word1024 <$> unsafeFreezeByteArray ba) xs
 
 instance Eq Word1024 where
