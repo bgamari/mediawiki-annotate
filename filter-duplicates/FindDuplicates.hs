@@ -34,10 +34,11 @@ newtype Bloom = Bloom Integer
 instance Show Bloom where
     showsPrec _ (Bloom b) = showHex b
 
-opts :: Parser (Double, FilePath, FilePath)
-opts = (,,)
+opts :: Parser (Double, FilePath, Maybe Int, FilePath)
+opts = (,,,)
     <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
     <*> option str (long "output" <> short 'o' <> help "output file name")
+    <*> optional (option auto (long "num" <> short 'n' <> help "number of paragraphs to compute duplicates with"))
     <*> argument str (help "pages file" <> metavar "PAGES")
 
 data BloomTree = Node !Bloom !(V.Vector BloomTree)
@@ -77,7 +78,7 @@ chunksOf n = go
 
 main :: IO ()
 main = do
-    (thresh, outputFile, parasFile) <- execParser $ info (helper <*> opts) mempty
+    (thresh, outputFile, maybeNumParas, parasFile) <- execParser $ info (helper <*> opts) mempty
     paras <- decodeCborList <$> BSL.readFile parasFile
 
     let textToBloom :: [Term] -> Bloom
@@ -90,13 +91,14 @@ main = do
         paras' =
             V.fromList
             [ DedupPara (paraId para) (textToBloom toks) toks
-            | para <- paras
+            | para <- maybeTake maybeNumParas paras
             , let toks = tokenise $ paraToText para
             ]
 
-    putStrLn "running"
-    --bruteForce thresh paras'
-    putStrLn "ich habe fertig"
+          where maybeTake Nothing paras = paras
+                maybeTake (Just numParas) paras = take numParas paras
+                  
+
     xs <- treeSearch thresh paras'
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
