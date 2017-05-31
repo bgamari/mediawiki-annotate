@@ -31,7 +31,7 @@ executable trec-car-find-duplicates
                        parallel >= 3.2,
                        simplir,
                        trec-car-tools
-  ghc-options:         -rtsopts -threaded -with-rtsopts="-N -A64M"
+  ghc-options:         -rtsopts -threaded -with-rtsopts=-N -with-rtsopts=-A64M
   default-language:    Haskell2010
 
 executable trec-car-rewrite-duplicates
