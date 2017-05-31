@@ -34,11 +34,12 @@ newtype Bloom = Bloom Integer
 instance Show Bloom where
     showsPrec _ (Bloom b) = showHex b
 
-opts :: Parser (Double, FilePath, Maybe Int, FilePath)
-opts = (,,,)
+opts :: Parser (Double, FilePath, Maybe Int, Int, FilePath)
+opts = (,,,,)
     <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
     <*> option str (long "output" <> short 'o' <> help "output file name")
     <*> optional (option auto (long "num" <> short 'n' <> help "number of paragraphs to compute duplicates with"))
+    <*> option auto (long "fanout" <> help "bloom tree fanout" <> value 64)
     <*> argument str (help "pages file" <> metavar "PAGES")
 
 data BloomTree = Node !Bloom !(V.Vector BloomTree)
@@ -78,43 +79,30 @@ chunksOf n = go
 
 main :: IO ()
 main = do
-    (thresh, outputFile, maybeNumParas, parasFile) <- execParser $ info (helper <*> opts) mempty
+    (thresh, outputFile, maybeNumParas, fanout, parasFile) <- execParser $ info (helper <*> opts) mempty
     paras <- decodeCborList <$> BSL.readFile parasFile
-
-    let textToBloom :: [Term] -> Bloom
-        textToBloom toks =
-            toBloom [ pair
-                    | pair <- toBigrams toks
-                    ]
 
     let paras' :: V.Vector DedupPara
         paras' =
             V.fromList
-            [ DedupPara (paraId para) (textToBloom toks) toks
-            | para <- maybeTake maybeNumParas paras
+            [ DedupPara (paraId para) (toBloom $ toBigrams toks) toks
+            | para <- paras
             , let toks = tokenise $ paraToText para
             ]
 
-          where maybeTake Nothing paras = paras
-                maybeTake (Just numParas) paras = take numParas paras
-                  
-
-    xs <- treeSearch thresh paras'
+    let tree = parasToBloomTree fanout paras'
+    tree `seq` putStrLn "Built tree"
+    let xs = treeSearch thresh tree paras'
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
 
-treeSearch :: Double -> V.Vector DedupPara -> IO [(ParagraphId, ParagraphId, Double)]
-treeSearch thresh paras = do
-    tree <- mkCompact $! parasToBloomTree 64 paras
-    putStrLn "Built tree"
-    return
-      $ foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j)
-                                  | (dup, j) <- dups ])
-      $ withStrategy (parBuffer 64 $ evalTuple2 rseq $ evalList rseq)
-      $ map (\para -> (para, para `duplicates` tree)) (V.toList paras)
+treeSearch :: Double -> BloomTree -> V.Vector DedupPara -> [(ParagraphId, ParagraphId, Double)]
+treeSearch thresh bloomTree paras =
+      foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j)
+                                | (dup, j) <- dups ])
+    $ withStrategy (parBuffer 64 $ evalTuple2 rseq $ evalList rseq)
+    $ map (\para -> (para, para `duplicates` bloomTree)) (V.toList paras)
   where
-    mkCompact = return
-
     duplicates :: DedupPara -> BloomTree -> [(DedupPara, Double)]
     duplicates (DedupPara pid0 b0 terms0) = go
       where
