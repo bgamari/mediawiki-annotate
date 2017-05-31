@@ -28,7 +28,7 @@ import qualified Data.ByteString.Lazy as BSL
 
 
 type Term = T.Text
-newtype Bloom = Bloom Integer
+newtype Bloom = Bloom Int
               deriving (Eq, Num, Bits)
 
 instance Show Bloom where
@@ -100,7 +100,7 @@ treeSearch :: Double -> BloomTree -> V.Vector DedupPara -> [(ParagraphId, Paragr
 treeSearch thresh bloomTree paras =
       foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j)
                                 | (dup, j) <- dups ])
-    $ withStrategy (parBuffer 64 $ evalTuple2 rseq $ evalList rseq)
+    $ withStrategy (parBuffer 256 $ evalTuple2 rseq $ evalList rseq)
     $ map (\para -> (para, para `duplicates` bloomTree)) (V.toList paras)
   where
     duplicates :: DedupPara -> BloomTree -> [(DedupPara, Double)]
@@ -161,7 +161,7 @@ unionBlooms = foldl' (.|.) 0
 
 toBloom :: Hashable a => [a] -> Bloom
 toBloom = foldl' (.|.) 0 . map toBit
-  where toBit x = bit $ hash x .&. 1023
+  where toBit x = bit $ hash x .&. 63
 
 toBigrams :: [Term] -> [(Term, Term)]
 toBigrams = mapMaybe f . tails
