@@ -56,6 +56,10 @@ treeBloom :: BloomTree -> Bloom
 treeBloom (Node b _) = b
 treeBloom (Leaf (DedupPara _ b _)) = b
 
+treeDepth :: BloomTree -> Int
+treeDepth (Node _ children) = V.maximum (V.map treeDepth children) + 1
+treeDepth _ = 1
+
 chunksOf :: Int -> V.Vector a -> [V.Vector a]
 chunksOf n = go
   where
@@ -80,6 +84,7 @@ main = do
 
     let tree = parasToBloomTree fanout paras'
     tree `seq` putStrLn "Built tree"
+    print $ treeDepth tree
     let xs = treeSearch thresh tree paras'
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
@@ -121,7 +126,6 @@ bruteForce thresh paras =
            , j >= thresh
            , j' >= thresh
            ]
-
 
 jaccard :: HS.HashSet (Term, Term) -> HS.HashSet (Term, Term) -> Double
 jaccard xs ys
