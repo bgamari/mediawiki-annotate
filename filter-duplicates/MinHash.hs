@@ -1,5 +1,6 @@
 import Data.Bits
 import Data.Char
+import Data.Monoid
 import Data.Maybe
 import Data.List
 import Data.Hashable
@@ -56,12 +57,15 @@ bucketForPara embedding projs toks =
             toBit n True = bit n
     in fromBits $ map (\p -> dotWordVecs v p > 1) projs
 
+opts :: Parser (FilePath, Double, FilePath)
+opts = (,,)
+    <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
+    <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
+    <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
+
 main :: IO ()
 main = do
-    let parasFile = "train.test200.cbor.paragraphs"
-    let parasFile = "fold0.train.cbor.paragraphs"
-    let embeddingFile = "glove"
-    let thresh = 0.5
+    (embeddingFile, thresh, parasFile) <- execParser $ info (helper <*> opts) mempty
 
     paras <- decodeCborList <$> BSL.readFile parasFile
     let paras' = [ (paraId para, toks)
