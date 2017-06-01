@@ -82,9 +82,11 @@ main = do
                  | para <- paras
                  , let toks = tokenise $ paraToText para
                  ]
+    rnf paras' `seq` putStrLn ("Read "++show (length paras')++" paragraphs")
 
     SomeWordEmbedding embedding <- readGlove embeddingFile
     projs <- randomProjections 10
+    putStrLn "Read embeddings"
     let partitions :: M.Map Bucket [(ParagraphId, [Term])]
         partitions = partitionParas embedding projs paras'
 
