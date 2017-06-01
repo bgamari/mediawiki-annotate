@@ -31,7 +31,7 @@ import CAR.Utils
 import qualified IntSet as IS
 import Utils
 
-newtype Bucket = Bucket Int
+newtype Bucket = Bucket Integer
                deriving (Show, Ord, Eq)
 
 partitionParas :: KnownNat n => WordEmbedding n -> Projections n
@@ -40,6 +40,7 @@ partitionParas embedding projs paras =
     M.unionsWith (++)
     $ withStrategy strat
     $ map chunkToBuckets
+    $ listStatus "partition" 10
     $ chunksOf 10000 paras
 
   where
@@ -47,7 +48,7 @@ partitionParas embedding projs paras =
     chunkToBuckets ps =
         M.fromListWith (++)
         [ (bucketForPara embedding projs toks, [(pid, toks)])
-        | (pid, toks) <- listStatus "partition" 10000 (V.toList ps)
+        | (pid, toks) <- V.toList ps
         ]
     strat :: Strategy [M.Map Bucket [(ParagraphId, [Term])]]
     strat = parBuffer 256 rseq
@@ -64,7 +65,7 @@ bucketForPara embedding projs toks =
         fromBits :: [Bool] -> Bucket
         fromBits = Bucket . foldl' (.|.) 0 . zipWith toBit [0..]
           where
-            toBit :: Int -> Bool -> Int
+            toBit :: Int -> Bool -> Integer
             toBit n True  = bit n
             toBit n False = 0
     in fromBits $ map (\p -> dotWordVecs v p > 1) projs
