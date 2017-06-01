@@ -14,6 +14,7 @@ import qualified Data.ByteString.Short as BSS
 import Options.Applicative
 import Control.Parallel.Strategies
 import System.IO
+import System.CPUTime
 
 import SimplIR.StopWords
 import NLP.Snowball
@@ -98,9 +99,13 @@ main = do
     tree `seq` putStrLn "Built tree"
     print $ treeDepth tree
     print $ V.length paras'
+    startTime <- getCPUTime
+    putStrLn $ "Tree building time: "++show (realToFrac startTime / 1e12)
     let xs = treeSearch thresh tree (maybe id V.take maybeNumParas $ paras')
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
+    endTime <- getCPUTime
     putStrLn "ich habe fertig"
+    putStrLn $ "Search time: "++show (realToFrac (endTime - startTime) / 1e12)
     hFlush stderr
     hFlush stdout
 
@@ -129,16 +134,16 @@ treeSearch thresh bloomTree paras =
 
         go :: Int -> BloomTree -> [(DedupPara, Double)]
         go !i (Leaf p@(DedupPara pid b terms))
-          | traceShow ("test0", bloomJaccard b0 b, pid) $ bloomJaccard b0 b > thresh
+          | traceShow ("leaf", i, bloomJaccard b0 b, pid) $
+            bloomJaccard b0 b > thresh
           , pid0 < pid
           , let j = jaccard bigrams0 (HS.fromList $ toBigrams terms)
-          , traceShow ("test", j) $ j > thresh
-          = traceShow ("hit", i)
+          , j > thresh
+          = traceShow ("hit", i, j)
             [(p, j)]
         go i (Node b children)
-          | traceShow ("node", approxJaccard) $ approxJaccard > thresh
-          = traceShow ("node", i, approxJaccard) $
-            foldMap (go (i+1)) children
+          | traceShow ("node", i, approxJaccard) $ approxJaccard > thresh
+          = foldMap (go (i+1)) children
           where approxJaccard = boundedJaccard b0 b
         go i _ = []
 
