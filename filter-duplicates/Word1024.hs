@@ -29,9 +29,7 @@ word1024ToInteger (Word1024 ba) = go 0 (word1024Bytes `div` 8 - 1)
 word1024Bytes = 1024 `div` 8
 
 newWord1024Buf :: ST s (MutableByteArray s)
-newWord1024Buf = do
-    ba <- newAlignedPinnedByteArray 64 word1024Bytes
-    return ba
+newWord1024Buf = newAlignedPinnedByteArray word1024Bytes 64
 
 fillZeros :: MutableByteArray s -> ST s ()
 fillZeros ba = fillByteArray ba 0 word1024Bytes 0
