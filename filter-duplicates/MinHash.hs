@@ -38,9 +38,9 @@ partitionParas :: KnownNat n => WordEmbedding n -> Projections n
                -> V.Vector (ParagraphId, [Term]) -> M.Map Bucket [(ParagraphId, [Term])]
 partitionParas embedding projs paras =
     M.unionsWith (++)
+    $ listStatus "partition" 10
     $ withStrategy strat
     $ map chunkToBuckets
-    $ listStatus "partition" 10
     $ chunksOf 10000 paras
 
   where
@@ -82,38 +82,37 @@ main = do
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
         toTuple p = (paraId p, tokenise $ paraToText p)
+    ncaps <- getNumCapabilities
     setNumCapabilities 1
-    paras <- V.fromList . map toTuple . decodeCborList <$> BSL.readFile parasFile
+    paras <- V.fromList . listStatus "read" 100000 . map toTuple . decodeCborList <$> BSL.readFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
-    setNumCapabilities 30
 
     SomeWordEmbedding embedding <- readGlove embeddingFile
     projs <- randomProjections 10
     putStrLn "Read embeddings"
+
+    setNumCapabilities ncaps
 
     let partitions :: M.Map Bucket [(ParagraphId, [Term])]
         partitions = partitionParas embedding projs paras
     putStrLn "Bucket counts:"
     putStrLn $ unlines $ map (show . fmap length) $ M.toList partitions
 
-    let filterDuplicates :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId)]
-        filterDuplicates ps =
-            [ (a, b)
-            | (a, b, sim) <- hashSimilarities ps
-            , sim > thresh
-            ]
     let duplicates :: [(ParagraphId, ParagraphId)]
-        duplicates = fold $ withStrategy (parTraversable rdeepseq) $ fmap filterDuplicates partitions
-    print duplicates
+        duplicates = concat $ withStrategy (parBuffer 1024 rdeepseq)
+                     $ concat $ M.elems $ fmap (hashSimilarities thresh) partitions
+    writeFile "duplicates" $ show duplicates
 
-hashSimilarities :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId, Double)]
-hashSimilarities paras =
-    [ (pid1, pid2, sim)
-    | (pid1, s1) <- listStatus "test" 100 hashes
-    , (pid2, s2) <- hashes
-    , let (denom, num) = IS.unionIntersectSize s1 s2
-          sim = realToFrac num / realToFrac denom
-    , pid1 < pid2
+hashSimilarities :: Double -> [(ParagraphId, [Term])] -> [[(ParagraphId, ParagraphId)]]
+hashSimilarities thresh paras =
+    [ [ (pid1, pid2)
+      | (pid2, s2) <- hashes
+      , let (denom, num) = IS.unionIntersectSize s1 s2
+            sim = realToFrac num / realToFrac denom
+      , pid1 < pid2
+      , sim > thresh
+      ]
+    | (pid1, s1) <- listStatus "test" 100000 hashes
     ]
   where
     toHashes :: [Term] -> IS.IntSet
@@ -121,4 +120,4 @@ hashSimilarities paras =
         IS.fromAscList $ sort
         $ map hash $ toBigrams toks
     hashes :: [(ParagraphId, IS.IntSet)]
-    hashes = map (fmap toHashes) $ listStatus "hashes" 1000 paras
+    hashes = map (fmap toHashes) $ listStatus "hashes" 100000 paras
