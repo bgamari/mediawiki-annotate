@@ -1,12 +1,10 @@
 {-# LANGUAGE BangPatterns #-}
 
-import Data.Char
 import Data.Maybe
 import Data.Monoid
 import Data.List
 
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
 import qualified Data.Vector as V
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
@@ -16,17 +14,12 @@ import Control.Parallel.Strategies
 import System.IO
 import System.CPUTime
 
-import SimplIR.StopWords
-import NLP.Snowball
-
 --import Bloom.Naive
 import Bloom.Opt
 --import Bloom.IntSet
 import CAR.Types
 import CAR.Utils
-import Debug.Trace
-
-type Term = T.Text
+import Utils
 
 opts :: Parser (Double, FilePath, Maybe Int, Int, FilePath)
 opts = (,,,,)
@@ -71,16 +64,6 @@ treeDepth :: BloomTree -> Int
 treeDepth (Node _ children) = V.maximum (V.map treeDepth children) + 1
 treeDepth _ = 1
 
-chunksOf :: Int -> V.Vector a -> [V.Vector a]
-chunksOf n = go
-  where
-    go xs
-      | V.null xs       = []
-      | V.length xs < n = [xs]
-      | otherwise       =
-        let (a,b) = V.splitAt n xs
-        in a : go b
-
 main :: IO ()
 main = do
     (thresh, outputFile, maybeNumParas, fanout, parasFile) <- execParser $ info (helper <*> opts) mempty
@@ -109,19 +92,11 @@ main = do
     hFlush stderr
     hFlush stdout
 
-listStatus :: [a] -> [a]
-listStatus = go 0
-  where
-    go n (x:xs)
-      | n `mod` 100 == 0 = traceShow n (x : go (n+1) xs)
-      | otherwise         = x : go (n+1) xs
-    go _ [] = []
-
 treeSearch :: Double -> BloomTree -> V.Vector DedupPara -> [(ParagraphId, ParagraphId, Double)]
 treeSearch thresh bloomTree paras =
       foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j)
                                 | (dup, j) <- dups ])
-    $ listStatus
+    $ listStatus "search" 10000
     $ withStrategy (parBuffer 256 $ evalTuple2 rseq $ evalList rseq)
     $ map (\para -> (para, para `duplicates` bloomTree)) (V.toList paras)
   where
@@ -159,29 +134,6 @@ bruteForce thresh paras =
            , j >= thresh
            , j' >= thresh
            ]
-
-jaccard :: HS.HashSet (Term, Term) -> HS.HashSet (Term, Term) -> Double
-jaccard xs ys
-  | denom == 0 = 0
-  | otherwise  = num / denom
-  where
-    num = realToFrac $ HS.size (xs `HS.intersection` ys)
-    denom = realToFrac $ HS.size (xs `HS.union` ys)
-
-tokenise :: TL.Text -> [Term]
-tokenise =
-    stems English
-    . killStopwords enInquery
-    . map TL.toStrict
-    . TL.words
-    . TL.toCaseFold
-    . TL.filter (not . isPunctuation)
-
-toBigrams :: [Term] -> [(Term, Term)]
-toBigrams = mapMaybe f . tails
-  where
-    f (x:y:_) = Just (x,y)
-    f _ = Nothing
 
 testParagraphs :: [DedupPara]
 testParagraphs = zipWith toTestPara [1..]

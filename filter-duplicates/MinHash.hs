@@ -1,5 +1,6 @@
 import Data.Bits
 import Data.Char
+import Data.Foldable
 import Data.Monoid
 import Data.Maybe
 import Data.List
@@ -7,6 +8,7 @@ import Data.Hashable
 import Control.DeepSeq
 import Control.Monad (replicateM)
 import GHC.TypeLits
+import GHC.Conc
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -27,21 +29,28 @@ import NLP.Snowball
 import CAR.Types
 import CAR.Utils
 import qualified IntSet as IS
-
-import Debug.Trace
-
-type Term = T.Text
+import Utils
 
 newtype Bucket = Bucket Int
                deriving (Show, Ord, Eq)
 
 partitionParas :: KnownNat n => WordEmbedding n -> Projections n
-               -> [(ParagraphId, [Term])] -> M.Map Bucket [(ParagraphId, [Term])]
+               -> V.Vector (ParagraphId, [Term]) -> M.Map Bucket [(ParagraphId, [Term])]
 partitionParas embedding projs paras =
-    M.fromListWith (++)
-    [ (bucketForPara embedding projs toks, [(pid, toks)])
-    | (pid, toks) <- listStatus "partition" 10000 paras
-    ]
+    M.unionsWith (++)
+    $ withStrategy strat
+    $ map chunkToBuckets
+    $ chunksOf 10000 paras
+
+  where
+    chunkToBuckets :: V.Vector (ParagraphId, [Term]) -> M.Map Bucket [(ParagraphId, [Term])]
+    chunkToBuckets ps =
+        M.fromListWith (++)
+        [ (bucketForPara embedding projs toks, [(pid, toks)])
+        | (pid, toks) <- listStatus "partition" 10000 (V.toList ps)
+        ]
+    strat :: Strategy [M.Map Bucket [(ParagraphId, [Term])]]
+    strat = parBuffer 256 rseq
 
 type Projections n = [WordVec n]
 
@@ -66,38 +75,35 @@ opts = (,,)
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
 
-listStatus :: String -> Int -> [a] -> [a]
-listStatus str period = go 0 period
-  where
-    go m 0 (x:xs) = trace (str ++ ": "++show (period*m)) (x : go (m+1) period xs)
-    go m n (x:xs) = x : go m (n-1) xs
-    go _ _ []     = []
-
 main :: IO ()
 main = do
     (embeddingFile, thresh, parasFile) <- execParser $ info (helper <*> opts) mempty
 
-    paras <- decodeCborList <$> BSL.readFile parasFile
-    let paras' = [ (paraId para, toks)
-                 | para <- paras
-                 , let toks = tokenise $ paraToText para
-                 ]
-    rnf paras' `seq` putStrLn ("Read "++show (length paras')++" paragraphs")
+    let toTuple :: Paragraph -> (ParagraphId, [Term])
+        toTuple p = (paraId p, tokenise $ paraToText p)
+    setNumCapabilities 1
+    paras <- V.fromList . map toTuple . decodeCborList <$> BSL.readFile parasFile
+    putStrLn $ "Read "++show (V.length paras)++" paragraphs"
+    setNumCapabilities 30
 
     SomeWordEmbedding embedding <- readGlove embeddingFile
     projs <- randomProjections 10
     putStrLn "Read embeddings"
+
     let partitions :: M.Map Bucket [(ParagraphId, [Term])]
-        partitions = partitionParas embedding projs paras'
+        partitions = partitionParas embedding projs paras
     putStrLn "Bucket counts:"
     putStrLn $ unlines $ map (show . fmap length) $ M.toList partitions
 
-    let filterDuplicates ps =
+    let filterDuplicates :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId)]
+        filterDuplicates ps =
             [ (a, b)
             | (a, b, sim) <- minHashSimilarities ps
             , sim > thresh
             ]
-    print $ fmap filterDuplicates partitions
+    let duplicates :: [(ParagraphId, ParagraphId)]
+        duplicates = fold $ withStrategy (parTraversable rdeepseq) $ fmap filterDuplicates partitions
+    print duplicates
 
 minHashSimilarities :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId, Double)]
 minHashSimilarities paras =
@@ -120,18 +126,3 @@ minHashSimilarities paras =
         ]
     minHashes :: [(ParagraphId, IS.IntSet)]
     minHashes = map (fmap minHash) $ listStatus "minHash" 1000 paras
-
-tokenise :: TL.Text -> [Term]
-tokenise =
-    stems English
-    . killStopwords enInquery
-    . map TL.toStrict
-    . TL.words
-    . TL.toCaseFold
-    . TL.filter (not . isPunctuation)
-
-toBigrams :: [Term] -> [(Term, Term)]
-toBigrams = mapMaybe f . tails
-  where
-    f (x:y:_) = Just (x,y)
-    f _ = Nothing
