@@ -32,7 +32,8 @@ import CAR.Types
 import qualified SimplIR.Term as Term
 import AttriRank
 import Retrieve
-import GloveEmbedding
+import SimplIR.WordEmbedding
+import SimplIR.WordEmbedding.GloVe
 import ZScore (Attributes(..))
 
 

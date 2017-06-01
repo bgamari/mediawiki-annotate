@@ -43,7 +43,8 @@ import WriteRanking
 import Retrieve
 import GraphExpansion
 import GraphExpansionExperiments
-import GloveEmbedding
+import SimplIR.WordEmbedding
+import SimplIR.WordEmbedding.GloVe
 import ZScore
 
 data QuerySource = QueriesFromCbor FilePath
