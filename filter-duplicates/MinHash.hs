@@ -54,7 +54,8 @@ bucketForPara embedding projs toks =
         fromBits = Bucket . foldl' (.|.) 0 . zipWith toBit [0..]
           where
             toBit :: Int -> Bool -> Int
-            toBit n True = bit n
+            toBit n True  = bit n
+            toBit n False = 0
     in fromBits $ map (\p -> dotWordVecs v p > 1) projs
 
 opts :: Parser (FilePath, Double, FilePath)
