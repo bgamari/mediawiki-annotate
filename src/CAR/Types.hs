@@ -7,7 +7,7 @@
 
 module CAR.Types
     ( -- * Identifiers
-      PageName(..)
+      PageName(..), unpackPageName
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
@@ -79,6 +79,9 @@ instance ToJSONKey PageName where
 instance CBOR.Serialise SBS.ShortByteString where
     encode = CBOR.encode . SBS.fromShort
     decode = SBS.toShort <$> CBOR.decode   -- FIXME: copy
+
+unpackPageName :: PageName -> String
+unpackPageName (PageName t) = T.unpack t
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId Utf8.SmallUtf8
