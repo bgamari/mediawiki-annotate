@@ -1,6 +1,7 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnliftedFFITypes #-}
+{-# LANGUAGE BangPatterns #-}
 
 module Word1024 where
 
@@ -13,7 +14,7 @@ import Control.Monad.ST
 import Control.Monad.ST.Unsafe
 import Numeric
 
-data Word1024 = Word1024 ByteArray
+newtype Word1024 = Word1024 ByteArray
 
 instance Show Word1024 where
     showsPrec _ = showHex . word1024ToInteger
@@ -21,10 +22,13 @@ instance Show Word1024 where
 word1024ToInteger :: Word1024 -> Integer
 word1024ToInteger (Word1024 ba) = go 0 (word1024Bytes `div` 8 - 1)
   where
-    go accum (-1) = accum
-    go accum b =
-        let accum' = accum .|. (fromIntegral (indexByteArray ba b :: Word64) `shiftL` (64*b))
-        in go accum' (b-1)
+    go !accum (-1) = accum
+    go accum  b =
+        let v = fromIntegral (ba `indexByteArray` b :: Word64) `shiftL` (64*b)
+        in go (v .|. accum) (b-1)
+
+integerToWord1024 :: Integer -> Word1024
+integerToWord1024 w = fromBits $ filter (testBit w) [0..1023]
 
 word1024Bytes = 1024 `div` 8
 
