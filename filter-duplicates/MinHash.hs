@@ -89,6 +89,8 @@ main = do
     putStrLn "Read embeddings"
     let partitions :: M.Map Bucket [(ParagraphId, [Term])]
         partitions = partitionParas embedding projs paras'
+    putStrLn "Bucket counts:"
+    putStrLn $ unlines $ map (show . fmap length) $ M.toList partitions
 
     let filterDuplicates ps =
             [ (a, b)
@@ -117,9 +119,7 @@ minHashSimilarities paras =
         , salt <- salts
         ]
     minHashes :: [(ParagraphId, IS.IntSet)]
-    minHashes = [ (pid, minHash toks)
-                | (pid, toks) <- listStatus "minHash" 1000 paras
-                ]
+    minHashes = map (fmap minHash) $ listStatus "minHash" 1000 paras
 
 tokenise :: TL.Text -> [Term]
 tokenise =
