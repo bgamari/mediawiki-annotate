@@ -74,6 +74,7 @@ chunksOf :: Int -> V.Vector a -> [V.Vector a]
 chunksOf n = go
   where
     go xs
+      | V.null xs       = []
       | V.length xs < n = [xs]
       | otherwise       =
         let (a,b) = V.splitAt n xs
@@ -97,7 +98,7 @@ main = do
     tree `seq` putStrLn "Built tree"
     print $ treeDepth tree
     print $ V.length paras'
-    let xs = treeSearch thresh tree paras'
+    let xs = treeSearch thresh tree (maybe id V.take maybeNumParas $ paras')
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
     hFlush stderr
