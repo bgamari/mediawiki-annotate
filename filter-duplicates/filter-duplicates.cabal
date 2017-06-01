@@ -59,6 +59,27 @@ executable trec-car-rewrite-duplicates
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
 
+executable trec-car-minhash-duplicates
+  main-is:             MinHash.hs
+  other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
+  build-depends:       base >=4.9 && <4.10,
+                       hashable >=1.2 && <1.3,
+                       containers >= 0.5,
+                       deepseq >= 1.4,
+                       text >= 1.2,
+                       vector >= 0.12,
+                       parallel >= 3.2,
+                       snowball >= 1.0,
+                       mwc-random >= 0.13,
+                       unordered-containers >=0.2 && <0.3,
+                       bytestring >=0.10 && <0.11,
+                       optparse-applicative >= 0.13,
+                       simplir,
+                       simplir-word-embedding,
+                       trec-car-tools
+  ghc-options:         -rtsopts -threaded
+  default-language:    Haskell2010
+
 test-suite word1024-test
   type:                exitcode-stdio-1.0
   main-is:             Test.hs

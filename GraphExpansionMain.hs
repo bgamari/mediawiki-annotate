@@ -214,7 +214,7 @@ main = do
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
 
-    SomeWordEmbedding wordEmbeddings <- parseGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
+    SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
