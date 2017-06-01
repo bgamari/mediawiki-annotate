@@ -33,32 +33,35 @@ data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              , entityViewPathname :: SectionPath -> Maybe FilePath
                              , viewURL :: FilePath -> String
                              , maybePassageViewUrl :: SectionPath -> Maybe FilePath
+                             , maybeEntityViewUrl :: SectionPath -> Maybe FilePath
                              }
 
-fileNameLookupFactory :: (SectionPath -> Bool) -> FileNameLookup
-fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
+fileNameLookupFactory :: (SectionPath -> Bool) -> (SectionPath -> Bool) -> FileNameLookup
+fileNameLookupFactory existResultsForSectionpath  existEntityResultsForSectionpath = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"   -- todo I think switching from pageId to pageName get's rid of our url encoding issues
+       (unpackPageId pageId) </> "index" <.> "html"
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
---         escapeURIString isUnreserved (outlinePathname stub)  -- todo remove
       outlinePathname stub  -- do not percent encode filename, we leave this to the browser
 
     passageViewPathname :: SectionPath -> Maybe FilePath
-    passageViewPathname = viewPathname "psg"
+    passageViewPathname sectionpath = if existResultsForSectionpath sectionpath
+                                      then Just (viewPathname "psg" sectionpath)
+                                      else Nothing
 
     entityViewPathname :: SectionPath -> Maybe FilePath
-    entityViewPathname = viewPathname "entity"
+    entityViewPathname sectionpath = if existEntityResultsForSectionpath sectionpath
+                                          then Just (viewPathname "entity" sectionpath)
+                                          else Nothing
 
 
-    viewPathname ::  String -> SectionPath -> Maybe FilePath
-    viewPathname suffix sectionPath@(SectionPath page headings)
-        | existResultsForSectionpath sectionPath = Just (unpackPageId page </> sectionfilename <.> suffix <.> "html")
+    viewPathname ::  String -> SectionPath -> FilePath
+    viewPathname suffix sectionPath@(SectionPath page headings) =
+        unpackPageId page </> sectionfilename <.> suffix <.> "html"
         -- do not percent encode filename, we leave this to the browser
-        | otherwise = Nothing
       where
         sectionfilename =
           case headings of
@@ -70,7 +73,6 @@ fileNameLookupFactory existResultsForSectionpath  = FileNameLookup {..}
 
     viewURL :: FilePath -> String
     viewURL inputFile =
---         escapeURIString isUnreserved inputFile    -- todo remove
            inputFile
 
     maybePassageViewUrl sectionPath = fmap viewURL (passageViewPathname sectionPath)
