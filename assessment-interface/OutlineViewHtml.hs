@@ -28,7 +28,6 @@ import FileNameLookup
 
 outlineToHtml :: FileNameLookup -> Stub -> H.Html
 outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docTypeHtml $ do
-
     H.head prologue
     H.body $ do
         H.h1 $ "Title "
@@ -37,34 +36,38 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
 
         H.div $ do
             H.p $ do
+                  "Back to "
+                  H.a ! HA.href "../" $ "Topic List"
+            H.p "Click on heading for passage-level assessments."
+
+            H.p $ do
                 let sectionPath = SectionPath pageId []
                 let maybeFileURL = maybePassageViewUrl sectionPath
                 let maybeEntityFileURL = maybeEntityViewUrl sectionPath
 
                 H.span ! HA.class_ "heading"  $ do
                     toHtml (getPageName pageName)
-                    wrapHyperlink maybeFileURL "psg"
-                    " &nbsp; "
-                    wrapHyperlink maybeEntityFileURL "entity"
---                   "List article "
---                   H.a ! HA.href "index-article.entity.html" $ "entities"
---                   " / "
---                   H.a ! HA.href "index-article.psg.html" $ "passages"
-            H.p $ do
-                  "Back to "
-                  H.a ! HA.href "../" $ "Topic List"
-            H.p "Click on heading for passage-level assessments."
+                    nbsp
+                    optHyperlink maybeFileURL "psg"
+                    nbsp
+                    optHyperlink maybeEntityFileURL "entity"
 
 
         H.div $ do
             H.ol $ mapM_ (H.li . (renderHtml [])) skeleta
 
   where
+    nbsp = H.preEscapedText " &nbsp; "
     wrapHyperlink :: (Maybe FilePath) -> H.Html -> H.Html
     wrapHyperlink maybeFileURL html =
         case maybeFileURL of
           Just fileURL -> H.a ! HA.href (H.stringValue $ "../" <> fileURL) $ html
           Nothing -> html
+    optHyperlink :: (Maybe FilePath) -> H.Html -> H.Html
+    optHyperlink maybeFileURL html =
+        case maybeFileURL of
+          Just fileURL -> H.a ! HA.href (H.stringValue $ "../" <> fileURL) $ html
+          Nothing -> ""
 
     renderHtml :: [HeadingId] -> PageSkeleton -> H.Html
     renderHtml headingPath (Para _) = mempty
@@ -77,8 +80,9 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
 
         H.span ! HA.class_ "heading"  $ do
             H.toHtml $ getSectionHeading sectionHeading
-            wrapHyperlink maybeFileURL  "psg"
-            " &nbsp; "
-            wrapHyperlink maybeEntityFileURL "entity"
+            nbsp
+            optHyperlink maybeFileURL  "psg"
+            nbsp
+            optHyperlink maybeEntityFileURL "entity"
             H.ol $ mapM_ (H.li . (renderHtml headingPath' ) ) children
 
