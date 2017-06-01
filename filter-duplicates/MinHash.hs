@@ -6,7 +6,7 @@ import Data.List
 import Data.Hashable
 import Control.DeepSeq
 import Control.Monad (replicateM)
-import GHC.TypeNats
+import GHC.TypeLits
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
