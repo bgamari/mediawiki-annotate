@@ -99,31 +99,26 @@ main = do
     let filterDuplicates :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId)]
         filterDuplicates ps =
             [ (a, b)
-            | (a, b, sim) <- minHashSimilarities ps
+            | (a, b, sim) <- hashSimilarities ps
             , sim > thresh
             ]
     let duplicates :: [(ParagraphId, ParagraphId)]
         duplicates = fold $ withStrategy (parTraversable rdeepseq) $ fmap filterDuplicates partitions
     print duplicates
 
-minHashSimilarities :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId, Double)]
-minHashSimilarities paras =
+hashSimilarities :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId, Double)]
+hashSimilarities paras =
     [ (pid1, pid2, sim)
-    | (pid1, s1) <- listStatus "test" 100 minHashes
-    , (pid2, s2) <- minHashes
+    | (pid1, s1) <- listStatus "test" 100 hashes
+    , (pid2, s2) <- hashes
     , let (denom, num) = IS.unionIntersectSize s1 s2
           sim = realToFrac num / realToFrac denom
     , pid1 < pid2
     ]
   where
-    k = 200
-    salts = [56, 77]
-    minHash :: [Term] -> IS.IntSet
-    minHash toks =
-        IS.fromAscList $ take k $ sort
-        [ hashWithSalt salt bigram
-        | bigram <- toBigrams toks
-        , salt <- salts
-        ]
-    minHashes :: [(ParagraphId, IS.IntSet)]
-    minHashes = map (fmap minHash) $ listStatus "minHash" 1000 paras
+    toHashes :: [Term] -> IS.IntSet
+    toHashes toks =
+        IS.fromAscList $ sort
+        $ map hash $ toBigrams toks
+    hashes :: [(ParagraphId, IS.IntSet)]
+    hashes = map (fmap toHashes) $ listStatus "hashes" 1000 paras
