@@ -28,6 +28,8 @@ import CAR.Types
 import CAR.Utils
 import qualified IntSet as IS
 
+import Debug.Trace
+
 type Term = T.Text
 
 newtype Bucket = Bucket Int
@@ -38,7 +40,7 @@ partitionParas :: KnownNat n => WordEmbedding n -> Projections n
 partitionParas embedding projs paras =
     M.fromListWith (++)
     [ (bucketForPara embedding projs toks, [(pid, toks)])
-    | (pid, toks) <- paras
+    | (pid, toks) <- listStatus "partition" 10000 paras
     ]
 
 type Projections n = [WordVec n]
@@ -63,6 +65,13 @@ opts = (,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
+
+listStatus :: String -> Int -> [a] -> [a]
+listStatus str period = go 0 period
+  where
+    go m 0 (x:xs) = trace (str ++ ": "++show (period*m)) (x : go (m+1) period xs)
+    go m n (x:xs) = x : go m (n-1) xs
+    go _ _ []     = []
 
 main :: IO ()
 main = do
@@ -89,7 +98,7 @@ main = do
 minHashSimilarities :: [(ParagraphId, [Term])] -> [(ParagraphId, ParagraphId, Double)]
 minHashSimilarities paras =
     [ (pid1, pid2, sim)
-    | (pid1, s1) <- minHashes
+    | (pid1, s1) <- listStatus "test" 100 minHashes
     , (pid2, s2) <- minHashes
     , let (denom, num) = IS.unionIntersectSize s1 s2
           sim = realToFrac num / realToFrac denom
@@ -107,7 +116,7 @@ minHashSimilarities paras =
         ]
     minHashes :: [(ParagraphId, IS.IntSet)]
     minHashes = [ (pid, minHash toks)
-                | (pid, toks) <- paras
+                | (pid, toks) <- listStatus "minHash" 1000 paras
                 ]
 
 tokenise :: TL.Text -> [Term]
