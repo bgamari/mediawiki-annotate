@@ -27,9 +27,8 @@ module CAR.Types
     , LinkStyle
     , withLink, anchorOnly
       -- * Miscellaneous Utilities
-    , decodeCborList
-    , encodeCborList
-    , writeCborList
+    , decodeCborList, readCborList
+    , encodeCborList, writeCborList
     ) where
 
 import Data.Foldable
@@ -193,6 +192,9 @@ decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
               rest <- unsafeInterleaveST $ start (bs : bss)
               return (x : rest)
           (CBOR.Fail _rest _ err, _) -> error $ show err
+
+readCborList :: CBOR.Serialise a => FilePath -> IO [a]
+readCborList path = decodeCborList <$> BSL.readFile path
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
