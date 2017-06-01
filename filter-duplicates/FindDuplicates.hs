@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 import Data.Char
 import Data.Maybe
 import Data.Monoid
@@ -8,17 +10,20 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Vector as V
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Short as BSS
 import Options.Applicative
 import Control.Parallel.Strategies
+import System.IO
 
 import SimplIR.StopWords
 import NLP.Snowball
 
-import Bloom.Naive
---import Bloom.Opt
+--import Bloom.Naive
+import Bloom.Opt
+--import Bloom.IntSet
 import CAR.Types
 import CAR.Utils
-
+import Debug.Trace
 
 type Term = T.Text
 
@@ -39,6 +44,11 @@ data DedupPara = DedupPara { dedupParaId     :: !ParagraphId
                            , dedupParaTokens :: [Term]
                            }
                deriving (Show)
+
+toDedupPara :: ParagraphId -> [Term] -> DedupPara
+toDedupPara pid toks =
+    --traceShow (pid, toks, toBloom $ toBigrams toks) $
+    DedupPara pid (toBloom $ toBigrams toks) toks
 
 parasToBloomTree :: Int -> V.Vector DedupPara -> BloomTree
 parasToBloomTree fanout = go . V.map Leaf
@@ -77,42 +87,59 @@ main = do
     let paras' :: V.Vector DedupPara
         paras' =
             V.fromList
-            [ DedupPara (paraId para) (toBloom $ toBigrams toks) toks
+            [ toDedupPara (paraId para) toks
             | para <- paras
             , let toks = tokenise $ paraToText para
             ]
+    --let paras' = V.fromList testParagraphs
 
     let tree = parasToBloomTree fanout paras'
     tree `seq` putStrLn "Built tree"
     print $ treeDepth tree
+    print $ V.length paras'
     let xs = treeSearch thresh tree paras'
     writeFile outputFile $ show [ (a,b) | (a,b,_) <- xs ]
     putStrLn "ich habe fertig"
+    hFlush stderr
+    hFlush stdout
+
+listStatus :: [a] -> [a]
+listStatus = go 0
+  where
+    go n (x:xs)
+      | n `mod` 100 == 0 = traceShow n (x : go (n+1) xs)
+      | otherwise         = x : go (n+1) xs
+    go _ [] = []
 
 treeSearch :: Double -> BloomTree -> V.Vector DedupPara -> [(ParagraphId, ParagraphId, Double)]
 treeSearch thresh bloomTree paras =
       foldMap (\(para, dups) -> [ (dedupParaId para, dedupParaId dup, j)
                                 | (dup, j) <- dups ])
+    $ listStatus
     $ withStrategy (parBuffer 256 $ evalTuple2 rseq $ evalList rseq)
     $ map (\para -> (para, para `duplicates` bloomTree)) (V.toList paras)
   where
+    traceShow _ x = x
+
     duplicates :: DedupPara -> BloomTree -> [(DedupPara, Double)]
-    duplicates (DedupPara pid0 b0 terms0) = go
+    duplicates (DedupPara pid0 b0 terms0) = traceShow ("go", pid0) . go 0
       where
         bigrams0 = HS.fromList $ toBigrams terms0
 
-        go :: BloomTree -> [(DedupPara, Double)]
-        go (Leaf p@(DedupPara pid b terms))
-          | bloomJaccard b0 b > thresh
+        go :: Int -> BloomTree -> [(DedupPara, Double)]
+        go !i (Leaf p@(DedupPara pid b terms))
+          | traceShow ("test0", bloomJaccard b0 b, pid) $ bloomJaccard b0 b > thresh
           , pid0 < pid
           , let j = jaccard bigrams0 (HS.fromList $ toBigrams terms)
-          , j > thresh
-          = [(p, j)]
-        go (Node b children)
-          | approxJaccard > thresh
-          = foldMap go children
+          , traceShow ("test", j) $ j > thresh
+          = traceShow ("hit", i)
+            [(p, j)]
+        go i (Node b children)
+          | traceShow ("node", approxJaccard) $ approxJaccard > thresh
+          = traceShow ("node", i, approxJaccard) $
+            foldMap (go (i+1)) children
           where approxJaccard = boundedJaccard b0 b
-        go _ = []
+        go i _ = []
 
 bruteForce :: Double -> V.Vector DedupPara
            -> IO [(ParagraphId, ParagraphId, Double, Double)]
@@ -150,3 +177,15 @@ toBigrams = mapMaybe f . tails
     f (x:y:_) = Just (x,y)
     f _ = Nothing
 
+testParagraphs :: [DedupPara]
+testParagraphs = zipWith toTestPara [1..]
+    [ "love hate love hate"
+    , "love hate love love"
+    , "love chip date love"
+    , "chip date love love"
+    ]
+  where
+    toTestPara n t = toDedupPara pid toks
+      where
+        pid = ParagraphId $ BSS.pack $ map (fromIntegral . ord) $ "test-"++show n
+        toks = map T.pack $ words t
