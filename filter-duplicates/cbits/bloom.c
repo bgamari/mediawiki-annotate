@@ -4,6 +4,8 @@
 
 #define BITS 1024
 
+typedef __m256i word1024[4] __attribute__((aligned(64)));
+
 // slow and possibly broken
 // #define AVX
 
@@ -17,13 +19,14 @@ void and_word1024(__m256i *a, const __m256i *b) {
     a[i] = _mm256_and_si256(a[i], b[i]);
 }
 
-bool eq_word1024(__m256i *a, __m256i *b) {
+bool eq_word1024(const __m256i *a, const __m256i *b) {
   uint64_t *aa = (uint64_t *) a;
   uint64_t *bb = (uint64_t *) b;
+  bool ret = true;
   for (int i=0; i < BITS / 64; i++) {
-    if (aa[i] != bb[i]) return false;
+    ret &= aa[i] == bb[i];
   }
-  return true;
+  return ret;
 
   //__m256i mask = _mm256_setzero_si256();
   //return
