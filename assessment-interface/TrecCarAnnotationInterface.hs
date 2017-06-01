@@ -226,11 +226,8 @@ main = do
 
     -- ========================================================
 
-    let fileNameLookup = fileNameLookupFactory existResultsForSectionpath
-         where
-           existResultsForSectionpath :: SectionPath -> Bool
-           existResultsForSectionpath path =
-              isJust (lookupResult path) || isJust (lookupResultEntity path)
+    let fileNameLookup = fileNameLookupFactory (isJust . lookupResult) (isJust . lookupResultEntity)
+
 
     let wrapDestDir :: FilePath -> IO FilePath
         wrapDestDir filePath = do
