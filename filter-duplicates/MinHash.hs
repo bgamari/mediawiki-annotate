@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveTraversable #-}
+
 import Data.Bits
 import Data.Char
 import Data.Foldable
@@ -34,24 +36,34 @@ import Utils
 newtype Bucket = Bucket Integer
                deriving (Show, Ord, Eq)
 
+data Bag a = None
+           | One a
+           | Two (Bag a) (Bag a)
+           deriving (Functor, Foldable, Traversable)
+
+instance Monoid (Bag a) where
+    mempty = None
+    mappend = Two
+
 partitionParas :: KnownNat n => WordEmbedding n -> Projections n
                -> V.Vector (ParagraphId, [Term]) -> M.Map Bucket [(ParagraphId, [Term])]
 partitionParas embedding projs paras =
-    M.unionsWith (++)
+    fmap toList
+    $ M.unionsWith (<>)
     $ listStatus "partition" 10
     $ withStrategy strat
     $ map chunkToBuckets
     $ chunksOf 10000 paras
 
   where
-    chunkToBuckets :: V.Vector (ParagraphId, [Term]) -> M.Map Bucket [(ParagraphId, [Term])]
+    chunkToBuckets :: V.Vector (ParagraphId, [Term]) -> M.Map Bucket (Bag (ParagraphId, [Term]))
     chunkToBuckets ps =
-        M.fromListWith (++)
-        [ (bucketForPara embedding projs toks, [(pid, toks)])
+        M.fromListWith (<>)
+        [ (bucketForPara embedding projs toks, One (pid, toks))
         | (pid, toks) <- V.toList ps
         ]
-    strat :: Strategy [M.Map Bucket [(ParagraphId, [Term])]]
-    strat = parBuffer 256 rseq
+    strat :: Strategy [M.Map Bucket (Bag (ParagraphId, [Term]))]
+    strat = parBuffer 256 $ evalTraversable $ evalTraversable r0
 
 type Projections n = [WordVec n]
 
