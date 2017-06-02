@@ -82,15 +82,16 @@ bucketForPara embedding projs toks =
             toBit n False = 0
     in fromBits $ map (\p -> dotWordVecs v p > 1) projs
 
-opts :: Parser (FilePath, Double, FilePath)
-opts = (,,)
+opts :: Parser (FilePath, Double, FilePath, FilePath)
+opts = (,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
+    <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
 
 main :: IO ()
 main = do
-    (embeddingFile, thresh, parasFile) <- execParser $ info (helper <*> opts) mempty
+    (embeddingFile, thresh, outputFile, parasFile) <- execParser $ info (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
         toTuple p = (paraId p, tokenise $ paraToText p)
@@ -113,7 +114,7 @@ main = do
     let duplicates :: [(ParagraphId, ParagraphId)]
         duplicates = concat $ withStrategy (parBuffer 1024 rdeepseq)
                      $ concat $ M.elems $ fmap (hashSimilarities thresh) partitions
-    writeFile "duplicates" $ show duplicates
+    writeFile outputFile $ show duplicates
 
 hashSimilarities :: Double -> [(ParagraphId, [Term])] -> [[(ParagraphId, ParagraphId)]]
 hashSimilarities thresh paras =
