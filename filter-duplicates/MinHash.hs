@@ -139,7 +139,8 @@ main = do
     putStrLn $ unlines $ map show $ parMap rseq (fmap length) $ M.toList partitions
 
     let duplicates :: [(ParagraphId, ParagraphId)]
-        duplicates = concat $ listStatus "dup-chunk" 1000 $ withStrategy (parBuffer 10024 rdeepseq)
+        duplicates = concat
+                     $ listStatus "dup-chunk" 1 $ withStrategy (parList rdeepseq)
                      $ foldMap (hashSimilarities thresh) $ M.elems partitions
     writeFile outputFile $ show duplicates
 
@@ -153,7 +154,7 @@ hashSimilarities thresh paras =
             sim = realToFrac num / realToFrac denom
       , sim > thresh
       ]
-    | chunk <- chunksOf 100 hashes
+    | chunk <- chunksOf 10000 hashes
     ]
   where
     toHashes :: [Term] -> IS.IntSet
