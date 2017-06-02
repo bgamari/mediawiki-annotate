@@ -89,16 +89,18 @@ bucketForPara projs v =
             toBit n False = 0
     in fromBits $ map (\p -> dotWordVecs v p > 1) projs
 
-opts :: Parser (FilePath, Double, FilePath, FilePath)
-opts = (,,,)
+opts :: Parser (FilePath, Double, Int, FilePath, FilePath)
+opts = (,,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
+    <*> option auto (long "projections" <> metavar "N" <> help "number of splitting hyperplanes for partitioning" <> value 10)
     <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
 
 main :: IO ()
 main = do
-    (embeddingFile, thresh, outputFile, parasFile) <- execParser $ info (helper <*> opts) mempty
+    (embeddingFile, thresh, nProjections, outputFile, parasFile) <-
+        execParser $ info (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
         toTuple p = (paraId p, tokenise $ paraToText p)
@@ -108,7 +110,7 @@ main = do
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readGlove embeddingFile
-    projs <- randomProjections 10
+    projs <- randomProjections nProjections
     putStrLn "Read embeddings"
     setNumCapabilities ncaps
 
