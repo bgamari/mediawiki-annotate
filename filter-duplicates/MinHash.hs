@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE BangPatterns #-}
 
 import Data.Bits
 import Data.Char
@@ -103,14 +104,14 @@ main = do
         toTuple p = (paraId p, tokenise $ paraToText p)
     ncaps <- getNumCapabilities
     setNumCapabilities 1
-    paras <- V.fromList . listStatus "read" 100000 . map toTuple . take 1000000 . decodeCborList <$> BSL.readFile parasFile
+    paras <- V.fromList . listStatus "read" 100000 . map toTuple . decodeCborList <$> BSL.readFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readGlove embeddingFile
     projs <- randomProjections 10
     putStrLn "Read embeddings"
-
     setNumCapabilities ncaps
+
     let embeddedParas :: V.Vector (ParagraphId, [Term], WordVec n)
         embeddedParas = V.map embed uncenteredParas
           where
@@ -122,7 +123,7 @@ main = do
           where
             embed (pid, terms) = (pid, terms, embedTerms embedding terms)
 
-        embeddingMean =
+        !embeddingMean =
             scaleWordVec (recip $ realToFrac $ V.length paras)
             $ sumWordVecs
             $ withStrategy (parBuffer 256 rseq)
@@ -131,24 +132,26 @@ main = do
     print $ wordVecElems embeddingMean
 
     let partitions :: M.Map Bucket (V.Vector (ParagraphId, [Term]))
-        partitions = partitionParas projs embeddedParas
+        !partitions = partitionParas projs embeddedParas
     putStrLn "Bucket counts:"
     putStrLn $ unlines $ map show $ parMap rseq (fmap length) $ M.toList partitions
 
     let duplicates :: [(ParagraphId, ParagraphId)]
-        duplicates = concat $ listStatus "dup-chunk" 100000 $ withStrategy (parBuffer 1024 rdeepseq)
-                     $ concat $ M.elems $ fmap (hashSimilarities thresh) partitions
+        duplicates = concat $ listStatus "dup-chunk" 1000 $ withStrategy (parBuffer 10024 rdeepseq)
+                     $ foldMap (hashSimilarities thresh) $ M.elems partitions
     writeFile outputFile $ show duplicates
 
+-- | Break into chunks which we will parallelise over
 hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
 hashSimilarities thresh paras =
     [ [ (pid1, pid2)
-      | (pid2, s2) <- takeWhile (\(pid,_) -> pid < pid1) $ V.toList hashes
+      | (pid1, s1) <- V.toList chunk
+      , (pid2, s2) <- takeWhile (\(pid,_) -> pid < pid1) $ V.toList hashes
       , let (denom, num) = IS.unionIntersectSize s1 s2
             sim = realToFrac num / realToFrac denom
       , sim > thresh
       ]
-    | (pid1, s1) <- listStatus "test" 100000 $ V.toList hashes
+    | chunk <- chunksOf 100 hashes
     ]
   where
     toHashes :: [Term] -> IS.IntSet
@@ -156,4 +159,4 @@ hashSimilarities thresh paras =
         IS.fromAscList $ sort
         $ map hash $ toBigrams toks
     hashes :: V.Vector (ParagraphId, IS.IntSet)
-    hashes = fmap (fmap toHashes) paras
+    !hashes = fmap (fmap toHashes) paras
