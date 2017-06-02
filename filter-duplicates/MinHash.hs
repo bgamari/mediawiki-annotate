@@ -103,7 +103,7 @@ main = do
         toTuple p = (paraId p, tokenise $ paraToText p)
     ncaps <- getNumCapabilities
     setNumCapabilities 1
-    paras <- V.fromList . listStatus "read" 100000 . map toTuple . take 100000 . decodeCborList <$> BSL.readFile parasFile
+    paras <- V.fromList . listStatus "read" 100000 . map toTuple . take 1000000 . decodeCborList <$> BSL.readFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readGlove embeddingFile
@@ -112,15 +112,22 @@ main = do
 
     setNumCapabilities ncaps
     let embeddedParas :: V.Vector (ParagraphId, [Term], WordVec n)
-        embeddedParas = V.map embed paras
+        embeddedParas = V.map embed uncenteredParas
           where
-            embed (pid, terms) =
-                let v = subtractWordVec embeddingMean $ embedTerms embedding terms
-                in (pid, terms, v)
+            embed (pid, terms, v) =
+                (pid, terms, subtractWordVec embeddingMean v)
+
+        uncenteredParas :: V.Vector (ParagraphId, [Term], WordVec n)
+        uncenteredParas = V.map embed paras
+          where
+            embed (pid, terms) = (pid, terms, embedTerms embedding terms)
 
         embeddingMean =
             scaleWordVec (recip $ realToFrac $ V.length paras)
-            $ sumWordVecs $ map (embedTerms embedding . snd) $ V.toList paras
+            $ sumWordVecs
+            $ withStrategy (parBuffer 256 rseq)
+            $ map (sumWordVecs . map (\(_,_,v) -> v) . V.toList)
+            $ chunksOf 100000 uncenteredParas
     print $ wordVecElems embeddingMean
 
     let partitions :: M.Map Bucket (V.Vector (ParagraphId, [Term]))
@@ -129,7 +136,7 @@ main = do
     putStrLn $ unlines $ map show $ parMap rseq (fmap length) $ M.toList partitions
 
     let duplicates :: [(ParagraphId, ParagraphId)]
-        duplicates = concat $ listStatus "dup-chunk" 1 $ withStrategy (parBuffer 1024 rdeepseq)
+        duplicates = concat $ listStatus "dup-chunk" 100000 $ withStrategy (parBuffer 1024 rdeepseq)
                      $ concat $ M.elems $ fmap (hashSimilarities thresh) partitions
     writeFile outputFile $ show duplicates
 
