@@ -68,6 +68,7 @@ executable trec-car-minhash-duplicates
                        deepseq >= 1.4,
                        text >= 1.2,
                        vector >= 0.12,
+                       vector-algorithms,
                        parallel >= 3.2,
                        snowball >= 1.0,
                        mwc-random >= 0.13,
