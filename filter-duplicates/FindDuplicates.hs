@@ -1,8 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 
-import Data.Maybe
+import Data.Char
 import Data.Monoid
-import Data.List
 
 import qualified Data.Text as T
 import qualified Data.Vector as V
