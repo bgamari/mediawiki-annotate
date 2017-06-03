@@ -36,6 +36,8 @@ import CAR.Utils
 import qualified IntSet as IS
 import Utils
 
+-- | Identifier of a bucket (think: fingerprint by which paragraphs are
+-- bucketized)
 newtype Bucket = Bucket Integer
                deriving (Show, Ord, Eq)
 
@@ -48,6 +50,8 @@ instance Monoid (Bag a) where
     mempty = None
     mappend = Two
 
+-- | Partition paragraphs into buckets via random projections of the accumulated
+-- word embedding vector.
 partitionParas :: forall n. KnownNat n => Projections n
                -> V.Vector (ParagraphId, [Term], WordVec n)
                -> M.Map Bucket (V.Vector (ParagraphId, [Term]))
@@ -79,6 +83,9 @@ randomProjections :: KnownNat n => Int -> IO (Projections n)
 randomProjections nProjs = withSystemRandom $ asGenST $ \gen -> do
     replicateM nProjs $ generateWordVec (const $ fmap realToFrac $ standard gen)
 
+-- | Given a list of projections of an n-dimensional embedding space and a word
+-- vector (such as accumulated word vectors of word in a paragraph), compute the
+-- 'Bucket' to which the vector belongs.
 bucketForPara :: KnownNat n => Projections n -> WordVec n -> Bucket
 bucketForPara projs v =
     let fromBits :: [Bool] -> Bucket
@@ -143,22 +150,26 @@ main = do
                      $ foldMap (hashSimilarities thresh) $ M.elems partitions
     writeFile outputFile $ show duplicates
 
--- | Break into chunks which we will parallelise over
+-- | For all elements of a given bucket, compute the similarity and chunks which
+-- we will parallelise pair-wise similarity computation over. (paras are all from
+-- the same bucket). Only pairs with sufficintly high jaccard will be returned.
+-- (Needs final testing on real bigrams)
 hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
 hashSimilarities thresh paras =
     [ [ (pid1, pid2)
-      | (pid1, s1) <- V.toList chunk
-      , (pid2, s2) <- takeWhile (\(pid,_) -> pid < pid1) $ V.toList hashes
-      , let (denom, num) = IS.unionIntersectSize s1 s2
+      | (pid1, bigrams1) <- V.toList chunk
+      , (pid2, bigrams2) <- takeWhile (\(pid,_) -> pid < pid1) $ V.toList bigramHashes
+      , let (denom, num) = IS.unionIntersectSize bigrams1 bigrams2
             sim = realToFrac num / realToFrac denom
       , sim > thresh
       ]
-    | chunk <- chunksOf 100 hashes
+    | chunk <- chunksOf 100 bigramHashes
     ]
   where
-    toHashes :: [Term] -> IS.IntSet
-    toHashes toks =
+    toBigramHashes :: [Term] -> IS.IntSet
+    toBigramHashes toks =
         IS.fromAscList $ sort
         $ map hash $ toBigrams toks
-    hashes :: V.Vector (ParagraphId, IS.IntSet)
-    !hashes = fmap (fmap toHashes) paras
+    -- for each paragraph: bigrams are hashed onto integers
+    bigramHashes :: V.Vector (ParagraphId, IS.IntSet)
+    !bigramHashes = fmap (fmap toBigramHashes) paras
