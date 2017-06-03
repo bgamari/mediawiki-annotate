@@ -20,6 +20,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Algorithms.Intro as Sort
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as M
+import qualified Data.HashSet as HS
 import Options.Applicative
 import Control.Parallel.Strategies
 import System.CPUTime
@@ -120,22 +121,25 @@ centerWordEmbedding uncenteredParas =
 hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
 hashSimilarities thresh paras =
     [ [ (pid1, pid2)
-      | (pid1, bigrams1) <- V.toList chunk
-      , (pid2, bigrams2) <- takeWhile (\(pid,_) -> pid < pid1) $ V.toList bigramHashes
+      | (pid1, toks1, bigrams1) <- V.toList chunk
+      , (pid2, toks2, bigrams2) <- takeWhile (\(pid,_,_) -> pid < pid1) $ V.toList bigramHashes
       , let (denom, num) = IS.unionIntersectSize bigrams1 bigrams2
             sim = realToFrac num / realToFrac denom
       , sim > thresh
+      , let realSim = jaccard (HS.fromList $ toBigrams toks1) (HS.fromList $ toBigrams toks2)
+      , realSim > thresh
       ]
     | chunk <- chunksOf 100 bigramHashes
     ]
   where
-    toBigramHashes :: [Term] -> IS.IntSet
-    toBigramHashes toks =
-        IS.fromAscList $ sort
-        $ map hash $ toBigrams toks
+    toBigramHashes :: (ParagraphId, [Term]) -> (ParagraphId, [Term], IS.IntSet)
+    toBigramHashes (pid, toks) =
+        let hashes =
+              IS.fromAscList $ sort $ map hash $ toBigrams toks
+        in (pid, toks, hashes)
     -- for each paragraph: bigrams are hashed onto integers
-    bigramHashes :: V.Vector (ParagraphId, IS.IntSet)
-    !bigramHashes = fmap (fmap toBigramHashes) paras
+    bigramHashes :: V.Vector (ParagraphId, [Term], IS.IntSet)
+    !bigramHashes = fmap toBigramHashes paras
 
 
 opts :: Parser (FilePath, Double, Int, FilePath, FilePath)
