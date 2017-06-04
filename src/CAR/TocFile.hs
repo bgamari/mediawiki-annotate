@@ -5,9 +5,10 @@ module CAR.TocFile
     ( IndexedCborPath(..)
     , IndexedCbor
       -- * Building index
-    , buildIndex
+    , createIndex
       -- * Opening index
     , open
+    , openInMem
       -- * Queries
     , lookup
     , toList
@@ -60,18 +61,23 @@ readValuesWithOffsets = \bs -> runST $ start 0 $ BSL.toChunks bs
               return $ (startOff, x) : rest
           (CBOR.Fail _rest _ err, _)   -> error $ show err
 
-data IndexedCborPath i a = IndexedCborPath FilePath
-                         deriving (Show)
+newtype IndexedCborPath i a = IndexedCborPath FilePath
+                            deriving (Show)
 
-buildIndex :: (Hashable i, Eq i, CBOR.Serialise i, CBOR.Serialise a)
-           => (a -> i) -> FilePath -> IO (IndexedCborPath i a)
+buildIndex :: (Hashable i, Eq i, CBOR.Serialise a)
+           => (a -> i) -> FilePath -> IO (HM.HashMap i Offset)
 buildIndex toIndex path = do
     xs <- readValuesWithOffsets <$> BSL.readFile path
     let addElem acc (offset, x) = HM.insert (toIndex x) offset acc
-        toc = foldl' addElem mempty xs
-        tocPath = path <.> "toc"
+    return $ foldl' addElem mempty xs
+
+createIndex :: (Hashable i, Eq i, CBOR.Serialise i, CBOR.Serialise a)
+           => (a -> i) -> FilePath -> IO (IndexedCborPath i a)
+createIndex toIndex path = do
+    toc <- buildIndex toIndex path
     BSL.writeFile tocPath $ CBOR.serialise toc
     return $ IndexedCborPath path
+  where tocPath = path <.> "toc"
 
 data IndexedCbor i a = IndexedCbor (HM.HashMap i Offset) BS.ByteString String
 
@@ -86,6 +92,14 @@ open (IndexedCborPath fname) = do
     onError err =
         error $ "Deserialisation error while deserialising TOC "++show tocName++": "++show err
     tocName = fname <.> "toc"
+
+-- | Build a TOC in-memory
+openInMem :: (Hashable i, Eq i, CBOR.Serialise a)
+          => (a -> i) -> FilePath -> IO (IndexedCbor i a)
+openInMem toIndex fname = do
+    cbor <- mmapFileByteString fname Nothing
+    toc <- buildIndex toIndex fname
+    return $ IndexedCbor toc cbor fname
 
 lookup :: (Hashable i, Eq i, CBOR.Serialise a)
        => i -> IndexedCbor i a -> Maybe a
