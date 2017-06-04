@@ -19,3 +19,6 @@
 [submodule "assessment-interface/annotation"]
 	path = assessment-interface/annotation
 	url = git://github.com/bgamari/annotation
+[submodule "vendor/intset"]
+	path = vendor/intset
+	url = git://github.com/bgamari/intset
