@@ -11,6 +11,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
 import Control.Parallel.Strategies
 
+import CAR.Types
 import SimplIR.StopWords
 import NLP.Snowball
 
@@ -59,3 +60,9 @@ jaccard xs ys
 parVectorChunksOf :: Int -> Strategy (V.Vector a) -> Strategy (V.Vector a)
 parVectorChunksOf chunkSz s =
     \v -> V.fromListN (V.length v) . foldMap V.toList <$> evalList s (chunksOf chunkSz v)
+
+parseDuplicates :: String -> [(ParagraphId, ParagraphId)]
+parseDuplicates = map (toPair . words) . filter (not . null) . lines
+  where
+    toPair [a,b] = (packParagraphId a, packParagraphId b)
+    toPair x = error $ "parseDuplicates: "++show x

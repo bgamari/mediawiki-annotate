@@ -10,6 +10,7 @@ import Options.Applicative
 import CAR.CarExports
 import CAR.Types
 import ConnectedComponent
+import Utils
 
 opts :: Parser (FilePath, FilePath, FilePath)
 opts = (,,)
@@ -21,7 +22,7 @@ main :: IO ()
 main = do
     (outputFile, duplicatesFile, inputFile) <- execParser $ info (helper <*> opts) mempty
 
-    edges <- read <$> readFile duplicatesFile
+    edges <- parseDuplicates <$> readFile duplicatesFile
     let ccs = connectedComponents [ Edge a b | (a, b) <- edges ]
 
         rewriteIds :: HM.HashMap ParagraphId ParagraphId
