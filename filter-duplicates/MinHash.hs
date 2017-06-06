@@ -184,4 +184,5 @@ main = do
     let duplicates :: [(ParagraphId, ParagraphId)]
         duplicates = concat $ listStatus "dup-chunk" 1000 $ withStrategy (parBuffer 1024 rdeepseq)
                      $ foldMap (hashSimilarities thresh) $ M.elems partitions
-    writeFile outputFile $ show duplicates
+    writeFile outputFile $ unlines [ unpackParagraphId a <> "\t" <> unpackParagraphId b
+                                   | (a, b) <- duplicates ]
