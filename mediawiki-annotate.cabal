@@ -208,7 +208,6 @@ executable trec-car-graph-expansion
                        AttriRank
                        ZScore
                        WriteRanking
-                       Retrieve
                        GraphExpansionExperiments
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
@@ -248,7 +247,6 @@ executable trec-car-seeds
                        AttriRank
                        ZScore
                        WriteRanking
-                       Retrieve
                        GraphExpansionExperiments
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
