@@ -69,15 +69,7 @@ oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
 
 tokenize :: T.Text -> BagOfWords
--- tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunctuation
 tokenize =  foldMap oneWord . textToTokens'
-
-
-outlineTerms :: PageSkeleton -> BagOfWords
-outlineTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
-outlineTerms (Image {}) = mempty
-outlineTerms (Section (SectionHeading t) _ children) =
-    tokenize t <> foldMap outlineTerms children
 
 paraBodyTerms :: ParaBody -> BagOfWords
 paraBodyTerms (ParaText t) = tokenize t
@@ -86,11 +78,12 @@ paraBodyTerms (ParaLink l) = tokenize $ linkAnchor l
 modeCorpusStats :: Parser (IO ())
 modeCorpusStats =
     go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
-       <*> argument str (help "pages file")
+       <*> argument str (metavar "PARAGRAPHS" <> help "paragraphs file")
   where
-    go outFile pagesFile = do
-        anns <- openAnnotations pagesFile
-        let BagOfWords terms = foldMap (foldMap outlineTerms . pageSkeleton) (pages anns)
+    go outFile paragraphsFile = do
+        paras <- readCborList paragraphsFile
+            :: IO [Paragraph]
+        let BagOfWords terms = foldMap (foldMap paraBodyTerms . paraBody) paras
             toBLeaf (a,b) = BTree.BLeaf a b
         BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) (outFile <.> "terms")
                                 (Pipes.each $ map toBLeaf $ M.assocs terms)
@@ -109,7 +102,7 @@ readCorpusStats fname =
 modeMergeCorpusStats :: Parser (IO ())
 modeMergeCorpusStats =
     go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
-       <*> many (argument str (help "corpus stats files"))
+       <*> many (argument str (metavar "STATS" <> help "corpus stats files"))
   where
     go outFile indexes = do
         idxs <- mapM openTermFreqs indexes
@@ -120,7 +113,7 @@ modeMergeCorpusStats =
 modeIndex :: Parser (IO ())
 modeIndex =
     go <$> option str (long "output" <> short 'o' <> help "output index path")
-       <*> argument str (help "paragraphs file")
+       <*> argument str (metavar "PARAS" <> help "paragraphs file")
   where
     go outFile paragraphsFile = do
         paras <- readCborList paragraphsFile
@@ -136,7 +129,7 @@ modeMerge :: Parser (IO ())
 modeMerge =
     go
       <$> option str (long "output" <> short 'o' <> help "output path")
-      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (help "pages file"))
+      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (metavar "INDEX" <> help "index file"))
   where
     go :: FilePath -> [CarDiskIndex] -> IO ()
     go outPath parts = mapM DiskIdx.openOnDiskIndex parts >>= DiskIdx.merge outPath
@@ -145,7 +138,7 @@ modeQuery :: Parser (IO ())
 modeQuery =
     go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
        <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
-       <*> option str (long "outlines" <> short 'o' <> help "File containing page outlines to predict (one per line)")
+       <*> option str (long "outlines" <> short 'O' <> help "File containing page outlines to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
        <*> option auto (long "count" <> short 'k' <> help "How many results to retrieve per query" <> value 1000)
   where
@@ -156,8 +149,7 @@ modeQuery =
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
-        let query = map Term.fromString ["hello", "world"]
-            termFreq = realToFrac . fromMaybe 0 . BTree.lookup termFreqs
+        let termFreq = realToFrac . fromMaybe 0 . BTree.lookup termFreqs
             termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
             smoothing = Dirichlet 1000 termProb
 
