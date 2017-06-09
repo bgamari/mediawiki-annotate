@@ -38,7 +38,7 @@ import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
-import CAR.Retrieve
+import CAR.Retrieve as Retrieve
 
 import WriteRanking
 import GraphExpansion
