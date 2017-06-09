@@ -6,6 +6,7 @@ allow-newer:
 packages:
     ./
     mediawiki-parser/
+    graph-expansion/
     simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal

@@ -27,7 +27,7 @@ import qualified Data.Text as T
 import Data.Aeson
 
 import CAR.Types
-import qualified ExtractKnowledgeBase as KB
+import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
 import GraphExpansion
@@ -55,7 +55,7 @@ instance ToJSON QueryDocList
 
 pagesToLeadEntities :: [Page] -> [QueryDoc]
 pagesToLeadEntities pages =
-        map (\page -> let kbDoc = KB.transformContent inlinkCounts page
+        map (\page -> let kbDoc = KB.pageToKbDoc inlinkCounts page
                       in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
                                   , queryDocQueryText      = getPageName $ pageName page
                                   , queryDocLeadEntities   = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc

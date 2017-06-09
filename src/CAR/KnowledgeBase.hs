@@ -2,8 +2,17 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
-module ExtractKnowledgeBase where
-
+module CAR.KnowledgeBase
+    ( -- * Knowledge base documents
+      KbDoc(..)
+    , pageToKbDoc
+    
+      -- * Inlink statistics
+    , InlinkInfo(..)
+    , collectInlinkInfo
+    , resolveRedirects
+    , InlinkCounts(..)
+    ) where
 
 import Control.Exception (assert)
 import Data.Monoid hiding (All, Any)
@@ -103,8 +112,8 @@ collectInlinkInfo = foldMap pageInlinkInfo
             in foldMap toInlinkInfo (pageLinks page)
 
 -- #(anchor, target) / #(anchor, *)
-transformContent :: HM.HashMap PageName InlinkCounts -> Page -> KbDoc
-transformContent inlinkInfoMap (Page pageName pageId pageSkeleta) =
+pageToKbDoc :: HM.HashMap PageName InlinkCounts -> Page -> KbDoc
+pageToKbDoc inlinkInfoMap (Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
       kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas

@@ -19,7 +19,7 @@ import Data.Maybe
 import CAR.Types
 import SimplIR.Galago as Galago
 
-import ExtractKnowledgeBase
+import CAR.KnowledgeBase
 
 
 opts :: Parser (FilePath, FilePath)
@@ -114,7 +114,7 @@ main = do
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
             $ map (toGalagoDoc inlinkCounts inlinkTotals)
-            $ map (transformContent inlinkCounts)
+            $ map (pageToKbDoc inlinkCounts)
             $ filter (\p -> not $ pageName p `HS.member` redirectPages inlinkInfo)
             $ pages
 
