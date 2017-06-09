@@ -3,9 +3,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-import Control.Monad.IO.Class
 import Data.Foldable
-import Data.Profunctor
 import Data.Bifunctor
 import Data.Functor.Identity
 import Data.List (intersperse)
@@ -26,13 +24,11 @@ import qualified Numeric.Log as Log
 
 import qualified BTree
 import CAR.Types
-import CAR.AnnotationsFile
 import CAR.CarExports
 import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
-import SimplIR.Tokenise (killPunctuation)
 import SimplIR.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
@@ -78,10 +74,12 @@ paraBodyTerms (ParaLink l) = tokenize $ linkAnchor l
 modeCorpusStats :: Parser (IO ())
 modeCorpusStats =
     go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
+       <*> optional (option auto (long "first-n" <> short 'n' <> help "only build statistics from first-N paragraphs"))
        <*> argument str (metavar "PARAGRAPHS" <> help "paragraphs file")
   where
-    go outFile paragraphsFile = do
-        paras <- readCborList paragraphsFile
+    go outFile firstN paragraphsFile = do
+        let maybeTakeN = maybe id take firstN
+        paras <- maybeTakeN <$> readCborList paragraphsFile
             :: IO [Paragraph]
         let BagOfWords terms = foldMap (foldMap paraBodyTerms . paraBody) paras
             toBLeaf (a,b) = BTree.BLeaf a b
@@ -119,9 +117,10 @@ modeIndex =
         paras <- readCborList paragraphsFile
               :: IO [Paragraph]
         runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
-                  $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
-                                in ((paraId p, DocLength $ sum terms), terms)
-                         ) paras
+                 $ statusList 1000 (\n -> show n <> " paragraphs")
+                 $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
+                               in ((paraId p, DocLength $ sum terms), terms)
+                        ) paras
 
         return ()
 
@@ -149,7 +148,7 @@ modeQuery =
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
-        let termFreq = realToFrac . fromMaybe 0 . BTree.lookup termFreqs
+        let termFreq = maybe 0.5 realToFrac . BTree.lookup termFreqs
             termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
             smoothing = Dirichlet 1000 termProb
 
@@ -235,8 +234,10 @@ scoreQuery smoothing idx k (BagOfWords query) =
      $ foldProducer (Foldl.generalize $ topK k)
      $ termPostings idx (M.keys query)
     >-> cat'                      @((ParagraphId, DocumentLength), [(Term, Int)])
-    >-> P.P.map (\((paraId, docLen), docTf) ->
-                   let score = queryLikelihood smoothing (M.assocs queryReal) docLen $ map (second realToFrac) docTf
+    >-> P.P.map (\((paraId, docLen), docTfs) ->
+                   let score = queryLikelihood smoothing (M.assocs queryReal) docLen
+                               $ map (second realToFrac) docTfs
                    in Entry score paraId)
     >-> cat'                      @(Entry Score ParagraphId)
-  where queryReal = fmap realToFrac query
+  where queryReal :: M.Map Term Double
+        queryReal = fmap realToFrac query
