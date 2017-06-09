@@ -44,6 +44,8 @@ import Pipes.Safe
 import qualified Control.Foldl as Foldl
 import Options.Applicative
 
+import CAR.Retrieve (textToTokens')
+
 instance Binary ParagraphId
 
 type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
@@ -67,13 +69,15 @@ oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
 
 tokenize :: T.Text -> BagOfWords
-tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunctuation
+-- tokenize = foldMap (oneWord . Term.fromText) . T.words . T.toCaseFold . killPunctuation
+tokenize =  foldMap oneWord . textToTokens'
 
-skeletonTerms :: PageSkeleton -> BagOfWords
-skeletonTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
-skeletonTerms (Image {}) = mempty
-skeletonTerms (Section (SectionHeading t) _ children) =
-    tokenize t <> foldMap skeletonTerms children
+
+outlineTerms :: PageSkeleton -> BagOfWords
+outlineTerms (Para (Paragraph _ t)) = foldMap paraBodyTerms t
+outlineTerms (Image {}) = mempty
+outlineTerms (Section (SectionHeading t) _ children) =
+    tokenize t <> foldMap outlineTerms children
 
 paraBodyTerms :: ParaBody -> BagOfWords
 paraBodyTerms (ParaText t) = tokenize t
@@ -82,11 +86,11 @@ paraBodyTerms (ParaLink l) = tokenize $ linkAnchor l
 modeCorpusStats :: Parser (IO ())
 modeCorpusStats =
     go <$> option str (long "output" <> short 'o' <> help "output corpus statistics path")
-       <*> argument str (help "annotations file")
+       <*> argument str (help "pages file")
   where
-    go outFile annotationsFile = do
-        anns <- openAnnotations annotationsFile
-        let BagOfWords terms = foldMap (foldMap skeletonTerms . pageSkeleton) (pages anns)
+    go outFile pagesFile = do
+        anns <- openAnnotations pagesFile
+        let BagOfWords terms = foldMap (foldMap outlineTerms . pageSkeleton) (pages anns)
             toBLeaf (a,b) = BTree.BLeaf a b
         BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) (outFile <.> "terms")
                                 (Pipes.each $ map toBLeaf $ M.assocs terms)
@@ -116,11 +120,11 @@ modeMergeCorpusStats =
 modeIndex :: Parser (IO ())
 modeIndex =
     go <$> option str (long "output" <> short 'o' <> help "output index path")
-       <*> argument str (help "annotations file")
+       <*> argument str (help "paragraphs file")
   where
-    go outFile annotationsFile = do
-        anns <- openAnnotations annotationsFile
-        let paras = concatMap toParagraphs (pages anns)
+    go outFile paragraphsFile = do
+        paras <- readCborList paragraphsFile
+              :: IO [Paragraph]
         runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
                   $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
                                 in ((paraId p, DocLength $ sum terms), terms)
@@ -132,7 +136,7 @@ modeMerge :: Parser (IO ())
 modeMerge =
     go
       <$> option str (long "output" <> short 'o' <> help "output path")
-      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (help "annotations file"))
+      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (help "pages file"))
   where
     go :: FilePath -> [CarDiskIndex] -> IO ()
     go outPath parts = mapM DiskIdx.openOnDiskIndex parts >>= DiskIdx.merge outPath
@@ -141,14 +145,14 @@ modeQuery :: Parser (IO ())
 modeQuery =
     go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
        <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
-       <*> option str (long "skeletons" <> short 'S' <> help "File containing page skeletons to predict (one per line)")
+       <*> option str (long "outlines" <> short 'o' <> help "File containing page outlines to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
        <*> option auto (long "count" <> short 'k' <> help "How many results to retrieve per query" <> value 1000)
   where
     go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> IO ()
-    go diskIdx corpusStatsFile skeletonFile runName k = do
+    go diskIdx corpusStatsFile outlineFile runName k = do
         termFreqs <- openTermFreqs corpusStatsFile
-        skeletons <- decodeCborList <$> BSL.readFile skeletonFile
+        outlines <- decodeCborList <$> BSL.readFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
@@ -167,7 +171,7 @@ modeQuery =
                     | (paraId, score) <- scoreQuery smoothing idx k query
                     ]
 
-        BSL.putStrLn $ BSB.toLazyByteString $ foldMap predictStub skeletons
+        BSL.putStrLn $ BSB.toLazyByteString $ foldMap predictStub outlines
 
 -- | Format results in the TREC run file format
 prettyTrecRun :: BS.ByteString -- ^ run ID

@@ -7,7 +7,7 @@
 
 module CAR.Types
     ( -- * Identifiers
-      PageName(..)
+      PageName(..), unpackPageName
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
@@ -27,9 +27,8 @@ module CAR.Types
     , LinkStyle
     , withLink, anchorOnly
       -- * Miscellaneous Utilities
-    , decodeCborList
-    , encodeCborList
-    , writeCborList
+    , decodeCborList, readCborList
+    , encodeCborList, writeCborList
     ) where
 
 import Data.Foldable
@@ -80,6 +79,9 @@ instance ToJSONKey PageName where
 instance CBOR.Serialise SBS.ShortByteString where
     encode = CBOR.encode . SBS.fromShort
     decode = SBS.toShort <$> CBOR.decode   -- FIXME: copy
+
+unpackPageName :: PageName -> String
+unpackPageName (PageName t) = T.unpack t
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId Utf8.SmallUtf8
@@ -193,6 +195,9 @@ decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
               rest <- unsafeInterleaveST $ start (bs : bss)
               return (x : rest)
           (CBOR.Fail _rest _ err, _) -> error $ show err
+
+readCborList :: CBOR.Serialise a => FilePath -> IO [a]
+readCborList path = decodeCborList <$> BSL.readFile path
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode

@@ -15,9 +15,9 @@ mode = subparser
     <> command "paragraphs" (info (helper <*> indexParagraphs) fullDesc)
   where
     indexPages =
-        void . Toc.buildIndex pageId <$> argument str (help "articles cbor file" <> metavar "FILE")
+        void . Toc.createIndex pageId <$> argument str (help "articles cbor file" <> metavar "FILE")
     indexParagraphs =
-        void . Toc.buildIndex paraId <$> argument str (help "paragraphs cbor file" <> metavar "FILE")
+        void . Toc.createIndex paraId <$> argument str (help "paragraphs cbor file" <> metavar "FILE")
 
 
 main :: IO ()

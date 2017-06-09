@@ -28,11 +28,12 @@ import Dijkstra
 import PageRank
 import CAR.Utils
 import CAR.Types
+import CAR.Retrieve
 
 import qualified SimplIR.Term as Term
 import AttriRank
-import Retrieve
-import GloveEmbedding
+import SimplIR.WordEmbedding
+import SimplIR.WordEmbedding.GloVe
 import ZScore (Attributes(..))
 
 

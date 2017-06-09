@@ -13,34 +13,38 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Bloom.IntSet, Bloom.Naive, Bloom.Opt, Word1024
+  exposed-modules:     Bloom.IntSet, Bloom.Naive, Bloom.Opt, Word1024, Utils
+  hs-source-dirs:      src
   c-sources:           cbits/bloom.c
   cc-options:          -march=haswell
   other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
   build-depends:       base >=4.9 && <4.10,
                        primitive >= 0.6,
                        hashable >=1.2 && <1.3,
+                       text >=1.2 && <1.3,
+                       vector >=0.12 && <0.13,
                        unordered-containers >= 0.2,
-                       intset
+                       snowball >=1.0 && <1.1,
+                       parallel >= 3.2,
+                       simplir,
+                       intset,
+                       trec-car-tools
   ghc-options:         -optc=-march=skylake -optc=-g3
   default-language:    Haskell2010
 
 executable trec-car-find-duplicates
   main-is:             FindDuplicates.hs
-  other-modules:       Bloom.IntSet, Bloom.Naive, Bloom.Opt, Word1024
   build-depends:       base >=4.9 && <4.10,
                        hashable >=1.2 && <1.3,
-                       text >=1.2 && <1.3,
                        vector >=0.12 && <0.13,
+                       text >=1.2 && <1.3,
                        unordered-containers >=0.2 && <0.3,
                        vector-algorithms >=0.7 && <0.8,
-                       snowball >=1.0 && <1.1,
                        bytestring >=0.10 && <0.11,
                        primitive >=0.6 && <0.7,
                        optparse-applicative >= 0.13,
                        parallel >= 3.2,
                        intset,
-                       simplir,
                        trec-car-filter-duplicates,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded -with-rtsopts=-N -with-rtsopts=-A64M -optc=-march=skylake
@@ -48,13 +52,48 @@ executable trec-car-find-duplicates
 
 executable trec-car-rewrite-duplicates
   main-is:             RewriteDuplicates.hs
-  other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
+  build-depends:       base >=4.9 && <4.10,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       bytestring >=0.10 && <0.11,
+                       optparse-applicative >= 0.13,
+                       trec-car-filter-duplicates,
+                       trec-car-tools
+  ghc-options:         -rtsopts -threaded
+  default-language:    Haskell2010
+
+executable trec-car-duplicates-rewrite-table
+  main-is:             DuplicatesRewriteTable.hs
   build-depends:       base >=4.9 && <4.10,
                        hashable >=1.2 && <1.3,
                        unordered-containers >=0.2 && <0.3,
                        bytestring >=0.10 && <0.11,
                        optparse-applicative >= 0.13,
                        simplir,
+                       trec-car-filter-duplicates,
+                       trec-car-tools
+  ghc-options:         -rtsopts -threaded
+  default-language:    Haskell2010
+
+executable trec-car-minhash-duplicates
+  main-is:             MinHash.hs
+  other-extensions:    ForeignFunctionInterface, MagicHash, UnliftedFFITypes
+  build-depends:       base >=4.9 && <4.10,
+                       hashable >=1.2 && <1.3,
+                       containers >= 0.5,
+                       deepseq >= 1.4,
+                       text >= 1.2,
+                       vector >= 0.12,
+                       vector-algorithms,
+                       parallel >= 3.2,
+                       mwc-random >= 0.13,
+                       unordered-containers >=0.2 && <0.3,
+                       bytestring >=0.10 && <0.11,
+                       optparse-applicative >= 0.13,
+                       simplir,
+                       snowball,
+                       simplir-word-embedding,
+                       trec-car-filter-duplicates,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
