@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveFoldable #-}
-module Retrieve
+module CAR.Retrieve
     ( Score
     , Term
     , TermCounts(..)

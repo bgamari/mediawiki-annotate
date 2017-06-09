@@ -38,9 +38,9 @@ import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
+import CAR.Retrieve
 
 import WriteRanking
-import Retrieve
 import GraphExpansion
 import GraphExpansionExperiments
 import SimplIR.WordEmbedding

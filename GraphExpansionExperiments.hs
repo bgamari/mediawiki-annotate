@@ -29,7 +29,7 @@ import Data.Aeson
 import CAR.Types
 import qualified ExtractKnowledgeBase as KB
 
-import Retrieve
+import CAR.Retrieve
 import GraphExpansion
 
 
