@@ -146,7 +146,6 @@ executable trec-car-transform-content
 executable trec-car-extract-kb
   main-is:             ExtractKnowledgeBaseMain.hs
   ghc-options:         -Wall
-  other-modules:       ExtractKnowledgeBase
   build-depends:       base >=4.9 && <4.10,
                        bytestring,
                        unordered-containers,
