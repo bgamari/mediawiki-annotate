@@ -34,7 +34,7 @@ opts =
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> (fullMode <|> sectionsCategoriesMode)
   where 
-    fullMode = flag' fullTransformContent (long "full" <> help "full filtering of lead, category, hidden sections, and short page remainders")
+    fullMode = flag' transformFull (long "full" <> help "full filtering of lead, category, hidden sections, and short page remainders")
     sectionsCategoriesMode = flag' transformCategoriesAndForbiddenSection  (long "sections-categories" <> help "partial filtering of category and hidden sections only")
 
     -- <*> argument predicate (metavar "PRED" <> help "Predicate")
@@ -136,8 +136,8 @@ isCategoriesPara _ = False
 --            pageSkeleta
 
 
-filterTopLevel :: (PageSkeleton -> Bool) -> Page  ->  Page
-filterTopLevel f (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
+topLevelFilterPage :: (PageSkeleton -> Bool) -> Page  ->  Page
+topLevelFilterPage f (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
     Page pageName pageId (filter f pageSkeleta)
 
 
@@ -149,13 +149,13 @@ dropShortPage page@(Page {pageName, pageId, pageSkeleton=pageSkeleta})
   | otherwise = Nothing
   
 
-fullTransformContent :: Page -> Maybe Page
-fullTransformContent page =
+transformFull :: Page -> Maybe Page
+transformFull page =
     dropShortPage
     $ recurseFilterPage (not . isForbiddenSkeleton)
     $ recurseFilterPage (not . isImage)
     $ recurseFilterPage (not . isCategoriesPara)
-    $ filterTopLevel (not . isPara)
+    $ topLevelFilterPage (not . isPara)
     page
 
 
