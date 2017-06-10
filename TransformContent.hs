@@ -65,11 +65,18 @@ isForbiddenSkeleton _ = False
 -- recurseDropForbiddenSections =  recurseSections (not . isForbiddenSkeleton)
 
 recurseFilterSections :: (PageSkeleton -> Bool) -> PageSkeleton -> Maybe PageSkeleton
+recurseFilterSections f skel
+  | not $ f skel   = Nothing
 recurseFilterSections f (Section heading sectionId children)
-    | null children' = Nothing
-    | otherwise =  Just (Section heading sectionId children')
-  where children' = mapMaybe (recurseFilterSections f) $ filter f children
-recurseFilterSections f x = Just x
+  | null children' = Nothing
+  | otherwise      = Just (Section heading sectionId children')
+  where children' = mapMaybe (recurseFilterSections f) children
+recurseFilterSections f skel = Just skel
+-- this implementation is making use of fall-through rules
+-- first see whether filter applies
+-- if fall through, then recurse to children
+-- if all else fails retain
+
 
 
 recurseFilterPage :: (PageSkeleton -> Bool) -> Page -> Page
