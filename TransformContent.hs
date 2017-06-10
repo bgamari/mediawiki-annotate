@@ -60,7 +60,6 @@ isForbiddenSkeleton (Section heading _ _) =
     ( T.toCaseFold (getSectionHeading heading) `HS.member` forbiddenHeadings )  ||  -- excluded
     T.length (T.filter isAlpha (getSectionHeading heading)) < 3 ||                      -- not enough letters
     T.length (getSectionHeading heading) > 100                                          -- too long, probably parse error
-isForbiddenSkeleton (Image _ _) = True
 isForbiddenSkeleton _ = False
 
 -- recurseDropForbiddenSections =  recurseSections (not . isForbiddenSkeleton)
@@ -148,7 +147,7 @@ fullTransformContent page =
     dropShortPage
     $ recurseFilterPage (not . isForbiddenSkeleton)
     $ recurseFilterPage (not . isImage)
-    $ filterTopLevel (not . isCategoriesPara)
+    $ recurseFilterPage (not . isCategoriesPara)
     $ filterTopLevel (not . isPara)
     page
 
@@ -159,7 +158,7 @@ transformCategoriesAndForbiddenSection page =
     Just
     $ recurseFilterPage (not . isForbiddenSkeleton)
     $ recurseFilterPage (not . isImage)
-    $ filterTopLevel (not . isCategoriesPara)
+    $ recurseFilterPage (not . isCategoriesPara)
     page
 
 ---
@@ -168,6 +167,5 @@ main :: IO ()
 main = do
     (inputFile, outputFile, transformMode) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
     pages <- decodeCborList <$> BSL.readFile inputFile
-    withFile outputFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList $ mapMaybe transformMode pages
+    writeCborList outputFile $ mapMaybe transformMode pages
 
