@@ -29,6 +29,7 @@ import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
+import qualified SimplIR.Format.TrecRunFile as TrecRun
 import SimplIR.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
@@ -140,9 +141,10 @@ modeQuery =
        <*> option str (long "outlines" <> short 'O' <> help "File containing page outlines to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
        <*> option auto (long "count" <> short 'k' <> help "How many results to retrieve per query" <> value 1000)
+       <*> option str (long "output" <> short 'o' <> help "Output ranking file")
   where
-    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> IO ()
-    go diskIdx corpusStatsFile outlineFile runName k = do
+    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> FilePath -> IO ()
+    go diskIdx corpusStatsFile outlineFile runName k outputFile = do
         termFreqs <- openTermFreqs corpusStatsFile
         outlines <- decodeCborList <$> BSL.readFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
@@ -152,34 +154,22 @@ modeQuery =
             termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
             smoothing = Dirichlet 1000 termProb
 
-        let predictStub :: Stub -> BSB.Builder
+        let predictStub :: Stub -> [TrecRun.RankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
 
-            predictSection :: BagOfWords -> SectionPath -> BSB.Builder
+            predictSection :: BagOfWords -> SectionPath -> [TrecRun.RankingEntry]
             predictSection query sectionPath =
-                prettyTrecRun runName
-                    [ (sectionPath, paraId, score)
-                    | (paraId, score) <- scoreQuery smoothing idx k query
+                    [ TrecRun.RankingEntry
+                      { TrecRun.queryId = T.pack $ escapeSectionPath sectionPath
+                      , TrecRun.documentName = T.pack $ unpackParagraphId paraId
+                      , TrecRun.documentRank = rank
+                      , TrecRun.documentScore = Log.ln score
+                      , TrecRun.methodName = T.pack $ BS.unpack runName
+                      }
+                    | (rank, (paraId, score)) <- zip [1..] $ scoreQuery smoothing idx k query
                     ]
 
-        BSL.putStrLn $ BSB.toLazyByteString $ foldMap predictStub outlines
-
--- | Format results in the TREC run file format
-prettyTrecRun :: BS.ByteString -- ^ run ID
-              -> [(SectionPath, ParagraphId, Score)]
-              -> BSB.Builder
-prettyTrecRun runName =
-    mconcat . intersperse (BSB.char7 '\n') . zipWith entry [1..]
-  where
-    entry rank (path, ParagraphId paraId, score) =
-        mconcat $ intersperse (BSB.char8 ' ')
-        [ BSB.string8 $ escapeSectionPath path
-        , BSB.char7 '0' -- iteration
-        , BSB.shortByteString paraId
-        , BSB.intDec rank
-        , BSB.doubleDec $ Log.ln score
-        , BSB.byteString runName
-        ]
+        TrecRun.writeRunFile outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
 stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
