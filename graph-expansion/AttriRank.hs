@@ -16,9 +16,10 @@ module AttriRank
    ) where
 
 import Control.Exception (assert)
-import qualified Data.Array as A (Array)
-import qualified Data.Array.IArray as A
-import qualified Data.Array.Unboxed as A (UArray)
+import qualified Data.Vector as V
+import qualified Data.Vector.Generic as VG
+import qualified Data.Vector.Unboxed as VU
+import qualified Data.Vector.Indexed as VI
 import qualified Data.HashMap.Strict as HM
 import Data.Foldable as F
 import Data.Hashable
@@ -49,42 +50,38 @@ attriRank gamma dDist getAttrs graph =
         nNodes = rangeSize (denseRange mapping)
 
         attrRange :: (t, t)
-        attrRange@(attr0,attr1) = A.bounds $ unAttrs $ getAttrs $ head $ elems mapping
+        attrRange@(attr0,attr1) = VI.bounds $ unAttrs $ getAttrs $ head $ elems mapping
 
-        attrs :: A.Array (DenseId n) (Attributes t)
-        attrs = A.listArray (denseRange mapping) $ map getAttrs $ elems mapping
+        attrs :: VI.Vector V.Vector (DenseId n) (Attributes t)
+        attrs = VI.fromList (denseRange mapping) $ map getAttrs $ elems mapping
 
-        ws :: A.UArray (DenseId n) a
-        ws = A.array (denseRange mapping)
-             [ (i, exp $ negate $ gamma * quadrance attr)
-             | i <- range (denseRange mapping)
-             , let Attrs attr = attrs A.! i ]
-        !a = sum $ A.elems ws
-        b :: A.UArray t Double
+        ws :: VI.Vector VU.Vector (DenseId n) a
+        ws = VI.convert $ VI.map (\(Attrs attr) -> exp $ negate $ gamma * VI.quadrance attr) attrs
+
+        !a = VI.sum ws
+        b :: VI.Vector VU.Vector t Double
         b = (2 * gamma) *^
-            A.accumArray (+) 0 attrRange
+            VI.accum' attrRange (+) 0
             [ (attr, v * wj)
-            | (j, Attrs attrs) <- A.assocs attrs
-            , let wj = ws A.! j
-            , (attr, v) <- A.assocs attrs
+            | (j, Attrs attrs) <- VI.assocs attrs
+            , let wj = ws VI.! j
+            , (attr, v) <- VI.assocs attrs
             ]
-        c :: A.UArray (t,t) a
-        c = (2 * squared gamma) *!
-            A.accumArray (+) 0 ((attr0,attr0), (attr1,attr1))
+        c :: VI.Vector VU.Vector (t,t) a
+        c = (2 * gamma * gamma) *!
+            VI.accum' ((attr0,attr0), (attr1,attr1)) (+) 0
             [ ((n,m), wj * xn * xm)
-            | (j, Attrs xj) <- A.assocs attrs
-            , let wj = ws A.! j
-            , (n, xn) <- A.assocs xj
-            , (m, xm) <- A.assocs xj
+            | (j, Attrs xj) <- VI.assocs attrs
+            , let wj = ws VI.! j
+            , (n, xn) <- VI.assocs xj
+            , (m, xm) <- VI.assocs xj
             ]
-        rs :: A.UArray (DenseId n) a
-        rs = A.array (denseRange mapping)
-             [ (i, wi * (a + xi ^*^ b + xi ^*^ (c !*^ xi)))
-             | (i, wi) <- A.assocs ws
-             , let Attrs xi = attrs A.! i
-             ]
-        rVec :: A.UArray (DenseId n) a
-        rVec = let z = foldl' (+) 0 (A.elems rs) in z *^ rs
+        rs :: VI.Vector VU.Vector (DenseId n) a
+        rs = let f wi (Attrs xi) = wi * (a + xi ^*^ b + xi ^*^ (c !*^ xi))
+             in VI.convert $ VI.zipWith f (VI.convert ws) attrs
+
+        rVec :: VI.Vector VU.Vector (DenseId n) a
+        rVec = let z = VI.sum rs in z *^ rs
 
         -- generate P matrix
         outDegree :: HM.HashMap n Double
@@ -103,61 +100,49 @@ attriRank gamma dDist getAttrs graph =
                 Uniform         -> 0.5 *^ rVec
                 Beta alpha beta -> (beta / (alpha + beta)) *^ rVec
 
-        go :: Int -> A.UArray (DenseId n) a -> A.UArray (DenseId n) a
-           -> [(Double, A.UArray (DenseId n) a)]
-        go k rho pi = (norm rho, pi')  : go (k+1) rho' pi'
+        go :: Int -> VI.Vector VU.Vector (DenseId n) a
+           -> VI.Vector VU.Vector (DenseId n) a
+           -> [(Double, VI.Vector VU.Vector (DenseId n) a)]
+        go k rho pi = (VI.norm rho, pi')  : go (k+1) rho' pi'
           where
             k' = realToFrac k
             rho' = case dDist of
                      Uniform         -> (k' / (k'+2)) *^ pRho
                      Beta alpha beta -> ((k'+alpha-1) / (k'+alpha+beta)) *^ pRho
             pi' = pi ^+^ rho'
-            pRho = A.accumArray (+) 0 (denseRange mapping)
+            pRho = VI.accum' (denseRange mapping) (+) 0
                    [ (i, v * rhoJ)
                    | Edge i j v <- p
-                   , let rhoJ = rho A.! j
+                   , let rhoJ = rho VI.! j
                    ]
-    in map (second $ Eigenvector mapping) $ (norm pi0, pi0) : go 1 pi0 pi0
+    in map (second $ Eigenvector mapping) $ (VI.norm pi0, pi0) : go 1 pi0 pi0
 
 data Edge n = Edge !(DenseId n) !(DenseId n) !Double
 
-(^+^) :: (Num a, Ix i, A.IArray arr a) => arr i a -> arr i a -> arr i a
-x ^+^ y =
-    assert (A.bounds x == A.bounds y)
-    $ A.listArray (A.bounds x)
-      [ a + b
-      | (a, b) <- zip (A.elems x) (A.elems y) ]
+(^+^) :: (Num a, Ix i, VG.Vector arr a)
+      => VI.Vector arr i a -> VI.Vector arr i a -> VI.Vector arr i a
+x ^+^ y = VI.zipWith (+) x y
 
-(^*^) :: (Num a, Ix i, A.IArray arr a) => arr i a -> arr i a -> a
-x ^*^ y =
-    assert (A.bounds x == A.bounds y)
-    $ foldl' (+) 0
-    $ zipWith (*) (A.elems x) (A.elems y)
+(^*^) :: (Num a, Ix i, VG.Vector arr a)
+      => VI.Vector arr i a -> VI.Vector arr i a -> a
+x ^*^ y = VI.sum $ VI.zipWith (*) x y
 
-(*^) :: (Num a, Ix i, A.IArray arr a) => a -> arr i a -> arr i a
-s *^ x = A.amap (s *) x
+(*^) :: (Num a, Ix i, VG.Vector arr a)
+     => a -> VI.Vector arr i a -> VI.Vector arr i a
+s *^ x = VI.map (s *) x
 
-(*!) :: (Num a, Ix i, Ix j, A.IArray arr a) => a -> arr (i,j) a -> arr (i,j) a
-s *! m = A.amap (s *) m
+(*!) :: (Num a, Ix i, Ix j, VG.Vector arr a)
+     => a -> VI.Vector arr (i,j) a -> VI.Vector arr (i,j) a
+s *! m = VI.map (s *) m
 
-(!*^) :: (Num a, Ix i, Ix j, A.IArray arr a) => arr (i,j) a -> arr j a -> arr i a
+(!*^) :: (Num a, Ix i, Ix j, VG.Vector arr a)
+      => VI.Vector arr (i,j) a -> VI.Vector arr j a -> VI.Vector arr i a
 m !*^ x =
-    A.accumArray (+) 0 (bimap fst fst $ A.bounds m)
+    VI.accum' (bimap fst fst $ VI.bounds m) (+) 0
     [ (i, a*b)
-    | ((i,j), a) <- A.assocs m
-    , let b = x A.! j
+    | ((i,j), a) <- VI.assocs m
+    , let b = x VI.! j
     ]
-
-squared :: Num a => a -> a
-squared x = x * x
-
-quadrance :: (Num a, Ix i, A.IArray arr a) => arr i a -> a
-quadrance = foldl' f 0 . A.elems
-  where f acc x = acc + squared x
-
-norm :: (RealFloat a, Ix i, A.IArray arr a) => arr i a -> a
-norm = sqrt . quadrance
-
 
 graph :: Graph Char Double
 graph = Graph $ HM.fromList
@@ -183,5 +168,5 @@ graphAttrs = HM.fromList
     , 'f' .= attrs [2,4,1,2,3]
     ]
   where
-    attrs = Attrs . A.listArray (0,4)
+    attrs = Attrs . VI.fromList (0,4)
     a .= b = (a, b)
