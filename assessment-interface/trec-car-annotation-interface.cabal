@@ -24,7 +24,7 @@ executable trec-car-annotation-interface
                        trec-car-tools >=0.1 && <0.2,
                        unordered-containers >=0.2 && <0.3,
                        bytestring >=0.10 && <0.11,
-                       blaze-html >=0.8 && <0.9,
+                       blaze-html >=0.8 && <0.10,
                        optparse-applicative,
                        text >= 1.2,
                        simplir,
