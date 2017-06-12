@@ -25,7 +25,7 @@ import CAR.KnowledgeBase
 opts :: Parser (FilePath, FilePath)
 opts =
     (,)
-    <$> argument str (help "input file" <> metavar "PARAGRAPH CBOR FILE")
+    <$> argument str (help "input file" <> metavar "PARAGRAPHS")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output warc file")
 
 
