@@ -20,6 +20,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.DList as DList
 import qualified Numeric.Log as Log
@@ -140,7 +141,17 @@ modeQuery =
 
         let termFreq = maybe 0.5 (realToFrac . termFrequency) . flip HM.lookup (corpusTerms corpusStats)
             termProb t = termFreq t / realToFrac (corpusTokenCount corpusStats)
-            smoothing = Dirichlet 1000 termProb
+
+            modelQL, modelBM25 :: ScoringModel
+            modelQL queryTerms docLen docTerms =
+                queryLikelihood (Dirichlet 1000 termProb)
+                                (fmap (fmap realToFrac) queryTerms)
+                                docLen (fmap (fmap realToFrac) docTerms)
+            modelBM25 queryTerms docLen docTerms =
+                BM25.bm25 BM25.sensibleParams corpusStats
+                          (HS.fromList $ map fst queryTerms)
+                          docLen (HM.fromList docTerms)
+            model = modelBM25
 
         let predictStub :: Stub -> [TrecRun.RankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
@@ -154,7 +165,7 @@ modeQuery =
                       , TrecRun.documentScore = Log.ln score
                       , TrecRun.methodName = T.pack $ BS.unpack runName
                       }
-                    | (rank, (paraId, score)) <- zip [1..] $ scoreQuery smoothing idx k query
+                    | (rank, (paraId, score)) <- zip [1..] $ scoreQuery model idx k query
                     ]
 
         TrecRun.writeRunFile outputFile $ foldMap predictStub outlines
@@ -201,21 +212,23 @@ termPostings idx terms =
               Just docMeta -> Just (docMeta, docTerms)
     in collectPostings postings >-> P.P.mapFoldable lookupMeta
 
-scoreQuery :: Smoothing Term
+type ScoringModel = [(Term, Int)]  -- ^ query term frequencies
+                 -> DocumentLength -- ^ document length
+                 -> [(Term, Int)]  -- ^ document term frequencies
+                 -> BM25.Score
+
+scoreQuery :: ScoringModel
            -> DiskIdx.DiskIndex (ParagraphId, DocumentLength) Int
            -> Int
            -> BagOfWords
            -> [(ParagraphId, BM25.Score)]
-scoreQuery smoothing idx k (BagOfWords query) =
+scoreQuery model idx k (BagOfWords query) =
        map (\(Entry a b) -> (b, a))
      $ runIdentity
      $ foldProducer (Foldl.generalize $ topK k)
      $ termPostings idx (M.keys query)
     >-> cat'                      @((ParagraphId, DocumentLength), [(Term, Int)])
     >-> P.P.map (\((paraId, docLen), docTfs) ->
-                   let score = queryLikelihood smoothing (M.assocs queryReal) docLen
-                               $ map (second realToFrac) docTfs
+                   let score = model (M.assocs query) docLen docTfs
                    in Entry score paraId)
     >-> cat'                      @(Entry BM25.Score ParagraphId)
-  where queryReal :: M.Map Term Double
-        queryReal = fmap realToFrac query
