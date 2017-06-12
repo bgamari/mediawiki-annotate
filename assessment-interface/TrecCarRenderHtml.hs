@@ -217,7 +217,7 @@ wikipediaSection spwn@SectionPathWithName{..} body =
     url = H.textValue $ "https://wikipedia.org/wiki/"<>n<>section'
     section' = case sprHeadingPath of
                  []  -> ""
-                 headings -> "#"<> (getSectionHeading $ last headings)
+                 headings -> "#"<> T.map (\c -> if c==' ' then '_' else c) (getSectionHeading $ last headings)
 
 
 -- =================== HTML prologue for annotationControl and Trec car data rendering   =================
