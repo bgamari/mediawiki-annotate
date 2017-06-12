@@ -11,7 +11,10 @@ module PageRank
    , pageRankWithSeeds
    ) where
 
-import qualified Data.Array.Unboxed as A
+import qualified Data.Vector as V
+import qualified Data.Vector.Generic as VG
+import qualified Data.Vector.Unboxed as VU
+import qualified Data.Vector.Indexed as VI
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Hashable
@@ -21,30 +24,29 @@ import Data.Bifunctor
 import DenseMapping
 import Graph
 
-data Eigenvector n a = Eigenvector (DenseMapping n) (A.UArray (DenseId n) a)
+data Eigenvector n a = Eigenvector (DenseMapping n) (VI.Vector VU.Vector (DenseId n) a)
 
 -- | A transition matrix
-type Transition n = A.UArray (DenseId n, DenseId n)
+type Transition n = VI.Vector VU.Vector (DenseId n, DenseId n)
 
-toHashMap :: (A.IArray A.UArray a, Hashable n, Eq n)
+toHashMap :: (VG.Vector VU.Vector a, Hashable n, Eq n)
           => Eigenvector n a -> HM.HashMap n a
 toHashMap = HM.fromList . toEntries
 
-toEntries :: (A.IArray A.UArray a)
+toEntries :: (VG.Vector VU.Vector a)
           => Eigenvector n a -> [(n, a)]
 toEntries (Eigenvector mapping arr) =
-    map (first $ fromDense mapping) (A.assocs arr)
+    map (first $ fromDense mapping) (VI.assocs arr)
 
-square x = x * x
-norm arr = sum $ map square $ A.elems arr
-normalize arr = let n = norm arr in A.amap (/ n) arr
+normalize arr = let n = VI.norm arr in VI.map (/ n) arr
 
-relChange :: (A.IArray A.UArray a, RealFrac a)
+relChange :: (VG.Vector VU.Vector a, RealFrac a)
           => Eigenvector n a -> Eigenvector n a -> a
 relChange (Eigenvector _ a) (Eigenvector _ b) =
-    delta / norm a
+    delta / VI.quadrance a
   where
-    delta = sum $ map square $ zipWith (-) (A.elems a) (A.elems b)
+    delta = VI.sum $ VI.map square $ VI.zipWith (-) a b
+    square x = x*x
 
 -- | Plain PageRank with uniform teleportation.
 --
@@ -54,7 +56,7 @@ relChange (Eigenvector _ a) (Eigenvector _ b) =
 -- \]
 -- given a graph with edge weights \(e_{ij}\).
 pageRank
-    :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
+    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
     => a                  -- ^ teleportation probability \(\alpha\)
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
@@ -77,7 +79,7 @@ pageRank alpha = pageRankWithSeeds alpha 0 HS.empty
 -- given a graph with edge weights \(e_{ij}\) and a seed node set
 -- \(\mathcal{S}\).
 pageRankWithSeeds
-    :: forall n a. (RealFrac a, A.IArray A.UArray a, Eq n, Hashable n, Show n)
+    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
     => a                  -- ^ uniform teleportation probability \(\alpha\)
     -> a                  -- ^ seed teleportation probability \(\beta\)
     -> HS.HashSet n       -- ^ seed node set
@@ -93,11 +95,11 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
         numNodes = rangeSize nodeRng
         numSeeds = HS.size seeds
 
-        initial = A.accumArray (const id) (1 / realToFrac numNodes) nodeRng []
+        initial = VI.replicate nodeRng (1 / realToFrac numNodes)
 
         -- normalized flow of nodes flowing into each node
-        inbound :: A.Array (DenseId n) [(DenseId n, a)]
-        inbound = A.accumArray (++) [] nodeRng
+        inbound :: VI.Vector V.Vector (DenseId n) [(DenseId n, a)]
+        inbound = VI.accum' nodeRng (++) []
                   [ ( toDense mapping v,
                       [(toDense mapping u, weightUV / weightUSum)]
                     )
@@ -106,13 +108,13 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                   , (v, weightUV) <- outEdges
                   ]
 
-        nextiter :: A.UArray (DenseId n) a -> A.UArray (DenseId n) a
-        nextiter pagerank = A.accumArray (+) 0 nodeRng
+        nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
+        nextiter pagerank = VI.accum' nodeRng (+) 0
                    [ (v, teleportationSum + outlinkSum + seedTeleportSum)
-                   | (v, inEdges) <- A.assocs inbound
+                   | (v, inEdges) <- VI.assocs inbound
                    , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
                                           | (u, normWeight) <- inEdges
-                                          , let uPR = pagerank A.! u
+                                          , let uPR = pagerank VI.! u
                                           ]
                          teleportationSum = alpha / realToFrac numNodes * c
                          seedTeleportSum
@@ -123,7 +125,7 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                            | otherwise = 0
                    ]
           where
-            !c = sum $ A.elems pagerank
+            !c = VI.sum pagerank
 
     in map (Eigenvector mapping)
        $ initial : iterate nextiter initial
@@ -134,37 +136,30 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
 
 
 -- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
-addTeleportation :: (RealFrac a, A.IArray A.UArray a)
+addTeleportation :: (RealFrac a, VG.Vector VU.Vector a)
                  => (DenseId n, DenseId n) -> a
                  -> Transition n a -> Transition n a
 addTeleportation nodeRange teleportation =
-    A.amap (\w -> (1-teleportation) * w  + teleportation / realToFrac numNodes)
+    VI.map (\w -> (1-teleportation) * w  + teleportation / realToFrac numNodes)
   where numNodes = rangeSize nodeRange
 
-iamap :: (A.IArray a e', A.IArray a e, Ix i)
-      => (i -> e' -> e) -> a i e' -> a i e
-iamap f arr =
-    A.listArray bounds $ zipWith f (range bounds) (A.elems arr)
-  where
-    bounds = A.bounds arr
-
 -- | normalize rows to sum to one (also handle case of no outedges)
-normRows :: forall a n. (RealFrac a, A.IArray A.UArray a)
+normRows :: forall a n. (RealFrac a, VG.Vector VU.Vector a)
          => (DenseId n, DenseId n) -> Transition n a -> Transition n a
 normRows nodeRange trans =
-    iamap (\(i,j) w ->
-        let total = totals A.! i
+    VI.imap (\(i,j) w ->
+        let total = totals VI.! i
         in if abs total < 1e-6
              then 1 / realToFrac (rangeSize nodeRange)  -- handle case of no outedges: every node is reachable by 1/N
              else w / total                             -- outedges are normalized to sum to one
         ) trans
   where
-    totals :: A.UArray (DenseId n) a
-    totals = A.accumArray (+) 0 nodeRange
+    totals :: VI.Vector VU.Vector (DenseId n) a
+    totals = VI.accum' nodeRange (+) 0
              [ (i, w)
              | i <- range nodeRange
              , j <- range nodeRange
-             , let w = trans A.! (i,j)
+             , let w = trans VI.! (i,j)
              ]
 
 test :: Graph Char Double

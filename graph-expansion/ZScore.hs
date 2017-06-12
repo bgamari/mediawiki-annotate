@@ -6,11 +6,12 @@ module ZScore
    , zScoreStandardize
    ) where
 
-import qualified Data.Array.Unboxed as A
+import qualified Data.Vector.Indexed as VI
+import qualified Data.Vector.Unboxed as VU
 import Data.Foldable as F
 import Data.Ix
 
-newtype Attributes a = Attrs { unAttrs :: A.UArray a Double }
+newtype Attributes a = Attrs { unAttrs :: VI.Vector VU.Vector a Double }
                      deriving (Show)
 
 zScoreStandardize :: forall a f. (Ix a, Functor f, Foldable f)
@@ -18,36 +19,29 @@ zScoreStandardize :: forall a f. (Ix a, Functor f, Foldable f)
 zScoreStandardize attrs
   | n == 0 = attrs
   | otherwise =
-      let attrRng = A.bounds $ unAttrs $ head $ toList attrs
+      let attrRng = VI.bounds $ unAttrs $ head $ toList attrs
 
-          vsum :: A.UArray a Double
-          vsum = A.accumArray (+) 0 attrRng
+          vsum :: VI.Vector VU.Vector a Double
+          vsum = VI.accum' attrRng (+) 0
                  [ (i, v)
                  | Attrs x <- toList attrs
-                 , (i, v) <- A.assocs x
+                 , (i, v) <- VI.assocs x
                  ]
-          mean = A.amap (/ realToFrac n) vsum
+          mean = VI.map (/ realToFrac n) vsum
 
-          vsumSqr :: A.UArray a Double
-          vsumSqr = A.accumArray (+) 0 attrRng
+          vsumSqr :: VI.Vector VU.Vector a Double
+          vsumSqr = VI.accum' attrRng (+) 0
                     [ (i, (v - mu)^(2::Int))
                     | Attrs x <- toList attrs
-                    , (i, v) <- A.assocs x
-                    , let mu = mean A.! i
+                    , (i, v) <- VI.assocs x
+                    , let mu = mean VI.! i
                     ]
-          stdDev = A.amap (\v -> sqrt (v / realToFrac n)) vsumSqr
+          stdDev = VI.map (\v -> sqrt (v / realToFrac n)) vsumSqr
 
           standardize (Attrs xs) =
-              Attrs $ iamap (\i v -> let mu = mean A.! i
-                                         sig = stdDev A.! i
-                                     in (v - mu) / sig
+              Attrs $ VI.imap (\i v -> let mu = mean VI.! i
+                                           sig = stdDev VI.! i
+                                       in (v - mu) / sig
                             ) xs
       in fmap standardize attrs
   where n = F.length attrs
-
-iamap :: (A.IArray a e', A.IArray a e, Ix i)
-      => (i -> e' -> e) -> a i e' -> a i e
-iamap f arr =
-    A.listArray bounds $ zipWith f (range bounds) (A.elems arr)
-  where
-    bounds = A.bounds arr

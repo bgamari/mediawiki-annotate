@@ -16,12 +16,12 @@ import GHC.Generics
 import GHC.TypeLits
 
 import Data.Hashable
-import qualified Data.Array.Unboxed as A
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import qualified Data.Vector.Indexed as VI
 
 import Graph
 import Dijkstra
@@ -122,7 +122,7 @@ computeTextEmbedding wordEmbedding text =
     toWordVec x = x `HM.lookup` wordEmbedding
 
 wordVecToAttributes :: WordVec n -> Attributes (EmbeddingDim n)
-wordVecToAttributes = Attrs . A.amap realToFrac . unWordVec
+wordVecToAttributes = Attrs . VI.map realToFrac . unWordVec
 
 pageTextEmbeddingAttributes :: KnownNat n => WordEmbedding n -> Page
                             -> WordVec n

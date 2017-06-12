@@ -19,3 +19,5 @@ packages:
 
 package mediawiki-parser
     tests: True
+
+debug-info: True

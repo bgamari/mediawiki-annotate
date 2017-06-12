@@ -15,7 +15,8 @@ module DenseMapping
     , mkDenseMapping
     ) where
 
-import qualified Data.Array.Unboxed as A
+import qualified Data.Vector as V
+import qualified Data.Vector.Indexed as VI
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Hashable
@@ -25,12 +26,12 @@ import GHC.Stack
 
 -- | A mapping of a 'Hashable' type to a dense index space ('DenseId').
 data DenseMapping a = DenseMapping { denseRange :: (DenseId a, DenseId a)
-                                   , fromDenseArr :: A.Array (DenseId a) a
+                                   , fromDenseArr :: VI.Vector V.Vector (DenseId a) a
                                    , toDenseMap :: HM.HashMap a (DenseId a)
                                    }
 
 assocs :: DenseMapping a -> [(DenseId a, a)]
-assocs = A.assocs . fromDenseArr
+assocs = VI.assocs . fromDenseArr
 
 elems :: DenseMapping a -> [a]
 elems = map snd . assocs
@@ -40,7 +41,7 @@ newtype DenseId a = DenseId Int
                deriving (Eq, Ord, Show, Enum, Ix)
 
 fromDense :: DenseMapping a -> DenseId a -> a
-fromDense m = (fromDenseArr m A.!)
+fromDense m = (fromDenseArr m VI.!)
 
 toDense :: (HasCallStack, Eq a, Hashable a, Show a)
         => DenseMapping a -> a -> DenseId a
@@ -60,7 +61,8 @@ mkDenseMapping things =
     maxNodeId = DenseId $ HS.size things - 1
     nodeRange = (minNodeId, maxNodeId)
 
-    toNodeArr :: A.Array (DenseId a) a
-    toNodeArr = A.listArray nodeRange (HS.toList things)
+    toNodeArr :: VI.Vector V.Vector (DenseId a) a
+    toNodeArr = VI.fromList nodeRange (HS.toList things)
+
     fromNodeMap :: HM.HashMap a (DenseId a)
     fromNodeMap = HM.fromList $ zip (HS.toList things) [DenseId 0..]
