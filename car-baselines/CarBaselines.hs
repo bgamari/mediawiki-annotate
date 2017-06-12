@@ -47,7 +47,6 @@ import Options.Applicative
 import CAR.Retrieve (textToTokens')
 
 instance Binary ParagraphId
-instance CBOR.Serialise Term.Term
 
 type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
 
