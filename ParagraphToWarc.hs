@@ -15,6 +15,7 @@ import qualified Data.Text.Lazy.Encoding as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.ByteString.Lazy as BSL
 import Data.Maybe
+import qualified Codec.Compression.GZip as GZip
 
 import CAR.Types
 import SimplIR.Galago as Galago
@@ -103,6 +104,7 @@ main = do
     paragraphs <- decodeCborList <$> BSL.readFile inputFile
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
+--         BSL.hPutStr h $ GZip.compress $ Galago.toWarc
             $ map toGalagoDoc
             paragraphs
 
