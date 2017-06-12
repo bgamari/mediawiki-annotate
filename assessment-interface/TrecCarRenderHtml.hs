@@ -127,6 +127,8 @@ viewHeader spr@SectionPathWithName{..} = do
       H.div ! HA.class_ "overview-heading-query" $ do
         prettySectionPath spr
 
+        H.p $ wikipediaSection spr "Wikipedia"
+
         H.div $ do
             H.span "Query ID: "
             H.code $ toHtml (escapeSectionPath sprQueryId)
@@ -169,6 +171,15 @@ paraBodyToHtml :: ParaBody -> H.Html
 paraBodyToHtml (ParaText t) = H.text t
 paraBodyToHtml (ParaLink l) = wikipediaLink l $ H.toHtml $ linkAnchor l
 
+-- | A link to a Wikipedia page
+wikipediaPage' :: PageName -> H.Html -> H.Html
+wikipediaPage' pageName =
+    H.a ! HA.href (H.textValue $ "https://en.wikipedia.org/wiki/" <> getPageName pageName)
+
+-- | A link to a Wikipedia page, using the page name as the anchor text
+wikipediaPage :: PageName -> H.Html
+wikipediaPage page = wikipediaPage' page (H.toHtml $ getPageName page)
+    
 wikipediaLink :: Link -> H.Html -> H.Html
 wikipediaLink l body =
     H.a ! HA.href url $ body
@@ -179,6 +190,16 @@ wikipediaLink l body =
                  Just sect -> "#"<>sect
                  Nothing   -> ""
 
+
+wikipediaSection :: SectionPathWithName -> H.Html -> H.Html
+wikipediaSection spwn@SectionPathWithName{..} body =
+    H.a ! HA.href url $ body
+  where
+    PageName n = sprPageName
+    url = H.textValue $ "https://wikipedia.org/wiki/"<>n<>section'
+    section' = case sprHeadingPath of
+                 []  -> ""
+                 headings -> "#"<> (getSectionHeading $ last headings)
 
 
 -- =================== HTML prologue for annotationControl and Trec car data rendering   =================

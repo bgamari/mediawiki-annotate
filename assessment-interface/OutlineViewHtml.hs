@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-
 -- | Construct passage views
 module OutlineViewHtml where
 
@@ -32,6 +31,8 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
     H.body $ do
         H.h1 $ "Title "
             <> toHtml (getPageName pageName)
+        H.p $ wikipediaPage' pageName "wikipedia"
+
         H.p $ " (" <> toHtml (unpackPageId pageId) <> ") "
 
         H.div $ do
