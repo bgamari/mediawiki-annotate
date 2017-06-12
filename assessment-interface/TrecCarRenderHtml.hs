@@ -8,6 +8,7 @@ module TrecCarRenderHtml where
 import Control.Monad
 import Data.Monoid
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ((!), p, ul, li, toHtml, div)
 import Text.Blaze.Html5.Attributes as HA
@@ -167,8 +168,25 @@ entityToHtml Entity{..} =
 paragraphToHtml :: Paragraph -> H.Html
 paragraphToHtml p = foldMap paraBodyToHtml (paraBody p)
 
+-- | Given a string, drop all text between the given beginning and end substrings.
+dropSpans :: T.Text -> T.Text -> T.Text -> TL.Text
+dropSpans begin end = go
+  where
+    go t
+      | T.null match = TL.fromStrict prefix
+      | otherwise    =
+        case T.breakOn end match of
+          (tagBody, endMatch)
+            | T.null endMatch -> TL.fromStrict t
+            | otherwise       -> let suffix = T.drop (T.length end) endMatch
+                                 in TL.fromStrict prefix <> go suffix
+      where (prefix, match) = T.breakOn begin t
+      
+dropRefs :: T.Text -> TL.Text
+dropRefs = dropSpans "<ref " "/>"
+
 paraBodyToHtml :: ParaBody -> H.Html
-paraBodyToHtml (ParaText t) = H.text t
+paraBodyToHtml (ParaText t) = H.text $ TL.toStrict $ dropRefs t
 paraBodyToHtml (ParaLink l) = wikipediaLink l $ H.toHtml $ linkAnchor l
 
 -- | A link to a Wikipedia page
