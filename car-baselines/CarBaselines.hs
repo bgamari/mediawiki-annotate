@@ -13,19 +13,22 @@ import GHC.Generics
 import System.FilePath
 
 import Data.Binary
+import qualified Data.Binary.Serialise.CBOR as CBOR
 import qualified Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
+import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.DList as DList
 import qualified Numeric.Log as Log
 
-import qualified BTree
 import CAR.Types
 import CAR.CarExports
+import SimplIR.RetrievalModels.CorpusStats
 import SimplIR.RetrievalModels.QueryLikelihood
+import SimplIR.RetrievalModels.BM25 as BM25
 import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
@@ -44,18 +47,10 @@ import Options.Applicative
 import CAR.Retrieve (textToTokens')
 
 instance Binary ParagraphId
+instance CBOR.Serialise Term.Term
 
 type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
 
-data CorpusStats = CorpusStats { corpusNTokens :: !Int }
-                 deriving (Generic)
-instance Monoid CorpusStats where
-    mempty = CorpusStats 0
-    a `mappend` b = CorpusStats { corpusNTokens = corpusNTokens a + corpusNTokens b }
-instance Aeson.FromJSON CorpusStats
-instance Aeson.ToJSON CorpusStats
-
-type TermFreqIndex = BTree.LookupTree Term Int
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
 instance Monoid BagOfWords where
@@ -65,12 +60,15 @@ instance Monoid BagOfWords where
 oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
 
-tokenize :: T.Text -> BagOfWords
-tokenize =  foldMap oneWord . textToTokens'
+tokenize :: T.Text -> [Term]
+tokenize =  textToTokens'
 
-paraBodyTerms :: ParaBody -> BagOfWords
+paraBodyTerms :: ParaBody -> [Term]
 paraBodyTerms (ParaText t) = tokenize t
 paraBodyTerms (ParaLink l) = tokenize $ linkAnchor l
+
+paraBodyBag :: ParaBody -> BagOfWords
+paraBodyBag = foldMap oneWord . paraBodyTerms
 
 modeCorpusStats :: Parser (IO ())
 modeCorpusStats =
@@ -82,21 +80,15 @@ modeCorpusStats =
         let maybeTakeN = maybe id take firstN
         paras <- maybeTakeN <$> readCborList paragraphsFile
             :: IO [Paragraph]
-        let BagOfWords terms = foldMap (foldMap paraBodyTerms . paraBody) paras
-            toBLeaf (a,b) = BTree.BLeaf a b
-        BTree.fromOrderedToFile 64 (fromIntegral $ M.size terms) (outFile <.> "terms")
-                                (Pipes.each $ map toBLeaf $ M.assocs terms)
-        writeCorpusStats outFile $ CorpusStats (sum terms)
+        let stats = Foldl.fold (documentTermStats Nothing) $ fmap paraBodyTerms $ foldMap paraBody paras
+        writeCorpusStats outFile $ stats
 
-openTermFreqs :: FilePath -> IO TermFreqIndex
-openTermFreqs = fmap (either error id) . BTree.open . (<.> "terms")
+writeCorpusStats :: FilePath -> CorpusStats Term -> IO ()
+writeCorpusStats fname = BSL.writeFile fname . CBOR.serialise
 
-writeCorpusStats :: FilePath -> CorpusStats -> IO ()
-writeCorpusStats fname = BSL.writeFile fname . Aeson.encode
-
-readCorpusStats :: FilePath -> IO CorpusStats
+readCorpusStats :: FilePath -> IO (CorpusStats Term)
 readCorpusStats fname =
-    fromMaybe (error "Error reading corpus statistics") . Aeson.decode <$> BSL.readFile fname
+    fromMaybe (error "Error reading corpus statistics") . CBOR.deserialise <$> BSL.readFile fname
 
 modeMergeCorpusStats :: Parser (IO ())
 modeMergeCorpusStats =
@@ -104,10 +96,8 @@ modeMergeCorpusStats =
        <*> many (argument str (metavar "STATS" <> help "corpus stats files"))
   where
     go outFile indexes = do
-        idxs <- mapM openTermFreqs indexes
-        BTree.mergeTrees (\a b -> pure $! a+b) 64 (outFile <.> "terms") idxs
         stats <- mapM readCorpusStats indexes
-        writeCorpusStats outFile $ fold stats
+        writeCorpusStats outFile $ mconcat stats
 
 modeIndex :: Parser (IO ())
 modeIndex =
@@ -119,7 +109,7 @@ modeIndex =
               :: IO [Paragraph]
         runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
                  $ statusList 1000 (\n -> show n <> " paragraphs")
-                 $ fmap (\p -> let BagOfWords terms = foldMap paraBodyTerms (paraBody p)
+                 $ fmap (\p -> let BagOfWords terms = foldMap paraBodyBag (paraBody p)
                                in ((paraId p, DocLength $ sum terms), terms)
                         ) paras
 
@@ -145,13 +135,12 @@ modeQuery =
   where
     go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> FilePath -> IO ()
     go diskIdx corpusStatsFile outlineFile runName k outputFile = do
-        termFreqs <- openTermFreqs corpusStatsFile
         outlines <- decodeCborList <$> BSL.readFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
-        let termFreq = maybe 0.5 realToFrac . BTree.lookup termFreqs
-            termProb t = termFreq t / realToFrac (corpusNTokens corpusStats)
+        let termFreq = maybe 0.5 (realToFrac . termFrequency) . flip HM.lookup (corpusTerms corpusStats)
+            termProb t = termFreq t / realToFrac (corpusTokenCount corpusStats)
             smoothing = Dirichlet 1000 termProb
 
         let predictStub :: Stub -> [TrecRun.RankingEntry]
@@ -184,7 +173,7 @@ stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
         me = parents `DList.snoc` headingId
 
     headingWords :: SectionHeading -> BagOfWords
-    headingWords (SectionHeading t) = tokenize t
+    headingWords (SectionHeading t) = foldMap oneWord $ tokenize t
 
 modes :: Parser (IO ())
 modes = subparser
@@ -217,7 +206,7 @@ scoreQuery :: Smoothing Term
            -> DiskIdx.DiskIndex (ParagraphId, DocumentLength) Int
            -> Int
            -> BagOfWords
-           -> [(ParagraphId, Score)]
+           -> [(ParagraphId, BM25.Score)]
 scoreQuery smoothing idx k (BagOfWords query) =
        map (\(Entry a b) -> (b, a))
      $ runIdentity
@@ -228,6 +217,6 @@ scoreQuery smoothing idx k (BagOfWords query) =
                    let score = queryLikelihood smoothing (M.assocs queryReal) docLen
                                $ map (second realToFrac) docTfs
                    in Entry score paraId)
-    >-> cat'                      @(Entry Score ParagraphId)
+    >-> cat'                      @(Entry BM25.Score ParagraphId)
   where queryReal :: M.Map Term Double
         queryReal = fmap realToFrac query
