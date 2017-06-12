@@ -42,7 +42,8 @@ opts =
 forbiddenHeadings :: HS.HashSet T.Text
 forbiddenHeadings = HS.fromList ["see also", "references", "external links", "notes",
     "bibliography", "gallery", "publications", "further reading", "track listing", "sources",
-    "cast", "discography", "awards", "other"]
+    "cast", "discography", "awards", "other",
+    "external links and references", "notes and references" ] --new in v1.6
 
 isPara :: PageSkeleton -> Bool
 isPara (Para{})    = True
@@ -93,48 +94,6 @@ isCategoriesPara (Para (Paragraph paraId paraBody)) =
     isCategoryLinks (ParaLink (Link (PageName name) section _ anchor)) =
       "Category:" `T.isPrefixOf` name
 isCategoriesPara _ = False
-
--- transformOnlySections :: Page -> Page
--- transformOnlySections (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
---     Page pageName pageId pageSkeleta'
---   where
---     pageSkeleta'=
---          mapMaybe recurseDropForbiddenSections
---          $ filter (\skel -> not (isForbiddenSkeleton skel || isCategoriesPara skel)) pageSkeleta
---
--- transformContent :: Page -> Maybe Page
--- transformContent (Page {pageName, pageId, pageSkeleton=pageSkeleta})
---   | length pageSkeleta' > 3 =
---       Just (Page pageName pageId pageSkeleta')
---   | otherwise = Nothing
---   where
---     pageSkeleta'=
---          mapMaybe recurseDropForbiddenSections
---          $ filter (\skel -> not (isForbiddenSkeleton skel) &&  not (isLead skel))
---            pageSkeleta
-
----
-
---
--- transformForbiddenSections :: Page -> Page
--- transformForbiddenSections (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
---     Page pageName pageId pageSkeleta'
---   where
---     pageSkeleta'=
---          mapMaybe recurseDropForbiddenSections
---          $ filter (\skel -> not (isForbiddenSkeleton skel))
---            pageSkeleta
---
---
---
--- transformDropLead :: Page -> Page
--- transformDropLead (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
---     Page pageName pageId pageSkeleta'
---   where
---     pageSkeleta'=
---          filter (\skel -> not (isLead skel))
---            pageSkeleta
-
 
 topLevelFilterPage :: (PageSkeleton -> Bool) -> Page  ->  Page
 topLevelFilterPage f (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
