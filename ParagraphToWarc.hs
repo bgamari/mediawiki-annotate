@@ -15,6 +15,7 @@ import qualified Data.Text.Lazy.Encoding as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.ByteString.Lazy as BSL
 import Data.Maybe
+-- import qualified Codec.Compression.GZip as GZip
 
 import CAR.Types
 import SimplIR.Galago as Galago
@@ -25,7 +26,7 @@ import CAR.KnowledgeBase
 opts :: Parser (FilePath, FilePath)
 opts =
     (,)
-    <$> argument str (help "input file" <> metavar "PARAGRAPH CBOR FILE")
+    <$> argument str (help "input file" <> metavar "PARAGRAPHS")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output warc file")
 
 
@@ -103,6 +104,7 @@ main = do
     paragraphs <- decodeCborList <$> BSL.readFile inputFile
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
+--         BSL.hPutStr h $ GZip.compress $ Galago.toWarc
             $ map toGalagoDoc
             paragraphs
 
