@@ -140,7 +140,7 @@ entityPassageToAnnotationHtml' queryId (entity, paragraph) groundTruthLabel cont
             -- H.span ! HA.class_ "htmlscore" $ H.toHtml (show $ entryScore e)
             annotationControl queryId itemId groundTruthLabel  -- todo prio2 show ground truth label in annotation
             H.span ! HA.class_ "entity-snippet-li-text" $ do
-                    H.p $ contentEntityHtml entity
+                    H.div ! HA.class_ "passage-orig-entity" $ contentEntityHtml entity
                     H.p $ contentParagraphHtml paragraph
 
   where
