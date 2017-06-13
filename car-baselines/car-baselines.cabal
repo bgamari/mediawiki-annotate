@@ -50,6 +50,7 @@ executable car-galago-query
                        trec-car-tools,
                        profunctors,
                        foldl >=1.2 && <1.3,
+                       charset >=0.3 && <0.4,
                        pipes,
                        pipes-safe,
                        text,

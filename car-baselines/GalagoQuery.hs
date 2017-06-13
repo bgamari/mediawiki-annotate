@@ -25,6 +25,8 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.DList as DList
+import qualified Data.CharSet as CS
+import qualified Data.CharSet.Common as CS
 import qualified Numeric.Log as Log
 
 import CAR.Types
@@ -41,18 +43,33 @@ import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
 import qualified SimplIR.DiskIndex as DiskIdx
 
+
+
 import Pipes
 import qualified Pipes.Prelude as P.P
 import Pipes.Safe
 import qualified Control.Foldl as Foldl
 import Options.Applicative
 
-import CAR.Retrieve (textToTokens')
+import SimplIR.StopWords
+import SimplIR.Tokenise
 
 
 
 tokenize :: T.Text -> [Term]
-tokenize =  textToTokens'
+tokenize text =
+    let terms =    T.words
+                   $ killCharSet notLatin1Letters  -- replaces with space
+                   $ T.filter (/='\'')             -- drop chars without substitution
+                   $ T.toCaseFold text
+    in fmap Term.fromText
+       $ filter (\t -> T.length t > 1)
+       $ killStopwords enInquery
+       $ terms
+    where isAcronym  =
+            T.all (`CS.member` CS.upper)
+            . T.filter (`CS.member` acronymPunctuation)
+          acronymPunctuation = CS.fromList ".-"
 
 
 opts :: Parser (IO ())
