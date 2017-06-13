@@ -89,7 +89,7 @@ trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
 
 
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
-                             => (TrecRun.DocumentName -> item)
+                             => (TrecRun.DocumentName -> Maybe item)
                              -> (RankingEntry item -> nubKey) -> Int -> Bool -> [FilePath]
                              -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
 trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuffle trecRunFiles = do
@@ -99,11 +99,12 @@ trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuff
             let resultMap :: HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
                 resultMap = HM.fromListWith (++) $
                   [ ( TrecRun.queryId entry
-                    , [RankingEntry { entryItem = trecRunItemToEntryItem $ TrecRun.documentName entry
+                    , [RankingEntry { entryItem = item
                                     , entryScore = TrecRun.documentScore entry
                                     }]
                     )
                   | entry <- trecRankingContents
+                  , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry
                   ]
             in fmap (take optsTopK) resultMap
 
@@ -163,10 +164,10 @@ main = do
     entityIndex <- TocFile.open (TocFile.IndexedCborPath entityFile :: TocFile.IndexedCborPath PageId Page)
     putStrLn "...done deserializing articles"
 
-    let loadEntity :: PageId -> Entity
+    let loadEntity :: PageId -> Maybe Entity
         loadEntity pid =
-          fromMaybe (error $ "Can't find entity: "++ show pid ++ " in file "++ entityFile)
-           $ loadEntityMaybe pid
+--           fromMaybe (trace $ "Can't find entity: "++ show pid ++ " in file "++ entityFile) $
+            loadEntityMaybe pid
 
         loadEntityMaybe :: PageId -> Maybe Entity
         loadEntityMaybe pid = do
@@ -175,8 +176,8 @@ main = do
 
     -- ========= view renderer Paragraphs ==============
     trecResultMap <-
-        let trecRunItemToEntryItemPara ::  TrecRun.DocumentName -> Paragraph
-            trecRunItemToEntryItemPara = loadParagraph . packParagraphId . T.unpack
+        let trecRunItemToEntryItemPara ::  TrecRun.DocumentName -> Maybe Paragraph
+            trecRunItemToEntryItemPara = Just . loadParagraph . packParagraphId . T.unpack
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
@@ -202,10 +203,12 @@ main = do
 --
 
     trecResultMapEntity <-
-        let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> (Entity, Paragraph)
+        let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
                 let (Just pid,Just eid) = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in (loadEntity eid, loadParagraph pid)
+                in case (loadEntity eid) of
+                    Just (entity) -> Just (entity, loadParagraph pid)
+                    Nothing -> Nothing
 
             getNubKeyEntity :: EntityParagraphRankingEntry -> (PageId, ParagraphId)
             getNubKeyEntity rankingEntry =
