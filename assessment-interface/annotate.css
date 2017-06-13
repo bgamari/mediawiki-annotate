@@ -1,0 +1,37 @@
+.annotate .btn {
+    border-color: #ccc;
+    background-color: #fff;
+}
+
+.annotate .btn.active {
+    background-color: #286090;
+    color: #fff;
+}
+
+.entity-snippet-li {
+    display: inline-table;
+    width: 400px;
+    text-align: left;
+    background-color: #dce7f1;
+    border-style: solid;
+    border-width: thin;
+    border-color: #a9d1f5;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 4px;
+    vertical-align: top;
+}
+
+a {
+    color: #005dac;
+}
+
+a:hover {
+    color: #005dac;
+    text-decoration: underline;
+}
+
+
+div.passage-orig-entity {
+    font-weight: bold;
+}
