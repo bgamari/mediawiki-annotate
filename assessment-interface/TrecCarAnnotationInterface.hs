@@ -63,6 +63,30 @@ data Opts = Opts { outlinesFile :: FilePath
 
 
 
+-- todo generify  trecQrelParagraphs
+trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
+              -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
+-- loadParagraphMaybe $ packParagraphId --> loadEntityMaybe $  unpackPageId (not sure)
+-- Just paragraph <- pure $ loadParagraphMaybe $ packParagraphId --> Just entity <- pure $ ressurrect Enity(entityPageId, entityPageName)
+-- QrelEntry --> EntityQrelEntry     (entryLabel --> entityEntryLabel)
+
+
+trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
+
+    qrelEntries <- TrecQrel.readQRel qrelfile
+    let qrelMap =   HM.fromListWith (++)
+                    $  [ ( TrecQrel.queryId entry
+                        , [QrelEntry { entryItem = item
+                                     , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
+                                     }]
+                        )
+                      | entry <- qrelEntries
+                      ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
+                      ,Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
+                      ]
+    return qrelMap
+
+
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
                              => (TrecRun.DocumentName -> item)
                              -> (RankingEntry item -> nubKey) -> Int -> Bool -> [FilePath]
@@ -93,28 +117,8 @@ trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuff
     unionResultMap
 
 
--- todo generify  trecQrelParagraphs
-trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
-              -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
--- loadParagraphMaybe $ packParagraphId --> loadEntityMaybe $  unpackPageId (not sure)
--- Just paragraph <- pure $ loadParagraphMaybe $ packParagraphId --> Just entity <- pure $ ressurrect Enity(entityPageId, entityPageName)
--- QrelEntry --> EntityQrelEntry     (entryLabel --> entityEntryLabel)
+-- todo urgent mix ground truth and result files
 
-
-trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
-
-    qrelEntries <- TrecQrel.readQRel qrelfile
-    let qrelMap =   HM.fromListWith (++)
-                    $  [ ( TrecQrel.queryId entry
-                        , [QrelEntry { entryItem = item
-                                     , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
-                                     }]
-                        )
-                      | entry <- qrelEntries
-                      ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
-                      ,Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
-                      ]
-    return qrelMap
 
 opts :: Parser Opts
 opts =

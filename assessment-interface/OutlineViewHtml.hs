@@ -42,6 +42,7 @@ outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docT
             H.p "Click on heading for passage-level assessments."
 
             H.p $ do
+                -- article-level rankings
                 let sectionPath = SectionPath pageId []
                 let maybeFileURL = maybePassageViewUrl sectionPath
                 let maybeEntityFileURL = maybeEntityViewUrl sectionPath
