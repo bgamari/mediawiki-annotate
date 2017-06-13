@@ -160,7 +160,8 @@ modeQuery =
             predictSection query sectionPath =
                     [ CarRun.RankingEntry
                           { carQueryId    = CarRun.sectionPathToQueryId sectionPath
-                          , carPassage    = paraId
+                          , carPassage    = Just paraId
+                          , carEntity     = Nothing
                           , carRank       = rank
                           , carScore      = Log.ln score
                           , carMethodName = CarRun.MethodName $ T.pack $ BS.unpack runName
