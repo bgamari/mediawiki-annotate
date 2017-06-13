@@ -27,13 +27,13 @@ import qualified Numeric.Log as Log
 
 import CAR.Types
 import CAR.CarExports
+import CAR.RunFile as CarRun
 import SimplIR.RetrievalModels.CorpusStats
 import SimplIR.RetrievalModels.QueryLikelihood
 import SimplIR.RetrievalModels.BM25 as BM25
 import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
-import qualified SimplIR.Format.TrecRunFile as TrecRun
 import SimplIR.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
@@ -153,22 +153,22 @@ modeQuery =
                           docLen (HM.fromList docTerms)
             model = modelBM25
 
-        let predictStub :: Stub -> [TrecRun.RankingEntry]
+        let predictStub :: Stub -> [CarRun.RankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
 
-            predictSection :: BagOfWords -> SectionPath -> [TrecRun.RankingEntry]
+            predictSection :: BagOfWords -> SectionPath -> [CarRun.RankingEntry]
             predictSection query sectionPath =
-                    [ TrecRun.RankingEntry
-                      { TrecRun.queryId = T.pack $ escapeSectionPath sectionPath
-                      , TrecRun.documentName = T.pack $ unpackParagraphId paraId
-                      , TrecRun.documentRank = rank
-                      , TrecRun.documentScore = Log.ln score
-                      , TrecRun.methodName = T.pack $ BS.unpack runName
-                      }
+                    [ CarRun.RankingEntry
+                          { carQueryId = CarRun.sectionPathToQueryId sectionPath
+                          , carParagraphId = paraId
+                          , carRank = rank
+                          , carScore = Log.ln score
+                          , carMethodName = CarRun.MethodName $ T.pack $ BS.unpack runName
+                          }
                     | (rank, (paraId, score)) <- zip [1..] $ scoreQuery model idx k query
                     ]
 
-        TrecRun.writeRunFile outputFile $ foldMap predictStub outlines
+        CarRun.writeRunFile outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
 stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
