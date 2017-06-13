@@ -31,6 +31,7 @@ data RankingEntry item = RankingEntry { entryItem  :: item
 
 
 type EntityRankingEntry = RankingEntry Entity
+type EntityParagraphRankingEntry = RankingEntry (Entity, Paragraph)
 type PassageRankingEntry = RankingEntry Paragraph
 
 
@@ -119,7 +120,36 @@ entityToAnnotationHtml' queryId entity groundTruthLabel contentHtml =
     itemId = entityToItemId entity
 
 
-entityToAnnotationHtml queryId entity groundTruthLabel =  entityToAnnotationHtml' queryId entity groundTruthLabel entityToHtml
+entityToAnnotationHtml queryId entity groundTruthLabel =
+    entityToAnnotationHtml' queryId entity groundTruthLabel entityToHtml
+
+
+-- ============= Tieing Annotation Control together with entity-passage rendering ===========
+
+entityPassageToItemId :: (Entity, Paragraph) -> ItemId
+entityPassageToItemId (entity, para) =
+    let e = unpackPageId . entityPageId $ entity
+        p = unpackParagraphId . paraId $ para
+    in ItemId $ H.stringValue $  p <> "/" <> e
+
+
+entityPassageToAnnotationHtml' :: AnnotationQueryId -> (Entity, Paragraph) -> Maybe IsRelevant -> (Entity-> H.Html) -> (Paragraph -> H.Html) -> H.Html
+entityPassageToAnnotationHtml' queryId (entity, paragraph) groundTruthLabel contentEntityHtml contentParagraphHtml =
+    H.li ! HA.class_ "entity-snippet-li" $ do
+        H.p $ do
+            -- H.span ! HA.class_ "htmlscore" $ H.toHtml (show $ entryScore e)
+            annotationControl queryId itemId groundTruthLabel  -- todo prio2 show ground truth label in annotation
+            H.span ! HA.class_ "entity-snippet-li-text" $ do
+                    H.p $ contentEntityHtml entity
+                    H.p $ contentParagraphHtml paragraph
+
+  where
+    itemId = entityPassageToItemId (entity, paragraph)
+
+
+entityPassageToAnnotationHtml :: AnnotationQueryId -> (Entity, Paragraph) -> Maybe IsRelevant -> H.Html
+entityPassageToAnnotationHtml queryId (entity, paragraph) groundTruthLabel =
+    entityPassageToAnnotationHtml' queryId (entity,paragraph) groundTruthLabel entityToHtml paragraphToHtml
 
 
 -- === Pretty section Path ====

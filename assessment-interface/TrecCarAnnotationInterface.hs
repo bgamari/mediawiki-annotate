@@ -34,6 +34,7 @@ import qualified Text.Blaze.Html5.Attributes as HA
 import           Text.Blaze.Html5 ((!))
 
 import CAR.Types
+import qualified CAR.RunFile as CarRun
 import CAR.CarExports
 import qualified CAR.TocFile as TocFile
 import PassageViewHtml
@@ -201,27 +202,41 @@ main = do
 --
 
     trecResultMapEntity <-
-        let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Entity
-            trecRunItemToEntryItemEntity = loadEntity . packPageId . T.unpack
+        let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> (Entity, Paragraph)
+            trecRunItemToEntryItemEntity docName =
+                let (Just pid,Just eid) = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
+                in (loadEntity eid, loadParagraph pid)
 
-            getNubKeyEntity :: EntityRankingEntry -> PageId
-            getNubKeyEntity = entityPageId . entryItem
+            getNubKeyEntity :: EntityParagraphRankingEntry -> (PageId, ParagraphId)
+            getNubKeyEntity rankingEntry =
+                let (entity, paragraph) = entryItem  rankingEntry
+                in (entityPageId entity, paraId paragraph)
 
         in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
+      :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
+
     trecQrelsMapEntity <-
-        let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe Entity
-            trecRunItemToEntryItemMaybeEntity = loadEntityMaybe . packPageId .  T.unpack
+        let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
+            trecRunItemToEntryItemMaybeEntity docName =
+                let (Just pid,Just eid) = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
+                in case (loadEntityMaybe eid) of
+                      Just entity -> Just (entity, loadParagraph pid)
+                      Nothing -> Nothing
+                    -- todo load para from qrel
+
         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
+      :: IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry (Entity, Paragraph)])
+
 
 
     putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
 
-    let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityRankingEntry]
+    let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry]
         lookupResultEntity sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
           in queryId  `HM.lookup` trecResultMapEntity
 
-    let lookupTruthEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityRankingEntry]
+    let lookupTruthEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry]
         lookupTruthEntity sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
           in queryId  `HM.lookup` trecQrelsMapEntity
@@ -276,7 +291,7 @@ main = do
                maybeFilePath = entityViewPathname sectionPath
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
-                 let pageHtml = (trace $ "filePath"<> filePath) EntityViewHtml.entityRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = (trace $ "filePath"<> filePath) EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just rankingEntries, Nothing) -> do
