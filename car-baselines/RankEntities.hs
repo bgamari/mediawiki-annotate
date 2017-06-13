@@ -14,7 +14,7 @@ import CAR.Types
 import qualified CAR.TocFile as TocFile
 import CAR.Utils
 
-newtype EntityCounts = EntityCounts (M.Map PageName (Sum Int, Min (Run.Score, ParagraphId)))
+newtype EntityCounts = EntityCounts (M.Map PageName (Sum Int, Max (Run.Score, ParagraphId)))
 
 instance Monoid EntityCounts where
     mempty = EntityCounts mempty
@@ -24,15 +24,15 @@ instance Monoid EntityCounts where
 queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.RankingEntry -> [(PageName, ParagraphId)]
 queryEntities lookupPara ranking =
     let EntityCounts counts = foldMap countEntities ranking
-        entityRanking :: [(PageName, (Min (Run.Score, ParagraphId)))]
-        entityRanking = map (second snd) $ sortBy (comparing $ fst . snd) $ M.toList counts
-    in fmap (fmap $ snd . getMin) entityRanking
+        entityRanking :: [(PageName, (Max (Run.Score, ParagraphId)))]
+        entityRanking = map (second snd) $ sortBy (flip $ comparing $ fst . snd) $ M.toList counts
+    in fmap (fmap $ snd . getMax) entityRanking
   where
     countEntities :: Run.RankingEntry -> EntityCounts
     countEntities r = foldMap (toCounts . linkTarget) (paraLinks para)
       where
         toCounts target =
-            EntityCounts $ M.singleton target (Sum 1, Min (Run.carScore r, paraId para))
+            EntityCounts $ M.singleton target (Sum 1, Max (Run.carScore r, paraId para))
         para = lookupPara $ Run.carParagraphId r
 
 opts :: Parser (FilePath, TocFile.IndexedCborPath ParagraphId Paragraph)
