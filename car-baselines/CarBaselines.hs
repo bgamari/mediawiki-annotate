@@ -159,10 +159,10 @@ modeQuery =
             predictSection :: BagOfWords -> SectionPath -> [CarRun.RankingEntry]
             predictSection query sectionPath =
                     [ CarRun.RankingEntry
-                          { carQueryId = CarRun.sectionPathToQueryId sectionPath
-                          , carParagraphId = paraId
-                          , carRank = rank
-                          , carScore = Log.ln score
+                          { carQueryId    = CarRun.sectionPathToQueryId sectionPath
+                          , carPassage    = paraId
+                          , carRank       = rank
+                          , carScore      = Log.ln score
                           , carMethodName = CarRun.MethodName $ T.pack $ BS.unpack runName
                           }
                     | (rank, (paraId, score)) <- zip [1..] $ scoreQuery model idx k query
