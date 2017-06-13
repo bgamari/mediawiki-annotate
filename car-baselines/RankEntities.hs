@@ -46,5 +46,7 @@ main = do
     queries <- Run.groupByQuery <$> Run.readRunFile runFile
     paras <- TocFile.open parasFile
     let lookupPara = fromMaybe (error "uh oh") . flip TocFile.lookup paras
-    print $ fmap (queryEntities lookupPara) queries
+    putStrLn $ unlines [ unlines $ (show query : map (("  "++) . show) entityRanking) ++ [""]
+                       | (query, entityRanking) <- M.toList $ fmap (queryEntities lookupPara) queries
+                       ]
 
