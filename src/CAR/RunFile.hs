@@ -21,9 +21,9 @@ import qualified SimplIR.Format.TrecRunFile as Run
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord)
+                deriving (Eq, Ord, Show)
 newtype MethodName = MethodName { unMethodName :: T.Text }
-                   deriving (Eq, Ord)
+                   deriving (Eq, Ord, Show)
 
 data RankingEntry = RankingEntry { carQueryId     :: !QueryId
                                  , carParagraphId :: !ParagraphId
