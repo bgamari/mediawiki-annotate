@@ -230,3 +230,17 @@ prologue = do
     H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
     H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "/annotate.css"
     H.link ! HA.rel "stylesheet" ! HA.type_ "text/css" ! HA.href "/assessment-interface-v1.css"
+
+
+assessmentScaleInfo :: H.Html
+assessmentScaleInfo = do
+        H.p ! HA.class_ "entity-snippet-intro" $ "Assess relevance of passages for this section/article."
+        H.p ! HA.class_ "entity-snippet-intro" $ "Assessment scale (Use Must/Can/No whenever possible):"
+        H.p ! HA.class_ "entity-snippet-intro" $ H.ol $ do
+            H.li "Perfect: reserved for a passage that by itself says everything there needs to be said about this section"
+            H.li $ H.b "Must: Must be mentioned"
+            H.li "Should: Should be mentioned"
+            H.li $ H.b "Can: Can be mentioned"
+            H.li $ H.b "No: Not relevant for this section"
+            H.li "Trash: Low-quality passage that is not useful for any section"
+            H.li "Eraser: delete assessment"
