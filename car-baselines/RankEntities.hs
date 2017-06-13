@@ -22,7 +22,8 @@ instance Monoid EntityCounts where
     EntityCounts a `mappend` EntityCounts b = EntityCounts $ M.unionWith (<>) a b
 
 
-queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.RankingEntry -> [(PageId, ParagraphId, Run.Score)]
+queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.ParagraphRankingEntry
+              -> [(PageId, ParagraphId, Run.Score)]
 queryEntities lookupPara ranking =
     let EntityCounts counts = foldMap countEntities ranking
         entityRanking :: [(PageId, (Max (Run.Score, ParagraphId)))]
@@ -31,12 +32,12 @@ queryEntities lookupPara ranking =
        | (pageId, (Max (score, paraId))) <- entityRanking
        ]
   where
-    countEntities :: Run.RankingEntry -> EntityCounts
+    countEntities :: Run.ParagraphRankingEntry -> EntityCounts
     countEntities r = foldMap (toCounts . linkTargetId) (paraLinks para)
       where
         toCounts target =
             EntityCounts $ M.singleton target (Sum 1, Max (Run.carScore r, paraId para))
-        para = lookupPara $ fromMaybe (error "No paragraph") $ Run.carPassage r
+        para = lookupPara $ Run.carDocument r
 
 opts :: Parser (FilePath,  FilePath, TocFile.IndexedCborPath ParagraphId Paragraph)
 opts = (,,)
@@ -47,14 +48,13 @@ opts = (,,)
 main :: IO ()
 main = do
     (outputFile, runFile, parasFile) <- execParser $ info (helper <*> opts) mempty
-    queries <- Run.groupByQuery <$> Run.readRunFile runFile
+    queries <- Run.groupByQuery <$> Run.readParagraphRun runFile
     paras <- TocFile.open parasFile
     let lookupPara = fromMaybe (error "uh oh") . flip TocFile.lookup paras
     --print $ fmap (queryEntities lookupPara) queries
-    Run.writeRunFile outputFile
+    Run.writeEntityParagraphRun outputFile
         [ Run.RankingEntry { Run.carQueryId = qid
-                           , Run.carPassage = Just paraId
-                           , Run.carEntity  = Just pageId
+                           , Run.carDocument= Run.EntityAndPassage pageId paraId
                            , Run.carRank    = rank
                            , Run.carScore   = score
                            , Run.carMethodName = Run.MethodName "by+entity"
