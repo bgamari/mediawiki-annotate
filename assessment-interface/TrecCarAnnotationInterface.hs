@@ -275,7 +275,7 @@ main = do
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
              -- todo PassageViewHtml --> EntityViewHtml
-                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just rankingEntries, Nothing) -> do
