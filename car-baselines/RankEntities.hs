@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import Data.Bifunctor
 import Data.List
@@ -14,39 +15,49 @@ import CAR.Types
 import qualified CAR.TocFile as TocFile
 import CAR.Utils
 
-newtype EntityCounts = EntityCounts (M.Map PageName (Sum Int, Max (Run.Score, ParagraphId)))
+newtype EntityCounts = EntityCounts (M.Map PageId (Sum Int, Max (Run.Score, ParagraphId)))
 
 instance Monoid EntityCounts where
     mempty = EntityCounts mempty
     EntityCounts a `mappend` EntityCounts b = EntityCounts $ M.unionWith (<>) a b
 
 
-queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.RankingEntry -> [(PageName, ParagraphId)]
+queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.ParagraphRankingEntry
+              -> [(PageId, ParagraphId, Run.Score)]
 queryEntities lookupPara ranking =
     let EntityCounts counts = foldMap countEntities ranking
-        entityRanking :: [(PageName, (Max (Run.Score, ParagraphId)))]
+        entityRanking :: [(PageId, (Max (Run.Score, ParagraphId)))]
         entityRanking = map (second snd) $ sortBy (flip $ comparing $ fst . snd) $ M.toList counts
-    in fmap (fmap $ snd . getMax) entityRanking
+    in [ (pageId, paraId, score)
+       | (pageId, (Max (score, paraId))) <- entityRanking
+       ]
   where
-    countEntities :: Run.RankingEntry -> EntityCounts
-    countEntities r = foldMap (toCounts . linkTarget) (paraLinks para)
+    countEntities :: Run.ParagraphRankingEntry -> EntityCounts
+    countEntities r = foldMap (toCounts . linkTargetId) (paraLinks para)
       where
         toCounts target =
             EntityCounts $ M.singleton target (Sum 1, Max (Run.carScore r, paraId para))
-        para = lookupPara $ Run.carParagraphId r
+        para = lookupPara $ Run.carDocument r
 
-opts :: Parser (FilePath, TocFile.IndexedCborPath ParagraphId Paragraph)
-opts = (,)
-    <$> option str (short 'r' <> long "ranking" <> help "TREC ranking file")
+opts :: Parser (FilePath,  FilePath, TocFile.IndexedCborPath ParagraphId Paragraph)
+opts = (,,)
+    <$> option str (short 'o' <> long "output" <> help "Output TREC ranking file")
+    <*> option str (short 'r' <> long "ranking" <> help "TREC ranking file")
     <*> option (TocFile.IndexedCborPath <$> str) (short 'p' <> long "paragraphs" <> help "Paragraphs file")
 
 main :: IO ()
 main = do
-    (runFile, parasFile) <- execParser $ info (helper <*> opts) mempty
-    queries <- Run.groupByQuery <$> Run.readRunFile runFile
+    (outputFile, runFile, parasFile) <- execParser $ info (helper <*> opts) mempty
+    queries <- Run.groupByQuery <$> Run.readParagraphRun runFile
     paras <- TocFile.open parasFile
     let lookupPara = fromMaybe (error "uh oh") . flip TocFile.lookup paras
-    putStrLn $ unlines [ unlines $ (show query : map (("  "++) . show) entityRanking) ++ [""]
-                       | (query, entityRanking) <- M.toList $ fmap (queryEntities lookupPara) queries
-                       ]
-
+    Run.writeEntityParagraphRun outputFile
+        [ Run.RankingEntry { Run.carQueryId = qid
+                           , Run.carDocument= Run.EntityAndPassage pageId paraId
+                           , Run.carRank    = rank
+                           , Run.carScore   = score
+                           , Run.carMethodName = Run.MethodName "by+entity"
+                           }
+        | (qid, queryRanking) <- M.toList queries
+        , (rank, (pageId, paraId, score)) <- zip [1..] $ queryEntities lookupPara queryRanking
+        ]

@@ -2,15 +2,31 @@
 
 module CAR.RunFile
     ( -- * Types
-      RankingEntry(..)
+      RankingEntry'(..)
     , QueryId(..)
     , MethodName(..)
     , Run.Score
-      -- * I/O
-    , readRunFile
-    , writeRunFile
+
+      -- ** Entity/paragraph rankings
+    , RankingEntry
+    , PassageEntity(..)
+    , carEntity, carPassage
+    , readEntityParagraphRun
+    , writeEntityParagraphRun
+
+      -- ** Paragraph ranking
+    , ParagraphRankingEntry
+    , readParagraphRun
+    , writeParagraphRun
+
+      -- ** Entity ranking
+    , EntityRankingEntry
+    , readEntityRun
+    , writeEntityRun
+
       -- * Grouping and sorting runs
     , groupByQuery
+
       -- * Conversion
     , sectionPathToQueryId
     , parsePassageEntity
@@ -31,28 +47,48 @@ newtype QueryId = QueryId { unQueryId :: T.Text }
 newtype MethodName = MethodName { unMethodName :: T.Text }
                    deriving (Eq, Ord, Show)
 
-data RankingEntry = RankingEntry { carQueryId     :: !QueryId
-                                 , carPassage     :: Maybe ParagraphId
-                                 , carEntity      :: Maybe PageId
-                                 , carRank        :: !Int
-                                 , carScore       :: !Run.Score
-                                 , carMethodName  :: !MethodName
-                                 }
+data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
+                                      , carDocument    :: doc
+                                      , carRank        :: !Int
+                                      , carScore       :: !Run.Score
+                                      , carMethodName  :: !MethodName
+                                      }
 
-toCarRankingEntry :: Run.RankingEntry -> RankingEntry
-toCarRankingEntry r =
+-- | Paragraph/entity ranking entry
+type RankingEntry = RankingEntry' PassageEntity
+
+data PassageEntity = EntityOnly PageId
+                   | EntityAndPassage !PageId !ParagraphId
+
+carEntity :: RankingEntry -> PageId
+carEntity r =
+    case carDocument r of
+      EntityOnly pid         -> pid
+      EntityAndPassage pid _ -> pid
+
+carPassage :: RankingEntry -> Maybe ParagraphId
+carPassage r =
+    case carDocument r of
+      EntityOnly pid            -> Nothing
+      EntityAndPassage _ paraId -> Just paraId
+
+type ParagraphRankingEntry = RankingEntry' ParagraphId
+type EntityRankingEntry = RankingEntry' PageId
+
+toCarRankingEntry :: (Run.DocumentName -> doc) -> Run.RankingEntry -> RankingEntry' doc
+toCarRankingEntry parseDocument r =
     RankingEntry { carQueryId     = QueryId $ Run.queryId r
-                 , carPassage     = passage
-                 , carEntity      = entity
+                 , carDocument    = parseDocument $ Run.documentName r
                  , carRank        = Run.documentRank r
                  , carScore       = Run.documentScore r
                  , carMethodName  = MethodName $ Run.methodName r
                  }
-  where
-    (passage, entity) = parsePassageEntity $ Run.documentName r
 
-parsePassageEntity :: Run.DocumentName -> (Maybe ParagraphId, Maybe PageId)
-parsePassageEntity docName = (passage, entity)
+parsePassageEntity :: Run.DocumentName -> PassageEntity
+parsePassageEntity docName =
+    case (passage, entity) of
+      (Just p, Just e) -> EntityAndPassage e p
+      (Nothing, Just e) -> EntityOnly e
   where
     (p,e) = case T.splitOn "/" docName of
               [a,b] -> (a,b)
@@ -64,34 +100,52 @@ parsePassageEntity docName = (passage, entity)
       | T.null e  = Nothing
       | otherwise = Just $ packPageId $ T.unpack e
 
-
-
-
-fromCarRankingEntry :: RankingEntry -> Run.RankingEntry
-fromCarRankingEntry r =
+fromCarRankingEntry :: (doc -> Run.DocumentName) -> RankingEntry' doc -> Run.RankingEntry
+fromCarRankingEntry construct r =
     Run.RankingEntry { Run.queryId       = unQueryId $ carQueryId r
-                     , Run.documentName  = constructPassageEntity (carPassage r) (carEntity r)
+                     , Run.documentName  = construct $ carDocument r
                      , Run.documentRank  = carRank r
                      , Run.documentScore = carScore r
                      , Run.methodName    = unMethodName $ carMethodName r
                      }
 
-constructPassageEntity :: Maybe ParagraphId -> Maybe PageId -> Run.DocumentName
-constructPassageEntity maybePara maybeEntity =
-      fromMaybe "" (T.pack . unpackParagraphId <$> maybePara) <> "/" <>
-      fromMaybe "" (T.pack . unpackPageId <$> maybeEntity)
+constructPassageEntity :: PassageEntity -> Run.DocumentName
+constructPassageEntity ep =
+    fromMaybe "" (T.pack . unpackParagraphId <$> maybePara) <> "/" <>
+    fromMaybe "" (T.pack . unpackPageId <$> maybeEntity)
+  where
+    (maybePara, maybeEntity) =
+        case ep of
+          EntityOnly e -> (Nothing, Just e)
+          EntityAndPassage e p -> (Just p, Just e)
 
 sectionPathToQueryId :: SectionPath -> QueryId
 sectionPathToQueryId = QueryId . T.pack . escapeSectionPath
 
-readRunFile :: FilePath -> IO [RankingEntry]
-readRunFile path = map toCarRankingEntry <$> Run.readRunFile path
+readEntityParagraphRun :: FilePath -> IO [RankingEntry]
+readEntityParagraphRun path = map (toCarRankingEntry parsePassageEntity) <$> Run.readRunFile path
 
-writeRunFile :: FilePath -> [RankingEntry] -> IO ()
-writeRunFile path = Run.writeRunFile path . map fromCarRankingEntry
+writeEntityParagraphRun :: FilePath -> [RankingEntry] -> IO ()
+writeEntityParagraphRun path = Run.writeRunFile path . map (fromCarRankingEntry constructPassageEntity)
+
+readParagraphRun :: FilePath -> IO [ParagraphRankingEntry]
+readParagraphRun path = map (toCarRankingEntry parseDoc) <$> Run.readRunFile path
+  where parseDoc = packParagraphId . T.unpack
+
+writeParagraphRun :: FilePath -> [ParagraphRankingEntry] -> IO ()
+writeParagraphRun path = Run.writeRunFile path . map (fromCarRankingEntry constructDoc)
+  where constructDoc = T.pack . unpackParagraphId
+
+readEntityRun :: FilePath -> IO [EntityRankingEntry]
+readEntityRun path = map (toCarRankingEntry parseDoc) <$> Run.readRunFile path
+  where parseDoc = packPageId . T.unpack
+
+writeEntityRun :: FilePath -> [EntityRankingEntry] -> IO ()
+writeEntityRun path = Run.writeRunFile path . map (fromCarRankingEntry constructDoc)
+  where constructDoc = T.pack . unpackPageId
 
 -- | Group a run by query and sort each query by score
-groupByQuery :: [RankingEntry] -> M.Map QueryId (Seq.Seq RankingEntry)
+groupByQuery :: [RankingEntry' doc] -> M.Map QueryId (Seq.Seq (RankingEntry' doc))
 groupByQuery run =
     fmap (Seq.sortBy $ comparing carScore)
     $ M.fromListWith mappend [ (carQueryId r, Seq.singleton r) | r <- run ]
