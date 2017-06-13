@@ -205,9 +205,9 @@ main = do
     trecResultMapEntity <-
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
-                let (Just pid,Just eid) = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in case (loadEntity eid) of
-                    Just (entity) -> Just (entity, loadParagraph pid)
+                let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
+                in case loadEntity eid of
+                    Just entity -> Just (entity, loadParagraph pid)
                     Nothing -> Nothing
 
             getNubKeyEntity :: EntityParagraphRankingEntry -> (PageId, ParagraphId)
@@ -221,8 +221,8 @@ main = do
     trecQrelsMapEntity <-
         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemMaybeEntity docName =
-                let (Just pid,Just eid) = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in case (loadEntityMaybe eid) of
+                let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
+                in case loadEntityMaybe eid of
                       Just entity -> Just (entity, loadParagraph pid)
                       Nothing -> Nothing
                     -- todo load para from qrel

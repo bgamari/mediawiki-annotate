@@ -153,15 +153,14 @@ modeQuery =
                           docLen (HM.fromList docTerms)
             model = modelBM25
 
-        let predictStub :: Stub -> [CarRun.RankingEntry]
+        let predictStub :: Stub -> [CarRun.ParagraphRankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
 
-            predictSection :: BagOfWords -> SectionPath -> [CarRun.RankingEntry]
+            predictSection :: BagOfWords -> SectionPath -> [CarRun.ParagraphRankingEntry]
             predictSection query sectionPath =
                     [ CarRun.RankingEntry
                           { carQueryId    = CarRun.sectionPathToQueryId sectionPath
-                          , carPassage    = Just paraId
-                          , carEntity     = Nothing
+                          , carDocument   = paraId
                           , carRank       = rank
                           , carScore      = Log.ln score
                           , carMethodName = CarRun.MethodName $ T.pack $ BS.unpack runName
@@ -169,7 +168,7 @@ modeQuery =
                     | (rank, (paraId, score)) <- zip [1..] $ scoreQuery model idx k query
                     ]
 
-        CarRun.writeRunFile outputFile $ foldMap predictStub outlines
+        CarRun.writeParagraphRun outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
 stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
