@@ -59,5 +59,6 @@ main = do
                            , Run.carMethodName = Run.MethodName "by+entity"
                            }
         | (qid, queryRanking) <- M.toList queries
-        , (rank, (pageId, paraId, score)) <- zip [1..] $ queryEntities lookupPara queryRanking
+        , (rank, (pageId, paraId, score)) <- zip [1..] $ sortBy (flip $ comparing $ \(_,_,c) -> c)
+                                             $ queryEntities lookupPara queryRanking
         ]
