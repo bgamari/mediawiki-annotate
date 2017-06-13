@@ -3,20 +3,27 @@ module CAR.RunFile
       RankingEntry(..)
     , QueryId(..)
     , MethodName(..)
+    , Run.Score
       -- * I/O
     , readRunFile
     , writeRunFile
+      -- * Grouping and sorting runs
+    , groupByQuery
       -- * Conversion
     , sectionPathToQueryId
     ) where
 
+import Data.Ord
 import qualified Data.Text as T
---import SimplIR.Format.TrecRunFile hiding (MethodName, QueryId, RankingEntry)
+import qualified Data.Map.Strict as M
+import qualified Data.Sequence as Seq
 import qualified SimplIR.Format.TrecRunFile as Run
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
+                deriving (Eq, Ord)
 newtype MethodName = MethodName { unMethodName :: T.Text }
+                   deriving (Eq, Ord)
 
 data RankingEntry = RankingEntry { carQueryId     :: !QueryId
                                  , carParagraphId :: !ParagraphId
@@ -51,3 +58,9 @@ readRunFile path = map toCarRankingEntry <$> Run.readRunFile path
 
 writeRunFile :: FilePath -> [RankingEntry] -> IO ()
 writeRunFile path = Run.writeRunFile path . map fromCarRankingEntry
+
+-- | Group a run by query and sort each query by score
+groupByQuery :: [RankingEntry] -> M.Map QueryId (Seq.Seq RankingEntry)
+groupByQuery run =
+    fmap (Seq.sortBy $ comparing carScore)
+    $ M.fromListWith mappend [ (carQueryId r, Seq.singleton r) | r <- run ]
