@@ -87,12 +87,16 @@ toCarRankingEntry parseDocument r =
 parsePassageEntity :: Run.DocumentName -> PassageEntity
 parsePassageEntity docName =
     case (passage, entity) of
-      (Just p, Just e) -> EntityAndPassage e p
-      (Nothing, Just e) -> EntityOnly e
+      (Just p, Just e)   -> EntityAndPassage e p
+      (Nothing, Just e)  -> EntityOnly e
+      (Just _, Nothing)  -> error $ "parsePassageEntity: Passage but no entity: " ++ show docName
+      (Nothing, Nothing) -> error $ "parsePassageEntity: Neither a passage nor an entity: " ++ show docName
   where
-    (p,e) = case T.splitOn "/" docName of
-              [a,b] -> (a,b)
-              _     -> error $ "toCarRankingEntry: Invalid document name: " ++ show docName
+    (p,e) = case T.breakOn "/" docName of
+              (a,b)
+                | T.null a -> error $ "toCarRankingEntry: Invalid document name: " ++ show docName
+                | otherwise -> (a, T.drop 1 b)
+
     passage
       | T.null p  = Nothing
       | otherwise = Just $ packParagraphId $ T.unpack p
