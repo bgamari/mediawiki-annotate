@@ -45,6 +45,16 @@ executable rank-entities
                        optparse-applicative >= 0.12,
                        trec-car-tools
 
+executable entityranking-with-lead
+  main-is:             EntityRankingToEntityLeadPassage.hs
+  other-extensions:    ScopedTypeVariables, BangPatterns
+  default-language:    Haskell2010
+  build-depends:       base >=4.9 && <4.10,
+                       containers,
+                       optparse-applicative >= 0.12,
+                       unordered-containers >= 0.2,
+                       trec-car-tools
+
 executable car-galago-query
   main-is:             GalagoQuery.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
