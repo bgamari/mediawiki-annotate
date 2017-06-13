@@ -44,6 +44,20 @@ entityRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.d
                     H.ol $ mapM_ renderHtml sprTruths
                 Nothing -> mempty
 
+entityPassageRankingToHtml :: SectionPathWithName -> [TrecCarRenderHtml.EntityParagraphRankingEntry] -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry] -> H.Html
+entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.docTypeHtml $ do
+    H.head prologue
+    H.body $ do
+        viewHeader spr
+
+        assessmentScaleInfo
+        let renderHtml entry =
+                entityPassageToAnnotationHtml queryId (entryItem entry) Nothing
+              where queryId = sectionPathToQueryId sprQueryId
+
+        H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
+            H.h1 "Entities with Passages"
+            H.ol $ mapM_ renderHtml sprRanking  -- todo urgent sort by entity
 
 
 
