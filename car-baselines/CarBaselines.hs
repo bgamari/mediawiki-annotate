@@ -11,6 +11,7 @@ import Data.Maybe (fromMaybe)
 import Data.Monoid
 import GHC.Generics
 import System.FilePath
+import Control.Exception
 
 import Data.Binary
 import qualified Data.Binary.Serialise.CBOR as CBOR
@@ -86,9 +87,14 @@ modeCorpusStats =
 writeCorpusStats :: FilePath -> CorpusStats Term -> IO ()
 writeCorpusStats fname = BSL.writeFile fname . CBOR.serialise
 
+data CorpusStatsReadError = CorpusStatsReadError FilePath SomeException
+                          deriving (Show)
+instance Exception CorpusStatsReadError
+
 readCorpusStats :: FilePath -> IO (CorpusStats Term)
 readCorpusStats fname =
-    fromMaybe (error "Error reading corpus statistics") . CBOR.deserialise <$> BSL.readFile fname
+    Control.Exception.handle (\e -> throw $ CorpusStatsReadError fname e)
+    $ fromMaybe (error "Error reading corpus statistics") . CBOR.deserialise <$> BSL.readFile fname
 
 modeMergeCorpusStats :: Parser (IO ())
 modeMergeCorpusStats =
