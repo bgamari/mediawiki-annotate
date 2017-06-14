@@ -12,7 +12,7 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable car-test
+executable car-retrieval
   main-is:             CarBaselines.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
   build-depends:       base >=4.9 && <4.10,
