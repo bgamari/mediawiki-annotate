@@ -34,6 +34,7 @@ module CAR.Types
 import Data.Foldable
 import Data.Char (ord, chr)
 import Data.List (intercalate)
+import Control.Exception
 import Control.Monad.ST
 import Control.Monad.ST.Unsafe
 import Control.DeepSeq
@@ -196,8 +197,14 @@ decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
               return (x : rest)
           (CBOR.Fail _rest _ err, _) -> error $ show err
 
+data CborListDeserialiseError = CborListDeserialiseError FilePath CBOR.DeserialiseFailure
+                              deriving (Show)
+instance Exception CborListDeserialiseError
+
 readCborList :: CBOR.Serialise a => FilePath -> IO [a]
-readCborList path = decodeCborList <$> BSL.readFile path
+readCborList fname =
+    handle (throw . CborListDeserialiseError fname)
+           (decodeCborList <$> BSL.readFile fname)
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode

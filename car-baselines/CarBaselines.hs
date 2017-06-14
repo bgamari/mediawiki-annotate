@@ -143,7 +143,7 @@ modeQuery =
   where
     go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> Double -> String -> FilePath -> IO ()
     go diskIdx corpusStatsFile outlineFile runName k dropFreqTermsFactor modelName outputFile = do
-        outlines <- decodeCborList <$> BSL.readFile outlineFile
+        outlines <- readCborList outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
