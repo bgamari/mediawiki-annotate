@@ -87,14 +87,13 @@ modeCorpusStats =
 writeCorpusStats :: FilePath -> CorpusStats Term -> IO ()
 writeCorpusStats fname = BSL.writeFile fname . CBOR.serialise
 
-data CorpusStatsReadError = CorpusStatsReadError FilePath SomeException
+data CorpusStatsReadError = CorpusStatsReadError FilePath CBOR.DeserialiseFailure
                           deriving (Show)
 instance Exception CorpusStatsReadError
 
 readCorpusStats :: FilePath -> IO (CorpusStats Term)
 readCorpusStats fname =
-    Control.Exception.handle (\e -> throw $ CorpusStatsReadError fname e)
-    $ fromMaybe (error "Error reading corpus statistics") . CBOR.deserialise <$> BSL.readFile fname
+    either (throw . CorpusStatsReadError fname) id . CBOR.deserialiseOrFail <$> BSL.readFile fname
 
 modeMergeCorpusStats :: Parser (IO ())
 modeMergeCorpusStats =
