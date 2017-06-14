@@ -131,27 +131,50 @@ modeQuery =
        <*> option str (long "outlines" <> short 'O' <> help "File containing page outlines to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
        <*> option auto (long "count" <> short 'k' <> help "How many results to retrieve per query" <> value 1000)
+       <*> option auto (short 'x' <> help "factor above average for cutting off frequent terms" <> value (1/0))
+       <*> option str (long "model" <> short 'm' <> help "retrieval model, values: bm25 ql")
        <*> option str (long "output" <> short 'o' <> help "Output ranking file")
   where
-    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> FilePath -> IO ()
-    go diskIdx corpusStatsFile outlineFile runName k outputFile = do
+    go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> Double -> String -> FilePath -> IO ()
+    go diskIdx corpusStatsFile outlineFile runName k dropFreqTermsFactor modelName outputFile = do
         outlines <- decodeCborList <$> BSL.readFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
-        let termFreq = maybe 0.5 (realToFrac . termFrequency) . flip HM.lookup (corpusTerms corpusStats)
+
+
+        let termFreq :: Fractional a => Term -> a
+            termFreq = maybe 0.5 (realToFrac . termFrequency) . flip HM.lookup (corpusTerms corpusStats)
+
+            termIsFrequent :: Term -> Bool
+            termIsFrequent t =
+                 let avgTermFreq = realToFrac (corpusTokenCount corpusStats) /  (realToFrac $ HM.size $ corpusTerms corpusStats)
+                 in termFreq t > dropFreqTermsFactor * avgTermFreq
+                 
+            filterQueryTerms queryTerms =
+                 let queryTerms' = filter (not . termIsFrequent . fst) queryTerms
+                 in if null queryTerms' then
+                    queryTerms
+                 else
+                    queryTerms'
+
             termProb t = termFreq t / realToFrac (corpusTokenCount corpusStats)
 
             modelQL, modelBM25 :: ScoringModel
             modelQL queryTerms docLen docTerms =
                 queryLikelihood (Dirichlet 1000 termProb)
-                                (fmap (fmap realToFrac) queryTerms)
+                                (fmap (fmap realToFrac) queryTerms')
                                 docLen (fmap (fmap realToFrac) docTerms)
+                  where queryTerms' = filterQueryTerms queryTerms
             modelBM25 queryTerms docLen docTerms =
                 BM25.bm25 BM25.sensibleParams corpusStats
-                          (HS.fromList $ map fst queryTerms)
+                          (HS.fromList $ map fst queryTerms')
                           docLen (HM.fromList docTerms)
-            model = modelBM25
+                  where queryTerms' = filterQueryTerms queryTerms
+
+            model = case modelName of
+                  "bm25" -> modelBM25
+                  "ql" -> modelQL
 
         let predictStub :: Stub -> [CarRun.ParagraphRankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
