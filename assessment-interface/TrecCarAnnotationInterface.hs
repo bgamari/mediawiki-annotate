@@ -232,7 +232,7 @@ main = do
 
 
 
-    putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
+--     putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
 
     let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry]
         lookupResultEntity sectionPath =
