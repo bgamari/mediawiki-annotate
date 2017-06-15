@@ -94,8 +94,8 @@ trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
                              -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
 trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuffle trecRunFiles = do
 
-    let resultsToTopkMap ::  [TrecRun.RankingEntry] -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
-        resultsToTopkMap trecRankingContents =
+    let resultsToTopkMap ::  Int -> [TrecRun.RankingEntry] -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
+        resultsToTopkMap optsTopK  trecRankingContents  =
             let resultMap :: HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
                 resultMap = HM.fromListWith (++) $
                   [ ( TrecRun.queryId entry
@@ -109,14 +109,19 @@ trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuff
             in fmap (take optsTopK) resultMap
 
     files <- mapM TrecRun.readRunFile trecRunFiles
-    let unionResultMap = evalRandIO $ mapM condShuffleStuffNub $ foldl' (HM.unionWith (++)) mempty $ fmap resultsToTopkMap files
+    let topKPerFile = ceiling ((realToFrac optsTopK) / (realToFrac $ length files))
+        unionResultMap ::  IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
+        unionResultMap = evalRandIO $ mapM condShuffleStuffNub
+                                    $ foldl' (HM.unionWith (++)) mempty
+                                    $ fmap (resultsToTopkMap topKPerFile)
+                                      files
           where
             condShuffleStuffNub :: [TrecCarRenderHtml.RankingEntry item] -> Rand StdGen [TrecCarRenderHtml.RankingEntry item]    -- todo generify
             condShuffleStuffNub rankElements
               | optsShuffle = shuffleM $ nubBy rankElements
               | otherwise   = return $ nubBy rankElements
             nubBy = HM.elems . HM.fromList . fmap (\rankElem -> (getNubKey $ rankElem, rankElem))
-    unionResultMap
+    fmap (fmap (take optsTopK)) unionResultMap
 
 
 -- todo urgent mix ground truth and result files
