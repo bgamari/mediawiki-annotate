@@ -53,6 +53,7 @@ import Options.Applicative
 
 import SimplIR.StopWords
 import SimplIR.Tokenise
+{-# ANN module ("HLint: ignore Redundant bracket"::String) #-}
 
 
 
@@ -76,24 +77,38 @@ opts :: Parser (IO ())
 opts =
     go <$> option str (long "output" <> short 'o' <> help "output file for galago query json format")
        <*> option str (long "outlines" <> short 'O' <> help "File containing page outlines to predict (one per line)")
-  where
-    go outFile outlinesFile = do
+       <*> switch (long "sdm")
+       <*> switch (long "rm")
+       <*> optional (option (fmap T.pack str) (long "field" <> short 'f' <> help "fieldname to search in"))
+
+ where
+    go outFile outlinesFile useSDM useRM maybeFieldname = do
         outlines <- readCborList outlinesFile :: IO [Stub]
-        BSL.writeFile outFile $ Aeson.encode $ foldMap stubToGalagoQuery outlines
+        BSL.writeFile outFile $ Aeson.encode $ foldMap stubToGalagoQuery outlines useSDM useRM maybeFieldname
 
 type GalagoQueryId = T.Text
 type GalagoQueryText = T.Text
 
-stubToGalagoQuery :: Stub -> GalagoQuerySet
-stubToGalagoQuery outline =
+stubToGalagoQuery :: Stub -> Bool -> Bool -> Maybe T.Text -> GalagoQuerySet
+stubToGalagoQuery outline useSDM useRM maybeFieldname =
     GalagoQuerySet $ fmap (uncurry querySection) $ stubPaths outline
   where
     querySection :: [Term] -> SectionPath -> GalagoQuery
     querySection queryTerms sectionPath =
             let queryId = T.pack $ escapeSectionPath sectionPath
-                queryText =  "#sdm ( " --"$rm (
-                          <> T.intercalate " " (map Term.toText queryTerms)
-                          <> " )"
+                rawQueryTerms = (map Term.toText queryTerms)
+                fieldNameQueryTerms fieldName ts = map (\t -> t<>"."<>fieldName) ts
+                combineText ts = T.unwords ts
+                sdmQuery x = "#sdm ( " <> x <> " )"
+                rmQuery x = "#rm ( " <> x <> " )"
+
+                queryText =
+                   (if useSDM then sdmQuery else id)
+                   $ (if useRM then rmQuery else id)
+                   $ combineText
+                   $ maybe id fieldNameQueryTerms maybeFieldname
+                   rawQueryTerms
+                   
             in GalagoQuery queryId queryText
 
 data GalagoQuery = GalagoQuery { galagoQueryId :: GalagoQueryId
