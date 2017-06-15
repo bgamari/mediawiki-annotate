@@ -199,7 +199,7 @@ modeQuery =
         CarRun.writeParagraphRun outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
-stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
+stubPaths (Stub pageName pageId skel) = foldMap (go mempty pageNameWords) skel
   where
     go :: DList.DList HeadingId -> BagOfWords -> PageSkeleton -> [(BagOfWords, SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen
@@ -210,6 +210,7 @@ stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
         terms = parentTerms <> headingWords heading
         me = parents `DList.snoc` headingId
 
+    pageNameWords = foldMap oneWord $ tokenize $ getPageName pageName
     headingWords :: SectionHeading -> BagOfWords
     headingWords (SectionHeading t) = foldMap oneWord $ tokenize t
 
