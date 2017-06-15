@@ -54,6 +54,7 @@ import Crypto.Hash.SHA1 as SHA
 import qualified Data.ByteString.Base16 as Base16
 import Data.MediaWiki.Markup
 import Data.Aeson.Types
+import qualified Data.Aeson as Aeson
 import Data.Hashable
 import Data.String
 import System.IO
@@ -126,6 +127,8 @@ instance CBOR.Serialise Paragraph
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
                     deriving (Show, Read, Generic, Ord, Eq, CBOR.Serialise, Hashable)
 instance NFData ParagraphId
+instance Aeson.FromJSON ParagraphId where parseJSON o = packParagraphId <$> parseJSON o
+instance Aeson.ToJSON ParagraphId where toJSON = toJSON . unpackParagraphId
 
 unpackParagraphId :: ParagraphId -> String
 unpackParagraphId (ParagraphId s) = unpackSBS s
@@ -159,6 +162,8 @@ data Entity = Entity { entityPageName :: !PageName
                      }
             deriving (Show, Generic)
 instance CBOR.Serialise Entity
+instance Aeson.FromJSON Entity
+instance Aeson.ToJSON Entity
 
 
 -- | A page on Wikipedia (which coincides with an Entity in this case)
