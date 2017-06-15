@@ -174,9 +174,8 @@ main = do
     putStrLn "...done deserializing articles"
 
     let loadEntity :: PageId -> Maybe Entity
-        loadEntity pid =
+        loadEntity = loadEntityMaybe
 --           fromMaybe (trace $ "Can't find entity: "++ show pid ++ " in file "++ entityFile) $
-            loadEntityMaybe pid
 
         loadEntityMaybe :: PageId -> Maybe Entity
         loadEntityMaybe pid = do
@@ -186,7 +185,7 @@ main = do
     -- ========= view renderer Paragraphs ==============
     trecResultMap <-
         let trecRunItemToEntryItemPara ::  TrecRun.DocumentName -> Maybe Paragraph
-            trecRunItemToEntryItemPara = Just . loadParagraph . packParagraphId . T.unpack
+            trecRunItemToEntryItemPara = loadParagraphMaybe . packParagraphId . T.unpack
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
@@ -215,9 +214,9 @@ main = do
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in case loadEntity eid of
-                    Just entity -> Just (entity, loadParagraph pid)
-                    Nothing -> Nothing
+                in do entity <- loadEntityMaybe eid
+                      para <- loadParagraphMaybe pid
+                      return (entity, para)
 
             getNubKeyEntity :: EntityParagraphRankingEntry -> (PageId, ParagraphId)
             getNubKeyEntity rankingEntry =
@@ -231,10 +230,9 @@ main = do
         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemMaybeEntity docName =
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in case loadEntityMaybe eid of
-                      Just entity -> Just (entity, loadParagraph pid)
-                      Nothing -> Nothing
-                    -- todo load para from qrel
+                in do entity <- loadEntityMaybe eid
+                      para <- loadParagraphMaybe pid
+                      return (entity, para)
 
         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
       :: IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry (Entity, Paragraph)])
