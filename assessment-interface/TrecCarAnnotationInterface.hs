@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE RankNTypes #-}
@@ -10,12 +11,14 @@ module Main where
 
 import Options.Applicative
 
+import Data.Bifunctor
 import Data.Monoid
 import Data.Traversable
 import Data.List
 import Data.Maybe
 import Data.Foldable
 import Data.Hashable
+import GHC.Generics
 import System.FilePath
 import System.Directory
 import System.FilePath.Glob
@@ -24,6 +27,7 @@ import System.Random
 import System.Random.Shuffle
 import Control.Monad.Random
 
+import qualified Data.Aeson as Aeson
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.ByteString.Lazy as BSL
@@ -322,6 +326,25 @@ main = do
                                     createPassageView fileNameLookup spwn >>
                                     createEntityView fileNameLookup spwn
                                     )
+
+
+    BSL.writeFile "interface.json" $ Aeson.encode
+        $ AnnotationInterface { entityResults = fmap (map $ second paraId . entryItem) trecResultMapEntity
+                              , entityQRels   = fmap (map $ second paraId . entryItem) trecQrelsMapEntity
+                              , passageResults = fmap (map $ paraId . entryItem) trecResultMap
+                              , passageQRels   = fmap (map $ paraId . entryItem) trecQrelsMap
+                              }
+
+
+data AnnotationInterface =
+    AnnotationInterface { entityResults  :: HM.Lazy.HashMap TrecRun.QueryId [(Entity, ParagraphId)]
+                        , entityQRels    :: HM.Lazy.HashMap TrecRun.QueryId [(Entity, ParagraphId)]
+                        , passageResults :: HM.Lazy.HashMap TrecRun.QueryId [ParagraphId]
+                        , passageQRels   :: HM.Lazy.HashMap TrecRun.QueryId [ParagraphId]
+                        }
+    deriving (Generic)
+instance Aeson.FromJSON AnnotationInterface
+instance Aeson.ToJSON AnnotationInterface
 
     -- ======== get sectionpaths out of a stub ===============
 
