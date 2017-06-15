@@ -214,7 +214,7 @@ main = do
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in do entity <- loadEntityMaybe eid
+                in do entity <- loadEntityMaybe eid                                                           
                       para <- loadParagraphMaybe pid
                       return (entity, para)
 
@@ -226,17 +226,17 @@ main = do
         in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
-    trecQrelsMapEntity <-
-        let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
-            trecRunItemToEntryItemMaybeEntity docName =
-                let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in do entity <- loadEntityMaybe eid
-                      para <- loadParagraphMaybe pid
-                      return (entity, para)
-
-        in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
-      :: IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry (Entity, Paragraph)])
-
+--     trecQrelsMapEntity <-
+--         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
+--             trecRunItemToEntryItemMaybeEntity docName =
+--                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
+--                 in do entity <- loadEntityMaybe eid
+--                       para <- loadParagraphMaybe pid
+--                       return (entity, para)
+--
+--         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
+--       :: IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry (Entity, Paragraph)])
+    let trecQrelsMapEntity = mempty
 
 
 --     putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
