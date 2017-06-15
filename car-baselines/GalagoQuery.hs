@@ -110,7 +110,7 @@ instance ToJSON GalagoQuerySet where
     toJSON (GalagoQuerySet qs) = object [ "queries" .= qs ]
 
 stubPaths :: Stub -> [([Term], SectionPath)]
-stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
+stubPaths (Stub pageName pageId skel) = foldMap (go mempty (titleWords pageName)) skel
   where
     go :: DList.DList HeadingId -> [Term] -> PageSkeleton -> [([Term], SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen
@@ -123,6 +123,7 @@ stubPaths (Stub _ pageId skel) = foldMap (go mempty mempty) skel
 
     headingWords :: SectionHeading -> [Term]
     headingWords (SectionHeading t) = tokenize t
+    titleWords (PageName t) = tokenize t
 
 main :: IO ()
 main = do
