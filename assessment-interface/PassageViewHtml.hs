@@ -64,7 +64,7 @@ passageMixedRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe
 
             case sprTruthsMaybe of
                 Just sprTruths -> do
-                    let mixed =  sortBy (compare `on` (paraId . entryItem)) $ (sprRanking ++ sprTruths)
+                    let mixed = nubBy ((==) `on` (paraId . entryItem)) $ sortBy (compare `on` (paraId . entryItem)) $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
                 Nothing -> mempty
 
