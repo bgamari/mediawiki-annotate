@@ -10,12 +10,9 @@ import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Text.Blaze.Html5 as H
-import Text.Blaze.Html5 ((!), p, ul, li, toHtml, div)
+import Text.Blaze.Html5 ((!), toHtml)
 import Text.Blaze.Html5.Attributes as HA
-import qualified Text.Blaze.Html.Renderer.Utf8 as H
-import qualified Data.ByteString.Lazy as BSL
 
-import CAR.Utils
 import CAR.Types
 
 import qualified SimplIR.Format.TrecRunFile as TrecRun

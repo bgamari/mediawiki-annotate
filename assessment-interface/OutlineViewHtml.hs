@@ -4,21 +4,13 @@
 -- | Construct passage views
 module OutlineViewHtml where
 
-import Control.Monad
 import Data.Monoid
-import qualified Data.HashMap.Strict as HM
-import qualified Data.Text as T
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ((!), toHtml)
 import Text.Blaze.Html5.Attributes as HA
-import qualified Text.Blaze.Html.Renderer.Utf8 as H
-import qualified Data.ByteString.Lazy as BSL
-import Network.URI
 
-import CAR.Utils
 import CAR.Types
 import CAR.CarExports
-import qualified SimplIR.Format.TrecRunFile as Run
 
 import TrecCarRenderHtml
 import FileNameLookup
@@ -26,7 +18,7 @@ import FileNameLookup
 -- todo generate links to both passageView and entityView  (separate page for ground truth?)
 
 outlineToHtml :: FileNameLookup -> Stub -> H.Html
-outlineToHtml FileNameLookup{..} outline@(Stub pageName pageId skeleta) = H.docTypeHtml $ do
+outlineToHtml FileNameLookup{..} (Stub pageName pageId skeleta) = H.docTypeHtml $ do
     H.head prologue
     H.body $ do
         H.h1 $ "Title "

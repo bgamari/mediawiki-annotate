@@ -60,6 +60,7 @@ data Opts = Opts { outlinesFile :: FilePath
                  , optsShuffle :: Bool
                  , optsTopK :: Int
                  , optsOutlineId :: Maybe String
+                 , optsTrueQrelFiles :: [FilePath]
                  , optsQrelFile :: FilePath
                  , optsTrecPsgRunGlobs :: [FilePath]
                  , optsTrecEntityRunGlobs :: [FilePath]
@@ -141,6 +142,7 @@ opts =
     <*> switch (short 's' <> long "shuffle results")
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
+    <*> many (option str (short 't' <> long "true-qrel" <> help "qrel file to show annotations from"))
     <*> option str (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "QRELS")
     <*> many (option str (short 'p' <> long "psg-runs" <> help "trec compatible passage run file(s)" <> metavar "Trec-psg-run-FILE(s)"))
     <*> many (option str (short 'e' <> long "entity-runs" <> help "trec compatible entity run file(s)" <> metavar "Trec-entity-run-FILE(s)"))
@@ -214,7 +216,7 @@ main = do
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in do entity <- loadEntityMaybe eid                                                           
+                in do entity <- loadEntityMaybe eid
                       para <- loadParagraphMaybe pid
                       return (entity, para)
 
