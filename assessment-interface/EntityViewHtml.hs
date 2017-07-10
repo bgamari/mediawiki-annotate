@@ -30,7 +30,7 @@ entityRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.d
         assessmentScaleInfo
 
         let renderHtml entry =
-                entityToAnnotationHtml queryId (entryItem entry) Nothing   -- todo prio2 pass in relevance label instead of Nothing
+                entityToAnnotationHtml queryId (entryItem entry) []   -- todo prio2 pass in relevance label instead of Nothing
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
@@ -52,7 +52,7 @@ entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMayb
 
         assessmentScaleInfo
         let renderHtml entry =
-                entityPassageToAnnotationHtml queryId (entryItem entry) Nothing
+                entityPassageToAnnotationHtml queryId (entryItem entry) []
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do

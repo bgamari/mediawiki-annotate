@@ -45,16 +45,11 @@ data SectionPathWithName = SectionPathWithName { sprQueryId      :: SectionPath
 
 -- ========= Annotation Control, does not care what it is annotating   =============
 
-annotationControl :: AnnotationQueryId -> ItemId -> Maybe IsRelevant -> H.Html
-annotationControl (AnnotationQueryId queryId) (ItemId item) groundTruthLabel =
+annotationControl :: AnnotationQueryId -> ItemId -> H.Html
+annotationControl (AnnotationQueryId queryId) (ItemId item) =
     H.span ! H.dataAttribute "item"  item ! H.dataAttribute "query" queryId ! annotationClass $ mempty
   where
-    annotationClass =  HA.class_ ("annotation " <> groundTruthHtml)
-    groundTruthHtml =
-      case groundTruthLabel of
-        Just Relevant -> "poslabel"
-        Just NotRelevant -> "neglabel"
-        Nothing -> ""
+    annotationClass =  HA.class_ "annotation"
 
 
  -- | A client-side query ID -- the query for which things are being annotated
@@ -73,8 +68,15 @@ fromBinaryRelevance simplirRelevance =
       TrecQrel.Relevant -> Relevant
       TrecQrel.NotRelevant -> NotRelevant
 
+-- | A textual description of a shown description.
+type AssessmentSource = T.Text
 
-
+shownAssessmentsHtml :: [(AssessmentSource, T.Text)] -> H.Html
+shownAssessmentsHtml [] = mempty
+shownAssessmentsHtml assessments =
+    H.ul ! HA.class_ "shown-assessments" $ forM_ assessments $ \(source, label) -> H.li $ do
+        H.span ! HA.class_ "source" $ H.toHtml source
+        H.span ! HA.class_ "label" $ H.toHtml label
 
 -- ========= Tieing Annotation control together with paragraph rendering ===========
 
@@ -85,19 +87,20 @@ paragraphToItemId = ItemId . H.stringValue . unpackParagraphId . paraId
 sectionPathToQueryId :: SectionPath -> AnnotationQueryId
 sectionPathToQueryId = AnnotationQueryId . H.stringValue . escapeSectionPath
 
-paragraphToAnnotationHtml' :: AnnotationQueryId -> Paragraph -> Maybe IsRelevant -> (Paragraph-> H.Html) -> H.Html
-paragraphToAnnotationHtml' queryId para groundTruthLabel contentHtml =
+paragraphToAnnotationHtml' :: AnnotationQueryId -> Paragraph -> [(AssessmentSource, T.Text)] -> (Paragraph-> H.Html) -> H.Html
+paragraphToAnnotationHtml' queryId para shownAssessments contentHtml =
     H.li ! HA.class_ "entity-snippet-li" $ do
         H.p $ do
             -- H.span ! HA.class_ "htmlscore" $ H.toHtml (show $ entryScore e)
-            annotationControl queryId itemId groundTruthLabel   -- todo prio2 show ground truth label in annotation
+            annotationControl queryId itemId -- todo prio2 show ground truth label in annotation
+            shownAssessmentsHtml shownAssessments
             H.span ! HA.class_ "entity-snippet-li-text" $ do
                     contentHtml para
   where
     itemId = paragraphToItemId para
 
 
-paragraphToAnnotationHtml queryId p groundTruthLabel =  paragraphToAnnotationHtml' queryId p groundTruthLabel paragraphToHtml
+paragraphToAnnotationHtml queryId p shownAssessments =  paragraphToAnnotationHtml' queryId p shownAssessments paragraphToHtml
 
 
 -- ============= Tieing Annotation Control together with entity rendering ===========
@@ -107,12 +110,13 @@ entityToItemId = ItemId . H.stringValue . unpackPageId . entityPageId
 
 
 
-entityToAnnotationHtml' :: AnnotationQueryId -> Entity -> Maybe IsRelevant -> (Entity-> H.Html) -> H.Html
-entityToAnnotationHtml' queryId entity groundTruthLabel contentHtml =
+entityToAnnotationHtml' :: AnnotationQueryId -> Entity -> [(AssessmentSource, T.Text)] -> (Entity-> H.Html) -> H.Html
+entityToAnnotationHtml' queryId entity shownAssessments contentHtml =
     H.li ! HA.class_ "entity-snippet-li" $ do
         H.p $ do
             -- H.span ! HA.class_ "htmlscore" $ H.toHtml (show $ entryScore e)
-            annotationControl queryId itemId groundTruthLabel  -- todo prio2 show ground truth label in annotation
+            annotationControl queryId itemId -- todo prio2 show ground truth label in annotation
+            shownAssessmentsHtml shownAssessments
             H.span ! HA.class_ "entity-snippet-li-text" $ do
                     contentHtml entity
 
@@ -120,8 +124,8 @@ entityToAnnotationHtml' queryId entity groundTruthLabel contentHtml =
     itemId = entityToItemId entity
 
 
-entityToAnnotationHtml queryId entity groundTruthLabel =
-    entityToAnnotationHtml' queryId entity groundTruthLabel entityToHtml
+entityToAnnotationHtml queryId entity shownAssessments =
+    entityToAnnotationHtml' queryId entity shownAssessments entityToHtml
 
 
 -- ============= Tieing Annotation Control together with entity-passage rendering ===========
@@ -133,12 +137,14 @@ entityPassageToItemId (entity, para) =
     in ItemId $ H.stringValue $  p <> "/" <> e
 
 
-entityPassageToAnnotationHtml' :: AnnotationQueryId -> (Entity, Paragraph) -> Maybe IsRelevant -> (Entity-> H.Html) -> (Paragraph -> H.Html) -> H.Html
-entityPassageToAnnotationHtml' queryId (entity, paragraph) groundTruthLabel contentEntityHtml contentParagraphHtml =
+entityPassageToAnnotationHtml' :: AnnotationQueryId -> (Entity, Paragraph) -> [(AssessmentSource, T.Text)]
+                               -> (Entity-> H.Html) -> (Paragraph -> H.Html) -> H.Html
+entityPassageToAnnotationHtml' queryId (entity, paragraph) shownAssessments contentEntityHtml contentParagraphHtml =
     H.li ! HA.class_ "entity-snippet-li" $ do
         H.p $ do
             -- H.span ! HA.class_ "htmlscore" $ H.toHtml (show $ entryScore e)
-            annotationControl queryId itemId groundTruthLabel  -- todo prio2 show ground truth label in annotation
+            annotationControl queryId itemId -- todo prio2 show ground truth label in annotation
+            shownAssessmentsHtml shownAssessments
             H.span ! HA.class_ "entity-snippet-li-text" $ do
                     H.div ! HA.class_ "passage-orig-entity" $ contentEntityHtml entity
                     H.p $ contentParagraphHtml paragraph
@@ -147,9 +153,9 @@ entityPassageToAnnotationHtml' queryId (entity, paragraph) groundTruthLabel cont
     itemId = entityPassageToItemId (entity, paragraph)
 
 
-entityPassageToAnnotationHtml :: AnnotationQueryId -> (Entity, Paragraph) -> Maybe IsRelevant -> H.Html
-entityPassageToAnnotationHtml queryId (entity, paragraph) groundTruthLabel =
-    entityPassageToAnnotationHtml' queryId (entity,paragraph) groundTruthLabel entityToHtml paragraphToHtml
+entityPassageToAnnotationHtml :: AnnotationQueryId -> (Entity, Paragraph) -> [(AssessmentSource, T.Text)] -> H.Html
+entityPassageToAnnotationHtml queryId (entity, paragraph) shownAssessments =
+    entityPassageToAnnotationHtml' queryId (entity,paragraph) shownAssessments entityToHtml paragraphToHtml
 
 
 -- === Pretty section Path ====

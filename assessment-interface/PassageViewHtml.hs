@@ -32,7 +32,7 @@ passageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe = H.
         assessmentScaleInfo
 
         let renderHtml entry =
-                paragraphToAnnotationHtml queryId (entryItem entry) Nothing  -- todo prio2 : pass in relevance label instead of Nothing
+                paragraphToAnnotationHtml queryId (entryItem entry) []  -- todo prio2 : pass in relevance label instead of Nothing
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
@@ -55,7 +55,7 @@ passageMixedRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe
         assessmentScaleInfo
 
         let renderHtml entry =
-                paragraphToAnnotationHtml queryId (entryItem entry) Nothing  -- todo prio2 : pass in relevance label instead of Nothing
+                paragraphToAnnotationHtml queryId (entryItem entry) []  -- todo prio2 : pass in relevance label instead of Nothing
               where queryId = sectionPathToQueryId sprQueryId
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
