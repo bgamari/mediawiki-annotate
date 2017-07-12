@@ -13,6 +13,8 @@ import Options.Applicative
 import Data.Bifunctor
 import Data.Monoid
 import Data.Maybe
+import Data.Ord
+import Data.List (sortBy)
 import Data.Foldable
 import Data.Hashable
 import GHC.Generics
@@ -81,41 +83,41 @@ trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
     return qrelMap
 
 
+readTrecRanking :: (TrecRun.DocumentName -> Maybe item)
+                -> FilePath
+                -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
+readTrecRanking trecRunItemToEntryItem path = do
+    fmap sortIt . toMap <$> TrecRun.readRunFile path
+  where
+    sortIt = sortBy (comparing entryScore)
+    toMap contents =
+        HM.fromListWith (++) $
+        [ ( TrecRun.queryId entry
+          , [RankingEntry { entryItem = item
+                          , entryScore = TrecRun.documentScore entry
+                          }]
+          )
+        | entry <- contents
+        , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry
+        ]
+
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
-                             => (TrecRun.DocumentName -> Maybe item)
-                             -> (RankingEntry item -> nubKey) -> Int -> Bool -> [FilePath]
-                             -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
-trecResultUnionOfRankedItems trecRunItemToEntryItem getNubKey optsTopK optsShuffle trecRunFiles = do
+                             => (RankingEntry item -> nubKey) -> Int
+                             -> [HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]]
+                             -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
+trecResultUnionOfRankedItems getNubKey optsTopK rankings =
+    fmap nubIt
+    $ foldl' (HM.unionWith (++)) mempty
+    $ fmap (fmap $ take topKPerFile)
+      rankings
+  where
+    topKPerFile = ceiling ((realToFrac optsTopK) / (realToFrac $ length rankings))
+    nubIt = HM.elems . HM.fromList . fmap (\rankElem -> (getNubKey rankElem, rankElem))
 
-    let resultsToTopkMap ::  Int -> [TrecRun.RankingEntry] -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
-        resultsToTopkMap optsTopK  trecRankingContents  =
-            let resultMap :: HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
-                resultMap = HM.fromListWith (++) $
-                  [ ( TrecRun.queryId entry
-                    , [RankingEntry { entryItem = item
-                                    , entryScore = TrecRun.documentScore entry
-                                    }]
-                    )
-                  | entry <- trecRankingContents
-                  , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry
-                  ]
-            in fmap (take optsTopK) resultMap
-
-    files <- mapM TrecRun.readRunFile trecRunFiles
-    let topKPerFile = ceiling ((realToFrac optsTopK) / (realToFrac $ length files))
-        unionResultMap ::  IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
-        unionResultMap = evalRandIO $ mapM condShuffleStuffNub
-                                    $ foldl' (HM.unionWith (++)) mempty
-                                    $ fmap (resultsToTopkMap topKPerFile)
-                                      files
-          where
-            condShuffleStuffNub :: [TrecCarRenderHtml.RankingEntry item] -> Rand StdGen [TrecCarRenderHtml.RankingEntry item]    -- todo generify
-            condShuffleStuffNub rankElements
-              | optsShuffle = shuffleM $ nubBy rankElements
-              | otherwise   = return $ nubBy rankElements
-            nubBy = HM.elems . HM.fromList . fmap (\rankElem -> (getNubKey $ rankElem, rankElem))
-    fmap (fmap (take optsTopK)) unionResultMap
-
+shuffleRankings :: Traversable t
+                => t [TrecCarRenderHtml.RankingEntry item]
+                -> IO (t [TrecCarRenderHtml.RankingEntry item])
+shuffleRankings = evalRandIO . traverse shuffleM
 
 -- todo urgent mix ground truth and result files
 
@@ -170,7 +172,8 @@ main = do
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemPara getNubKeyPara optsTopK optsShuffle trecPsgRunFiles
+        in trecResultUnionOfRankedItems getNubKeyPara optsTopK
+           <$> mapM (readTrecRanking trecRunItemToEntryItemPara) trecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems  trecRunItemToEntryItemMaybePara optsQrelFile
@@ -202,7 +205,8 @@ main = do
                 let (entity, paragraph) = entryItem  rankingEntry
                 in (entityPageId entity, paraId paragraph)
 
-        in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
+        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK
+           <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
     let trecQrelsMapEntity = mempty
