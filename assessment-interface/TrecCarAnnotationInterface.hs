@@ -5,7 +5,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-
 -- | TrecCarAnnotationInterface: Commandline argument reading, trec run loading, merging, shuffling, nubbing
 module Main where
 
@@ -13,8 +12,6 @@ import Options.Applicative
 
 import Data.Bifunctor
 import Data.Monoid
-import Data.Traversable
-import Data.List
 import Data.Maybe
 import Data.Foldable
 import Data.Hashable
@@ -33,9 +30,6 @@ import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Text.Blaze.Html.Renderer.Utf8 as H
-import qualified Text.Blaze.Html5 as H
-import qualified Text.Blaze.Html5.Attributes as HA
-import           Text.Blaze.Html5 ((!))
 
 import CAR.Types
 import qualified CAR.RunFile as CarRun
@@ -72,24 +66,18 @@ data Opts = Opts { outlinesFile :: FilePath
 -- todo generify  trecQrelParagraphs
 trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
               -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
--- loadParagraphMaybe $ packParagraphId --> loadEntityMaybe $  unpackPageId (not sure)
--- Just paragraph <- pure $ loadParagraphMaybe $ packParagraphId --> Just entity <- pure $ ressurrect Enity(entityPageId, entityPageName)
--- QrelEntry --> EntityQrelEntry     (entryLabel --> entityEntryLabel)
-
-
 trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
-
     qrelEntries <- TrecQrel.readQRel qrelfile
     let qrelMap =   HM.fromListWith (++)
-                    $  [ ( TrecQrel.queryId entry
-                        , [QrelEntry { entryItem = item
-                                     , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
-                                     }]
-                        )
-                      | entry <- qrelEntries
-                      ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
-                      ,Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
-                      ]
+                    [ ( TrecQrel.queryId entry
+                      , [QrelEntry { entryItem = item
+                                   , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
+                                   }]
+                      )
+                    | entry <- qrelEntries
+                    ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
+                    ,Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
+                    ]
     return qrelMap
 
 
@@ -142,7 +130,7 @@ opts =
     <*> switch (short 's' <> long "shuffle results")
     <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
-    <*> many (option str (short 't' <> long "true-qrel" <> help "qrel file to show annotations from"))
+    <*> many (option str (short 'Q' <> long "show-qrel" <> help "qrel file to show annotations from"))
     <*> option str (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "QRELS")
     <*> many (option str (short 'p' <> long "psg-runs" <> help "trec compatible passage run file(s)" <> metavar "Trec-psg-run-FILE(s)"))
     <*> many (option str (short 'e' <> long "entity-runs" <> help "trec compatible entity run file(s)" <> metavar "Trec-entity-run-FILE(s)"))
@@ -161,12 +149,7 @@ main = do
     paragraphIndex <- TocFile.open $ TocFile.IndexedCborPath paragraphFile
     putStrLn "...done deserializing paragraphs"
 
-    let loadParagraph :: ParagraphId -> Paragraph
-        loadParagraph pid =
-          fromMaybe (error $ "Can't find paragraph: "++ show pid ++ " in file "++ paragraphFile)
-           $ loadParagraphMaybe pid
-
-        loadParagraphMaybe :: ParagraphId -> Maybe Paragraph
+    let loadParagraphMaybe :: ParagraphId -> Maybe Paragraph
         loadParagraphMaybe pid =
          TocFile.lookup pid paragraphIndex
 
@@ -175,12 +158,8 @@ main = do
     entityIndex <- TocFile.open (TocFile.IndexedCborPath entityFile :: TocFile.IndexedCborPath PageId Page)
     putStrLn "...done deserializing articles"
 
-    let loadEntity :: PageId -> Maybe Entity
-        loadEntity = loadEntityMaybe
---           fromMaybe (trace $ "Can't find entity: "++ show pid ++ " in file "++ entityFile) $
-
-        loadEntityMaybe :: PageId -> Maybe Entity
-        loadEntityMaybe pid = do
+    let loadEntityMaybe :: PageId -> Maybe Entity
+        loadEntityMaybe pid =
             fmap toEntity $ TocFile.lookup pid entityIndex
           where toEntity page = Entity (pageName page) (pageId page)
 
@@ -210,8 +189,6 @@ main = do
 
     -- ========= view renderer Entity ==============
 
---
-
     trecResultMapEntity <-
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
@@ -228,19 +205,7 @@ main = do
         in trecResultUnionOfRankedItems trecRunItemToEntryItemEntity getNubKeyEntity optsTopK optsShuffle trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
---     trecQrelsMapEntity <-
---         let trecRunItemToEntryItemMaybeEntity :: TrecQrel.DocumentName -> Maybe (Entity, Paragraph)
---             trecRunItemToEntryItemMaybeEntity docName =
---                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
---                 in do entity <- loadEntityMaybe eid
---                       para <- loadParagraphMaybe pid
---                       return (entity, para)
---
---         in trecQrelItems  trecRunItemToEntryItemMaybeEntity optsQrelFile
---       :: IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry (Entity, Paragraph)])
     let trecQrelsMapEntity = mempty
-
-
 --     putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
 
     let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry]
@@ -254,11 +219,8 @@ main = do
           in queryId  `HM.lookup` trecQrelsMapEntity
 
 
-
-    -- ========================================================
-
+    -- ======= File names =====================================
     let fileNameLookup = fileNameLookupFactory (isJust . lookupResult) (isJust . lookupResultEntity)
-
 
     let wrapDestDir :: FilePath -> IO FilePath
         wrapDestDir filePath = do
@@ -280,7 +242,7 @@ main = do
 
     let createPassageView :: FileNameLookup -> TrecCarRenderHtml.SectionPathWithName -> IO ()
         createPassageView FileNameLookup{..} sectionPathWithNames = do
-           let sectionPath = sprQueryId $ sectionPathWithNames
+           let sectionPath = sprQueryId sectionPathWithNames
                sectionResults = lookupResult sectionPath
                sectionTruthsMaybe = lookupTruth sectionPath    -- todo entity Lookups
                maybeFilePath = passageViewPathname sectionPath
@@ -290,14 +252,14 @@ main = do
                  let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
-             (Just rankingEntries, Nothing) -> do
-                 error $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
-             _  -> do
+             (Just _rankingEntries, Nothing) ->
+                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+             _  ->
                  putStrLn $ "no results for section path "++show sectionPath
 
     let createEntityView :: FileNameLookup -> TrecCarRenderHtml.SectionPathWithName -> IO ()
         createEntityView FileNameLookup{..} sectionPathWithNames = do
-           let sectionPath = sprQueryId $ sectionPathWithNames
+           let sectionPath = sprQueryId sectionPathWithNames
                sectionResults = lookupResultEntity sectionPath
                sectionTruthsMaybe = lookupTruthEntity sectionPath
                maybeFilePath = entityViewPathname sectionPath
@@ -306,12 +268,12 @@ main = do
                  let pageHtml = (trace $ "filePath"<> filePath) EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
-             (Just rankingEntries, Nothing) -> do
-                 error $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
-             _  -> do
+             (Just _rankingEntries, Nothing) ->
+                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+             _  ->
                  putStrLn $ "no results for section path "++show sectionPath
 
-    let outlineToFiles fileNameLookup@FileNameLookup{..} outline = do
+    let outlineToFiles FileNameLookup{..} outline = do
             outlineFile <- wrapDestDir $ outlinePathname outline
             let pageHtml = OutlineViewHtml.outlineToHtml fileNameLookup outline
             BSL.writeFile outlineFile $ H.renderHtml pageHtml
