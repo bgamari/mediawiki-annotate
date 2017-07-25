@@ -30,7 +30,6 @@ import CAR.Types
 import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
-import GraphExpansion
 import EdgeDocCorpus
 
 
@@ -110,8 +109,8 @@ filterGraphByTopNGraphEdges rankDocs topN query edgeDocs  =
             edges  = rankNormDocs rankDocs topN topN query edgeDocs
         in HM.fromListWith (++) $ foldMap groupByEntity $ edges
   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
-        groupByEntity elem@(EdgeDocWithScores edgeDoc _ _ _) =
-                  [ (entity, [elem])
+        groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
+                  [ (entity, [ele])
                   | entity <- edgeDocNeighbors $ edgeDoc]
 
 

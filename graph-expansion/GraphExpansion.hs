@@ -11,10 +11,8 @@ import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
 import Data.Ix
-import GHC.Generics
 import GHC.TypeLits
 
-import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Sequence as Seq
@@ -33,7 +31,6 @@ import CAR.Retrieve
 import qualified SimplIR.Term as Term
 import AttriRank
 import SimplIR.WordEmbedding
-import SimplIR.WordEmbedding.GloVe
 import ZScore (Attributes(..))
 
 type UniverseGraph = HM.HashMap PageId [EdgeDoc]
