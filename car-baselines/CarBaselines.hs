@@ -233,7 +233,7 @@ termPostings :: (Monad m, Ord p, Binary docmeta, Binary p)
              -> Producer (docmeta, [(Term, p)]) m ()
 termPostings idx terms =
     let postings = map (\term -> ( term
-                                 , each $ fromMaybe [] $ DiskIdx.lookupPostings term idx)
+                                 , each $ fromMaybe [] $ DiskIdx.lookupPostings' term idx)
                        ) terms
         lookupMeta (docId, docTerms) =
             case docId `DiskIdx.lookupDoc` idx of
