@@ -85,13 +85,11 @@ data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
 instance NFData EdgeDocWithScores
 
 
-rankNormDocs :: RankingFunction -> Int -> Int -> [Term] -> [EdgeDoc] -> [EdgeDocWithScores]
-rankNormDocs rankDocs normRank cutoffRank query edgeDocs =
+rankNormDocs :: RetrievalFunction EdgeDoc -> Int -> Int -> [Term] -> [EdgeDocWithScores]
+rankNormDocs retrieveDocs normRank cutoffRank query =
     let rankedEdgeDocs :: [(EdgeDoc, Double)]
         rankedEdgeDocs = take cutoffRank
-                         $ rankDocs query
-                         $ fmap (\edgeDoc -> (edgeDoc, edgeDocContent $ edgeDoc))
-                         $ edgeDocs
+                         $ retrieveDocs query
         (_, normScore)
           | length rankedEdgeDocs > normRank  = rankedEdgeDocs !! normRank
           | not (null rankedEdgeDocs)         = last rankedEdgeDocs
@@ -103,10 +101,10 @@ rankNormDocs rankDocs normRank cutoffRank query edgeDocs =
     in cutRankedEdgeDocs
 
 
-filterGraphByTopNGraphEdges :: RankingFunction -> Int ->  [Term] -> [EdgeDoc] ->   HM.HashMap PageId [EdgeDocWithScores]
-filterGraphByTopNGraphEdges rankDocs topN query edgeDocs  =
+filterGraphByTopNGraphEdges :: RetrievalFunction EdgeDoc -> Int -> [Term] -> HM.HashMap PageId [EdgeDocWithScores]
+filterGraphByTopNGraphEdges retrieveDocs topN query =
         let edges :: [EdgeDocWithScores]
-            edges  = rankNormDocs rankDocs topN topN query edgeDocs
+            edges  = rankNormDocs retrieveDocs topN topN query
         in HM.fromListWith (++) $ foldMap groupByEntity $ edges
   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
         groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
@@ -118,9 +116,9 @@ instance NFData GraphNames
 instance NFData WeightingNames
 instance NFData GraphRankingNames
 
-
-filterGraphByTop5NodeEdges :: RankingFunction -> [Term] -> [EdgeDoc] ->  HM.HashMap PageId [EdgeDocWithScores]
-filterGraphByTop5NodeEdges rankDocs query edgeDocs =
+{-
+filterGraphByTop5NodeEdges :: RetrievalFunction -> [Term] -> [EdgeDoc] ->  HM.HashMap PageId [EdgeDocWithScores]
+filterGraphByTop5NodeEdges retrieveDocs query edgeDocs =
   let perNodeEdges :: HM.HashMap PageId [EdgeDoc]
       perNodeEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs
       perNodeFilteredEdges :: HM.HashMap PageId [EdgeDocWithScores]
@@ -134,7 +132,8 @@ filterGraphByTop5NodeEdges rankDocs query edgeDocs =
                   | entity <- edgeDocNeighbors $ edgeDoc]
         filterNode :: [EdgeDoc] -> [EdgeDocWithScores]
         filterNode edgeDocs' =
-            rankNormDocs rankDocs 5 5 query edgeDocs'
+            rankNormDocs retrieveDocs 5 5 query edgeDocs'
+    -}
 
 
 noFilterTwice :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
@@ -321,3 +320,4 @@ topNPerGraphMethods = [ Method gName eName wName rName
 
 
 type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
+type RetrievalFunction elem = [Term] -> [(elem, Double)]

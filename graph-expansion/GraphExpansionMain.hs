@@ -41,6 +41,7 @@ import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 
 import EdgeDocCorpus
+import EdgeDocIndex
 import WriteRanking
 import GraphExpansion
 import GraphExpansionExperiments
@@ -105,13 +106,13 @@ candidateSetList seeds radius binarySymmetricGraph  =
 
 
 computeRankingsForQuery :: forall n. (KnownNat n)
-                        => RankingFunction
+                        => RetrievalFunction EdgeDoc
                         -> AnnotationsFile
                         -> [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
                         -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery rankDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding =
+computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding =
     let nodeSet :: HS.HashSet PageId
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
@@ -139,12 +140,12 @@ computeRankingsForQuery rankDocs annsFile query seeds radius universeGraph binar
                       ]
 
         fancyGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId [EdgeDocWithScores])]
-        fancyGraphs = [(Top5PerNode,     filterGraphByTop5NodeEdges  rankDocs      query)
-                      ,(Top100PerGraph,  filterGraphByTopNGraphEdges rankDocs 100  query)
-                      ,(Top10PerGraph,   filterGraphByTopNGraphEdges rankDocs 10   query)
-                      ,(Top50PerGraph,   filterGraphByTopNGraphEdges rankDocs 50   query)
-                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges rankDocs 200  query)
-                      ,(Top2000PerGraph, filterGraphByTopNGraphEdges rankDocs 2000 query)
+        fancyGraphs = [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
+                       (Top100PerGraph,  const $ filterGraphByTopNGraphEdges retrieveDocs 100  query)
+                      ,(Top10PerGraph,   const $ filterGraphByTopNGraphEdges retrieveDocs 10   query)
+                      ,(Top50PerGraph,   const $ filterGraphByTopNGraphEdges retrieveDocs 50   query)
+                      ,(Top200PerGraph,  const $ filterGraphByTopNGraphEdges retrieveDocs 200  query)
+                      ,(Top2000PerGraph, const $ filterGraphByTopNGraphEdges retrieveDocs 2000 query)
                       ]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
@@ -241,10 +242,7 @@ main = do
 
     putStrLn $ "# corpus statistics " ++ show corpusStatistics
 
-    let rankDoc q docs =
-            map (\(Doc a b) -> (a,b))
-            $ Retrieve.retrieve corpusStatistics 2000 q
-            $ map (uncurry Doc) docs
+    retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking "index"
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)
@@ -254,14 +252,14 @@ main = do
     ncaps <- getNumCapabilities
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
-        --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
+            --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
     forM_' queriesWithSeedEntities $ \query -> do
         when (null $ queryDocLeadEntities query) $
             T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
-            rankings = computeRankingsForQuery rankDoc annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
+            rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
                                   universeGraph binarySymmetricGraph wordEmbeddings
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()

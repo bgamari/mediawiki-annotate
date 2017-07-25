@@ -46,6 +46,12 @@ executable trec-car-graph-expansion
                        binary,
                        unix,
                        fork-map,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       binary-serialise-cbor,
+                       filepath,
+                       snowball,
                        time,
                        simplir-word-embedding,
                        trec-car-tools
