@@ -31,6 +31,7 @@ import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
 import GraphExpansion
+import EdgeDocCorpus
 
 
 mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v

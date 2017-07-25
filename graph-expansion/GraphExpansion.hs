@@ -7,7 +7,6 @@
 
 module GraphExpansion where
 
-import Control.DeepSeq
 import Data.Monoid hiding (All, Any)
 import Data.Foldable
 import Data.Maybe
@@ -26,6 +25,7 @@ import qualified Data.Vector.Indexed as VI
 import Graph
 import Dijkstra
 import PageRank
+import EdgeDocCorpus
 import CAR.Utils
 import CAR.Types
 import CAR.Retrieve
@@ -35,60 +35,6 @@ import AttriRank
 import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.GloVe
 import ZScore (Attributes(..))
-
-
-data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
-                       , edgeDocArticleId       :: PageId
-                       , edgeDocNeighbors       :: [PageId]
-                       , edgeDocContent         :: T.Text
-                       }
-           deriving (Show, Generic)
-
-instance NFData EdgeDoc
-
-instance Eq EdgeDoc where
-    x == y =
-           edgeDocParagraphId x == edgeDocParagraphId y
-        && edgeDocArticleId x == edgeDocArticleId y
-
-instance Hashable EdgeDoc where
-    hashWithSalt salt x =
-        hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
-
-transformContent :: Page -> [EdgeDoc]
-transformContent (Page pageName pageId pageSkeleta) =
-    foldMap (go mempty) pageSkeleta
-  where
-    go :: [SectionHeading] -> PageSkeleton -> [EdgeDoc]
-    go headings (Section heading _ children) =
-        concatMap (go (heading : headings)) $ children
-    go headings (Para paragraph) =
-      [convertPara paragraph headings]
-    go headings (Image{}) = []
-
-    convertPara :: Paragraph -> [SectionHeading] -> EdgeDoc
-    convertPara paragraph headings=
-      let
-        edgeDocParagraphId    = paraId $ paragraph
-        edgeDocArticleId      = pageId
-        edgeDocNeighbors      = [pageId] ++ (fmap linkTargetId $ paraLinks $ paragraph)
-        edgeDocContent        = paragraphContent paragraph headings
-      in EdgeDoc {..}
-      where paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
-            paragraphContent paragraph headings =
-              TL.toStrict (paraToText $ paragraph)
-              <> (T.intercalate " " $ fmap getSectionHeading $ headings)
-              <> (getPageName pageName)
-
-
-
-
-
-dropEdgeDocsNoLinks :: [EdgeDoc] -> [EdgeDoc]
-dropEdgeDocsNoLinks =
-    filter (\edgeDoc -> not ( lengthOne (edgeDocNeighbors $ edgeDoc)))
-  where lengthOne [_] = True   -- list with one element
-        lengthOne _   = False
 
 type UniverseGraph = HM.HashMap PageId [EdgeDoc]
 
@@ -101,18 +47,6 @@ edgeDocsToUniverseGraph edgeDocs =
     symmetrizeEdge edgeDoc =
            [ (target, [edgeDoc])
            | target <- edgeDocNeighbors edgeDoc]
-
-
-emitEdgeDocs :: [Page] -> [EdgeDoc]
-emitEdgeDocs pages =
-    foldMap (dropEdgeDocsNoLinks . transformContent)
-    $ pages
-  where
-    symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
-    symmetrizeEdge edgeDoc =
-           [ (target, [edgeDoc])
-           | target <- edgeDocNeighbors edgeDoc]
-
 
 computeTextEmbedding :: KnownNat n => WordEmbedding n -> T.Text -> WordVec n
 computeTextEmbedding wordEmbedding text =

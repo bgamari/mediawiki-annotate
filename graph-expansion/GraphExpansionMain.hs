@@ -40,6 +40,7 @@ import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 
+import EdgeDocCorpus
 import WriteRanking
 import GraphExpansion
 import GraphExpansionExperiments
@@ -217,7 +218,7 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
     let universeGraph :: UniverseGraph
-        !universeGraph = edgeDocsToUniverseGraph $ emitEdgeDocs $ AnnsFile.pages annsFile
+        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
     putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
 
@@ -236,7 +237,7 @@ main = do
 
     let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
                           $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
-                          $ emitEdgeDocs $ AnnsFile.pages annsFile
+                          $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
     putStrLn $ "# corpus statistics " ++ show corpusStatistics
 
