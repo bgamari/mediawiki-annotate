@@ -28,7 +28,7 @@ modes = subparser
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
            <*> some (argument (Term.fromString <$> str) (help "query terms"))
       where
-        go :: OnDiskIndex DocMeta Int -> [Term] -> IO ()
+        go :: OnDiskIndex EdgeDoc Int -> [Term] -> IO ()
         go indexPath terms = do
             idx <- DiskIndex.openOnDiskIndex indexPath
             let postings = fold $ mapMaybe (`DiskIndex.lookupPostings` idx) terms

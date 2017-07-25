@@ -1,7 +1,9 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module EdgeDocCorpus
   ( EdgeDoc(..)
@@ -13,6 +15,7 @@ import Data.Monoid hiding (All, Any)
 import Control.DeepSeq
 import GHC.Generics
 
+import Data.Binary
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Hashable
@@ -27,6 +30,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
                        }
            deriving (Show, Generic)
 
+deriving instance Binary ParagraphId
+deriving instance Binary PageId
+instance Binary EdgeDoc
 instance NFData EdgeDoc
 
 instance Eq EdgeDoc where

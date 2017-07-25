@@ -1,12 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module EdgeDocIndex where
-
-import GHC.Generics
-import Data.Binary
 
 import Pipes.Safe
 import qualified Data.Text as T
@@ -33,25 +25,9 @@ tokenize =
     . killPunctuation
     . killCharSet notLatin1Letters
 
-data DocMeta = DocMeta { docMetaParagraphId :: ParagraphId
-                       , docMetaArticleId :: PageId
-                       , docMetaNeighbors :: [PageId]
-                       }
-             deriving (Show, Generic)
-
-instance Binary DocMeta
-deriving instance Binary ParagraphId
-deriving instance Binary PageId
-
-edgeDocMeta :: EdgeDoc -> DocMeta
-edgeDocMeta EdgeDoc{..} = DocMeta { docMetaParagraphId = edgeDocParagraphId
-                                  , docMetaArticleId  = edgeDocArticleId
-                                  , docMetaNeighbors  = edgeDocNeighbors
-                                  }
-
-indexEdgeDocs :: FilePath -> [EdgeDoc] -> IO (OnDiskIndex DocMeta Int)
+indexEdgeDocs :: FilePath -> [EdgeDoc] -> IO (OnDiskIndex EdgeDoc Int)
 indexEdgeDocs indexPath edocs = do
     runSafeT $ Foldl.foldM (buildIndex 1024 indexPath) (map toDoc edocs)
   where
-    toDoc edoc = (edgeDocMeta edoc, toks)
+    toDoc edoc = (edoc, toks)
       where toks = M.fromListWith (+) [ (tok, 1) | tok <- tokenize $ edgeDocContent edoc ]
