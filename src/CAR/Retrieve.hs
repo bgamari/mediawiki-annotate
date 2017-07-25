@@ -2,11 +2,17 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveFoldable #-}
 module CAR.Retrieve
-    ( Score
+    ( -- * Types
+      Score
     , Term
+      -- * Term counts
     , TermCounts(..)
-    , Doc(..)
+    , oneTerm
+    , fromCounts
     , computeTermCounts
+      -- * Scoring
+    , Doc(..)
+    , scoreDoc
     , retrieve
     , textToTokens'
     ) where
@@ -18,6 +24,7 @@ import qualified Control.Foldl as Foldl
 import Data.Bifunctor
 import Data.Monoid
 import Data.Binary
+import Data.Binary.Serialise.CBOR
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
@@ -34,6 +41,7 @@ import SimplIR.StopWords
 
 
 newtype TermCounts = TermCounts { getTermCounts :: HM.HashMap Term Int }
+                   deriving (Serialise)
 
 instance Show TermCounts where
     showsPrec _ = shows . sortBy (flip (compare `on` snd)) . HM.toList . getTermCounts
@@ -57,6 +65,9 @@ instance Ord a => Ord (Doc meta a) where
 
 oneTerm :: Term -> TermCounts
 oneTerm t = TermCounts $ HM.singleton t 1
+
+fromCounts :: [(Term, Int)] -> TermCounts
+fromCounts = TermCounts . HM.fromListWith (+)
 
 type TermFilter = Term -> Bool
 
