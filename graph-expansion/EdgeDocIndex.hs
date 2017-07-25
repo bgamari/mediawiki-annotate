@@ -26,17 +26,6 @@ import SimplIR.StopWords
 import SimplIR.Tokenise
 import SimplIR.Term as Term
 
-tokenize :: T.Text -> [Term]
-tokenize =
-      fmap Term.fromText
-    . stems English
-    . killStopwords enInquery
-    . T.words
-    . T.toCaseFold
-    . T.filter (/= '\'')
-    . killPunctuation
-    . killCharSet notLatin1Letters
-
 indexEdgeDocs :: FilePath -> [EdgeDoc] -> IO (TermCounts, OnDiskIndex EdgeDoc Int)
 indexEdgeDocs indexPath edocs = do
     runSafeT $ Foldl.foldM ((,) <$> Foldl.generalize (Foldl.premap (toTermCounts . snd) $ Foldl.mconcat)
@@ -46,7 +35,7 @@ indexEdgeDocs indexPath edocs = do
     toTermCounts = TermCounts . HM.fromList . M.toList
     toDoc :: EdgeDoc -> (EdgeDoc, M.Map Term Int)
     toDoc edoc = (edoc, toks)
-      where toks = M.fromListWith (+) [ (tok, 1) | tok <- tokenize $ edgeDocContent edoc ]
+      where toks = M.fromListWith (+) [ (tok, 1) | tok <- textToTokens' $ edgeDocContent edoc ]
 
 retrievalRanking :: FilePath -> IO ([Term] -> [(Double, EdgeDoc)])
 retrievalRanking indexPath = do

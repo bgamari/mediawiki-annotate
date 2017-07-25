@@ -77,9 +77,9 @@ type TermFilter = Term -> Bool
 -- bothStemAndOrig term =
 --     [stems English [term], term]
 
-textToTokens' :: T.Text -> [Term]
--- textToTokens' = map Term.fromText .  bothStemAndOrig . killStopwords enInquery . tokenise
-textToTokens' text =
+-- This didn't work very well
+complexTextToTokens' :: T.Text -> [Term]
+complexTextToTokens' text =
     let acronyms = fmap (T.filter (`CS.member` acronymPunctuation))
                    $ filter isAcronym
                    $ T.words
@@ -101,6 +101,17 @@ textToTokens' text =
             T.all (`CS.member` CS.upper)
             . T.filter (`CS.member` acronymPunctuation)
           acronymPunctuation = CS.fromList ".-"
+
+textToTokens' :: T.Text -> [Term]
+textToTokens' =
+      fmap Term.fromText
+    . stems English
+    . killStopwords enInquery
+    . T.words
+    . T.toCaseFold
+    . T.filter (/= '\'')
+    . killPunctuation
+    . killCharSet notLatin1Letters
 
 textToTokens :: TermFilter -> T.Text -> TermCounts
 textToTokens termFilter = foldMap oneTerm . filter termFilter . textToTokens'
