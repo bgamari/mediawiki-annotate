@@ -234,15 +234,6 @@ main = do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
 
-    let queryTermsAll = foldMap (queryDocRawTerms) $ queriesWithSeedEntities
-    putStrLn $ "# queryTermsAll " ++ show queryTermsAll
-
-    let !corpusStatistics = Retrieve.computeTermCounts queryTermsAll
-                          $ map (\edgeDoc -> Doc edgeDoc (edgeDocContent edgeDoc))
-                          $ pagesToEdgeDocs $ AnnsFile.pages annsFile
-
-    putStrLn $ "# corpus statistics " ++ show corpusStatistics
-
     retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking "index"
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
