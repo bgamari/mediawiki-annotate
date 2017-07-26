@@ -26,11 +26,13 @@ import SimplIR.StopWords
 import SimplIR.Tokenise
 import SimplIR.Term as Term
 
-indexEdgeDocs :: FilePath -> [EdgeDoc] -> IO (TermCounts, OnDiskIndex EdgeDoc Int)
+indexEdgeDocs :: FilePath -> [EdgeDoc] -> IO ()
 indexEdgeDocs indexPath edocs = do
-    runSafeT $ Foldl.foldM ((,) <$> Foldl.generalize (Foldl.premap (toTermCounts . snd) $ Foldl.mconcat)
+    (termCounts, _idx) <-
+        runSafeT $ Foldl.foldM ((,) <$> Foldl.generalize (Foldl.premap (toTermCounts . snd) $ Foldl.mconcat)
                                 <*> buildIndex 1024 indexPath)
                            (map toDoc edocs)
+    BSL.writeFile (indexPath <.> "stats") $ S.serialise termCounts
   where
     toTermCounts = TermCounts . HM.fromList . M.toList
     toDoc :: EdgeDoc -> (EdgeDoc, M.Map Term Int)

@@ -21,7 +21,7 @@ modes = subparser
       where
         go outputPath articlesPath = do
             pages <- readCborList articlesPath
-            _ <- indexEdgeDocs outputPath (pagesToEdgeDocs pages)
+            indexEdgeDocs outputPath (pagesToEdgeDocs pages)
             return ()
 
     queryMode =
