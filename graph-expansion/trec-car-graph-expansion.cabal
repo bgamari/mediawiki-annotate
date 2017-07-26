@@ -91,6 +91,7 @@ executable trec-car-seeds
                        simplir,
                        pipes,
                        binary,
+                       foldl,
                        unix,
                        fork-map,
                        time,

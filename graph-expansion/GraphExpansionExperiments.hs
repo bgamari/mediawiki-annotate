@@ -19,6 +19,7 @@ import Data.List (intercalate)
 import GHC.Generics
 import Data.Tuple
 
+import qualified Control.Foldl as Foldl
 import Data.Bifunctor
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
@@ -30,6 +31,7 @@ import CAR.Types
 import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
+import SimplIR.TopK
 import EdgeDocCorpus
 
 
@@ -87,8 +89,12 @@ instance NFData EdgeDocWithScores
 
 rankNormDocs :: RetrievalFunction EdgeDoc -> Int -> Int -> [Term] -> [EdgeDocWithScores]
 rankNormDocs retrieveDocs normRank cutoffRank query =
-    let rankedEdgeDocs :: [(EdgeDoc, Double)]
-        rankedEdgeDocs = take cutoffRank $ retrieveDocs query
+    let fromEntry (Entry b a) = (a, b)
+        rankedEdgeDocs :: [(EdgeDoc, Double)]
+        rankedEdgeDocs = map fromEntry
+                         $ Foldl.fold (topK cutoffRank)
+                         $ map (uncurry $ flip  Entry)
+                         $ retrieveDocs query
         (_, normScore)
           | length rankedEdgeDocs > normRank  = rankedEdgeDocs !! normRank
           | not (null rankedEdgeDocs)         = last rankedEdgeDocs
