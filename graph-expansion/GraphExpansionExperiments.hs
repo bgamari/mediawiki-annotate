@@ -184,7 +184,7 @@ randomFilter topN edgeDocs =
   let edgeDocs' = take topN $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
       perSourceEdges :: HM.HashMap PageId [EdgeDoc]
       perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
-      perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByEntity edgeDocs' ) $ perSourceEdges
+      perTargetEdges = fmap (HM.fromListWith (++) . foldMap groupByEntity) $ perSourceEdges
   in perTargetEdges
   where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByEntity edgeDoc =
@@ -248,6 +248,14 @@ coreMethods = [ Method gName eName wName rName
              , wName <- [Count, Score]
              , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
              ]
+
+prio0Methods :: [Method]
+prio0Methods = [Method gName eName wName rName
+               | gName <- [Top2000PerGraph]
+               , eName <- [Unfiltered]
+               , wName <- [Score]
+               , rName <- [MargEdges, PageRank]
+               ]
 
 prio1Methods :: [Method]
 prio1Methods = [ Method gName eName wName rName
