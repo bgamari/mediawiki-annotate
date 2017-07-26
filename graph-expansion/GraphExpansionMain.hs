@@ -131,7 +131,6 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
 --         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
         universeSubset = subsetOfUniverseGraph universeGraph nodeSet
 
-
         edgeDocsSubset :: [EdgeDoc]
         edgeDocsSubset = HS.toList $ HS.fromList $ concat $ HM.elems universeSubset
 
@@ -140,13 +139,13 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                       ,(Unfiltered,    id)
                       ]
 
-        fancyGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId [EdgeDocWithScores])]
+        fancyGraphs :: [(GraphNames, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                       (Top100PerGraph,  const $ filterGraphByTopNGraphEdges retrieveDocs 100  query)
-                      ,(Top10PerGraph,   const $ filterGraphByTopNGraphEdges retrieveDocs 10   query)
-                      ,(Top50PerGraph,   const $ filterGraphByTopNGraphEdges retrieveDocs 50   query)
-                      ,(Top200PerGraph,  const $ filterGraphByTopNGraphEdges retrieveDocs 200  query)
-                      ,(Top2000PerGraph, const $ filterGraphByTopNGraphEdges retrieveDocs 2000 query)
+                       (Top100PerGraph,  filterGraphByTopNGraphEdges retrieveDocs 100  query)
+                      ,(Top10PerGraph,   filterGraphByTopNGraphEdges retrieveDocs 10   query)
+                      ,(Top50PerGraph,   filterGraphByTopNGraphEdges retrieveDocs 50   query)
+                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges retrieveDocs 200  query)
+                      ,(Top2000PerGraph, filterGraphByTopNGraphEdges retrieveDocs 2000 query)
                       ]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
@@ -184,11 +183,9 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                         ]
 
         fancyWeightedGraphs ::  [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
-        fancyWeightedGraphs =  [((gname, ename, wname), accumulateEdgeWeights graph weighting)
-                               | (ename, edgeFilter) <- edgeFilters
-                               , (gname, mkGraph) <- fancyGraphs
+        fancyWeightedGraphs =  [((gname, Unfiltered, wname), accumulateEdgeWeights graph weighting)
+                               | (gname, graph) <- fancyGraphs
                                , (wname, weighting) <- weightings
-                               , let graph = mkGraph $ edgeFilter edgeDocsSubset
                                ]
 
         simpleWeightedGraphs :: [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
@@ -220,12 +217,12 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
     let universeGraph :: UniverseGraph
-        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
-
-    putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
+        universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
     let binarySymmetricGraph :: BinarySymmetricGraph
-        !binarySymmetricGraph = universeToBinaryGraph universeGraph
+        binarySymmetricGraph = universeToBinaryGraph universeGraph
+
+    putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
 
     queriesWithSeedEntities <-
         case querySrc of

@@ -88,8 +88,7 @@ instance NFData EdgeDocWithScores
 rankNormDocs :: RetrievalFunction EdgeDoc -> Int -> Int -> [Term] -> [EdgeDocWithScores]
 rankNormDocs retrieveDocs normRank cutoffRank query =
     let rankedEdgeDocs :: [(EdgeDoc, Double)]
-        rankedEdgeDocs = take cutoffRank
-                         $ retrieveDocs query
+        rankedEdgeDocs = take cutoffRank $ retrieveDocs query
         (_, normScore)
           | length rankedEdgeDocs > normRank  = rankedEdgeDocs !! normRank
           | not (null rankedEdgeDocs)         = last rankedEdgeDocs
@@ -101,7 +100,10 @@ rankNormDocs retrieveDocs normRank cutoffRank query =
     in cutRankedEdgeDocs
 
 
-filterGraphByTopNGraphEdges :: RetrievalFunction EdgeDoc -> Int -> [Term] -> HM.HashMap PageId [EdgeDocWithScores]
+filterGraphByTopNGraphEdges :: RetrievalFunction EdgeDoc
+                            -> Int
+                            -> [Term]
+                            -> HM.HashMap PageId [EdgeDocWithScores]
 filterGraphByTopNGraphEdges retrieveDocs topN query =
         let edges :: [EdgeDocWithScores]
             edges  = rankNormDocs retrieveDocs topN topN query
@@ -192,7 +194,10 @@ randomFilter topN edgeDocs =
                   | entity <- edgeDocNeighbors $ edgeDoc]
 
 
-accumulateEdgeWeights :: forall w. Num w => HM.HashMap PageId [EdgeDocWithScores] -> (EdgeDocWithScores -> w) ->   HM.HashMap PageId (HM.HashMap PageId w)
+accumulateEdgeWeights :: forall w. Num w
+                      => HM.HashMap PageId [EdgeDocWithScores]
+                      -> (EdgeDocWithScores -> w)
+                      -> HM.HashMap PageId (HM.HashMap PageId w)
 accumulateEdgeWeights sourceToEdgeDocsWithScores by=
     HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores
   where countEdgeDocs :: PageId -> [EdgeDocWithScores] -> HM.HashMap PageId w
