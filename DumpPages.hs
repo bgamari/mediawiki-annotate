@@ -21,6 +21,7 @@ opts = subparser
     $  cmd "titles"        dumpTitles
     <> cmd "pages"         dumpPages
     <> cmd "paragraphs"    dumpParagraphs
+    <> cmd "paragraphids"  dumpParagraphIds
     <> cmd "sections"      dumpSections
     <> cmd "hist-headings" histogramHeadings
   where
@@ -83,6 +84,16 @@ opts = subparser
                 mapM_ printParagraph paragraphs
 
           where printParagraph = putStrLn . prettyParagraph linkStyle
+
+    dumpParagraphIds =
+        f <$> argument str (help "input paragraph file" <> metavar "FILE")
+      where
+        f :: FilePath -> IO ()
+        f inputFile  = do
+                paragraphs <- decodeCborList <$> BSL.readFile inputFile
+                mapM_ printParagraph paragraphs
+
+          where printParagraph (Paragraph paraId _) = putStrLn $ unpackParagraphId paraId
 
     histogramHeadings =
         f <$> argument str (help "input file" <> metavar "FILE")
