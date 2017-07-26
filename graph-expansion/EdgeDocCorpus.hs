@@ -12,6 +12,7 @@ module EdgeDocCorpus
   ) where
 
 import Data.Monoid hiding (All, Any)
+import Data.Maybe
 import Control.DeepSeq
 import GHC.Generics
 
@@ -76,4 +77,4 @@ edgeDocHasLinks edgeDoc
 
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
-    foldMap (filter edgeDocHasLinks . pageToEdgeDocs)
+    foldMap (filter edgeDocHasLinks . pageToEdgeDocs) . filter (isNothing . pageRedirect)
