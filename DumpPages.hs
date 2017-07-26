@@ -10,16 +10,17 @@ import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Text.Lazy.Builder.Int as TB
-import Options.Applicative
+import Options.Applicative hiding (action)
 import qualified Data.ByteString.Lazy as BSL
 
-import CAR.AnnotationsFile
+import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
 
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "titles"        dumpTitles
     <> cmd "pages"         dumpPages
+    <> cmd "entityids"     dumpEntityIds
     <> cmd "paragraphs"    dumpParagraphs
     <> cmd "paragraphids"  dumpParagraphIds
     <> cmd "sections"      dumpSections
@@ -44,8 +45,8 @@ opts = subparser
 
             mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
         listSections :: Page -> [SectionPath]
-        listSections (Page _ pageId skeleton) =
-             fmap (\sp -> (SectionPath pageId sp) )
+        listSections (Page _ pageId' skeleton) =
+             fmap (\sp -> (SectionPath pageId' sp) )
              $ foldMap go skeleton
           where
             go :: PageSkeleton -> [[HeadingId]]
@@ -69,10 +70,24 @@ opts = subparser
                 pages <- decodeCborList <$> BSL.readFile inputFile
                 mapM_ printPage pages
           | otherwise = do
-                anns <- openAnnotations inputFile
-                mapM_ printPage $ mapMaybe (`lookupPage` anns) (S.toList pageNames)
+                anns <- CAR.openAnnotations inputFile
+                mapM_ printPage $ mapMaybe (`CAR.lookupPage` anns) (S.toList pageNames)
 
           where printPage = putStrLn . prettyPage linkStyle
+
+    dumpEntityIds =
+        f <$> argument str (help "input file" <> metavar "FILE")
+      where
+        f :: FilePath -> IO ()
+        f inputFile = do
+                pages <- decodeCborList <$> BSL.readFile inputFile
+                mapM_ printPage pages
+
+          where printPage = putStrLn . entityIdFromPage
+                entityIdFromPage page =
+                    let pname = unpackPageName $ pageName page
+                        pid = unpackPageId $ pageId page
+                    in pid <> "\t" <> pname
 
     dumpParagraphs =
         f <$> argument str (help "input paragraph file" <> metavar "FILE")
@@ -93,7 +108,7 @@ opts = subparser
                 paragraphs <- decodeCborList <$> BSL.readFile inputFile
                 mapM_ printParagraph paragraphs
 
-          where printParagraph (Paragraph paraId _) = putStrLn $ unpackParagraphId paraId
+          where printParagraph (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
 
     histogramHeadings =
         f <$> argument str (help "input file" <> metavar "FILE")
