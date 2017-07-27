@@ -60,15 +60,16 @@ import Debug.Trace
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
-opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int, Maybe PageId , Maybe FilePath)
+opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int, FilePath, Maybe PageId , Maybe FilePath)
 opts =
-    (,,,,,,,)
+    (,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
     <*> querySource
     <*> optional methods
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
+    <*> option str (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     <*> optional (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
@@ -149,14 +150,20 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                       ,(Unfiltered,    id)
                       ]
 
-        fancyGraphs :: [(GraphNames, HM.HashMap PageId [EdgeDocWithScores])]
-        fancyGraphs = [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                       (Top100PerGraph,  filterGraphByTopNGraphEdges retrieveDocs 100  query)
-                      ,(Top10PerGraph,   filterGraphByTopNGraphEdges retrieveDocs 10   query)
-                      ,(Top50PerGraph,   filterGraphByTopNGraphEdges retrieveDocs 50   query)
-                      ,(Top200PerGraph,  filterGraphByTopNGraphEdges retrieveDocs 200  query)
-                      ,(Top2000PerGraph, filterGraphByTopNGraphEdges retrieveDocs 2000 query)
+        retrievalFunctions :: [(RetrievalFun, RetrievalFunction EdgeDoc )]
+        retrievalFunctions = [ (Ql, retrieveDocs )
+                             , (Bm25, retrieveDocs ) -- todo change
+                             ]
+
+        fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
+        fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
+                       [(Top100PerGraph, irname,  filterGraphByTopNGraphEdges retrievalFun 100  query)
+                      ,(Top10PerGraph, irname,   filterGraphByTopNGraphEdges retrievalFun 10   query)
+                      ,(Top50PerGraph, irname,   filterGraphByTopNGraphEdges retrievalFun 50   query)
+                      ,(Top200PerGraph, irname,  filterGraphByTopNGraphEdges retrievalFun 200  query)
+                      ,(Top2000PerGraph, irname, filterGraphByTopNGraphEdges retrievalFun 2000 query)
                       ]
+                      | (irname, retrievalFun) <- retrievalFunctions]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
         simpleGraphs =  [(SimpleGraph, noFilterTwice )
@@ -192,15 +199,15 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                         ,(MargEdges, \graph -> marginalizeEdges graph)
                         ]
 
-        fancyWeightedGraphs ::  [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
-        fancyWeightedGraphs =  [((gname, Unfiltered, wname), accumulateEdgeWeights graph weighting)
-                               | (gname, graph) <- fancyGraphs
+        fancyWeightedGraphs ::  [((GraphNames, EdgeFilteringNames, WeightingNames, RetrievalFun), HM.HashMap PageId (HM.HashMap PageId Double))]
+        fancyWeightedGraphs =  [((gname, Unfiltered, wname, irname), accumulateEdgeWeights graph weighting)
+                               | (gname, irname, graph) <- fancyGraphs
                                , (wname, weighting) <- weightings
                                ]
 
-        simpleWeightedGraphs :: [((GraphNames, EdgeFilteringNames, WeightingNames), HM.HashMap PageId (HM.HashMap PageId Double))]
-        simpleWeightedGraphs = concat [ [ ((gname, ename, Count),  fmap (fmap (realToFrac . length)) graph)
-                                        , ((gname, ename, Binary), fmap (fmap (const 1))             graph)
+        simpleWeightedGraphs :: [((GraphNames, EdgeFilteringNames, WeightingNames, RetrievalFun), HM.HashMap PageId (HM.HashMap PageId Double))]
+        simpleWeightedGraphs = concat [ [ ((gname, ename, Count, NoIr),  fmap (fmap (realToFrac . length)) graph)
+                                        , ((gname, ename, Binary, NoIr), fmap (fmap (const 1))             graph)
                                         ]
                                       | (ename, edgeFilter) <- edgeFilters
                                       , (gname, mkGraph) <- simpleGraphs
@@ -209,8 +216,8 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
 
         computeRankings' :: [(Method,  [(PageId, Double)])]
         computeRankings' =
-            [ (Method gname ename wname rname,  graphRanking graph )
-            | ((gname, ename, wname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
+            [ (Method gname ename wname rname irname,  graphRanking graph )
+            | ((gname, ename, wname, irname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
               (rname, graphRanking) <- graphRankings
             ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
 
@@ -265,11 +272,12 @@ instance Dot.Labellable PageId where
 
 main :: IO ()
 main = do
-    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, queryMaybe, dotFilenameMaybe) <-
+    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath, queryMaybe, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction " ++ show queryMaybe
+    putStrLn $ "# Edgedoc index "++ show simplirIndexFilepath
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
@@ -293,7 +301,7 @@ main = do
                                        $ filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
           | otherwise = queriesWithSeedEntities'
 
-    retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking "index"
+    retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking simplirIndexFilepath
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)

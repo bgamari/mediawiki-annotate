@@ -235,101 +235,114 @@ data GraphRankingNames = PageRank | PersPageRank | AttriRank | ShortPath | MargE
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data EdgeFilteringNames = Unfiltered | BidiFiltered
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
-data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames
+data RetrievalFun = Bm25 | Ql | NoIr
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames RetrievalFun
             | CandidateSet
     deriving ( Ord, Eq, Generic)
 instance Show Method where
     show = showMethodName
 showMethodName:: Method -> String
-showMethodName (Method a b c d) = intercalate "-" [show a, show b, show c, show d]
+showMethodName (Method a b c d e) = intercalate "-" [show a, show b, show c, show d, show e]
 showMethodName (CandidateSet ) = "CandidateSet"
 
 allMethods :: [Method]
-allMethods = [ Method gName eName wName rName
+allMethods = [ Method gName eName wName rName irName
              | gName <- [minBound :: GraphNames .. maxBound ]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [minBound :: WeightingNames .. maxBound]
              , rName <- [minBound :: GraphRankingNames .. maxBound]
+             , irName <- [minBound :: RetrievalFun .. maxBound]
              ] ++ [CandidateSet]
 
 coreMethods :: [Method]
-coreMethods = [ Method gName eName wName rName
+coreMethods = [ Method gName eName wName rName irName
              | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [Count, Score]
              , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+             , irName <- [minBound :: RetrievalFun .. maxBound]
              ]
 
 prio0Methods :: [Method]
-prio0Methods = [Method gName eName wName rName
+prio0Methods = [Method gName eName wName rName irName
                | gName <- [Top2000PerGraph]
                , eName <- [Unfiltered]
                , wName <- [Score]
                , rName <- [MargEdges, PageRank]
+               , irName <- [Ql]
                ]
 
 prio1Methods :: [Method]
-prio1Methods = [ Method gName eName wName rName
+prio1Methods = [ Method gName eName wName rName irName
                           | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 
 prio2Methods :: [Method]
-prio2Methods = [ Method gName eName wName rName
+prio2Methods = [ Method gName eName wName rName irName
                           | gName <- [SimpleGraph, Top5PerNode ]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 prio3Methods :: [Method]
-prio3Methods = [ Method gName eName wName rName
+prio3Methods = [ Method gName eName wName rName irName
                           | gName <- [Top10PerGraph, Top50PerGraph, Top200PerGraph ]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 
 prio4Methods :: [Method]
-prio4Methods = [ Method gName eName wName rName
+prio4Methods = [ Method gName eName wName rName irName
                           | gName <- [Top100PerGraph, Top2000PerGraph, Random2000Graph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score, RecipRank, LinearRank, BucketRank]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 
 fix1Methods :: [Method]
-fix1Methods = [ Method gName eName wName rName
+fix1Methods = [ Method gName eName wName rName irName
                           | gName <- [Top100PerGraph, Top2000PerGraph ]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score]
                           , rName <- [AttriRank]
+                          , irName <- [Ql]
                           ]
 
 fix2Methods :: [Method]
-fix2Methods = [ Method gName eName wName rName
+fix2Methods = [ Method gName eName wName rName irName
                           | gName <- [Random2000Graph ]
                           , eName <- [Unfiltered]
                           , wName <- [Count, Score]
                           , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 
 
 testMethods :: [Method]
-testMethods = [ Method gName eName wName rName
+testMethods = [ Method gName eName wName rName irName
                           | gName <- [minBound :: GraphNames .. maxBound]
                           , eName <- [Unfiltered]
                           , wName <- [Binary, Score]
                           , rName <- [PersPageRank, MargEdges, AttriRank, ShortPath]
+                          , irName <- [Ql]
                           ]
 
 topNPerGraphMethods :: [Method]
-topNPerGraphMethods = [ Method gName eName wName rName
+topNPerGraphMethods = [ Method gName eName wName rName irName
              | gName <- [Top100PerGraph, Top10PerGraph, Top50PerGraph, Top200PerGraph, Top2000PerGraph]
              , eName <- [minBound :: EdgeFilteringNames .. maxBound]
              , wName <- [Count, Score, RecipRank]
              , rName <- [PersPageRank, PageRank, ShortPath, MargEdges]
+             , irName <- [Ql]
              ]
 
 
