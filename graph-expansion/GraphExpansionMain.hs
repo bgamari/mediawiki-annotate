@@ -248,7 +248,7 @@ computeGraphForQuery retrieveDocs annsFile query seeds dotFilename=
         fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting
 
         graph = dotGraph fancyWeightedGraph  --todo highlight seeds
-     in void $ Dot.runGraphvizCommand Dot.Neato graph Dot.Svg dotFilename
+     in void $ Dot.runGraphvizCommand Dot.Neato graph Dot.DotOutput dotFilename
 
 instance Dot.PrintDot PageId where
     unqtDot x = Dot.unqtText $ TL.pack $ unpackPageId x
