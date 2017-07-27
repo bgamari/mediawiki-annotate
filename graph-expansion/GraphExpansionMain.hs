@@ -41,6 +41,7 @@ import qualified Data.Text.Lazy.IO as TL
 import qualified Data.GraphViz as Dot
 import qualified Data.GraphViz.Printing as Dot
 import qualified Data.GraphViz.Attributes.Complete as Dot
+import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
@@ -236,19 +237,19 @@ computeGraphForQuery :: RetrievalFunction EdgeDoc
                      -> HS.HashSet PageId
                      -> FilePath
                      -> IO ()
-computeGraphForQuery retrieveDocs annsFile query seeds dotFilename=
+computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
     let
         fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 10   query
 
         weighting :: EdgeDocWithScores -> Double
         weighting = withScoreScore
 
-
         fancyWeightedGraph ::  HM.HashMap PageId (HM.HashMap PageId Double)
         fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting
 
         graph = dotGraph fancyWeightedGraph  --todo highlight seeds
-     in void $ Dot.runGraphvizCommand Dot.Neato graph Dot.DotOutput dotFilename
+    Dot.writeDotFile (dotFilename ++ ".dot") graph
+    void $ Dot.runGraphvizCommand Dot.Neato graph Dot.Svg dotFilename
 
 instance Dot.PrintDot PageId where
     unqtDot x = Dot.unqtText $ TL.pack $ unpackPageId x
