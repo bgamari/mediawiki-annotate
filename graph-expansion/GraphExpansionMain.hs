@@ -253,6 +253,8 @@ computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
 
 instance Dot.PrintDot PageId where
     unqtDot x = Dot.unqtText $ TL.pack $ unpackPageId x
+    toDot x = Dot.printEscaped [] $ TL.pack $ unpackPageId x
+
 instance Dot.Labellable PageId where
     toLabelValue x = Dot.StrLabel $ TL.pack $ unpackPageId x
 
