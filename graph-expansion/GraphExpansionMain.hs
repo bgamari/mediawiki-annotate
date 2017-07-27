@@ -225,7 +225,8 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
     params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (w/10.0), Dot.Weight $ Dot.Int (ceiling w) ]
                                     , Dot.fmtNode = \(_,a) -> [Dot.toLabel a]
-                                    , Dot.globalAttributes = [ Dot.GraphAttrs [Dot.Overlap $ Dot.PrismOverlap Nothing] ]
+                                    , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
+                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
                                     }
     nodes = [ (a,a) | a <- HM.keys graph ]
     edges = [ (a,b,w)
