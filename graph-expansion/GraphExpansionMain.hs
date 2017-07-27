@@ -239,7 +239,7 @@ computeGraphForQuery :: RetrievalFunction EdgeDoc
                      -> IO ()
 computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
     let
-        fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 10   query
+        fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 50   query
 
         weighting :: EdgeDocWithScores -> Double
         weighting = withScoreScore
