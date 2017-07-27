@@ -5,7 +5,7 @@ version:             0.1.0.0
 license:             BSD3
 license-file:        LICENSE
 author:              Laura Dietz
-maintainer:          dietz@cs.umass.edu
+maintainer:          dietz@cs.unh.edu
 -- copyright:           
 -- category:            
 build-type:          Simple
@@ -23,6 +23,8 @@ executable trec-car-graph-expansion
                        ZScore
                        WriteRanking
                        GraphExpansionExperiments
+                       EdgeDocCorpus
+                       EdgeDocIndex
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
                        async,

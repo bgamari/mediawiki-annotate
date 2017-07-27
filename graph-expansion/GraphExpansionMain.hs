@@ -54,6 +54,8 @@ import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.GloVe
 import ZScore
 
+import Debug.Trace
+
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
@@ -261,6 +263,7 @@ main = do
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
+    putStrLn $ "# Query restriction " ++ show queryMaybe
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
@@ -280,7 +283,8 @@ main = do
               return queriesWithSeedEntities
 
     let queriesWithSeedEntities
-          | Just query <- queryMaybe =  filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
+          | Just query <- queryMaybe =  (trace $ "using only query "<>(unpackPageId query))
+                                       $ filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
           | otherwise = queriesWithSeedEntities'
 
     retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking "index"
