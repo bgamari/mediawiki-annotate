@@ -8,10 +8,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 
 import Control.Exception (bracket)
-import Control.Monad (when)
+import Control.Monad (when, void)
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
@@ -34,8 +35,12 @@ import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
 
+import qualified Data.GraphViz as Dot
+import qualified Data.GraphViz.Printing as Dot
+import qualified Data.GraphViz.Attributes.Complete as Dot
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
@@ -52,15 +57,17 @@ import ZScore
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
-opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int)
+opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int, Maybe PageId , Maybe FilePath)
 opts =
-    (,,,,,)
+    (,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
     <*> querySource
     <*> optional methods
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
+    <*> optional (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+    <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
       methods :: Parser [Method]
       methods = fmap concat $ some
@@ -207,9 +214,50 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
 --     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
     in computeRankings'
 
+
+
+
+dotGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Dot.DotGraph PageId
+dotGraph graph = Dot.graphElemsToDot params nodes edges
+  where
+    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth w]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a] }
+    nodes = [ (a,a) | a <- HM.keys graph ]
+    edges = [ (a,b,w)
+            | (a, ns) <- HM.toList graph
+            , (b, w) <- HM.toList ns
+            ]
+
+computeGraphForQuery :: RetrievalFunction EdgeDoc
+                     -> AnnotationsFile
+                     -> [Term]
+                     -> HS.HashSet PageId
+                     -> FilePath
+                     -> IO ()
+computeGraphForQuery retrieveDocs annsFile query seeds dotFilename=
+    let
+        fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 10   query
+
+        weighting :: EdgeDocWithScores -> Double
+        weighting = withScoreScore
+
+
+        fancyWeightedGraph ::  HM.HashMap PageId (HM.HashMap PageId Double)
+        fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting
+
+        graph = dotGraph fancyWeightedGraph  --todo highlight seeds
+     in void $ Dot.runGraphvizCommand Dot.Neato graph Dot.Svg dotFilename
+
+instance Dot.PrintDot PageId where
+    unqtDot x = Dot.unqtText $ TL.pack $ unpackPageId x
+instance Dot.Labellable PageId where
+    toLabelValue x = Dot.StrLabel $ TL.pack $ unpackPageId x
+
+
+
 main :: IO ()
 main = do
-    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops) <-
+    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, queryMaybe, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
@@ -224,12 +272,16 @@ main = do
 
     putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
 
-    queriesWithSeedEntities <-
+    queriesWithSeedEntities' <-
         case querySrc of
           QueriesFromCbor queryFile -> pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
+
+    let queriesWithSeedEntities
+          | Just query <- queryMaybe =  filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
+          | otherwise = queriesWithSeedEntities'
 
     retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking "index"
 
@@ -248,6 +300,7 @@ main = do
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
+
             rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
                                   universeGraph binarySymmetricGraph wordEmbeddings
 
@@ -276,6 +329,10 @@ main = do
                                 ranking
                 bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
+
+        case dotFilenameMaybe of
+            Just dotFilename ->  computeGraphForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
+            Nothing -> return ()
 
         let methodsAvailable = S.fromList (map fst rankings)
             badMethods
