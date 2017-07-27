@@ -223,8 +223,10 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
 dotGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
-    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth w]
-                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a] }
+    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (w/10.0), Dot.Weight $ Dot.Int (ceiling w) ]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a]
+                                    , Dot.globalAttributes = [ Dot.GraphAttrs [Dot.Overlap $ Dot.PrismOverlap Nothing] ]
+                                    }
     nodes = [ (a,a) | a <- HM.keys graph ]
     edges = [ (a,b,w)
             | (a, ns) <- HM.toList graph
