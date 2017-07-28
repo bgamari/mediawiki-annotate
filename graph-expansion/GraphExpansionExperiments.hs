@@ -88,14 +88,14 @@ data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
 instance NFData EdgeDocWithScores
 
 
-rankNormDocs :: RetrievalFunction EdgeDoc -> Int -> Int -> [Term] -> [EdgeDocWithScores]
-rankNormDocs retrieveDocs normRank cutoffRank query =
+rankNormDocs :: RetrievalResult EdgeDoc -> Int -> Int ->  [EdgeDocWithScores]
+rankNormDocs retrievalResults normRank cutoffRank =
     let fromEntry (Entry b a) = (a, b)
         rankedEdgeDocs :: [(EdgeDoc, Log Double)]
         rankedEdgeDocs = map fromEntry
                          $ Foldl.fold (topK cutoffRank)
                          $ map (uncurry $ flip Entry)
-                         $ retrieveDocs query
+                         $ retrievalResults
         (_, normScore)
           | length rankedEdgeDocs > normRank  = rankedEdgeDocs !! normRank
           | not (null rankedEdgeDocs)         = last rankedEdgeDocs
@@ -106,19 +106,32 @@ rankNormDocs retrieveDocs normRank cutoffRank query =
                            $ rankedEdgeDocs
     in cutRankedEdgeDocs
 
+--
+-- filterGraphByTopNGraphEdges :: RetrievalFunction EdgeDoc
+--                             -> Int
+--                             -> [Term]
+--                             -> HM.HashMap PageId [EdgeDocWithScores]
+-- filterGraphByTopNGraphEdges retrieveDocs topN query =
+--         let edges :: [EdgeDocWithScores]
+--             edges  = rankNormDocs retrieveDocs topN topN query
+--         in HM.fromListWith (++) $ foldMap groupByEntity $ edges
+--   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
+--         groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
+--                   [ (entity, [ele])
+--                   | entity <- edgeDocNeighbors $ edgeDoc]
 
-filterGraphByTopNGraphEdges :: RetrievalFunction EdgeDoc
+
+filterGraphByTopNGraphEdges :: RetrievalResult EdgeDoc
                             -> Int
-                            -> [Term]
                             -> HM.HashMap PageId [EdgeDocWithScores]
-filterGraphByTopNGraphEdges retrieveDocs topN query =
-        let edges :: [EdgeDocWithScores]
-            edges  = rankNormDocs retrieveDocs topN topN query
-        in HM.fromListWith (++) $ foldMap groupByEntity $ edges
-  where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
-        groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
-                  [ (entity, [ele])
-                  | entity <- edgeDocNeighbors $ edgeDoc]
+filterGraphByTopNGraphEdges retrievalResult topN =
+        HM.fromListWith (++) $ foldMap groupByEntity $ edges
+      where edges :: [EdgeDocWithScores]
+            edges = rankNormDocs retrievalResult topN topN
+            groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
+            groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
+                      [ (entity, [ele])
+                      | entity <- edgeDocNeighbors $ edgeDoc]
 
 
 instance NFData GraphNames
@@ -228,7 +241,7 @@ marginalizeEdges graph =
 
 -- ----------------------------------------------------------------------
 
-data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph | Random2000Graph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph
+data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph | Random2000Graph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph | Top20000PerGraph
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
     deriving (Show, Enum, Bounded, Ord, Eq, Generic)
@@ -258,8 +271,8 @@ allMethods = [ Method gName eName wName rName irName
 
 coreMethods :: [Method]
 coreMethods = [ Method gName eName wName rName irName
-             | gName <- [Top100PerGraph, Top2000PerGraph, RandomGraph ]
-             , eName <- [minBound :: EdgeFilteringNames .. maxBound]
+             | gName <- [Top100PerGraph, Top2000PerGraph, Top20000PerGraph, RandomGraph ]
+             , eName <- [Unfiltered]
              , wName <- [Count, Score]
              , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
              , irName <- [minBound :: RetrievalFun .. maxBound]
@@ -353,4 +366,5 @@ topNPerGraphMethods = [ Method gName eName wName rName irName
 
 
 type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
-type RetrievalFunction elem = [Term] -> [(elem, Log Double)]
+type RetrievalFunction elem = [Term] -> RetrievalResult elem
+type RetrievalResult elem = [(elem, Log Double)]

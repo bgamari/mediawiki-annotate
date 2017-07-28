@@ -10,6 +10,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE TypeApplications #-}
 
 import Control.Exception (bracket)
 import Control.Monad (when, void)
@@ -141,7 +142,7 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
           where
             toWordVec pid =
                 wordVecToAttributes
-                $ maybe mempty (pageTextEmbeddingAttributes wordEmbedding)
+                $ maybe (pageNameEmbeddingAttributes wordEmbedding pid) (pageTextEmbeddingAttributes wordEmbedding)
                 $ AnnsFile.lookupPage pid annsFile
 
         universeSubset ::  HM.HashMap PageId [EdgeDoc]
@@ -162,6 +163,10 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                    ]
 
 
+        irRankings :: [(RetrievalFun, RetrievalResult EdgeDoc)]
+        irRankings = [ (irname, retrieveDocs retrievalFun query)
+                     | (irname, retrievalFun) <- irModels
+                     ]
 
         addSeedNodes ::   HS.HashSet PageId ->  HM.HashMap PageId [EdgeDocWithScores] -> HM.HashMap PageId [EdgeDocWithScores]
         addSeedNodes seeds graph =
@@ -171,13 +176,14 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
               
         fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                       [(Top100PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 100  query)
-                      ,(Top10PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 10   query)
-                      ,(Top50PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 50   query)
-                      ,(Top200PerGraph, irname,  addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 200  query)
-                      ,(Top2000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 2000 query)
+                       [(Top100PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 100)
+                      ,(Top10PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 10)
+                      ,(Top50PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 50)
+                      ,(Top200PerGraph, irname,  addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 200)
+                      ,(Top2000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 2000)
+                      ,(Top20000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 20000)
                       ]
-                      | (irname, retrievalFun) <- irModels]
+                      | (irname, retrievalResult) <- irRankings]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
         simpleGraphs =  [(SimpleGraph, noFilterTwice )
@@ -255,7 +261,7 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
             , (b, w) <- HM.toList ns
             ]
 
-computeGraphForQuery :: RetrievalFunction EdgeDoc
+computeGraphForQuery ::(Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                      -> AnnotationsFile
                      -> [Term]
                      -> HS.HashSet PageId
@@ -263,7 +269,9 @@ computeGraphForQuery :: RetrievalFunction EdgeDoc
                      -> IO ()
 computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
     let
-        fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 50   query
+        irModel = BM25.bm25 @Term $ BM25.sensibleParams
+        retrievalResult = (retrieveDocs irModel) query
+        fancyGraph =  filterGraphByTopNGraphEdges retrievalResult 50
 
         weighting :: EdgeDocWithScores -> Double
         weighting = realToFrac . withScoreScore
@@ -371,8 +379,7 @@ main = do
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
         case dotFilenameMaybe of
-            Just dotFilename -> let retrievalFun = retrieveDocs (QL.queryLikelihood $ QL.Dirichlet 100)
-                                in computeGraphForQuery retrievalFun  annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
+            Just dotFilename -> computeGraphForQuery retrieveDocs  annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
             Nothing -> return ()
 
 

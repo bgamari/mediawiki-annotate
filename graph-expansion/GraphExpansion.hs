@@ -64,6 +64,15 @@ pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId pageSkeleta) =
     where
       pageText = fmap (map TL.toStrict . pageSkeletonText) pageSkeleta
 
+pageNameEmbeddingAttributes :: KnownNat n => WordEmbedding n -> PageId
+                            -> WordVec n
+pageNameEmbeddingAttributes wordEmbedding pageId =
+     mconcat  -- merge wordvectors per skeleton                
+     $ fmap (computeTextEmbedding wordEmbedding) [T.pack $ unpackPageName pageName]
+    where
+      pageName :: PageName
+      pageName = pageIdToName pageId
+
 -- ------------------------------------------------
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
 
