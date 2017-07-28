@@ -54,21 +54,22 @@ pageToEdgeDocs (Page pageName pageId pageSkeleta) =
         concatMap (go (heading : headings)) $ children
     go headings (Para paragraph) =
       [convertPara paragraph headings]
-    go headings (Image{}) = []
+    go _headings (Image{}) = []
 
     convertPara :: Paragraph -> [SectionHeading] -> EdgeDoc
-    convertPara paragraph headings=
+    convertPara para headings=
       let
-        edgeDocParagraphId    = paraId $ paragraph
+        edgeDocParagraphId    = paraId para
         edgeDocArticleId      = pageId
-        edgeDocNeighbors      = [pageId] ++ (fmap linkTargetId $ paraLinks $ paragraph)
-        edgeDocContent        = paragraphContent paragraph headings
+        edgeDocNeighbors      = [pageId] ++ fmap linkTargetId (paraLinks para)
+        edgeDocContent        = paragraphContent para headings
       in EdgeDoc {..}
-      where paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
-            paragraphContent paragraph headings =
-              TL.toStrict (paraToText $ paragraph)
-              <> (T.intercalate " " $ fmap getSectionHeading $ headings)
-              <> (getPageName pageName)
+
+    paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
+    paragraphContent para headings =
+         TL.toStrict (paraToText para)
+      <> T.intercalate " " (fmap getSectionHeading headings)
+      <> getPageName pageName
 
 edgeDocHasLinks :: EdgeDoc -> Bool
 edgeDocHasLinks edgeDoc
