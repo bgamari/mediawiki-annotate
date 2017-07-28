@@ -55,6 +55,7 @@ import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.GloVe
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
+import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
 import Debug.Trace
@@ -123,7 +124,7 @@ candidateSetList seeds radius binarySymmetricGraph  =
 
 
 computeRankingsForQuery :: forall n. (KnownNat n)
-                        => RetrievalFunction EdgeDoc
+                        => (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> AnnotationsFile
                         -> [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
@@ -155,20 +156,20 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                       ,(Unfiltered,    id)
                       ]
 
-        retrievalFunctions :: [(RetrievalFun, RetrievalFunction EdgeDoc )]
-        retrievalFunctions = [ (Ql, retrieveDocs )
-                             , (Bm25, retrieveDocs ) -- todo change
-                             ]
+        irModels :: [(RetrievalFun, Index.RetrievalModel Term EdgeDoc Int)]
+        irModels = [ (Ql,  QL.queryLikelihood $ QL.Dirichlet 100 )
+                   , (Bm25, BM25.bm25 $ BM25.sensibleParams )
+                   ]
 
         fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                       [(Top100PerGraph, irname,  filterGraphByTopNGraphEdges retrievalFun 100  query)
-                      ,(Top10PerGraph, irname,   filterGraphByTopNGraphEdges retrievalFun 10   query)
-                      ,(Top50PerGraph, irname,   filterGraphByTopNGraphEdges retrievalFun 50   query)
-                      ,(Top200PerGraph, irname,  filterGraphByTopNGraphEdges retrievalFun 200  query)
-                      ,(Top2000PerGraph, irname, filterGraphByTopNGraphEdges retrievalFun 2000 query)
+                       [(Top100PerGraph, irname,  filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 100  query)
+                      ,(Top10PerGraph, irname,   filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 10   query)
+                      ,(Top50PerGraph, irname,   filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 50   query)
+                      ,(Top200PerGraph, irname,  filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 200  query)
+                      ,(Top2000PerGraph, irname, filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 2000 query)
                       ]
-                      | (irname, retrievalFun) <- retrievalFunctions]
+                      | (irname, retrievalFun) <- irModels]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> HM.HashMap PageId (HM.HashMap PageId [EdgeDoc]))]
         simpleGraphs =  [(SimpleGraph, noFilterTwice )
@@ -307,8 +308,8 @@ main = do
           | otherwise = queriesWithSeedEntities'
 
     index <- Index.open simplirIndexFilepath
-    let retrieveDocs = map swap . Index.score index model
-        model = QL.queryLikelihood $ QL.Dirichlet 100
+    let retrieveDocs :: Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc
+        retrieveDocs model = map swap . Index.score index model
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)
@@ -356,8 +357,10 @@ main = do
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
         case dotFilenameMaybe of
-            Just dotFilename ->  computeGraphForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
+            Just dotFilename -> let retrievalFun = retrieveDocs (QL.queryLikelihood $ QL.Dirichlet 100)
+                                in computeGraphForQuery retrievalFun  annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
             Nothing -> return ()
+
 
         let methodsAvailable = S.fromList (map fst rankings)
             badMethods
