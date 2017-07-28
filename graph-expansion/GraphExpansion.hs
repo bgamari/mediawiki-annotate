@@ -106,7 +106,9 @@ rankByPageRank graph teleport iterations =
   in prRanking
 
 rankByPersonalizedPageRank :: Graph PageId Double -> Double -> HS.HashSet PageId -> Int -> [(PageId, Double)]
-rankByPersonalizedPageRank graph teleport seeds iterations =
+rankByPersonalizedPageRank graph teleport seeds iterations
+  | HM.null $ getGraph graph `HM.intersection` HS.toMap seeds = []
+  | otherwise =
   let pr = (!! iterations) $ PageRank.persPageRankWithSeeds 0 teleport seeds graph
       prRanking  =  PageRank.toEntries $ pr
   in prRanking

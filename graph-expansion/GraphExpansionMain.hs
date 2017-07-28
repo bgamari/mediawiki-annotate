@@ -282,7 +282,7 @@ instance Dot.PrintDot PageId where
 instance Dot.Labellable PageId where
     toLabelValue x = Dot.StrLabel $ TL.pack $ unpackPageId x
 
-
+dummyInvalidPageId = packPageId "__invalid__"
 
 main :: IO ()
 main = do
@@ -357,10 +357,15 @@ main = do
                 --logMsg $ "graph size: "++show (graphSize graph)
                 --ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
                 logMsg $ "ranking entries="++show (length ranking)
+                ranking' <- if null ranking
+                               then do logMsg $ "empty result set replaced by dummy result"
+                                       pure [(dummyInvalidPageId, 0.0)]
+                               else pure ranking
+                
                 let formatted = WriteRanking.formatEntityRankings
                                 (T.pack $ show method)
                                 (T.pack $ unpackPageId queryId)
-                                ranking
+                                ranking'
                 bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
