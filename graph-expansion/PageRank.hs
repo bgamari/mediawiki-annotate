@@ -8,7 +8,7 @@ module PageRank
    , toHashMap
    , toEntries
    , pageRank
-   , pageRankWithSeeds
+   , persPageRankWithSeeds
    ) where
 
 import qualified Data.Vector as V
@@ -60,7 +60,7 @@ pageRank
     => a                  -- ^ teleportation probability \(\alpha\)
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
-pageRank alpha = pageRankWithSeeds alpha 0 HS.empty
+pageRank alpha = persPageRankWithSeeds alpha 0 HS.empty
 
 -- | Personalized PageRank.
 --
@@ -78,18 +78,18 @@ pageRank alpha = pageRankWithSeeds alpha 0 HS.empty
 -- \]
 -- given a graph with edge weights \(e_{ij}\) and a seed node set
 -- \(\mathcal{S}\).
-pageRankWithSeeds
+persPageRankWithSeeds
     :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
     => a                  -- ^ uniform teleportation probability \(\alpha\)
     -> a                  -- ^ seed teleportation probability \(\beta\)
     -> HS.HashSet n       -- ^ seed node set
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
-pageRankWithSeeds _ beta seeds _
+persPageRankWithSeeds _ beta seeds _
   | beta /= 0
   , HS.null seeds =
-    error "pageRankWithSeeds: empty seed set"
-pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
+    error "persPageRankWithSeeds: empty seed set"
+persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
     let mapping  = mkDenseMapping (nodeSet graph)
         nodeRng  = denseRange mapping
         numNodes = rangeSize nodeRng
@@ -129,7 +129,7 @@ pageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
 
     in map (Eigenvector mapping)
        $ initial : iterate nextiter initial
-{-# SPECIALISE pageRankWithSeeds
+{-# SPECIALISE persPageRankWithSeeds
                    :: (Eq n, Hashable n, Show n)
                    => Double -> Double -> HS.HashSet n
                    -> Graph n Double -> [Eigenvector n Double] #-}

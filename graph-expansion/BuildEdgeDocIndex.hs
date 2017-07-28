@@ -17,7 +17,7 @@ modes = subparser
   where
     buildMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
-           <*> argument str (help "articles file")
+           <*> argument str (metavar "CBOR" <> help "kb articles file")
       where
         go outputPath articlesPath = do
             pages <- readCborList articlesPath

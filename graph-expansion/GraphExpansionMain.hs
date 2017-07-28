@@ -161,13 +161,21 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                    , (Bm25, BM25.bm25 $ BM25.sensibleParams )
                    ]
 
+
+
+        addSeedNodes ::   HS.HashSet PageId ->  HM.HashMap PageId [EdgeDocWithScores] -> HM.HashMap PageId [EdgeDocWithScores]
+        addSeedNodes seeds graph =
+              let seedNodes ::  HM.HashMap PageId [EdgeDocWithScores]
+                  seedNodes = HM.fromList [(seed, []) | seed <- HS.toList seeds]
+              in HM.unionWith (++) graph seedNodes
+              
         fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                       [(Top100PerGraph, irname,  filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 100  query)
-                      ,(Top10PerGraph, irname,   filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 10   query)
-                      ,(Top50PerGraph, irname,   filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 50   query)
-                      ,(Top200PerGraph, irname,  filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 200  query)
-                      ,(Top2000PerGraph, irname, filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 2000 query)
+                       [(Top100PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 100  query)
+                      ,(Top10PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 10   query)
+                      ,(Top50PerGraph, irname,   addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 50   query)
+                      ,(Top200PerGraph, irname,  addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 200  query)
+                      ,(Top2000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges (retrieveDocs retrievalFun) 2000 query)
                       ]
                       | (irname, retrievalFun) <- irModels]
 
