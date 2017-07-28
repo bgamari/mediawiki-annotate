@@ -276,7 +276,7 @@ coreMethods = [ Method gName eName wName rName irName
              | gName <- [Top100PerGraph, Top2000PerGraph, Top20000PerGraph, RandomGraph ]
              , eName <- [Unfiltered]
              , wName <- [Count, Score]
-             , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
+             , rName <- [PersPageRank, MargEdges, PageRank, ShortPath] -- AttriRank,
              , irName <- [minBound :: RetrievalFun .. maxBound]
              ]
 

@@ -129,12 +129,12 @@ candidateSetList seeds radius binarySymmetricGraph  =
 computeRankingsForQuery :: forall n. (KnownNat n)
                         => (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> AnnotationsFile
-                        -> [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
+                        -> PageId ->  [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
                         -> (PageId -> PageId)
                         -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding resolveRedirect=
+computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius universeGraph binarySymmetricGraph wordEmbedding resolveRedirect=
     let nodeSet :: HS.HashSet PageId
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
@@ -170,8 +170,12 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
             edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
                     , edgeDocNeighbors = fmap resolveRedirect edgeDocNeighbors}
 
+        isNotFromQueryPage :: EdgeDoc -> Bool
+        isNotFromQueryPage edgeDoc@EdgeDoc{..} =
+            edgeDocArticleId /= queryPageId
+
         irRankings :: [(RetrievalFun, RetrievalResult EdgeDoc)]
-        irRankings = [ (irname, fmap (first fixRedirectEdgeDocs) $ retrieveDocs retrievalFun query)
+        irRankings = [ (irname, fmap (first fixRedirectEdgeDocs) $ filter (isNotFromQueryPage . fst) $ retrieveDocs retrievalFun query)
                      | (irname, retrievalFun) <- irModels
                      ]
 
@@ -367,7 +371,7 @@ main = do
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
         let queryId = queryDocQueryId query
 
-            rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
+            rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocQueryId query) (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
                                   universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
