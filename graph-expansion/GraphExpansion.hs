@@ -137,17 +137,19 @@ filterEdges pred (Graph.Graph graph ) =
           filter (\(target, _) -> pred source target)
 
 rankByShortestPaths :: Graph.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
-rankByShortestPaths graph seeds =
-    let seeds' = HS.fromList seeds
-        graph' = filterEdges (\s t -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph
-        shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
-                         | n1 <- toList seeds
-                         , let paths = Dijkstra.dijkstra (graph') n1
-                         , n2 <- toList seeds
-                         ]
+rankByShortestPaths graph seeds
+  | nullGraph graph = []
+  | otherwise =
+      let seeds' = HS.fromList seeds
+          graph' = filterEdges (\s t -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph
+          shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
+                           | n1 <- toList seeds
+                           , let paths = Dijkstra.dijkstra (graph') n1
+                           , n2 <- toList seeds
+                           ]
 
-        pathRanking = shortestPathsToNodeScores shortestPaths
-    in pathRanking
+          pathRanking = shortestPathsToNodeScores shortestPaths
+      in pathRanking
 
 takeMiddle :: Seq.Seq a -> Seq.Seq a
 takeMiddle s =
