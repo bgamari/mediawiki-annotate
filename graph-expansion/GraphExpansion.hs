@@ -100,17 +100,20 @@ subsetOfUniverseGraph universe nodeset =
     pruneEdges edoc = edoc { edgeDocNeighbors = filter (`HS.member` nodeset) (edgeDocNeighbors edoc) }
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
-rankByPageRank graph teleport iterations =
-  let pr = (!! iterations)  $ PageRank.pageRank teleport graph
-      prRanking  =  PageRank.toEntries $ pr
-  in prRanking
+rankByPageRank graph teleport iterations
+  | nullGraph graph = []
+  | otherwise =
+      let pr = (!! iterations)  $ PageRank.pageRank teleport graph
+          prRanking  =  PageRank.toEntries pr
+      in prRanking
 
 rankByPersonalizedPageRank :: Graph PageId Double -> Double -> HS.HashSet PageId -> Int -> [(PageId, Double)]
 rankByPersonalizedPageRank graph teleport seeds iterations
+  | nullGraph graph = []
   | HM.null $ getGraph graph `HM.intersection` HS.toMap seeds = []
   | otherwise =
   let pr = (!! iterations) $ PageRank.persPageRankWithSeeds 0 teleport seeds graph
-      prRanking  =  PageRank.toEntries $ pr
+      prRanking  =  PageRank.toEntries pr
   in prRanking
 
 -- gamma dDist nodeAttrs graph
