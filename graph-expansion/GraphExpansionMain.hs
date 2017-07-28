@@ -212,15 +212,15 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                         ,(PersPageRank, \graph -> let wgraph = toGraph graph
                                                   in rankByPersonalizedPageRank wgraph 0.15 seeds 20)
                         ,(AttriRank, \graph ->  let wgraph = toGraph graph
-                                                    numAttrs = wordEmbeddingDim wordEmbedding
-                                                in rankByAttriPageRank wgraph 0.15 numAttrs nodeToAttributes 20)
+                                                    embeddingBounds = wordEmbeddingDimBounds wordEmbedding
+                                                in rankByAttriPageRank wgraph 0.15 embeddingBounds nodeToAttributes 20)
                         ,(ShortPath, \graph -> let wgraph = toGraph graph
                                                in rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce wgraph) (toList seeds))
                         ,(MargEdges, \graph -> marginalizeEdges graph)
                         ]
 
         fancyWeightedGraphs ::  [((GraphNames, EdgeFilteringNames, WeightingNames, RetrievalFun), HM.HashMap PageId (HM.HashMap PageId Double))]
-        fancyWeightedGraphs =  [((gname, Unfiltered, wname, irname), accumulateEdgeWeights graph weighting)
+        fancyWeightedGraphs =  [((gname, Unfiltered, wname, irname), accumulateEdgeWeights graph weighting seeds)
                                | (gname, irname, graph) <- fancyGraphs
                                , (wname, weighting) <- weightings
                                ]
@@ -277,7 +277,7 @@ computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
         weighting = realToFrac . withScoreScore
 
         fancyWeightedGraph ::  HM.HashMap PageId (HM.HashMap PageId Double)
-        fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting
+        fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting seeds
 
         graph = dotGraph fancyWeightedGraph  --todo highlight seeds
     Dot.writeDotFile (dotFilename ++ ".dot") graph

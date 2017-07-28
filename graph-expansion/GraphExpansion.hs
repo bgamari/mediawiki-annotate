@@ -32,6 +32,7 @@ import qualified SimplIR.Term as Term
 import AttriRank
 import SimplIR.WordEmbedding
 import ZScore (Attributes(..))
+import Debug.Trace
 
 type UniverseGraph = HM.HashMap PageId [EdgeDoc]
 
@@ -127,13 +128,14 @@ rankByPersonalizedPageRank graph teleport seeds iterations
 
 -- gamma dDist nodeAttrs graph
 rankByAttriPageRank :: Ix t
-                    => Graph PageId Double -> Double -> Int
+                    => Graph PageId Double -> Double -> (t, t)
                     -> HM.HashMap PageId (Attributes t) -> Int -> [(PageId, Double)]
-rankByAttriPageRank graph teleport numAttrs nodeAttrs iterations
+rankByAttriPageRank graph teleport attrBounds nodeAttrs iterations
   | nullGraph graph = []
   | otherwise =
-      let gamma = 1/(realToFrac numAttrs)
-          getAttr n = fromMaybe (error $ "rankByAttriPageRank: no attributes for "++show n)
+      let gamma = 1/(realToFrac $ rangeSize attrBounds)
+          zeroAttrs = Attrs $ VI.replicate attrBounds 0
+          getAttr n = fromMaybe  (trace ("rankByAttriPageRank: no attributes for "++show n) $ zeroAttrs)
                       $ HM.lookup n nodeAttrs
           pr = snd $ (!! iterations) $ AttriRank.attriRank gamma AttriRank.Uniform getAttr graph
           prRanking  =  PageRank.toEntries $ pr

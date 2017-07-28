@@ -15,6 +15,7 @@ module GraphExpansionExperiments where
 
 import Control.DeepSeq
 import Data.Foldable
+import Data.Monoid
 import Data.List (intercalate)
 import GHC.Generics
 import Data.Tuple
@@ -217,16 +218,17 @@ randomFilter topN edgeDocs =
 accumulateEdgeWeights :: forall w. Num w
                       => HM.HashMap PageId [EdgeDocWithScores]
                       -> (EdgeDocWithScores -> w)
+                      -> HS.HashSet PageId
                       -> HM.HashMap PageId (HM.HashMap PageId w)
-accumulateEdgeWeights sourceToEdgeDocsWithScores by=
-    HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores
+accumulateEdgeWeights sourceToEdgeDocsWithScores by seeds=
+     (HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores) <> fmap (const mempty) (HS.toMap seeds)
   where countEdgeDocs :: PageId -> [EdgeDocWithScores] -> HM.HashMap PageId w
         countEdgeDocs sourceNode edgeDocsWithScores =
             HM.fromListWith (+)
               [ (targetNode, by edgeDocsWithScore)
               | edgeDocsWithScore <- edgeDocsWithScores
               , targetNode <- edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
-              , targetNode /= sourceNode
+              , targetNode /= sourceNode  -- we only compute the destinations, this will be added to the source's outedges
               ]
 
 
