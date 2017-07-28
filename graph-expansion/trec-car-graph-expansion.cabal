@@ -24,7 +24,6 @@ executable trec-car-graph-expansion
                        WriteRanking
                        GraphExpansionExperiments
                        EdgeDocCorpus
-                       EdgeDocIndex
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base >=4.9 && <4.10,
                        async,
@@ -54,6 +53,7 @@ executable trec-car-graph-expansion
                        foldl,
                        binary-serialise-cbor,
                        filepath,
+                       log-domain,
                        snowball,
                        time,
                        simplir-word-embedding,
@@ -96,6 +96,7 @@ executable trec-car-seeds
                        binary,
                        foldl,
                        unix,
+                       log-domain,
                        fork-map,
                        time,
                        trec-car-tools
@@ -103,7 +104,6 @@ executable trec-car-seeds
 
 executable graph-expansion-build-index
   main-is:             BuildEdgeDocIndex.hs
-  other-modules:       EdgeDocIndex
   build-depends:       base,
                        text >= 1.2,
                        bytestring,

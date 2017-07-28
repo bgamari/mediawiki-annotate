@@ -18,6 +18,7 @@ import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
 import Data.Maybe
+import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
 import Data.Coerce
@@ -47,12 +48,13 @@ import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 
 import EdgeDocCorpus
-import EdgeDocIndex
 import WriteRanking
 import GraphExpansion
 import GraphExpansionExperiments
 import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.GloVe
+import qualified SimplIR.SimpleIndex as Index
+import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import ZScore
 
 import Debug.Trace
@@ -60,7 +62,9 @@ import Debug.Trace
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
-opts :: Parser (FilePath, FilePath, FilePath, QuerySource, Maybe [Method], Int, FilePath, Maybe PageId , Maybe FilePath)
+opts :: Parser ( FilePath, FilePath, FilePath, QuerySource
+               , Maybe [Method], Int, Index.OnDiskIndex Term EdgeDoc Int
+               , Maybe PageId , Maybe FilePath)
 opts =
     (,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
@@ -69,7 +73,8 @@ opts =
     <*> querySource
     <*> optional methods
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
-    <*> option str (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
+    <*> option (Index.OnDiskIndex <$> str)
+               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     <*> optional (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
@@ -172,8 +177,8 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                         ]
 
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
-        weightings =  [ (Count,  realToFrac . withScoreCount)
-                      , (Score, withScoreScore)
+        weightings =  [ (Count, realToFrac . withScoreCount)
+                      , (Score, realToFrac . withScoreScore)
                       , (RecipRank,   (\edge ->  1.0 / (realToFrac $ withScoreRank edge )))
                       , (LinearRank,  (\edge -> realToFrac (101 - (withScoreRank edge))))
                       , (BucketRank,  (\edge ->  let rank = withScoreRank $ edge
@@ -252,7 +257,7 @@ computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
         fancyGraph =  filterGraphByTopNGraphEdges retrieveDocs 50   query
 
         weighting :: EdgeDocWithScores -> Double
-        weighting = withScoreScore
+        weighting = realToFrac . withScoreScore
 
         fancyWeightedGraph ::  HM.HashMap PageId (HM.HashMap PageId Double)
         fancyWeightedGraph =  accumulateEdgeWeights fancyGraph weighting
@@ -301,7 +306,9 @@ main = do
                                        $ filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
           | otherwise = queriesWithSeedEntities'
 
-    retrieveDocs <- fmap (map (\(a,b)->(b,a))) <$> retrievalRanking simplirIndexFilepath
+    index <- Index.open simplirIndexFilepath
+    let retrieveDocs = map swap . Index.score index model
+        model = QL.queryLikelihood $ QL.Dirichlet 100
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)

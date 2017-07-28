@@ -5,10 +5,10 @@ import Data.Monoid
 
 import Options.Applicative
 import EdgeDocCorpus
-import EdgeDocIndex
 import CAR.Types
+import CAR.Retrieve
 import SimplIR.Term as Term
-import SimplIR.DiskIndex as DiskIndex
+import SimplIR.SimpleIndex as Index
 
 modes :: Parser (IO ())
 modes = subparser
@@ -21,17 +21,20 @@ modes = subparser
       where
         go outputPath articlesPath = do
             pages <- readCborList articlesPath
-            indexEdgeDocs outputPath (pagesToEdgeDocs pages)
+            Index.buildTermFreq outputPath
+                [ (edoc, textToTokens' $ edgeDocContent edoc)
+                | edoc <- pagesToEdgeDocs pages
+                ]
             return ()
 
     queryMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
            <*> some (argument (Term.fromString <$> str) (help "query terms"))
       where
-        go :: OnDiskIndex EdgeDoc Int -> [Term] -> IO ()
+        go :: Index.OnDiskIndex Term EdgeDoc Int -> [Term] -> IO ()
         go indexPath terms = do
-            idx <- DiskIndex.openOnDiskIndex indexPath
-            let postings = fold $ mapMaybe (`DiskIndex.lookupPostings` idx) terms
+            idx <- Index.open indexPath
+            let postings = fold $ map (Index.lookupPostings idx) terms
             print postings
 
 main :: IO ()

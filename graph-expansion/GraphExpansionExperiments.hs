@@ -26,6 +26,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Data.Aeson
+import Numeric.Log (Log)
 
 import CAR.Types
 import qualified CAR.KnowledgeBase as KB
@@ -80,7 +81,7 @@ data GraphStats = GraphStats { nNodes, nEdges :: !Int }
 
 data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
                                            , withScoreCount     :: Int
-                                           , withScoreScore     :: Double
+                                           , withScoreScore     :: Log Double
                                            , withScoreRank      :: Int
                                            }
            deriving (Show, Generic)
@@ -90,10 +91,10 @@ instance NFData EdgeDocWithScores
 rankNormDocs :: RetrievalFunction EdgeDoc -> Int -> Int -> [Term] -> [EdgeDocWithScores]
 rankNormDocs retrieveDocs normRank cutoffRank query =
     let fromEntry (Entry b a) = (a, b)
-        rankedEdgeDocs :: [(EdgeDoc, Double)]
+        rankedEdgeDocs :: [(EdgeDoc, Log Double)]
         rankedEdgeDocs = map fromEntry
                          $ Foldl.fold (topK cutoffRank)
-                         $ map (uncurry $ flip  Entry)
+                         $ map (uncurry $ flip Entry)
                          $ retrieveDocs query
         (_, normScore)
           | length rankedEdgeDocs > normRank  = rankedEdgeDocs !! normRank
@@ -352,4 +353,4 @@ topNPerGraphMethods = [ Method gName eName wName rName irName
 
 
 type RankingFunction = forall elem. [Term] -> [(elem, T.Text)] -> [(elem, Double)]
-type RetrievalFunction elem = [Term] -> [(elem, Double)]
+type RetrievalFunction elem = [Term] -> [(elem, Log Double)]
