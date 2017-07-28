@@ -282,6 +282,7 @@ instance Dot.PrintDot PageId where
 instance Dot.Labellable PageId where
     toLabelValue x = Dot.StrLabel $ TL.pack $ unpackPageId x
 
+dummyInvalidPageId :: PageId
 dummyInvalidPageId = packPageId "__invalid__"
 
 main :: IO ()
