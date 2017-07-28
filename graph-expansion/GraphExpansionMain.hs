@@ -23,6 +23,7 @@ import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
 import Data.Coerce
+import Data.Bifunctor
 import Options.Applicative
 import System.IO
 import Data.Time.Clock
@@ -47,6 +48,7 @@ import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
+import CAR.Utils
 
 import EdgeDocCorpus
 import WriteRanking
@@ -129,9 +131,10 @@ computeRankingsForQuery :: forall n. (KnownNat n)
                         -> AnnotationsFile
                         -> [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
+                        -> (PageId -> PageId)
                         -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding =
+computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph binarySymmetricGraph wordEmbedding resolveRedirect=
     let nodeSet :: HS.HashSet PageId
         nodeSet = expandNodesK binarySymmetricGraph seeds radius
 
@@ -162,9 +165,13 @@ computeRankingsForQuery retrieveDocs annsFile query seeds radius universeGraph b
                    , (Bm25, BM25.bm25 $ BM25.sensibleParams )
                    ]
 
+        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
+        fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
+            edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
+                    , edgeDocNeighbors = fmap resolveRedirect edgeDocNeighbors}
 
         irRankings :: [(RetrievalFun, RetrievalResult EdgeDoc)]
-        irRankings = [ (irname, retrieveDocs retrievalFun query)
+        irRankings = [ (irname, fmap (first fixRedirectEdgeDocs) $ retrieveDocs retrievalFun query)
                      | (irname, retrievalFun) <- irModels
                      ]
 
@@ -304,6 +311,22 @@ main = do
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
+    let entityRedirect :: HM.HashMap PageId PageId
+        entityRedirect = HM.fromList $ mapMaybe extractRedirect $ AnnsFile.pages annsFile
+          where extractRedirect :: Page -> Maybe (PageId, PageId)
+                extractRedirect page@(Page _ fromPageId _ ) =
+                    fmap (\toPageId -> (fromPageId, toPageId))
+                    $ fmap pageNameToId
+                    $ pageRedirect page
+
+        resolveRedirect :: PageId -> PageId
+        resolveRedirect = go
+          where
+            go fromPageId
+              | Just toPageId <- HM.lookup fromPageId entityRedirect = go toPageId
+              | otherwise = fromPageId
+
+            
     let universeGraph :: UniverseGraph
         universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
@@ -345,7 +368,7 @@ main = do
         let queryId = queryDocQueryId query
 
             rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
-                                  universeGraph binarySymmetricGraph wordEmbeddings
+                                  universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
             runMethod method ranking = do
