@@ -10,6 +10,7 @@ packages:
     simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
+    simplir/vendor/binary-serialise-cbor/*/*.cabal
     car-baselines/
     assessment-interface/
     assessment-interface/annotation/server

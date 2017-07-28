@@ -50,7 +50,7 @@ import CAR.Retrieve (textToTokens')
 
 instance Binary ParagraphId
 
-type CarDiskIndex = DiskIdx.OnDiskIndex (ParagraphId, DocumentLength) Int
+type CarDiskIndex = DiskIdx.OnDiskIndex Term (ParagraphId, DocumentLength) Int
 
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
@@ -228,7 +228,7 @@ main = do
     mode
 
 termPostings :: (Monad m, Ord p, Binary docmeta, Binary p)
-             => DiskIdx.DiskIndex docmeta p
+             => DiskIdx.DiskIndex Term docmeta p
              -> [Term]
              -> Producer (docmeta, [(Term, p)]) m ()
 termPostings idx terms =
@@ -247,7 +247,7 @@ type ScoringModel = [(Term, Int)]  -- ^ query term frequencies
                  -> BM25.Score
 
 scoreQuery :: ScoringModel
-           -> DiskIdx.DiskIndex (ParagraphId, DocumentLength) Int
+           -> DiskIdx.DiskIndex Term (ParagraphId, DocumentLength) Int
            -> Int
            -> BagOfWords
            -> [(ParagraphId, BM25.Score)]
