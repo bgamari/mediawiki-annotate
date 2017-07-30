@@ -13,7 +13,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 import Control.Exception (bracket)
-import Control.Monad (when, void)
+import Control.Monad (when, void, guard)
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
@@ -318,17 +318,24 @@ main = do
     let entityRedirect :: HM.HashMap PageId PageId
         entityRedirect = HM.fromList $ mapMaybe extractRedirect $ AnnsFile.pages annsFile
           where extractRedirect :: Page -> Maybe (PageId, PageId)
-                extractRedirect page@(Page _ fromPageId _ ) =
-                    fmap (\toPageId -> (fromPageId, toPageId))
-                    $ fmap pageNameToId
-                    $ pageRedirect page
+                extractRedirect page@(Page _ fromPageId _ )
+                  | isNullPageId fromPageId = Nothing
+                  | otherwise = do
+                    toPageName <- pageRedirect page  -- MaybeMonad
+                    let toPageId = pageNameToId toPageName
+                    guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
+                    pure (fromPageId, toPageId)
 
+                isNullPageId :: PageId -> Bool
+                isNullPageId = null . unpackPageId
         resolveRedirect :: PageId -> PageId
-        resolveRedirect = go
+        resolveRedirect origFromPageId = go mempty origFromPageId
           where
-            go fromPageId
-              | Just toPageId <- HM.lookup fromPageId entityRedirect = go toPageId
-              | otherwise = fromPageId
+            go :: HS.HashSet PageId -> PageId -> PageId
+            go history fromPageId
+              | fromPageId `HS.member` history  = origFromPageId --  we are walking in circles, return original.
+              | Just toPageId <- HM.lookup fromPageId entityRedirect = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
+              | otherwise = fromPageId  -- success, we found a real page
 
             
     let universeGraph :: UniverseGraph
