@@ -126,7 +126,7 @@ toEntityAnnotations resolveRedirect (Page _ pageId skeleton) =
         let parentIds' = parentIds `DList.snoc` sectionId
         in foldMap (go parentIds') children
     go parentIds (Para paragraph) =
-        let entityIds =  filter badEntityId
+        let entityIds =  filter (not . badEntityId)
                       $ fmap (resolveRedirect . linkTargetId)
                       $ paraLinks paragraph
         in S.fromList
