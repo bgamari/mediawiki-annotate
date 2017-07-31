@@ -1,8 +1,13 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE BangPatterns #-}
 
 module CAR.Utils where
 
+
+import Control.Monad (guard)
 import Data.Maybe
+import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import CAR.Types
@@ -65,3 +70,25 @@ paraToText (Paragraph  _ bodies) =
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
 
+resolveRedirectFactory :: [Page] -> PageId -> PageId
+resolveRedirectFactory pages = \origFromPageId ->
+    let go :: HS.HashSet PageId -> PageId -> PageId
+        go history fromPageId
+          | fromPageId `HS.member` history  = origFromPageId --  we are walking in circles, return original.
+          | Just toPageId <- HM.lookup fromPageId entityRedirect = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
+          | otherwise = fromPageId  -- success, we found a real page
+    in go mempty origFromPageId
+  where
+    entityRedirect :: HM.HashMap PageId PageId
+    !entityRedirect = HM.fromList $ mapMaybe extractRedirect $ pages
+      where extractRedirect :: Page -> Maybe (PageId, PageId)
+            extractRedirect page@(Page _ fromPageId _ )
+              | isNullPageId fromPageId = Nothing
+              | otherwise = do
+                toPageName <- pageRedirect page  -- MaybeMonad
+                let toPageId = pageNameToId toPageName
+                guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
+                pure (fromPageId, toPageId)
+
+            isNullPageId :: PageId -> Bool
+            isNullPageId = null . unpackPageId

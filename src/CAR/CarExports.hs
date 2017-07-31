@@ -116,8 +116,8 @@ toAnnotations (Page _ pageId skeleton) =
         sectionPath = SectionPath pageId (DList.toList parentIds)
     go _parentIds (Image{}) = mempty
 
-toEntityAnnotations :: Page -> S.Set EntityAnnotation
-toEntityAnnotations (Page _ pageId skeleton) =
+toEntityAnnotations :: (PageId -> PageId) -> Page ->  S.Set EntityAnnotation
+toEntityAnnotations resolveRedirect (Page _ pageId skeleton) =
     -- recurse into sections, recursively collect section path, emit one entity annotation per link
     foldMap (go mempty) skeleton
   where
@@ -126,10 +126,14 @@ toEntityAnnotations (Page _ pageId skeleton) =
         let parentIds' = parentIds `DList.snoc` sectionId
         in foldMap (go parentIds') children
     go parentIds (Para paragraph) =
-        let entities =  fmap linkTarget $ paraLinks paragraph
+        let entityIds =  filter badEntityId
+                      $ fmap (resolveRedirect . linkTargetId)
+                      $ paraLinks paragraph
         in S.fromList
-            $ filter (\(EntityAnnotation _ pageId' _) -> (length (unpackPageId pageId')) > 0)
-            $  [EntityAnnotation sectionPath (pageNameToId entityId) Relevant | entityId <- entities]
+            $  [EntityAnnotation sectionPath entityId Relevant
+               | entityId <- entityIds
+               ]
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
+        badEntityId entityId = null $ unpackPageId entityId
     go _parentIds (Image{}) = mempty

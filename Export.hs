@@ -13,14 +13,16 @@ import System.FilePath
 
 import Options.Applicative
 
-import CAR.AnnotationsFile
 import CAR.Types
+import CAR.Utils
 import CAR.CarExports as Exports
-
-options :: Parser (FilePath, FilePath, [PageId])
+import CAR.AnnotationsFile as AnnsFile
+                                      
+options :: Parser (FilePath, FilePath, FilePath, [PageId])
 options =
-    (,,) <$> argument str (help "annotations file" <> metavar "FILE")
+    (,,,) <$> argument str (help "annotations file" <> metavar "FILE")
         <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+        <*> option str (long "unproc" <> metavar "FILE" <> help "unprocessed all.cbor file")
         <*> many (option (pageNameToId . PageName . T.pack <$> str)
                          (short 'p' <> long "page"
                           <> metavar "PAGE NAME" <> help "Export only this page")
@@ -31,8 +33,9 @@ options =
 
 main :: IO ()
 main = do
-    (path, outpath, names) <- execParser $ info (helper <*> options) mempty
+    (path, outpath, unprocessedPagesFile, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
+    unprocessedPages <- openAnnotations unprocessedPagesFile
     let pagesToExport
           | null names = pages anns
           | otherwise  = mapMaybe (`lookupPage` anns) names
@@ -73,8 +76,9 @@ main = do
             putStrLn "done"
 
 
+    let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages unprocessedPages
     -- entity annnotations
-    let writeEntityAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
+        writeEntityAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
         writeEntityAnnotations relsFile pages cutSectionPath = do
             putStr "Writing section relevance annotations..."
             let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
@@ -85,7 +89,7 @@ main = do
                   $ map prettyEntityAnnotation
                   $ S.toList
                   $ S.map cutAnnotation
-                  $ foldMap Exports.toEntityAnnotations pagesToExport
+                  $ foldMap (Exports.toEntityAnnotations resolveRedirect) pagesToExport
             putStrLn "done"
 
 
