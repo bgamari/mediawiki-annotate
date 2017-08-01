@@ -99,6 +99,7 @@ opts =
       methodSet "all"  = pure allMethods
       methodSet "topn" = pure topNPerGraphMethods
       methodSet "core" = pure coreMethods
+      methodSet "base" = pure baseMethods
       methodSet "prio0" = pure prio0Methods
       methodSet "prio1" = pure prio1Methods
       methodSet "prio2" = pure prio2Methods
@@ -152,8 +153,13 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
 --         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
         universeSubset = subsetOfUniverseGraph universeGraph nodeSet
 
+        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
+        fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
+            edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
+                    , edgeDocNeighbors = fmap resolveRedirect edgeDocNeighbors}
+
         edgeDocsSubset :: [EdgeDoc]
-        edgeDocsSubset = HS.toList $ HS.fromList $ concat $ HM.elems universeSubset
+        edgeDocsSubset = HS.toList $ HS.fromList $ fmap fixRedirectEdgeDocs $ concat $ HM.elems universeSubset
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
         edgeFilters = [(BidiFiltered,  onlySymmetricEdges)
@@ -165,10 +171,6 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
                    , (Bm25, BM25.bm25 $ BM25.sensibleParams )
                    ]
 
-        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
-        fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
-            edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
-                    , edgeDocNeighbors = fmap resolveRedirect edgeDocNeighbors}
 
         isNotFromQueryPage :: EdgeDoc -> Bool
         isNotFromQueryPage edgeDoc@EdgeDoc{..} =

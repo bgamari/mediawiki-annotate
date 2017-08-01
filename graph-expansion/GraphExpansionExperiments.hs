@@ -271,6 +271,15 @@ allMethods = [ Method gName eName wName rName irName
              , irName <- [minBound :: RetrievalFun .. maxBound]
              ] ++ [CandidateSet]
 
+baseMethods :: [Method]
+baseMethods = [ Method gName eName wName rName irName
+             | gName <- [SimpleGraph]
+             , eName <- [Unfiltered]
+             , wName <- [Count]
+             , rName <- [PersPageRank, MargEdges, PageRank, ShortPath] -- AttriRank,
+             , irName <- [NoIr]
+             ]
+
 coreMethods :: [Method]
 coreMethods = [ Method gName eName wName rName irName
              | gName <- [Top100PerGraph, Top2000PerGraph, Top20000PerGraph, RandomGraph ]
