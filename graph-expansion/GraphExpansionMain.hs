@@ -386,7 +386,8 @@ main = do
 
                 let ranking'' = filter notSeedEntity ranking'      --  remove seed entities from ranking
                       where notSeedEntity (entityId, _) =
-                              not $ entityId `HS.member` seedEntities
+                              (not $ entityId `HS.member` seedEntities)
+                              && (not $ entityId == queryId)
                               
                     formatted = WriteRanking.formatEntityRankings
                                 (T.pack $ show method)
