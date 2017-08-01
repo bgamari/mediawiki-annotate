@@ -328,7 +328,7 @@ main = do
 
     queriesWithSeedEntities' <-
         case querySrc of
-          QueriesFromCbor queryFile -> pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
+          QueriesFromCbor queryFile -> (pagesToLeadEntities resolveRedirect) . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
@@ -351,14 +351,13 @@ main = do
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
             --forM_' xs f = void $ runEffect $ ForkMap.mapIO 16 16 f xs
-    forM_' queriesWithSeedEntities $ \query -> do
-        when (null $ queryDocLeadEntities query) $
+    forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocLeadEntities=seedEntities} -> do
+        when (null $ seedEntities) $
             T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
         T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
-        let queryId = queryDocQueryId query
-
-            rankings = computeRankingsForQuery retrieveDocs annsFile (queryDocQueryId query) (queryDocRawTerms query) (queryDocLeadEntities query) expansionHops
+        let rankings :: [(Method, [(PageId, Double)])]
+            rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query) seedEntities expansionHops
                                   universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
 
             runMethod :: Method -> [(PageId, Double)] -> IO ()
@@ -380,20 +379,24 @@ main = do
                 --logMsg $ "graph size: "++show (graphSize graph)
                 --ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
                 logMsg $ "ranking entries="++show (length ranking)
-                ranking' <- if null ranking
+                ranking' <- if null ranking                        -- replace empty rankings with dummy result (for trec_eval)
                                then do logMsg $ "empty result set replaced by dummy result"
                                        pure [(dummyInvalidPageId, 0.0)]
                                else pure ranking
-                
-                let formatted = WriteRanking.formatEntityRankings
+
+                let ranking'' = filter notSeedEntity ranking'      --  remove seed entities from ranking
+                      where notSeedEntity (entityId, _) =
+                              not $ entityId `HS.member` seedEntities
+                              
+                    formatted = WriteRanking.formatEntityRankings
                                 (T.pack $ show method)
                                 (T.pack $ unpackPageId queryId)
-                                ranking'
+                                ranking''
                 bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
         case dotFilenameMaybe of
-            Just dotFilename -> computeGraphForQuery retrieveDocs  annsFile (queryDocRawTerms query) (queryDocLeadEntities query)  dotFilename
+            Just dotFilename -> computeGraphForQuery retrieveDocs  annsFile (queryDocRawTerms query) seedEntities  dotFilename
             Nothing -> return ()
 
 

@@ -57,12 +57,12 @@ data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
 instance FromJSON QueryDocList
 instance ToJSON QueryDocList
 
-pagesToLeadEntities :: [Page] -> [QueryDoc]
-pagesToLeadEntities pages =
+pagesToLeadEntities :: (PageId -> PageId) -> [Page] ->  [QueryDoc]
+pagesToLeadEntities resolveRedirect pages  =
         map (\page -> let kbDoc = KB.pageToKbDoc inlinkCounts page
                       in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
                                   , queryDocQueryText      = getPageName $ pageName page
-                                  , queryDocLeadEntities   = HS.fromList $ fmap pageNameToId $ KB.kbDocOutLinks kbDoc
+                                  , queryDocLeadEntities   = HS.fromList $ fmap (resolveRedirect . pageNameToId) $ KB.kbDocOutLinks kbDoc
                                   }
             )
         $ pages

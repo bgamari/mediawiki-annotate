@@ -17,7 +17,7 @@ main = do
     (queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    queriesToSeedEntities <- pagesToLeadEntities . decodeCborList <$> BSL.readFile queryFile
+    queriesToSeedEntities <- (pagesToLeadEntities id) . decodeCborList <$> BSL.readFile queryFile
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where
     toSeedLines queryDoc =
