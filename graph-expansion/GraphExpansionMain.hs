@@ -156,7 +156,8 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
         fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
         fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
             edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
-                    , edgeDocNeighbors = fmap resolveRedirect edgeDocNeighbors}
+                    , edgeDocNeighbors = HS.map resolveRedirect edgeDocNeighbors
+                    }
 
         edgeDocsSubset :: [EdgeDoc]
         edgeDocsSubset = HS.toList $ HS.fromList $ fmap fixRedirectEdgeDocs $ concat $ HM.elems universeSubset

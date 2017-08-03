@@ -44,7 +44,7 @@ edgeDocsToUniverseGraph edgeDocs =
     symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
     symmetrizeEdge edgeDoc =
            [ (target, [edgeDoc])
-           | target <- edgeDocNeighbors edgeDoc]
+           | target <- HS.toList $ edgeDocNeighbors edgeDoc]
 
 computeTextEmbedding :: KnownNat n => WordEmbedding n -> T.Text -> WordVec n
 computeTextEmbedding wordEmbedding text =
@@ -79,7 +79,7 @@ type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
 
 universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
 universeToBinaryGraph universeGraph =
-  fmap (foldMap (\edgeDoc -> HS.fromList $ (edgeDocNeighbors $edgeDoc))) $ universeGraph
+  fmap (foldMap edgeDocNeighbors) universeGraph
 
 
 expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
@@ -107,7 +107,7 @@ subsetOfUniverseGraph universe nodeset =
   where
     -- Throw out neighbors not in our subgraph
     pruneEdges :: EdgeDoc -> EdgeDoc
-    pruneEdges edoc = edoc { edgeDocNeighbors = filter (`HS.member` nodeset) (edgeDocNeighbors edoc) }
+    pruneEdges edoc = edoc { edgeDocNeighbors = HS.filter (`HS.member` nodeset) (edgeDocNeighbors edoc) }
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations

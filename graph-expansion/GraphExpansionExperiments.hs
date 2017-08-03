@@ -119,7 +119,7 @@ rankNormDocs retrievalResults normRank cutoffRank =
 --   where groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
 --         groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
 --                   [ (entity, [ele])
---                   | entity <- edgeDocNeighbors $ edgeDoc]
+--                   | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 filterGraphByTopNGraphEdges :: RetrievalResult EdgeDoc
@@ -132,7 +132,7 @@ filterGraphByTopNGraphEdges retrievalResult topN =
             groupByEntity :: EdgeDocWithScores -> [(PageId, [EdgeDocWithScores])]
             groupByEntity ele@(EdgeDocWithScores edgeDoc _ _ _) =
                       [ (entity, [ele])
-                      | entity <- edgeDocNeighbors $ edgeDoc]
+                      | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 instance NFData GraphNames
@@ -152,7 +152,7 @@ filterGraphByTop5NodeEdges retrieveDocs query edgeDocs =
   where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByEntity edgeDoc =
                   [ (entity, [edgeDoc])
-                  | entity <- edgeDocNeighbors $ edgeDoc]
+                  | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
         filterNode :: [EdgeDoc] -> [EdgeDocWithScores]
         filterNode edgeDocs' =
             rankNormDocs retrieveDocs 5 5 query edgeDocs'
@@ -168,7 +168,7 @@ noFilterTwice edgeDocs =
   where groupByIncidentEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByIncidentEntity edgeDoc =
                   [ (entity, [edgeDoc])
-                  | entity <- edgeDocNeighbors $ edgeDoc]
+                  | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 
@@ -181,7 +181,7 @@ onlySymmetricEdges edgeDocs =
       fromTo = unionsWith (++)
           [ HM.singleton (edgeDocArticleId edoc, neigh) [edoc]
           | edoc <- edgeDocs
-          , neigh <- edgeDocNeighbors edoc
+          , neigh <- HS.toList $ edgeDocNeighbors edoc
           ]
       fromToFiltered :: HM.HashMap (PageId, PageId) [EdgeDoc]
       fromToFiltered = HM.intersectionWith (++) fromTo (mapKeys swap fromTo)
@@ -195,7 +195,7 @@ onlySymmetricEdges edgeDocs =
 
       edgeDocs' :: [EdgeDoc]
       edgeDocs' =
-          [ edoc { edgeDocNeighbors = HS.toList v }
+          [ edoc { edgeDocNeighbors = v }
           | (edoc, v) <- HM.toList filteredIncidentNodes
           ]
 
@@ -212,7 +212,7 @@ randomFilter topN edgeDocs =
   where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByEntity edgeDoc =
                   [ (entity, [edgeDoc])
-                  | entity <- edgeDocNeighbors $ edgeDoc]
+                  | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 accumulateEdgeWeights :: forall w. Num w
@@ -227,7 +227,7 @@ accumulateEdgeWeights sourceToEdgeDocsWithScores by seeds=
             HM.fromListWith (+)
               [ (targetNode, by edgeDocsWithScore)
               | edgeDocsWithScore <- edgeDocsWithScores
-              , targetNode <- edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
+              , targetNode <- HS.toList $ edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
               , targetNode /= sourceNode  -- we only compute the destinations, this will be added to the source's outedges
               ]
 

@@ -19,19 +19,23 @@ import GHC.Generics
 import Data.Binary
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import qualified Data.HashSet as HS
 import Data.Hashable
 
 import CAR.Types
 import CAR.Utils
 
-data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: ParagraphId
-                       , edgeDocArticleId       :: PageId
-                       , edgeDocNeighbors       :: [PageId]
-                       , edgeDocContent         :: T.Text
+data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: !ParagraphId
+                       , edgeDocArticleId       :: !PageId
+                       , edgeDocNeighbors       :: !(HS.HashSet PageId)
+                       , edgeDocContent         :: !T.Text
                        }
            deriving (Show, Generic)
 
 deriving instance Binary ParagraphId
+instance (Hashable a, Eq a, Binary a) => Binary (HS.HashSet a) where
+    put = put . HS.toList
+    get = HS.fromList <$> get
 deriving instance Binary PageId
 instance Binary EdgeDoc
 instance NFData EdgeDoc
@@ -64,7 +68,7 @@ pageToEdgeDocs (Page pageName pageId pageSkeleta) =
       let
         edgeDocParagraphId    = paraId para
         edgeDocArticleId      = pageId
-        edgeDocNeighbors      = filter (not . isNullPageId) -- kick out links to empty entity ids
+        edgeDocNeighbors      = HS.fromList $ filter (not . isNullPageId) -- kick out links to empty entity ids
                               $ [pageId] ++ fmap linkTargetId (paraLinks para)
         edgeDocContent        = paragraphContent para headings
       in EdgeDoc {..}
@@ -76,9 +80,7 @@ pageToEdgeDocs (Page pageName pageId pageSkeleta) =
       <> getPageName pageName
 
 edgeDocHasLinks :: EdgeDoc -> Bool
-edgeDocHasLinks edgeDoc
-  | _:_:_ <- edgeDocNeighbors edgeDoc = True
-  | otherwise                         = False
+edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
