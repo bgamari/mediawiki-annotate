@@ -90,18 +90,18 @@ persPageRankWithSeeds _ beta seeds _
   , HS.null seeds =
     error "persPageRankWithSeeds: empty seed set"
 persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
-    let mapping  = mkDenseMapping (nodeSet graph)
-        nodeRng  = denseRange mapping
-        numNodes = rangeSize nodeRng
-        numSeeds = HS.size seeds
+    let !mapping  = mkDenseMapping (nodeSet graph)
+        !nodeRng  = denseRange mapping
+        !numNodes = rangeSize nodeRng
+        !numSeeds = HS.size seeds
 
-        initial = VI.replicate nodeRng (1 / realToFrac numNodes)
+        !initial = VI.replicate nodeRng (1 / realToFrac numNodes)
 
         -- normalized flow of nodes flowing into each node
-        inbound :: VI.Vector V.Vector (DenseId n) [(DenseId n, a)]
-        inbound = VI.accum' nodeRng (++) []
+        inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
+        !inbound = VI.accum' nodeRng (HM.unionWith (+)) mempty -- TODO mappend?
                   [ ( toDense mapping v,
-                      [(toDense mapping u, weightUV / weightUSum)]
+                      HM.singleton (toDense mapping u) (weightUV / weightUSum)
                     )
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum $ map snd outEdges
@@ -110,19 +110,20 @@ persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
 
         nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
         nextiter pagerank = VI.accum' nodeRng (+) 0
-                   [ (v, teleportationSum + outlinkSum + seedTeleportSum)
+                   [ (v, weight)
                    | (v, inEdges) <- VI.assocs inbound
-                   , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
-                                          | (u, normWeight) <- inEdges
-                                          , let uPR = pagerank VI.! u
-                                          ]
-                         teleportationSum = alpha / realToFrac numNodes * c
-                         seedTeleportSum
+                   , let !outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
+                                           | (u, normWeight) <- HM.toList inEdges
+                                           , let uPR = pagerank VI.! u
+                                           ]
+                         !teleportationSum = alpha / realToFrac numNodes * c
+                         !seedTeleportSum
                            | beta == 0 = 0
                            | otherwise = beta' / realToFrac numSeeds * c
-                         beta'
+                         !beta'
                            | fromDense mapping v `HS.member` seeds = beta
                            | otherwise = 0
+                         !weight = teleportationSum + outlinkSum + seedTeleportSum
                    ]
           where
             !c = VI.sum pagerank
@@ -133,7 +134,6 @@ persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                    :: (Eq n, Hashable n, Show n)
                    => Double -> Double -> HS.HashSet n
                    -> Graph n Double -> [Eigenvector n Double] #-}
-
 
 -- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
 addTeleportation :: (RealFrac a, VG.Vector VU.Vector a)
