@@ -98,10 +98,10 @@ persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
         initial = VI.replicate nodeRng (1 / realToFrac numNodes)
 
         -- normalized flow of nodes flowing into each node
-        inbound :: VI.Vector V.Vector (DenseId n) [(DenseId n, a)]
-        inbound = VI.accum' nodeRng (++) []
-                  [ ( toDense mapping v,
-                      [(toDense mapping u, weightUV / weightUSum)]
+        inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
+        inbound = VI.accum' nodeRng mappend mempty
+                  [ ( toDense mapping v
+                    , HM.singleton (toDense mapping u) (weightUV / weightUSum)
                     )
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum $ map snd outEdges
@@ -112,15 +112,15 @@ persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
         nextiter pagerank = VI.accum' nodeRng (+) 0
                    [ (v, teleportationSum + outlinkSum + seedTeleportSum)
                    | (v, inEdges) <- VI.assocs inbound
-                   , let outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
-                                          | (u, normWeight) <- inEdges
-                                          , let uPR = pagerank VI.! u
-                                          ]
-                         teleportationSum = alpha / realToFrac numNodes * c
-                         seedTeleportSum
+                   , let !outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
+                                           | (u, normWeight) <- HM.toList inEdges
+                                           , let uPR = pagerank VI.! u
+                                           ]
+                         !teleportationSum = alpha / realToFrac numNodes * c
+                         !seedTeleportSum
                            | beta == 0 = 0
                            | otherwise = beta' / realToFrac numSeeds * c
-                         beta'
+                         !beta'
                            | fromDense mapping v `HS.member` seeds = beta
                            | otherwise = 0
                    ]

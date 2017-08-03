@@ -38,7 +38,7 @@ elems = map snd . assocs
 
 -- | A dense node index.
 newtype DenseId a = DenseId Int
-               deriving (Eq, Ord, Show, Enum, Ix)
+               deriving (Eq, Ord, Show, Enum, Ix, Hashable)
 
 fromDense :: DenseMapping a -> DenseId a -> a
 fromDense m = (fromDenseArr m VI.!)
