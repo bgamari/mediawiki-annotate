@@ -326,11 +326,11 @@ prio3Methods = [ Method gName eName wName rName irName
 
 prio4Methods :: [Method]
 prio4Methods = [ Method gName eName wName rName irName
-                | gName <- [Top100PerGraph, Top2000PerGraph, Random2000Graph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
+                | gName <- [Top100PerGraph, Top2000PerGraph, Top20000PerGraph, Random2000Graph, Top10PerGraph, Top50PerGraph, Top200PerGraph]
                 , eName <- [Unfiltered]
                 , wName <- [Count, Score, RecipRank, LinearRank, BucketRank]
-                , rName <- [PersPageRank, MargEdges, AttriRank, PageRank, ShortPath]
-                , irName <- [Ql]
+                , rName <- [PersPageRank, MargEdges,  PageRank, ShortPath] --AttriRank,
+                , irName <- [Ql,Bm25]
                 ]
 
 fix1Methods :: [Method]
