@@ -275,12 +275,11 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
             ]
 
 computeGraphForQuery ::(Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
-                     -> AnnotationsFile
                      -> [Term]
                      -> HS.HashSet PageId
                      -> FilePath
                      -> IO ()
-computeGraphForQuery retrieveDocs annsFile query seeds dotFilename = do
+computeGraphForQuery retrieveDocs query seeds dotFilename = do
     let
         irModel = BM25.bm25 @Term $ BM25.sensibleParams
         retrievalResult = (retrieveDocs irModel) query
@@ -399,7 +398,7 @@ main = do
                     logTimed "writing ranking" $ TL.hPutStrLn h formatted
 
         case dotFilenameMaybe of
-            Just dotFilename -> computeGraphForQuery retrieveDocs  annsFile (queryDocRawTerms query) seedEntities  dotFilename
+            Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename
             Nothing -> return ()
 
 
