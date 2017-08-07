@@ -61,14 +61,13 @@ import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
-import Debug.Trace
 
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
 opts :: Parser ( FilePath, FilePath, FilePath, QuerySource
                , Maybe [Method], Int, Index.OnDiskIndex Term EdgeDoc Int
-               , Maybe PageId , Maybe FilePath)
+               , [PageId], Maybe FilePath)
 opts =
     (,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
@@ -79,7 +78,7 @@ opts =
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     <*> option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
-    <*> optional (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+    <*> many (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
       methods :: Parser [Method]
@@ -309,18 +308,17 @@ dummyInvalidPageId = packPageId "__invalid__"
 
 main :: IO ()
 main = do
-    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath, queryMaybe, dotFilenameMaybe) <-
+    (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath, queryRestriction, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
-    putStrLn $ "# Query restriction " ++ show queryMaybe
-    putStrLn $ "# Edgedoc index "++ show simplirIndexFilepath
+    putStrLn $ "# Query restriction: " ++ show queryRestriction
+    putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
     let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
 
-            
     let universeGraph :: UniverseGraph
         universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
@@ -336,10 +334,11 @@ main = do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
 
-    let queriesWithSeedEntities
-          | Just query <- queryMaybe =  (trace $ "using only query "<>(unpackPageId query))
-                                       $ filter (\q-> queryDocQueryId q == query ) queriesWithSeedEntities'
-          | otherwise = queriesWithSeedEntities'
+    queriesWithSeedEntities <-
+        if null queryRestriction
+          then return queriesWithSeedEntities'
+          else do putStrLn $ "using only queries "<>show queryRestriction
+                  return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queriesWithSeedEntities'
 
     index <- Index.open simplirIndexFilepath
     let retrieveDocs :: Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc
