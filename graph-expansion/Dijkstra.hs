@@ -71,7 +71,7 @@ dijkstra graph =
         case mNext of
           Nothing -> return ()
           Just (u, distU) -> do
-              forM_ (getNeighbors graph u) $ \(v, len) -> do
+              forM_ (HM.toList $ getNeighbors graph u) $ \(v, len) -> do
                   distV <- lookupDistance v
                   let alt = distU <> Finite len
                   if -- sanity check
@@ -144,7 +144,7 @@ lazyDijkstra' collect graph =
               s' = s0 { lsTodo = todo'
                       , lsEmit = lsEmit'
                       }
-              s'' = foldl' (tryNeighbor (u, distU)) s' (getNeighbors graph u)
+              s'' = foldl' (tryNeighbor (u, distU)) s' (HM.toList $ getNeighbors graph u)
           in emitted ++ go s''
       | otherwise = PSQ.toList (lsEmit s0)
       where
@@ -233,7 +233,7 @@ interleaveSorted = go . foldl' (flip addCandidate) mempty
 -- Testing
 
 test :: Graph Char (Sum Int)
-test = Graph $ HM.fromList
+test = Graph $ fmap HM.fromList $ HM.fromList
     [ a .= [ b .= 1, c .= 2, d .= 10, e .= 1, f .= 1 ]
     , b .= [ a .= 1, c .= 1 ]
     , c .= [ a .= 2, b .= 1, d .= 1, e .= 1 ]

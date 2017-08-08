@@ -96,7 +96,7 @@ expandNodesK binarySymmetricGraph seeds k =
 
 
 
-lookupNeighbors :: Monoid v =>  HM.HashMap PageId v -> PageId -> v
+lookupNeighbors :: Monoid v => HM.HashMap PageId v -> PageId -> v
 lookupNeighbors graph node =
     fromMaybe mempty $ HM.lookup node graph
 
@@ -142,13 +142,6 @@ rankByAttriPageRank graph teleport attrBounds nodeAttrs iterations
       in prRanking
 
 
-filterEdges :: (PageId -> PageId -> Bool)
-            -> Graph.Graph PageId w -> Graph.Graph PageId w
-filterEdges pred (Graph.Graph graph ) =
-    Graph.Graph $ HM.mapWithKey f $ graph
-  where f :: PageId -> [(PageId, w)] -> [(PageId, w) ]
-        f source =
-          filter (\(target, _) -> pred source target)
 
 rankByShortestPaths :: Graph.Graph PageId (Sum Double) -> [PageId] -> [(PageId, Double)]
 rankByShortestPaths graph seeds
@@ -188,9 +181,3 @@ shortestPathsToNodeScores paths =
                            | path <- innerPaths
                            , elem <- toList path
                            ]
-
-
-
-toGraph :: HM.HashMap PageId (HM.HashMap PageId Double) -> Graph PageId Double
-toGraph graph =
-    Graph $ fmap HM.toList graph
