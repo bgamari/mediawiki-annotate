@@ -25,7 +25,7 @@ executable trec-car-graph-expansion
                        GraphExpansionExperiments
                        EdgeDocCorpus
   ghc-options:         -Wall -threaded -rtsopts
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.11,
                        async,
                        bytestring,
                        unordered-containers,
@@ -73,7 +73,7 @@ executable trec-car-seeds
                        WriteRanking
                        GraphExpansionExperiments
   ghc-options:         -Wall -threaded -rtsopts
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -106,7 +106,7 @@ executable trec-car-remove-seeds-from-qrels
   main-is:             RemoveSeedsFromQrels.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,

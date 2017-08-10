@@ -1,7 +1,5 @@
 allow-newer:
-    vector, aws, xml-conduit
-
-    base, time, directory, template-haskell, ghc-prim
+    template-haskell, pipes
 
 packages:
     ./

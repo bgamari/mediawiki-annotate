@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 executable car-retrieval
   main-is:             CarBaselines.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.11,
                        filepath,
                        containers >=0.5 && <0.6,
                        unordered-containers >= 0.2,
@@ -40,7 +40,7 @@ executable rank-entities
   main-is:             RankEntities.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
   default-language:    Haskell2010
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.11,
                        containers,
                        optparse-applicative >= 0.12,
                        trec-car-tools
@@ -49,7 +49,7 @@ executable entityranking-with-lead
   main-is:             EntityRankingToEntityLeadPassage.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
   default-language:    Haskell2010
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.11,
                        containers,
                        optparse-applicative >= 0.12,
                        unordered-containers >= 0.2,
@@ -58,7 +58,7 @@ executable entityranking-with-lead
 executable car-galago-query
   main-is:             GalagoQuery.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.11,
                        filepath,
                        containers >=0.5 && <0.6,
                        unordered-containers >= 0.2,
