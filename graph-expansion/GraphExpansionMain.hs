@@ -62,8 +62,6 @@ import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
-import Debug.Trace
-
 data QuerySource = QueriesFromCbor FilePath
                  | QueriesFromJson FilePath
 
@@ -270,11 +268,12 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
 
 
 
-computeSimpleGraphs :: HS.HashSet PageId -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
+computeSimpleGraphs :: UniverseGraph
                     -> (PageId -> PageId)
+                    -> HS.HashSet PageId
                     -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
 
-computeSimpleGraphs queryPageIds seeds radius universeGraph binarySymmetricGraph resolveRedirect =
+computeSimpleGraphs universeGraph resolveRedirect queryPageIds =
     let universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset = universeGraph
 
@@ -326,17 +325,13 @@ computeSimpleGraphs queryPageIds seeds radius universeGraph binarySymmetricGraph
 computeFullgraphRankingsForQuery
     :: forall n. (KnownNat n)
     => AnnotationsFile
-    -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
-    -> HS.HashSet PageId -> Int -> BinarySymmetricGraph
     -> WordEmbedding n
+    -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
+    -> HS.HashSet PageId
     -> [(Method, [(PageId, Double)])]
 
-computeFullgraphRankingsForQuery annsFile simpleWeightedGraphs seeds radius binarySymmetricGraph wordEmbedding =
-    let nodes :: HS.HashSet PageId
-        nodes = expandNodesK binarySymmetricGraph seeds radius
-        nodeAttributes = nodesToAttributes annsFile wordEmbedding nodes
-
-        graphRankings :: [(GraphRankingNames, Graph PageId Double -> [(PageId, Double)])]
+computeFullgraphRankingsForQuery annsFile wordEmbedding simpleWeightedGraphs = \seeds ->
+    let graphRankings :: [(GraphRankingNames, Graph PageId Double -> [(PageId, Double)])]
         graphRankings = [(PageRank, \graph -> rankByPageRank graph 0.15 20)
                         ,(PersPageRank, \graph -> rankByPersonalizedPageRank graph 0.15 seeds 20)
                         ,(AttriRank, \graph ->  let embeddingBounds = wordEmbeddingDimBounds wordEmbedding
@@ -350,11 +345,10 @@ computeFullgraphRankingsForQuery annsFile simpleWeightedGraphs seeds radius bina
             [ (Method gname ename wname rname NoIr,  graphRanking graph )
             | ((gname, ename, wname), graph) <- simpleWeightedGraphs ,
               (rname, graphRanking) <- graphRankings
-            ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
-
---     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
+            ]
     in computeRankings'
-
+  where
+    nodeAttributes = nodesToAttributes annsFile wordEmbedding (foldMap (nodeSet . snd) simpleWeightedGraphs)
 
 
 
@@ -440,7 +434,6 @@ main = do
 
     let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
 
-            
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
@@ -505,20 +498,17 @@ main = do
                 TL.hPutStrLn h formatted
 
     let fullgraphExpansion = do
-
+            putStrLn "full graph"
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocLeadEntities=seedEntities} -> do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
-                let simpleWeightedGraphs = computeSimpleGraphs queryPageIds seedEntities expansionHops universeGraph binarySymmetricGraph resolveRedirect
-                    queryPageIds = HS.fromList $ map queryDocQueryId queriesWithSeedEntities
 
-                    rankings :: [(Method, [(PageId, Double)])]
+                let rankings :: [(Method, [(PageId, Double)])]
                     rankings = computeFullgraphRankingsForQuery
-                                   annsFile simpleWeightedGraphs
-                                   seedEntities expansionHops
-                                   binarySymmetricGraph wordEmbeddings
+                                   annsFile wordEmbeddings simpleWeightedGraphs
+                                   seedEntities
 
                 let methodsAvailable = S.fromList (map fst rankings)
                     badMethods
@@ -529,6 +519,9 @@ main = do
                       | otherwise             = const True
                 when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
                 mapM_ (uncurry $ runMethod queryId query) $ filter (filterMethods . fst) rankings
+          where
+            simpleWeightedGraphs = computeSimpleGraphs universeGraph resolveRedirect queryPageIds
+            queryPageIds = HS.fromList $ map queryDocQueryId queriesWithSeedEntities
 
 
     let subgraphExpansion = do
