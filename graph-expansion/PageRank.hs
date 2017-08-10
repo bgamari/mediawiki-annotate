@@ -104,8 +104,8 @@ persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
                       HM.singleton (toDense mapping u) (weightUV / weightUSum)
                     )
                   | (u, outEdges) <- HM.toList nodeMap
-                  , let !weightUSum = sum $ map snd outEdges
-                  , (v, weightUV) <- outEdges
+                  , let !weightUSum = sum outEdges
+                  , (v, weightUV) <- HM.toList outEdges
                   ]
 
         nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
@@ -163,7 +163,7 @@ normRows nodeRange trans =
              ]
 
 test :: Graph Char Double
-test = Graph $ HM.fromList
+test = Graph $ fmap HM.fromList $ HM.fromList
     [ d0 .= [ d2 .= 1],
       d1 .= [ d1 .= 1, d2 .= 1],
       d2 .= [ d0 .= 1, d2 .= 1, d3 .= 1],
@@ -178,7 +178,7 @@ test = Graph $ HM.fromList
     a .= b = (a, b)
 
 testW :: Graph Char Double
-testW = Graph $ HM.fromList
+testW = Graph $ fmap HM.fromList $ HM.fromList
     [ d0 .= [ d2 .= 0.0001],
       d1 .= [ d1 .= 1, d2 .= 100],
       d2 .= [ d0 .= 1, d2 .= 1, d3 .= 1],

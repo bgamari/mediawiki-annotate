@@ -85,13 +85,13 @@ attriRank gamma dDist getAttrs graph =
 
         -- generate P matrix
         outDegree :: HM.HashMap n Double
-        outDegree = fmap (sum . map snd) (getGraph graph)
+        outDegree = fmap sum (getGraph graph)
 
         p :: [Edge n]
         p = [ Edge i' (toDense mapping j) v
             | (i, js) <- HM.toList (getGraph graph)
             , let i' = toDense mapping i
-            , (j, edgeW) <- js
+            , (j, edgeW) <- HM.toList js
             , let v = case HM.lookup j outDegree of
                         Nothing     -> 1 / realToFrac nNodes
                         Just outDeg -> edgeW / outDeg
@@ -145,7 +145,7 @@ m !*^ x =
     ]
 
 graph :: Graph Char Double
-graph = Graph $ HM.fromList
+graph = Graph $ fmap HM.fromList $ HM.fromList
     [ a .= [ b .= 1, c .= 2, d .= 10, e .= 1, f .= 1 ]
     , b .= [ a .= 1, c .= 1 ]
     , c .= [ a .= 2, b .= 1, d .= 1, e .= 1 ]

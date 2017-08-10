@@ -35,7 +35,7 @@ import qualified CAR.KnowledgeBase as KB
 import CAR.Retrieve
 import SimplIR.TopK
 import EdgeDocCorpus
-
+import Graph
 
 mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v
 mapKeys f = HM.fromList . map (first f) . HM.toList
@@ -159,12 +159,12 @@ filterGraphByTop5NodeEdges retrieveDocs query edgeDocs =
     -}
 
 
-noFilterTwice :: [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
+noFilterTwice :: [EdgeDoc] ->  Graph PageId [EdgeDoc]
 noFilterTwice edgeDocs =
   let perSourceEdges :: HM.HashMap PageId [EdgeDoc]
       perSourceEdges = HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs
       perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs' ) $ perSourceEdges
-  in perTargetEdges
+  in Graph perTargetEdges
   where groupByIncidentEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByIncidentEntity edgeDoc =
                   [ (entity, [edgeDoc])
@@ -202,13 +202,13 @@ onlySymmetricEdges edgeDocs =
   in edgeDocs'
 
 
-randomFilter :: Int -> [EdgeDoc] ->  HM.HashMap PageId (HM.HashMap PageId [EdgeDoc])
+randomFilter :: Int -> [EdgeDoc] -> Graph PageId [EdgeDoc]
 randomFilter topN edgeDocs =
   let edgeDocs' = take topN $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
       perSourceEdges :: HM.HashMap PageId [EdgeDoc]
       perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
       perTargetEdges = fmap (HM.fromListWith (++) . foldMap groupByEntity) $ perSourceEdges
-  in perTargetEdges
+  in Graph perTargetEdges
   where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
         groupByEntity edgeDoc =
                   [ (entity, [edgeDoc])
@@ -219,9 +219,9 @@ accumulateEdgeWeights :: forall w. Num w
                       => HM.HashMap PageId [EdgeDocWithScores]
                       -> (EdgeDocWithScores -> w)
                       -> HS.HashSet PageId
-                      -> HM.HashMap PageId (HM.HashMap PageId w)
+                      -> Graph PageId w
 accumulateEdgeWeights sourceToEdgeDocsWithScores by seeds=
-     (HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores) <> fmap (const mempty) (HS.toMap seeds)
+     Graph $ (HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores) <> fmap (const mempty) (HS.toMap seeds)
   where countEdgeDocs :: PageId -> [EdgeDocWithScores] -> HM.HashMap PageId w
         countEdgeDocs sourceNode edgeDocsWithScores =
             HM.fromListWith (+)
@@ -234,9 +234,9 @@ accumulateEdgeWeights sourceToEdgeDocsWithScores by seeds=
 
 
 -- Marginalized over second argument in edges, e.g. Map source (Map target weight_{st}) -> Map source weight_{s*}
-marginalizeEdges :: HM.HashMap PageId (HM.HashMap PageId Double) -> [(PageId, Double)]
+marginalizeEdges :: Graph PageId Double -> [(PageId, Double)]
 marginalizeEdges graph =
-    HM.toList $ fmap marginalizeMap $ graph
+    HM.toList $ fmap marginalizeMap $ getGraph graph
   where marginalizeMap :: HM.HashMap PageId Double -> Double
         marginalizeMap = sum . fmap snd . HM.toList
 
