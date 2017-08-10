@@ -275,11 +275,8 @@ computeSimpleGraphs :: HS.HashSet PageId -> HS.HashSet PageId -> Int -> Universe
                     -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
 
 computeSimpleGraphs queryPageIds seeds radius universeGraph binarySymmetricGraph resolveRedirect =
-    let nodes :: HS.HashSet PageId
-        nodes = expandNodesK binarySymmetricGraph seeds radius
-
-        universeSubset ::  HM.HashMap PageId [EdgeDoc]
-        universeSubset = subsetOfUniverseGraph universeGraph nodes
+    let universeSubset ::  HM.HashMap PageId [EdgeDoc]
+        universeSubset = universeGraph
 
         fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
         fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
@@ -515,7 +512,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
                 let simpleWeightedGraphs = computeSimpleGraphs queryPageIds seedEntities expansionHops universeGraph binarySymmetricGraph resolveRedirect
-                    queryPageIds = undefined
+                    queryPageIds = HS.fromList $ map queryDocQueryId queriesWithSeedEntities
 
                     rankings :: [(Method, [(PageId, Double)])]
                     rankings = computeFullgraphRankingsForQuery
