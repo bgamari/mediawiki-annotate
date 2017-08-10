@@ -141,7 +141,8 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
         nodeToAttributes :: HM.HashMap PageId (Attributes (EmbeddingDim n))
         nodeToAttributes =
             zScoreStandardize
-            $ foldMap (\pid -> HM.singleton pid $ toWordVec pid) (toList nodeSet)
+            $ HM.mapWithKey (\pid _ -> HM.singleton pid $ toWordVec pid)
+            $ HS.toMap nodeSet
           where
             toWordVec pid =
                 wordVecToAttributes
@@ -316,13 +317,13 @@ main = do
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
 
-    let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
+    let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
 
     let universeGraph :: UniverseGraph
-        universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
+        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 
     let binarySymmetricGraph :: BinarySymmetricGraph
-        binarySymmetricGraph = universeToBinaryGraph universeGraph
+        !binarySymmetricGraph = universeToBinaryGraph universeGraph
 
     putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
 
@@ -389,7 +390,7 @@ main = do
                       where notSeedEntity (entityId, _) =
                               (not $ entityId `HS.member` seedEntities)
                               && (not $ entityId == queryId)
-                              
+
                     formatted = WriteRanking.formatEntityRankings
                                 (T.pack $ show method)
                                 (T.pack $ unpackPageId queryId)
@@ -400,7 +401,6 @@ main = do
         case dotFilenameMaybe of
             Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename
             Nothing -> return ()
-
 
         let methodsAvailable = S.fromList (map fst rankings)
             badMethods

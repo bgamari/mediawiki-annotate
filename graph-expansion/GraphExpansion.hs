@@ -79,7 +79,7 @@ type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
 
 universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
 universeToBinaryGraph universeGraph =
-  fmap (foldMap edgeDocNeighbors) universeGraph
+    HM.map (foldMap edgeDocNeighbors) universeGraph
 
 
 expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
@@ -103,11 +103,12 @@ lookupNeighbors graph node =
 
 subsetOfUniverseGraph :: UniverseGraph -> HS.HashSet PageId -> UniverseGraph
 subsetOfUniverseGraph universe nodeset =
-    foldMap (\node -> HM.singleton node (map pruneEdges $ universe `lookupNeighbors` node) ) $ nodeset
+    HM.mapWithKey (\node _ -> map pruneEdges $ universe `lookupNeighbors` node)
+    $ HS.toMap nodeset
   where
     -- Throw out neighbors not in our subgraph
     pruneEdges :: EdgeDoc -> EdgeDoc
-    pruneEdges edoc = edoc { edgeDocNeighbors = HS.filter (`HS.member` nodeset) (edgeDocNeighbors edoc) }
+    pruneEdges edoc = edoc { edgeDocNeighbors = edgeDocNeighbors edoc `HS.intersection` nodeset }
 
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations
