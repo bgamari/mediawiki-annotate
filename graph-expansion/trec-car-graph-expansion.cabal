@@ -24,7 +24,7 @@ executable trec-car-graph-expansion
                        WriteRanking
                        GraphExpansionExperiments
                        EdgeDocCorpus
-  ghc-options:         -Wall -threaded -rtsopts
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
                        bytestring,
