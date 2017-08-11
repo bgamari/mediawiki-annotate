@@ -43,9 +43,9 @@ mapKeys f = HM.fromList . map (first f) . HM.toList
 unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.HashMap k v
 unionsWith f = foldl' (HM.unionWith f) mempty
 
-data QueryDoc = QueryDoc { queryDocQueryId :: PageId
-                         , queryDocQueryText :: T.Text
-                         , queryDocLeadEntities ::  HS.HashSet PageId
+data QueryDoc = QueryDoc { queryDocQueryId      :: !PageId
+                         , queryDocQueryText    :: !T.Text
+                         , queryDocLeadEntities :: !(HS.HashSet PageId)
                          }
            deriving (Show, Generic)
 instance FromJSON QueryDoc
