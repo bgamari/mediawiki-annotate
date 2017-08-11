@@ -444,7 +444,7 @@ main = do
 
     queriesWithSeedEntities' <-
         case querySrc of
-          QueriesFromCbor queryFile -> (pagesToLeadEntities resolveRedirect) . decodeCborList <$> BSL.readFile queryFile
+          QueriesFromCbor queryFile -> pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
