@@ -238,7 +238,7 @@ marginalizeEdges :: Graph PageId Double -> [(PageId, Double)]
 marginalizeEdges graph =
     HM.toList $ fmap marginalizeMap $ getGraph graph
   where marginalizeMap :: HM.HashMap PageId Double -> Double
-        marginalizeMap = sum . fmap snd . HM.toList
+        marginalizeMap = sum
 
 
 -- ----------------------------------------------------------------------

@@ -82,7 +82,7 @@ opts =
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     <*> option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
-    <*> flag Fullgraph Subgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
+    <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
     <*> many (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
@@ -430,7 +430,7 @@ main = do
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 
-    SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile -- "/home/dietz/trec-car/code/lstm-car/data/glove.6B.50d.txt"
+    SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
 
     let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
 
