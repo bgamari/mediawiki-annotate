@@ -532,7 +532,7 @@ main = do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
-                T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
+                T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
 
                 let rankings :: [(Method, [(PageId, Double)])]
                     rankings = computeFullgraphRankingsForQuery
@@ -558,7 +558,7 @@ main = do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
-                T.putStr $ T.pack $ "# Processing query "++ show query++"\n"
+                T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query) seedEntities expansionHops
                                           universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
