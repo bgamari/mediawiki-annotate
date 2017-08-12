@@ -6,7 +6,7 @@ module CAR.KnowledgeBase
     ( -- * Knowledge base documents
       KbDoc(..)
     , pageToKbDoc
-    
+
       -- * Inlink statistics
     , InlinkInfo(..)
     , collectInlinkInfo

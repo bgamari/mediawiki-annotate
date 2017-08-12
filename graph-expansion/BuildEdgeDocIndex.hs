@@ -82,7 +82,7 @@ entityModes = subparser
 
 modes = subparser
     $ command "entity"  (info entityModes mempty)
-   <> command "edgedoc" (info entityModes mempty)
+   <> command "edgedoc" (info edgeDocModes mempty)
 
 main :: IO ()
 main = do
