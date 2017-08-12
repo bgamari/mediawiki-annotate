@@ -38,7 +38,7 @@ type UniverseGraph = HM.HashMap PageId [EdgeDoc]
 
 edgeDocsToUniverseGraph :: [EdgeDoc] -> UniverseGraph
 edgeDocsToUniverseGraph edgeDocs =
-    HM.fromListWith (++)
+    HM.fromListWith (flip (++))
     $ foldMap symmetrizeEdge edgeDocs
   where
     symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
