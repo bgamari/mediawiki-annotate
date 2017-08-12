@@ -1,3 +1,5 @@
+import Data.List
+import Data.Ord
 import Control.Applicative
 import Data.Foldable
 import Data.Maybe
@@ -78,7 +80,7 @@ entityModes = subparser
         go indexPath terms = do
             idx <- Index.open indexPath
             let postings = fold $ map (Index.lookupPostings idx) terms
-            print postings
+            mapM_ print $ sortBy (flip $ comparing snd) postings
 
 modes = subparser
     $ command "entity"  (info entityModes mempty)
