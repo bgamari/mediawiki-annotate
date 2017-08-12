@@ -59,7 +59,7 @@ instance ToJSON QueryDocList
 
 pagesToLeadEntities :: (PageId -> PageId) -> [Page] ->  [QueryDoc]
 pagesToLeadEntities resolveRedirect pages  =
-        map (\page -> let kbDoc = KB.pageToKbDoc inlinkCounts page
+        map (\page -> let kbDoc = KB.pageToKbDoc page
                       in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
                                   , queryDocQueryText      = getPageName $ pageName page
                                   , queryDocLeadEntities   = HS.fromList $ fmap (resolveRedirect . pageNameToId) $ KB.kbDocOutLinks kbDoc

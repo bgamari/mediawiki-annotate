@@ -112,8 +112,8 @@ collectInlinkInfo = foldMap pageInlinkInfo
             in foldMap toInlinkInfo (pageLinks page)
 
 -- #(anchor, target) / #(anchor, *)
-pageToKbDoc :: HM.HashMap PageName InlinkCounts -> Page -> KbDoc
-pageToKbDoc inlinkInfoMap (Page pageName pageId pageSkeleta) =
+pageToKbDoc :: Page -> KbDoc
+pageToKbDoc (Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
       kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
@@ -122,10 +122,4 @@ pageToKbDoc inlinkInfoMap (Page pageName pageId pageSkeleta) =
       kbDocLeadPara = leadParas
       kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
       kbDocCanonicalName = pageName
-
-      inlinkInfo = fromMaybe mempty $ HM.lookup pageName inlinkInfoMap
-
-      kbDocAnchorNames = anchorCount inlinkInfo -- todo consolidate multiple occurrences of the same name
-      disambiguationNames = disambiguationCount inlinkInfo
-      redirectNames = redirectCount inlinkInfo
   in KbDoc {..}

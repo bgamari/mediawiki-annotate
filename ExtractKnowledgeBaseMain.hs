@@ -114,7 +114,7 @@ main = do
     withFile outputFile WriteMode $ \h ->
         BSL.hPutStr h $ Galago.toWarc
             $ map (toGalagoDoc inlinkCounts inlinkTotals)
-            $ map (pageToKbDoc inlinkCounts)
+            $ map pageToKbDoc
             $ filter (\p -> not $ pageName p `HS.member` redirectPages inlinkInfo)
             $ pages
 

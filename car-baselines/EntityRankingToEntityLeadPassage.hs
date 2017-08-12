@@ -37,7 +37,7 @@ main = do
         entity2lead entityid = join $ fmap page2leadPId $ TocFile.lookup entityid kb
           where page2leadPId :: Page -> Maybe ParagraphId
                 page2leadPId page =
-                  let leadSkeleton = listToMaybe $ kbDocLeadPara $ Kb.pageToKbDoc mempty page
+                  let leadSkeleton = listToMaybe $ kbDocLeadPara $ Kb.pageToKbDoc page
                   in case leadSkeleton of
                     Just(Para (Paragraph pid _ )) -> Just pid
                     _ -> Nothing
@@ -47,8 +47,6 @@ main = do
           case paraId `HM.lookup` dedupTable of
           Just toPid -> toPid
           Nothing -> paraId
-            
-
 
 
     let lookupLeadPara ::  PageId -> Maybe ParagraphId
