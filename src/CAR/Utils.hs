@@ -11,6 +11,7 @@ import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import CAR.Types
+import SimplIR.Utils.Compact
 
 
 pageRedirect :: Page -> Maybe PageName
@@ -73,7 +74,7 @@ paraToText (Paragraph  _ bodies) =
 resolveRedirectFactory :: [Page] -> PageId -> PageId
 resolveRedirectFactory pages = resolveRedirectFun entityRedirects
   where
-    !entityRedirects = entityRedirectMap pages
+    !entityRedirects = inCompact $ entityRedirectMap pages
 
 resolveRedirectFun :: HM.HashMap PageId PageId -> PageId -> PageId
 resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
