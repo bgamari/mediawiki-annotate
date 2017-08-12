@@ -6,22 +6,15 @@ import Data.Monoid hiding (All, Any)
 import System.IO
 
 import Options.Applicative
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Encoding as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.ByteString.Lazy as BSL
-import Data.Maybe
--- import qualified Codec.Compression.GZip as GZip
 
 import CAR.Types
 import SimplIR.Galago as Galago
-
-import CAR.KnowledgeBase
-
 
 opts :: Parser (FilePath, FilePath)
 opts =
@@ -34,7 +27,6 @@ wikiAnchorStopwords = [ "more....", "wikipedia article", "source: wikipedia", "h
 wikiAnchorStopphrases = [ "wikipedia the free encyclopedia", "en.wikipedia.org", "full article at wikipedia.org"
                         , "wikipedia the free encyclopedia", "wikipedia, the free encyclopedia"
                         , "http://en.wikipedia.org/wiki/", "wikipedia"]
-
 
 skeletonToXml :: [PageSkeleton] -> TB.Builder
 skeletonToXml list =
