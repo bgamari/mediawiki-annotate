@@ -431,6 +431,8 @@ logTimed queryId method msg doIt = do
 
 main :: IO ()
 main = do
+    hSetBuffering stdout LineBuffering
+
     (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath,
       graphset, queryRestriction, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
