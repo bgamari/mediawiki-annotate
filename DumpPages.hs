@@ -15,6 +15,7 @@ import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
+import CAR.Utils
 
 opts :: Parser (IO ())
 opts = subparser
@@ -40,23 +41,10 @@ opts = subparser
         f inputFile = do
             pages <- decodeCborList <$> BSL.readFile inputFile
             let sectionpathlist p = fmap escapeSectionPath
-                                  $ listSections p
+                                  $ pageSectionPaths p
             let pageNameStr p = (T.unpack $ getPageName $ pageName p)
 
             mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
-        listSections :: Page -> [SectionPath]
-        listSections (Page _ pageId' skeleton) =
-             fmap (\sp -> (SectionPath pageId' sp) )
-             $ foldMap go skeleton
-          where
-            go :: PageSkeleton -> [[HeadingId]]
-            go (Section _ sectionId children) =
-                let childSectionPaths = foldMap go children
-                in if null childSectionPaths
-                then [[sectionId]]
-                else fmap (\childPath -> sectionId : childPath)  childSectionPaths
-            go (Para {}) = []
-            go (Image {}) = []
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")

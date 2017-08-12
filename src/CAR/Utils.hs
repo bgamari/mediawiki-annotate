@@ -3,7 +3,6 @@
 
 module CAR.Utils where
 
-
 import Control.Monad (guard)
 import Data.Maybe
 import qualified Data.HashMap.Strict as HM
@@ -12,7 +11,6 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import CAR.Types
 import SimplIR.Utils.Compact
-
 
 pageRedirect :: Page -> Maybe PageName
 pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : rest)) : _})
@@ -51,6 +49,34 @@ pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
+
+pageSectionPaths :: Page -> [SectionPath]
+pageSectionPaths (Page _ pageId skel0) =
+    fmap (\sp -> SectionPath pageId sp) (foldMap go skel0)
+  where
+    go :: PageSkeleton -> [[HeadingId]]
+    go (Section _ sectionId children)
+      | null childSectionPaths =
+        [[sectionId]]
+      | otherwise              =
+        fmap (\childPath -> sectionId : childPath)  childSectionPaths
+      where childSectionPaths = foldMap go children
+    go (Para {}) = []
+    go (Image {}) = []
+
+pageSectionNames :: Page -> [(PageName, [SectionHeading])]
+pageSectionNames (Page pageName _ skel0) =
+    fmap (\sp -> (pageName, sp)) (foldMap go skel0)
+  where
+    go :: PageSkeleton -> [[SectionHeading]]
+    go (Section sectionName _ children)
+      | null childSectionPaths =
+        [[sectionName]]
+      | otherwise              =
+        fmap (\childPath -> sectionName : childPath)  childSectionPaths
+      where childSectionPaths = foldMap go children
+    go (Para {}) = []
+    go (Image {}) = []
 
 paraLinks :: Paragraph -> [Link]
 paraLinks (Paragraph _ bodies) =
