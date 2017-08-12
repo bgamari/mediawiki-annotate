@@ -434,28 +434,33 @@ main = do
     (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath,
       graphset, queryRestriction, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
+    putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
+    putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
     let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
+    putStrLn $ "# computed redirects"
 
     let universeGraph :: UniverseGraph
         !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
+    putStrLn $ "# nodes in KB = " <> show (HM.size universeGraph)
 
     let binarySymmetricGraph :: BinarySymmetricGraph
         !binarySymmetricGraph = universeToBinaryGraph universeGraph
+    putStrLn $ "# symmetric graph size = " <> show (HM.size binarySymmetricGraph)
 
-    putStrLn ("nodes in KB = " <> show (HM.size universeGraph))
 
     queriesWithSeedEntities' <-
         case querySrc of
           QueriesFromCbor queryFile -> pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
           QueriesFromCborAndEntityIndex queryFile entityIndexFile -> do
               entityIndex <- Index.open entityIndexFile
+              putStrLn $ "# entity index: " ++ show entityIndexFile
               let entitiesFromIndex :: QueryDoc -> QueryDoc
                   entitiesFromIndex qdoc =
                       qdoc { queryDocLeadEntities = seeds }
@@ -474,12 +479,14 @@ main = do
     queriesWithSeedEntities <-
         if null queryRestriction
           then return queriesWithSeedEntities'
-          else do putStrLn $ "using only queries "<>show queryRestriction
+          else do putStrLn $ "# using only queries "<>show queryRestriction
                   return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queriesWithSeedEntities'
+    putStrLn $ "# query count: " ++ show (length queriesWithSeedEntities)
 
     index <- Index.open simplirIndexFilepath
     let retrieveDocs :: Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc
         retrieveDocs model = map swap . Index.score index model
+    putStrLn "# opened edgedoc index"
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
       [ (method, openFile (outputFilePrefix ++ showMethodName method ++ ".run") WriteMode >>= newMVar)
