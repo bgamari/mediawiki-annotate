@@ -18,7 +18,9 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
+import Data.List (sortBy)
 import Data.Maybe
+import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
@@ -63,6 +65,7 @@ import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
 data QuerySource = QueriesFromCbor FilePath
+                 | QueriesFromCborAndEntityIndex FilePath (Index.OnDiskIndex Term PageId Int)
                  | QueriesFromJson FilePath
 
 
@@ -120,6 +123,12 @@ opts =
       querySource =
               option (fmap QueriesFromCbor str) (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
           <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
+          <|> fromEntityIndex
+        where
+          fromEntityIndex =
+              QueriesFromCborAndEntityIndex
+                <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
+                <*> option (Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
 
 candidateSetList :: HS.HashSet PageId -> Int -> BinarySymmetricGraph
@@ -445,6 +454,19 @@ main = do
     queriesWithSeedEntities' <-
         case querySrc of
           QueriesFromCbor queryFile -> pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
+          QueriesFromCborAndEntityIndex queryFile entityIndexFile -> do
+              entityIndex <- Index.open entityIndexFile
+              let entitiesFromIndex :: QueryDoc -> QueryDoc
+                  entitiesFromIndex qdoc =
+                      qdoc { queryDocLeadEntities = seeds }
+                    where
+                      queryTerms = textToTokens' $ queryDocQueryText qdoc
+                      seedModel = QL.queryLikelihood (QL.Dirichlet 100)
+                      seeds = HS.fromList $ map snd
+                              $ take 5 $ sortBy (flip $ comparing snd)
+                              $ Index.score entityIndex seedModel queryTerms
+
+              map entitiesFromIndex . pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
