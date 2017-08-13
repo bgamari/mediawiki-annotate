@@ -15,7 +15,7 @@ import qualified Data.Text.Lazy.Builder.Int as TB
 import CAR.Types
 
 rankingLength :: Int
-rankingLength = 100
+rankingLength = 1000
 
 formatEntityRankings :: T.Text -> T.Text -> [(PageId, Double)] -> TL.Text
 formatEntityRankings runName queryId scoredItems =
@@ -23,7 +23,7 @@ formatEntityRankings runName queryId scoredItems =
     $ mconcat
     $ intersperse "\n"
     $ zipWith formatEntry [1..]
- --   $ take rankingLength
+    $ take rankingLength
     $ toRanking
     $ scoredItems
   where formatEntry :: Int -> (PageId, Double) -> TB.Builder
@@ -44,7 +44,7 @@ formatEntityPassageRankings runName queryId scoredItems =
     $ mconcat
     $ intersperse "\n"
     $ zipWith formatEntry [1..]
- --   $ take rankingLength
+    $ take rankingLength
     $ toRanking
     $ map (\(a,b,c) -> ((a,b), c))
     $ scoredItems

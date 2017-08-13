@@ -472,6 +472,12 @@ retrieveEntities entityIndexFile = do
     -- let model = QL.queryLikelihood (QL.Dirichlet 100)
     return $ sortBy (flip $ comparing snd) . Index.score entityIndex model
 
+filterOutSeeds :: QueryDoc -> [(PageId, ParagraphId, Double)] -> [(PageId, ParagraphId, Double)]
+filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking
+  where notSeedEntity (entityId, _, _) =
+             (not $ entityId `HS.member` queryDocLeadEntities query)
+          && (not $ entityId == queryDocPageId query)
+          
 main :: IO ()
 main = do
     hSetBuffering stdout LineBuffering
@@ -546,12 +552,6 @@ main = do
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
 
-    let filterOutSeeds :: QueryDoc -> [(PageId, ParagraphId, Double)] -> [(PageId, ParagraphId, Double)]
-        filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking
-            where notSeedEntity (entityId, _, _) =
-                    (not $ entityId `HS.member` queryDocLeadEntities query)
-                    && (not $ entityId == queryDocPageId query)
-
         runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, ParagraphId, Double)] -> IO ()
         runMethod queryId query method ranking = do
             let Just hdl = M.lookup method handles
@@ -568,7 +568,11 @@ main = do
                            pure [(dummyInvalidPageId, dummyInvalidParagraphId, 0.0)]
                   r  -> pure r
 
-            let ranking'' = filterOutSeeds query ranking'
+            -- Drop seed entities
+            let ranking'' =
+                  case querySrc of
+                    QueriesFromCbor _ _ SeedsFromLeadSection -> filterOutSeeds query ranking'
+                    _                                        -> ranking'
 
                 formatted =
                     case rankingType of
@@ -576,7 +580,7 @@ main = do
                         WriteRanking.formatEntityPassageRankings
                                      (T.pack $ show method)
                                      (CarRun.unQueryId queryId)
-                                     ranking''
+                                     $ ranking''
                       EntityRanking ->
                         WriteRanking.formatEntityRankings
                                      (T.pack $ show method)
