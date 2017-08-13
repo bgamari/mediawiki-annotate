@@ -33,7 +33,11 @@ import CAR.Types
 import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
+import CAR.Utils
 import SimplIR.TopK
+import qualified SimplIR.SimpleIndex as Index
+import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
+import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import EdgeDocCorpus
 import Graph
 
@@ -57,18 +61,32 @@ data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
 instance FromJSON QueryDocList
 instance ToJSON QueryDocList
 
-pagesToLeadEntities :: (PageId -> PageId) -> [Page] ->  [QueryDoc]
-pagesToLeadEntities resolveRedirect pages  =
-        map (\page -> let kbDoc = KB.pageToKbDoc page
-                      in QueryDoc { queryDocQueryId        = KB.kbDocPageId kbDoc
-                                  , queryDocQueryText      = getPageName $ pageName page
-                                  , queryDocLeadEntities   = HS.fromList $ fmap (resolveRedirect . pageNameToId) $ KB.kbDocOutLinks kbDoc
-                                  }
-            )
-        $ pages
-      where
-        inlinkInfo   = KB.collectInlinkInfo pages
-        inlinkCounts = KB.resolveRedirects inlinkInfo
+data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
+
+pagesToQueryDocs :: (PageId -> PageId) -> QueryDerivation -> [Page] ->  [QueryDoc]
+pagesToQueryDocs resolveRedirect deriv pages  =
+    queryDocs
+  where
+    leadEntities = HS.fromList . fmap (resolveRedirect . pageNameToId) . KB.kbDocOutLinks
+    queryDocs = case deriv of
+      QueryFromPageTitle ->
+          [ QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
+                     , queryDocQueryText    = getPageName $ pageName page
+                     , queryDocLeadEntities = leadEntities kbDoc
+                     }
+          | page <- pages
+          , let kbDoc = KB.pageToKbDoc page
+          ]
+      QueryFromSectionPaths ->
+          [ QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
+                     , queryDocQueryText    = getPageName (pageName page)
+                                              <> T.unwords (map getSectionHeading sectHeadings)
+                     , queryDocLeadEntities = leadEntities kbDoc
+                     }
+          | page <- pages
+          , (_, sectHeadings) <- pageSectionNames page
+          , let kbDoc = KB.pageToKbDoc page
+          ]
 
 queryDocRawTerms :: QueryDoc -> [Term]
 queryDocRawTerms = textToTokens' . queryDocQueryText
@@ -256,11 +274,19 @@ data RetrievalFun = Bm25 | Ql | NoIr
 data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames RetrievalFun
             | CandidateSet
     deriving ( Ord, Eq, Generic)
+
 instance Show Method where
     show = showMethodName
+
 showMethodName:: Method -> String
 showMethodName (Method a b c d e) = intercalate "-" [show a, show b, show c, show d, show e]
 showMethodName (CandidateSet ) = "CandidateSet"
+
+retrievalModels :: [(RetrievalFun, Index.RetrievalModel Term EdgeDoc Int)]
+retrievalModels =
+    [ (Ql,   QL.queryLikelihood $ QL.Dirichlet 100)
+    , (Bm25, BM25.bm25 $ BM25.sensibleParams)
+    ]
 
 allMethods :: [Method]
 allMethods = [ Method gName eName wName rName irName

@@ -25,13 +25,13 @@ import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
 import Data.Coerce
-import Data.Bifunctor
 import Options.Applicative
 import System.IO
 import Data.Time.Clock
 import Numeric
 import GHC.TypeLits
 import Data.Aeson
+import Numeric.Log
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -64,10 +64,14 @@ import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
-data QuerySource = QueriesFromCbor FilePath
-                 | QueriesFromCborAndEntityIndex FilePath (Index.OnDiskIndex Term PageId Int)
-                 | QueriesFromJson FilePath
+type EntityIndex = Index.OnDiskIndex Term PageId Int
 
+data SeedDerivation = SeedsFromLeadSection
+                    | SeedsFromEntityIndex EntityIndex
+                    -- | SeedsFromHeadingEntityLinks -- TODO
+
+data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
+                 | QueriesFromJson FilePath
 
 data Graphset = Fullgraph | Subgraph
 
@@ -120,15 +124,23 @@ opts =
 
       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
+      querySource :: Parser QuerySource
       querySource =
-              option (fmap QueriesFromCbor str) (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+              fromCborTitle
           <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
           <|> fromEntityIndex
         where
+          fromCborTitle =
+              QueriesFromCbor
+                <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+                <*> pure QueryFromPageTitle
+                <*> pure SeedsFromLeadSection
+
           fromEntityIndex =
-              QueriesFromCborAndEntityIndex
+              QueriesFromCbor
                 <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
-                <*> option (Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+                <*> pure QueryFromPageTitle
+                <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
 
 candidateSetList :: HS.HashSet PageId -> Int -> BinarySymmetricGraph
@@ -163,7 +175,10 @@ computeRankingsForQuery :: forall n. (KnownNat n)
                         -> (PageId -> PageId)
                         -> [(Method, [(PageId, Double)])]
 
-computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius universeGraph binarySymmetricGraph wordEmbedding resolveRedirect=
+computeRankingsForQuery
+      retrieveDocs
+      annsFile queryPageId query seeds radius
+      universeGraph binarySymmetricGraph wordEmbedding resolveRedirect =
     let nodes :: HS.HashSet PageId
         nodes = expandNodesK binarySymmetricGraph seeds radius
 
@@ -187,20 +202,9 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
                       ,(Unfiltered,    id)
                       ]
 
-        irModels :: [(RetrievalFun, Index.RetrievalModel Term EdgeDoc Int)]
-        irModels = [ (Ql,  QL.queryLikelihood $ QL.Dirichlet 100 )
-                   , (Bm25, BM25.bm25 $ BM25.sensibleParams )
-                   ]
-
-
         isNotFromQueryPage :: EdgeDoc -> Bool
         isNotFromQueryPage EdgeDoc{..} =
             edgeDocArticleId /= queryPageId
-
-        irRankings :: [(RetrievalFun, RetrievalResult EdgeDoc)]
-        irRankings = [ (irname, fmap (first fixRedirectEdgeDocs) $ filter (isNotFromQueryPage . fst) $ retrieveDocs retrievalFun query)
-                     | (irname, retrievalFun) <- irModels
-                     ]
 
         addSeedNodes :: HS.HashSet PageId -> HM.HashMap PageId [EdgeDocWithScores] -> HM.HashMap PageId [EdgeDocWithScores]
         addSeedNodes seeds graph =
@@ -217,7 +221,9 @@ computeRankingsForQuery retrieveDocs annsFile queryPageId query seeds radius uni
                                , (Top2000PerGraph,  irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 2000)
                                , (Top20000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 20000)
                                ]
-                             | (irname, retrievalResult) <- irRankings
+                             | (irname, retrievalModel) <- retrievalModels
+                             , let retrievalResult = filter (isNotFromQueryPage . fst)
+                                                     $ retrieveDocs retrievalModel query
                              ]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> Graph PageId [EdgeDoc])]
@@ -427,7 +433,11 @@ logTimed queryId method msg doIt = do
       logMsg queryId method $ msg++"\ttime="++(showFFloat (Just 3) t "")
       return r
 
-
+retrieveEntities :: EntityIndex -> IO ([Term] -> [(Log Double, PageId)])
+retrieveEntities entityIndexFile = do
+    entityIndex <- Index.open entityIndexFile
+    let model = QL.queryLikelihood (QL.Dirichlet 100)
+    return $ sortBy (flip $ comparing snd) . Index.score entityIndex model
 
 main :: IO ()
 main = do
@@ -456,24 +466,27 @@ main = do
         !binarySymmetricGraph = universeToBinaryGraph universeGraph
     putStrLn $ "# symmetric graph size = " <> show (HM.size binarySymmetricGraph)
 
+    let seedMethod :: SeedDerivation -> IO (QueryDoc -> QueryDoc)
+        seedMethod SeedsFromLeadSection = return id
+        seedMethod (SeedsFromEntityIndex entityIndexFile) = do
+            retrieve <- retrieveEntities entityIndexFile
+            putStrLn $ "# entity index: " ++ show entityIndexFile
+            let entitiesFromIndex :: QueryDoc -> QueryDoc
+                entitiesFromIndex qdoc =
+                    qdoc { queryDocLeadEntities = seeds }
+                  where
+                    queryTerms = textToTokens' $ queryDocQueryText qdoc
+                    seeds = HS.fromList $ map snd
+                            $ take 5 $ retrieve queryTerms
+            return entitiesFromIndex
 
     queriesWithSeedEntities' <-
         case querySrc of
-          QueriesFromCbor queryFile -> pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
-          QueriesFromCborAndEntityIndex queryFile entityIndexFile -> do
-              entityIndex <- Index.open entityIndexFile
-              putStrLn $ "# entity index: " ++ show entityIndexFile
-              let entitiesFromIndex :: QueryDoc -> QueryDoc
-                  entitiesFromIndex qdoc =
-                      qdoc { queryDocLeadEntities = seeds }
-                    where
-                      queryTerms = textToTokens' $ queryDocQueryText qdoc
-                      seedModel = QL.queryLikelihood (QL.Dirichlet 100)
-                      seeds = HS.fromList $ map snd
-                              $ take 5 $ sortBy (flip $ comparing snd)
-                              $ Index.score entityIndex seedModel queryTerms
+          QueriesFromCbor queryFile queryDeriv seedDerivation -> do
+              populateSeeds <- seedMethod seedDerivation
+              map populateSeeds . pagesToQueryDocs resolveRedirect queryDeriv
+                  <$> readCborList queryFile
 
-              map entitiesFromIndex . pagesToLeadEntities resolveRedirect . decodeCborList <$> BSL.readFile queryFile
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queriesWithSeedEntities
