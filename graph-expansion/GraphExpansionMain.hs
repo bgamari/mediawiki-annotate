@@ -76,13 +76,16 @@ data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
                  | QueriesFromJson FilePath
 
 data Graphset = Fullgraph | Subgraph
+data RankingType = EntityRanking | EntityPassageRanking
+  deriving (Show)
 
 opts :: Parser ( FilePath, FilePath, FilePath, QuerySource
                , Maybe [Method], Int, Index.OnDiskIndex Term EdgeDoc Int
+               , RankingType
                , Graphset
                , [CarRun.QueryId], Maybe FilePath)
 opts =
-    (,,,,,,,,,)
+    (,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
@@ -91,6 +94,7 @@ opts =
     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     <*> option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
+    <*> flag EntityRanking EntityPassageRanking (long "entity-psg" <> help "If set, include provenance paragraphs")
     <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
@@ -178,7 +182,7 @@ computeRankingsForQuery :: forall n. (KnownNat n)
                         -> CarRun.QueryId -> PageId ->  [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
                         -> (PageId -> PageId)
-                        -> [(Method, [(PageId, Double)])]
+                        -> [(Method, [(PageId, ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
@@ -217,6 +221,14 @@ computeRankingsForQuery
                   seedNodes = HM.fromList [(seed, []) | seed <- HS.toList seeds]
               in HM.unionWith (++) graph seedNodes
 
+
+        retrievalResults :: [(_, _)]
+        retrievalResults = [ (irname, retrievalResult)
+                           | (irname, retrievalModel) <- retrievalModels
+                           , let retrievalResult = filter (isNotFromQueryPage . fst)
+                                                   $ retrieveDocs retrievalModel query
+                           ]
+
         fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
         fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
                                [ (Top100PerGraph,   irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 100)
@@ -226,9 +238,7 @@ computeRankingsForQuery
                                , (Top2000PerGraph,  irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 2000)
                                , (Top20000PerGraph, irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 20000)
                                ]
-                             | (irname, retrievalModel) <- retrievalModels
-                             , let retrievalResult = filter (isNotFromQueryPage . fst)
-                                                     $ retrieveDocs retrievalModel query
+                             | (irname, retrievalResult) <- retrievalResults
                              ]
 
         simpleGraphs :: [(GraphNames, [EdgeDoc] -> Graph PageId [EdgeDoc])]
@@ -275,13 +285,28 @@ computeRankingsForQuery
                                , let graph = weighting $ mkGraph $ edgeFilter edgeDocsSubset
                                ]
 
-        computeRankings' :: [(Method,  [(PageId, Double)])]
-        computeRankings' =
-            [ (Method gname ename wname rname irname,  graphRanking graph )
-            | ((gname, ename, wname, irname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
-              (rname, graphRanking) <- graphRankings
-            ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
+--         computeRankings'' :: [(Method,  [(PageId, Double)])]
+--         computeRankings'' =
+--             [ (Method gname ename wname rname irname,  graphRanking graph )
+--             | ((gname, ename, wname, irname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
+--               (rname, graphRanking) <- graphRankings
+--             ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
 
+        attachParagraphs :: RetrievalFun ->  [(PageId, Double)] -> [(PageId, ParagraphId, Double)]
+        attachParagraphs irname entityRanking
+          | Just results <- lookup irname retrievalResults =
+             let psgOf :: HM.HashMap PageId ParagraphId
+                 psgOf = HM.fromListWith (\x _ -> x)
+                         $ foldMap (\(EdgeDoc{..}, _) -> fmap (\x -> (x, edgeDocParagraphId)) (HS.toList edgeDocNeighbors ++ [edgeDocArticleId]))
+                         $ results
+             in fmap (\(entity, score) -> (entity, psgOf HM.! entity, score)) entityRanking
+
+        computeRankings' :: [(Method, [(PageId, ParagraphId, Double)])]
+        computeRankings' =
+            [ (Method gname ename wname rname irname, attachParagraphs irname $ graphRanking graph )
+            | ((gname, ename, wname, irname), graph) <- fancyWeightedGraphs,
+              (rname, graphRanking) <- graphRankings
+            ]
 --     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
     in computeRankings'
 
@@ -417,6 +442,8 @@ instance Dot.Labellable PageId where
 dummyInvalidPageId :: PageId
 dummyInvalidPageId = packPageId "__invalid__"
 
+dummyInvalidParagraphId :: ParagraphId
+dummyInvalidParagraphId = packParagraphId "__invalid__"
 
 
 logMsg :: CarRun.QueryId -> Method -> String -> IO ()
@@ -450,13 +477,14 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath,
-      graphset, queryRestriction, dotFilenameMaybe) <-
+      rankingType, graphset, queryRestriction, dotFilenameMaybe) <-
         execParser $ info (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
+    putStrLn $ "# RankingType: " ++ show rankingType
 
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
@@ -518,13 +546,13 @@ main = do
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
 
-    let filterOutSeeds :: QueryDoc -> [(PageId, Double)] -> [(PageId, Double)]
+    let filterOutSeeds :: QueryDoc -> [(PageId, ParagraphId, Double)] -> [(PageId, ParagraphId, Double)]
         filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking
-            where notSeedEntity (entityId, _) =
+            where notSeedEntity (entityId, _, _) =
                     (not $ entityId `HS.member` queryDocLeadEntities query)
                     && (not $ entityId == queryDocPageId query)
 
-        runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, Double)] -> IO ()
+        runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, ParagraphId, Double)] -> IO ()
         runMethod queryId query method ranking = do
             let Just hdl = M.lookup method handles
 
@@ -533,21 +561,30 @@ main = do
             --logMsg $ "graph size: "++show (graphSize graph)
             --ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
             logMsg queryId method $ "ranking entries="++show (length ranking)
-            ranking' <- if null
-                           $ (filter ((/=0) . length . unpackPageId . fst) ranking)                        -- replace empty rankings with dummy result (for trec_eval)
-                           then do logMsg queryId method $ "empty result set replaced by dummy result"
-                                   pure [(dummyInvalidPageId, 0.0)]
-                           else pure $ (filter ((/=0) . length . unpackPageId . fst) ranking)
+            ranking' <-
+                case filter (\(entity, _ , _) -> ((/=0) $ length $ unpackPageId entity)) ranking of
+                  [] -> do -- replace empty rankings with dummy result (for trec_eval)
+                           logMsg queryId method $ "empty result set replaced by dummy result"
+                           pure [(dummyInvalidPageId, dummyInvalidParagraphId, 0.0)]
+                  r  -> pure r
 
             let ranking'' = filterOutSeeds query ranking'
 
-                formatted = WriteRanking.formatEntityRankings
-                            (T.pack $ show method)
-                            (CarRun.unQueryId queryId) -- unpackPageId queryId)
-                            ranking''
+                formatted =
+                    case rankingType of
+                      EntityPassageRanking ->
+                        WriteRanking.formatEntityPassageRankings
+                                     (T.pack $ show method)
+                                     (CarRun.unQueryId queryId)
+                                     ranking''
+                      EntityRanking ->
+                        WriteRanking.formatEntityRankings
+                                     (T.pack $ show method)
+                                     (CarRun.unQueryId queryId)
+                                     (map (\(a,_,c) -> (a,c)) ranking'')
             bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                 TL.hPutStrLn h formatted
-
+{-
     let fullgraphExpansion = do
             putStrLn "full graph"
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocLeadEntities=seedEntities} -> do
@@ -569,11 +606,12 @@ main = do
                       | Just ms <- runMethods = (`elem` ms)
                       | otherwise             = const True
                 when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
-                mapM_ (uncurry $ runMethod queryId query) $ filter (filterMethods . fst) rankings
+                mapM_ (uncurry $ runMethod queryId query)
+                    $ filter (\(method, _) -> filterMethods method) rankings
           where
             simpleWeightedGraphs = computeSimpleGraphs universeGraph resolveRedirect queryPageIds
             queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
-
+-}
 
     let subgraphExpansion = do
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
@@ -581,7 +619,7 @@ main = do
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
-                let rankings :: [(Method, [(PageId, Double)])]
+                let rankings :: [(Method, [(PageId, ParagraphId,  Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
                                           universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
 
@@ -597,10 +635,11 @@ main = do
                       | Just ms <- runMethods = (`elem` ms)
                       | otherwise             = const True
                 when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
-                mapM_ (uncurry $ runMethod queryId query) $ filter (filterMethods . fst) rankings
+                mapM_ (uncurry $ runMethod queryId query)
+                    $ filter (filterMethods . fst) rankings
 
     case graphset of
-      Fullgraph -> fullgraphExpansion
+      --Fullgraph -> fullgraphExpansion
       Subgraph ->  subgraphExpansion
 
     mapM_ (\h -> takeMVar h >>= hClose) handles

@@ -2,6 +2,7 @@
 
 module WriteRanking where
 
+import Data.Semigroup
 import Data.Ord (comparing)
 import Data.List (sortBy, intersperse)
 
@@ -37,6 +38,26 @@ formatEntityRankings runName queryId scoredItems =
             , TB.fromText runName]
 
 
+formatEntityPassageRankings :: T.Text -> T.Text -> [(PageId, ParagraphId, Double)] -> TL.Text
+formatEntityPassageRankings runName queryId scoredItems =
+      TB.toLazyText
+    $ mconcat
+    $ intersperse "\n"
+    $ zipWith formatEntry [1..]
+ --   $ take rankingLength
+    $ toRanking
+    $ map (\(a,b,c) -> ((a,b), c))
+    $ scoredItems
+  where formatEntry :: Int -> ((PageId, ParagraphId), Double) -> TB.Builder
+        formatEntry rank ((entity, passage), score) =
+            mconcat
+            $ intersperse " "
+            [ TB.fromText queryId
+            , "Q0"
+            , TB.fromString (unpackParagraphId passage) <> "/" <> TB.fromString (unpackPageId entity)
+            , TB.decimal rank
+            , TB.realFloat score
+            , TB.fromText runName]
 
 
 toRanking ::  [(elem, Double)] -> [(elem, Double)]
