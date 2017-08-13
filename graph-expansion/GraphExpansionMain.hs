@@ -441,7 +441,8 @@ logTimed queryId method msg doIt = do
 retrieveEntities :: EntityIndex -> IO ([Term] -> [(Log Double, PageId)])
 retrieveEntities entityIndexFile = do
     entityIndex <- Index.open entityIndexFile
-    let model = QL.queryLikelihood (QL.Dirichlet 100)
+    let model = BM25.bm25 $ BM25.sensibleParams
+    -- let model = QL.queryLikelihood (QL.Dirichlet 100)
     return $ sortBy (flip $ comparing snd) . Index.score entityIndex model
 
 main :: IO ()
