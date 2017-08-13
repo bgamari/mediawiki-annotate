@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module CAR.RunFile
     ( -- * Types
@@ -28,6 +29,7 @@ module CAR.RunFile
     , groupByQuery
 
       -- * Conversion
+    , pageIdToQueryId
     , sectionPathToQueryId
     , parsePassageEntity
     , constructPassageEntity
@@ -36,16 +38,19 @@ module CAR.RunFile
 import Data.Ord
 import Data.Maybe
 import Data.Monoid
+import Data.Aeson
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
 import qualified SimplIR.Format.TrecRunFile as Run
+import qualified Data.SmallUtf8 as Utf8
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord, Show)
+                deriving (Eq, Ord, Show, FromJSON, ToJSON)
+
 newtype MethodName = MethodName { unMethodName :: T.Text }
-                   deriving (Eq, Ord, Show)
+                   deriving (Eq, Ord, Show, FromJSON, ToJSON)
 
 data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
                                       , carDocument    :: doc
@@ -122,6 +127,9 @@ constructPassageEntity ep =
         case ep of
           EntityOnly e -> (Nothing, Just e)
           EntityAndPassage e p -> (Just p, Just e)
+
+pageIdToQueryId :: PageId -> QueryId
+pageIdToQueryId (PageId s) = QueryId $ Utf8.toText s
 
 sectionPathToQueryId :: SectionPath -> QueryId
 sectionPathToQueryId = QueryId . T.pack . escapeSectionPath

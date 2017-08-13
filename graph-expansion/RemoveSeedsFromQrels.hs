@@ -45,12 +45,12 @@ main = do
 
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =
-             queryDocQueryId queryDoc `HS.insert` queryDocLeadEntities queryDoc
+             queryDocPageId queryDoc `HS.insert` queryDocLeadEntities queryDoc
 
         pagesToForbiddenEntities :: [Page] -> [(PageId, HS.HashSet PageId)]
-        pagesToForbiddenEntities  pages = [ ( queryDocQueryId queryDoc, toSeeds queryDoc)
-                                          | queryDoc <- pagesToQueryDocs id QueryFromPageTitle pages
-                                          ]
+        pagesToForbiddenEntities pages = [ ( queryDocPageId queryDoc, toSeeds queryDoc)
+                                         | queryDoc <- pagesToQueryDocs id QueryFromPageTitle pages
+                                         ]
 
 
     query2ForbiddenEntities <- HM.fromList . pagesToForbiddenEntities

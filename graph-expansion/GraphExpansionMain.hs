@@ -42,6 +42,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
+import qualified Data.SmallUtf8 as Utf8
 
 import qualified Data.GraphViz as Dot
 import qualified Data.GraphViz.Printing as Dot
@@ -51,6 +52,7 @@ import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import CAR.Utils
+import qualified CAR.RunFile as CarRun
 
 import Graph
 import EdgeDocCorpus
@@ -78,7 +80,7 @@ data Graphset = Fullgraph | Subgraph
 opts :: Parser ( FilePath, FilePath, FilePath, QuerySource
                , Maybe [Method], Int, Index.OnDiskIndex Term EdgeDoc Int
                , Graphset
-               , [PageId], Maybe FilePath)
+               , [CarRun.QueryId], Maybe FilePath)
 opts =
     (,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
@@ -90,7 +92,7 @@ opts =
     <*> option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
-    <*> many (option (packPageId <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+    <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
     where
       methods :: Parser [Method]
@@ -173,14 +175,14 @@ nodesToAttributes annsFile wordEmbedding nodes =
 computeRankingsForQuery :: forall n. (KnownNat n)
                         => (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> AnnotationsFile
-                        -> PageId ->  [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
+                        -> CarRun.QueryId -> PageId ->  [Term] -> HS.HashSet PageId -> Int -> UniverseGraph -> BinarySymmetricGraph
                         -> WordEmbedding n
                         -> (PageId -> PageId)
                         -> [(Method, [(PageId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
-      annsFile queryPageId query seeds radius
+      annsFile queryId queryPageId query seeds radius
       universeGraph binarySymmetricGraph wordEmbedding resolveRedirect =
     let nodes :: HS.HashSet PageId
         nodes = expandNodesK binarySymmetricGraph seeds radius
@@ -417,8 +419,8 @@ dummyInvalidPageId = packPageId "__invalid__"
 
 
 
-logMsg :: PageId -> Method -> String -> IO ()
-logMsg queryId method t = T.putStr $ T.pack $ unpackPageId queryId++"\t"++showMethodName method++"\t"++t++"\n"
+logMsg :: CarRun.QueryId -> Method -> String -> IO ()
+logMsg queryId method t = T.putStr $ (CarRun.unQueryId queryId)<>"\t"<>T.pack (showMethodName method)<>"\t"<>T.pack t<>"\n"
 
 
 timeIt :: IO a -> IO (Double, a)
@@ -429,11 +431,11 @@ timeIt action = do
       let dt = t1 `diffUTCTime` t0
       return (realToFrac dt / 60 :: Double, r)
 
-logTimed :: PageId -> Method -> String -> IO a -> IO a
+logTimed :: CarRun.QueryId -> Method -> String -> IO a -> IO a
 logTimed queryId method msg doIt = do
       logMsg queryId method msg
       (t, r) <- timeIt doIt
-      logMsg queryId method $ msg++"\ttime="++(showFFloat (Just 3) t "")
+      logMsg queryId method $ msg<>"\ttime="<>(showFFloat (Just 3) t "")
       return r
 
 retrieveEntities :: EntityIndex -> IO ([Term] -> [(Log Double, PageId)])
@@ -519,9 +521,9 @@ main = do
         filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking
             where notSeedEntity (entityId, _) =
                     (not $ entityId `HS.member` queryDocLeadEntities query)
-                    && (not $ entityId == queryDocQueryId query)
+                    && (not $ entityId == queryDocPageId query)
 
-        runMethod :: PageId -> QueryDoc -> Method -> [(PageId, Double)] -> IO ()
+        runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, Double)] -> IO ()
         runMethod queryId query method ranking = do
             let Just hdl = M.lookup method handles
 
@@ -539,7 +541,7 @@ main = do
 
                 formatted = WriteRanking.formatEntityRankings
                             (T.pack $ show method)
-                            (T.pack $ unpackPageId queryId)
+                            (CarRun.unQueryId queryId) -- unpackPageId queryId)
                             ranking''
             bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                 TL.hPutStrLn h formatted
@@ -568,17 +570,17 @@ main = do
                 mapM_ (uncurry $ runMethod queryId query) $ filter (filterMethods . fst) rankings
           where
             simpleWeightedGraphs = computeSimpleGraphs universeGraph resolveRedirect queryPageIds
-            queryPageIds = HS.fromList $ map queryDocQueryId queriesWithSeedEntities
+            queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
 
 
     let subgraphExpansion = do
-            forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocLeadEntities=seedEntities} -> do
+            forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Double)])]
-                    rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query) seedEntities expansionHops
+                    rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
                                           universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
 
                 case dotFilenameMaybe of

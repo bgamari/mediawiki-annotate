@@ -21,5 +21,5 @@ main = do
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where
     toSeedLines queryDoc =
-           [ (unpackPageId $ queryDocQueryId queryDoc)++" 0 "++ (unpackPageId seed) ++ " 1"
+           [ (unpackPageId $ queryDocPageId queryDoc)++" 0 "++ (unpackPageId seed) ++ " 1"
            | seed <- HS.toList $ queryDocLeadEntities queryDoc]

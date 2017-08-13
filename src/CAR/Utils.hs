@@ -5,6 +5,8 @@ module CAR.Utils where
 
 import Control.Monad (guard)
 import Data.Maybe
+import qualified Data.DList as DList
+import           Data.DList (DList)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
@@ -51,32 +53,21 @@ pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
 
 pageSectionPaths :: Page -> [SectionPath]
-pageSectionPaths (Page _ pageId skel0) =
-    fmap (\sp -> SectionPath pageId sp) (foldMap go skel0)
-  where
-    go :: PageSkeleton -> [[HeadingId]]
-    go (Section _ sectionId children)
-      | null childSectionPaths =
-        [[sectionId]]
-      | otherwise              =
-        fmap (\childPath -> sectionId : childPath)  childSectionPaths
-      where childSectionPaths = foldMap go children
-    go (Para {}) = []
-    go (Image {}) = []
+pageSectionPaths = map fst . pageSections
 
-pageSectionNames :: Page -> [(PageName, [SectionHeading])]
-pageSectionNames (Page pageName _ skel0) =
-    fmap (\sp -> (pageName, sp)) (foldMap go skel0)
+pageSections :: Page -> [(SectionPath, [SectionHeading])]
+pageSections (Page _pageName pageId skel0) =
+    foldMap (go mempty mempty) skel0
   where
-    go :: PageSkeleton -> [[SectionHeading]]
-    go (Section sectionName _ children)
-      | null childSectionPaths =
-        [[sectionName]]
-      | otherwise              =
-        fmap (\childPath -> sectionName : childPath)  childSectionPaths
-      where childSectionPaths = foldMap go children
-    go (Para {}) = []
-    go (Image {}) = []
+    go :: DList HeadingId -> DList SectionHeading
+       -> PageSkeleton -> [(SectionPath, [SectionHeading])]
+    go parentIds parentHeadings (Section sectionName sectionId children) =
+        let parentIds' = parentIds `DList.snoc` sectionId
+            parentHeadings' = parentHeadings `DList.snoc` sectionName
+        in (SectionPath pageId (DList.toList parentIds'), DList.toList parentHeadings')
+           : foldMap (go parentIds' parentHeadings') children
+    go _ _ (Para {})  = []
+    go _ _ (Image {}) = []
 
 paraLinks :: Paragraph -> [Link]
 paraLinks (Paragraph _ bodies) =

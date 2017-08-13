@@ -34,6 +34,7 @@ import qualified CAR.KnowledgeBase as KB
 
 import CAR.Retrieve
 import CAR.Utils
+import qualified CAR.RunFile as CarRun
 import SimplIR.TopK
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
@@ -47,7 +48,8 @@ mapKeys f = HM.fromList . map (first f) . HM.toList
 unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.HashMap k v
 unionsWith f = foldl' (HM.unionWith f) mempty
 
-data QueryDoc = QueryDoc { queryDocQueryId      :: !PageId
+data QueryDoc = QueryDoc { queryDocQueryId      :: !CarRun.QueryId
+                         , queryDocPageId       :: !PageId
                          , queryDocQueryText    :: !T.Text
                          , queryDocLeadEntities :: !(HS.HashSet PageId)
                          }
@@ -70,7 +72,8 @@ pagesToQueryDocs resolveRedirect deriv pages  =
     leadEntities = HS.fromList . fmap (resolveRedirect . pageNameToId) . KB.kbDocOutLinks
     queryDocs = case deriv of
       QueryFromPageTitle ->
-          [ QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
+          [ QueryDoc { queryDocQueryId      = CarRun.pageIdToQueryId $ KB.kbDocPageId kbDoc
+                     , queryDocPageId       = KB.kbDocPageId kbDoc
                      , queryDocQueryText    = getPageName $ pageName page
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
@@ -78,14 +81,15 @@ pagesToQueryDocs resolveRedirect deriv pages  =
           , let kbDoc = KB.pageToKbDoc page
           ]
       QueryFromSectionPaths ->
-          [ QueryDoc { queryDocQueryId      = KB.kbDocPageId kbDoc
+          [ QueryDoc { queryDocQueryId      = CarRun.sectionPathToQueryId sectionPath -- KB.kbDocPageId kbDoc
+                     , queryDocPageId       = pageId page
                      , queryDocQueryText    = getPageName (pageName page)
-                                              <> T.unwords (map getSectionHeading sectHeadings)
+                                              <> T.unwords (map getSectionHeading headings)
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
           | page <- pages
           , let kbDoc = KB.pageToKbDoc page
-          , (_, sectHeadings) <- pageSectionNames page
+          , (sectionPath, headings) <- pageSections page
           ]
 
 queryDocRawTerms :: QueryDoc -> [Term]
