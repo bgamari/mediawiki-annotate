@@ -84,8 +84,8 @@ pagesToQueryDocs resolveRedirect deriv pages  =
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
           | page <- pages
-          , (_, sectHeadings) <- pageSectionNames page
           , let kbDoc = KB.pageToKbDoc page
+          , (_, sectHeadings) <- pageSectionNames page
           ]
 
 queryDocRawTerms :: QueryDoc -> [Term]

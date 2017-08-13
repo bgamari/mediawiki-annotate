@@ -130,16 +130,19 @@ opts =
           <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
           <|> fromEntityIndex
         where
+          queryDeriv =
+              flag QueryFromPageTitle QueryFromSectionPaths
+                   (long "--query-from-sections" <> help "Use sections as query documents")
           fromCborTitle =
               QueriesFromCbor
                 <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
-                <*> pure QueryFromPageTitle
+                <*> queryDeriv
                 <*> pure SeedsFromLeadSection
 
           fromEntityIndex =
               QueriesFromCbor
                 <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
-                <*> pure QueryFromPageTitle
+                <*> queryDeriv
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
 
