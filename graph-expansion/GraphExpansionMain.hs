@@ -533,10 +533,11 @@ main = do
             --logMsg $ "graph size: "++show (graphSize graph)
             --ranking <- logTimed "computing ranking" $ evaluate $ force $ computeRanking graph
             logMsg queryId method $ "ranking entries="++show (length ranking)
-            ranking' <- if null ranking                        -- replace empty rankings with dummy result (for trec_eval)
+            ranking' <- if null
+                           $ (filter ((/=0) . length . unpackPageId . fst) ranking)                        -- replace empty rankings with dummy result (for trec_eval)
                            then do logMsg queryId method $ "empty result set replaced by dummy result"
                                    pure [(dummyInvalidPageId, 0.0)]
-                           else pure ranking
+                           else pure $ (filter ((/=0) . length . unpackPageId . fst) ranking)
 
             let ranking'' = filterOutSeeds query ranking'
 
