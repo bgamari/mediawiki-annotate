@@ -134,7 +134,7 @@ opts =
         where
           queryDeriv =
               flag QueryFromPageTitle QueryFromSectionPaths
-                   (long "--query-from-sections" <> help "Use sections as query documents")
+                   (long "query-from-sections" <> help "Use sections as query documents")
           fromCborTitle =
               QueriesFromCbor
                 <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
