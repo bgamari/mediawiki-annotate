@@ -117,6 +117,7 @@ opts =
       methodSet "topn" = pure topNPerGraphMethods
       methodSet "core" = pure coreMethods
       methodSet "base" = pure baseMethods
+      methodSet "trec" = pure trecMethods
       methodSet "prio0" = pure prio0Methods
       methodSet "prio1" = pure prio1Methods
       methodSet "prio2" = pure prio2Methods

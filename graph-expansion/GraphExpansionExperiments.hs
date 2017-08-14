@@ -83,7 +83,7 @@ pagesToQueryDocs resolveRedirect deriv pages  =
       QueryFromSectionPaths ->
           [ QueryDoc { queryDocQueryId      = CarRun.sectionPathToQueryId sectionPath -- KB.kbDocPageId kbDoc
                      , queryDocPageId       = pageId page
-                     , queryDocQueryText    = getPageName (pageName page)
+                     , queryDocQueryText    = getPageName (pageName page) <> getPageName (pageName page) -- twice factor
                                               <> T.unwords (map getSectionHeading headings)
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
@@ -327,6 +327,15 @@ prio0Methods = [Method gName eName wName rName irName
                , rName <- [MargEdges, PageRank]
                , irName <- [Ql]
                ]
+
+trecMethods :: [Method]
+trecMethods = [ Method gName eName wName rName irName
+                | gName <- [Top100PerGraph, Top2000PerGraph ]
+                , eName <- [Unfiltered]
+                , wName <- [Count, Score, RecipRank]
+                , rName <- [PersPageRank, MargEdges, PageRank, ShortPath]
+                , irName <- [Ql, Bm25]
+                ]
 
 prio1Methods :: [Method]
 prio1Methods = [ Method gName eName wName rName irName
