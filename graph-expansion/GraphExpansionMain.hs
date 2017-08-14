@@ -184,7 +184,7 @@ computeRankingsForQuery :: --forall n. (KnownNat n) =>
 --                         -> BinarySymmetricGraph
 --                         -> WordEmbedding n
                         -> (PageId -> PageId)
-                        -> [(Method, [(PageId, ParagraphId, Double)])]
+                        -> [(Method, [(PageId, Maybe ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
@@ -295,16 +295,16 @@ computeRankingsForQuery
 --               (rname, graphRanking) <- graphRankings
 --             ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
 
-        attachParagraphs :: RetrievalFun ->  [(PageId, Double)] -> [(PageId, ParagraphId, Double)]
+        attachParagraphs :: RetrievalFun ->  [(PageId, Double)] -> [(PageId, Maybe ParagraphId, Double)]
         attachParagraphs irname entityRanking
           | Just results <- lookup irname retrievalResults =
              let psgOf :: HM.HashMap PageId ParagraphId
                  psgOf = HM.fromListWith (\x _ -> x)
                          $ foldMap (\(EdgeDoc{..}, _) -> fmap (\x -> (x, edgeDocParagraphId)) (HS.toList edgeDocNeighbors ++ [edgeDocArticleId]))
                          $ results
-             in fmap (\(entity, score) -> (entity, psgOf HM.! entity, score)) entityRanking
+             in fmap (\(entity, score) -> (entity, (entity `HM.lookup` psgOf), score)) entityRanking
 
-        computeRankings' :: [(Method, [(PageId, ParagraphId, Double)])]
+        computeRankings' :: [(Method, [(PageId, Maybe ParagraphId, Double)])]
         computeRankings' =
             [ (Method gname ename wname rname irname, attachParagraphs irname $ graphRanking graph )
             | ((gname, ename, wname, irname), graph) <- fancyWeightedGraphs,
@@ -475,7 +475,7 @@ retrieveEntities entityIndexFile = do
     -- let model = QL.queryLikelihood (QL.Dirichlet 100)
     return $ sortBy (flip $ comparing snd) . Index.score entityIndex model
 
-filterOutSeeds :: QueryDoc -> [(PageId, ParagraphId, Double)] -> [(PageId, ParagraphId, Double)]
+filterOutSeeds :: QueryDoc -> [(PageId, Maybe ParagraphId, Double)] -> [(PageId, Maybe ParagraphId, Double)]
 filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking
   where notSeedEntity (entityId, _, _) =
              (not $ entityId `HS.member` queryDocLeadEntities query)
@@ -555,7 +555,7 @@ main = do
     let --forM_' = forM_
         forM_' = forConcurrentlyN_ ncaps
 
-        runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, ParagraphId, Double)] -> IO ()
+        runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, Maybe ParagraphId, Double)] -> IO ()
         runMethod queryId query method ranking = do
             let Just hdl = M.lookup method handles
 
@@ -568,7 +568,7 @@ main = do
                 case filter (\(entity, _ , _) -> ((/=0) $ length $ unpackPageId entity)) ranking of
                   [] -> do -- replace empty rankings with dummy result (for trec_eval)
                            logMsg queryId method $ "empty result set replaced by dummy result"
-                           pure [(dummyInvalidPageId, dummyInvalidParagraphId, 0.0)]
+                           pure [(dummyInvalidPageId, Just dummyInvalidParagraphId, 0.0)]
                   r  -> pure r
 
             -- Drop seed entities
@@ -626,7 +626,7 @@ main = do
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
-                let rankings :: [(Method, [(PageId, ParagraphId,  Double)])]
+                let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
                                           resolveRedirect
 --                                           universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
