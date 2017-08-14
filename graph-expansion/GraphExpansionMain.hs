@@ -501,10 +501,10 @@ main = do
     let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
     putStrLn $ "# computed redirects"
 
-    let universeGraph :: UniverseGraph
-        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
-    putStrLn $ "# nodes in KB = " <> show (HM.size universeGraph)
-
+-- LD     let universeGraph :: UniverseGraph
+-- LD        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
+-- LD     putStrLn $ "# nodes in KB = " <> show (HM.size universeGraph)
+-- LD
 -- LD    let binarySymmetricGraph :: BinarySymmetricGraph
 -- LD         !binarySymmetricGraph = universeToBinaryGraph universeGraph
 -- LD     putStrLn $ "# symmetric graph size = " <> show (HM.size binarySymmetricGraph)
