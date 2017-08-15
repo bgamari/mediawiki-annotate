@@ -114,7 +114,7 @@ rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations
   | nullGraph graph = []
   | otherwise =
-      let pr = (!! iterations)  $ PageRank.pageRank teleport graph
+      let pr = (!! iterations) $ PageRank.pageRank teleport graph
           prRanking  =  PageRank.toEntries pr
       in prRanking
 

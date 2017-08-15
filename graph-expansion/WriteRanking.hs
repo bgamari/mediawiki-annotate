@@ -15,7 +15,7 @@ import qualified Data.Text.Lazy.Builder.Int as TB
 import CAR.Types
 
 rankingLength :: Int
-rankingLength = 100
+rankingLength = 1000
 
 formatEntityRankings :: T.Text -> T.Text -> [(PageId, Double)] -> TL.Text
 formatEntityRankings runName queryId scoredItems =
@@ -23,7 +23,7 @@ formatEntityRankings runName queryId scoredItems =
     $ mconcat
     $ intersperse "\n"
     $ zipWith formatEntry [1..]
- --   $ take rankingLength
+    $ take rankingLength
     $ toRanking
     $ scoredItems
   where formatEntry :: Int -> (PageId, Double) -> TB.Builder
@@ -38,26 +38,31 @@ formatEntityRankings runName queryId scoredItems =
             , TB.fromText runName]
 
 
-formatEntityPassageRankings :: T.Text -> T.Text -> [(PageId, ParagraphId, Double)] -> TL.Text
+formatEntityPassageRankings :: T.Text -> T.Text -> [(PageId, Maybe ParagraphId, Double)] -> TL.Text
 formatEntityPassageRankings runName queryId scoredItems =
       TB.toLazyText
     $ mconcat
     $ intersperse "\n"
     $ zipWith formatEntry [1..]
- --   $ take rankingLength
+    $ take rankingLength
     $ toRanking
     $ map (\(a,b,c) -> ((a,b), c))
     $ scoredItems
-  where formatEntry :: Int -> ((PageId, ParagraphId), Double) -> TB.Builder
+  where formatEntry :: Int -> ((PageId, Maybe ParagraphId), Double) -> TB.Builder
         formatEntry rank ((entity, passage), score) =
             mconcat
             $ intersperse " "
             [ TB.fromText queryId
             , "Q0"
-            , TB.fromString (unpackParagraphId passage) <> "/" <> TB.fromString (unpackPageId entity)
+            , formatPsgEntity passage entity
             , TB.decimal rank
             , TB.realFloat score
             , TB.fromText runName]
+        formatPsgEntity (Just passage) entity =
+            TB.fromString (unpackParagraphId passage) <> "/" <> TB.fromString (unpackPageId entity)
+        formatPsgEntity Nothing entity =
+            TB.fromString (unpackPageId entity)
+
 
 
 toRanking ::  [(elem, Double)] -> [(elem, Double)]
