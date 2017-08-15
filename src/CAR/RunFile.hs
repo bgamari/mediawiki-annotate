@@ -35,6 +35,7 @@ module CAR.RunFile
     , constructPassageEntity
     ) where
 
+import Control.Exception
 import Data.Ord
 import Data.Maybe
 import Data.Monoid
@@ -74,8 +75,8 @@ carEntity r =
 carPassage :: RankingEntry -> Maybe ParagraphId
 carPassage r =
     case carDocument r of
-      EntityOnly pid            -> Nothing
-      EntityAndPassage _ paraId -> Just paraId
+      EntityOnly _pid         -> Nothing
+      EntityAndPassage _ pid  -> Just pid
 
 type ParagraphRankingEntry = RankingEntry' ParagraphId
 type EntityRankingEntry = RankingEntry' PageId
@@ -89,25 +90,30 @@ toCarRankingEntry parseDocument r =
                  , carMethodName  = MethodName $ Run.methodName r
                  }
 
+data ParseError = ParseError String Run.DocumentName
+                deriving (Show)
+
+instance Exception ParseError
+
 parsePassageEntity :: Run.DocumentName -> PassageEntity
 parsePassageEntity docName =
     case (passage, entity) of
-      (Just p, Just e)   -> EntityAndPassage e p
+      (Just p,  Just e)  -> EntityAndPassage e p
       (Nothing, Just e)  -> EntityOnly e
-      (Just _, Nothing)  -> error $ "parsePassageEntity: Passage but no entity: " ++ show docName
-      (Nothing, Nothing) -> error $ "parsePassageEntity: Neither a passage nor an entity: " ++ show docName
+      (Just _,  Nothing) -> throw $ ParseError "Passage but no entity" docName
+      (Nothing, Nothing) -> throw $ ParseError "Neither a passage nor an entity" docName
   where
-    (p,e) = case T.breakOn "/" docName of
-              (a,b)
-                | T.null a -> error $ "toCarRankingEntry: Invalid document name: " ++ show docName
-                | otherwise -> (a, T.drop 1 b)
+    (psg,ent)
+      | T.null a  = throw $ ParseError "Invalid document name" docName
+      | otherwise = (a, T.drop 1 b)
+      where (a,b) = T.breakOn "/" docName
 
     passage
-      | T.null p  = Nothing
-      | otherwise = Just $ packParagraphId $ T.unpack p
+      | T.null psg = Nothing
+      | otherwise  = Just $ packParagraphId $ T.unpack psg
     entity
-      | T.null e  = Nothing
-      | otherwise = Just $ packPageId $ T.unpack e
+      | T.null ent = Nothing
+      | otherwise  = Just $ packPageId $ T.unpack ent
 
 fromCarRankingEntry :: (doc -> Run.DocumentName) -> RankingEntry' doc -> Run.RankingEntry
 fromCarRankingEntry construct r =
@@ -134,11 +140,18 @@ pageIdToQueryId (PageId s) = QueryId $ Utf8.toText s
 sectionPathToQueryId :: SectionPath -> QueryId
 sectionPathToQueryId = QueryId . T.pack . escapeSectionPath
 
+data ReadRunError = ReadRunError FilePath ParseError
+                  deriving (Show)
+instance Exception ReadRunError
+
 readEntityParagraphRun :: FilePath -> IO [RankingEntry]
-readEntityParagraphRun path = map (toCarRankingEntry parsePassageEntity) <$> Run.readRunFile path
+readEntityParagraphRun path =
+    handle (throwIO . ReadRunError path)
+    (map (toCarRankingEntry parsePassageEntity) <$> Run.readRunFile path)
 
 writeEntityParagraphRun :: FilePath -> [RankingEntry] -> IO ()
-writeEntityParagraphRun path = Run.writeRunFile path . map (fromCarRankingEntry constructPassageEntity)
+writeEntityParagraphRun path =
+    Run.writeRunFile path . map (fromCarRankingEntry constructPassageEntity)
 
 readParagraphRun :: FilePath -> IO [ParagraphRankingEntry]
 readParagraphRun path = map (toCarRankingEntry parseDoc) <$> Run.readRunFile path
