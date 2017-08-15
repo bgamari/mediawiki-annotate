@@ -47,6 +47,15 @@ pageLinkTargets = map linkTarget . pageLinks
 pageLinks :: Page -> [Link]
 pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 
+pageParas :: Page -> [Paragraph]
+pageParas = foldMap pageSkeletonParas . pageSkeleton
+
+
+pageSkeletonParas :: PageSkeleton -> [Paragraph]
+pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
+pageSkeletonParas (Para (paragraph)) = [paragraph]
+pageSkeletonParas (Image {}) = []
+
 pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies

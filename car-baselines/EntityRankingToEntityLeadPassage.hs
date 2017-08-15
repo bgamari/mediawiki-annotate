@@ -38,9 +38,9 @@ main = do
         entity2lead entityid = join $ fmap page2leadPId $ TocFile.lookup entityid kb
           where page2leadPId :: Page -> Maybe ParagraphId
                 page2leadPId page =
-                  let leadSkeleton = listToMaybe $ kbDocLeadPara $ Kb.pageToKbDoc page
+                  let leadSkeleton = listToMaybe $ pageParas page
                   in case leadSkeleton of
-                    Just(Para (Paragraph pid _ )) -> Just pid
+                    Just(Paragraph pid _ ) -> Just pid
                     _ -> Nothing
 
 
