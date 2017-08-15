@@ -59,12 +59,14 @@ data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
                                       , carScore       :: !Run.Score
                                       , carMethodName  :: !MethodName
                                       }
+                       deriving  (Show)
 
 -- | Paragraph/entity ranking entry
 type RankingEntry = RankingEntry' PassageEntity
 
 data PassageEntity = EntityOnly PageId
                    | EntityAndPassage !PageId !ParagraphId
+                   deriving (Show)
 
 carEntity :: RankingEntry -> PageId
 carEntity r =
