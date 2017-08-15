@@ -19,20 +19,18 @@ import CAR.Utils
 import CAR.KnowledgeBase as Kb
 
 
-opts :: Parser (FilePath,  FilePath, FilePath, TocFile.IndexedCborPath PageId Page)
-opts = (,,,)
+opts :: Parser (FilePath,  FilePath, TocFile.IndexedCborPath PageId Page)
+opts = (,,)
     <$> option str (short 'o' <> long "output" <> help "Output TREC ranking file")
     <*> option str (short 'r' <> long "ranking" <> help "Entity TREC ranking file")
-    <*> option str (short 'd' <> long "dedup" <> help "Deduplication table file")
     <*> option (TocFile.IndexedCborPath <$> str) (short 'b' <> long "kb" <> help "cbor file with knowledge base")
 
 main :: IO ()
 main = do
-    (outputFile, runFile, dedupTableFile, kbFile) <- execParser $ info (helper <*> opts) mempty
+    (outputFile, runFile, kbFile) <- execParser $ info (helper <*> opts) mempty
     queries <- Run.groupByQuery <$> Run.readEntityRun runFile
     kb <- TocFile.open kbFile
-    dedupTable <- readDedupTable dedupTableFile
-
+    
     let entity2lead :: PageId -> Maybe ParagraphId
         entity2lead entityid = join $ fmap page2leadPId $ TocFile.lookup entityid kb
           where page2leadPId :: Page -> Maybe ParagraphId
@@ -42,15 +40,10 @@ main = do
                     Just(Para (Paragraph pid _ )) -> Just pid
                     _ -> Nothing
 
-    let resolveDedupParaId :: ParagraphId -> ParagraphId
-        resolveDedupParaId paraId =
-          case paraId `HM.lookup` dedupTable of
-          Just toPid -> toPid
-          Nothing -> paraId
-
+    
 
     let lookupLeadPara ::  PageId -> Maybe ParagraphId
-        lookupLeadPara entityId =  fmap resolveDedupParaId $ entity2lead entityId
+        lookupLeadPara entityId =  entity2lead entityId
 
     entityRun <- Run.readEntityRun runFile
     let entityPassageRun = mapMaybe augmentLeadParagraph entityRun
