@@ -178,7 +178,8 @@ instance CBOR.Serialise Page
 data SectionPath = SectionPath { sectionPathPageId :: PageId
                                , sectionPathHeadings :: [HeadingId]
                                }
-               deriving (Show, Eq, Ord)
+               deriving (Show, Eq, Ord, Generic)
+instance Hashable SectionPath
 
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
