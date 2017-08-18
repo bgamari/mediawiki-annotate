@@ -89,7 +89,7 @@ pagesToQueryDocs resolveRedirect deriv pages  =
                      }
           | page <- pages
           , let kbDoc = KB.pageToKbDoc page
-          , (sectionPath, headings) <- pageSections page
+          , (sectionPath, headings, _) <- pageSections page
           ]
 
 queryDocRawTerms :: QueryDoc -> [Term]

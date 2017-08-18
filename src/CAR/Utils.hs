@@ -53,21 +53,27 @@ pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
 
 pageSectionPaths :: Page -> [SectionPath]
-pageSectionPaths = map fst . pageSections
+pageSectionPaths = map (\(path,_,_) -> path) . pageSections
 
-pageSections :: Page -> [(SectionPath, [SectionHeading])]
+pageSections :: Page -> [(SectionPath, [SectionHeading], [PageSkeleton])]
 pageSections (Page _pageName pageId skel0) =
     foldMap (go mempty mempty) skel0
   where
     go :: DList HeadingId -> DList SectionHeading
-       -> PageSkeleton -> [(SectionPath, [SectionHeading])]
+       -> PageSkeleton -> [(SectionPath, [SectionHeading], [PageSkeleton])]
     go parentIds parentHeadings (Section sectionName sectionId children) =
         let parentIds' = parentIds `DList.snoc` sectionId
             parentHeadings' = parentHeadings `DList.snoc` sectionName
-        in (SectionPath pageId (DList.toList parentIds'), DList.toList parentHeadings')
+            children' = filter (not . isSection) children
+        in ( SectionPath pageId (DList.toList parentIds')
+           , DList.toList parentHeadings'
+           , children')
            : foldMap (go parentIds' parentHeadings') children
     go _ _ (Para {})  = []
     go _ _ (Image {}) = []
+
+    isSection (Section {}) = True
+    isSection _            = False
 
 paraLinks :: Paragraph -> [Link]
 paraLinks (Paragraph _ bodies) =
