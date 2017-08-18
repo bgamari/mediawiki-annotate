@@ -4,6 +4,7 @@ allow-newer:
 packages:
     ./
     mediawiki-parser/
+    db-export/
     graph-expansion/
     simplir/
     simplir/*/*.cabal
