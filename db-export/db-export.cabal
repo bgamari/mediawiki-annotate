@@ -26,6 +26,8 @@ executable db-export
                        pipes >=4.3 && <4.4,
                        pipes-concurrency,
                        optparse-applicative >= 0.13,
+                       deepseq >= 1.4,
+                       postgresql-simple,
                        trec-car-tools,
-                       postgresql-simple
+                       simplir
   default-language:    Haskell2010

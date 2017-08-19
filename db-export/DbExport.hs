@@ -5,8 +5,8 @@
 {-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+import Control.DeepSeq
 import Control.Monad
-import Data.Foldable
 import Data.Hashable
 import Data.Monoid
 import qualified Data.HashMap.Strict as HM
@@ -25,6 +25,7 @@ import Options.Applicative
 import Control.Concurrent.Async
 import Pipes
 import Pipes.Concurrent as PC
+import SimplIR.Utils.Compact
 import CAR.Types
 import CAR.Utils
 
@@ -105,11 +106,11 @@ finishSchema =
     [ [sql| ALTER TABLE fragments ADD CONSTRAINT FOREIGN KEY (parent) REFERENCES fragments(fragment_id) |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
-    , [sql| CREATE INDEX ON paragraphs (content_index)  |]
+    , [sql| CREATE INDEX ON paragraphs USING GIN (to_tsvector('english', content)) |]
     ]
 
 newtype FragmentId = FragmentId Int
-                deriving (Eq, Ord, Hashable, Enum, ToField, FromField)
+                deriving (Eq, Ord, Hashable, Enum, ToField, FromField, NFData)
 deriving instance ToField PageName
 instance ToField ParagraphId where
     toField = toField . unpackParagraphId
@@ -132,7 +133,7 @@ sectionPathParent (SectionPath pageId hds) = Just $ SectionPath pageId (init hds
 
 insertChunks :: ToRow a => [Connection] -> Query -> [[a]] -> IO ()
 insertChunks conns query rowChunks = do
-    (sq, rq, seal) <- PC.spawn' PC.unbounded
+    (sq, rq, seal) <- PC.spawn' $ PC.bounded 200
     inserters <- mapM (startInserter rq) conns
     mapM_ link inserters
     mapM_ (atomically . PC.send sq) rowChunks
@@ -150,58 +151,67 @@ toPostgres openConn pagesFile = do
     mapM_ (execute_ conn) createSchema
 
     putStrLn "building fragment index..."
-    !fragments <- pagesToFragments <$> readCborList pagesFile
+    !fragments <- inCompact . pagesToFragments <$> readCborList pagesFile
     let lookupFragmentId :: SectionPath -> Maybe FragmentId
         lookupFragmentId path =
             fmap (\(fragId,_) -> fragId) $ HM.lookup path fragments
 
-    putStrLn "exporting fragments..."
-    insertChunks conns
-        [sql| INSERT INTO fragments ( id, title, parent )
-              VALUES (?,?,?) |]
-        $ chunksOf 10000
-        [ (fragId, title, parentId)
-        | (path, (fragId, title)) <- HM.toList fragments
-        , let parentId = lookupFragmentId =<< sectionPathParent path
-        ]
-
-    putStrLn "exporting paragraphs..."
-    pages <- readCborList pagesFile
-    let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text, TL.Text)]
-        pageParaRows page =
-           [ (paraId para, fragId, text, text)
-           | (path, _, skel) <- pageSections page
-           , Para para <- skel
-           , let text = paraToText para
-                 fragId = lookupFragmentId path
-           ]
-    insertChunks
-        conns
-        [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content, content_index)
-              SELECT x.column1, x.column2, x.column3, to_tsvector(x.column4)
-              FROM (VALUES (?,?,?,?)) AS x |]
-        (map (foldMap pageParaRows) $ chunksOf 1000 pages)
-
-    putStrLn "exporting links..."
-    pages <- readCborList pagesFile
-    let pagesLinkRows :: [Page] -> [(FragmentId, FragmentId, T.Text, ParagraphId)]
-        pagesLinkRows pagesChunk =
-            [ (srcId, destId, linkAnchor, paraId para)
-            | page                <- pagesChunk
-            , (srcPath, _, skels) <- pageSections page
-            , Just srcId          <- pure $ lookupFragmentId srcPath
-            , Para para           <- skels
-            , Link{..}            <- paraLinks para
-            , let destPath         = SectionPath linkTargetId [] -- TODO section
-            , Just destId         <- pure $ lookupFragmentId destPath
-            ]
-    insertChunks
-        conns
-        [sql| INSERT INTO links (src_fragment, dest_fragment, paragraph, anchor)
-              SELECT column1 AS src_fragment, column2 AS dest_fragment, paragraphs.id, column3 AS anchor
-              FROM (VALUES (?,?,?,?)) AS x, paragraphs
-              WHERE paragraphs.paragraph_id = x.column4 |]
-        (map pagesLinkRows $ chunksOf 1000 pages)
+    exportFragments conns fragments lookupFragmentId
+    exportParagraphs conns lookupFragmentId
+    exportLinks conns lookupFragmentId
 
     mapM_ (execute_ conn) finishSchema
     return ()
+
+  where
+    exportFragments conns fragments lookupFragmentId = do
+      putStrLn "exporting fragments..."
+      insertChunks conns
+          [sql| INSERT INTO fragments ( id, title, parent )
+                VALUES (?,?,?) |]
+          $ chunksOf 10000
+          [ (fragId, title, parentId)
+          | (path, (fragId, title)) <- HM.toList fragments
+          , let parentId = lookupFragmentId =<< sectionPathParent path
+          ]
+
+    exportParagraphs conns lookupFragmentId = do
+        putStrLn "exporting paragraphs..."
+        pages <- readCborList pagesFile
+        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text, TL.Text)]
+            pageParaRows page =
+              [ (paraId para, fragId, text, text)
+              | (path, _, skel) <- pageSections page
+              , Para para <- skel
+              , let text = paraToText para
+                    fragId = lookupFragmentId path
+              ]
+        insertChunks
+            conns
+            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content, content_index)
+                  SELECT x.column1, x.column2, x.column3, to_tsvector(x.column4)
+                  FROM (VALUES (?,?,?,?)) AS x |]
+            (map (foldMap pageParaRows) $ chunksOf 1000 pages)
+
+    exportLinks conns lookupFragmentId = do
+        putStrLn "exporting links..."
+        pages <- readCborList pagesFile
+        let pagesLinkRows :: [Page] -> [(FragmentId, FragmentId, T.Text, ParagraphId)]
+            pagesLinkRows pagesChunk =
+                [ (srcId, destId, linkAnchor, paraId para)
+                | page                <- pagesChunk
+                , (srcPath, _, skels) <- pageSections page
+                , Just srcId          <- pure $ lookupFragmentId srcPath
+                , Para para           <- skels
+                , Link{..}            <- paraLinks para
+                , let destPath         = SectionPath linkTargetId [] -- TODO section
+                , Just destId         <- pure $ lookupFragmentId destPath
+                ]
+        insertChunks
+            conns
+            [sql| INSERT INTO links (src_fragment, dest_fragment, paragraph, anchor)
+                  SELECT column1 AS src_fragment, column2 AS dest_fragment, paragraphs.id, column3 AS anchor
+                  FROM (VALUES (?,?,?,?)) AS x, paragraphs
+                  WHERE paragraphs.paragraph_id = x.column4 |]
+            (map pagesLinkRows $ chunksOf 1000 pages)
+
