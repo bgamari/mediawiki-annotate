@@ -1,10 +1,13 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+import Control.Concurrent
+import Control.Exception
 import Control.DeepSeq
 import Control.Monad
 import Data.Hashable
@@ -17,6 +20,7 @@ import qualified Data.ByteString.Char8 as BS
 import Data.List.Split (chunksOf)
 
 import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.Types
 import Database.PostgreSQL.Simple.SqlQQ
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.FromField
@@ -40,20 +44,20 @@ main = do
 
 createSchema :: [Query]
 createSchema =
-    [ [sql| CREATE TABLE IF NOT EXISTS fragments
+    [ [sql| CREATE UNLOGGED TABLE IF NOT EXISTS fragments
                ( id serial PRIMARY KEY
                , title text NOT NULL
                , parent integer -- REFERENCES fragments (id)
                )
       |]
-    , [sql| CREATE TABLE IF NOT EXISTS paragraphs
+    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs
                ( id serial PRIMARY KEY
                , paragraph_id text NOT NULL
                , fragment integer REFERENCES fragments (id)
                , content text
                )
       |]
-    , [sql| CREATE TABLE IF NOT EXISTS links
+    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS links
                ( src_fragment integer NOT NULL REFERENCES fragments (id)
                , dest_fragment integer NOT NULL REFERENCES fragments (id)
                , paragraph integer NOT NULL REFERENCES paragraphs (id)
@@ -103,6 +107,9 @@ createSchema =
 finishSchema :: [Query]
 finishSchema =
     [ [sql| ALTER TABLE fragments ADD CONSTRAINT FOREIGN KEY (parent) REFERENCES fragments(fragment_id) |]
+    , [sql| ALTER TABLE fragments SET LOGGED |]
+    , [sql| ALTER TABLE paragraphs SET LOGGED |]
+    , [sql| ALTER TABLE paragraphs SET LOGGED |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
     , [sql| CREATE INDEX ON paragraphs USING GIN (to_tsvector('english', content)) |]
@@ -139,8 +146,10 @@ insertChunks conns query rowChunks = do
     atomically seal
     mapM_ wait inserters
   where
-    startInserter rq conn = withTransaction conn $
-        async $ runEffect $ for (PC.fromInput rq) $ \chunk ->
+    startInserter rq conn = async $ withTransaction conn $ do
+        tid <- myThreadId
+        runEffect $ for (PC.fromInput rq) $ \chunk -> do
+            liftIO $ print (tid, length chunk)
             void $ liftIO $ executeMany conn query chunk
 
 toPostgres :: IO Connection -> FilePath -> IO ()
@@ -191,7 +200,7 @@ toPostgres openConn pagesFile = do
             [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content )
                   SELECT x.column1, x.column2, x.column3
                   FROM (VALUES (?,?,?)) AS x |]
-            (map (foldMap pageParaRows) $ chunksOf 10000 pages)
+            (map (foldMap pageParaRows) $ chunksOf 100 pages)
 
     exportLinks conns lookupFragmentId = do
         putStrLn "exporting links..."
