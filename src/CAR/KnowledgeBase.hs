@@ -14,7 +14,6 @@ module CAR.KnowledgeBase
     , InlinkCounts(..)
     ) where
 
-import Control.Exception (assert)
 import Data.Monoid hiding (All, Any)
 
 import Data.Hashable (Hashable)
@@ -22,7 +21,6 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import Data.Maybe
 
 import CAR.Utils
 import CAR.Types
@@ -125,5 +123,5 @@ pageToKbDoc page@(Page pageName pageId pageSkeleta) =
       kbDocLeadPara = leadParas
       kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
       kbDocCanonicalName = pageName
-      kbFullText = TL.toStrict $ mconcat $ pageFulltext page
+      kbDocFullText = pageFulltext page
   in KbDoc {..}
