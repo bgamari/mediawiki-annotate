@@ -22,8 +22,8 @@ import qualified Data.Text.Lazy as TL
 
 edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
-    $ command "index" (info buildMode mempty)
-   <> command "query" (info queryMode mempty)
+    $ command "index" (info (helper <*> buildMode) mempty)
+   <> command "query" (info (helper <*> queryMode) mempty)
   where
     buildMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
@@ -49,8 +49,8 @@ edgeDocModes = subparser
 
 entityModes :: Parser (IO ())
 entityModes = subparser
-    $ command "index" (info buildMode mempty)
-   <> command "query" (info queryMode mempty)
+    $ command "index" (info (helper <*> buildMode) mempty)
+   <> command "query" (info (helper <*> queryMode) mempty)
   where
     buildMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
