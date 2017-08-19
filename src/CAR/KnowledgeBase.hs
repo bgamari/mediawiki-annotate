@@ -90,14 +90,14 @@ collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton (pageNameToId redirTargetId)
+            mempty { documentInlinks = HM.singleton (resolveRedirects' $ pageNameToId redirTargetId)
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
 
       | pageIsDisambiguation page  =
             let toInlinkInfo link =
-                    mempty { documentInlinks = HM.singleton (linkTargetId link)
+                    mempty { documentInlinks = HM.singleton (resolveRedirects' $ linkTargetId link)
                                                $ mempty { disambiguationCount = one $ pageName page }
                            }
             in foldMap toInlinkInfo (pageLinks page)
