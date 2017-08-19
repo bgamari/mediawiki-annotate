@@ -13,8 +13,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ApplicativeDo #-}
 
-import Debug.Trace
-
 import Data.List (sortBy)
 import Data.Maybe
 import Data.Tuple
@@ -67,7 +65,7 @@ data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
 data Opts = Opts { output :: FilePath
                  , query :: QuerySource
                  , entityIndexFile :: Index.OnDiskIndex Term PageId Int
-                 , selectedQueries :: [TrecRun.QueryId]
+                 , selectedQueries :: HS.HashSet TrecRun.QueryId
                  , methodName :: T.Text
                  , topK :: Int
                  }
@@ -92,7 +90,7 @@ opts = do
     query <-  querySource
     entityIndexFile <-  option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
-    selectedQueries <- many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+    selectedQueries <- HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     methodName <- T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" )
     topK <- option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
     return Opts {..}
@@ -169,20 +167,24 @@ main = do
 
 
     let retrieveQuery :: QueryDoc -> [TrecRun.RankingEntry]
-        retrieveQuery q@QueryDoc{..} =
-            trace (show q) $ fmap toTrecEntry
+        retrieveQuery QueryDoc{..} =
+            fmap toTrecEntry
                 $ zip [1.. ]
                 $ take topK
                 $ retrieve (textToTokens' queryDocQueryText)
           where toTrecEntry::  (Int, (Log Double, PageId)) -> TrecRun.RankingEntry
                 toTrecEntry (rank, (score, doc)) =
-                    TrecRun.RankingEntry { queryId  = queryDocQueryText
+                    TrecRun.RankingEntry {
+                                   queryId  = queryDocQueryId
                                  , documentName  = T.pack $ unpackPageId doc
                                  , documentRank  = rank
                                  , documentScore = ln score
                                  , methodName    = methodName
                                  }
 
+    let isSelectedQuery query =
+            null selectedQueries ||
+                (queryDocQueryId query) `HS.member` selectedQueries
 
-    let trecRanking = foldMap retrieveQuery queries
+    let trecRanking = foldMap retrieveQuery $ filter isSelectedQuery queries
     TrecRun.writeRunFile output trecRanking
