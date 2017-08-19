@@ -474,7 +474,8 @@ retrieveEntities entityIndexFile = do
     entityIndex <- Index.open entityIndexFile
     let model = BM25.bm25 $ BM25.sensibleParams
     -- let model = QL.queryLikelihood (QL.Dirichlet 100)
-    return $ sortBy (flip $ comparing snd) . Index.score entityIndex model
+    return $ sortBy Index.descending . Index.score entityIndex model
+
 
 filterOutSeeds :: QueryDoc -> [(PageId, Maybe ParagraphId, Double)] -> [(PageId, Maybe ParagraphId, Double)]
 filterOutSeeds query ranking = filter notSeedEntity ranking      --  remove seed entities from ranking

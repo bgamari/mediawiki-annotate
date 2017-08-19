@@ -59,7 +59,6 @@ instance ToJSON QueryDoc
 
 data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
            deriving Generic
-
 instance FromJSON QueryDocList
 instance ToJSON QueryDocList
 
