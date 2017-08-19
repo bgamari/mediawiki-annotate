@@ -79,18 +79,23 @@ createSchema =
                 FROM raw_fragment_parents
                 INNER JOIN fragments ON fragments.id = raw_fragment_parents.fragment_id
                 INNER JOIN fragments AS parent ON parent.id = raw_fragment_parents.parent
-                WHERE fragment_id=12563
                 GROUP BY raw_fragment_parents.fragment_id, fragments.title
       |]
     , [sql| CREATE VIEW links_view AS
             SELECT src.title AS src_title,
                    dest.title AS dest_title,
                    paragraphs.content AS paragraph,
-                   anchor
-            FROM links, fragments AS src, fragments AS dest, paragraphs
+                   anchor,
+                   parent.parent_titles
+            FROM links,
+                 fragments AS src,
+                 fragments AS dest,
+                 fragment_parents AS parent,
+                 paragraphs
             WHERE links.src_fragment = src.id
               AND links.dest_fragment = dest.id
               AND paragraphs.id = links.paragraph
+              AND parent.fragment_id = src.id
       |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
