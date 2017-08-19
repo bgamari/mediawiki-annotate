@@ -47,6 +47,7 @@ opts = (,,)
 
 main :: IO ()
 main = do
+    -- takes a passage ranking, creates an entity ranking from it.
     (outputFile, runFile, parasFile) <- execParser $ info (helper <*> opts) mempty
     queries <- Run.groupByQuery <$> Run.readParagraphRun runFile
     paras <- TocFile.open parasFile
