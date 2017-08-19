@@ -151,9 +151,10 @@ toPostgres openConn pagesFile = do
 
     putStrLn "building fragment index..."
     !fragments <- inCompact . pagesToFragments <$> readCborList pagesFile
-    let lookupFragmentId :: SectionPath -> Maybe FragmentId
-        lookupFragmentId path =
-            fmap (\(fragId,_) -> fragId) $ HM.lookup path fragments
+    let fragmentIdxMap :: HM.HashMap SectionPath FragmentId
+        !fragmentIdxMap = HM.map (\(fragId,_) -> fragId) fragments
+        lookupFragmentId :: SectionPath -> Maybe FragmentId
+        lookupFragmentId path = HM.lookup path fragmentIdxMap
 
     exportFragments conns fragments lookupFragmentId
     exportParagraphs conns lookupFragmentId
