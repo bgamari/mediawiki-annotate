@@ -4,12 +4,14 @@
 {-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+import Control.Monad
 import Data.Foldable
 import Data.Hashable
 import Data.Monoid
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Char8 as BS
 import Data.List.Split (chunksOf)
 
@@ -30,8 +32,8 @@ main = do
     let opts = (,) <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
                    <*> argument str (help "Articles file")
     (connStr, path) <- execParser $ info (helper <*> opts) mempty
-    conn <- connectPostgreSQL (BS.pack connStr)
-    toPostgres conn path
+    let openConn = connectPostgreSQL (BS.pack connStr)
+    toPostgres openConn path
 
 
 createSchema :: [Query]
@@ -122,8 +124,22 @@ sectionPathParent :: SectionPath -> Maybe SectionPath
 sectionPathParent (SectionPath _      [])  = Nothing
 sectionPathParent (SectionPath pageId hds) = Just $ SectionPath pageId (init hds)
 
-toPostgres :: Connection -> FilePath -> IO ()
-toPostgres conn pagesFile = do
+insertChunks :: ToRow a => [Connection] -> Query -> [[a]] -> IO ()
+insertChunks conns query rowChunks = do
+    (sq, rq, seal) <- PC.spawn' PC.unbounded
+    inserters <- mapM (startInserter rq) conns
+    mapM_ link inserters
+    mapM_ (atomically . PC.send sq) rowChunks
+    atomically seal
+    mapM_ wait inserters
+  where
+    startInserter rq conn = async $ runEffect $ for (PC.fromInput rq) $ \chunk -> do
+        void $ liftIO $ executeMany conn query chunk
+
+toPostgres :: IO Connection -> FilePath -> IO ()
+toPostgres openConn pagesFile = do
+    conn <- openConn
+    conns <- replicateM 32 openConn
     mapM_ (execute_ conn) createSchema
 
     fragments <- pagesToFragments <$> readCborList pagesFile
@@ -132,9 +148,10 @@ toPostgres conn pagesFile = do
             fmap (\(fragId,_) -> fragId) $ HM.lookup path fragments
 
     putStrLn "exporting fragments..."
-    void $ executeMany conn
+    insertChunks conns
         [sql| INSERT INTO fragments ( id, title, parent )
               VALUES (?,?,?) |]
+        $ chunksOf 10000
         [ (fragId, title, parentId)
         | (path, (fragId, title)) <- HM.toList fragments
         , let parentId = lookupFragmentId =<< sectionPathParent path
@@ -142,41 +159,39 @@ toPostgres conn pagesFile = do
 
     putStrLn "exporting paragraphs..."
     pages <- readCborList pagesFile
-    forM_ pages $ \page ->
-       void $ executeMany conn
-           [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content, content_index)
-                 SELECT x.column1, x.column2, x.column3, to_tsvector(x.column4)
-                 FROM (VALUES (?,?,?,?)) AS x |]
+    let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text, TL.Text)]
+        pageParaRows page =
            [ (paraId para, fragId, text, text)
            | (path, _, skel) <- pageSections page
            , Para para <- skel
            , let text = paraToText para
                  fragId = lookupFragmentId path
            ]
+    insertChunks
+        conns
+        [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content, content_index)
+              SELECT x.column1, x.column2, x.column3, to_tsvector(x.column4)
+              FROM (VALUES (?,?,?,?)) AS x |]
+        (map (foldMap pageParaRows) $ chunksOf 1000 pages)
 
     putStrLn "exporting links..."
-    (sq, rq, seal) <- PC.spawn' PC.unbounded
-    writer <- async $ runEffect $ for (PC.fromInput rq) $ \pagesChunk ->
-        let rows :: [(FragmentId, FragmentId, T.Text, ParagraphId)]
-            rows =
-                [ (srcId, destId, linkAnchor, paraId para)
-                | page                <- pagesChunk
-                , (srcPath, _, skels) <- pageSections page
-                , Just srcId          <- pure $ lookupFragmentId srcPath
-                , Para para           <- skels
-                , Link{..}            <- paraLinks para
-                , let destPath         = SectionPath linkTargetId [] -- TODO section
-                , Just destId         <- pure $ lookupFragmentId destPath
-                ]
-        in void $ liftIO $ executeMany conn
-                [sql| INSERT INTO links (src_fragment, dest_fragment, paragraph, anchor)
-                      SELECT column1 AS src_fragment, column2 AS dest_fragment, paragraphs.id, column3 AS anchor
-                      FROM (VALUES (?,?,?,?)) AS x, paragraphs
-                      WHERE paragraphs.paragraph_id = x.column4 |]
-                rows
-    link writer
     pages <- readCborList pagesFile
-    mapM_ (atomically . PC.send sq) (chunksOf 10000 pages)
-    atomically seal
-    wait writer
+    let pagesLinkRows :: [Page] -> [(FragmentId, FragmentId, T.Text, ParagraphId)]
+        pagesLinkRows pagesChunk =
+            [ (srcId, destId, linkAnchor, paraId para)
+            | page                <- pagesChunk
+            , (srcPath, _, skels) <- pageSections page
+            , Just srcId          <- pure $ lookupFragmentId srcPath
+            , Para para           <- skels
+            , Link{..}            <- paraLinks para
+            , let destPath         = SectionPath linkTargetId [] -- TODO section
+            , Just destId         <- pure $ lookupFragmentId destPath
+            ]
+    insertChunks
+        conns
+        [sql| INSERT INTO links (src_fragment, dest_fragment, paragraph, anchor)
+              SELECT column1 AS src_fragment, column2 AS dest_fragment, paragraphs.id, column3 AS anchor
+              FROM (VALUES (?,?,?,?)) AS x, paragraphs
+              WHERE paragraphs.paragraph_id = x.column4 |]
+        (map pagesLinkRows $ chunksOf 1000 pages)
     return ()
