@@ -73,6 +73,7 @@ urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedI
 -- Orphans
 deriving instance CBOR.Serialise PageName
 deriving instance FromJSON PageName
+instance NFData PageName
 instance FromJSONKey PageName where
     fromJSONKey = fmap PageName fromJSONKey
 deriving instance ToJSON PageName
@@ -109,7 +110,7 @@ unpackPageId (PageId s) = Utf8.toString s
 
 -- | An ASCII-only form of a section heading.
 newtype HeadingId = HeadingId SBS.ShortByteString
-                  deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise)
+                  deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData)
 
 sectionHeadingToId :: SectionHeading -> HeadingId
 sectionHeadingToId (SectionHeading h) = HeadingId $ urlEncodeText $ T.unpack h
@@ -119,11 +120,12 @@ unpackHeadingId (HeadingId s) = unpackSBS s
 
 -- | The text of a section heading.
 newtype SectionHeading = SectionHeading { getSectionHeading :: T.Text }
-                       deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise)
+                       deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData)
 
 data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
                deriving (Show, Generic)
 instance CBOR.Serialise Paragraph
+instance NFData Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
                     deriving (Show, Read, Generic, Ord, Eq, CBOR.Serialise, Hashable, Binary)
@@ -151,11 +153,14 @@ data Link = Link { linkTarget   :: !PageName
                  }
           deriving (Show, Generic)
 instance CBOR.Serialise Link
+instance NFData Link where
+    rnf Link{..} = rnf linkSection `seq` ()
 
 data ParaBody = ParaText !T.Text
               | ParaLink !Link
               deriving (Show, Generic)
 instance CBOR.Serialise ParaBody
+instance NFData ParaBody
 
 -- | A logical entity of a knowledge base
 data Entity = Entity { entityPageName :: !PageName
@@ -163,6 +168,7 @@ data Entity = Entity { entityPageName :: !PageName
                      }
             deriving (Show, Generic)
 instance CBOR.Serialise Entity
+instance NFData Entity
 instance Aeson.FromJSON Entity
 instance Aeson.ToJSON Entity
 
@@ -176,11 +182,12 @@ data Page = Page { pageName     :: !PageName
 instance CBOR.Serialise Page
 
 -- | Path from heading to page title in a page outline
-data SectionPath = SectionPath { sectionPathPageId :: PageId
+data SectionPath = SectionPath { sectionPathPageId   :: !PageId
                                , sectionPathHeadings :: [HeadingId]
                                }
                deriving (Show, Eq, Ord, Generic)
 instance Hashable SectionPath
+instance NFData SectionPath
 
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
