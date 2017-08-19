@@ -190,7 +190,7 @@ toPostgres openConn pagesFile = do
             [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content )
                   SELECT x.column1, x.column2, x.column3
                   FROM (VALUES (?,?,?)) AS x |]
-            (map (foldMap pageParaRows) $ chunksOf 1000 pages)
+            (map (foldMap pageParaRows) $ chunksOf 10000 pages)
 
     exportLinks conns lookupFragmentId = do
         putStrLn "exporting links..."
