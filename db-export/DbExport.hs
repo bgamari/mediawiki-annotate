@@ -51,7 +51,6 @@ createSchema =
                , paragraph_id text NOT NULL
                , fragment integer REFERENCES fragments (id)
                , content text
-               , content_index tsvector
                )
       |]
     , [sql| CREATE TABLE IF NOT EXISTS links
@@ -178,9 +177,9 @@ toPostgres openConn pagesFile = do
     exportParagraphs conns lookupFragmentId = do
         putStrLn "exporting paragraphs..."
         pages <- readCborList pagesFile
-        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text, TL.Text)]
+        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text)]
             pageParaRows page =
-              [ (paraId para, fragId, text, text)
+              [ (paraId para, fragId, text)
               | (path, _, skel) <- pageSections page
               , Para para <- skel
               , let text = paraToText para
@@ -188,9 +187,9 @@ toPostgres openConn pagesFile = do
               ]
         insertChunks
             conns
-            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content, content_index)
-                  SELECT x.column1, x.column2, x.column3, to_tsvector(x.column4)
-                  FROM (VALUES (?,?,?,?)) AS x |]
+            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content )
+                  SELECT x.column1, x.column2, x.column3
+                  FROM (VALUES (?,?,?)) AS x |]
             (map (foldMap pageParaRows) $ chunksOf 1000 pages)
 
     exportLinks conns lookupFragmentId = do
