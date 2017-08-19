@@ -49,6 +49,7 @@ import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Short as SBS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import Data.Binary
 import Network.URI
 import Crypto.Hash.SHA1 as SHA
 import qualified Data.ByteString.Base16 as Base16
@@ -88,7 +89,7 @@ unpackPageName (PageName t) = T.unpack t
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId Utf8.SmallUtf8
                deriving (Show, Eq, Ord, Generic, IsString, NFData,
-                         FromJSON, FromJSONKey, ToJSON, ToJSONKey)
+                         FromJSON, FromJSONKey, ToJSON, ToJSONKey, Binary)
 instance Hashable PageId
 instance CBOR.Serialise PageId where
     encode (PageId p) = CBOR.encode (Utf8.toByteString p)
@@ -125,7 +126,7 @@ data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
 instance CBOR.Serialise Paragraph
 
 newtype ParagraphId = ParagraphId SBS.ShortByteString -- Hash
-                    deriving (Show, Read, Generic, Ord, Eq, CBOR.Serialise, Hashable)
+                    deriving (Show, Read, Generic, Ord, Eq, CBOR.Serialise, Hashable, Binary)
 instance NFData ParagraphId
 instance Aeson.FromJSON ParagraphId where parseJSON o = packParagraphId <$> parseJSON o
 instance Aeson.ToJSON ParagraphId where toJSON = toJSON . unpackParagraphId

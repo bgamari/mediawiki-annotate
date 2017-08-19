@@ -32,11 +32,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: !ParagraphId
                        }
            deriving (Show, Generic)
 
-deriving instance Binary ParagraphId
 instance (Hashable a, Eq a, Binary a) => Binary (HS.HashSet a) where
     put = put . HS.toList
     get = HS.fromList <$> get
-deriving instance Binary PageId
 instance Binary EdgeDoc
 instance NFData EdgeDoc
 
