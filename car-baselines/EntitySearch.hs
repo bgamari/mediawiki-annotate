@@ -13,6 +13,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ApplicativeDo #-}
 
+import Debug.Trace
+
 import Data.List (sortBy)
 import Data.Maybe
 import Data.Tuple
@@ -167,8 +169,8 @@ main = do
 
 
     let retrieveQuery :: QueryDoc -> [TrecRun.RankingEntry]
-        retrieveQuery QueryDoc{..} =
-            fmap toTrecEntry
+        retrieveQuery q@QueryDoc{..} =
+            trace (show q) $ fmap toTrecEntry
                 $ zip [1.. ]
                 $ take topK
                 $ retrieve (textToTokens' queryDocQueryText)
