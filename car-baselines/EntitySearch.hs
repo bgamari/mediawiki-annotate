@@ -158,8 +158,8 @@ main = do
     queries <-
         case query of
           QueriesFromCbor queryFile queryDeriv -> do
-              foldMap (pagesToQueryDocs queryDeriv)
-                  <$> readCborList queryFile
+              pagesToQueryDocs queryDeriv
+                  <$> readCborList @Page queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
