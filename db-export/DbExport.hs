@@ -6,15 +6,18 @@
 
 import Data.Foldable
 import Data.Hashable
+import Data.Monoid
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.Text as T
+import qualified Data.ByteString.Char8 as BS
 import Data.List.Split (chunksOf)
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.SqlQQ
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.FromField
+import Options.Applicative
 
 import Control.Concurrent.Async
 import Pipes
@@ -22,19 +25,14 @@ import Pipes.Concurrent as PC
 import CAR.Types
 import CAR.Utils
 
-import System.Environment
-
 main :: IO ()
 main = do
-    [path] <- getArgs
-    toPostgres ci path
+    let opts = (,) <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
+                   <*> argument str (help "Articles file")
+    (connStr, path) <- execParser $ info (helper <*> opts) mempty
+    conn <- connectPostgreSQL (BS.pack connStr)
+    toPostgres conn path
 
-ci :: ConnectInfo
-ci = defaultConnectInfo { connectHost = "ben-server.local"
-                        , connectUser = "ben"
-                        , connectPassword = "mudpie"
-                        , connectDatabase = "wikipedia"
-                        }
 
 createSchema :: [Query]
 createSchema =
@@ -124,9 +122,8 @@ sectionPathParent :: SectionPath -> Maybe SectionPath
 sectionPathParent (SectionPath _      [])  = Nothing
 sectionPathParent (SectionPath pageId hds) = Just $ SectionPath pageId (init hds)
 
-toPostgres :: ConnectInfo -> FilePath -> IO ()
-toPostgres connInfo pagesFile = do
-    conn <- connect connInfo
+toPostgres :: Connection -> FilePath -> IO ()
+toPostgres conn pagesFile = do
     mapM_ (execute_ conn) createSchema
 
     fragments <- pagesToFragments <$> readCborList pagesFile
