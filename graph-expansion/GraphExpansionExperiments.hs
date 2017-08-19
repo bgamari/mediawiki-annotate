@@ -63,7 +63,7 @@ instance FromJSON QueryDocList
 instance ToJSON QueryDocList
 
 data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
-
+                      
 pagesToQueryDocs :: (PageId -> PageId) -> QueryDerivation -> [Page] ->  [QueryDoc]
 pagesToQueryDocs resolveRedirect deriv pages  =
     queryDocs

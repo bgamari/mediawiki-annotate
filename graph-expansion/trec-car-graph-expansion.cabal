@@ -135,8 +135,8 @@ executable trec-car-remove-seeds-from-qrels
                        trec-car-tools
   default-language:    Haskell2010
 
-executable graph-expansion-build-index
-  main-is:             BuildEdgeDocIndex.hs
+executable graph-expansion-build-kb-index
+  main-is:             BuildKbIndex.hs
   build-depends:       base,
                        text >= 1.2,
                        bytestring,

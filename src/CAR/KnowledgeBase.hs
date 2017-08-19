@@ -10,7 +10,7 @@ module CAR.KnowledgeBase
       -- * Inlink statistics
     , InlinkInfo(..)
     , collectInlinkInfo
-    , resolveRedirects
+--     , resolveRedirects
     , InlinkCounts(..)
     ) where
 
@@ -40,9 +40,10 @@ data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocOutLinks :: [PageName]  -- ^ Targets of page's outgoing links
                    , kbDocOutMentions :: [T.Text] -- ^ Anchor text of page's outgoing links
                    , kbDocLeadPara :: [PageSkeleton]   -- ^ 'PageSkeleton's of lead paragraph text
+                   , kbDocFullText :: [TL.Text]   -- ^ 'Page's full text including title
                    }
 
-data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageName InlinkCounts)
+data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageId InlinkCounts)
                              , redirectPages   :: !(HS.HashSet PageName)
                              }
                 deriving (Show)
@@ -68,52 +69,54 @@ instance Monoid InlinkCounts where
                      (HM.unionWith (+) c c')
                      (HM.unionWith (+) d d')
 
----  sourcepage targetpage anchortext => attach anchortext to targetpage
----  redirect sourcepage targetpage   => attach sourcepage to targetpage
+--  sourcepage targetpage anchortext => attach anchortext to targetpage
+--  redirect sourcepage targetpage   => attach sourcepage to targetpage
 --   similar for disambiguation
-resolveRedirects :: InlinkInfo -> HM.HashMap PageName InlinkCounts
-resolveRedirects (InlinkInfo {..}) =
-    fmap resolve documentInlinks
-  where
-    resolve :: InlinkCounts -> InlinkCounts
-    resolve counts =
-        counts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage documentInlinks
-                          | (rpage, n) <- HM.toList $ redirectCount counts ]
+-- resolveRedirects :: InlinkInfo -> HM.HashMap PageName InlinkCounts
+-- resolveRedirects (InlinkInfo {..}) =
+--     fmap resolve documentInlinks
+--   where
+--     resolve :: InlinkCounts -> InlinkCounts
+--     resolve inlinkCounts =
+--         inlinkCounts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage documentInlinks
+--                           | (rpage, n) <- HM.toList $ redirectCount inlinkCounts ]
 
 
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: [Page] -> InlinkInfo
-collectInlinkInfo = foldMap pageInlinkInfo
+collectInlinkInfo :: (PageId -> PageId) -> [Page] -> InlinkInfo
+collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1
 
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
-      | Just linkTarget <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton linkTarget
+      | Just redirTargetId <- pageRedirect page  =
+            mempty { documentInlinks = HM.singleton (pageNameToId redirTargetId)
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
 
       | pageIsDisambiguation page  =
             let toInlinkInfo link =
-                    mempty { documentInlinks = HM.singleton (linkTarget link)
+                    mempty { documentInlinks = HM.singleton (linkTargetId link)
                                                $ mempty { disambiguationCount = one $ pageName page }
                            }
             in foldMap toInlinkInfo (pageLinks page)
 
       | otherwise  =
             let toInlinkInfo link =
-                   mempty { documentInlinks = HM.singleton (linkTarget link)
-                                              $ mempty { anchorCount = one $ linkAnchor link
-                                                       , inLinkCounts = one $ linkTarget link }
+                   mempty { documentInlinks =
+                               HM.singleton
+                                   (resolveRedirects' (linkTargetId link))
+                                   (mempty { anchorCount = one $ linkAnchor link
+                                           , inLinkCounts = one $ linkTarget link })
                           }
-            in foldMap toInlinkInfo (pageLinks page)
+            in foldMap toInlinkInfo (pageLinks page)    -- Map [toPage, InLinkInfo (fromPage's outlinks)]
 
 -- #(anchor, target) / #(anchor, *)
 pageToKbDoc :: Page -> KbDoc
-pageToKbDoc (Page pageName pageId pageSkeleta) =
+pageToKbDoc page@(Page pageName pageId pageSkeleta) =
   let leadParas = filter isLead $ pageSkeleta
       kbDocPageId = pageId
       kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
@@ -122,4 +125,5 @@ pageToKbDoc (Page pageName pageId pageSkeleta) =
       kbDocLeadPara = leadParas
       kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
       kbDocCanonicalName = pageName
+      kbFullText = TL.toStrict $ mconcat $ pageFulltext page
   in KbDoc {..}

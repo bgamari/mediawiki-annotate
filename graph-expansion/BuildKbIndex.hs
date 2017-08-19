@@ -1,3 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
+
+
 import Data.List
 import Data.Ord
 import Control.Applicative
@@ -11,8 +14,11 @@ import EdgeDocCorpus
 import CAR.Types
 import CAR.Retrieve
 import CAR.KnowledgeBase
+import CAR.Utils
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
+
+import qualified Data.Text.Lazy as TL
 
 edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
@@ -51,18 +57,20 @@ entityModes = subparser
            <*> argument str (metavar "CBOR" <> help "kb articles file")
       where
         go outputPath articlesPath = do
-            pages1 <- readCborList articlesPath
-            let !inlinkInfo = collectInlinkInfo pages1
+            !resolveRedirect <- resolveRedirectFactory <$> readCborList articlesPath
+
+            !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readCborList articlesPath
             pages2 <- readCborList articlesPath
 
             let docTerms :: KbDoc -> [Term]
                 docTerms doc =
-                       foldMap tokeniseText (kbDocLeadText doc)
+--                        foldMap tokeniseText (kbDocLeadText doc)
+                       foldMap (tokeniseText . TL.toStrict) (kbDocFullText doc)
                     ++ foldMap tokeniseText (HM.keys $ anchorCount inlinks)
                     ++ foldMap tokenisePageId (HM.keys $ disambiguationCount inlinks)
                   where
                     inlinks = fromMaybe mempty
-                              $ HM.lookup (kbDocCanonicalName doc) (documentInlinks inlinkInfo)
+                              $ HM.lookup (kbDocPageId doc) (documentInlinks inlinkInfo)
                     tokenisePageId = textToTokens' . getPageName
                     tokeniseText   = textToTokens'
 

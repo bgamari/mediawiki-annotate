@@ -97,6 +97,20 @@ pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
 pageSkeletonText (Para para) = [ paraToText para ]
 pageSkeletonText (Image _ _) = []
 
+
+pageFulltext :: Page -> [TL.Text]
+pageFulltext (Page pageName _ skels) =
+    (TL.fromStrict $ getPageName pageName) : (foldMap pageSkeletonFulltext skels)
+    
+pageSkeletonFulltext :: PageSkeleton -> [TL.Text]
+pageSkeletonFulltext (Section heading _ children) =
+    (TL.fromStrict $ getSectionHeading heading) : (foldMap pageSkeletonFulltext children)
+pageSkeletonFulltext (Para para) = [ paraToText para ]
+pageSkeletonFulltext (Image _ children) =
+    foldMap pageSkeletonFulltext children
+
+
+
 paraToText :: Paragraph -> TL.Text
 paraToText (Paragraph  _ bodies) =
     TL.concat $ fmap toText bodies

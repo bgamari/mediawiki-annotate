@@ -105,7 +105,7 @@ complexTextToTokens' text =
 textToTokens' :: T.Text -> [Term]
 textToTokens' =
       fmap Term.fromText
-    -- . stems English -- no stemming due to word embedding projection
+    . stems English -- no stemming due to word embedding projection
     . killStopwords enInquery
     . T.words
     . T.toCaseFold
