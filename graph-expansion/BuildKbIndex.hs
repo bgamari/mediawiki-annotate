@@ -91,8 +91,8 @@ entityModes = subparser
             mapM_ print $ sortBy (flip $ comparing snd) postings
 
 modes = subparser
-    $ command "entity"  (info entityModes mempty)
-   <> command "edgedoc" (info edgeDocModes mempty)
+    $ command "entity"  (info (helper <*> entityModes) mempty)
+   <> command "edgedoc" (info (helper <*> edgeDocModes) mempty)
 
 main :: IO ()
 main = do
