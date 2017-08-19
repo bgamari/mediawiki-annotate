@@ -139,8 +139,9 @@ pagesToQueryDocs deriv pages  =
       QueryFromSectionPaths ->
           [ QueryDoc { queryDocQueryId      = T.pack $ escapeSectionPath sectionPath
                      , queryDocPageId       = pageId page
-                     , queryDocQueryText    = getPageName (pageName page) <> getPageName (pageName page) -- twice factor
-                                              <> T.unwords (map getSectionHeading headings)
+                     , queryDocQueryText    = T.unwords
+                                            $ getPageName (pageName page) : getPageName (pageName page) -- twice factor
+                                              : map getSectionHeading headings
                      }
           | page <- pages
           , (sectionPath, headings, _) <- pageSections page

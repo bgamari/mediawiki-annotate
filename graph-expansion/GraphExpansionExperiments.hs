@@ -82,8 +82,9 @@ pagesToQueryDocs resolveRedirect deriv pages  =
       QueryFromSectionPaths ->
           [ QueryDoc { queryDocQueryId      = CarRun.sectionPathToQueryId sectionPath -- KB.kbDocPageId kbDoc
                      , queryDocPageId       = pageId page
-                     , queryDocQueryText    = getPageName (pageName page) <> getPageName (pageName page) -- twice factor
-                                              <> T.unwords (map getSectionHeading headings)
+                     , queryDocQueryText    = T.unwords
+                                            $ getPageName (pageName page) : getPageName (pageName page) -- twice factor
+                                              : map getSectionHeading headings
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
           | page <- pages
