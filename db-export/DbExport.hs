@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -41,7 +42,7 @@ createSchema =
     [ [sql| CREATE TABLE IF NOT EXISTS fragments
                ( id serial PRIMARY KEY
                , title text NOT NULL
-               , parent integer REFERENCES fragments (id)
+               , parent integer -- REFERENCES fragments (id)
                )
       |]
     , [sql| CREATE TABLE IF NOT EXISTS paragraphs
@@ -97,6 +98,11 @@ createSchema =
               AND paragraphs.id = links.paragraph
               AND parent.fragment_id = src.id
       |]
+    ]
+
+finishSchema :: [Query]
+finishSchema =
+    [ [sql| ALTER TABLE fragments ADD CONSTRAINT FOREIGN KEY (parent) REFERENCES fragments(fragment_id) |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
     , [sql| CREATE INDEX ON paragraphs (content_index)  |]
@@ -133,8 +139,9 @@ insertChunks conns query rowChunks = do
     atomically seal
     mapM_ wait inserters
   where
-    startInserter rq conn = async $ runEffect $ for (PC.fromInput rq) $ \chunk -> do
-        void $ liftIO $ executeMany conn query chunk
+    startInserter rq conn = withTransaction conn $
+        async $ runEffect $ for (PC.fromInput rq) $ \chunk ->
+            void $ liftIO $ executeMany conn query chunk
 
 toPostgres :: IO Connection -> FilePath -> IO ()
 toPostgres openConn pagesFile = do
@@ -142,7 +149,8 @@ toPostgres openConn pagesFile = do
     conns <- replicateM 32 openConn
     mapM_ (execute_ conn) createSchema
 
-    fragments <- pagesToFragments <$> readCborList pagesFile
+    putStrLn "building fragment index..."
+    !fragments <- pagesToFragments <$> readCborList pagesFile
     let lookupFragmentId :: SectionPath -> Maybe FragmentId
         lookupFragmentId path =
             fmap (\(fragId,_) -> fragId) $ HM.lookup path fragments
@@ -194,4 +202,6 @@ toPostgres openConn pagesFile = do
               FROM (VALUES (?,?,?,?)) AS x, paragraphs
               WHERE paragraphs.paragraph_id = x.column4 |]
         (map pagesLinkRows $ chunksOf 1000 pages)
+
+    mapM_ (execute_ conn) finishSchema
     return ()
