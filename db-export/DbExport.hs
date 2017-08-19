@@ -150,9 +150,9 @@ toPostgres openConn pagesFile = do
     mapM_ (execute_ conn) createSchema
 
     putStrLn "building fragment index..."
-    !fragments <- inCompact . pagesToFragments <$> readCborList pagesFile
+    !fragments <- pagesToFragments <$> readCborList pagesFile
     let fragmentIdxMap :: HM.HashMap SectionPath FragmentId
-        !fragmentIdxMap = HM.map (\(fragId,_) -> fragId) fragments
+        !fragmentIdxMap = inCompact $ HM.map (\(fragId,_) -> fragId) fragments
         lookupFragmentId :: SectionPath -> Maybe FragmentId
         lookupFragmentId path = HM.lookup path fragmentIdxMap
 
