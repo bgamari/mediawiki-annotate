@@ -44,7 +44,6 @@ encodedCbor = EncodedCbor . CBOR.toLazyByteString . CBOR.encode
 
 instance B.Binary NamespaceId
 instance B.Binary Format
-instance B.Binary PageId
 instance B.Binary XmlDump.PageId
 instance B.Binary WikiDoc
 

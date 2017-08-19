@@ -48,8 +48,6 @@ import Options.Applicative
 
 import CAR.Retrieve (textToTokens')
 
-instance Binary ParagraphId
-
 type CarDiskIndex = DiskIdx.OnDiskIndex Term (ParagraphId, DocumentLength) Int
 
 newtype BagOfWords = BagOfWords (M.Map Term Int)
