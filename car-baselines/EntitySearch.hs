@@ -88,7 +88,7 @@ opts :: Parser Opts
 opts = do
     output <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output file")
     query <-  querySource
-    index <-  option (Index.OnDiskIndex <$> str)
+    entityIndexFile <-  option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     selectedQueries <- many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     methodName <- T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" )
