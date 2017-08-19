@@ -194,7 +194,12 @@ escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
 
 decodeCborList :: forall a. CBOR.Serialise a => BSL.ByteString -> [a]
-decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
+decodeCborList = decodeCborList' (CborListDeserialiseError "<decodeCborList>")
+
+decodeCborList' :: forall a. CBOR.Serialise a
+                => (CBOR.DeserialiseFailure -> CborListDeserialiseError)
+                -> BSL.ByteString -> [a]
+decodeCborList' deserialiseFail = \bs -> runST $ start $ BSL.toChunks bs
   where
     start xs
       | all BS.null xs = return []
@@ -209,7 +214,7 @@ decodeCborList = \bs -> runST $ start $ BSL.toChunks bs
           (CBOR.Done bs _ x, bss)    -> do
               rest <- unsafeInterleaveST $ start (bs : bss)
               return (x : rest)
-          (CBOR.Fail _rest _ err, _) -> error $ show err
+          (CBOR.Fail _rest _ err, _) -> throw $ deserialiseFail err
 
 data CborListDeserialiseError = CborListDeserialiseError FilePath CBOR.DeserialiseFailure
                               deriving (Show)
@@ -217,8 +222,7 @@ instance Exception CborListDeserialiseError
 
 readCborList :: CBOR.Serialise a => FilePath -> IO [a]
 readCborList fname =
-    handle (throw . CborListDeserialiseError fname)
-           (decodeCborList <$> BSL.readFile fname)
+    decodeCborList' (CborListDeserialiseError fname) <$> BSL.readFile fname
 
 encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
 encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
