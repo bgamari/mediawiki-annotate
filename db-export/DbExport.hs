@@ -106,13 +106,14 @@ createSchema =
 
 finishSchema :: [Query]
 finishSchema =
-    [ [sql| ALTER TABLE fragments ADD CONSTRAINT FOREIGN KEY (parent) REFERENCES fragments(fragment_id) |]
+    [ [sql| ALTER TABLE fragments ADD FOREIGN KEY (parent) REFERENCES fragments(id) |]
     , [sql| ALTER TABLE fragments SET LOGGED |]
     , [sql| ALTER TABLE paragraphs SET LOGGED |]
-    , [sql| ALTER TABLE paragraphs SET LOGGED |]
+    , [sql| ALTER TABLE links SET LOGGED |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
     , [sql| CREATE INDEX ON paragraphs USING GIN (to_tsvector('english', content)) |]
+    , [sql| ANALYZE |]
     ]
 
 newtype FragmentId = FragmentId Int
