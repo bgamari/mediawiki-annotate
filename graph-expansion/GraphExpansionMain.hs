@@ -558,7 +558,7 @@ main = do
         forM_' = forConcurrentlyN_ ncaps
 
         runMethod :: CarRun.QueryId -> QueryDoc -> Method -> [(PageId, Maybe ParagraphId, Double)] -> IO ()
-        runMethod queryId query method ranking = do
+        runMethod queryId query method ranking = handle onError $ do
             let Just hdl = M.lookup method handles
 
             logMsg queryId method $ "evaluating"
@@ -593,6 +593,10 @@ main = do
                                      (map (\(a,_,c) -> (a,c)) ranking'')
             bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                 TL.hPutStrLn h formatted
+          where
+            onError exc =
+                putStrLn $ concat [ "error: exception while running "
+                                  , show method, " on ", show queryId, ": ", show exc ]
 {-
     let fullgraphExpansion = do
             putStrLn "full graph"

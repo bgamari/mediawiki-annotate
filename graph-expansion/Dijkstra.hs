@@ -22,6 +22,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Sequence as Seq
 import qualified Data.Heap as H
 import Control.Monad.Trans.State.Strict
+import GHC.Stack
 
 import Graph
 
@@ -56,7 +57,7 @@ popS = do
 -- | Compute the shortest path lengths and predecessor nodes from the given source node.
 -- By convention the source node has itself as a predecessor.
 dijkstra :: forall n e.
-            ( Hashable n, Monoid e, Ord e, Ord n )
+            ( HasCallStack, Hashable n, Monoid e, Ord e, Ord n, Show e, Show n )
          => Graph n e -> n -> HM.HashMap n (Distance e, [n])
 dijkstra graph =
     \src -> let s0 = S { sAccum = HM.singleton src (Finite mempty, [src])
@@ -75,8 +76,9 @@ dijkstra graph =
                   distV <- lookupDistance v
                   let alt = distU <> Finite len
                   if -- sanity check
-                     | alt <= distU -> error "dijkstra: Non-increasing distance"
-                     | alt < distV -> do
+                     | alt <= distU ->
+                         error $ "dijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
+                     | alt < distV ->
                          modify $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
                                           , sPSQ   = PSQ.insert v alt () (sPSQ s)
                                           }
