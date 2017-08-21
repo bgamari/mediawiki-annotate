@@ -12,7 +12,7 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 
-import Control.Exception (bracket)
+import Control.Exception (bracket, handle, SomeException(..))
 import Control.Monad (when, void)
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -20,7 +20,6 @@ import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
 import Data.List (sortBy)
 import Data.Maybe
-import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Data.Foldable
@@ -42,7 +41,6 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
-import qualified Data.SmallUtf8 as Utf8
 
 import qualified Data.GraphViz as Dot
 import qualified Data.GraphViz.Printing as Dot
@@ -62,7 +60,6 @@ import GraphExpansionExperiments
 import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.GloVe
 import qualified SimplIR.SimpleIndex as Index
-import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
 
@@ -594,7 +591,7 @@ main = do
             bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
                 TL.hPutStrLn h formatted
           where
-            onError exc =
+            onError (SomeException exc) =
                 putStrLn $ concat [ "error: exception while running "
                                   , show method, " on ", show queryId, ": ", show exc ]
 {-
