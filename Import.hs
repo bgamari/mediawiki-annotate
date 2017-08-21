@@ -88,15 +88,16 @@ toPage WikiDoc{..} =
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
         Page { pageName     = name
-             , pageId       = pageNameToId name
-             , pageSkeleton = docsToSkeletons contents
+             , pageId       = pageId
+             , pageSkeleton = docsToSkeletons pageId contents
              }
       where
+        pageId = pageNameToId name
         name = normPageName $ PageName $ TE.decodeUtf8 docTitle
 
-docsToSkeletons :: [Doc] -> [PageSkeleton]
-docsToSkeletons =
-      toSkeleton
+docsToSkeletons :: PageId -> [Doc] -> [PageSkeleton]
+docsToSkeletons thisPage =
+      toSkeleton thisPage
     . filter (not . isTemplate) -- drop unknown templates here so they don't
                                 -- break up paragraphs
     . concatMap resolveTemplate
@@ -112,7 +113,7 @@ docsToSkeletons =
 
 -- | For testing.
 parseSkeleton :: String -> Either String [PageSkeleton]
-parseSkeleton = fmap docsToSkeletons . Markup.parse
+parseSkeleton = fmap (docsToSkeletons (PageId "Test Page")) . Markup.parse
 
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
@@ -300,19 +301,22 @@ isImage _ = Nothing
 
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
-toParaBody :: Doc -> Maybe [ParaBody]
-toParaBody (Text x)        = Just [ParaText $ T.pack x]
-toParaBody (Char x)        = Just [ParaText $ T.singleton x]
-toParaBody (Bold xs)       = Just $ concat $ mapMaybe toParaBody xs
-toParaBody (Italic xs)     = Just $ concat $ mapMaybe toParaBody xs
-toParaBody (BoldItalic xs) = Just $ concat $ mapMaybe toParaBody xs
-toParaBody doc@(InternalLink target parts)
+toParaBody :: PageId -> Doc -> Maybe [ParaBody]
+toParaBody thisPage (Text x)        = Just [ParaText $ T.pack x]
+toParaBody thisPage (Char x)        = Just [ParaText $ T.singleton x]
+toParaBody thisPage (Bold xs)       = Just $ concat $ mapMaybe (toParaBody thisPage) xs
+toParaBody thisPage (Italic xs)     = Just $ concat $ mapMaybe (toParaBody thisPage) xs
+toParaBody thisPage (BoldItalic xs) = Just $ concat $ mapMaybe (toParaBody thisPage) xs
+toParaBody thisPage doc@(InternalLink target parts)
   | Just _ <- isImage doc
   = Nothing
   | otherwise
   = let linkTarget   = normPageName page
         linkSection  = linkTargetAnchor target
-        linkTargetId = pageNameToId linkTarget
+        isSelfLink   = null $ unpackPageName $ linkTargetPage target
+        linkTargetId
+          | isSelfLink = thisPage
+          | otherwise  = pageNameToId linkTarget
         linkAnchor   = resolveEntities t
     in Just [ParaLink $ Link {..}]
   where
@@ -320,9 +324,9 @@ toParaBody doc@(InternalLink target parts)
     t = case parts of
           [anchor] -> T.pack $ getAllText anchor
           _        -> getPageName page
-toParaBody (ExternalLink _url (Just anchor))
+toParaBody thisPage (ExternalLink _url (Just anchor))
   = Just [ParaText $ T.pack anchor]
-toParaBody _ = Nothing
+toParaBody _ _ = Nothing
 
 getText :: Doc -> Maybe String
 getText (Text x)        = Just $ x
@@ -372,27 +376,29 @@ mkParagraph bodies = Paragraph (paraBodiesToId bodies) bodies
 
 -- | Does the @[Doc]@ begin with a paragraph? If so, return it and the remaining
 -- 'Doc's.
-splitParagraph :: [Doc] -> Maybe (Paragraph, [Doc])
-splitParagraph docs
-  | (bodies@(_:_), rest) <- getPrefix toParaBody docs
+splitParagraph :: PageId -> [Doc] -> Maybe (Paragraph, [Doc])
+splitParagraph thisPage docs
+  | (bodies@(_:_), rest) <- getPrefix (toParaBody thisPage) docs
   , let bodies' = collapseParaBodies $ concat bodies
   , not $ all nullParaBody bodies'
   = Just (mkParagraph bodies', rest)
   | otherwise
   = Nothing
 
-toSkeleton :: [Doc] -> [PageSkeleton]
-toSkeleton [] = []
-toSkeleton docs
-  | Just (para, rest) <- splitParagraph docs
-  = Para para : toSkeleton rest
-toSkeleton (doc : docs)
-  | Just (target, caption) <- isImage doc
-  = Image target (toSkeleton caption) : toSkeleton docs
-toSkeleton (Heading lvl title : docs) =
-    let (children, docs') = break isParentHeader docs
-        isParentHeader (Heading lvl' _) = lvl' <= lvl
-        isParentHeader _                = False
-        heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
-    in Section heading (sectionHeadingToId heading) (toSkeleton children) : toSkeleton docs'
-toSkeleton (_ : docs)                = toSkeleton docs
+toSkeleton :: PageId -> [Doc] -> [PageSkeleton]
+toSkeleton thisPage = go
+  where
+    go [] = []
+    go docs
+      | Just (para, rest) <- splitParagraph thisPage docs
+      = Para para : go rest
+    go (doc : docs)
+      | Just (target, caption) <- isImage doc
+      = Image target (go caption) : go docs
+    go (Heading lvl title : docs) =
+        let (children, docs') = break isParentHeader docs
+            isParentHeader (Heading lvl' _) = lvl' <= lvl
+            isParentHeader _                = False
+            heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
+        in Section heading (sectionHeadingToId heading) (go children) : go docs'
+    go (_ : docs)                 = go docs
