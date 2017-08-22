@@ -1,6 +1,6 @@
 [submodule "mediawiki-parser"]
 	path = mediawiki-parser
-	url = git://git.smart-cactus.org/ben/mediawiki-parser
+	url = https://git.smart-cactus.org/ben/mediawiki-parser
 [submodule "binary-serialise-cbor"]
 	path = binary-serialise-cbor
 	url = git://github.com/well-typed/binary-serialise-cbor
@@ -12,7 +12,7 @@
 	url = git://github.com/bgamari/b-tree
 [submodule "simplir"]
 	path = simplir
-	url = git://git.smart-cactus.org/ben/simpl-ir
+	url = https://git.smart-cactus.org/ben/simpl-ir
 [submodule "vendor/xml"]
 	path = vendor/xml
 	url = git://github.com/snoyberg/xml
