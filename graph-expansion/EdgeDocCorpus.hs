@@ -74,10 +74,11 @@ pageToEdgeDocs (Page pageName pageId pageSkeleta) =
     paragraphContent :: Paragraph -> [SectionHeading] -> T.Text
     paragraphContent para headings =
          TL.toStrict
-       $ paraToText para
+       $ TL.fromStrict (getPageName pageName)
+      <> "\n"
       <> TL.intercalate " " (fmap (TL.fromStrict . getSectionHeading) headings)
-      <> TL.fromStrict (getPageName pageName)
-
+      <> "\n"
+      <> paraToText para
 edgeDocHasLinks :: EdgeDoc -> Bool
 edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 

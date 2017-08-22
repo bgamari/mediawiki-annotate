@@ -18,6 +18,7 @@ import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
+import Control.Exception
 import Data.List (sortBy)
 import Data.Maybe
 import Data.Tuple
@@ -251,12 +252,17 @@ computeRankingsForQuery
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count, realToFrac . withScoreCount)
                       , (Score, realToFrac . withScoreScore)
-                      , (RecipRank,   (\edge ->  1.0 / (realToFrac $ withScoreRank edge )))
-                      , (LinearRank,  (\edge -> realToFrac (101 - (withScoreRank edge))))
+                      , (RecipRank,   (\edge ->  let w = 1.0 / (realToFrac $ withScoreRank edge )
+                                                 in assert (w > 0) w
+                        ))
+                      , (LinearRank,  (\edge ->  let w = realToFrac (101 - (withScoreRank edge))
+                                                 in assert (w > 0) w
+                                      ))
                       , (BucketRank,  (\edge ->  let rank = withScoreRank $ edge
-                                                 in if rank <= 5 then 3.0 else
-                                                    if rank <= 20 then 2.0 else
-                                                    1.0
+                                                     w = if rank <= 5 then 3.0 else
+                                                            if rank <= 20 then 2.0 else
+                                                            1.0
+                                                 in assert (w > 0) w
                                       ))
                       ]
 
