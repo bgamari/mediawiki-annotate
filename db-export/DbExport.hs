@@ -42,8 +42,8 @@ main = do
     toPostgres openConn path
 
 
-createSchema :: [Query]
-createSchema =
+createTables :: [Query]
+createTables =
     [ [sql| CREATE UNLOGGED TABLE IF NOT EXISTS fragments
                ( id serial PRIMARY KEY
                , title text NOT NULL
@@ -64,7 +64,11 @@ createSchema =
                , anchor text
                )
       |]
-    , [sql| CREATE VIEW raw_fragment_parents(fragment_id, parent, depth) AS
+    ]
+
+createViews :: [Query]
+createViews =
+    [ [sql| CREATE MATERIALIZED VIEW raw_fragment_parents(fragment_id, parent, depth) AS
             WITH RECURSIVE frags(fragment_id, parent, depth) AS (
                 SELECT fragments.id AS fragment_id,
                       fragments.parent AS parent,
@@ -101,6 +105,13 @@ createSchema =
               AND links.dest_fragment = dest.id
               AND paragraphs.id = links.paragraph
               AND parent.fragment_id = src.id
+      |]
+    , [sql| CREATE VIEW paragraphs_view AS
+            SELECT paragraph_id,
+                   content,
+                   parent_titles
+            FROM paragraphs, fragment_parents
+            WHERE fragment_parents.fragment_id = paragraphs.fragment
       |]
     ]
 
@@ -157,7 +168,7 @@ toPostgres :: IO Connection -> FilePath -> IO ()
 toPostgres openConn pagesFile = do
     conn <- openConn
     conns <- replicateM 32 openConn
-    mapM_ (execute_ conn) createSchema
+    mapM_ (execute_ conn) createTables
 
     putStrLn "building fragment index..."
     !fragments <- pagesToFragments <$> readCborList pagesFile
@@ -171,6 +182,7 @@ toPostgres openConn pagesFile = do
     exportLinks conns lookupFragmentId
 
     mapM_ (execute_ conn) finishSchema
+    mapM_ (execute_ conn) createViews
     return ()
 
   where
