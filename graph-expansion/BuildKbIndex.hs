@@ -20,6 +20,10 @@ import SimplIR.SimpleIndex as Index
 
 import qualified Data.Text.Lazy as TL
 
+data TextPart = FullText | LeadText
+
+
+
 edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
     $ command "index" (info (helper <*> buildMode) mempty)
@@ -55,8 +59,9 @@ entityModes = subparser
     buildMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
            <*> argument str (metavar "CBOR" <> help "kb articles file")
+           <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
       where
-        go outputPath articlesPath = do
+        go outputPath articlesPath textPart = do
             !resolveRedirect <- resolveRedirectFactory <$> readCborList articlesPath
 
             !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readCborList articlesPath
@@ -64,11 +69,13 @@ entityModes = subparser
 
             let docTerms :: KbDoc -> [Term]
                 docTerms doc =
---                        foldMap tokeniseText (kbDocLeadText doc)
-                       foldMap (tokeniseText . TL.toStrict) (kbDocFullText doc)
+                       docText
                     ++ foldMap tokeniseText (HM.keys $ anchorCount inlinks)
                     ++ foldMap tokenisePageId (HM.keys $ disambiguationCount inlinks)
                   where
+                    docText = case textPart of
+                      FullText -> foldMap (tokeniseText . TL.toStrict) (kbDocFullText doc)
+                      LeadText -> foldMap tokeniseText (kbDocLeadText doc)
                     inlinks = fromMaybe mempty
                               $ HM.lookup (kbDocPageId doc) (documentInlinks inlinkInfo)
                     tokenisePageId = textToTokens' . getPageName
