@@ -39,7 +39,7 @@ edgeDocModes = subparser
 
     queryMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
-           <*> some (argument (Term.fromString <$> str) (help "query terms"))
+           <*> some (argument (Term.fromString <$> str) (metavar "TERM" <> help "query terms"))
       where
         go :: Index.OnDiskIndex Term EdgeDoc Int -> [Term] -> IO ()
         go indexPath terms = do
@@ -82,7 +82,7 @@ entityModes = subparser
 
     queryMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
-           <*> some (argument (Term.fromString <$> str) (help "query terms"))
+           <*> some (argument (Term.fromString <$> str) (metavar "TERM" <> help "query terms"))
       where
         go :: Index.OnDiskIndex Term PageId Int -> [Term] -> IO ()
         go indexPath terms = do
