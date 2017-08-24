@@ -51,6 +51,13 @@ edgeDocModes = subparser
             idx <- Index.open indexPath
             let postings = fold $ map (Index.lookupPostings idx) terms
             print postings
+    dumpMode =
+        go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
+      where
+        go :: Index.OnDiskIndex Term EdgeDoc Int -> IO ()
+        go indexPath = do
+            idx <- Index.open indexPath
+            print $ map fst $ Index.termPostings idx
 
 entityModes :: Parser (IO ())
 entityModes = subparser

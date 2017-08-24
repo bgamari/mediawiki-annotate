@@ -59,7 +59,7 @@ import WriteRanking
 import GraphExpansion
 import GraphExpansionExperiments
 import SimplIR.WordEmbedding
-import SimplIR.WordEmbedding.GloVe
+import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
