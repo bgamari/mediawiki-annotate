@@ -162,7 +162,7 @@ main = do
     paras <- V.fromList . listStatus "read" 100000 . map toTuple . decodeCborList <$> BSL.readFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
-    SomeWordEmbedding (embedding :: WordEmbedding n) <- readGlove embeddingFile
+    SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
     projs <- randomProjections nProjections
     putStrLn "Read embeddings"
     setNumCapabilities ncaps
