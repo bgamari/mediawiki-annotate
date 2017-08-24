@@ -26,9 +26,7 @@ import PageRank
 import EdgeDocCorpus
 import CAR.Utils
 import CAR.Types
-import CAR.Retrieve
 
-import qualified SimplIR.Term as Term
 import AttriRank
 import SimplIR.WordEmbedding
 import ZScore (Attributes(..))
@@ -47,11 +45,9 @@ edgeDocsToUniverseGraph edgeDocs =
            | target <- HS.toList $ edgeDocNeighbors edgeDoc]
 
 computeTextEmbedding :: KnownNat n => WordEmbedding n -> T.Text -> WordVec n
-computeTextEmbedding wordEmbedding text =
-    mconcat $ mapMaybe toWordVec
-    $ fmap Term.toText $ textToTokens' text
+computeTextEmbedding wordEmbedding = embed . TL.fromStrict
   where
-    toWordVec x = x `HM.lookup` wordEmbedding
+    !embed = embedText wordEmbedding
 
 wordVecToAttributes :: WordVec n -> Attributes (EmbeddingDim n)
 wordVecToAttributes = Attrs . VI.map realToFrac . unWordVec
