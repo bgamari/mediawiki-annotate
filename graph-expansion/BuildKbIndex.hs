@@ -167,6 +167,7 @@ edgeDocModes = subparser
            <*> (HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query (option can be included multiple times)")))
            <*> (T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" ))
            <*> option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
+           <*> option str (short 'm' <> long "retrievalmodel" <> help "retrieval model (bm25 or ql)" )
       where
         go :: Index.OnDiskIndex Term EdgeDoc Int
                 -> QuerySource
@@ -174,9 +175,10 @@ edgeDocModes = subparser
                 -> HS.HashSet TrecRun.QueryId
                 -> T.Text
                 -> Int
+                -> String
                 -> IO ()
-        go indexFile queries output selectedQuery methodName topK = do
-            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK
+        go indexFile queries output selectedQuery methodName topK retrievalModelName = do
+            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK (T.pack retrievalModelName)
               where getDocName = T.pack . unpackParagraphId . edgeDocParagraphId
 
 entityModes :: Parser (IO ())
@@ -233,6 +235,7 @@ entityModes = subparser
            <*> (HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query (option can be included multiple times)")))
            <*> (T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" ))
            <*> option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
+           <*> option str (short 'm' <> long "retrievalmodel" <> help "retrieval model (bm25 or ql)")
       where
         go :: Index.OnDiskIndex Term PageId Int
                 -> QuerySource
@@ -240,9 +243,10 @@ entityModes = subparser
                 -> HS.HashSet TrecRun.QueryId
                 -> T.Text
                 -> Int
+                -> String
                 -> IO ()
-        go indexFile queries output selectedQuery methodName topK = do
-            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK
+        go indexFile queries output selectedQuery methodName topK retrievalModelName = do
+            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK (T.pack retrievalModelName)
               where getDocName = T.pack . unpackPageId
 
 
@@ -294,6 +298,7 @@ paragraphModes = subparser
            <*> (HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query (option can be included multiple times)")))
            <*> (T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" ))
            <*> option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
+           <*> option str (short 'm' <> long "retrievalmodel" <> help "retrieval model (bm25 or ql)")
       where
         go :: Index.OnDiskIndex Term ParagraphId Int
                 -> QuerySource
@@ -301,9 +306,10 @@ paragraphModes = subparser
                 -> HS.HashSet TrecRun.QueryId
                 -> T.Text
                 -> Int
+                -> String
                 -> IO ()
-        go indexFile queries output selectedQuery methodName topK = do
-            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK
+        go indexFile queries output selectedQuery methodName topK retrievalModelName = do
+            queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK (T.pack retrievalModelName)
               where getDocName = T.pack . unpackParagraphId
 
 modes = subparser
@@ -353,10 +359,15 @@ queryDocRawTerms = textToTokens' . queryDocQueryText
 
 
 
-queryIndexToTrecRun :: forall t. Binary t => (t -> TrecRun.DocumentName) -> Index.OnDiskIndex Term t Int -> QuerySource -> FilePath -> HS.HashSet TrecRun.QueryId->  T.Text -> Int -> IO ()
-queryIndexToTrecRun getDocName indexFile querySource output selectedQueries methodName topK = do
+queryIndexToTrecRun :: forall t. Binary t => (t -> TrecRun.DocumentName) -> Index.OnDiskIndex Term t Int -> QuerySource -> FilePath -> HS.HashSet TrecRun.QueryId->  T.Text -> Int -> T.Text -> IO ()
+queryIndexToTrecRun getDocName indexFile querySource output selectedQueries methodName topK retrievalModelName = do
     index <- Index.open indexFile
-    let retrieve = sortBy Index.descending . Index.score index bm25
+    let retrieve = sortBy Index.descending . Index.score index retrievalModel
+         where retrievalModel = case retrievalModelName of
+                                  "bm25" -> bm25
+                                  "ql" -> ql
+
+
 
     queries <-
         case querySource of
