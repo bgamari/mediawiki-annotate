@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -107,22 +106,23 @@ opts = do
     methodName <- T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" )
     topK <- option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
     return Opts {..}
-    where
+
+querySource :: Parser QuerySource
+querySource =
+        fromCbor
+    <|> fromJson
+  where
+    fromCbor =
+          QueriesFromCbor
+          <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+          <*> flag QueryFromPageTitle QueryFromSectionPaths
+                 (long "query-from-sections" <> help "Use sections as query documents")
+
+    fromJson =
+        QueriesFromJson
+          <$> option str (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
+
         
-      querySource :: Parser QuerySource
-      querySource =
-              fromCbor
-          <|> fromJson
-        where
-          fromCbor =
-                QueriesFromCbor
-                <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
-                <*> flag QueryFromPageTitle QueryFromSectionPaths
-                       (long "query-from-sections" <> help "Use sections as query documents")
-          
-          fromJson =
-              QueriesFromJson
-                <$> option str (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
 
 
 bm25 :: (Hashable term, Eq term) => Index.RetrievalModel term doc Int
