@@ -29,7 +29,7 @@ import System.Random.MWC.Distributions (standard)
 
 import SimplIR.StopWords
 import SimplIR.WordEmbedding
-import SimplIR.WordEmbedding.GloVe
+import SimplIR.WordEmbedding.Parse
 import NLP.Snowball
 
 import CAR.Types
