@@ -88,9 +88,11 @@ cohenKappa a b =
 fleissKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
             => [HM.HashMap subj cat]  -- ^ the assessments of each assessor
             -> Double
-fleissKappa assessments =
+fleissKappa assessments' =
     (barP - barPe) / (1 - barPe)
   where
+    assessments = onlyOverlappingAssessments assessments'
+
     -- n_i
     numAssessments :: HM.HashMap subj Int
     numAssessments = HM.fromListWith (+) [ (x, 1)
@@ -98,6 +100,7 @@ fleissKappa assessments =
                                          , x <- HM.keys a ]
     -- N
     numSubjects = HM.size numAssessments
+    totalAssessments = sum numAssessments
 
     -- n_ij
     nij :: HM.HashMap subj (HM.HashMap cat Int)
@@ -110,19 +113,32 @@ fleissKappa assessments =
     -- p_j, probability that class k is predicted
     pj :: HM.HashMap cat Double
     pj = HM.fromListWith (+)
-         [ (k, realToFrac n / realToFrac ni)
-         | (x, xs) <- HM.toList nij
-         , let Just ni = x `HM.lookup` numAssessments
+         [ (k, realToFrac n / realToFrac totalAssessments)
+         | xs <- HM.elems nij
          , (k, n) <- HM.toList xs
          ]
 
     barP :: Double
     barP = (/ realToFrac numSubjects) $ sum
-           [ sum [ (realToFrac v)^(2::Int) - realToFrac numSubjects * ni
-                 | v <- HM.elems nijs
-                 ]
-           | (x, nijs) <- HM.toList nij
-           , let Just ni = realToFrac <$> x `HM.lookup` numAssessments
+           [ (inner / realToFrac ni / realToFrac (ni - 1)) - 1 / realToFrac (ni - 1)
+           | (x, njs) <- HM.toList nij
+           , let Just ni = x `HM.lookup` numAssessments
+           , let inner = sum [ (realToFrac v)^(2::Int)
+                             | v <- HM.elems njs
+                             ]
            ]
 
     barPe = sum [ v^(2 :: Int) | v <- HM.elems pj ]
+
+onlyOverlappingAssessments
+    :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
+    => [HM.HashMap subj cat] -> [HM.HashMap subj cat]
+onlyOverlappingAssessments assessments =
+    map (HM.filterWithKey overlaps) assessments
+  where
+    numAssessments :: HM.HashMap subj Int
+    numAssessments = HM.fromListWith (+) [ (x, 1)
+                                         | a <- assessments
+                                         , x <- HM.keys a ]
+    overlaps x _ = n > 1
+      where Just n = x `HM.lookup` numAssessments
