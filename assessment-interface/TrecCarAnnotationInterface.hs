@@ -70,7 +70,7 @@ data Opts = Opts { outlinesFile :: FilePath
 trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
               -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
 trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
-    qrelEntries <- TrecQrel.readQRel qrelfile
+    qrelEntries <- TrecQrel.readQRel TrecQrel.binaryRelevance qrelfile
     let qrelMap =   HM.fromListWith (++)
                     [ ( TrecQrel.queryId entry
                       , [QrelEntry { entryItem = item
