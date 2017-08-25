@@ -54,6 +54,7 @@ main = do
             return $ HM.singleton (assessorFromFilepath path) (fmap toBinary as)
 
     assessments <- HM.unions <$> mapM readAssessor files
+    putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
     putStrLn "Cohen:"
     putStrLn $ unlines [ show a <> "\t" <> show b <> "\t" <> show (cohenKappa a' b')
                        | (a, a') <- HM.toList assessments
