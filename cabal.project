@@ -4,6 +4,7 @@ allow-newer:
 packages:
     ./
     multilang-car/
+    assessment-eval/
     mediawiki-parser/
     db-export/
     graph-expansion/

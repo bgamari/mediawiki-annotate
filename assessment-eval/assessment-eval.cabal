@@ -1,0 +1,24 @@
+name:                assessment-eval
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Ben Gamari
+maintainer:          ben@smart-cactus.org
+copyright:           (c) 2017 Ben Gamari
+category:            Math
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+executable assessment-eval
+  main-is:             Agreement.hs
+  other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
+  build-depends:       base >=4.10 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       optparse-applicative >=0.14 && <0.15,
+                       simplir
+  default-language:    Haskell2010
