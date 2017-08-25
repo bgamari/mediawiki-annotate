@@ -48,14 +48,17 @@ main = do
     files <- execParser $ info opts mempty
     let readAssessor path = do
             as <- readAssessments path
-            return $ HM.singleton (assessorFromFilepath path) as
+            let toBinary (Relevance n)
+                  | n > 2     = QRel.Relevant
+                  | otherwise = QRel.NotRelevant
+            return $ HM.singleton (assessorFromFilepath path) (fmap toBinary as)
 
     assessments <- HM.unions <$> mapM readAssessor files
     putStrLn "Cohen:"
     putStrLn $ unlines [ show a <> "\t" <> show b <> "\t" <> show (cohenKappa a' b')
                        | (a, a') <- HM.toList assessments
                        , (b, b') <- HM.toList assessments
-                       , a < b
+                       -- , a < b
                        ]
     putStrLn $ "Fleiss: "<>show (fleissKappa $ HM.elems assessments)
     return ()
