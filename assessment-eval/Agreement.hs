@@ -67,13 +67,20 @@ cohenKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
 cohenKappa a b =
     1 - (1 - po) / (1 - pe)
   where
-    po = realToFrac (length [ () | (ka,kb) <- HM.elems inter, ka == kb ]) / realToFrac (HM.size inter)
-    pe = sum (HM.intersectionWith (*) na nb) / realToFrac (HM.size inter)^(2::Int)
+    !agreementCount = length [ ()
+                             | (ka,kb) <- HM.elems inter
+                             , ka == kb
+                             ]
+    !po = realToFrac agreementCount / realToFrac allCount
+    !pe = realToFrac (sum $ HM.intersectionWith (*) na nb) / realToFrac allCount^(2::Int)
     -- how many times a and b predict class k
-    na, nb :: HM.HashMap cat Double
-    na = HM.fromListWith (+) [ (k, 1) | (_, (k, _)) <- HM.toList inter ]
-    nb = HM.fromListWith (+) [ (k, 1) | (_, (_, k)) <- HM.toList inter ]
-    inter = HM.intersectionWith (,) a b
+    na, nb :: HM.HashMap cat Int
+    !na = HM.fromListWith (+) [ (k, 1) | (_, (k, _)) <- HM.toList inter ]
+    !nb = HM.fromListWith (+) [ (k, 1) | (_, (_, k)) <- HM.toList inter ]
+
+    inter :: HM.HashMap subj (cat,cat)
+    !inter = HM.intersectionWith (,) a b
+    !allCount = HM.size inter
 
 fleissKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
             => [HM.HashMap subj cat]  -- ^ the assessments of each assessor
