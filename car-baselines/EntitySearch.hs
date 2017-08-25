@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -27,6 +26,8 @@ import GHC.TypeLits
 import Data.Aeson
 import Numeric.Log
 import Data.Hashable
+import Text.PrettyPrint.ANSI.Leijen hiding ((<>), (<$>))
+import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -62,12 +63,23 @@ data QuerySource = QueriesFromCbor FilePath QueryDerivation
 data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
 
 
+desc :: PP.Doc
+desc = "Retrieve entities from entity index `index`." <$$>
+       "Supports queries with cbor outlines or custom through JSON." <$$>
+       "JSON format : " <$$>
+       indent 4 (vcat [ "{\"queryDocListContent\":["
+                      , "    {\"queryDocPageId\":\"pageId\""
+                      , "    ,\"queryDocQueryText\":\"stemmed query text\""
+                      , "    ,\"queryDocQueryId\":\"qidForRun\"}"
+                      , ",...]}"
+                      ])
+
 data Opts = Opts { output :: FilePath
                  , query :: QuerySource
-                 , entityIndexFile :: Index.OnDiskIndex Term PageId Int
                  , selectedQueries :: HS.HashSet TrecRun.QueryId
-                 , methodName :: T.Text
+                 , entityIndexFile :: Index.OnDiskIndex Term PageId Int
                  , topK :: Int
+                 , methodName :: T.Text
                  }
 
 data QueryDoc = QueryDoc { queryDocQueryId      :: !TrecRun.QueryId
@@ -86,30 +98,31 @@ instance ToJSON QueryDocList
 
 opts :: Parser Opts
 opts = do
-    output <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output file")
+    output <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output run file")
     query <-  querySource
     entityIndexFile <-  option (Index.OnDiskIndex <$> str)
-               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
-    selectedQueries <- HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir entity index")
+    selectedQueries <- HS.fromList <$> many (option (T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query (option can be included multiple times)"))
     methodName <- T.pack <$> option str (short 'n' <> value "" <> long "methodname" <> metavar "NAME" <> help "name of method for trec run file" )
     topK <- option auto (short 'k' <> value 100 <> long "topK" <> help "number of ranking entries per query" <> metavar "K" )
     return Opts {..}
-    where
+
+querySource :: Parser QuerySource
+querySource =
+        fromCbor
+    <|> fromJson
+  where
+    fromCbor =
+          QueriesFromCbor
+          <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+          <*> flag QueryFromPageTitle QueryFromSectionPaths
+                 (long "query-from-sections" <> help "Use sections as query documents")
+
+    fromJson =
+        QueriesFromJson
+          <$> option str (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
+
         
-      querySource :: Parser QuerySource
-      querySource =
-              fromCbor
-          <|> fromJson
-        where
-          fromCbor =
-                QueriesFromCbor
-                <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
-                <*> flag QueryFromPageTitle QueryFromSectionPaths
-                       (long "query-from-sections" <> help "Use sections as query documents")
-          
-          fromJson =
-              QueriesFromJson
-                <$> option str (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
 
 
 bm25 :: (Hashable term, Eq term) => Index.RetrievalModel term doc Int
@@ -152,7 +165,7 @@ queryDocRawTerms = textToTokens' . queryDocQueryText
 
 main :: IO ()
 main = do
-    Opts{..} <- execParser (info (helper <*> opts) mempty)
+    Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just desc)
 
     retrieve <- retrieveEntities entityIndexFile bm25
 

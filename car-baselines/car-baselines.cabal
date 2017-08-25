@@ -59,6 +59,7 @@ executable trec-car-entity-search
                        bytestring,
                        optparse-applicative >= 0.12,
                        trec-car-tools,
+                       ansi-wl-pprint,
                        hashable
   default-language:    Haskell2010
 
