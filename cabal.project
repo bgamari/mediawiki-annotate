@@ -1,8 +1,9 @@
 allow-newer:
-    template-haskell, pipes
+    base, template-haskell, pipes
 
 packages:
     ./
+    multilang-car/
     mediawiki-parser/
     db-export/
     graph-expansion/
