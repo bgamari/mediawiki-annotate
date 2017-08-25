@@ -9,6 +9,7 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import Options.Applicative
+import System.FilePath
 
 import qualified SimplIR.Format.QRel as QRel
 
@@ -37,7 +38,7 @@ assessorFromFilepath :: FilePath -> Assessor
 assessorFromFilepath path =
     Assessor $ fromMaybe t $ foldMap (t `T.stripPrefix`) [".rel", ".qrel"]
   where
-    t = T.pack path
+    t = T.pack $ takeFileName path
 
 opts :: Parser [FilePath]
 opts = some $ argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor")
@@ -56,7 +57,7 @@ main = do
                        , (b, b') <- HM.toList assessments
                        , a < b
                        ]
-    print $ "Fleiss: "<>show (fleissKappa $ HM.elems assessments)
+    putStrLn $ "Fleiss: "<>show (fleissKappa $ HM.elems assessments)
     return ()
 
 cohenKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
