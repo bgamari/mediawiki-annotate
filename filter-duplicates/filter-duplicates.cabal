@@ -13,7 +13,13 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Bloom.IntSet, Bloom.Naive, Bloom.Opt, Word1024, Utils
+  exposed-modules:     Bloom.IntSet
+                       Bloom.Naive
+                       Bloom.Opt
+                       Word1024
+                       Utils
+                       ConnectedComponent
+                       IntSet
   hs-source-dirs:      src
   c-sources:           cbits/bloom.c
   cc-options:          -march=haswell
@@ -26,6 +32,7 @@ library
                        unordered-containers >= 0.2,
                        snowball >=1.0 && <1.1,
                        parallel >= 3.2,
+                       deepseq,
                        simplir,
                        intset,
                        trec-car-tools
