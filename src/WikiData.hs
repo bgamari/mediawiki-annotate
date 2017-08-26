@@ -12,7 +12,7 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Codec.Serialise as CBOR
 
 type LangIndex = HM.HashMap ItemId (HM.HashMap SiteId PageName)
 
