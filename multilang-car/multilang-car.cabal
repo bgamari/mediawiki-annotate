@@ -12,17 +12,7 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-library
-  hs-source-dirs:      src
-  exposed-modules:     WikiData
-  build-depends:       base >=4.9 && <4.11,
-                       aeson >=1.2 && <1.3,
-                       hashable >=1.2 && <1.3,
-                       bytestring >=0.10 && <0.11,
-                       unordered-containers >=0.2 && <0.3,
-                       text >=1.2 && <1.3,
-                       serialise >=0.1 && <0.2
-  
+
 executable multilang-car
   main-is:             LangExtract.hs
   other-extensions:    OverloadedStrings, GeneralizedNewtypeDeriving, TypeApplications, DeriveGeneric
@@ -34,5 +24,5 @@ executable multilang-car
                        text >=1.2 && <1.3,
                        serialise >=0.1 && <0.2,
                        json-stream >=0.4 && <0.5,
-                       multilang-car
+                       trec-car-tools
   default-language:    Haskell2010
