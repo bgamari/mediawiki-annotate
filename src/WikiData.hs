@@ -5,13 +5,14 @@
 
 module WikiData where
 
+import CAR.Types (PageName)
 import GHC.Generics
 import Data.Aeson
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
-import qualified Codec.Serialise as CBOR
+import qualified Data.Binary.Serialise.CBOR as CBOR
 
 type LangIndex = HM.HashMap ItemId (HM.HashMap SiteId PageName)
 
@@ -32,12 +33,10 @@ readItemId s
   | otherwise
   = Nothing
 
+-- SiteId enwiki or itwiki, envoyage
 newtype SiteId = SiteId T.Text
                deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
-
-newtype PageName = PageName T.Text
-               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, CBOR.Serialise)
-
+               
 data EntityType = Item
                 deriving (Show, Generic)
 instance CBOR.Serialise EntityType
@@ -72,3 +71,18 @@ instance FromJSON Entity where
         parseSitelink = withObject "site link" $ \o ->
               (,) <$> o .: "site"
                   <*> o .: "title"
+
+
+createLookup :: LangIndex -> SiteId -> SiteId -> HM.HashMap PageName PageName
+createLookup index fromLang toLang =
+    HM.fromList
+    [ (fromPage, toPage )
+    | entries <- HM.elems index
+    , Just fromPage <- pure $ fromLang `HM.lookup` entries
+    , Just toPage <- pure $ toLang `HM.lookup` entries
+    ]
+
+
+loadLangIndex :: FilePath -> IO LangIndex
+loadLangIndex =
+    CBOR.readFileDeserialise

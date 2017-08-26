@@ -6,15 +6,18 @@ import Control.Monad (void)
 import System.IO
 import Options.Applicative
 import qualified Data.HashSet as HS
+import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
 import qualified Text.Trifecta as Tri
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
+import qualified Data.Binary.Serialise.CBOR as CBOR
 import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 
 import CAR.Types
 import FilterPred
+import WikiData
 
 helpDescr :: PP.Doc
 helpDescr =
@@ -27,11 +30,10 @@ helpDescr =
         cmd "fold K"                           "matches pages in fold k (k in 0..4)",
         cmd "is-redirect"                      "matches redirect pages",
         cmd "is-disambiguation"                "matches disambiguation pages",
-        cmd "page-hash-mod N K [SALT]"         "matches pages where the page id mod N == K, for N > K ",
+        cmd "page-hash-mod N K [SALT]"         "matches pages where the hash of the page name mod N == K, for N > K ",
         "",
         cmd "name-contains SUBSTR"             "matches pages where the page name contains the SUBSTR (case insensitive)",
         cmd "name-has-prefix PREFIX"           "matches pages where the page name starts with PREFIX (case sensitive)",
-        cmd "name-in-set [NAME1, NAME2, ...]"  "matches pages where the page name is exactly NAME1 or NAME2, ... (case sensitive with the exception of the first letter)",
         cmd "category-contain SUBSTR"          "matches pages that are a member of a category that contains SUBSTR (case insensitive)",
         "",
         cmd "category-contains-from-file FILE" "like category-contain but loads SUBSTRs from FILE",
@@ -43,12 +45,13 @@ helpDescr =
         cmd "! PRED"                           "Boolean NOT, inverts the predicate PRED"
       ]
 
-opts :: Parser (FilePath, FilePath, Maybe Int, Pred PredFromFile)
+opts :: Parser (FilePath, FilePath, Maybe Int, Maybe (FilePath, SiteId, SiteId), Pred PredFromFile)
 opts =
-    (,,,)
+    (,,,,)
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> optional (option auto  (short 'n' <> long "take" <> metavar "N" <> help "Take the first N pages"))
+    <*> optional multiLangOpts
     <*> argument predicate (metavar "PRED" <> help "Predicate")
   where
     predicate = do
@@ -56,7 +59,13 @@ opts =
         case Tri.parseString (FilterPred.pred predFromFile <* Tri.eof) mempty s of
           Tri.Success p -> return p
           Tri.Failure e -> fail $ show $ Tri._errDoc e
-
+    multiLangOpts =
+        (,,)
+          <$> option str (short 'L' <> long "lang-index" <> metavar "LANGIDX" <> help "Inter-site page name mapping")
+          <*> option siteId (long "from-site" <> metavar "FROMSITE" <> help "language of this archive")
+          <*> option siteId (long "to-site" <> metavar "TOSITE" <> help "canonical site (enwiki)" <> value (SiteId "enwiki"))
+    siteId = SiteId . T.pack <$> str
+    
 data PredFromFile = NameSetFromFile FilePath
                   | HasCategoryContainingFromFile FilePath
                   deriving (Show)
@@ -83,10 +92,24 @@ runPredFromFile = runPred go
 
 main :: IO ()
 main = do
-    (inputFile, outputFile, takeN, predicate) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
+    (inputFile, outputFile, takeN, multiLangOptsMaybe, predicate) <-
+        execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
     pages <- decodeCborList <$> BSL.readFile inputFile
     predicate' <- runPredFromFile predicate
+
+    pageNameTranslate <- case multiLangOptsMaybe of
+                           Nothing -> return $ id
+                           Just (siteWikiIndex, fromSite, toSite)  -> do
+                               siteIndex <- CBOR.readFileDeserialise siteWikiIndex
+                               let siteLookup = createLookup siteIndex fromSite toSite
+                               let pageNameTranslate :: PageName -> PageName
+                                   pageNameTranslate =
+                                       \fromPageName -> case HM.lookup fromPageName siteLookup of
+                                                          Just toPageName -> toPageName
+                                                          Nothing -> fromPageName
+                               return $ pageNameTranslate
+
     withFile outputFile WriteMode $ \h ->
         BSB.hPutBuilder h $ encodeCborList
             $ maybe id take takeN
-            $ filter (interpret predicate') pages
+            $ filter (interpret pageNameTranslate predicate') pages

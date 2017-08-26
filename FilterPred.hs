@@ -11,6 +11,7 @@ import Data.Foldable
 import Data.Hashable
 import qualified Data.Text as T
 import qualified Data.HashSet as HS
+import Prelude hiding (pred)
 
 import Text.Trifecta
 import Text.Parser.Expression
@@ -42,7 +43,7 @@ runPred :: Applicative m => (a -> m (Pred b)) -> Pred a -> m (Pred b)
 runPred _ (NameContains x)     = pure $ NameContains x
 runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
 runPred _ (NameInSet x)        = pure $ NameInSet x
-runPred _ (HasCategoryContaining x)    = pure $ HasCategoryContaining x
+runPred _ (HasCategoryContaining x)  = pure $ HasCategoryContaining x
 runPred _ (PageHashMod s x y)  = pure $ PageHashMod s x y
 runPred _ IsRedirect           = pure IsRedirect
 runPred _ IsDisambiguation     = pure IsDisambiguation
@@ -128,19 +129,19 @@ normalize (All [xs, All ys]) = All (xs:ys)
 normalize (All [All xs, ys]) = All (ys:xs)
 normalize x                  = x
 
-interpret :: Pred Void -> Page -> Bool
-interpret (NameContains t)  page = t `T.isInfixOf` T.toCaseFold (getPageName (pageName page))
-interpret (NameHasPrefix prefix) page = prefix `T.isPrefixOf` getPageName (pageName page)
-interpret (NameInSet names) page = pageName page `HS.member` names
-interpret (HasCategoryContaining s) page =
-    any (s `T.isInfixOf`) $ map T.toCaseFold $ pageCategories page
-interpret (PageHashMod salt n k) page =
-    let h = hashWithSalt salt $ pageName page
-    in h `mod` n == k
-interpret  IsRedirect page       = isJust $ pageRedirect page
-interpret  IsDisambiguation page = pageIsDisambiguation page
-interpret (Any preds) page = any (`interpret` page) preds
-interpret (All preds) page = all (`interpret` page) preds
-interpret (Negate p)  page = not $ interpret p page
-interpret TruePred _ = True
-interpret (Pure _) _ = error "Impossible"
+interpret :: (PageName -> PageName) -> Pred Void -> Page -> Bool
+interpret pageNameTranslate pred page =
+    case pred of
+      NameContains t                -> t `T.isInfixOf` T.toCaseFold (getPageName (pageName page))
+      NameHasPrefix prefix          -> prefix `T.isPrefixOf` getPageName (pageName page)
+      NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
+      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map T.toCaseFold $ pageCategories page
+      PageHashMod salt n k          -> let h = hashWithSalt salt $ pageNameTranslate $ pageName page
+                                       in h `mod` n == k
+      IsRedirect                    -> isJust $ pageRedirect page
+      IsDisambiguation              -> pageIsDisambiguation page
+      Any preds                     -> any (\pred' -> interpret pageNameTranslate pred' page) preds
+      All preds                     -> all (\pred' -> interpret pageNameTranslate pred' page) preds
+      Negate p                      -> not $ interpret pageNameTranslate p page
+      TruePred                      -> True
+      Pure _                        -> error "Impossible"
