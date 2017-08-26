@@ -19,8 +19,8 @@ import Control.Exception (Exception, throw)
 import Control.Monad.ST
 import Control.Monad.ST.Unsafe
 import Data.Foldable hiding (toList)
-import qualified Data.Binary.Serialise.CBOR.Read as CBOR.Read
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Codec.CBOR.Read as CBOR.Read
+import qualified Codec.Serialise as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.HashMap.Strict as HM
@@ -85,7 +85,7 @@ open :: (Hashable i, Eq i, CBOR.Serialise i)
      => IndexedCborPath i a -> IO (IndexedCbor i a)
 open (IndexedCborPath fname) = do
     cbor <- mmapFileByteString fname Nothing
-    toc <- either onError id . CBOR.Read.deserialiseFromBytes CBOR.decode
+    toc <- either onError snd . CBOR.Read.deserialiseFromBytes CBOR.decode
            <$> BSL.readFile tocName
     return $ IndexedCbor toc cbor fname
   where
@@ -106,8 +106,8 @@ lookup :: (Hashable i, Eq i, CBOR.Serialise a)
 lookup i (IndexedCbor toc bs source) = deser <$> HM.lookup i toc
   where deser offset =
           case CBOR.Read.deserialiseFromBytes CBOR.decode $ BSL.fromStrict $ BS.drop offset bs of
-            Left err -> throw $ DeserialiseFailure source err
-            Right x -> x
+            Left err    -> throw $ DeserialiseFailure source err
+            Right (_,x) -> x
 
 data DeserialiseFailure = DeserialiseFailure String CBOR.DeserialiseFailure
                         deriving (Show)

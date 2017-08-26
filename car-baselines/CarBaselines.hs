@@ -14,7 +14,7 @@ import System.FilePath
 import Control.Exception
 
 import Data.Binary
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Codec.Serialise as CBOR
 import qualified Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Char8 as BS

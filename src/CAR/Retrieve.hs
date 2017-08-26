@@ -24,7 +24,7 @@ import qualified Control.Foldl as Foldl
 import Data.Bifunctor
 import Data.Monoid
 import Data.Binary
-import Data.Binary.Serialise.CBOR
+import Codec.Serialise
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T

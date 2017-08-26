@@ -8,7 +8,7 @@ import Options.Applicative
 import Control.Monad
 import Data.Maybe
 import Data.Hashable
-import Data.Binary.Serialise.CBOR as CBOR
+import Codec.Serialise as CBOR
 import qualified Data.Text as T
 
 import CAR.Types

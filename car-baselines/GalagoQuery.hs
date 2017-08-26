@@ -15,7 +15,7 @@ import GHC.Generics
 import System.FilePath
 
 import Data.Binary
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Codec.Serialise as CBOR
 import Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Char8 as BS

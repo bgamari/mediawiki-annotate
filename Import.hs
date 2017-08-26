@@ -16,8 +16,7 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import qualified Data.HashMap.Strict as HM
 
-import qualified Data.Binary.Serialise.CBOR as CBOR
-import qualified Data.Binary.Serialise.CBOR.Write as CBOR
+import qualified Codec.Serialise as CBOR
 
 import qualified Data.Binary as B
 import Pipes
@@ -40,7 +39,7 @@ instance (CBOR.Serialise a) => B.Binary (EncodedCbor a) where
     put = B.put . getEncodedCbor
 
 encodedCbor :: CBOR.Serialise a => a -> EncodedCbor a
-encodedCbor = EncodedCbor . CBOR.toLazyByteString . CBOR.encode
+encodedCbor = EncodedCbor . CBOR.serialise
 
 instance B.Binary NamespaceId
 instance B.Binary Format
