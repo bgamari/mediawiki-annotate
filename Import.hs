@@ -313,31 +313,33 @@ dropQuotes [] = []
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: PageId -> Doc -> Maybe [ParaBody]
-toParaBody thisPage (Text x)        = Just [ParaText $ T.pack x]
-toParaBody thisPage (Char x)        = Just [ParaText $ T.singleton x]
-toParaBody thisPage (Bold xs)       = Just $ concat $ mapMaybe (toParaBody thisPage) xs
-toParaBody thisPage (Italic xs)     = Just $ concat $ mapMaybe (toParaBody thisPage) xs
-toParaBody thisPage (BoldItalic xs) = Just $ concat $ mapMaybe (toParaBody thisPage) xs
-toParaBody thisPage doc@(InternalLink target parts)
-  | Just _ <- isImage doc
-  = Nothing
-  | otherwise
-  = let linkTarget   = normPageName page
-        linkSection  = linkTargetAnchor target
-        isSelfLink   = null $ unpackPageName $ linkTargetPage target
-        linkTargetId
-          | isSelfLink = thisPage
-          | otherwise  = pageNameToId linkTarget
-        linkAnchor   = resolveEntities t
-    in Just [ParaLink $ Link {..}]
+toParaBody thisPage = go
   where
-    page = linkTargetPage target
-    t = case parts of
-          [anchor] -> T.pack $ getAllText anchor
-          _        -> getPageName page
-toParaBody thisPage (ExternalLink _url (Just anchor))
-  = Just [ParaText $ T.pack anchor]
-toParaBody _ _ = Nothing
+    go (Text x)        = Just [ParaText $ T.pack x]
+    go (Char x)        = Just [ParaText $ T.singleton x]
+    go (Bold xs)       = Just $ concat $ mapMaybe go xs
+    go (Italic xs)     = Just $ concat $ mapMaybe go xs
+    go (BoldItalic xs) = Just $ concat $ mapMaybe go xs
+    go doc@(InternalLink target parts)
+      | Just _ <- isImage doc
+                       = Nothing
+      | otherwise      =
+            let linkTarget   = normPageName page
+                linkSection  = linkTargetAnchor target
+                isSelfLink   = null $ unpackPageName $ linkTargetPage target
+                linkTargetId
+                  | isSelfLink = thisPage
+                  | otherwise  = pageNameToId linkTarget
+                linkAnchor   = resolveEntities t
+            in Just [ParaLink $ Link {..}]
+      where
+        page = linkTargetPage target
+        t = case parts of
+              [anchor] -> T.pack $ getAllText anchor
+              _        -> getPageName page
+    go (ExternalLink _url (Just anchor))
+                       = Just [ParaText $ T.pack anchor]
+    go _               = Nothing
 
 getText :: Doc -> Maybe String
 getText (Text x)        = Just $ x
