@@ -11,6 +11,8 @@ import qualified Data.Text.Lazy.IO as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Text.Lazy.Builder.Int as TB
 import Options.Applicative hiding (action)
+import qualified Codec.Serialise as CBOR
+import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
@@ -25,8 +27,16 @@ opts = subparser
     <> cmd "paragraphids"  dumpParagraphIds
     <> cmd "sections"      dumpSections
     <> cmd "hist-headings" histogramHeadings
+    <> cmd "dump-header"   dumpHeader
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
+    dumpHeader =
+        f <$> argument str (help "input file" <> metavar "FILE")
+      where
+        f inputFile = do
+            hdr <- CBOR.deserialise <$> BSL.readFile inputFile
+            print (hdr :: Header)
+
     dumpTitles =
         f <$> argument str (help "input file" <> metavar "FILE")
       where
