@@ -15,6 +15,7 @@ library
   exposed-modules:     CAR.Types
                        CAR.Types.AST
                        CAR.Types.AST.Pretty
+                       CAR.Types.CborList
                        CAR.Types.Orphans
                        CAR.RunFile
                        CAR.AnnotationsFile
