@@ -65,8 +65,16 @@ pageSectionPaths :: Page -> [SectionPath]
 pageSectionPaths = map (\(path,_,_) -> path) . pageSections
 
 pageSections :: Page -> [(SectionPath, [SectionHeading], [PageSkeleton])]
-pageSections (Page _pageName pageId skel0) =
-    foldMap (go mempty mempty) skel0
+pageSections (Page {pageId=pageId, pageSkeleton=skel0}) =
+    foldMap (pageSkeletonSections pageId) skel0
+
+stubSections :: Stub -> [(SectionPath, [SectionHeading], [PageSkeleton])]
+stubSections (Stub {stubPageId=pageId, stubSkeleton=skel0}) =
+    foldMap (pageSkeletonSections pageId) skel0
+
+pageSkeletonSections :: PageId -> PageSkeleton
+                     -> [(SectionPath, [SectionHeading], [PageSkeleton])]
+pageSkeletonSections pageId = go mempty mempty
   where
     go :: DList HeadingId -> DList SectionHeading
        -> PageSkeleton -> [(SectionPath, [SectionHeading], [PageSkeleton])]
