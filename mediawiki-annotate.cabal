@@ -13,6 +13,9 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     CAR.Types
+                       CAR.Types.AST
+                       CAR.Types.AST.Pretty
+                       CAR.Types.Orphans
                        CAR.RunFile
                        CAR.AnnotationsFile
                        CAR.CarExports
