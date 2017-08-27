@@ -1,10 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module CAR.CarExports
-    ( ParaNumber(..)
-    , PassageFile
+    ( PassageFile
       -- * Stubs
     , Stub(..)
     , toStubSkeleton
@@ -25,26 +23,13 @@ import Data.Maybe
 import qualified Data.DList as DList
 import qualified Data.Text as T
 import qualified Data.Set as S
-import Codec.Serialise
-import GHC.Generics
 
 import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types hiding (paraId)
 import CAR.Utils
 
--- General
-newtype ParaNumber = ParaNumber Int -- Sequential index
-                   deriving (Show)
-
 -- Passage file
 type PassageFile = [Paragraph]
-
--- | Stub is like Page, but with the guarantee that there are no paragraphs in the page skeleton
-data Stub = Stub { stubName     :: PageName
-                 , stubPageId   :: PageId
-                 , stubSkeleton :: [PageSkeleton] }
-          deriving (Show, Generic)
-instance Serialise Stub
 
 -- Ground truth
 data Relevance = Relevant | NonRelevant

@@ -83,7 +83,7 @@ opts =
 
  where
     go outFile outlinesFile useSDM useRM maybeFieldname = do
-        outlines <- readCborList outlinesFile :: IO [Stub]
+        outlines <- readOutlinesFile outlinesFile
         BSL.writeFile outFile $ Aeson.encode $ foldMap stubToGalagoQuery outlines useSDM useRM maybeFieldname
 
 type GalagoQueryId = T.Text

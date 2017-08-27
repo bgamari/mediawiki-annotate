@@ -17,6 +17,8 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.HashMap.Strict as HM
 
 import qualified Codec.Serialise as CBOR
+import qualified Codec.Serialise.Encoding as CBOR
+import qualified Codec.CBOR.Write as CBOR
 
 import qualified Data.Binary as B
 import Pipes
@@ -48,7 +50,7 @@ instance B.Binary WikiDoc
 
 main :: IO ()
 main = do
-    (_namespaces, docs) <- parseWikiDocs <$> BSL.getContents
+    (namespaces, docs) <- parseWikiDocs <$> BSL.getContents
     let parsed :: Producer (Either String (EncodedCbor Page)) IO ()
         parsed =
             CM.map (2*workers) workers
@@ -56,7 +58,17 @@ main = do
                 (each $ filter isInteresting docs)
         putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
         putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."
+
+    let prov = Provenance { wikiDumpDate = ""
+                          , wikiSite     = SiteId ""
+                          , dataRelease  = ""
+                          , toolsCommit  = ""
+                          }
+    BSL.putStr $ CBOR.toLazyByteString
+        $ CBOR.encode (Header { headerType = PagesFile, provenance = prov })
+       <> CBOR.encodeListLenIndef
     runEffect $ parsed >-> PP.mapM_ putParsed
+    BSL.putStr $ CBOR.toLazyByteString $ CBOR.encodeBreak
 
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $

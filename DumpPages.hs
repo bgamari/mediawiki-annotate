@@ -11,7 +11,6 @@ import qualified Data.Text.Lazy.IO as TL
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Text.Lazy.Builder.Int as TB
 import Options.Applicative hiding (action)
-import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
@@ -32,14 +31,14 @@ opts = subparser
         f <$> argument str (help "input file" <> metavar "FILE")
       where
         f inputFile = do
-            pages <- decodeCborList <$> BSL.readFile inputFile
+            pages <- readPagesFile inputFile
             mapM_ (T.putStrLn . getPageName . pageName) pages
 
     dumpSections =
         f <$> argument str (help "input file" <> metavar "FILE")
       where
         f inputFile = do
-            pages <- decodeCborList <$> BSL.readFile inputFile
+            pages <- readPagesFile inputFile
             let sectionpathlist p = fmap escapeSectionPath
                                   $ pageSectionPaths p
             let pageNameStr p = (T.unpack $ getPageName $ pageName p)
@@ -55,7 +54,7 @@ opts = subparser
         f :: FilePath -> S.Set PageId -> LinkStyle -> IO ()
         f inputFile pageNames linkStyle
           | S.null pageNames = do
-                pages <- decodeCborList <$> BSL.readFile inputFile
+                pages <- readPagesFile inputFile
                 mapM_ printPage pages
           | otherwise = do
                 anns <- CAR.openAnnotations inputFile
@@ -68,7 +67,7 @@ opts = subparser
       where
         f :: FilePath -> IO ()
         f inputFile = do
-                pages <- decodeCborList <$> BSL.readFile inputFile
+                pages <- readPagesFile inputFile
                 mapM_ printPage pages
 
           where printPage = putStrLn . entityIdFromPage
@@ -83,7 +82,7 @@ opts = subparser
       where
         f :: FilePath -> LinkStyle -> IO ()
         f inputFile linkStyle = do
-                paragraphs <- decodeCborList <$> BSL.readFile inputFile
+                paragraphs <- readParagraphsFile inputFile
                 mapM_ printParagraph paragraphs
 
           where printParagraph = putStrLn . prettyParagraph linkStyle
@@ -93,7 +92,7 @@ opts = subparser
       where
         f :: FilePath -> IO ()
         f inputFile  = do
-                paragraphs <- decodeCborList <$> BSL.readFile inputFile
+                paragraphs <- readParagraphsFile inputFile
                 mapM_ printParagraph paragraphs
 
           where printParagraph (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
@@ -102,7 +101,7 @@ opts = subparser
         f <$> argument str (help "input file" <> metavar "FILE")
       where
         f inputFile = do
-            pages <- decodeCborList <$> BSL.readFile inputFile
+            pages <- readPagesFile inputFile
             TL.putStrLn $ TB.toLazyText
                 $ mconcat
                 $ intersperse (TB.singleton '\n')
@@ -110,7 +109,8 @@ opts = subparser
                 $ HM.toList
                 $ HM.fromListWith (+)
                 $ map (\h -> (h,1::Int))
-                $ foldMap sectionHeadings pages
+                $ foldMap sectionHeadings
+                $ foldMap pageSkeleton pages
 
 sectionHeadings :: PageSkeleton -> [SectionHeading]
 sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children

@@ -47,8 +47,8 @@ main = do
                 , Just para <- pure $ HM.lookup canonicalParaId canonicalParagraphs
                 ]
 
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    writeCborList outputFile $ map (rewritePage rewritePara) pages
+    (prov, pages) <- readPagesFile' inputFile
+    writeCarFile outputFile prov $ map (rewritePage rewritePara) pages
 
 rewritePage :: (Paragraph -> Paragraph) -> Page -> Page
 rewritePage rewritePara page@(Page{..}) =
@@ -65,7 +65,7 @@ fetchParagraphs pagesFile interestingParas =
     HM.fromList
     . mapMaybe isInteresting
     . concatMap toParagraphs
-    . decodeCborList <$> BSL.readFile pagesFile
+    <$> readPagesFile pagesFile
   where
     isInteresting para
       | pid `HS.member` interestingParas = Just (pid, para)

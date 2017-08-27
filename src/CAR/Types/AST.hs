@@ -7,6 +7,7 @@
 module CAR.Types.AST
     ( -- * Identifiers
       PageName(..), unpackPageName
+    , SiteId(..)
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
@@ -18,6 +19,8 @@ module CAR.Types.AST
     , ParaBody(..), paraBodiesToId
     , PageSkeleton(..)
     , Page(..)
+      -- * Outline documents
+    , Stub(..)
       -- * Entity
     , Entity(..), pageIdToName
     ) where
@@ -54,6 +57,10 @@ urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedI
 
 unpackPageName :: PageName -> String
 unpackPageName (PageName t) = T.unpack t
+
+-- | A Wikipedia site ID. e.g. @enwiki@, @itwiki@, or @envoyage@.
+newtype SiteId = SiteId T.Text
+               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId Utf8.SmallUtf8
@@ -167,3 +174,11 @@ instance NFData SectionPath
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
+
+-- | 'Stub' is like 'Page', but with the guarantee that there are no paragraphs
+-- in the page skeleton
+data Stub = Stub { stubName     :: PageName
+                 , stubPageId   :: PageId
+                 , stubSkeleton :: [PageSkeleton] }
+          deriving (Show, Generic)
+instance CBOR.Serialise Stub

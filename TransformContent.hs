@@ -7,7 +7,6 @@ import Data.Monoid hiding (All, Any)
 import Options.Applicative
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as BSL
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 import Data.Maybe
@@ -42,7 +41,7 @@ opts =
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> (fullMode <|> sectionsCategoriesMode <|>  configurableMode)
-  where 
+  where
     fullMode = flag' transformFull (long "full" <> help "full  filtering of lead, category, hidden sections, and short page remainders")
     sectionsCategoriesMode = flag' transformCategoriesAndForbiddenSection  (long "sections-categories" <> help "partial filtering of category and hidden sections only")
     configurableMode = transformConf <$> (do includeLead  <- switch (long "lead" <> help "include lead paragraph")
@@ -189,6 +188,6 @@ transformCategoriesAndForbiddenSection page =
 main :: IO ()
 main = do
     (inputFile, outputFile, transformMode) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    writeCborList outputFile $ mapMaybe transformMode pages
+    (prov, pages) <- readPagesFile' inputFile
+    writeCarFile outputFile prov $ mapMaybe transformMode pages
 

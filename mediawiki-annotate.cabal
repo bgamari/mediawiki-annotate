@@ -16,6 +16,7 @@ library
                        CAR.Types.AST
                        CAR.Types.AST.Pretty
                        CAR.Types.CborList
+                       CAR.Types.Files
                        CAR.Types.Orphans
                        CAR.RunFile
                        CAR.AnnotationsFile
@@ -47,7 +48,7 @@ library
                        mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
-                       cryptohash-sha1,
+                       cryptohash,
                        text,
                        simplir,
                        mediawiki-parser >= 0.1
@@ -78,6 +79,7 @@ executable trec-car-import
                        split >=0.2 && <0.3,
                        parallel >=3.2 && <3.3,
                        async >=2.1 && <2.2,
+                       cborg,
                        binary,
                        fork-map,
                        stm,

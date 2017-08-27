@@ -17,7 +17,7 @@ import CAR.Types
 import CAR.Utils
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
-                                      
+
 options :: Parser (FilePath, FilePath, FilePath, [PageId])
 options =
     (,,,) <$> argument str (help "annotations file" <> metavar "FILE")
@@ -35,6 +35,7 @@ main :: IO ()
 main = do
     (path, outpath, unprocessedPagesFile, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
+    (prov, _) <- readPagesFile' path
     unprocessedPages <- openAnnotations unprocessedPagesFile
     let pagesToExport
           | null names = pages anns
@@ -44,18 +45,18 @@ main = do
     when (not $ null names) $ do
         putStr "Writing articles..."
         let articleFile = outpath <.> "articles"
-        writeCborList articleFile pagesToExport
+        writeCarFile articleFile prov pagesToExport
         putStrLn "done"
 
     putStr "Writing outlines..."
     let skeletonFile = outpath <.> "outlines"
-    writeCborList skeletonFile $ map toStubSkeleton pagesToExport
+    writeCarFile skeletonFile prov $ map toStubSkeleton pagesToExport
     putStrLn "done"
 
     putStr "Writing paragraphs..."
     let paragraphsFile = outpath <.> "paragraphs"
     let sortIt = map snd . M.toAscList . foldMap (\para -> M.singleton (paraId para) para)
-    writeCborList paragraphsFile $ sortIt $ concatMap toParagraphs pagesToExport
+    writeCarFile paragraphsFile prov $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
 

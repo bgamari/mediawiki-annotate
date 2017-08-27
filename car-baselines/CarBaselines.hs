@@ -77,8 +77,7 @@ modeCorpusStats =
   where
     go outFile firstN paragraphsFile = do
         let maybeTakeN = maybe id take firstN
-        paras <- maybeTakeN <$> readCborList paragraphsFile
-            :: IO [Paragraph]
+        paras <- maybeTakeN <$> readParagraphsFile paragraphsFile
         let stats = Foldl.fold (documentTermStats Nothing) $ fmap paraBodyTerms $ foldMap paraBody paras
         writeCorpusStats outFile $ stats
 
@@ -108,8 +107,7 @@ modeIndex =
        <*> argument str (metavar "PARAS" <> help "paragraphs file")
   where
     go outFile paragraphsFile = do
-        paras <- readCborList paragraphsFile
-              :: IO [Paragraph]
+        paras <- readParagraphsFile paragraphsFile
         runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
                  $ statusList 1000 (\n -> show n <> " paragraphs")
                  $ fmap (\p -> let BagOfWords terms = foldMap paraBodyBag (paraBody p)
@@ -140,7 +138,7 @@ modeQuery =
   where
     go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> Double -> String -> FilePath -> IO ()
     go diskIdx corpusStatsFile outlineFile runName k dropFreqTermsFactor modelName outputFile = do
-        outlines <- readCborList outlineFile
+        outlines <- readOutlinesFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 

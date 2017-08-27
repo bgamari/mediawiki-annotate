@@ -171,7 +171,7 @@ toPostgres openConn pagesFile = do
     mapM_ (execute_ conn) createTables
 
     putStrLn "building fragment index..."
-    !fragments <- pagesToFragments <$> readCborList pagesFile
+    !fragments <- pagesToFragments <$> readPagesFile pagesFile
     let fragmentIdxMap :: HM.HashMap SectionPath FragmentId
         !fragmentIdxMap = inCompact $ HM.map (\(fragId,_) -> fragId) fragments
         lookupFragmentId :: SectionPath -> Maybe FragmentId
@@ -199,7 +199,7 @@ toPostgres openConn pagesFile = do
 
     exportParagraphs conns lookupFragmentId = do
         putStrLn "exporting paragraphs..."
-        pages <- readCborList pagesFile
+        pages <- readPagesFile pagesFile
         let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text)]
             pageParaRows page =
               [ (paraId para, fragId, text)
@@ -217,7 +217,7 @@ toPostgres openConn pagesFile = do
 
     exportLinks conns lookupFragmentId = do
         putStrLn "exporting links..."
-        pages <- readCborList pagesFile
+        pages <- readPagesFile pagesFile
         let pagesLinkRows :: [Page] -> [(FragmentId, FragmentId, T.Text, ParagraphId)]
             pagesLinkRows pagesChunk =
                 [ (srcId, destId, linkAnchor, paraId para)

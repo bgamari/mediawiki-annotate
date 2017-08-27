@@ -22,3 +22,6 @@
 [submodule "vendor/intset"]
 	path = vendor/intset
 	url = git://github.com/bgamari/intset
+[submodule "vendor/binary-serialise-cbor"]
+	path = vendor/binary-serialise-cbor
+	url = git://github.com/bgamari/binary-serialise-cbor

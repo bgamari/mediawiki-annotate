@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE TypeApplications #-}
 
 module CAR.TocFile
     ( IndexedCborPath(..)
@@ -16,50 +17,37 @@ module CAR.TocFile
     ) where
 
 import Control.Exception (Exception, throw)
-import Control.Monad.ST
-import Control.Monad.ST.Unsafe
 import Data.Foldable hiding (toList)
 import qualified Codec.CBOR.Read as CBOR.Read
+import qualified Codec.CBOR.Decoding as CBOR (decodeListLenIndef)
+import qualified Codec.CBOR.Term as CBOR
 import qualified Codec.Serialise as CBOR
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import System.IO.MMap
-import CAR.Types
 import System.FilePath
 import Prelude hiding (lookup)
+
+import CAR.Types.CborList
 
 type Offset = Int
 
 readValuesWithOffsets :: forall a. CBOR.Serialise a
                       => BSL.ByteString -> [(Offset, a)]
-readValuesWithOffsets = \bs -> runST $ start 0 $ BSL.toChunks bs
+readValuesWithOffsets = go 0
   where
-    start :: Offset  -- ^ current offset
-          -> [BS.ByteString]
-          -> ST s [(Offset, a)]
-    start _offset []  = return []
-    start offset  bss =
-        go offset offset CBOR.deserialiseIncremental bss
-
-    go :: Offset          -- ^ offset of beginning of current chunk
-       -> Offset          -- ^ start offset of thing currently being decoded
-       -> ST s (CBOR.IDecode s a)
-       -> [BS.ByteString] -- ^ remaining chunks
-       -> ST s [(Offset, a)]
-    go !currOff !startOff decoder bss0 = do
-        r <- decoder
-        case (r, bss0) of
-          (CBOR.Partial f,     [])     -> go currOff startOff (f Nothing) []
-          (CBOR.Partial f,     bs:bss) -> go currOff startOff (f (Just bs)) bss
-          (CBOR.Done bs off x, bss)    -> do
-              let !currOff' = currOff + fromIntegral off
-                  bss' | BS.null bs = bss
-                       | otherwise  = bs : bss
-              rest <- unsafeInterleaveST $ start currOff' bss'
-              return $ (startOff, x) : rest
-          (CBOR.Fail _rest _ err, _)   -> error $ show err
+    go :: Offset  -- ^ current offset
+       -> BSL.ByteString
+       -> [(Offset, a)]
+    go !offset !bs
+      | BSL.null bs = []
+      | otherwise   =
+          case CBOR.Read.deserialiseFromBytesWithSize breakOrElement bs of
+            Left err                  -> error $ show err
+            Right (_   , _ , Nothing) -> []
+            Right (rest, sz, Just x)  -> (offset, x) : go (offset + fromIntegral sz) rest
 
 newtype IndexedCborPath i a = IndexedCborPath FilePath
                             deriving (Show)
@@ -67,8 +55,19 @@ newtype IndexedCborPath i a = IndexedCborPath FilePath
 buildIndex :: (Hashable i, Eq i, CBOR.Serialise a)
            => (a -> i) -> FilePath -> IO (HM.HashMap i Offset)
 buildIndex toIndex path = do
-    xs <- readValuesWithOffsets <$> BSL.readFile path
-    let addElem acc (offset, x) = HM.insert (toIndex x) offset acc
+    -- Ignore header
+    bs <- BSL.readFile path
+    let decodeHeader = do
+            _ <- CBOR.decode @CBOR.Term
+            _ <- CBOR.decodeListLenIndef
+            return ()
+        (rest, headerSize) =
+            case CBOR.Read.deserialiseFromBytesWithSize decodeHeader bs of
+              Right (bs', off, _) -> (bs', fromIntegral off)
+              Left _              -> (bs, 0) -- header probably doesn't exist
+
+    let xs = readValuesWithOffsets rest
+    let addElem acc (offset, x) = HM.insert (toIndex x) (headerSize + offset) acc
     return $ foldl' addElem mempty xs
 
 createIndex :: (Hashable i, Eq i, CBOR.Serialise i, CBOR.Serialise a)
@@ -113,8 +112,9 @@ data DeserialiseFailure = DeserialiseFailure String CBOR.DeserialiseFailure
                         deriving (Show)
 instance Exception DeserialiseFailure
 
-toList :: (CBOR.Serialise a) => IndexedCbor i a -> [a]
-toList (IndexedCbor _ bs _) = decodeCborList $ BSL.fromStrict bs
+toList :: forall i a. (CBOR.Serialise a) => IndexedCbor i a -> [a]
+toList (IndexedCbor _ bs _) =
+    snd $ decodeCborList @CBOR.Term @a $ BSL.fromStrict bs
 
 keys :: IndexedCbor i a -> [i]
 keys (IndexedCbor toc _ _) = HM.keys toc

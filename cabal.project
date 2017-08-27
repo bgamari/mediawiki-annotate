@@ -16,6 +16,7 @@ packages:
     assessment-interface/annotation/server
     filter-duplicates/
     vendor/*
+    vendor/binary-serialise-cbor/*
 
 package mediawiki-parser
     tests: True

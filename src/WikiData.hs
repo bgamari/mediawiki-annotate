@@ -5,7 +5,7 @@
 
 module WikiData where
 
-import CAR.Types (PageName)
+import CAR.Types (PageName, SiteId(..))
 import GHC.Generics
 import Data.Aeson
 import Data.Hashable
@@ -33,10 +33,6 @@ readItemId s
   | otherwise
   = Nothing
 
--- SiteId enwiki or itwiki, envoyage
-newtype SiteId = SiteId T.Text
-               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
-               
 data EntityType = Item
                 deriving (Show, Generic)
 instance CBOR.Serialise EntityType

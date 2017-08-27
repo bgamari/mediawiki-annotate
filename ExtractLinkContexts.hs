@@ -3,7 +3,6 @@
 {-# LANGUAGE TupleSections #-}
 
 import Data.Monoid hiding (All, Any)
-import System.IO
 
 import Options.Applicative
 import qualified Data.DList as DList
@@ -130,12 +129,12 @@ toGalagoDoc linkDoc =
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    withFile outputFile WriteMode $ \h ->
-        BSL.hPutStr h $ Galago.toWarc
-            $ map toGalagoDoc
-            $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent)
-            $ pages
+    pages <- readPagesFile inputFile
+    BSL.writeFile outputFile
+        $ Galago.toWarc
+        $ map toGalagoDoc
+        $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent)
+        $ pages
   where
     nubLinkDocs :: [LinkDoc] -> [LinkDoc]
     nubLinkDocs linkDocs =

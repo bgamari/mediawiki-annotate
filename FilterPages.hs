@@ -3,13 +3,10 @@
 import Data.Monoid hiding (All, Any)
 import Data.Void
 import Control.Monad (void)
-import System.IO
 import Options.Applicative
 import qualified Data.HashSet as HS
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString.Builder as BSB
 import qualified Text.Trifecta as Tri
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import qualified Data.Binary.Serialise.CBOR as CBOR
@@ -94,7 +91,7 @@ main :: IO ()
 main = do
     (inputFile, outputFile, takeN, multiLangOptsMaybe, predicate) <-
         execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
-    pages <- decodeCborList <$> BSL.readFile inputFile
+    (prov, pages) <- readPagesFile' inputFile
     predicate' <- runPredFromFile predicate
 
     pageNameTranslate <- case multiLangOptsMaybe of
@@ -109,7 +106,6 @@ main = do
                                                           Nothing -> fromPageName
                                return $ pageNameTranslate
 
-    withFile outputFile WriteMode $ \h ->
-        BSB.hPutBuilder h $ encodeCborList
-            $ maybe id take takeN
-            $ filter (interpret pageNameTranslate predicate') pages
+    writeCarFile outputFile prov
+        $ maybe id take takeN
+        $ filter (interpret pageNameTranslate predicate') pages

@@ -533,7 +533,7 @@ main = do
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
               map populateSeeds . pagesToQueryDocs resolveRedirect queryDeriv
-                  <$> readCborList queryFile
+                  <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile

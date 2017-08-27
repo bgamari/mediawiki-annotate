@@ -44,7 +44,7 @@ main = do
 
 
     query2ForbiddenEntities <- HM.fromList . pagesToForbiddenEntities
-                            <$> readCborList queryFile
+                            <$> readPagesFile queryFile
         :: IO (HM.HashMap PageId (HS.HashSet PageId))
 
     let notEntryWithSeed :: Entry IsRelevant -> Bool
