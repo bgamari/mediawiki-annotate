@@ -75,20 +75,22 @@ instance CBOR.Serialise Header where
 magicWord :: String
 magicWord = "CAR"
 
-data Provenance = Provenance { wikiDumpDate :: String
-                             , wikiSite     :: SiteId
-                             , dataRelease  :: String
-                             , toolsCommit  :: String
+data Provenance = Provenance { wikiDumpDate     :: String
+                             , wikiSite         :: SiteId
+                             , dataReleaseName  :: String
+                             , comments         :: String
+                             , toolsCommit      :: String
                              }
                 deriving (Show, Generic)
 instance CBOR.Serialise Provenance
 
 invalidProvenance :: Provenance
 invalidProvenance =
-    Provenance { wikiDumpDate = ""
-               , wikiSite     = SiteId ""
-               , dataRelease  = ""
-               , toolsCommit  = ""
+    Provenance { wikiDumpDate    = ""
+               , wikiSite        = SiteId ""
+               , dataReleaseName = ""
+               , comments        = ""
+               , toolsCommit     = ""
                }
 
 data NoHeader = NoHeader
