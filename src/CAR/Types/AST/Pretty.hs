@@ -31,8 +31,8 @@ prettySkeleton renderLink = go 1
         "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
-prettyParagraph renderLink (Paragraph paraId bodies) =
-    "{" ++ unpackParagraphId paraId ++ "} " ++ concatMap go bodies ++ "\n"
+prettyParagraph renderLink (Paragraph pid bodies) =
+    "{" ++ unpackParagraphId pid ++ "} " ++ concatMap go bodies ++ "\n"
   where
     go (ParaText t) = T.unpack t
     go (ParaLink l) = renderLink l
