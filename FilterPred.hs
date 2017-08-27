@@ -53,8 +53,8 @@ runPred f (Negate x)  = Negate <$> runPred f x
 runPred _ TruePred    = pure TruePred
 runPred f (Pure x)    = f x
 
-pred :: Parser a -> Parser (Pred a)
-pred inj = term
+parsePred :: Parser a -> Parser (Pred a)
+parsePred inj = term
   where
     opTable :: OperatorTable Parser (Pred a)
     opTable = [ [ prefix "!" Negate ]

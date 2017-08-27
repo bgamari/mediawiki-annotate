@@ -56,7 +56,7 @@ opts =
   where
     predicate = do
         s <- str
-        case Tri.parseString (FilterPred.pred predFromFile <* Tri.eof) mempty s of
+        case Tri.parseString (FilterPred.parsePred predFromFile <* Tri.eof) mempty s of
           Tri.Success p -> return p
           Tri.Failure e -> fail $ show $ Tri._errDoc e
     multiLangOpts =
@@ -65,7 +65,7 @@ opts =
           <*> option siteId (long "from-site" <> metavar "FROMSITE" <> help "language of this archive")
           <*> option siteId (long "to-site" <> metavar "TOSITE" <> help "canonical site (enwiki)" <> value (SiteId "enwiki"))
     siteId = SiteId . T.pack <$> str
-    
+
 data PredFromFile = NameSetFromFile FilePath
                   | HasCategoryContainingFromFile FilePath
                   deriving (Show)
