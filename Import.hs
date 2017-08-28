@@ -374,9 +374,9 @@ toParaBody siteId thisPage = go
   where
     go (Text x)        = Just [ParaText $ T.pack x]
     go (Char x)        = Just [ParaText $ T.singleton x]
-    go (Bold xs)       = Just $ concat $ mapMaybe go xs
-    go (Italic xs)     = Just $ concat $ mapMaybe go xs
-    go (BoldItalic xs) = Just $ concat $ mapMaybe go xs
+    go  Bold           = Just []
+    go  Italic         = Just []
+    go  BoldItalic     = Just []
     go doc@(InternalLink target parts)
       | Just _ <- isImage doc
                        = Nothing
@@ -399,11 +399,11 @@ toParaBody siteId thisPage = go
     go _               = Nothing
 
 getText :: Doc -> Maybe String
-getText (Text x)        = Just $ x
-getText (Char c)        = Just $ [c]
-getText (Bold xs)       = Just $ getAllText xs
-getText (Italic xs)     = Just $ getAllText xs
-getText (BoldItalic xs) = Just $ getAllText xs
+getText (Text x)        = Just x
+getText (Char c)        = Just [c]
+getText  Bold           = Just ""
+getText  Italic         = Just ""
+getText  BoldItalic     = Just ""
 getText (InternalLink target [])  = Just $ T.unpack $ getPageName $ linkTargetPage target
 getText (InternalLink _ (xs:_))   = Just $ getAllText xs
 getText (ExternalLink _ (Just s)) = Just s
