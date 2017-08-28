@@ -81,8 +81,8 @@ instance Monoid InlinkCounts where
 
 
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: (PageId -> PageId) -> [Page] -> InlinkInfo
-collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
+collectInlinkInfo :: SiteId -> (PageId -> PageId) -> [Page] -> InlinkInfo
+collectInlinkInfo siteId resolveRedirects' = foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1
@@ -90,7 +90,7 @@ collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton (resolveRedirects' $ pageNameToId redirTargetId)
+            mempty { documentInlinks = HM.singleton (resolveRedirects' $ pageNameToId siteId redirTargetId)
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
@@ -114,14 +114,15 @@ collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
 
 -- #(anchor, target) / #(anchor, *)
 pageToKbDoc :: Page -> KbDoc
-pageToKbDoc page@(Page pageName pageId pageSkeleta) =
-  let leadParas = filter isLead $ pageSkeleta
-      kbDocPageId = pageId
+pageToKbDoc page =
+  let leadParas = filter isLead $ pageSkeleton page
+      kbDocPageId = pageId page
       kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
       kbDocOutLinks = fmap linkTarget $ foldMap pageSkeletonLinks $ leadParas
       kbDocOutMentions = fmap linkAnchor $ foldMap pageSkeletonLinks $ leadParas
       kbDocLeadPara = leadParas
-      kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
-      kbDocCanonicalName = pageName
+      -- FIXME
+      --kbDocCategories = pageCategories $ pageMetadata page
+      kbDocCanonicalName = pageName page
       kbDocFullText = pageFulltext page
   in KbDoc {..}

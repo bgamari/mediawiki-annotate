@@ -193,9 +193,10 @@ entityModes = subparser
            <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
       where
         go outputPath articlesPath textPart = do
-            !resolveRedirect <- resolveRedirectFactory <$> readPagesFile articlesPath
+            (prov, pages) <- readPagesFile' articlesPath
+            let !resolveRedirect = resolveRedirectFactory (wikiSite prov) pages
 
-            !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readPagesFile articlesPath
+            !inlinkInfo <- collectInlinkInfo (wikiSite prov) resolveRedirect <$> readPagesFile articlesPath
             pages2 <- readPagesFile articlesPath
 
             let docTerms :: KbDoc -> [Term]

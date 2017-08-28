@@ -104,7 +104,7 @@ parsePred inj = term
 
     hasCategoryContaining = do
         void $ textSymbol "category-contains"
-        HasCategoryContaining . T.toCaseFold <$> string'
+        HasCategoryContaining <$> string'
 
     pageHashMod = do
         void $ textSymbol "page-hash-mod"
@@ -135,7 +135,7 @@ interpret pageNameTranslate pred page =
       NameContains t                -> t `T.isInfixOf` T.toCaseFold (getPageName (pageName page))
       NameHasPrefix prefix          -> prefix `T.isPrefixOf` getPageName (pageName page)
       NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
-      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map T.toCaseFold $ pageCategories page
+      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName . pageIdToName) $ pageCategories (pageMetadata page)
       PageHashMod salt n k          -> let h = hashWithSalt salt $ pageNameTranslate $ pageName page
                                        in h `mod` n == k
       IsRedirect                    -> isJust $ pageRedirect page

@@ -33,13 +33,14 @@ main = do
     (outputFile, qrelfile, queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
+    siteId <- wikiSite . fst <$> readPagesFile' queryFile
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =
              queryDocPageId queryDoc `HS.insert` queryDocLeadEntities queryDoc
 
         pagesToForbiddenEntities :: [Page] -> [(PageId, HS.HashSet PageId)]
         pagesToForbiddenEntities pages = [ (queryDocPageId queryDoc, toSeeds queryDoc)
-                                         | queryDoc <- pagesToQueryDocs id QueryFromPageTitle pages
+                                         | queryDoc <- pagesToQueryDocs siteId id QueryFromPageTitle pages
                                          ]
 
 

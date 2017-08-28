@@ -13,7 +13,7 @@ import qualified Data.Text as T
 import CAR.Types.AST
 
 prettyPage :: LinkStyle -> Page -> String
-prettyPage linkStyle (Page (PageName name) _ skeleton) =
+prettyPage linkStyle (Page (PageName name) _ _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
             ++ map (prettySkeleton linkStyle) skeleton
 

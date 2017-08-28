@@ -108,7 +108,7 @@ stubToGalagoQuery outline useSDM useRM maybeFieldname =
                    $ combineText
                    $ maybe id fieldNameQueryTerms maybeFieldname
                    rawQueryTerms
-                   
+
             in GalagoQuery queryId queryText
 
 data GalagoQuery = GalagoQuery { galagoQueryId :: GalagoQueryId
@@ -125,7 +125,8 @@ instance ToJSON GalagoQuerySet where
     toJSON (GalagoQuerySet qs) = object [ "queries" .= qs ]
 
 stubPaths :: Stub -> [([Term], SectionPath)]
-stubPaths (Stub pageName pageId skel) = foldMap (go mempty (titleWords pageName)) skel
+stubPaths (Stub pageName pageId _ skel) =
+    foldMap (go mempty (titleWords pageName)) skel
   where
     go :: DList.DList HeadingId -> [Term] -> PageSkeleton -> [([Term], SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen

@@ -195,7 +195,8 @@ modeQuery =
         CarRun.writeParagraphRun outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
-stubPaths (Stub pageName pageId skel) = foldMap (go mempty pageNameWords) skel
+stubPaths (Stub pageName pageId _ skel) =
+    foldMap (go mempty pageNameWords) skel
   where
     go :: DList.DList HeadingId -> BagOfWords -> PageSkeleton -> [(BagOfWords, SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen

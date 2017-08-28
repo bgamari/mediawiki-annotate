@@ -63,8 +63,8 @@ prettyEntityAnnotation (EntityAnnotation sectionPath entityId rel) =
             ]
 
 toStubSkeleton :: Page -> Stub
-toStubSkeleton (Page name pageId skeleton) =
-    Stub name pageId (mapMaybe go skeleton)
+toStubSkeleton (Page name pageId meta skeleton) =
+    Stub name pageId meta (mapMaybe go skeleton)
   where
     go :: PageSkeleton -> Maybe PageSkeleton
     go (Section heading headingId children) =
@@ -73,13 +73,13 @@ toStubSkeleton (Page name pageId skeleton) =
     go (Image{}) = Nothing
 
 prettyStub :: Stub -> String
-prettyStub (Stub (PageName name) _ skeleton) =
+prettyStub (Stub (PageName name) _ _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
            ++ map (prettySkeleton anchorOnly) skeleton
 
 toParagraphs :: Page -> [Paragraph]
-toParagraphs (Page _name _ skeleton) =
-    concatMap go skeleton
+toParagraphs =
+    concatMap go . pageSkeleton
   where
     go :: PageSkeleton -> [Paragraph]
     go (Section _ _ children) = concatMap go children
@@ -87,7 +87,7 @@ toParagraphs (Page _name _ skeleton) =
     go (Image{}) = [] -- ignore images
 
 toAnnotations :: Page -> S.Set Annotation
-toAnnotations (Page _ pageId skeleton) =
+toAnnotations (Page _ pageId _ skeleton) =
     -- recurse into sections, recursively collect section path, emit one annotation per paragraph
     foldMap (go mempty) skeleton
   where
@@ -102,7 +102,7 @@ toAnnotations (Page _ pageId skeleton) =
     go _parentIds (Image{}) = mempty
 
 toEntityAnnotations :: (PageId -> PageId) -> Page ->  S.Set EntityAnnotation
-toEntityAnnotations resolveRedirect (Page _ pageId skeleton) =
+toEntityAnnotations resolveRedirect (Page _ pageId _ skeleton) =
     -- recurse into sections, recursively collect section path, emit one entity annotation per link
     foldMap (go mempty) skeleton
   where

@@ -57,18 +57,20 @@ opts = subparser
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")
-          <*> fmap S.fromList (many (argument (pageNameToId . PageName . T.pack <$> str)
+          <*> fmap S.fromList (many (argument (PageName . T.pack <$> str)
                                       (metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
           <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
       where
-        f :: FilePath -> S.Set PageId -> LinkStyle -> IO ()
+        f :: FilePath -> S.Set PageName -> LinkStyle -> IO ()
         f inputFile pageNames linkStyle
           | S.null pageNames = do
                 pages <- readPagesFile inputFile
                 mapM_ printPage pages
           | otherwise = do
                 anns <- CAR.openAnnotations inputFile
-                mapM_ printPage $ mapMaybe (`CAR.lookupPage` anns) (S.toList pageNames)
+                siteId <- wikiSite . fst <$> readPagesFile' inputFile
+                let pageIds = map (pageNameToId siteId) $ S.toList pageNames
+                mapM_ printPage $ mapMaybe (`CAR.lookupPage` anns) pageIds
 
           where printPage = putStrLn . prettyPage linkStyle
 

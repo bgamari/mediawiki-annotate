@@ -19,8 +19,8 @@ fileNameLookupFactory :: (SectionPath -> Bool) -> (SectionPath -> Bool) -> FileN
 fileNameLookupFactory existResultsForSectionpath  existEntityResultsForSectionpath = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
-    outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"
+    outlinePathname (Stub {stubPageId=pageId}) =
+       unpackPageId pageId </> "index" <.> "html"
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =

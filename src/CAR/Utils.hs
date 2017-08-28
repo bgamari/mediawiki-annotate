@@ -34,13 +34,6 @@ pageContainsText str = any goSkeleton . pageSkeleton
     goParaBody (ParaLink l) = str `T.isInfixOf` linkAnchor l
     goParaBody (ParaText t) = str `T.isInfixOf` t
 
-pageCategories :: Page -> [T.Text]
-pageCategories = mapMaybe isCategoryTag . pageLinkTargets
-  where
-    isCategoryTag :: PageName -> Maybe T.Text
-    isCategoryTag (PageName pageName) =
-        T.pack "Category:" `T.stripPrefix` pageName
-
 pageLinkTargets :: Page -> [PageName]
 pageLinkTargets = map linkTarget . pageLinks
 
@@ -107,9 +100,9 @@ pageSkeletonText (Image _ _) = []
 
 
 pageFulltext :: Page -> [TL.Text]
-pageFulltext (Page pageName _ skels) =
+pageFulltext (Page {pageName=pageName, pageSkeleton=skels}) =
     (TL.fromStrict $ getPageName pageName) : (foldMap pageSkeletonFulltext skels)
-    
+
 pageSkeletonFulltext :: PageSkeleton -> [TL.Text]
 pageSkeletonFulltext (Section heading _ children) =
     (TL.fromStrict $ getSectionHeading heading) : (foldMap pageSkeletonFulltext children)
@@ -125,10 +118,11 @@ paraToText (Paragraph  _ bodies) =
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
 
-resolveRedirectFactory :: [Page] -> PageId -> PageId
-resolveRedirectFactory pages = resolveRedirectFun entityRedirects
+resolveRedirectFactory :: SiteId -> [Page] -> PageId -> PageId
+resolveRedirectFactory siteId pages =
+    resolveRedirectFun entityRedirects
   where
-    !entityRedirects = inCompact $ entityRedirectMap pages
+    !entityRedirects = inCompact $ entityRedirectMap siteId pages
 
 resolveRedirectFun :: HM.HashMap PageId PageId -> PageId -> PageId
 resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
@@ -139,14 +133,15 @@ resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
       | Just toPageId <- HM.lookup fromPageId entityRedirects = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
       | otherwise = fromPageId  -- success, we found a real page
 
-entityRedirectMap :: [Page] -> HM.HashMap PageId PageId
-entityRedirectMap pages = HM.fromList $ mapMaybe extractRedirect $ pages
+entityRedirectMap :: SiteId -> [Page] -> HM.HashMap PageId PageId
+entityRedirectMap siteId pages =
+    HM.fromList $ mapMaybe extractRedirect $ pages
   where extractRedirect :: Page -> Maybe (PageId, PageId)
-        extractRedirect page@(Page _ fromPageId _ )
+        extractRedirect page@(Page {pageId=fromPageId})
           | isNullPageId fromPageId = Nothing
           | otherwise = do
             toPageName <- pageRedirect page  -- MaybeMonad
-            let toPageId = pageNameToId toPageName
+            let toPageId = pageNameToId siteId toPageName
             guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
             pure (fromPageId, toPageId)
 

@@ -8,7 +8,6 @@ import System.IO
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
-import qualified Data.ByteString.Builder as BSB
 import System.FilePath
 
 import Options.Applicative
@@ -18,15 +17,15 @@ import CAR.Utils
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 
-options :: Parser (FilePath, FilePath, FilePath, [PageId])
+options :: Parser (FilePath, FilePath, FilePath, [SiteId -> PageId])
 options =
     (,,,) <$> argument str (help "annotations file" <> metavar "FILE")
         <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
         <*> option str (long "unproc" <> metavar "FILE" <> help "unprocessed all.cbor file")
-        <*> many (option (pageNameToId . PageName . T.pack <$> str)
+        <*> many (option (flip pageNameToId . PageName . T.pack <$> str)
                          (short 'p' <> long "page"
                           <> metavar "PAGE NAME" <> help "Export only this page")
-              <|> option (packPageId <$> str)
+              <|> option (const . packPageId <$> str)
                          (short 'P' <> long "page-id"
                           <> metavar "PAGE ID" <> help "Export only this page"))
 
@@ -36,10 +35,12 @@ main = do
     (path, outpath, unprocessedPagesFile, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFile' path
+    let siteId = wikiSite prov
     unprocessedPages <- openAnnotations unprocessedPagesFile
     let pagesToExport
           | null names = pages anns
-          | otherwise  = mapMaybe (`lookupPage` anns) names
+          | otherwise  = mapMaybe (`lookupPage` anns)
+                         $ map ($ siteId) names
         {-# INLINE pagesToExport #-}
 
     when (not $ null names) $ do
@@ -63,7 +64,7 @@ main = do
 
     -- paragraph annotations
     let writeAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
-        writeAnnotations relsFile pages cutSectionPath = do
+        writeAnnotations relsFile _pages cutSectionPath = do
             putStr "Writing section relevance annotations..."
             let cutAnnotation (Annotation sectionPath paraId rel) =
                   Annotation (cutSectionPath sectionPath) paraId rel
@@ -77,7 +78,7 @@ main = do
             putStrLn "done"
 
 
-    let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages unprocessedPages
+    let resolveRedirect = resolveRedirectFactory siteId $ AnnsFile.pages unprocessedPages
     -- entity annnotations
         writeEntityAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
         writeEntityAnnotations relsFile pages cutSectionPath = do

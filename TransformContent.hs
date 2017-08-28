@@ -133,32 +133,27 @@ recurseFilterSections _ skel = Just skel                          -- keep
 
 
 recurseFilterPage :: (PageSkeleton -> Bool) -> Page -> Page
-recurseFilterPage f (Page {..}) =
-    Page pageName pageId children'
-  where children' = mapMaybe (recurseFilterSections f) pageSkeleton
+recurseFilterPage f page@(Page {..}) =
+    page {pageSkeleton = mapMaybe (recurseFilterSections f) pageSkeleton}
 
 isCategoriesPara :: PageSkeleton -> Bool
-isCategoriesPara (Para (Paragraph paraId paraBody)) =
+isCategoriesPara (Para (Paragraph _ paraBody)) =
     all isCategoryLinks paraBody
   where
     isCategoryLinks :: ParaBody -> Bool
     isCategoryLinks (ParaText _) = False
-    isCategoryLinks (ParaLink (Link (PageName name) section _ anchor)) =
+    isCategoryLinks (ParaLink (Link (PageName name) _ _ _)) =
       "Category:" `T.isPrefixOf` name
 isCategoriesPara _ = False
 
 topLevelFilterPage :: (PageSkeleton -> Bool) -> Page  ->  Page
-topLevelFilterPage f (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
-    Page pageName pageId (filter f pageSkeleta)
-
-
+topLevelFilterPage f page =
+    page { pageSkeleton = filter f $ pageSkeleton page }
 
 dropPageIfShort :: Page -> Maybe Page
-dropPageIfShort page@(Page {pageName, pageId, pageSkeleton=pageSkeleta})
-  | length pageSkeleta > 3 =
-      Just page
-  | otherwise = Nothing
-  
+dropPageIfShort page@(Page {pageSkeleton=pageSkeleta})
+  | length pageSkeleta > 3 = Just page
+  | otherwise              = Nothing
 
 transformFull :: Page -> Maybe Page
 transformFull page =

@@ -34,6 +34,7 @@ import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
 import qualified Data.MediaWiki.XmlDump as XmlDump
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
+import CAR.Utils
 import Entities
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
@@ -69,15 +70,16 @@ main :: IO ()
 main = do
     (workers, prov) <- execParser $ info (helper <*> opts) mempty
     (siteInfo, docs) <- parseWikiDocs <$> BSL.getContents
-    let parsed :: Producer (Either String (EncodedCbor Page)) IO ()
+    let siteId = SiteId $ XmlDump.siteDbName siteInfo
+
+        parsed :: Producer (Either String (EncodedCbor Page)) IO ()
         parsed =
             CM.map (2*workers) workers
-                (fmap encodedCbor . toPage)
+                (fmap encodedCbor . toPage defaultConfig siteId)
                 (each $ filter isInteresting docs)
         putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
         putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."
 
-    let siteId = SiteId $ XmlDump.siteDbName siteInfo
     BSL.putStr $ CBOR.toLazyByteString
         $ CBOR.encode (Header { headerType = PagesFile
                               , provenance = prov siteId
@@ -86,10 +88,19 @@ main = do
     runEffect $ parsed >-> PP.mapM_ putParsed
     BSL.putStr $ CBOR.toLazyByteString $ CBOR.encodeBreak
 
+data Config = Config { isCategory :: PageName -> Bool
+                     , isDisambiguation :: PageName -> Bool
+                     }
+
+defaultConfig :: Config
+defaultConfig =
+    Config { isCategory = \name -> "Category" `T.isPrefixOf` getPageName name
+           , isDisambiguation = \name -> "(disambiguation)" `T.isPrefixOf` getPageName name
+           }
+
 isInteresting :: WikiDoc -> Bool
 isInteresting WikiDoc{..} = not $
-       "Category:" `BS.isPrefixOf` docTitle
-    || "Category talk:" `BS.isPrefixOf` docTitle
+       "Category talk:" `BS.isPrefixOf` docTitle
     || "Talk:" `BS.isPrefixOf` docTitle
     || "File:" `BS.isPrefixOf` docTitle
     || "File talk:" `BS.isPrefixOf` docTitle
@@ -108,23 +119,40 @@ isInteresting WikiDoc{..} = not $
     || "TimedText:" `BS.isPrefixOf` docTitle
     || "MediaWiki:" `BS.isPrefixOf` docTitle
 
-toPage :: WikiDoc -> Either String Page
-toPage WikiDoc{..} =
+toPage :: Config -> SiteId -> WikiDoc -> Either String Page
+toPage Config{..} site WikiDoc{..} =
     toPage' <$> Markup.parse (T.unpack $ TE.decodeUtf8 docText)
   where
     toPage' contents =
         --trace (unlines $ map show $ dropRefs contents)
-        Page { pageName     = name
-             , pageId       = pageId
-             , pageSkeleton = docsToSkeletons pageId contents
-             }
+        page
       where
-        pageId = pageNameToId name
-        name = normPageName $ PageName $ TE.decodeUtf8 docTitle
+        page = Page { pageName     = name
+                    , pageId       = pageId
+                    , pageSkeleton = skeleton
+                    , pageMetadata = metadata
+                    }
+        pageId   = pageNameToId site name
+        name     = normPageName $ PageName $ TE.decodeUtf8 docTitle
+        skeleton = docsToSkeletons site pageId contents
+        categories =   map linkTargetId
+                     $ filter (isCategory . linkTarget)
+                     $ foldMap pageSkeletonLinks skeleton
 
-docsToSkeletons :: PageId -> [Doc] -> [PageSkeleton]
-docsToSkeletons thisPage =
-      toSkeleton thisPage
+        pageType
+          | isCategory name             = CategoryPage
+          | isDisambiguation name       = DisambiguationPage
+          | Just _ <- pageRedirect page = RedirectPage
+          | otherwise                   = ArticlePage
+        metadata =
+            PageMetadata { pagemetaType   = pageType
+                         , redirectNames  = []
+                         , pageCategories = categories
+                         }
+
+docsToSkeletons :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
+docsToSkeletons siteId thisPage =
+      toSkeleton siteId thisPage
     . filter (not . isTemplate) -- drop unknown templates here so they don't
                                 -- break up paragraphs
     . concatMap resolveTemplate
@@ -140,7 +168,8 @@ docsToSkeletons thisPage =
 
 -- | For testing.
 parseSkeleton :: String -> Either String [PageSkeleton]
-parseSkeleton = fmap (docsToSkeletons (PageId "Test Page")) . Markup.parse
+parseSkeleton =
+    fmap (docsToSkeletons (SiteId "Test Site") (PageId "Test Page")) . Markup.parse
 
 isTemplate :: Doc -> Bool
 isTemplate (Template{}) = True
@@ -340,8 +369,8 @@ dropQuotes [] = []
 
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
-toParaBody :: PageId -> Doc -> Maybe [ParaBody]
-toParaBody thisPage = go
+toParaBody :: SiteId -> PageId -> Doc -> Maybe [ParaBody]
+toParaBody siteId thisPage = go
   where
     go (Text x)        = Just [ParaText $ T.pack x]
     go (Char x)        = Just [ParaText $ T.singleton x]
@@ -357,7 +386,7 @@ toParaBody thisPage = go
                 isSelfLink   = null $ unpackPageName $ linkTargetPage target
                 linkTargetId
                   | isSelfLink = thisPage
-                  | otherwise  = pageNameToId linkTarget
+                  | otherwise  = pageNameToId siteId linkTarget
                 linkAnchor   = resolveEntities t
             in Just [ParaLink $ Link {..}]
       where
@@ -417,21 +446,21 @@ mkParagraph bodies = Paragraph (paraBodiesToId bodies) bodies
 
 -- | Does the @[Doc]@ begin with a paragraph? If so, return it and the remaining
 -- 'Doc's.
-splitParagraph :: PageId -> [Doc] -> Maybe (Paragraph, [Doc])
-splitParagraph thisPage docs
-  | (bodies@(_:_), rest) <- getPrefix (toParaBody thisPage) docs
+splitParagraph :: SiteId -> PageId -> [Doc] -> Maybe (Paragraph, [Doc])
+splitParagraph siteId thisPage docs
+  | (bodies@(_:_), rest) <- getPrefix (toParaBody siteId thisPage) docs
   , let bodies' = collapseParaBodies $ concat bodies
   , not $ all nullParaBody bodies'
   = Just (mkParagraph bodies', rest)
   | otherwise
   = Nothing
 
-toSkeleton :: PageId -> [Doc] -> [PageSkeleton]
-toSkeleton thisPage = go
+toSkeleton :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
+toSkeleton siteId thisPage = go
   where
     go [] = []
     go docs
-      | Just (para, rest) <- splitParagraph thisPage docs
+      | Just (para, rest) <- splitParagraph siteId thisPage docs
       = Para para : go rest
     go (doc : docs)
       | Just (target, caption) <- isImage doc
