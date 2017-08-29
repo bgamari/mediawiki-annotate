@@ -217,7 +217,7 @@ normPageName (PageName target) =
 type TemplateTag = Text
 
 resolveTemplate :: Doc -> [Doc]
-resolveTemplate (Template tmpl args)
+resolveTemplate (Template tmpl' args)
   | "IPA-" `T.isPrefixOf` tmpl    = []
   | "IPAc-" `T.isPrefixOf` tmpl   = []
   | "lang-" `T.isPrefixOf` tmpl
@@ -227,6 +227,7 @@ resolveTemplate (Template tmpl args)
   | Just alt <- lookupNamed "alt" args = alt
   | Just handler <- HM.lookup (T.toCaseFold tmpl) templates
   , Just res <- handler args = concatMap resolveTemplate res
+  where tmpl = T.pack $ getAllText tmpl'
 resolveTemplate x = [x]
 
 type TemplateHandler = [(Maybe Text, [Doc])] -> Maybe [Doc]
