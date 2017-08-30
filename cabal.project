@@ -6,6 +6,7 @@ packages:
     multilang-car/
     assessment-eval/
     mediawiki-parser/
+    mediawiki-import/
     db-export/
     graph-expansion/
     simplir/
