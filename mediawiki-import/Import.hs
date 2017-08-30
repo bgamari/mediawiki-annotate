@@ -5,8 +5,6 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-import Data.Char (isSpace)
-import Data.List (intersperse)
 import Data.Maybe
 import Data.Monoid
 import System.IO
@@ -14,9 +12,7 @@ import System.IO
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
-import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
-import qualified Data.HashMap.Strict as HM
 
 import qualified Codec.Serialise as CBOR
 import qualified Codec.Serialise.Encoding as CBOR
@@ -36,6 +32,7 @@ import Data.MediaWiki.Markup as Markup
 import CAR.Types
 import CAR.Utils
 import Entities
+import Templates
 import Utils
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
@@ -90,13 +87,15 @@ main = do
     BSL.putStr $ CBOR.toLazyByteString $ CBOR.encodeBreak
 
 data Config = Config { isCategory :: PageName -> Bool
-                     , isDisambiguation :: PageName -> Bool
+                     , isDisambiguation :: PageName -> [Doc] -> Bool
+                     , resolveTemplate :: TemplateTag -> TemplateHandler
                      }
 
 defaultConfig :: Config
 defaultConfig =
     Config { isCategory = \name -> "Category" `T.isPrefixOf` getPageName name
-           , isDisambiguation = \name -> "(disambiguation)" `T.isPrefixOf` getPageName name
+           , isDisambiguation = \name _ -> "(disambiguation)" `T.isPrefixOf` getPageName name
+           , resolveTemplate = defaultTemplateHandler
            }
 
 isInteresting :: WikiDoc -> Bool
@@ -135,28 +134,28 @@ toPage Config{..} site WikiDoc{..} =
                     }
         pageId   = pageNameToId site name
         name     = normPageName $ PageName $ TE.decodeUtf8 docTitle
-        skeleton = docsToSkeletons site pageId contents
+        skeleton = docsToSkeletons resolveTemplate site pageId contents
         categories =   map linkTargetId
                      $ filter (isCategory . linkTarget)
                      $ foldMap pageSkeletonLinks skeleton
 
         pageType
-          | isCategory name             = CategoryPage
-          | isDisambiguation name       = DisambiguationPage
-          | Just _ <- pageRedirect page = RedirectPage
-          | otherwise                   = ArticlePage
+          | isCategory name                = CategoryPage
+          | isDisambiguation name contents = DisambiguationPage
+          | Just _ <- pageRedirect page    = RedirectPage
+          | otherwise                      = ArticlePage
         metadata =
             PageMetadata { pagemetaType   = pageType
                          , redirectNames  = []
                          , pageCategories = categories
                          }
 
-docsToSkeletons :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
-docsToSkeletons siteId thisPage =
+docsToSkeletons :: (TemplateTag -> TemplateHandler) -> SiteId -> PageId -> [Doc] -> [PageSkeleton]
+docsToSkeletons resolveTemplate siteId thisPage =
       toSkeleton siteId thisPage
-    . filter (not . isTemplate) -- drop unknown templates here so they don't
-                                -- break up paragraphs
-    . concatMap resolveTemplate
+      -- drop unknown templates here so they don't break up paragraphs
+    . filter (isNothing . isTemplate)
+    . concatMap (runTemplateHandler resolveTemplate)
     . filter (not . isComment)
     . takeXml "code"
     . takeXml "s"
@@ -170,135 +169,7 @@ docsToSkeletons siteId thisPage =
 -- | For testing.
 parseSkeleton :: String -> Either String [PageSkeleton]
 parseSkeleton =
-    fmap (docsToSkeletons (SiteId "Test Site") (PageId "Test Page")) . Markup.parse
-
-type TemplateTag = Text
-
-resolveTemplate :: Doc -> [Doc]
-resolveTemplate (Template tmpl' args)
-  | "IPA-" `T.isPrefixOf` tmpl    = []
-  | "IPAc-" `T.isPrefixOf` tmpl   = []
-  | "lang-" `T.isPrefixOf` tmpl
-  , ((Nothing, body):_) <- args   = body
-  | "Infobox" `T.isPrefixOf` tmpl = [] -- don't show infoboxes, even with alt
-
-  | Just alt <- lookupNamed "alt" args = alt
-  | Just handler <- HM.lookup (T.toCaseFold tmpl) templates
-  , Just res <- handler args = concatMap resolveTemplate res
-  where tmpl = T.pack $ getAllText tmpl'
-resolveTemplate x = [x]
-
-type TemplateHandler = [(Maybe Text, [Doc])] -> Maybe [Doc]
-
-templates :: HM.HashMap TemplateTag TemplateHandler
-templates = HM.fromList $
-    -- Lists
-    map (.= listTemplate)
-    [ "bulleted list", "blist", "bulleted", "ulist", "unordered list"
-    , "unbulleted list", "ubl", "ubt", "ublist", "unbullet"
-    , "plainlist"
-    , "ordered list"
-    , "hlist"
-    , "flatlist"
-    ] ++
-    -- Text styling
-    map (.= simpleTemplate)
-    [ "small" , "smaller" , "midsize" , "larger" , "big" , "large" , "huge" , "resize"
-    , "smallcaps", "sc1", "smallcaps2", "sc2", "sc", "allcaps", "caps", "nocaps"
-    ] ++
-    -- Unit conversion
-    map (.= convertTemplate)
-    [ "cvt"
-    , "convert"
-    ] ++
-    -- Other
-    [ "as of"            .= asOfTemplate
-    , "lang"             .= langTemplate
-    , "rtl-lang"         .= langTemplate
-    , "transl"           .= langTemplate
-    , "time ago"         .= timeAgoTemplate
-    , "angbr"            .= sandwichTemplate [Text "⟨"] [Text "⟩"]
-    , "linktext"         .= simpleTemplate
-    , "cardinal to word" .= simpleTemplate
-    , "number to word"   .= simpleTemplate
-    , "ordinal to word"  .= simpleTemplate
-    , "nowrap"           .= simpleTemplate
-    , "mvar"             .= simpleTemplate
-    , "format price"     .= simpleTemplate
-    , "visible anchor"   .= simpleTemplate
-    , "quotation"        .= simpleTemplate
-    , "cquote"           .= simpleTemplate
-    , "inflation"        .= inflationTemplate
-    , "citation needed"  .= dropTemplate
-    , "respell"          .= dropTemplate
-    , "ref"              .= dropTemplate
-    , "refn"             .= dropTemplate
-    , "r"                .= dropTemplate  -- synonym for ref
-    , "zh"               .= dropTemplate  -- "Chinese: "
-    , "sfn"              .= dropTemplate  -- shortened footnote
-    ]
-  where
-    a .= b = (a,b)
-    justText :: String -> Maybe [Doc]
-    justText x = Just [Text x]
-
-    dropTemplate _ = Nothing
-
-    listTemplate args =
-        Just $ concat $ [Text " "] : intersperse [Text ", "] (mapMaybe isUnnamed args)
-
-    convertTemplate ((Nothing, val) : (Nothing, unit) : _) =
-        justText $ getAllText val <> " " <> getAllText unit
-    convertTemplate _ = Nothing
-
-    langTemplate (_ : (Nothing, body) : _) = Just body
-    langTemplate _ = Nothing
-
-    asOfTemplate args =
-        case mapMaybe isUnnamed args of
-          [year, month, day] -> Just $ unwords' [[leader], day, month, year]
-          [year, month]      -> Just $ unwords' [[leader], month, year]
-          [year]             -> Just $ unwords' [[leader], year]
-          _                  -> Nothing
-      where
-        unwords' = concat . intersperse [Char ' ']
-        leader
-          | since, lowercase = Text "since"
-          | since            = Text "Since"
-          | lowercase        = Text "as of"
-          | otherwise        = Text "As of"
-        since = lookupNamed "since" args == Just [Text "y"]
-        lowercase = lookupNamed "lc" args == Just [Text "y"]
-
-    simpleTemplate ((Nothing, val) : _) = Just $ concatMap resolveTemplate val
-    simpleTemplate _                    = Nothing
-
-    timeAgoTemplate ((Nothing, [Text time]) : _)
-      | '-':rest <- trimmed = justText $ rest ++ " ago"
-      | '+':rest <- trimmed = justText $ rest ++ "'s time'"
-      | otherwise           = justText $ "on " ++ time
-      where
-        trimmed = dropWhile isSpace time
-    timeAgoTemplate _ = Nothing
-
-    sandwichTemplate :: [Doc] -> [Doc] -> TemplateHandler
-    sandwichTemplate before after [(Nothing, xs)] = Just $ before ++ xs ++ after
-    sandwichTemplate _      _     _               = Nothing
-
-    inflationTemplate (_ : (Nothing, [Text amount]) : _) = justText amount
-    inflationTemplate _ = Nothing
-
-lookupNamed :: TemplateTag -> [(Maybe Text, [Doc])] -> Maybe [Doc]
-lookupNamed key = listToMaybe . mapMaybe (isNamed key)
-
-isNamed :: TemplateTag -> (Maybe Text, [Doc]) -> Maybe [Doc]
-isNamed key (Just key', val)
-  | key == key'  = Just val
-isNamed _   _    = Nothing
-
-isUnnamed :: (Maybe Text, [Doc]) -> Maybe [Doc]
-isUnnamed (Nothing, val) = Just val
-isUnnamed _              = Nothing
+    fmap (docsToSkeletons defaultTemplateHandler (SiteId "Test Site") (PageId "Test Page")) . Markup.parse
 
 -- | Is a 'Doc' an image element?
 isImage :: Doc -> Maybe (T.Text, [Doc])

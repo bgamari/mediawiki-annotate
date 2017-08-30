@@ -11,9 +11,11 @@ normPageName (PageName target) =
   where
     normFirst t = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 t
 
-isTemplate :: Doc -> Bool
-isTemplate (Template{}) = True
-isTemplate _            = False
+type TemplateTag = T.Text
+
+isTemplate :: Doc -> Maybe TemplateTag
+isTemplate (Template tag _) = Just $ T.toCaseFold $ T.pack $ getAllText tag
+isTemplate _ = Nothing
 
 isComment :: Doc -> Bool
 isComment (Comment{}) = True
