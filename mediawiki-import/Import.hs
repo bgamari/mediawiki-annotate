@@ -1,90 +1,27 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ApplicativeDo #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
+
+module Import
+    ( Config(..)
+    , defaultConfig
+    , toPage
+    , isInteresting
+    ) where
 
 import Data.Maybe
-import Data.Monoid
-import System.IO
 
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
-import qualified Codec.Serialise as CBOR
-import qualified Codec.Serialise.Encoding as CBOR
-import qualified Codec.CBOR.Write as CBOR
-
-import qualified Data.Binary as B
-import Pipes
-import qualified Pipes.Prelude as PP
-import qualified Control.Concurrent.ForkMap as CM
-
-import Development.GitRev
-import Options.Applicative
-
-import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
-import qualified Data.MediaWiki.XmlDump as XmlDump
+import Data.MediaWiki.XmlDump (WikiDoc(..))
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
 import CAR.Utils
 import Entities
 import Templates
 import Utils
-
-newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
-
-instance (CBOR.Serialise a) => B.Binary (EncodedCbor a) where
-    get = EncodedCbor <$> B.get
-    put = B.put . getEncodedCbor
-
-encodedCbor :: CBOR.Serialise a => a -> EncodedCbor a
-encodedCbor = EncodedCbor . CBOR.serialise
-
-instance B.Binary NamespaceId
-instance B.Binary Format
-instance B.Binary XmlDump.PageId
-instance B.Binary WikiDoc
-
-commit :: String
-commit = $(gitHash)
-
-opts :: Parser (Int, SiteId -> Provenance)
-opts =
-    (,)
-       <$> option auto (short 'j' <> long "jobs" <> metavar "N" <> help "Number of workers" <> value 1)
-       <*> prov
-  where
-    prov = do
-        wikiDumpDate <- option str (short 'D' <> long "dump-date" <> metavar "DATE" <> help "Wikipedia dump date" <> value "unknown")
-        dataReleaseName <- option str (short 'N' <> long "release-name" <> metavar "NAME" <> help "Data release name" <> value "unknown")
-        comments <- fmap unlines $ many $ option str (short 'C' <> long "comments" <> metavar "NAME" <> help "Other comments about data release")
-        return (\wikiSite -> Provenance {toolsCommit = commit, ..})
-
-main :: IO ()
-main = do
-    (workers, prov) <- execParser $ info (helper <*> opts) mempty
-    (siteInfo, docs) <- parseWikiDocs <$> BSL.getContents
-    let siteId = SiteId $ XmlDump.siteDbName siteInfo
-
-        parsed :: Producer (Either String (EncodedCbor Page)) IO ()
-        parsed =
-            CM.map (2*workers) workers
-                (fmap encodedCbor . toPage defaultConfig siteId)
-                (each $ filter isInteresting docs)
-        putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
-        putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."
-
-    BSL.putStr $ CBOR.toLazyByteString
-        $ CBOR.encode (Header { headerType = PagesFile
-                              , provenance = prov siteId
-                              })
-       <> CBOR.encodeListLenIndef
-    runEffect $ parsed >-> PP.mapM_ putParsed
-    BSL.putStr $ CBOR.toLazyByteString $ CBOR.encodeBreak
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
