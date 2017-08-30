@@ -8,6 +8,7 @@
 import Data.Monoid
 import System.IO
 
+import qualified Data.Yaml as Yaml
 import qualified Data.ByteString.Lazy as BSL
 import qualified Codec.Serialise as CBOR
 import qualified Codec.Serialise.Encoding as CBOR
@@ -24,6 +25,7 @@ import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
 import qualified Data.MediaWiki.XmlDump as XmlDump
 import CAR.Types
 import Import
+import ConfigFile
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
 
@@ -42,10 +44,11 @@ instance B.Binary WikiDoc
 commit :: String
 commit = $(gitHash)
 
-opts :: Parser (Int, SiteId -> Provenance)
+opts :: Parser (Int, Maybe FilePath, SiteId -> Provenance)
 opts =
-    (,)
+    (,,)
        <$> option auto (short 'j' <> long "jobs" <> metavar "N" <> help "Number of workers" <> value 1)
+       <*> optional (option str (short 'c' <> long "config" <> metavar "CONFIG" <> help "Configuration file"))
        <*> prov
   where
     prov = do
@@ -56,14 +59,23 @@ opts =
 
 main :: IO ()
 main = do
-    (workers, prov) <- execParser $ info (helper <*> opts) mempty
+    (workers, maybeConfig, prov) <- execParser $ info (helper <*> opts) mempty
     (siteInfo, docs) <- parseWikiDocs <$> BSL.getContents
+
+    let Just (XmlDump.Namespace categoryNamespaceName) =
+            lookup (XmlDump.NamespaceId 14) (XmlDump.siteNamespaces siteInfo)
+    config <- case maybeConfig of
+      Just configPath -> do
+          configFile <- Yaml.decodeFileEither configPath >>= either (fail . show) return
+          return $ configFileToConfig categoryNamespaceName configFile
+      Nothing         -> return defaultConfig
+
     let siteId = SiteId $ XmlDump.siteDbName siteInfo
 
         parsed :: Producer (Either String (EncodedCbor Page)) IO ()
         parsed =
             CM.map (2*workers) workers
-                (fmap encodedCbor . toPage defaultConfig siteId)
+                (fmap encodedCbor . toPage config siteId)
                 (each $ filter isInteresting docs)
         putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
         putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."

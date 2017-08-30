@@ -12,7 +12,7 @@ cabal-version:       >=1.10
 
 executable trec-car-import
   main-is:             Main.hs
-  other-modules:       Import, Entities, Utils, Templates
+  other-modules:       Import, Entities, Utils, Templates, ConfigFile
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall -rtsopts -threaded
   build-depends:       base,
@@ -31,6 +31,7 @@ executable trec-car-import
                        gitrev,
                        trifecta,
                        aeson,
+                       yaml,
                        optparse-applicative >= 0.13,
                        free >=4.12 && <4.13,
                        transformers >=0.5 && <0.6,
