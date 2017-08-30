@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module ConfigFile where
 
+import GHC.Generics
 import Data.Maybe
 import Data.List
 import Control.Applicative
@@ -60,17 +62,20 @@ instance FromJSON TemplateResolution where
         Tri.Success a -> pure $ TemplateResolution a
         Tri.Failure e -> fail $ show e
 
-data ConfigFile = ConfigFile { interestingNamespaces :: [String]
-                             , disambiguationTemplates :: [TemplateTag]
+instance ToJSON TemplateResolution where
+    toJSON (TemplateResolution rs) = toJSON $ concatMap showResolutionPart rs
+
+showResolutionPart :: ResolutionPart -> String
+showResolutionPart (TRText s) = s
+showResolutionPart (TRPositionalArg n) = "{{#"++show n++"}}"
+showResolutionPart (TRNamedArg n) = "{{"++T.unpack n++"}}"
+
+data ConfigFile = ConfigFile { disambiguationTemplates :: [TemplateTag]
                              , templateResolutions :: HM.HashMap TemplateTag TemplateResolution
                              }
-
-instance FromJSON ConfigFile where
-    parseJSON = withObject "configuration" $ \obj ->
-      ConfigFile
-        <$> obj .: "interesting_namespaces"
-        <*> obj .: "disambuation_templates"
-        <*> obj .: "template_resolutions"
+                deriving (Generic)
+instance FromJSON ConfigFile
+instance ToJSON ConfigFile
 
 configFileToConfig :: T.Text -> ConfigFile -> Config
 configFileToConfig categoryNamespaceName c =

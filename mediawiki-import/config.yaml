@@ -1,0 +1,13 @@
+templateResolutions:
+  lang: "{{#1}}"
+  linktext: "{{#0}}"
+  small: "{{#0}}"
+  smaller: "{{#0}}"
+  midsize: "{{#0}}"
+  larger: "{{#0}}"
+  big: "{{#0}}"
+  large: "{{#0}}"
+  huge: "{{#0}}"
+  resize: "{{#0}}"
+disambiguationTemplates:
+  - disambig
