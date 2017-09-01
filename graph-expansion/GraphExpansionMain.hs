@@ -495,7 +495,7 @@ main = do
         execParser $ info (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
-    siteId <- wikiSite . fst <$> readPagesFile' articlesFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath

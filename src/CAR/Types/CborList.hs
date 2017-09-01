@@ -1,6 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
+-- Stop! Use Files module for reading car cbor files with headers!
 module CAR.Types.CborList
     ( decodeCborList, readCborList, readCborList'
     , encodeCborList, writeCborList

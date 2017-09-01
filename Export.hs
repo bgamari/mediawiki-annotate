@@ -34,7 +34,7 @@ main :: IO ()
 main = do
     (path, outpath, unprocessedPagesFile, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
-    (prov, _) <- readPagesFile' path
+    (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
     unprocessedPages <- openAnnotations unprocessedPagesFile
     let pagesToExport
