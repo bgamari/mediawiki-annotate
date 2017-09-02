@@ -47,7 +47,7 @@ main = do
                 , Just para <- pure $ HM.lookup canonicalParaId canonicalParagraphs
                 ]
 
-    (prov, pages) <- readPagesFile' inputFile
+    (prov, pages) <- readPagesFileWithProvenance inputFile
     writeCarFile outputFile prov $ map (rewritePage rewritePara) pages
 
 rewritePage :: (Paragraph -> Paragraph) -> Page -> Page

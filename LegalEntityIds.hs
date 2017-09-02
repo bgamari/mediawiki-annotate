@@ -30,7 +30,7 @@ main :: IO ()
 main = do
     (unprocessedPagesFile, outputFile, mode) <- execParser $ info (helper <*> options) mempty
     unprocessedPages <- openAnnotations unprocessedPagesFile
-    siteId <- wikiSite . fst <$> readPagesFile' unprocessedPagesFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance unprocessedPagesFile
 
     let entityRedirects = entityRedirectMap siteId $ AnnsFile.pages unprocessedPages
         resolveRedirect = resolveRedirectFun entityRedirects

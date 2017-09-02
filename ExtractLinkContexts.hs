@@ -130,7 +130,7 @@ toGalagoDoc linkDoc =
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
-    (prov, pages) <- readPagesFile' inputFile
+    (prov, pages) <- readPagesFileWithProvenance inputFile
     BSL.writeFile outputFile
         $ Galago.toWarc
         $ map toGalagoDoc

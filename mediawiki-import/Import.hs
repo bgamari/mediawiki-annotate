@@ -6,7 +6,6 @@ module Import
     ( Config(..)
     , defaultConfig
     , toPage
-    , isInteresting
     ) where
 
 import Data.Maybe
@@ -34,27 +33,6 @@ defaultConfig =
            , isDisambiguation = \name _ -> "(disambiguation)" `T.isPrefixOf` getPageName name
            , resolveTemplate = defaultTemplateHandler
            }
-
-isInteresting :: WikiDoc -> Bool
-isInteresting WikiDoc{..} = not $
-       "Category talk:" `BS.isPrefixOf` docTitle
-    || "Talk:" `BS.isPrefixOf` docTitle
-    || "File:" `BS.isPrefixOf` docTitle
-    || "File talk:" `BS.isPrefixOf` docTitle
-    || "Special:" `BS.isPrefixOf` docTitle
-    || "User:" `BS.isPrefixOf` docTitle
-    || "User talk:" `BS.isPrefixOf` docTitle
-    || "Wikipedia talk:" `BS.isPrefixOf` docTitle
-    || "Wikipedia:" `BS.isPrefixOf` docTitle
-    || "Template:" `BS.isPrefixOf` docTitle
-    || "Template talk:" `BS.isPrefixOf` docTitle
-    || "Portal:" `BS.isPrefixOf` docTitle
-    || "Module:" `BS.isPrefixOf` docTitle
-    || "Draft:" `BS.isPrefixOf` docTitle
-    || "Help:" `BS.isPrefixOf` docTitle
-    || "Book:" `BS.isPrefixOf` docTitle
-    || "TimedText:" `BS.isPrefixOf` docTitle
-    || "MediaWiki:" `BS.isPrefixOf` docTitle
 
 toPage :: Config -> SiteId -> WikiDoc -> Either String Page
 toPage Config{..} site WikiDoc{..} =

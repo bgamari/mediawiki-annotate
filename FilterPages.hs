@@ -91,7 +91,7 @@ main :: IO ()
 main = do
     (inputFile, outputFile, takeN, multiLangOptsMaybe, predicate) <-
         execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
-    (prov, pages) <- readPagesFile' inputFile
+    (prov, pages) <- readPagesFileWithProvenance inputFile
     predicate' <- runPredFromFile predicate
 
     pageNameTranslate <- case multiLangOptsMaybe of

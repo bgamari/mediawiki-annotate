@@ -6,6 +6,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+
+-- Utilities for reading CAR cbor files with headers. Use this module rather than CborList
 module CAR.Types.Files
     ( Provenance(..)
       -- * File types
@@ -13,7 +15,7 @@ module CAR.Types.Files
     , writeCarFile
     , readCarFile
       -- ** Pages
-    , readPagesFile, readPagesFile'
+    , readPagesFile, readPagesFileWithProvenance
       -- ** Paragraphs
     , readParagraphsFile
       -- ** Outlines
@@ -131,10 +133,10 @@ writeCarFile path prov xs = do
     writeCborList path hdr xs
 
 readPagesFile :: FilePath -> IO [Page]
-readPagesFile = fmap snd . readPagesFile'
+readPagesFile = fmap snd . readPagesFileWithProvenance
 
-readPagesFile' :: FilePath -> IO (Provenance, [Page])
-readPagesFile' = readCarFile
+readPagesFileWithProvenance :: FilePath -> IO (Provenance, [Page])
+readPagesFileWithProvenance = readCarFile
 
 readParagraphsFile :: FilePath -> IO [Paragraph]
 readParagraphsFile = fmap snd . readCarFile

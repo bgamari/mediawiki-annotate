@@ -11,7 +11,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable trec-car-import
-  main-is:             Main.hs
+  main-is:             TrecCarImport.hs
   other-modules:       Import, Entities, Utils, Templates, ConfigFile
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall -rtsopts -threaded

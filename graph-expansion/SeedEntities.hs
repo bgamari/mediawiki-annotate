@@ -16,7 +16,7 @@ main = do
     (queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    siteId <- wikiSite . fst <$> readPagesFile' queryFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
     queriesToSeedEntities <- pagesToQueryDocs siteId id QueryFromPageTitle <$> readPagesFile queryFile
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where

@@ -193,7 +193,7 @@ entityModes = subparser
            <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
       where
         go outputPath articlesPath textPart = do
-            (prov, pages) <- readPagesFile' articlesPath
+            (prov, pages) <- readPagesFileWithProvenance articlesPath
             let !resolveRedirect = resolveRedirectFactory (wikiSite prov) pages
 
             !inlinkInfo <- collectInlinkInfo (wikiSite prov) resolveRedirect <$> readPagesFile articlesPath

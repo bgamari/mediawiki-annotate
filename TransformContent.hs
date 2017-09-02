@@ -183,6 +183,6 @@ transformCategoriesAndForbiddenSection page =
 main :: IO ()
 main = do
     (inputFile, outputFile, transformMode) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
-    (prov, pages) <- readPagesFile' inputFile
+    (prov, pages) <- readPagesFileWithProvenance inputFile
     writeCarFile outputFile prov $ mapMaybe transformMode pages
 

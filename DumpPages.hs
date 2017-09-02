@@ -68,7 +68,7 @@ opts = subparser
                 mapM_ printPage pages
           | otherwise = do
                 anns <- CAR.openAnnotations inputFile
-                siteId <- wikiSite . fst <$> readPagesFile' inputFile
+                siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
                 let pageIds = map (pageNameToId siteId) $ S.toList pageNames
                 mapM_ printPage $ mapMaybe (`CAR.lookupPage` anns) pageIds
 

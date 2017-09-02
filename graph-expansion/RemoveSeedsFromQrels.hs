@@ -33,7 +33,7 @@ main = do
     (outputFile, qrelfile, queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    siteId <- wikiSite . fst <$> readPagesFile' queryFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =
              queryDocPageId queryDoc `HS.insert` queryDocLeadEntities queryDoc
