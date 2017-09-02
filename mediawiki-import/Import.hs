@@ -61,7 +61,7 @@ toPage Config{..} site WikiDoc{..} =
           | otherwise                      = ArticlePage
         metadata =
             PageMetadata { pagemetaType   = pageType
-                         , redirectNames  = []
+                         , metadataItems  = []
                          , pageCategories = categories
                          }
 

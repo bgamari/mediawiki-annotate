@@ -21,6 +21,7 @@ module CAR.Types.AST
     , Page(..)
     , PageType(..)
     , PageMetadata(..)
+    , MetadataItem(..)
       -- * Outline documents
     , Stub(..)
       -- * Entity
@@ -211,8 +212,13 @@ data PageType = ArticlePage
               deriving (Show, Generic)
 instance CBOR.Serialise PageType
 
+data MetadataItem = RedirectNames [PageName]
+                  | DisambiguationNames [PageName]
+                  deriving (Show, Generic)
+instance CBOR.Serialise MetadataItem
+
 data PageMetadata = PageMetadata { pagemetaType   :: PageType
-                                 , redirectNames  :: [PageName]
+                                 , metadataItems  :: [MetadataItem]
                                  , pageCategories :: [PageId]
                                  }
                   deriving (Show, Generic)
