@@ -13,8 +13,13 @@ import qualified Data.Text as T
 import CAR.Types.AST
 
 prettyPage :: LinkStyle -> Page -> String
-prettyPage linkStyle (Page (PageName name) _ _ skeleton) =
-    unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
+prettyPage linkStyle (Page (PageName name) _ metaData skeleton) =
+    unlines $ [ T.unpack name
+              , replicate (T.length name) '='
+              , ""
+              , "   " ++ show metaData
+              , ""
+              ]
             ++ map (prettySkeleton linkStyle) skeleton
 
 prettySkeleton :: LinkStyle -> PageSkeleton -> String

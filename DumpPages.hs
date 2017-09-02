@@ -46,7 +46,7 @@ opts = subparser
 
     dumpSections =
         f <$> argument str (help "input file" <> metavar "FILE")
-          <*> flag False True (long "raw" <> help "only section paths no pagenames")
+          <*> flag False True (long "raw" <> help "only section paths - no pagenames")
       where
         f inputFile raw = do
             pages <- readPagesFile inputFile

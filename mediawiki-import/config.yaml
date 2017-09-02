@@ -1,13 +1,19 @@
 templateResolutions:
-  lang: "{{#1}}"
-  linktext: "{{#0}}"
-  small: "{{#0}}"
-  smaller: "{{#0}}"
-  midsize: "{{#0}}"
-  larger: "{{#0}}"
-  big: "{{#0}}"
-  large: "{{#0}}"
-  huge: "{{#0}}"
-  resize: "{{#0}}"
-disambiguationTemplates:
+  lang: "{{#1}}" # Q6610935
+  linktext: "{{#0}}" # Q13422707
+  small: "{{#0}}"  # Q5411092
+  smaller: "{{#0}}"  # Q15711916
+  midsize: "{{#0}}" # Q20783112
+  larger: "{{#0}}" # Q10984380
+  big: "{{#0}}"          # Q6953348
+  large: "{{#0}}"        # Q8091126
+  huge: "{{#0}}"         # Q6810626
+  resize: "{{#0}}"       # Q6196326
+
+  # date  Q6076642
+disambiguationTemplates: # Q6148868
   - disambig
+  - disambiguation
+  - dab
+  # - disambiguation/lang
+  # look up language specific template in https://www.wikidata.org/wiki/Q6148868
