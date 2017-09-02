@@ -118,7 +118,7 @@ pageToKbDoc :: Page -> KbDoc
 pageToKbDoc page =
   let leadParas = filter isLead $ pageSkeleton page
       kbDocPageId = pageId page
-      kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
+      kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonFulltext $ leadParas
       kbDocOutLinks = fmap linkTarget $ foldMap pageSkeletonLinks $ leadParas
       kbDocOutMentions = fmap linkAnchor $ foldMap pageSkeletonLinks $ leadParas
       kbDocLeadPara = leadParas

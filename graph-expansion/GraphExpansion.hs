@@ -59,7 +59,7 @@ pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId _ pageSkeleta) =
      $ fmap (computeTextEmbedding wordEmbedding)
      $ mconcat $ pageText
     where
-      pageText = fmap (map TL.toStrict . pageSkeletonText) pageSkeleta
+      pageText = fmap (map TL.toStrict . pageSkeletonFulltext) pageSkeleta
 
 pageNameEmbeddingAttributes :: KnownNat n => WordEmbedding n -> PageId
                             -> WordVec n
