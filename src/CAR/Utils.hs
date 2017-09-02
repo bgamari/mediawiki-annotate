@@ -4,6 +4,7 @@
 module CAR.Utils where
 
 import Control.Monad (guard)
+import Data.Char
 import Data.Maybe
 import qualified Data.DList as DList
 import           Data.DList (DList)
@@ -14,12 +15,20 @@ import qualified Data.Text.Lazy as TL
 import CAR.Types
 import SimplIR.Utils.Compact
 
+-- | Identify the target of a redirect page.
+--
+-- In English redirect pages begin with a paragraph starting with @#redirect@. However,
+-- to be langauge-agnostic we instead just look for any page beginning with a word starting
+-- with a hash sign, followed by a link.
 pageRedirect :: Page -> Maybe PageName
-pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : rest)) : _})
-  | T.pack "#redirect" `T.isPrefixOf` T.toCaseFold (T.stripStart t)
-  , (ParaLink l) : _ <- rest = Just (linkTarget l)
+pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)) : _})
+  | Just word <- T.pack "#" `T.stripPrefix` T.toCaseFold (T.strip t)
+  , not $ T.null word
+  , T.all isAlpha word
+  = Just (linkTarget l)
 pageRedirect _ = Nothing
 
+-- | Note that this is language-specific.
 pageIsDisambiguation :: Page -> Bool
 pageIsDisambiguation (Page { pageName = PageName t }) =
     (T.pack " (disambiguation)") `T.isInfixOf` T.toCaseFold t
