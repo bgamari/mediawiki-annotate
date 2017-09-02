@@ -46,14 +46,18 @@ opts = subparser
 
     dumpSections =
         f <$> argument str (help "input file" <> metavar "FILE")
+          <*> flag False True (long "raw" <> help "only section paths no pagenames")
       where
-        f inputFile = do
+        f inputFile raw = do
             pages <- readPagesFile inputFile
             let sectionpathlist p = fmap escapeSectionPath
                                   $ pageSectionPaths p
-            let pageNameStr p = (T.unpack $ getPageName $ pageName p)
+                pageNameStr p = (T.unpack $ getPageName $ pageName p)
 
-            mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
+            if raw then
+                mapM_  (\p -> putStrLn $ unlines $ sectionpathlist p) pages
+            else
+                mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")
