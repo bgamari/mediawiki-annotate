@@ -131,6 +131,7 @@ packParagraphId = ParagraphId . SBS.pack . map (fromIntegral . ord)
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
                   | Image T.Text [PageSkeleton]
+                  | List !Int Paragraph
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 

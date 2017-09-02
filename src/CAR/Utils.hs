@@ -37,8 +37,11 @@ pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
   where
     goSkeleton (Section _ _ children) = any goSkeleton children
-    goSkeleton (Para (Paragraph _ bodies)) = any goParaBody bodies
+    goSkeleton (Para p) = goParagraph p
     goSkeleton (Image {}) = False
+    goSkeleton (List _ p) = goParagraph p
+
+    goParagraph (Paragraph _ bodies) = any goParaBody bodies
 
     goParaBody (ParaLink l) = str `T.isInfixOf` linkAnchor l
     goParaBody (ParaText t) = str `T.isInfixOf` t
@@ -55,13 +58,15 @@ pageParas = foldMap pageSkeletonParas . pageSkeleton
 
 pageSkeletonParas :: PageSkeleton -> [Paragraph]
 pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
-pageSkeletonParas (Para (paragraph)) = [paragraph]
+pageSkeletonParas (Para paragraph) = [paragraph]
 pageSkeletonParas (Image {}) = []
+pageSkeletonParas (List _ paragraph) = [paragraph]
 
 pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
+pageSkeletonLinks (List _ (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 
 pageSectionPaths :: Page -> [SectionPath]
 pageSectionPaths = map (\(path,_,_) -> path) . pageSections
@@ -90,6 +95,7 @@ pageSkeletonSections pageId = go mempty mempty
            : foldMap (go parentIds' parentHeadings') children
     go _ _ (Para {})  = []
     go _ _ (Image {}) = []
+    go _ _ (List {})  = []
 
     isSection (Section {}) = True
     isSection _            = False
@@ -104,8 +110,9 @@ paraBodyLinks (ParaLink link)  = [link]
 
 pageSkeletonText :: PageSkeleton -> [TL.Text]
 pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
-pageSkeletonText (Para para) = [ paraToText para ]
-pageSkeletonText (Image _ _) = []
+pageSkeletonText (Para para)   = [paraToText para]
+pageSkeletonText (Image _ _)   = []
+pageSkeletonText (List _ para) = [paraToText para]
 
 
 pageFulltext :: Page -> [TL.Text]
@@ -115,9 +122,10 @@ pageFulltext (Page {pageName=pageName, pageSkeleton=skels}) =
 pageSkeletonFulltext :: PageSkeleton -> [TL.Text]
 pageSkeletonFulltext (Section heading _ children) =
     (TL.fromStrict $ getSectionHeading heading) : (foldMap pageSkeletonFulltext children)
-pageSkeletonFulltext (Para para) = [ paraToText para ]
+pageSkeletonFulltext (Para para) = [paraToText para]
 pageSkeletonFulltext (Image _ children) =
     foldMap pageSkeletonFulltext children
+pageSkeletonFulltext (List _ para) = [paraToText para]
 
 
 

@@ -100,6 +100,13 @@ isImage (InternalLink target parts)
       | otherwise   = Just (name, last parts)
 isImage _ = Nothing
 
+isList :: Doc -> Maybe (Int, [Doc])
+isList (NumberedList n xs)   = Just (n, xs)
+isList (BulletList n xs)     = Just (n, xs)
+isList (UnmarkedList n xs)   = Just (n, xs)
+isList (DefinitionList n xs) = Just (n, xs)
+isList _                     = Nothing
+
 -- | A terrible workaround for our inability to robustly parse bold/italics.
 dropQuotes :: String -> String
 dropQuotes ('\'':xs) =
@@ -185,6 +192,8 @@ splitParagraph siteId thisPage docs
   | otherwise
   = Nothing
 
+type ListLevel = Int
+
 toSkeleton :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
 toSkeleton siteId thisPage = go
   where
@@ -195,10 +204,13 @@ toSkeleton siteId thisPage = go
     go (doc : docs)
       | Just (target, caption) <- isImage doc
       = Image target (go caption) : go docs
+      | Just (lvl, content) <- isList doc
+      , Just (para, rest) <- splitParagraph siteId thisPage content
+      = List lvl para : go rest
     go (Heading lvl title : docs) =
         let (children, docs') = break isParentHeader docs
             isParentHeader (Heading lvl' _) = lvl' <= lvl
             isParentHeader _                = False
             heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
         in Section heading (sectionHeadingToId heading) (go children) : go docs'
-    go (_ : docs)                 = go docs
+    go (_ : docs) = go docs

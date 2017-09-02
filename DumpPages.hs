@@ -130,8 +130,7 @@ opts = subparser
 
 sectionHeadings :: PageSkeleton -> [SectionHeading]
 sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children
-sectionHeadings (Para _) = []
-sectionHeadings (Image{}) = []
+sectionHeadings _ = []
 
 main :: IO ()
 main = join $ execParser $ info (helper <*> opts) mempty

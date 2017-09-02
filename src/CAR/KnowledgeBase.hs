@@ -30,6 +30,7 @@ isLead :: PageSkeleton -> Bool
 isLead (Para{}) = True
 isLead (Section{}) = False
 isLead (Image{}) = False
+isLead (List{}) = False
 
 data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocCanonicalName :: PageName

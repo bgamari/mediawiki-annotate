@@ -34,6 +34,7 @@ prettySkeleton renderLink = go 1
     go _ (Para para) = prettyParagraph renderLink para
     go _ (Image target children) =
         "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
+    go _ (List n para) = replicate n '*' ++ " " ++ prettyParagraph renderLink para
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
 prettyParagraph renderLink (Paragraph pid bodies) =

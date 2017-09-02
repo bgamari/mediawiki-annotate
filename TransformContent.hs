@@ -85,14 +85,12 @@ forbiddenStdHeadings = HS.fromList ["see also", "references", "external links", 
     "external links and references", "notes and references" ] --new in v1.6
 
 isPara :: PageSkeleton -> Bool
-isPara (Para{})    = True
-isPara (Section{}) = False
-isPara (Image{})   = False
+isPara (Para{}) = True
+isPara _        = False
 
 isImage :: PageSkeleton -> Bool
-isImage (Para{})    = False
-isImage (Section{}) = False
 isImage (Image{})   = True
+isImage _           = False
 
 
 
