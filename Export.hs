@@ -63,13 +63,12 @@ main = do
 
 
     -- paragraph annotations
-    let writeAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
-        writeAnnotations relsFile _pages cutSectionPath = do
+    let writeAnnotations ::  FilePath ->  (SectionPath -> SectionPath) -> IO ()
+        writeAnnotations relsFile cutSectionPath = do
             putStr "Writing section relevance annotations..."
             let cutAnnotation (Annotation sectionPath paraId rel) =
                   Annotation (cutSectionPath sectionPath) paraId rel
-            withFile relsFile WriteMode $ \h ->
-                  hPutStr h
+            writeFile relsFile
                   $ unlines
                   $ map prettyAnnotation
                   $ S.toList
@@ -80,13 +79,12 @@ main = do
 
     let resolveRedirect = resolveRedirectFactory siteId $ AnnsFile.pages unprocessedPages
     -- entity annnotations
-        writeEntityAnnotations ::  FilePath -> [Page] ->  (SectionPath -> SectionPath) -> IO ()
-        writeEntityAnnotations relsFile pages cutSectionPath = do
+        writeEntityAnnotations ::  FilePath ->  (SectionPath -> SectionPath) -> IO ()
+        writeEntityAnnotations relsFile cutSectionPath = do
             putStr "Writing section relevance annotations..."
             let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
                   EntityAnnotation (cutSectionPath sectionPath) entityId rel
-            withFile relsFile WriteMode $ \h ->
-                  hPutStr h
+            writeFile relsFile
                   $ unlines
                   $ map prettyEntityAnnotation
                   $ S.toList
@@ -95,18 +93,18 @@ main = do
             putStrLn "done"
 
 
-    let cutSectionPathArticle (SectionPath pageId headinglist)  =
-            SectionPath pageId mempty
-    let cutSectionPathTopLevel  (SectionPath pageId headinglist) =
-            SectionPath pageId (take 1 headinglist)
+    let cutSectionPathArticle (SectionPath pgId _headinglist)  =
+            SectionPath pgId mempty
+    let cutSectionPathTopLevel  (SectionPath pgId headinglist) =
+            SectionPath pgId (take 1 headinglist)
 
 
-    writeAnnotations  (outpath <.> "hierarchical.qrels")  pagesToExport id
-    writeAnnotations  (outpath <.> "article.qrels")  pagesToExport cutSectionPathArticle
-    writeAnnotations  (outpath <.> "toplevel.qrels")  pagesToExport cutSectionPathTopLevel
-    writeEntityAnnotations  (outpath <.> "hierarchical.entity.qrels")  pagesToExport id
-    writeEntityAnnotations  (outpath <.> "article.entity.qrels")  pagesToExport cutSectionPathArticle
-    writeEntityAnnotations  (outpath <.> "toplevel.entity.qrels")  pagesToExport cutSectionPathTopLevel
+    writeAnnotations        (outpath <.> "hierarchical.qrels")         id
+    writeAnnotations        (outpath <.> "article.qrels")              cutSectionPathArticle
+    writeAnnotations        (outpath <.> "toplevel.qrels")             cutSectionPathTopLevel
+    writeEntityAnnotations  (outpath <.> "hierarchical.entity.qrels")  id
+    writeEntityAnnotations  (outpath <.> "article.entity.qrels")       cutSectionPathArticle
+    writeEntityAnnotations  (outpath <.> "toplevel.entity.qrels")      cutSectionPathTopLevel
 
 
 
