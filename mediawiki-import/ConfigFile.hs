@@ -50,7 +50,7 @@ runTemplateResolution ListTemplate args = listTemplate args
 runTemplateResolution (ViaResolution res) args =
     concat <$> mapM resolve res
   where
-    (posArgs, namedArgs) = partition (isJust . fst) args
+    (posArgs, namedArgs) = partition (isNothing . fst) args
 
     resolve :: ResolutionPart -> Maybe [Doc]
     resolve (TRText t) = Just [Text t]
