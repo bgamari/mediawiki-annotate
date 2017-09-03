@@ -9,6 +9,63 @@ templateResolutions:
   large: "{{#0}}"        # Q8091126
   huge: "{{#0}}"         # Q6810626
   resize: "{{#0}}"       # Q6196326
+  smallcaps: "{{#0}}"
+  sc1: "{{#0}}"
+  smallcaps2: "{{#0}}"
+  sc2: "{{#0}}"
+  sc: "{{#0}}"
+  allcaps: "{{#0}}"
+  caps: "{{#0}}"
+  nocaps: "{{#0}}"
+
+  angbr: "⟨{{#0}}⟩"
+  cquote: "{{#0}}"
+  quotation: "{{#0}}"
+  visible anchor: "{{#0}}"
+  format price: "{{#0}}"
+  mvar: "{{#0}}"
+  nowrap: "{{#0}}"
+  ordinal to word: "{{#0}}"
+  number to word: "{{#0}}"
+  cardinal to word: "{{#0}}"
+  linktext: "{{#0}}"
+  
+
+  transl: "{{#1}}"
+  rtl-lang: "{{#1}}"
+  lang: "{{#1}}"
+
+  citation needed: ""    
+  respell: ""
+  ref: ""
+  refn: ""
+  r: ""
+  zh: ""
+  sfn: ""
+
+  # approximations of complicated templates
+  as of: "as of {{#0}} {{#1}} {{#2}}"
+  time ago: "on {{#0}}"
+  inflation: "{{#1}}"
+  convert: "{{#0}} {{#1}}"
+  cvt:  "{{#0}} {{#1}}"
+  
+  # synonyms for lists
+  blist: "&list"
+  bulleted list:  "&list"
+  blist:  "&list"
+  bulleted: "&list"
+  ulist:  "&list"
+  unordered list:  "&list"
+  unbulleted list:  "&list"
+  ubl: "&list"
+  ubt:  "&list"
+  ublist:  "&list"
+  unbullet:  "&list"
+  plainlist:  "&list"
+  ordered list:  "&list"
+  hlist:  "&list"
+  flatlist:  "&list"
 
   # date  Q6076642
 disambiguationTemplates: # Q6148868

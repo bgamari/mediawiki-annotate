@@ -41,8 +41,13 @@ parseTemplateResolution = positionalArg <|> namedArg <|> text
         cs <- many $ Tri.noneOf "{"
         pure $ TRText $ c:cs
 
+listTemplate :: TemplateHandler
+listTemplate args =
+    Just $ map (BulletList 1) (mapMaybe isUnnamed args)
+    
 runTemplateResolution :: TemplateResolution -> TemplateHandler
-runTemplateResolution (TemplateResolution res) args =
+runTemplateResolution ListTemplate args = listTemplate args
+runTemplateResolution (ViaResolution res) args =
     concat <$> mapM resolve res
   where
     (posArgs, namedArgs) = partition (isJust . fst) args
@@ -54,16 +59,21 @@ runTemplateResolution (TemplateResolution res) args =
       | otherwise                  = Nothing
     resolve (TRNamedArg n) = lookup (Just n) namedArgs
 
-newtype TemplateResolution = TemplateResolution [ResolutionPart]
+data TemplateResolution = ListTemplate
+                        | ViaResolution [ResolutionPart]
 
 instance FromJSON TemplateResolution where
     parseJSON = withText "template resolution" $ \t ->
-      case Tri.parseString (many parseTemplateResolution) mempty (T.unpack t) of
-        Tri.Success a -> pure $ TemplateResolution a
-        Tri.Failure e -> fail $ show e
+      case t of
+        "&list" -> pure ListTemplate
+        _ -> 
+          case Tri.parseString (many parseTemplateResolution) mempty (T.unpack t) of
+            Tri.Success a -> pure $ ViaResolution a
+            Tri.Failure e -> fail $ show e
 
 instance ToJSON TemplateResolution where
-    toJSON (TemplateResolution rs) = toJSON $ concatMap showResolutionPart rs
+    toJSON ListTemplate       = String "&list"
+    toJSON (ViaResolution rs) = toJSON $ concatMap showResolutionPart rs
 
 showResolutionPart :: ResolutionPart -> String
 showResolutionPart (TRText s) = s

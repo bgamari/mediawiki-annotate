@@ -86,15 +86,17 @@ templates = HM.fromList $
     justText :: String -> Maybe [Doc]
     justText x = Just [Text x]
 
+    -- \ discards
     dropTemplate _ = Nothing
 
     listTemplate args =
-        Just $ concat $ [Text " "] : intersperse [Text ", "] (mapMaybe isUnnamed args)
+        Just $ map (BulletList 1) (mapMaybe isUnnamed args)
 
     convertTemplate ((Nothing, val) : (Nothing, unit) : _) =
         justText $ getAllText val <> " " <> getAllText unit
     convertTemplate _ = Nothing
 
+    -- \ preserves the second argument
     langTemplate (_ : (Nothing, body) : _) = Just body
     langTemplate _ = Nothing
 
@@ -114,6 +116,7 @@ templates = HM.fromList $
         since = lookupNamed "since" args == Just [Text "y"]
         lowercase = lookupNamed "lc" args == Just [Text "y"]
 
+    -- \ preserves the first argument
     simpleTemplate ((Nothing, val) : _) = Just val
     simpleTemplate _                    = Nothing
 
