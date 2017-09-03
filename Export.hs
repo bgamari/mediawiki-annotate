@@ -3,7 +3,6 @@
 import Control.Monad
 import Data.Maybe
 import Data.Monoid
-import System.IO
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
