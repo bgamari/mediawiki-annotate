@@ -198,8 +198,8 @@ toSkeleton siteId thisPage = go
       | Just (target, caption) <- isImage doc
       = Image target (go caption) : go docs
       | Markup.List tys content <- doc
-      , Just (para, rest) <- splitParagraph siteId thisPage content
-      = CAR.Types.List (length tys) para : go rest
+      = let contents = concat $ mapMaybe (toParaBody siteId thisPage) content
+        in CAR.Types.List (length tys) (mkParagraph contents) : go docs
     go (Heading lvl title : docs) =
         let (children, docs') = break isParentHeader docs
             isParentHeader (Heading lvl' _) = lvl' <= lvl
