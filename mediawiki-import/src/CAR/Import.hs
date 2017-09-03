@@ -113,13 +113,6 @@ isImage (InternalLink target parts)
       | otherwise   = Just (name, last parts)
 isImage _ = Nothing
 
-isList :: Doc -> Maybe (Int, [Doc])
-isList (NumberedList n xs)   = Just (n, xs)
-isList (BulletList n xs)     = Just (n, xs)
-isList (UnmarkedList n xs)   = Just (n, xs)
-isList (DefinitionList n xs) = Just (n, xs)
-isList _                     = Nothing
-
 -- | A terrible workaround for our inability to robustly parse bold/italics.
 dropQuotes :: String -> String
 dropQuotes ('\'':xs) =
@@ -215,9 +208,9 @@ toSkeleton siteId thisPage = go
     go (doc : docs)
       | Just (target, caption) <- isImage doc
       = Image target (go caption) : go docs
-      | Just (lvl, content) <- isList doc
+      | Markup.List tys content <- doc
       , Just (para, rest) <- splitParagraph siteId thisPage content
-      = List lvl para : go rest
+      = CAR.Types.List (length tys) para : go rest
     go (Heading lvl title : docs) =
         let (children, docs') = break isParentHeader docs
             isParentHeader (Heading lvl' _) = lvl' <= lvl

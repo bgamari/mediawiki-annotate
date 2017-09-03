@@ -90,7 +90,7 @@ templates = HM.fromList $
     dropTemplate _ = Nothing
 
     listTemplate args =
-        Just $ map (BulletList 1) (mapMaybe isUnnamed args)
+        Just $ map (List [Bulleted]) (mapMaybe isUnnamed args)
 
     convertTemplate ((Nothing, val) : (Nothing, unit) : _) =
         justText $ getAllText val <> " " <> getAllText unit

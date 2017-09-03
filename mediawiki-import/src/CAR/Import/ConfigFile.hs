@@ -43,7 +43,7 @@ parseTemplateResolution = positionalArg <|> namedArg <|> text
 
 listTemplate :: TemplateHandler
 listTemplate args =
-    Just $ map (BulletList 1) (mapMaybe isUnnamed args)
+    Just $ map (List [Bulleted]) (mapMaybe isUnnamed args)
 
 runTemplateResolution :: TemplateResolution -> TemplateHandler
 runTemplateResolution ListTemplate args = listTemplate args
