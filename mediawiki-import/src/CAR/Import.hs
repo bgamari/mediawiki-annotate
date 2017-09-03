@@ -113,18 +113,6 @@ isImage (InternalLink target parts)
       | otherwise   = Just (name, last parts)
 isImage _ = Nothing
 
--- | A terrible workaround for our inability to robustly parse bold/italics.
-dropQuotes :: String -> String
-dropQuotes ('\'':xs) =
-    case xs of
-      '\'':'\'':'\'':'\'':x:rest -> x : dropQuotes rest
-      '\'':'\'':x:rest           -> x : dropQuotes rest
-      '\'':x:rest                -> x : dropQuotes rest
-      x:rest                     -> '\'' : x : dropQuotes rest
-      []                         -> '\'' : []
-dropQuotes (x:rest) = x : dropQuotes rest
-dropQuotes [] = []
-
 -- | We need to make sure we handle cases like,
 -- @''[postwar tribunals]''@
 toParaBody :: SiteId -> PageId -> Doc -> Maybe [ParaBody]
