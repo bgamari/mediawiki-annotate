@@ -9,6 +9,7 @@ module Import
     ) where
 
 import Data.Maybe
+import Data.Char
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
@@ -17,7 +18,7 @@ import qualified Data.Text.Encoding as TE
 import Data.MediaWiki.XmlDump (WikiDoc(..))
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
-import CAR.Utils
+import CAR.Utils hiding (pageRedirect)
 import Entities
 import Templates
 import Utils
@@ -50,20 +51,32 @@ toPage Config{..} site WikiDoc{..} =
         pageId   = pageNameToId site name
         name     = normPageName $ PageName $ TE.decodeUtf8 docTitle
         skeleton = docsToSkeletons resolveTemplate site pageId contents
-        categories =   map linkTargetId
-                     $ filter (isCategory . linkTarget)
+        categories =  filter (isCategory . linkTarget)
                      $ foldMap pageSkeletonLinks skeleton
 
         pageType
-          | isCategory name                = CategoryPage
-          | isDisambiguation name contents = DisambiguationPage
-          | Just _ <- pageRedirect page    = RedirectPage
-          | otherwise                      = ArticlePage
+          | isCategory name                     = CategoryPage
+          | isDisambiguation name contents      = DisambiguationPage
+          | Just toPage <- pageRedirect page    = RedirectPage toPage
+          | otherwise                           = ArticlePage
         metadata =
-            PageMetadata { pagemetaType   = pageType
-                         , metadataItems  = []
-                         , pageCategories = categories
-                         }
+            emptyPageMetadata  { pagemetaType          = pageType
+                               , pagemetaCategoryNames = Just (map linkTarget categories)
+                               , pagemetaCategoryIds   = Just (map linkTargetId categories)
+                               }
+
+-- | Identify the target of a redirect page.
+--
+-- In English redirect pages begin with a paragraph starting with @#redirect@. However,
+-- to be langauge-agnostic we instead just look for any page beginning with a word starting
+-- with a hash sign, followed by a link.
+pageRedirect :: Page -> Maybe PageId
+pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)) : _})
+  | Just word <- T.pack "#" `T.stripPrefix` T.toCaseFold (T.strip t)
+  , not $ T.null word
+  , T.all isAlpha word
+  = Just (linkTargetId l)
+pageRedirect _ = Nothing
 
 docsToSkeletons :: (TemplateTag -> TemplateHandler) -> SiteId -> PageId -> [Doc] -> [PageSkeleton]
 docsToSkeletons resolveTemplate siteId thisPage =

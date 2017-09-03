@@ -16,22 +16,26 @@ import CAR.Types
 import SimplIR.Utils.Compact
 
 -- | Identify the target of a redirect page.
---
--- In English redirect pages begin with a paragraph starting with @#redirect@. However,
--- to be langauge-agnostic we instead just look for any page beginning with a word starting
--- with a hash sign, followed by a link.
-pageRedirect :: Page -> Maybe PageName
-pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)) : _})
-  | Just word <- T.pack "#" `T.stripPrefix` T.toCaseFold (T.strip t)
-  , not $ T.null word
-  , T.all isAlpha word
-  = Just (linkTarget l)
-pageRedirect _ = Nothing
+pageRedirect :: Page -> Maybe PageId
+pageRedirect Page { pageMetadata = meta } =
+    case (pagemetaType meta) of
+    RedirectPage toPage -> Just toPage
+    _                   -> Nothing
 
--- | Note that this is language-specific.
+-- | True if this is a disambiguation page (language-specifics already resolved)
 pageIsDisambiguation :: Page -> Bool
-pageIsDisambiguation (Page { pageName = PageName t }) =
-    (T.pack " (disambiguation)") `T.isInfixOf` T.toCaseFold t
+pageIsDisambiguation (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == DisambiguationPage
+
+pageIsCategory :: Page -> Bool
+pageIsCategory (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == CategoryPage
+
+pageIsArticle :: Page -> Bool
+pageIsArticle (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == ArticlePage
+
+
 
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
@@ -108,11 +112,6 @@ paraBodyLinks :: ParaBody -> [Link]
 paraBodyLinks (ParaText _text) = []
 paraBodyLinks (ParaLink link)  = [link]
 
--- pageSkeletonText :: PageSkeleton -> [TL.Text]
--- pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
--- pageSkeletonText (Para para) = [ paraToText para ]
--- pageSkeletonText (Image _ _) = []
-
 
 -- | Returns all visible text (including headers, page titles, and captions)  of the page.
 pageFulltext :: Page -> [TL.Text]
@@ -159,8 +158,7 @@ entityRedirectMap siteId pages =
         extractRedirect page@(Page {pageId=fromPageId})
           | isNullPageId fromPageId = Nothing
           | otherwise = do
-            toPageName <- pageRedirect page  -- MaybeMonad
-            let toPageId = pageNameToId siteId toPageName
+            toPageId <- pageRedirect page  -- MaybeMonad
             guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
             pure (fromPageId, toPageId)
 

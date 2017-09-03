@@ -135,7 +135,7 @@ interpret pageNameTranslate pred page =
       NameContains t                -> t `T.isInfixOf` T.toCaseFold (getPageName (pageName page))
       NameHasPrefix prefix          -> prefix `T.isPrefixOf` getPageName (pageName page)
       NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
-      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName . pageIdToName) $ pageCategories (pageMetadata page)
+      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName) $ fromMaybe [] $ pagemetaCategoryNames (pageMetadata page)
       PageHashMod salt n k          -> let h = hashWithSalt salt $ pageNameTranslate $ pageName page
                                        in h `mod` n == k
       IsRedirect                    -> isJust $ pageRedirect page

@@ -21,7 +21,7 @@ module CAR.Types.AST
     , Page(..)
     , PageType(..)
     , PageMetadata(..)
-    , MetadataItem(..)
+    , emptyPageMetadata
       -- * Outline documents
     , Stub(..)
       -- * Entity
@@ -208,24 +208,34 @@ instance CBOR.Serialise Page where
 data PageType = ArticlePage
               | CategoryPage
               | DisambiguationPage
-              | RedirectPage
-              deriving (Show, Generic)
+              | RedirectPage PageId
+              deriving (Show, Generic, Eq, Ord)
 instance CBOR.Serialise PageType
 
-data MetadataItem = RedirectNames [PageName]
-                  | DisambiguationNames [PageName]
-                  deriving (Show, Generic)
-instance CBOR.Serialise MetadataItem
+-- data MetadataItem = RedirectNames [PageName]
+--                   | RedirectIds [PageId]
+--                   | DisambiguationNames [PageName]
+--                   | DisambiguationIds [PageId]
+--                   | CategoryNames [PageName]
+--                   | CategoryIds [PageId]
+--                   | InlinkPageNames [PageName]
+--                   | InlinkPageIds [PageId]
+--                   deriving (Show, Generic)
+-- instance CBOR.Serialise MetadataItem
 
-data PageMetadata = PageMetadata { pagemetaType   :: PageType
-                                 , metadataItems  :: [MetadataItem]
-                                 , pageCategories :: [PageId]
+data PageMetadata = PageMetadata { pagemetaType                 :: PageType
+                                 , pagemetaRedirectNames        :: Maybe [PageName]
+                                 , pagemetaDisambiguationNames  :: Maybe [PageName]
+                                 , pagemetaDisambiguationIds    :: Maybe [PageId]
+                                 , pagemetaCategoryNames        :: Maybe [PageName]
+                                 , pagemetaCategoryIds          :: Maybe [PageId]
+                                 , pagemetaInlinkIds            :: Maybe [PageId]
                                  }
                   deriving (Show, Generic)
 instance CBOR.Serialise PageMetadata
 
 emptyPageMetadata :: PageMetadata
-emptyPageMetadata = PageMetadata ArticlePage [] []
+emptyPageMetadata = PageMetadata ArticlePage Nothing Nothing Nothing Nothing Nothing Nothing
 
 -- | Path from heading to page title in a page outline
 data SectionPath = SectionPath { sectionPathPageId   :: !PageId

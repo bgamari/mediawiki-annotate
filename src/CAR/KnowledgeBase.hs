@@ -91,7 +91,7 @@ collectInlinkInfo siteId resolveRedirects' = foldMap pageInlinkInfo
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton (resolveRedirects' $ pageNameToId siteId redirTargetId)
+            mempty { documentInlinks = HM.singleton (resolveRedirects' redirTargetId)
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
