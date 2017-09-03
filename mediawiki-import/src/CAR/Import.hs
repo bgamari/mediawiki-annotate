@@ -6,6 +6,7 @@ module CAR.Import
     ( Config(..)
     , defaultConfig
     , toPage
+    , parseSkeleton
     ) where
 
 import Data.Maybe
@@ -57,7 +58,7 @@ toPage Config{..} site WikiDoc{..} =
         pageType
           | isCategory name                     = CategoryPage
           | isDisambiguation name contents      = DisambiguationPage
-          | Just toPage <- pageRedirect page    = RedirectPage toPage
+          | Just toPageId <- pageRedirect page  = RedirectPage toPageId
           | otherwise                           = ArticlePage
         metadata =
             emptyPageMetadata  { pagemetaType          = pageType
