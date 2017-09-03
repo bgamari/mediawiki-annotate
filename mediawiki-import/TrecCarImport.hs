@@ -28,8 +28,8 @@ import Options.Applicative
 import Data.MediaWiki.XmlDump (NamespaceId, Format, WikiDoc(..), parseWikiDocs)
 import qualified Data.MediaWiki.XmlDump as XmlDump
 import CAR.Types
-import Import
-import ConfigFile
+import CAR.Import
+import CAR.Import.ConfigFile
 import Data.MediaWiki.XmlDump
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module ConfigFile where
+module CAR.Import.ConfigFile where
 
 import GHC.Generics
 import Data.Maybe
@@ -15,9 +15,9 @@ import qualified Data.HashMap.Strict as HM
 import Data.Aeson
 
 import Data.MediaWiki.Markup
-import Utils
-import Templates
-import Import
+import CAR.Import.Utils
+import CAR.Import.Templates
+import CAR.Import
 
 data ResolutionPart = TRText String
                     | TRPositionalArg Int
@@ -44,7 +44,7 @@ parseTemplateResolution = positionalArg <|> namedArg <|> text
 listTemplate :: TemplateHandler
 listTemplate args =
     Just $ map (BulletList 1) (mapMaybe isUnnamed args)
-    
+
 runTemplateResolution :: TemplateResolution -> TemplateHandler
 runTemplateResolution ListTemplate args = listTemplate args
 runTemplateResolution (ViaResolution res) args =
@@ -66,7 +66,7 @@ instance FromJSON TemplateResolution where
     parseJSON = withText "template resolution" $ \t ->
       case t of
         "&list" -> pure ListTemplate
-        _ -> 
+        _ ->
           case Tri.parseString (many parseTemplateResolution) mempty (T.unpack t) of
             Tri.Success a -> pure $ ViaResolution a
             Tri.Failure e -> fail $ show e

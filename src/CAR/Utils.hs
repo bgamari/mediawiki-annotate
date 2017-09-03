@@ -4,7 +4,6 @@
 module CAR.Utils where
 
 import Control.Monad (guard)
-import Data.Char
 import Data.Maybe
 import qualified Data.DList as DList
 import           Data.DList (DList)

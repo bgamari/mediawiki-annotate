@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ApplicativeDo #-}
 
-module Import
+module CAR.Import
     ( Config(..)
     , defaultConfig
     , toPage
@@ -11,7 +11,6 @@ module Import
 import Data.Maybe
 import Data.Char
 
-import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
@@ -19,9 +18,10 @@ import Data.MediaWiki.XmlDump (WikiDoc(..))
 import Data.MediaWiki.Markup as Markup
 import CAR.Types
 import CAR.Utils hiding (pageRedirect)
-import Entities
-import Templates
-import Utils
+
+import CAR.Import.Entities
+import CAR.Import.Templates
+import CAR.Import.Utils
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
@@ -204,8 +204,6 @@ splitParagraph siteId thisPage docs
   = Just (mkParagraph bodies', rest)
   | otherwise
   = Nothing
-
-type ListLevel = Int
 
 toSkeleton :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
 toSkeleton siteId thisPage = go

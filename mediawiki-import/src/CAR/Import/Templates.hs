@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Templates where
+module CAR.Import.Templates where
 
 import Data.Semigroup
 import Data.Maybe
@@ -10,7 +10,7 @@ import qualified Data.Text as T
 import Data.Text (Text)
 import qualified Data.HashMap.Strict as HM
 
-import Utils
+import CAR.Import.Utils
 import Data.MediaWiki.Markup
 
 type TemplateHandler = [(Maybe Text, [Doc])] -> Maybe [Doc]

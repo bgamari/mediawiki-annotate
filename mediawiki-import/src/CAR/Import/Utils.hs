@@ -1,4 +1,4 @@
-module Utils where
+module CAR.Import.Utils where
 
 import Data.Maybe
 import qualified Data.Text as T

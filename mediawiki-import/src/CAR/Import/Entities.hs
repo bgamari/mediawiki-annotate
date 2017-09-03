@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Entities (resolveEntities) where
+module CAR.Import.Entities (resolveEntities) where
 
 import Data.Monoid
 import Data.Char

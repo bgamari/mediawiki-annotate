@@ -10,9 +10,54 @@ copyright:           (c) 2017 Ben Gamari
 build-type:          Simple
 cabal-version:       >=1.10
 
+library
+  exposed-modules:     CAR.Import
+                       CAR.Import.Utils
+                       CAR.Import.Templates
+                       CAR.Import.Entities
+                       CAR.Import.ConfigFile
+  hs-source-dirs:      src
+  other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
+  ghc-options:         -Wall
+  build-depends:       base,
+                       serialise,
+                       text >=1.2 && <1.3,
+                       bytestring >=0.10 && <0.11,
+                       filepath >=1.4 && <1.5,
+                       attoparsec >=0.13 && <0.14,
+                       exceptions >=0.8 && <0.9,
+                       lens >=4.14 && <4.16,
+                       pipes >=4.1 && <4.3,
+                       pipes-bytestring >=2.1 && <2.2,
+                       pipes-zlib >=0.4 && <0.5,
+                       optparse-applicative >=0.12 && <0.15,
+                       pipes-attoparsec >=0.5 && <0.6,
+                       gitrev,
+                       trifecta,
+                       aeson,
+                       yaml,
+                       optparse-applicative >= 0.13,
+                       free >=4.12 && <4.13,
+                       transformers >=0.5 && <0.6,
+                       time >=1.6 && <1.7,
+                       hexpat >=0.20 && <0.21,
+                       deepseq >=1.4 && <1.5,
+                       split >=0.2 && <0.3,
+                       parallel >=3.2 && <3.3,
+                       async >=2.1 && <2.2,
+                       cborg,
+                       binary,
+                       fork-map,
+                       stm,
+                       unix >= 2.7,
+                       postgresql-simple >=0.5 && <0.6,
+                       unordered-containers >=0.2 && <0.3,
+                       trec-car-tools,
+                       mediawiki-parser
+  default-language:    Haskell2010
+
 executable trec-car-import
   main-is:             TrecCarImport.hs
-  other-modules:       Import, Entities, Utils, Templates, ConfigFile
   other-extensions:    DeriveGeneric, TypeApplications, RecordWildCards, ViewPatterns, OverloadedStrings, RankNTypes, ScopedTypeVariables, GADTs, TemplateHaskell, GeneralizedNewtypeDeriving, QuasiQuotes, StandaloneDeriving, BangPatterns
   ghc-options:         -Wall -rtsopts -threaded
   build-depends:       base,
@@ -49,5 +94,6 @@ executable trec-car-import
                        postgresql-simple >=0.5 && <0.6,
                        unordered-containers >=0.2 && <0.3,
                        trec-car-tools,
-                       mediawiki-parser
+                       mediawiki-parser,
+                       mediawiki-import
   default-language:    Haskell2010
