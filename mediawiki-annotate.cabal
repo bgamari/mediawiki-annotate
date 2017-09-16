@@ -48,7 +48,7 @@ library
                        mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
-                       cryptohash,
+                       cryptohash-sha1,
                        text,
                        simplir,
                        mediawiki-parser >= 0.1
