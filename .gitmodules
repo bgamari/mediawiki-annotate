@@ -25,3 +25,6 @@
 [submodule "vendor/binary-serialise-cbor"]
 	path = vendor/binary-serialise-cbor
 	url = git://github.com/bgamari/binary-serialise-cbor
+[submodule "vendor/frisby"]
+	path = vendor/frisby
+	url = git://github.com/bgamari/frisby
