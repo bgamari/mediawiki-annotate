@@ -23,6 +23,7 @@ import Data.List (sortBy)
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
 import Data.Monoid
+import Data.Semigroup
 import Data.Binary
 import Codec.Serialise
 import qualified Data.HashMap.Strict as HM
@@ -50,9 +51,12 @@ instance Binary TermCounts where
     get = TermCounts . HM.fromList <$> get
     put (TermCounts x) = put $ HM.toList x
 
+instance Semigroup TermCounts where
+    TermCounts a <> TermCounts b = TermCounts (HM.unionWith (+) a b)
+
 instance Monoid TermCounts where
     mempty = TermCounts mempty
-    TermCounts a `mappend` TermCounts b = TermCounts (HM.unionWith (+) a b)
+    mappend = (<>)
 
 data Doc meta a = Doc { docMeta :: meta, docThing :: a }
                 deriving (Show, Functor, Foldable)

@@ -14,6 +14,7 @@ module CAR.KnowledgeBase
     , InlinkCounts(..)
     ) where
 
+import Data.Semigroup (Semigroup(..))
 import Data.Monoid hiding (All, Any)
 
 import Data.Hashable (Hashable)
@@ -47,10 +48,13 @@ data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageId InlinkCoun
                              }
                 deriving (Show)
 
+instance Semigroup InlinkInfo where
+    InlinkInfo a b <> InlinkInfo a' b' =
+        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+
 instance Monoid InlinkInfo where
     mempty = InlinkInfo mempty mempty
-    InlinkInfo a b `mappend` InlinkInfo a' b' =
-        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+    mappend = (<>)
 
 data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to link to this document.
                                    inLinkCounts        :: !(HM.HashMap PageName Int)
@@ -60,13 +64,16 @@ data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to lin
                                  }
                   deriving (Show)
 
-instance Monoid InlinkCounts where
-    mempty = InlinkCounts mempty mempty mempty mempty
-    InlinkCounts a b c d `mappend` InlinkCounts a' b' c' d' =
+instance Semigroup InlinkCounts where
+    InlinkCounts a b c d <> InlinkCounts a' b' c' d' =
         InlinkCounts (HM.unionWith (+) a a')
                      (HM.unionWith (+) b b')
                      (HM.unionWith (+) c c')
                      (HM.unionWith (+) d d')
+
+instance Monoid InlinkCounts where
+    mempty = InlinkCounts mempty mempty mempty mempty
+    mappend = (<>)
 
 --  sourcepage targetpage anchortext => attach anchortext to targetpage
 --  redirect sourcepage targetpage   => attach sourcepage to targetpage
