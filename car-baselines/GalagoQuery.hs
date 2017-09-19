@@ -11,6 +11,7 @@ import Data.Functor.Identity
 import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
 import Data.Monoid
+import Data.Semigroup
 import GHC.Generics
 import System.FilePath
 
@@ -119,7 +120,7 @@ instance ToJSON GalagoQuery where
     toJSON q = object [ "number" .= galagoQueryId q, "text" .= galagoQueryText q ]
 
 newtype GalagoQuerySet = GalagoQuerySet [GalagoQuery]
-                       deriving (Monoid)
+                       deriving (Monoid, Semigroup)
 
 instance ToJSON GalagoQuerySet where
     toJSON (GalagoQuerySet qs) = object [ "queries" .= qs ]

@@ -52,9 +52,11 @@ type CarDiskIndex = DiskIdx.OnDiskIndex Term (ParagraphId, DocumentLength) Int
 
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
+instance Semigroup BagOfWords where
+    BagOfWords a <> BagOfWords b = BagOfWords (M.unionWith (+) a b)
 instance Monoid BagOfWords where
     mempty = BagOfWords mempty
-    BagOfWords a `mappend` BagOfWords b = BagOfWords (M.unionWith (+) a b)
+    mappend = (<>)
 
 oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
