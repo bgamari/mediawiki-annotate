@@ -57,6 +57,7 @@ rewritePage rewritePara page@(Page{..}) =
     rewriteSkeleton (Section a b skels) = Section a b (map rewriteSkeleton skels)
     rewriteSkeleton (Para para)         = Para (rewritePara para)
     rewriteSkeleton (Image a skels)     = Image a (map rewriteSkeleton skels)
+    rewriteSkeleton (List n para)       = List n (rewritePara para)
 
 -- | Fetch the 'Paragraph's having the given 'ParagraphId's.
 fetchParagraphs :: FilePath -> HS.HashSet ParagraphId
