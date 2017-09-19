@@ -182,7 +182,7 @@ instance CBOR.Serialise Page where
     decode = do
         len <- CBOR.decodeListLen
         tag <- CBOR.decodeInt
-        when (tag /= 1) $ fail "Serialise(Page): Unknown tag"
+        when (tag /= 0) $ fail "Serialise(Page): Unknown tag"
         case len of
           5 -> do
               pageName <- CBOR.decode
@@ -199,7 +199,7 @@ instance CBOR.Serialise Page where
           _ -> fail "Serialise(Page): Unknown length"
     encode (Page{..}) =
            CBOR.encodeListLen 5
-        <> CBOR.encodeInt 1
+        <> CBOR.encodeInt 0
         <> CBOR.encode pageName
         <> CBOR.encode pageId
         <> CBOR.encode pageSkeleton
