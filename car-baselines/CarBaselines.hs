@@ -8,7 +8,7 @@ import Data.Bifunctor
 import Data.Functor.Identity
 import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
-import Data.Monoid
+import Data.Semigroup (Semigroup(..))
 import GHC.Generics
 import System.FilePath
 import Control.Exception

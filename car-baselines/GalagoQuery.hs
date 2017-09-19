@@ -10,8 +10,8 @@ import Data.Bifunctor
 import Data.Functor.Identity
 import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
-import Data.Monoid
-import Data.Semigroup
+import Data.Monoid hiding ((<>))
+import Data.Semigroup hiding (option)
 import GHC.Generics
 import System.FilePath
 
