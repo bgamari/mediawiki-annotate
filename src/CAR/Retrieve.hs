@@ -22,7 +22,7 @@ import Data.Function (on)
 import Data.List (sortBy)
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
-import Data.Monoid
+import Data.Monoid (Monoid(..))
 import Data.Semigroup
 import Data.Binary
 import Codec.Serialise
