@@ -83,7 +83,7 @@ data Provenance = Provenance { wikiDumpDate     :: String
                              , comments         :: String
                              , toolsCommit      :: String
                              }
-                deriving (Show, Generic)
+                deriving (Show, Generic, Eq)
 instance CBOR.Serialise Provenance
 
 invalidProvenance :: Provenance
