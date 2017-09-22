@@ -26,3 +26,17 @@ executable multilang-car
                        json-stream >=0.4 && <0.5,
                        trec-car-tools
   default-language:    Haskell2010
+
+executable multilang-car-index
+  main-is:             LangIndex.hs
+  other-extensions:    OverloadedStrings, GeneralizedNewtypeDeriving, TypeApplications, DeriveGeneric
+  build-depends:       base >=4.9 && <4.11,
+                       aeson >=1.2 && <1.3,
+                       hashable >=1.2 && <1.3,
+                       bytestring >=0.10 && <0.11,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       serialise >=0.1 && <0.2,
+                       json-stream >=0.4 && <0.5,
+                       trec-car-tools
+  default-language:    Haskell2010
