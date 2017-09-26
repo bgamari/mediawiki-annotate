@@ -53,3 +53,17 @@ executable merge-annotations
                        time,
                        simplir
   default-language:    Haskell2010
+
+executable split-psg-entity-annotations
+  main-is:             SplitPsgEntityAnnotations.hs
+  other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
+  build-depends:       base >=4.9 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       filepath >= 1.4,
+                       optparse-applicative >=0.14 && <0.15,
+                       assessment-eval,
+                       time,
+                       simplir
+  default-language:    Haskell2010
