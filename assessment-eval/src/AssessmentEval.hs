@@ -37,16 +37,14 @@ readAssessments = fmap (foldMap toAssessments) . QRel.readQRel
 
 assessorFromFilepath :: FilePath -> Assessor
 assessorFromFilepath path = fromMaybe (error $ "Failed to get assessor from file path: "++path) $ do
-    let fpath = T.pack $ takeFileName path
-    nosuffix <- fpath `T.stripSuffix` ".json"
-    annotator: _ <- pure $ "-" `T.splitOn` nosuffix
+    let fpath = T.pack $ dropExtension $ takeFileName path
+    annotator: _ <- pure $ "-" `T.splitOn` fpath
     return $ Assessor annotator
 
 dateFromFilepath :: FilePath -> UTCTime
 dateFromFilepath path = fromMaybe (error $ "Failed to get date from file path: "++path) $ do
-    let fpath = T.pack $ takeFileName path
-    nosuffix <- fpath `T.stripSuffix` ".json"
-    let splits = "-" `T.splitOn` nosuffix
+    let fpath = T.pack $ dropExtension $ takeFileName path
+    let splits = "-" `T.splitOn` fpath
         dateStr = "-" `T.intercalate` drop 2 splits  -- drop login and session, reunite rest of date string
     parseTimeM False defaultTimeLocale "%F-%H%M" (T.unpack dateStr)
       -- Format:   $login-$session-$data.json
