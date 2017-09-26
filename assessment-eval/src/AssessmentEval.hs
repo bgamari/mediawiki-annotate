@@ -44,13 +44,11 @@ assessorFromFilepath path =
     annotator: _= "-" `T.splitOn` nosuffix
 
 dateFromFilepath :: FilePath -> UTCTime
-dateFromFilepath path =
-    date
-    where
-      fpath = T.pack $ takeFileName path
+dateFromFilepath path = fromMaybe (error $ "Failed to get date from file path: "++path) $ do
+    let fpath = T.pack $ takeFileName path
+    nosuffix <- fpath `T.stripSuffix` ".json"
+    let splits = "-" `T.splitOn` nosuffix
+        dateStr = "-" `T.intercalate` drop 2 splits  -- drop login and session, reunite rest of date string
+    parseTimeM False defaultTimeLocale "%F-%H%M" (T.unpack dateStr)
       -- Format:   $login-$session-$data.json
-      Just nosuffix =  ( fpath `T.stripSuffix` ".json")
-      
-      splits = "-" `T.splitOn` nosuffix
-      dateStr = "-" `T.intercalate` (drop 2 splits)  -- drop login and session, reunite rest of date string
-      Just date = parseTimeM False defaultTimeLocale "%F-%H%M" (T.unpack dateStr)
+
