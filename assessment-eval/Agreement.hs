@@ -11,32 +11,10 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import Options.Applicative
 import System.FilePath
-
 import qualified SimplIR.Format.QRel as QRel
 
-newtype QueryId = QueryId T.Text
-                deriving (Eq, Ord, Show, Hashable)
 
-newtype DocumentId = DocumentId T.Text
-                   deriving (Eq, Ord, Show, Hashable)
-
-type Assessments = HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance
-
-newtype Assessor = Assessor T.Text
-                 deriving (Eq, Ord, Show, Hashable)
-
-readAssessments :: FilePath -> IO Assessments
-readAssessments = fmap (foldMap toAssessments) . QRel.readQRel
-  where
-    toAssessments :: QRel.Entry QRel.GradedRelevance -> Assessments
-    toAssessments QRel.Entry{..} =
-        HM.singleton (QueryId queryId, DocumentId documentName) relevance
-
-assessorFromFilepath :: FilePath -> Assessor
-assessorFromFilepath path =
-    Assessor $ fromMaybe t $ foldMap (t `T.stripPrefix`) [".rel", ".qrel"]
-  where
-    t = T.pack $ takeFileName path
+import AssessmentEval
 
 opts :: Parser [FilePath]
 opts = some $ argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor")
