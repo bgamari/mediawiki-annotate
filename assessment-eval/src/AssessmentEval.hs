@@ -20,7 +20,7 @@ import qualified SimplIR.Format.QRel as QRel
 newtype QueryId = QueryId T.Text
                 deriving (Eq, Ord, Show, Hashable)
 
-newtype DocumentId = DocumentId {getDocumentId:: T.Text}
+newtype DocumentId = DocumentId {unDocumentId:: T.Text}
                    deriving (Eq, Ord, Show, Hashable)
 
 type Assessments = HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance
