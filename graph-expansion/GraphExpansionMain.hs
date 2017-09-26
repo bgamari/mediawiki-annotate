@@ -495,6 +495,7 @@ main = do
         execParser $ info (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
@@ -503,7 +504,7 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
-    let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
+    let !resolveRedirect = resolveRedirectFactory siteId $ AnnsFile.pages annsFile
     putStrLn $ "# computed redirects"
 
 -- LD     let universeGraph :: UniverseGraph
@@ -532,8 +533,8 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
-              map populateSeeds . pagesToQueryDocs resolveRedirect queryDeriv
-                  <$> readCborList queryFile
+              map populateSeeds . pagesToQueryDocs siteId resolveRedirect queryDeriv
+                  <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile

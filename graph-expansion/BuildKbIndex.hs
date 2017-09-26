@@ -143,7 +143,7 @@ edgeDocModes = subparser
            <*> argument str (metavar "CBOR" <> help "kb articles file")
       where
         go outputPath articlesPath = do
-            pages <- readCborList articlesPath
+            pages <- readPagesFile articlesPath
             Index.buildTermFreq outputPath
                 [ (edoc, textToTokens' $ edgeDocContent edoc)
                 | edoc <- pagesToEdgeDocs pages
@@ -193,10 +193,11 @@ entityModes = subparser
            <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
       where
         go outputPath articlesPath textPart = do
-            !resolveRedirect <- resolveRedirectFactory <$> readCborList articlesPath
+            (prov, pages) <- readPagesFileWithProvenance articlesPath
+            let !resolveRedirect = resolveRedirectFactory (wikiSite prov) pages
 
-            !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readCborList articlesPath
-            pages2 <- readCborList articlesPath
+            !inlinkInfo <- collectInlinkInfo (wikiSite prov) resolveRedirect <$> readPagesFile articlesPath
+            pages2 <- readPagesFile articlesPath
 
             let docTerms :: KbDoc -> [Term]
                 docTerms doc =
@@ -263,7 +264,7 @@ paragraphModes = subparser
       where
         go outputPath paragraphsPath textPart = do
 
-            paragraphs <- readCborList paragraphsPath
+            paragraphs <- readParagraphsFile paragraphsPath
 
             let docTerms :: Paragraph -> [Term]
                 docTerms paragraph =
@@ -372,8 +373,7 @@ queryIndexToTrecRun getDocName indexFile querySource output selectedQueries meth
     queries <-
         case querySource of
           QueriesFromCbor queryFile queryDeriv -> do
-              pagesToQueryDocs queryDeriv
-                  <$> readCborList @Page queryFile
+              pagesToQueryDocs queryDeriv <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile

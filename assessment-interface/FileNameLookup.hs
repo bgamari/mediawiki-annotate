@@ -2,30 +2,9 @@
 
 module FileNameLookup where
 
-
-import Options.Applicative
-
-import Data.Monoid
-import Data.Traversable
 import Data.List
-import Data.Maybe
-import Data.Foldable
 import System.FilePath
-import System.Directory
-import Network.URI
-
-
-import System.Random
-import System.Random.Shuffle
-import Control.Monad.Random
-
-import qualified Data.Text as T
-
 import CAR.Types
-import CAR.CarExports
-import qualified CAR.TocFile as TocFile
-import qualified SimplIR.Format.TrecRunFile as TrecRun
-
 
 data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              , outlineURL :: Stub -> FilePath
@@ -40,8 +19,8 @@ fileNameLookupFactory :: (SectionPath -> Bool) -> (SectionPath -> Bool) -> FileN
 fileNameLookupFactory existResultsForSectionpath  existEntityResultsForSectionpath = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
-    outlinePathname (Stub _ pageId _) =
-       (unpackPageId pageId) </> "index" <.> "html"
+    outlinePathname (Stub {stubPageId=pageId}) =
+       unpackPageId pageId </> "index" <.> "html"
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =

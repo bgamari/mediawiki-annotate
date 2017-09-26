@@ -17,10 +17,12 @@ import CAR.Utils
 
 newtype EntityCounts = EntityCounts (M.Map PageId (Sum Int, Max (Run.Score, ParagraphId)))
 
+instance Semigroup EntityCounts where
+    EntityCounts a <> EntityCounts b = EntityCounts $ M.unionWith (<>) a b
+
 instance Monoid EntityCounts where
     mempty = EntityCounts mempty
-    EntityCounts a `mappend` EntityCounts b = EntityCounts $ M.unionWith (<>) a b
-
+    mappend = (<>)
 
 queryEntities :: (ParagraphId -> Paragraph) -> Seq.Seq Run.ParagraphRankingEntry
               -> [(PageId, ParagraphId, Run.Score)]

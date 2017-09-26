@@ -2,7 +2,6 @@ import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 
 import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 
 import CAR.Types
 import GraphExpansionExperiments
@@ -10,14 +9,15 @@ import GraphExpansionExperiments
 opts :: Parser (FilePath)
 opts =
     id
-    <$> argument str (help "queryFile file" <> metavar "ANNOTATIONS FILE")
+    <$> argument str (help "queryFile file" <> metavar "PAGES FILE")
 
 main :: IO ()
 main = do
     (queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    queriesToSeedEntities <- pagesToQueryDocs id QueryFromPageTitle . decodeCborList <$> BSL.readFile queryFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
+    queriesToSeedEntities <- pagesToQueryDocs siteId id QueryFromPageTitle <$> readPagesFile queryFile
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where
     toSeedLines queryDoc =

@@ -70,7 +70,7 @@ data Opts = Opts { outlinesFile :: FilePath
 trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
               -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
 trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
-    qrelEntries <- TrecQrel.readQRel TrecQrel.binaryRelevance qrelfile
+    qrelEntries <- TrecQrel.readQRel qrelfile
     let qrelMap =   HM.fromListWith (++)
                     [ ( TrecQrel.queryId entry
                       , [QrelEntry { entryItem = item
@@ -183,7 +183,7 @@ main = do
            <$> mapM (readTrecRanking trecRunItemToEntryItemPara) trecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
-        in trecQrelItems  trecRunItemToEntryItemMaybePara optsQrelFile
+        in trecQrelItems trecRunItemToEntryItemMaybePara optsQrelFile
 
 
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
@@ -243,8 +243,7 @@ main = do
     -- ======= Main bits ================
 
     putStrLn "deserializing outlines.."
-    outlinesAll <- decodeCborList <$> BSL.readFile outlinesFile
-        :: IO [Stub]
+    outlinesAll <- readOutlinesFile outlinesFile
     putStrLn ".. done deserializing outlines"
 
     let outlines = case optsOutlineId of

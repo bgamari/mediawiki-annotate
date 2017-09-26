@@ -7,6 +7,7 @@
 module CAR.Types.AST
     ( -- * Identifiers
       PageName(..), unpackPageName
+    , SiteId(..)
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
@@ -18,6 +19,11 @@ module CAR.Types.AST
     , ParaBody(..), paraBodiesToId
     , PageSkeleton(..)
     , Page(..)
+    , PageType(..)
+    , PageMetadata(..)
+    , emptyPageMetadata
+      -- * Outline documents
+    , Stub(..)
       -- * Entity
     , Entity(..), pageIdToName
     ) where
@@ -25,9 +31,13 @@ module CAR.Types.AST
 import Data.Foldable
 import Data.Char (ord, chr)
 import Data.List (intercalate)
+import Data.Semigroup
 import Control.DeepSeq
+import Control.Monad (when)
 import GHC.Generics
 import qualified Codec.Serialise.Class as CBOR
+import qualified Codec.Serialise.Decoding as CBOR
+import qualified Codec.Serialise.Encoding as CBOR
 import qualified Data.ByteString.Short as SBS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -55,6 +65,10 @@ urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedI
 unpackPageName :: PageName -> String
 unpackPageName (PageName t) = T.unpack t
 
+-- | A Wikipedia site ID. e.g. @enwiki@, @itwiki@, or @envoyage@.
+newtype SiteId = SiteId T.Text
+               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
+
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId Utf8.SmallUtf8
                deriving (Show, Eq, Ord, Generic, IsString, NFData,
@@ -64,11 +78,18 @@ instance CBOR.Serialise PageId where
     encode (PageId p) = CBOR.encode (Utf8.toByteString p)
     decode = PageId . Utf8.unsafeFromByteString <$> CBOR.decode
 
-pageNameToId :: PageName -> PageId
-pageNameToId (PageName n) = PageId $ Utf8.unsafeFromShortByteString $ urlEncodeText $ T.unpack n
+pageNameToId :: SiteId -> PageName -> PageId
+pageNameToId (SiteId s) (PageName n) =
+    PageId
+    $ Utf8.unsafeFromShortByteString
+    $ urlEncodeText
+    $ T.unpack s ++ ":" ++ T.unpack n
 
 pageIdToName :: PageId -> PageName
-pageIdToName (PageId pid) = PageName $  T.pack  $ unEscapeString $  Utf8.toString pid
+pageIdToName (PageId pid) =
+    PageName
+    $ T.tail $ T.dropWhile (/=':')
+    $ T.pack $ unEscapeString $ Utf8.toString pid
 
 packPageId :: String -> PageId
 packPageId = PageId . Utf8.fromString
@@ -111,6 +132,7 @@ packParagraphId = ParagraphId . SBS.pack . map (fromIntegral . ord)
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
                   | Image T.Text [PageSkeleton]
+                  | List !Int Paragraph
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 
@@ -151,10 +173,69 @@ instance Aeson.ToJSON Entity
 -- | A page on Wikipedia (which coincides with an Entity in this case)
 data Page = Page { pageName     :: !PageName
                  , pageId       :: !PageId
+                 , pageMetadata :: !PageMetadata
                  , pageSkeleton :: [PageSkeleton]
                  }
           deriving (Show, Generic)
-instance CBOR.Serialise Page
+
+instance CBOR.Serialise Page where
+    decode = do
+        len <- CBOR.decodeListLen
+        tag <- CBOR.decodeInt
+        when (tag /= 0) $ fail "Serialise(Page): Unknown tag"
+        case len of
+          5 -> do
+              pageName <- CBOR.decode
+              pageId <- CBOR.decode
+              pageSkeleton <- CBOR.decode
+              pageMetadata <- CBOR.decode
+              return Page{..}
+          4 -> do
+              pageName <- CBOR.decode
+              pageId <- CBOR.decode
+              pageSkeleton <- CBOR.decode
+              let pageMetadata = emptyPageMetadata
+              return Page{..}
+          _ -> fail "Serialise(Page): Unknown length"
+    encode (Page{..}) =
+           CBOR.encodeListLen 5
+        <> CBOR.encodeInt 0
+        <> CBOR.encode pageName
+        <> CBOR.encode pageId
+        <> CBOR.encode pageSkeleton
+        <> CBOR.encode pageMetadata
+
+data PageType = ArticlePage
+              | CategoryPage
+              | DisambiguationPage
+              | RedirectPage PageId
+              deriving (Show, Generic, Eq, Ord)
+instance CBOR.Serialise PageType
+
+-- data MetadataItem = RedirectNames [PageName]
+--                   | RedirectIds [PageId]
+--                   | DisambiguationNames [PageName]
+--                   | DisambiguationIds [PageId]
+--                   | CategoryNames [PageName]
+--                   | CategoryIds [PageId]
+--                   | InlinkPageNames [PageName]
+--                   | InlinkPageIds [PageId]
+--                   deriving (Show, Generic)
+-- instance CBOR.Serialise MetadataItem
+
+data PageMetadata = PageMetadata { pagemetaType                 :: PageType
+                                 , pagemetaRedirectNames        :: Maybe [PageName]
+                                 , pagemetaDisambiguationNames  :: Maybe [PageName]
+                                 , pagemetaDisambiguationIds    :: Maybe [PageId]
+                                 , pagemetaCategoryNames        :: Maybe [PageName]
+                                 , pagemetaCategoryIds          :: Maybe [PageId]
+                                 , pagemetaInlinkIds            :: Maybe [PageId]
+                                 }
+                  deriving (Show, Generic)
+instance CBOR.Serialise PageMetadata
+
+emptyPageMetadata :: PageMetadata
+emptyPageMetadata = PageMetadata ArticlePage Nothing Nothing Nothing Nothing Nothing Nothing
 
 -- | Path from heading to page title in a page outline
 data SectionPath = SectionPath { sectionPathPageId   :: !PageId
@@ -167,3 +248,39 @@ instance NFData SectionPath
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
+
+-- | 'Stub' is like 'Page', but with the guarantee that there are no paragraphs
+-- in the page skeleton
+data Stub = Stub { stubName     :: PageName
+                 , stubPageId   :: PageId
+                 , stubMetadata :: PageMetadata
+                 , stubSkeleton :: [PageSkeleton]
+                 }
+          deriving (Show, Generic)
+
+instance CBOR.Serialise Stub where
+    decode = do
+        len <- CBOR.decodeListLen
+        tag <- CBOR.decodeInt
+        when (tag /= 1) $ fail "Serialise(Stub): Unknown tag"
+        case len of
+          5 -> do
+              stubName <- CBOR.decode
+              stubPageId <- CBOR.decode
+              stubSkeleton <- CBOR.decode
+              stubMetadata <- CBOR.decode
+              return Stub{..}
+          4 -> do
+              stubName <- CBOR.decode
+              stubPageId <- CBOR.decode
+              stubSkeleton <- CBOR.decode
+              let stubMetadata = emptyPageMetadata
+              return Stub{..}
+          _ -> fail "Serialise(Stub): Unknown length"
+    encode (Stub{..}) =
+           CBOR.encodeListLen 5
+        <> CBOR.encodeInt 1
+        <> CBOR.encode stubName
+        <> CBOR.encode stubPageId
+        <> CBOR.encode stubSkeleton
+        <> CBOR.encode stubMetadata

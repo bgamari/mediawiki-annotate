@@ -30,21 +30,22 @@ main :: IO ()
 main = do
     (unprocessedPagesFile, outputFile, mode) <- execParser $ info (helper <*> options) mempty
     unprocessedPages <- openAnnotations unprocessedPagesFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance unprocessedPagesFile
 
-    let entityRedirects = entityRedirectMap  $ AnnsFile.pages unprocessedPages
+    let entityRedirects = entityRedirectMap siteId $ AnnsFile.pages unprocessedPages
         resolveRedirect = resolveRedirectFun entityRedirects
         redirectedPageIds =  HM.keys entityRedirects
-        legalPageIds = filter (\pageId -> pageId == resolveRedirect pageId)
+        legalPageIds = filter (\pgId -> pgId == resolveRedirect pgId)
                      $ HM.elems entityRedirects
 
     case mode of
       LegalPageIds ->
         let formatPageIdToName :: PageId -> TB.Builder
-            formatPageIdToName pageId =
-                (TB.fromString $ unpackPageId pageId)
+            formatPageIdToName pgId =
+                (TB.fromString $ unpackPageId pgId)
                 <> "\t"
                 <> (TB.fromString $ unpackPageName finalPageName)
-              where finalPageName = pageIdToName pageId
+              where finalPageName = pageIdToName pgId
         in TL.writeFile outputFile $ TB.toLazyText
                 $ mconcat
                 $ intersperse "\n"

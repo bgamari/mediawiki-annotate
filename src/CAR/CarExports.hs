@@ -1,10 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module CAR.CarExports
-    ( ParaNumber(..)
-    , PassageFile
+    ( PassageFile
       -- * Stubs
     , Stub(..)
     , toStubSkeleton
@@ -25,26 +23,13 @@ import Data.Maybe
 import qualified Data.DList as DList
 import qualified Data.Text as T
 import qualified Data.Set as S
-import Codec.Serialise
-import GHC.Generics
 
 import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types hiding (paraId)
 import CAR.Utils
 
--- General
-newtype ParaNumber = ParaNumber Int -- Sequential index
-                   deriving (Show)
-
 -- Passage file
 type PassageFile = [Paragraph]
-
--- | Stub is like Page, but with the guarantee that there are no paragraphs in the page skeleton
-data Stub = Stub { stubName     :: PageName
-                 , stubPageId   :: PageId
-                 , stubSkeleton :: [PageSkeleton] }
-          deriving (Show, Generic)
-instance Serialise Stub
 
 -- Ground truth
 data Relevance = Relevant | NonRelevant
@@ -78,31 +63,33 @@ prettyEntityAnnotation (EntityAnnotation sectionPath entityId rel) =
             ]
 
 toStubSkeleton :: Page -> Stub
-toStubSkeleton (Page name pageId skeleton) =
-    Stub name pageId (mapMaybe go skeleton)
+toStubSkeleton (Page name pageId meta skeleton) =
+    Stub name pageId meta (mapMaybe go skeleton)
   where
     go :: PageSkeleton -> Maybe PageSkeleton
     go (Section heading headingId children) =
         Just $ Section heading headingId (mapMaybe go children)
-    go (Para _) = Nothing
+    go (Para _)  = Nothing
     go (Image{}) = Nothing
+    go (List{})  = Nothing
 
 prettyStub :: Stub -> String
-prettyStub (Stub (PageName name) _ skeleton) =
+prettyStub (Stub (PageName name) _ _ skeleton) =
     unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
            ++ map (prettySkeleton anchorOnly) skeleton
 
 toParagraphs :: Page -> [Paragraph]
-toParagraphs (Page _name _ skeleton) =
-    concatMap go skeleton
+toParagraphs =
+    concatMap go . pageSkeleton
   where
     go :: PageSkeleton -> [Paragraph]
     go (Section _ _ children) = concatMap go children
     go (Para para) = [para]
-    go (Image{}) = [] -- ignore images
+    go (Image{})   = [] -- ignore images
+    go (List{})    = []
 
 toAnnotations :: Page -> S.Set Annotation
-toAnnotations (Page _ pageId skeleton) =
+toAnnotations (Page _ pageId _ skeleton) =
     -- recurse into sections, recursively collect section path, emit one annotation per paragraph
     foldMap (go mempty) skeleton
   where
@@ -115,9 +102,10 @@ toAnnotations (Page _ pageId skeleton) =
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
     go _parentIds (Image{}) = mempty
+    go _parentIds (List{})  = mempty
 
 toEntityAnnotations :: (PageId -> PageId) -> Page ->  S.Set EntityAnnotation
-toEntityAnnotations resolveRedirect (Page _ pageId skeleton) =
+toEntityAnnotations resolveRedirect (Page _ pageId _ skeleton) =
     -- recurse into sections, recursively collect section path, emit one entity annotation per link
     foldMap (go mempty) skeleton
   where
@@ -137,3 +125,4 @@ toEntityAnnotations resolveRedirect (Page _ pageId skeleton) =
         sectionPath = SectionPath pageId (DList.toList parentIds)
         badEntityId entityId = null $ unpackPageId entityId
     go _parentIds (Image{}) = mempty
+    go _parentIds (List{})  = mempty

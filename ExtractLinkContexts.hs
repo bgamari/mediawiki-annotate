@@ -3,7 +3,6 @@
 {-# LANGUAGE TupleSections #-}
 
 import Data.Monoid hiding (All, Any)
-import System.IO
 
 import Options.Applicative
 import qualified Data.DList as DList
@@ -52,8 +51,8 @@ data LinkDoc = LinkDoc { linkDocParagraphId    :: ParagraphId
 
 -- todo handle links to Disambiguation pages and redirects
 
-transformContent :: Page -> [LinkDoc]
-transformContent (Page pageName pageId pageSkeleta) =
+transformContent :: SiteId -> Page -> [LinkDoc]
+transformContent siteId page@(Page pageName pageId _ pageSkeleta) =
     foldMap (go mempty) pageSkeleta
   where
     go :: DList.DList SectionHeading -> PageSkeleton -> [LinkDoc]
@@ -72,9 +71,10 @@ transformContent (Page pageName pageId pageSkeleta) =
         linkDocParagraphId    = paraId $ paragraph
         linkDocArticleId      = pageId
         linkDocSourceEntity   = pageName
-        linkDocSourceEntityId = pageNameToId pageName
+        linkDocSourceEntityId = pageNameToId siteId pageName
         linkDocSectionPath    = sectionPath
-        linkDocCategories     = pageCategories (Page pageName pageId pageSkeleta)
+        -- FIXME
+        --linkDocCategories     = pageCategories $ pageMetadata page
         linkDocParagraph      = paragraph
         linkDocOutlinks       = paraLinks $ paragraph
       in LinkDoc {..}
@@ -130,12 +130,12 @@ toGalagoDoc linkDoc =
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    withFile outputFile WriteMode $ \h ->
-        BSL.hPutStr h $ Galago.toWarc
-            $ map toGalagoDoc
-            $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent)
-            $ pages
+    (prov, pages) <- readPagesFileWithProvenance inputFile
+    BSL.writeFile outputFile
+        $ Galago.toWarc
+        $ map toGalagoDoc
+        $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent (wikiSite prov))
+        $ pages
   where
     nubLinkDocs :: [LinkDoc] -> [LinkDoc]
     nubLinkDocs linkDocs =

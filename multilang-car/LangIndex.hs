@@ -1,20 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module WikiData where
+module Main where
 
-import CAR.Types (PageName, SiteId(..))
 import GHC.Generics
 import Data.Aeson
 import Data.Hashable
+import qualified Data.ByteString.Lazy as BSL
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
 import qualified Codec.Serialise as CBOR
 
-type LangIndex = HM.HashMap ItemId (HM.HashMap SiteId PageName)
+import qualified Data.JsonStream.Parser as JS
 
 newtype Lang = Lang T.Text
              deriving (Show, Eq, Ord, Hashable, FromJSON, FromJSONKey, CBOR.Serialise)
@@ -33,6 +33,12 @@ readItemId s
   | otherwise
   = Nothing
 
+newtype SiteId = SiteId T.Text
+               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
+
+newtype PageName = PageName T.Text
+               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, CBOR.Serialise)
+
 data EntityType = Item
                 deriving (Show, Generic)
 instance CBOR.Serialise EntityType
@@ -42,7 +48,6 @@ instance FromJSON EntityType where
         "item" -> return Item
         _      -> fail "unknown entity type"
 
--- | A projection of the wikidata entity representation.
 data Entity = Entity { entityType :: EntityType
                      , entityId   :: ItemId
                      , entityLabels :: [(Lang, T.Text)]
@@ -68,17 +73,16 @@ instance FromJSON Entity where
               (,) <$> o .: "site"
                   <*> o .: "title"
 
+buildIndex :: BSL.ByteString -> HM.HashMap ItemId (HM.HashMap SiteId PageName)
+buildIndex =
+    foldMap f . JS.parseLazyByteString (JS.arrayOf (JS.value @Entity))
+  where
+    f :: Entity -> HM.HashMap ItemId (HM.HashMap SiteId PageName)
+    f e
+      | null (entitySiteLinks e) = mempty
+      | otherwise                = HM.singleton (entityId e) (HM.fromList $ entitySiteLinks e)
 
-createLookup :: LangIndex -> SiteId -> SiteId -> HM.HashMap PageName PageName
-createLookup index fromLang toLang =
-    HM.fromList
-    [ (fromPage, toPage )
-    | entries <- HM.elems index
-    , Just fromPage <- pure $ fromLang `HM.lookup` entries
-    , Just toPage <- pure $ toLang `HM.lookup` entries
-    ]
-
-
-loadLangIndex :: FilePath -> IO LangIndex
-loadLangIndex =
-    CBOR.readFileDeserialise
+main :: IO ()
+main = do
+    --BSL.getContents >>= print . eitherDecode @[Entity]
+    BSL.getContents >>= pure . buildIndex >>= BSL.writeFile "out" . CBOR.serialise

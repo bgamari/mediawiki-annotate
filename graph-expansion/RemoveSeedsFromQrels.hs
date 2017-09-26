@@ -33,18 +33,19 @@ main = do
     (outputFile, qrelfile, queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =
              queryDocPageId queryDoc `HS.insert` queryDocLeadEntities queryDoc
 
         pagesToForbiddenEntities :: [Page] -> [(PageId, HS.HashSet PageId)]
         pagesToForbiddenEntities pages = [ (queryDocPageId queryDoc, toSeeds queryDoc)
-                                         | queryDoc <- pagesToQueryDocs id QueryFromPageTitle pages
+                                         | queryDoc <- pagesToQueryDocs siteId id QueryFromPageTitle pages
                                          ]
 
 
     query2ForbiddenEntities <- HM.fromList . pagesToForbiddenEntities
-                            <$> readCborList queryFile
+                            <$> readPagesFile queryFile
         :: IO (HM.HashMap PageId (HS.HashSet PageId))
 
     let notEntryWithSeed :: Entry IsRelevant -> Bool
@@ -52,7 +53,7 @@ main = do
             case (packPageId $ T.unpack queryId) `HM.lookup` query2ForbiddenEntities of
               Just seeds -> not $ (packPageId $ T.unpack entityId) `HS.member` seeds
               _          -> True
-    qrelEntries <- filter notEntryWithSeed <$> readQRel binaryRelevance qrelfile
+    qrelEntries <- filter notEntryWithSeed <$> readQRel qrelfile
     let formatQrels :: Entry IsRelevant -> T.Text
         formatQrels Entry {..} =
           T.unwords [ queryId
