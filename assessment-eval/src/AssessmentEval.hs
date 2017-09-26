@@ -36,12 +36,11 @@ readAssessments = fmap (foldMap toAssessments) . QRel.readQRel
         HM.singleton (QueryId queryId, DocumentId documentName) relevance
 
 assessorFromFilepath :: FilePath -> Assessor
-assessorFromFilepath path =
-    Assessor annotator
-  where
-    fpath = T.pack $ takeFileName path
-    Just nosuffix = fpath `T.stripSuffix` ".json"
-    annotator: _= "-" `T.splitOn` nosuffix
+assessorFromFilepath path = fromMaybe (error $ "Failed to get assessor from file path: "++path) $ do
+    let fpath = T.pack $ takeFileName path
+    nosuffix <- fpath `T.stripSuffix` ".json"
+    annotator: _ <- pure $ "-" `T.splitOn` nosuffix
+    return $ Assessor annotator
 
 dateFromFilepath :: FilePath -> UTCTime
 dateFromFilepath path = fromMaybe (error $ "Failed to get date from file path: "++path) $ do
