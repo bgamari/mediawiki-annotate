@@ -20,18 +20,15 @@ newtype QueryId = QueryId T.Text
 newtype DocumentId = DocumentId T.Text
                    deriving (Eq, Ord, Show, Hashable)
 
-newtype Relevance = Relevance Int
-                  deriving (Eq, Ord, Show, Hashable)
-
-type Assessments = HM.HashMap (QueryId, DocumentId) Relevance
+type Assessments = HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance
 
 newtype Assessor = Assessor T.Text
                  deriving (Eq, Ord, Show, Hashable)
 
 readAssessments :: FilePath -> IO Assessments
-readAssessments = fmap (foldMap toAssessments) . QRel.readQRel (Relevance . QRel.gradedRelevance)
+readAssessments = fmap (foldMap toAssessments) . QRel.readQRel
   where
-    toAssessments :: QRel.Entry Relevance -> Assessments
+    toAssessments :: QRel.Entry QRel.GradedRelevance -> Assessments
     toAssessments QRel.Entry{..} =
         HM.singleton (QueryId queryId, DocumentId documentName) relevance
 
@@ -49,7 +46,7 @@ main = do
     files <- execParser $ info opts mempty
     let readAssessor path = do
             as <- readAssessments path
-            let toBinary (Relevance n)
+            let toBinary (QRel.GradedRelevance n)
                   | n > 2     = QRel.Relevant
                   | otherwise = QRel.NotRelevant
             return $ HM.singleton (assessorFromFilepath path) (fmap toBinary as)

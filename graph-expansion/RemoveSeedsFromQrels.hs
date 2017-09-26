@@ -53,7 +53,7 @@ main = do
             case (packPageId $ T.unpack queryId) `HM.lookup` query2ForbiddenEntities of
               Just seeds -> not $ (packPageId $ T.unpack entityId) `HS.member` seeds
               _          -> True
-    qrelEntries <- filter notEntryWithSeed <$> readQRel binaryRelevance qrelfile
+    qrelEntries <- filter notEntryWithSeed <$> readQRel qrelfile
     let formatQrels :: Entry IsRelevant -> T.Text
         formatQrels Entry {..} =
           T.unwords [ queryId
