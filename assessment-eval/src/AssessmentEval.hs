@@ -40,7 +40,7 @@ assessorFromFilepath path =
     Assessor annotator
   where
     fpath = T.pack $ takeFileName path
-    Just nosuffix = fpath `T.stripPrefix` ".json"
+    Just nosuffix = fpath `T.stripSuffix` ".json"
     annotator: _= "-" `T.splitOn` nosuffix
 
 dateFromFilepath :: FilePath -> UTCTime
@@ -49,7 +49,7 @@ dateFromFilepath path =
     where
       fpath = T.pack $ takeFileName path
       -- Format:   $login-$session-$data.json
-      Just nosuffix =  ( fpath `T.stripPrefix` ".json")
+      Just nosuffix =  ( fpath `T.stripSuffix` ".json")
       
       splits = "-" `T.splitOn` nosuffix
       dateStr = "-" `T.intercalate` (drop 2 splits)  -- drop login and session, reunite rest of date string
