@@ -45,15 +45,15 @@ main = do
     let filteredAnns =  case exportType of
                           Entity ->  [ QRel.Entry queryId entityId  rel
                                      | ((QueryId queryId, DocumentId docId), rel) <- HM.toList anns
-                                     , [psgId, entityId]  <- pure $ docId `T.splitOn` "/"  -- contains both arguments
+                                     , [psgId, entityId]  <- pure $ "/" `T.splitOn` docId  -- contains both arguments
                                      ]
-                          Psg ->     [ QRel.Entry queryId psgId  rel
+                          Psg ->     [ QRel.Entry queryId psgId rel
                                      | ((QueryId queryId, DocumentId docId), rel) <- HM.toList anns
-                                     , [psgId]  <- pure $ docId `T.splitOn` "/"            -- contains only psg
+                                     , [psgId]  <- pure $ "/" `T.splitOn` docId            -- contains only psg
                                      ]
                           EntityPsg ->  [ QRel.Entry queryId docId  rel
                                         | ((QueryId queryId, DocumentId docId), rel) <- HM.toList anns
-                                        , [psgId, entityId]  <- pure $ docId  `T.splitOn` "/"
+                                        , [psgId, entityId]  <- pure $ "/" `T.splitOn` docId
                                         ]
 
 
