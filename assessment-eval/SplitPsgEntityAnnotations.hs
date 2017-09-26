@@ -38,7 +38,7 @@ opts =
 
 main :: IO ()
 main = do
-    (files, outputFile, exportType) <- execParser $ info opts mempty
+    (files, outputFile, exportType) <- execParser $ info (helper <*> opts) mempty
     (anns :: HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance)
           <- HM.unions <$> mapM readAssessments files
 

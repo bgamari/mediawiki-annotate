@@ -33,7 +33,7 @@ opts =
 
 main :: IO ()
 main = do
-    (files, outputFile) <- execParser $ info opts mempty
+    (files, outputFile) <- execParser $ info  (helper <*> opts) mempty
     let readAssessmentTuples :: FilePath -> IO [((QueryId, DocumentId), ((Assessor, UTCTime), QRel.GradedRelevance))]
         readAssessmentTuples path = do
             anns <- readAssessments path

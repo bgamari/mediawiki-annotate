@@ -21,7 +21,7 @@ opts = some $ argument str (metavar "QREL" <> help "A qrel file with judgements 
 
 main :: IO ()
 main = do
-    files <- execParser $ info opts mempty
+    files <- execParser $ info  (helper <*> opts) mempty
     let readAssessor path = do
             as <- readAssessments path
             let toBinary (QRel.GradedRelevance n)
