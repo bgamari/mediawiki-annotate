@@ -114,13 +114,13 @@ readCarFile :: forall a.
                (File a, CBOR.Serialise a)
             => FilePath -> IO (Provenance, [a])
 readCarFile path = handle tryWithoutHeader $ do
-        (hdr, xs) <- readCborList' path
+        (hdr, xs) <- readCborList path
         checkFileType (fileType $ Proxy @a) (headerType hdr)
         return (provenance hdr, xs)
   where
     tryWithoutHeader (CborListHeaderDeserialiseError _ _) = do
         hPutStrLn stderr $ "Failed to deserialise header of "++path++"; provenance unavailable."
-        (NoHeader, xs) <- readCborList' path
+        xs <- readRawCborList path
         return (invalidProvenance, xs)
 
 writeCarFile :: forall a.
