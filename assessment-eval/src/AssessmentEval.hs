@@ -25,7 +25,7 @@ newtype DocumentId = DocumentId {unDocumentId:: T.Text}
 
 type Assessments = HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance
 
-newtype Assessor = Assessor T.Text
+newtype Assessor = Assessor {unAssessor :: T.Text}
                  deriving (Eq, Ord, Show, Hashable)
 
 readAssessments :: FilePath -> IO Assessments

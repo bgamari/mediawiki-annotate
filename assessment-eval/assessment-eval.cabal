@@ -37,6 +37,7 @@ executable agreement
                        filepath >= 1.4,
                        optparse-applicative >=0.14 && <0.15,
                        assessment-eval,
+                       tabular,
                        simplir
   default-language:    Haskell2010
 
