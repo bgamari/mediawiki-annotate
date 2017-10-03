@@ -30,7 +30,7 @@ newtype TableRenderer = TableRenderer (forall rh ch a. (rh -> String) -> (ch -> 
 
 tableRenderer :: Parser TableRenderer
 tableRenderer =
-    option (str >>= parse) (long "table" <> value (TableRenderer AsciiArt.render))
+    option (str >>= parse) (long "table" <> value (TableRenderer AsciiArt.render) <> help "table output type")
   where
     parse "latex" = pure $ TableRenderer Latex.render
     parse "tsv"   = pure $ TableRenderer $ SimpleText.render "\t"
@@ -39,25 +39,48 @@ tableRenderer =
                                   , s
                                   , "; expected 'latex', 'tsv', or 'ascii'"]
 
-opts :: Parser ([FilePath], TableRenderer)
+data RelType = Binary | Graded
+
+relType :: Parser RelType
+relType =
+    option (str >>= parse) (short 'r' <> long "relevance" <> help "relevance type")
+  where
+    parse "binary" = pure $ Binary
+    parse "graded" = pure $ Graded
+    parse s       = fail $ concat ["unknown relevance type"
+                                  , s
+                                  , "; expected 'binary' or 'graded'"]
+
+opts :: Parser ([FilePath], RelType, TableRenderer)
 opts =
-    (,)
+    (,,)
     <$> some (argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor"))
+    <*> relType
     <*> tableRenderer
 
 
 main :: IO ()
 main = do
-    (files, TableRenderer renderTable) <- execParser $ info  (helper <*> opts) mempty
-    let readAssessor path = do
-            as <- readAssessments path
-            let toBinary (QRel.GradedRelevance n)
-                  | n > 2     = QRel.Relevant
-                  | otherwise = QRel.NotRelevant
-            return $ HM.singleton (assessorFromFilepath path) (fmap toBinary as)
-
+    (files, relType, renderTable) <- execParser $ info  (helper <*> opts) mempty
+    let readAssessor path = HM.singleton (assessorFromFilepath path) <$> readAssessments path
     assessments <- HM.unions <$> mapM readAssessor files
-        :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.IsRelevant))
+        :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
+
+    case relType of
+      Binary -> report renderTable $ fmap (fmap toBinary) assessments
+      Graded -> report renderTable assessments
+
+
+toBinary :: QRel.GradedRelevance -> QRel.IsRelevant
+toBinary (QRel.GradedRelevance n)
+  | n > 2     = QRel.Relevant
+  | otherwise = QRel.NotRelevant
+
+report :: (Hashable rel, Eq rel)
+       => TableRenderer
+       -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
+       -> IO ()
+report (TableRenderer renderTable) assessments = do
     putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
     let assessors :: [Assessor]
         assessors = sort $ HM.keys assessments
