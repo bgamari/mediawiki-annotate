@@ -81,3 +81,11 @@ executable change-graded-scale
                        assessment-eval,
                        simplir
   default-language:    Haskell2010
+
+executable assessment-time
+  main-is:             AssessmentTime.hs
+  build-depends:       base >=4.9 && <4.11,
+                       time,
+                       unordered-containers,
+                       assessment-eval
+  default-language:    Haskell2010
