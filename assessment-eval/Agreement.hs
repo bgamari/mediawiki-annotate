@@ -12,6 +12,7 @@ import Numeric
 
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Options.Applicative
 import System.FilePath
@@ -39,17 +40,18 @@ tableRenderer =
                                   , s
                                   , "; expected 'latex', 'tsv', or 'ascii'"]
 
-data RelType = Binary | Graded
+data RelType = Binary | Graded | OffByOne
 
 relType :: Parser RelType
 relType =
     option (str >>= parse) (short 'r' <> long "relevance" <> help "relevance type")
   where
-    parse "binary" = pure $ Binary
-    parse "graded" = pure $ Graded
-    parse s       = fail $ concat ["unknown relevance type"
-                                  , s
-                                  , "; expected 'binary' or 'graded'"]
+    parse "binary"     = pure Binary
+    parse "graded"     = pure Graded
+    parse "off-by-one" = pure OffByOne
+    parse s            = fail $ concat ["unknown relevance type"
+                                       , s
+                                       , "; expected 'binary', 'graded', or 'off-by-one'"]
 
 opts :: Parser ([FilePath], RelType, TableRenderer)
 opts =
@@ -67,9 +69,18 @@ main = do
         :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
 
     case relType of
-      Binary -> report renderTable $ fmap (fmap toBinary) assessments
-      Graded -> report renderTable assessments
+      Binary   -> report renderTable Nothing $ fmap (fmap toBinary) assessments
+      Graded   -> report renderTable Nothing assessments
+      OffByOne -> report renderTable (Just agreementClasses) assessments
 
+agreementClasses :: [HS.HashSet QRel.GradedRelevance]
+agreementClasses = map (HS.fromList . map QRel.GradedRelevance)
+    [ [-2,0]
+    , [0,2]
+    , [2,3]
+    , [3,4]
+    , [4,5]
+    ]
 
 toBinary :: QRel.GradedRelevance -> QRel.IsRelevant
 toBinary (QRel.GradedRelevance n)
@@ -78,9 +89,10 @@ toBinary (QRel.GradedRelevance n)
 
 report :: (Hashable rel, Eq rel)
        => TableRenderer
+       -> Maybe [HS.HashSet rel]
        -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
        -> IO ()
-report (TableRenderer renderTable) assessments = do
+report (TableRenderer renderTable) agreementClasses assessments = do
     putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
     let assessors :: [Assessor]
         assessors = sort $ HM.keys assessments
@@ -89,7 +101,9 @@ report (TableRenderer renderTable) assessments = do
     putStrLn $ renderTable showAssessor showAssessor (maybe "" showFloat3)
       $ Table (Group SingleLine $ map Header assessors) (Group SingleLine $ map Header assessors)
               [ [ if a /= b
-                  then Just $ cohenKappa a' b'
+                  then case agreementClasses of
+                         Just clss -> Just $ cohenKappa' clss a' b'
+                         Nothing   -> Just $ cohenKappa a' b'
                   else Nothing
                 | b <- assessors
                 , let Just b' = HM.lookup b assessments
