@@ -223,15 +223,23 @@ instance CBOR.Serialise PageType
 --                   deriving (Show, Generic)
 -- instance CBOR.Serialise MetadataItem
 
-data PageMetadata = PageMetadata { pagemetaType                 :: PageType
-                                 , pagemetaRedirectNames        :: Maybe [PageName]
-                                 , pagemetaDisambiguationNames  :: Maybe [PageName]
-                                 , pagemetaDisambiguationIds    :: Maybe [PageId]
-                                 , pagemetaCategoryNames        :: Maybe [PageName]
-                                 , pagemetaCategoryIds          :: Maybe [PageId]
-                                 , pagemetaInlinkIds            :: Maybe [PageId]
-                                 }
-                  deriving (Show, Generic)
+data PageMetadata = PageMetadata
+    { pagemetaType                 :: PageType
+      -- ^ what kind of page is this?
+    , pagemetaRedirectNames        :: Maybe [PageName]
+      -- ^ the names of pages that redirect here
+    , pagemetaDisambiguationNames  :: Maybe [PageName]
+      -- ^ the names of disambiguation pages that link here
+    , pagemetaDisambiguationIds    :: Maybe [PageId]
+      -- ^ the 'PageId's of disambiguation pages that link here
+    , pagemetaCategoryNames        :: Maybe [PageName]
+      -- ^ the names of the categories to which the page belongs
+    , pagemetaCategoryIds          :: Maybe [PageId]
+      -- ^ the 'PageId's of the categories to which the page belongs
+    , pagemetaInlinkIds            :: Maybe [PageId]
+      -- ^ the 'PageId's of 'ArticlePage's and 'CategoryPage's that link here
+    }
+    deriving (Show, Generic)
 instance CBOR.Serialise PageMetadata
 
 emptyPageMetadata :: PageMetadata
