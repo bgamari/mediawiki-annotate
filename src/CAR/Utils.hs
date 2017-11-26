@@ -135,11 +135,11 @@ paraToText (Paragraph  _ bodies) =
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
 
-resolveRedirectFactory :: SiteId -> [Page] -> PageId -> PageId
-resolveRedirectFactory siteId pages =
+resolveRedirectFactory ::  [Page] -> PageId -> PageId
+resolveRedirectFactory  pages =
     resolveRedirectFun entityRedirects
   where
-    !entityRedirects = inCompact $ entityRedirectMap siteId pages
+    !entityRedirects = inCompact $ entityRedirectMap pages
 
 resolveRedirectFun :: HM.HashMap PageId PageId -> PageId -> PageId
 resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
@@ -150,8 +150,8 @@ resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
       | Just toPageId <- HM.lookup fromPageId entityRedirects = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
       | otherwise = fromPageId  -- success, we found a real page
 
-entityRedirectMap :: SiteId -> [Page] -> HM.HashMap PageId PageId
-entityRedirectMap siteId pages =
+entityRedirectMap ::  [Page] -> HM.HashMap PageId PageId
+entityRedirectMap pages =
     HM.fromList $ mapMaybe extractRedirect $ pages
   where extractRedirect :: Page -> Maybe (PageId, PageId)
         extractRedirect page@(Page {pageId=fromPageId})

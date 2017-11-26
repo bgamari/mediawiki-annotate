@@ -190,7 +190,8 @@ computeRankingsForQuery
       annsFile queryId queryPageId query seeds radius
 -- --       universeGraph binarySymmetricGraph wordEmbedding resolveRedirect =
       resolveRedirect =
---  LD    let nodes :: HS.HashSet PageId
+      let
+--  LD        nodes :: HS.HashSet PageId
 --   LD       nodes = expandNodesK binarySymmetricGraph seeds radius
 --   LD
 --    LD      nodeAttributes = nodesToAttributes annsFile wordEmbedding nodes
@@ -199,14 +200,15 @@ computeRankingsForQuery
 -- LD--         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
 -- LD         universeSubset = subsetOfUniverseGraph universeGraph nodes
 
-    let fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
-        fixRedirectEdgeDocs edgeDoc =
-            edgeDoc { edgeDocArticleId = resolveRedirect (edgeDocArticleId edgeDoc)
-                    , edgeDocNeighbors = HS.map resolveRedirect (edgeDocNeighbors edgeDoc)
-                    }
+-- LD2        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
+-- LD2        fixRedirectEdgeDocs edgeDoc =
+-- LD2            edgeDoc { edgeDocArticleId = resolveRedirect (edgeDocArticleId edgeDoc)
+-- LD2                    , edgeDocNeighbors = HS.map resolveRedirect (edgeDocNeighbors edgeDoc)
+-- LD2                    }
 
 -- LD         edgeDocsSubset :: [EdgeDoc]
 -- LD         edgeDocsSubset = HS.toList $ HS.fromList $ fmap fixRedirectEdgeDocs $ concat $ HM.elems universeSubset
+
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
         edgeFilters = [(BidiFiltered,  onlySymmetricEdges)
@@ -630,7 +632,7 @@ main = do
             queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
 -}
 
-    let subgraphExpansion = do
+    let subgraphExpansion = --do
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
