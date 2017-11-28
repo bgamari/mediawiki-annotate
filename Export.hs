@@ -76,7 +76,7 @@ main = do
             putStrLn "done"
 
 
-    let resolveRedirect = resolveRedirectFactory siteId $ AnnsFile.pages unprocessedPages
+    let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages unprocessedPages
     -- entity annnotations
         writeEntityAnnotations ::  FilePath ->  (SectionPath -> SectionPath) -> IO ()
         writeEntityAnnotations relsFile cutSectionPath = do

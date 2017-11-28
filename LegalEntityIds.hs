@@ -32,7 +32,7 @@ main = do
     unprocessedPages <- openAnnotations unprocessedPagesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance unprocessedPagesFile
 
-    let entityRedirects = entityRedirectMap siteId $ AnnsFile.pages unprocessedPages
+    let entityRedirects = entityRedirectMap $ AnnsFile.pages unprocessedPages
         resolveRedirect = resolveRedirectFun entityRedirects
         redirectedPageIds =  HM.keys entityRedirects
         legalPageIds = filter (\pgId -> pgId == resolveRedirect pgId)
