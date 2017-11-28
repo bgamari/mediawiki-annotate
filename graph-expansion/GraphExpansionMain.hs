@@ -250,7 +250,7 @@ computeRankingsForQuery
 -- LD                         ,(RandomGraph, randomFilter 100)
 -- LD                         ,(Random2000Graph, randomFilter 2000)
 -- LD                         ]
-
+                                     
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count, realToFrac . withScoreCount)
                       , (Score, realToFrac . withScoreScore)
@@ -506,7 +506,8 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
-    let !resolveRedirect = resolveRedirectFactory siteId $ AnnsFile.pages annsFile
+    let resolveRedirect :: PageId -> PageId
+        !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
     putStrLn $ "# computed redirects"
 
 -- LD     let universeGraph :: UniverseGraph
