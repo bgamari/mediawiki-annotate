@@ -95,7 +95,8 @@ opts =
     <*> method
     where
       method :: Parser Method
-      method =  pure $ Method Top2000PerGraph Unfiltered RecipRank PageRank Bm25
+      -- method =  pure $ Method Top2000PerGraph Unfiltered RecipRank PageRank Bm25
+      method =  pure $ Method Top2000PerGraph Unfiltered RecipRank PersPageRank Bm25
 --       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
       querySource :: Parser QuerySource
