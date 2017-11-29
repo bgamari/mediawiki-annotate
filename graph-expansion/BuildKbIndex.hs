@@ -3,22 +3,12 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ApplicativeDo #-}
 
-
-
-
-
-
 import GHC.Generics
-
 import Data.List
 import Data.Binary
 import Data.Ord
@@ -46,7 +36,6 @@ import Data.Hashable
 import Text.PrettyPrint.ANSI.Leijen hiding ((<>), (<$>))
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
-
 import Options.Applicative
 import EdgeDocCorpus
 import CAR.Types
@@ -62,10 +51,8 @@ import qualified CAR.RunFile as CarRun
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
--- import ZScore
 
 import qualified SimplIR.Format.TrecRunFile as TrecRun
-
 
 import qualified Data.Text.Lazy as TL
 
