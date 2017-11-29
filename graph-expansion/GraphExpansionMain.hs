@@ -45,6 +45,7 @@ import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import CAR.Utils
+import CAR.Utils.Redirects
 import qualified CAR.RunFile as CarRun
 
 import Graph
@@ -501,7 +502,7 @@ main = do
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
     let resolveRedirect :: PageId -> PageId
-        !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
+        !resolveRedirect = resolveRedirects $ AnnsFile.pages annsFile
     putStrLn $ "# computed redirects"
 
 -- LD     let universeGraph :: UniverseGraph
