@@ -14,6 +14,7 @@ module CAR.KnowledgeBase
     , InlinkCounts(..)
     ) where
 
+import qualified Data.Semigroup as S
 import Data.Monoid hiding (All, Any)
 
 import Data.Hashable (Hashable)
@@ -30,6 +31,7 @@ isLead :: PageSkeleton -> Bool
 isLead (Para{}) = True
 isLead (Section{}) = False
 isLead (Image{}) = False
+isLead (List{}) = False
 
 data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocCanonicalName :: PageName
@@ -46,10 +48,13 @@ data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageId InlinkCoun
                              }
                 deriving (Show)
 
+instance S.Semigroup InlinkInfo where
+    InlinkInfo a b <> InlinkInfo a' b' =
+        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+
 instance Monoid InlinkInfo where
     mempty = InlinkInfo mempty mempty
-    InlinkInfo a b `mappend` InlinkInfo a' b' =
-        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+    mappend = (<>)
 
 data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to link to this document.
                                    inLinkCounts        :: !(HM.HashMap PageName Int)
@@ -59,13 +64,16 @@ data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to lin
                                  }
                   deriving (Show)
 
-instance Monoid InlinkCounts where
-    mempty = InlinkCounts mempty mempty mempty mempty
-    InlinkCounts a b c d `mappend` InlinkCounts a' b' c' d' =
+instance S.Semigroup InlinkCounts where
+    InlinkCounts a b c d <> InlinkCounts a' b' c' d' =
         InlinkCounts (HM.unionWith (+) a a')
                      (HM.unionWith (+) b b')
                      (HM.unionWith (+) c c')
                      (HM.unionWith (+) d d')
+
+instance Monoid InlinkCounts where
+    mempty = InlinkCounts mempty mempty mempty mempty
+    mappend = (<>)
 
 --  sourcepage targetpage anchortext => attach anchortext to targetpage
 --  redirect sourcepage targetpage   => attach sourcepage to targetpage
@@ -81,8 +89,8 @@ instance Monoid InlinkCounts where
 
 
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: (PageId -> PageId) -> [Page] -> InlinkInfo
-collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
+collectInlinkInfo :: SiteId -> (PageId -> PageId) -> [Page] -> InlinkInfo
+collectInlinkInfo siteId resolveRedirects' = foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1
@@ -90,7 +98,7 @@ collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton (resolveRedirects' $ pageNameToId redirTargetId)
+            mempty { documentInlinks = HM.singleton (resolveRedirects' redirTargetId)
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
@@ -114,14 +122,15 @@ collectInlinkInfo resolveRedirects'= foldMap pageInlinkInfo
 
 -- #(anchor, target) / #(anchor, *)
 pageToKbDoc :: Page -> KbDoc
-pageToKbDoc page@(Page pageName pageId pageSkeleta) =
-  let leadParas = filter isLead $ pageSkeleta
-      kbDocPageId = pageId
-      kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonText $ leadParas
+pageToKbDoc page =
+  let leadParas = filter isLead $ pageSkeleton page
+      kbDocPageId = pageId page
+      kbDocLeadText = map TL.toStrict $ foldMap pageSkeletonFulltext $ leadParas
       kbDocOutLinks = fmap linkTarget $ foldMap pageSkeletonLinks $ leadParas
       kbDocOutMentions = fmap linkAnchor $ foldMap pageSkeletonLinks $ leadParas
       kbDocLeadPara = leadParas
-      kbDocCategories = pageCategories (Page pageName pageId pageSkeleta)
-      kbDocCanonicalName = pageName
+      -- FIXME
+      --kbDocCategories = pageCategories $ pageMetadata page
+      kbDocCanonicalName = pageName page
       kbDocFullText = pageFulltext page
   in KbDoc {..}

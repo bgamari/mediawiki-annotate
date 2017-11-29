@@ -14,32 +14,40 @@ import qualified Data.Text.Lazy as TL
 import CAR.Types
 import SimplIR.Utils.Compact
 
-pageRedirect :: Page -> Maybe PageName
-pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : rest)) : _})
-  | T.pack "#redirect" `T.isPrefixOf` T.toCaseFold (T.stripStart t)
-  , (ParaLink l) : _ <- rest = Just (linkTarget l)
-pageRedirect _ = Nothing
+-- | Identify the target of a redirect page.
+pageRedirect :: Page -> Maybe PageId
+pageRedirect Page { pageMetadata = meta } =
+    case (pagemetaType meta) of
+    RedirectPage toPage -> Just toPage
+    _                   -> Nothing
 
+-- | True if this is a disambiguation page (language-specifics already resolved)
 pageIsDisambiguation :: Page -> Bool
-pageIsDisambiguation (Page { pageName = PageName t }) =
-    (T.pack " (disambiguation)") `T.isInfixOf` T.toCaseFold t
+pageIsDisambiguation (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == DisambiguationPage
+
+pageIsCategory :: Page -> Bool
+pageIsCategory (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == CategoryPage
+
+pageIsArticle :: Page -> Bool
+pageIsArticle (Page { pageMetadata = meta }) =
+    (pagemetaType meta) == ArticlePage
+
+
 
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
   where
     goSkeleton (Section _ _ children) = any goSkeleton children
-    goSkeleton (Para (Paragraph _ bodies)) = any goParaBody bodies
+    goSkeleton (Para p) = goParagraph p
     goSkeleton (Image {}) = False
+    goSkeleton (List _ p) = goParagraph p
+
+    goParagraph (Paragraph _ bodies) = any goParaBody bodies
 
     goParaBody (ParaLink l) = str `T.isInfixOf` linkAnchor l
     goParaBody (ParaText t) = str `T.isInfixOf` t
-
-pageCategories :: Page -> [T.Text]
-pageCategories = mapMaybe isCategoryTag . pageLinkTargets
-  where
-    isCategoryTag :: PageName -> Maybe T.Text
-    isCategoryTag (PageName pageName) =
-        T.pack "Category:" `T.stripPrefix` pageName
 
 pageLinkTargets :: Page -> [PageName]
 pageLinkTargets = map linkTarget . pageLinks
@@ -53,20 +61,30 @@ pageParas = foldMap pageSkeletonParas . pageSkeleton
 
 pageSkeletonParas :: PageSkeleton -> [Paragraph]
 pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
-pageSkeletonParas (Para (paragraph)) = [paragraph]
+pageSkeletonParas (Para paragraph) = [paragraph]
 pageSkeletonParas (Image {}) = []
+pageSkeletonParas (List _ paragraph) = [paragraph]
 
 pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
+pageSkeletonLinks (List _ (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 
 pageSectionPaths :: Page -> [SectionPath]
 pageSectionPaths = map (\(path,_,_) -> path) . pageSections
 
 pageSections :: Page -> [(SectionPath, [SectionHeading], [PageSkeleton])]
-pageSections (Page _pageName pageId skel0) =
-    foldMap (go mempty mempty) skel0
+pageSections (Page {pageId=pageId, pageSkeleton=skel0}) =
+    foldMap (pageSkeletonSections pageId) skel0
+
+stubSections :: Stub -> [(SectionPath, [SectionHeading], [PageSkeleton])]
+stubSections (Stub {stubPageId=pageId, stubSkeleton=skel0}) =
+    foldMap (pageSkeletonSections pageId) skel0
+
+pageSkeletonSections :: PageId -> PageSkeleton
+                     -> [(SectionPath, [SectionHeading], [PageSkeleton])]
+pageSkeletonSections pageId = go mempty mempty
   where
     go :: DList HeadingId -> DList SectionHeading
        -> PageSkeleton -> [(SectionPath, [SectionHeading], [PageSkeleton])]
@@ -80,6 +98,7 @@ pageSections (Page _pageName pageId skel0) =
            : foldMap (go parentIds' parentHeadings') children
     go _ _ (Para {})  = []
     go _ _ (Image {}) = []
+    go _ _ (List {})  = []
 
     isSection (Section {}) = True
     isSection _            = False
@@ -92,22 +111,21 @@ paraBodyLinks :: ParaBody -> [Link]
 paraBodyLinks (ParaText _text) = []
 paraBodyLinks (ParaLink link)  = [link]
 
-pageSkeletonText :: PageSkeleton -> [TL.Text]
-pageSkeletonText (Section _ _ children) = foldMap pageSkeletonText children
-pageSkeletonText (Para para) = [ paraToText para ]
-pageSkeletonText (Image _ _) = []
 
-
+-- | Returns all visible text (including headers, page titles, and captions)  of the page.
 pageFulltext :: Page -> [TL.Text]
-pageFulltext (Page pageName _ skels) =
+pageFulltext (Page {pageName=pageName, pageSkeleton=skels}) =
     (TL.fromStrict $ getPageName pageName) : (foldMap pageSkeletonFulltext skels)
-    
+
+
+-- | Returns all visible text (including headers, etc ) from the page skeleton.
 pageSkeletonFulltext :: PageSkeleton -> [TL.Text]
 pageSkeletonFulltext (Section heading _ children) =
     (TL.fromStrict $ getSectionHeading heading) : (foldMap pageSkeletonFulltext children)
-pageSkeletonFulltext (Para para) = [ paraToText para ]
+pageSkeletonFulltext (Para para) = [paraToText para]
 pageSkeletonFulltext (Image _ children) =
     foldMap pageSkeletonFulltext children
+pageSkeletonFulltext (List _ para) = [paraToText para]
 
 
 
@@ -117,8 +135,9 @@ paraToText (Paragraph  _ bodies) =
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
 
-resolveRedirectFactory :: [Page] -> PageId -> PageId
-resolveRedirectFactory pages = resolveRedirectFun entityRedirects
+resolveRedirectFactory ::  [Page] -> PageId -> PageId
+resolveRedirectFactory  pages =
+    resolveRedirectFun entityRedirects
   where
     !entityRedirects = inCompact $ entityRedirectMap pages
 
@@ -131,14 +150,14 @@ resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
       | Just toPageId <- HM.lookup fromPageId entityRedirects = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
       | otherwise = fromPageId  -- success, we found a real page
 
-entityRedirectMap :: [Page] -> HM.HashMap PageId PageId
-entityRedirectMap pages = HM.fromList $ mapMaybe extractRedirect $ pages
+entityRedirectMap ::  [Page] -> HM.HashMap PageId PageId
+entityRedirectMap pages =
+    HM.fromList $ mapMaybe extractRedirect $ pages
   where extractRedirect :: Page -> Maybe (PageId, PageId)
-        extractRedirect page@(Page _ fromPageId _ )
+        extractRedirect page@(Page {pageId=fromPageId})
           | isNullPageId fromPageId = Nothing
           | otherwise = do
-            toPageName <- pageRedirect page  -- MaybeMonad
-            let toPageId = pageNameToId toPageName
+            toPageId <- pageRedirect page  -- MaybeMonad
             guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
             pure (fromPageId, toPageId)
 

@@ -1,146 +1,122 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BangPatterns #-}
 
+import Data.List
 import Data.Maybe
-import Data.Semigroup
+import Data.Semigroup hiding (option)
+import Numeric
+
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Options.Applicative
 import System.FilePath
 
+import Text.Tabular
+import qualified Text.Tabular.Latex as Latex
+import qualified Text.Tabular.AsciiArt as AsciiArt
+import qualified Text.Tabular.SimpleText as SimpleText
+
 import qualified SimplIR.Format.QRel as QRel
+import SimplIR.Assessment.Agreement
+import AssessmentEval
 
-newtype QueryId = QueryId T.Text
-                deriving (Eq, Ord, Show, Hashable)
+newtype TableRenderer = TableRenderer (forall rh ch a. (rh -> String) -> (ch -> String) -> (a -> String) -> Table rh ch a -> String)
 
-newtype DocumentId = DocumentId T.Text
-                   deriving (Eq, Ord, Show, Hashable)
 
-newtype Relevance = Relevance Int
-                  deriving (Eq, Ord, Show, Hashable)
-
-type Assessments = HM.HashMap (QueryId, DocumentId) Relevance
-
-newtype Assessor = Assessor T.Text
-                 deriving (Eq, Ord, Show, Hashable)
-
-readAssessments :: FilePath -> IO Assessments
-readAssessments = fmap (foldMap toAssessments) . QRel.readQRel (Relevance . QRel.gradedRelevance)
+tableRenderer :: Parser TableRenderer
+tableRenderer =
+    option (str >>= parse) (long "table" <> value (TableRenderer AsciiArt.render) <> help "table output type")
   where
-    toAssessments :: QRel.Entry Relevance -> Assessments
-    toAssessments QRel.Entry{..} =
-        HM.singleton (QueryId queryId, DocumentId documentName) relevance
+    parse "latex" = pure $ TableRenderer Latex.render
+    parse "tsv"   = pure $ TableRenderer $ SimpleText.render "\t"
+    parse "ascii" = pure $ TableRenderer AsciiArt.render
+    parse s       = fail $ concat ["unknown table rendering method "
+                                  , s
+                                  , "; expected 'latex', 'tsv', or 'ascii'"]
 
-assessorFromFilepath :: FilePath -> Assessor
-assessorFromFilepath path =
-    Assessor $ fromMaybe t $ foldMap (t `T.stripPrefix`) [".rel", ".qrel"]
+data RelType = Binary | Graded | OffByOne
+
+relType :: Parser RelType
+relType =
+    option (str >>= parse) (short 'r' <> long "relevance" <> help "relevance type")
   where
-    t = T.pack $ takeFileName path
+    parse "binary"     = pure Binary
+    parse "graded"     = pure Graded
+    parse "off-by-one" = pure OffByOne
+    parse s            = fail $ concat ["unknown relevance type"
+                                       , s
+                                       , "; expected 'binary', 'graded', or 'off-by-one'"]
 
-opts :: Parser [FilePath]
-opts = some $ argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor")
+opts :: Parser ([FilePath], RelType, TableRenderer)
+opts =
+    (,,)
+    <$> some (argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor"))
+    <*> relType
+    <*> tableRenderer
+
 
 main :: IO ()
 main = do
-    files <- execParser $ info opts mempty
-    let readAssessor path = do
-            as <- readAssessments path
-            let toBinary (Relevance n)
-                  | n > 2     = QRel.Relevant
-                  | otherwise = QRel.NotRelevant
-            return $ HM.singleton (assessorFromFilepath path) (fmap toBinary as)
-
+    (files, relType, renderTable) <- execParser $ info  (helper <*> opts) mempty
+    let readAssessor path = HM.singleton (assessorFromFilepath path) <$> readAssessments path
     assessments <- HM.unions <$> mapM readAssessor files
+        :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
+
+    case relType of
+      Binary   -> report renderTable Nothing $ fmap (fmap toBinary) assessments
+      Graded   -> report renderTable Nothing assessments
+      OffByOne -> report renderTable (Just agreementClasses) assessments
+
+agreementClasses :: [HS.HashSet QRel.GradedRelevance]
+agreementClasses = map (HS.fromList . map QRel.GradedRelevance)
+    [ [-2,0]
+    , [0,2]
+    , [2,3]
+    , [3,4]
+    , [4,5]
+    ]
+
+toBinary :: QRel.GradedRelevance -> QRel.IsRelevant
+toBinary (QRel.GradedRelevance n)
+  | n > 2     = QRel.Relevant
+  | otherwise = QRel.NotRelevant
+
+report :: (Hashable rel, Eq rel)
+       => TableRenderer
+       -> Maybe [HS.HashSet rel]
+       -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
+       -> IO ()
+report (TableRenderer renderTable) agreementClasses assessments = do
     putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
+    let assessors :: [Assessor]
+        assessors = sort $ HM.keys assessments
+
     putStrLn "Cohen:"
-    putStrLn $ unlines [ show a <> "\t" <> show b <> "\t" <> show (cohenKappa a' b')
-                       | (a, a') <- HM.toList assessments
-                       , (b, b') <- HM.toList assessments
-                       -- , a < b
-                       ]
-    putStrLn $ "Fleiss: "<>show (fleissKappa $ HM.elems assessments)
+    putStrLn $ renderTable showAssessor showAssessor (maybe "" showFloat3)
+      $ Table (Group SingleLine $ map Header assessors) (Group SingleLine $ map Header assessors)
+              [ [ if a /= b
+                  then case agreementClasses of
+                         Just clss -> Just $ cohenKappa' clss a' b'
+                         Nothing   -> Just $ cohenKappa a' b'
+                  else Nothing
+                | b <- assessors
+                , let Just b' = HM.lookup b assessments
+                ]
+              | a <- assessors
+              , let Just a' = HM.lookup a assessments
+              ]
+
+    putStrLn $ "Fleiss: "<>showFloat3 (fleissKappa $ HM.elems assessments)
     return ()
 
-cohenKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
-           => HM.HashMap subj cat
-           -> HM.HashMap subj cat
-           -> Double
-cohenKappa a b =
-    1 - (1 - po) / (1 - pe)
-  where
-    !agreementCount = length [ ()
-                             | (ka,kb) <- HM.elems inter
-                             , ka == kb
-                             ]
-    !po = realToFrac agreementCount / realToFrac allCount
-    !pe = realToFrac (sum $ HM.intersectionWith (*) na nb) / realToFrac allCount^(2::Int)
-    -- how many times a and b predict class k
-    na, nb :: HM.HashMap cat Int
-    !na = HM.fromListWith (+) [ (k, 1) | (_, (k, _)) <- HM.toList inter ]
-    !nb = HM.fromListWith (+) [ (k, 1) | (_, (_, k)) <- HM.toList inter ]
+showAssessor :: Assessor -> String
+showAssessor = T.unpack . unAssessor
 
-    inter :: HM.HashMap subj (cat,cat)
-    !inter = HM.intersectionWith (,) a b
-    !allCount = HM.size inter
-
-fleissKappa :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
-            => [HM.HashMap subj cat]  -- ^ the assessments of each assessor
-            -> Double
-fleissKappa assessments' =
-    (barP - barPe) / (1 - barPe)
-  where
-    assessments = onlyOverlappingAssessments assessments'
-
-    -- n_i
-    numAssessments :: HM.HashMap subj Int
-    numAssessments = HM.fromListWith (+) [ (x, 1)
-                                         | a <- assessments
-                                         , x <- HM.keys a ]
-    -- N
-    numSubjects = HM.size numAssessments
-    totalAssessments = sum numAssessments
-
-    -- n_ij
-    nij :: HM.HashMap subj (HM.HashMap cat Int)
-    nij = HM.fromListWith (HM.unionWith (+))
-        [ (x, HM.singleton k 1)
-        | a <- assessments
-        , (x, k) <- HM.toList a
-        ]
-
-    -- p_j, probability that class k is predicted
-    pj :: HM.HashMap cat Double
-    pj = HM.fromListWith (+)
-         [ (k, realToFrac n / realToFrac totalAssessments)
-         | xs <- HM.elems nij
-         , (k, n) <- HM.toList xs
-         ]
-
-    barP :: Double
-    barP = (/ realToFrac numSubjects) $ sum
-           [ (inner / realToFrac ni / realToFrac (ni - 1)) - 1 / realToFrac (ni - 1)
-           | (x, njs) <- HM.toList nij
-           , let Just ni = x `HM.lookup` numAssessments
-           , let inner = sum [ (realToFrac v)^(2::Int)
-                             | v <- HM.elems njs
-                             ]
-           ]
-
-    barPe = sum [ v^(2 :: Int) | v <- HM.elems pj ]
-
-onlyOverlappingAssessments
-    :: forall subj cat. (Eq cat, Hashable cat, Eq subj, Hashable subj)
-    => [HM.HashMap subj cat] -> [HM.HashMap subj cat]
-onlyOverlappingAssessments assessments =
-    map (HM.filterWithKey overlaps) assessments
-  where
-    numAssessments :: HM.HashMap subj Int
-    numAssessments = HM.fromListWith (+) [ (x, 1)
-                                         | a <- assessments
-                                         , x <- HM.keys a ]
-    overlaps x _ = n > 1
-      where Just n = x `HM.lookup` numAssessments
+showFloat3 :: RealFloat a => a -> String
+showFloat3 x = showFFloat (Just 3) x ""

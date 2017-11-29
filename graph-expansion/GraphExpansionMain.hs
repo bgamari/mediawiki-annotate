@@ -190,7 +190,8 @@ computeRankingsForQuery
       annsFile queryId queryPageId query seeds radius
 -- --       universeGraph binarySymmetricGraph wordEmbedding resolveRedirect =
       resolveRedirect =
---  LD    let nodes :: HS.HashSet PageId
+      let
+--  LD        nodes :: HS.HashSet PageId
 --   LD       nodes = expandNodesK binarySymmetricGraph seeds radius
 --   LD
 --    LD      nodeAttributes = nodesToAttributes annsFile wordEmbedding nodes
@@ -199,14 +200,15 @@ computeRankingsForQuery
 -- LD--         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
 -- LD         universeSubset = subsetOfUniverseGraph universeGraph nodes
 
-    let fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
-        fixRedirectEdgeDocs edgeDoc =
-            edgeDoc { edgeDocArticleId = resolveRedirect (edgeDocArticleId edgeDoc)
-                    , edgeDocNeighbors = HS.map resolveRedirect (edgeDocNeighbors edgeDoc)
-                    }
+-- LD2        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
+-- LD2        fixRedirectEdgeDocs edgeDoc =
+-- LD2            edgeDoc { edgeDocArticleId = resolveRedirect (edgeDocArticleId edgeDoc)
+-- LD2                    , edgeDocNeighbors = HS.map resolveRedirect (edgeDocNeighbors edgeDoc)
+-- LD2                    }
 
 -- LD         edgeDocsSubset :: [EdgeDoc]
 -- LD         edgeDocsSubset = HS.toList $ HS.fromList $ fmap fixRedirectEdgeDocs $ concat $ HM.elems universeSubset
+
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
         edgeFilters = [(BidiFiltered,  onlySymmetricEdges)
@@ -248,7 +250,7 @@ computeRankingsForQuery
 -- LD                         ,(RandomGraph, randomFilter 100)
 -- LD                         ,(Random2000Graph, randomFilter 2000)
 -- LD                         ]
-
+                                     
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count, realToFrac . withScoreCount)
                       , (Score, realToFrac . withScoreScore)
@@ -495,6 +497,7 @@ main = do
         execParser $ info (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
+    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
@@ -503,7 +506,8 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
-    let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
+    let resolveRedirect :: PageId -> PageId
+        !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
     putStrLn $ "# computed redirects"
 
 -- LD     let universeGraph :: UniverseGraph
@@ -532,8 +536,8 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
-              map populateSeeds . pagesToQueryDocs resolveRedirect queryDeriv
-                  <$> readCborList queryFile
+              map populateSeeds . pagesToQueryDocs siteId resolveRedirect queryDeriv
+                  <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
@@ -629,7 +633,7 @@ main = do
             queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
 -}
 
-    let subgraphExpansion = do
+    let subgraphExpansion = --do
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"

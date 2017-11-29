@@ -6,6 +6,7 @@ packages:
     multilang-car/
     assessment-eval/
     mediawiki-parser/
+    mediawiki-import/
     db-export/
     graph-expansion/
     simplir/
@@ -16,6 +17,7 @@ packages:
     assessment-interface/annotation/server
     filter-duplicates/
     vendor/*
+    vendor/binary-serialise-cbor/*
 
 package mediawiki-parser
     tests: True

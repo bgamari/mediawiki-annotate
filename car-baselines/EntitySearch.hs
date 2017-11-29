@@ -172,8 +172,7 @@ main = do
     queries <-
         case query of
           QueriesFromCbor queryFile queryDeriv -> do
-              pagesToQueryDocs queryDeriv
-                  <$> readCborList @Page queryFile
+              pagesToQueryDocs queryDeriv <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile

@@ -159,7 +159,7 @@ main = do
         toTuple p = (paraId p, tokenise $ paraToText p)
     ncaps <- getNumCapabilities
     setNumCapabilities 1
-    paras <- V.fromList . listStatus "read" 100000 . map toTuple . decodeCborList <$> BSL.readFile parasFile
+    paras <- V.fromList . listStatus "read" 100000 . map toTuple <$> readParagraphsFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile

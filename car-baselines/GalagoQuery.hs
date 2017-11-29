@@ -10,7 +10,8 @@ import Data.Bifunctor
 import Data.Functor.Identity
 import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
-import Data.Monoid
+import Data.Monoid hiding ((<>))
+import Data.Semigroup hiding (option)
 import GHC.Generics
 import System.FilePath
 
@@ -83,7 +84,7 @@ opts =
 
  where
     go outFile outlinesFile useSDM useRM maybeFieldname = do
-        outlines <- readCborList outlinesFile :: IO [Stub]
+        outlines <- readOutlinesFile outlinesFile
         BSL.writeFile outFile $ Aeson.encode $ foldMap stubToGalagoQuery outlines useSDM useRM maybeFieldname
 
 type GalagoQueryId = T.Text
@@ -108,7 +109,7 @@ stubToGalagoQuery outline useSDM useRM maybeFieldname =
                    $ combineText
                    $ maybe id fieldNameQueryTerms maybeFieldname
                    rawQueryTerms
-                   
+
             in GalagoQuery queryId queryText
 
 data GalagoQuery = GalagoQuery { galagoQueryId :: GalagoQueryId
@@ -119,13 +120,14 @@ instance ToJSON GalagoQuery where
     toJSON q = object [ "number" .= galagoQueryId q, "text" .= galagoQueryText q ]
 
 newtype GalagoQuerySet = GalagoQuerySet [GalagoQuery]
-                       deriving (Monoid)
+                       deriving (Monoid, Semigroup)
 
 instance ToJSON GalagoQuerySet where
     toJSON (GalagoQuerySet qs) = object [ "queries" .= qs ]
 
 stubPaths :: Stub -> [([Term], SectionPath)]
-stubPaths (Stub pageName pageId skel) = foldMap (go mempty (titleWords pageName)) skel
+stubPaths (Stub pageName pageId _ skel) =
+    foldMap (go mempty (titleWords pageName)) skel
   where
     go :: DList.DList HeadingId -> [Term] -> PageSkeleton -> [([Term], SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen

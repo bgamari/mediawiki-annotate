@@ -1,61 +1,89 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE TypeApplications #-}
 
+-- Stop! Use Files module for reading car cbor files with headers!
 module CAR.Types.CborList
     ( decodeCborList, readCborList
-    , encodeCborList, writeCborList
+    , writeCborList
+      -- * Raw lists
+    , readRawCborList
+      -- * Exceptions
+    , CborListHeaderDeserialiseError(..)
+    , CborListDeserialiseError(..)
+      -- * Utilities
+    , breakOrElement
     ) where
 
 import Control.Exception
-import Control.Monad.ST
-import Control.Monad.ST.Unsafe
+import Data.Semigroup
 import qualified Codec.Serialise.Class as CBOR
 import qualified Codec.CBOR.Write as CBOR
-import qualified Codec.CBOR.Read as CBOR
-import qualified Data.ByteString.Char8 as BS
+import qualified Codec.CBOR.Decoding as CBOR
+import qualified Codec.CBOR.Encoding as CBOR
+import qualified Codec.CBOR.Term as CBOR
+import qualified Codec.CBOR.Read as Read
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
 import System.IO
 
-decodeCborList :: forall a. CBOR.Serialise a => BSL.ByteString -> [a]
-decodeCborList = decodeCborList' (CborListDeserialiseError "<decodeCborList>")
+decodeCborList :: forall hdr a. (CBOR.Serialise hdr, CBOR.Serialise a)
+               => BSL.ByteString -> (hdr, [a])
+decodeCborList = decodeCborList' "<decodeCborList>"
 
-decodeCborList' :: forall a. CBOR.Serialise a
-                => (CBOR.DeserialiseFailure -> CborListDeserialiseError)
-                -> BSL.ByteString -> [a]
-decodeCborList' deserialiseFail = \bs -> runST $ start $ BSL.toChunks bs
+decodeCborList' :: forall hdr a. (CBOR.Serialise hdr, CBOR.Serialise a)
+                => String  -- ^ an error description
+                -> BSL.ByteString
+                -> (hdr, [a])
+decodeCborList' desc = \bs ->
+    case Read.deserialiseFromBytes (CBOR.decode <* CBOR.decodeListLenIndef) bs of
+      Right (rest, hdr) -> (hdr, decodeRawCborList desc rest)
+      Left err          -> throw $ CborListHeaderDeserialiseError desc err
+
+decodeRawCborList :: forall a. (CBOR.Serialise a)
+                => String  -- ^ an error description
+                -> BSL.ByteString
+                -> [a]
+decodeRawCborList desc = go
   where
-    start xs
-      | all BS.null xs = return []
-      | otherwise      = go (CBOR.deserialiseIncremental CBOR.decode) xs
+    go bs
+      | BSL.null bs = []
+      | otherwise   =
+            case Read.deserialiseFromBytes breakOrElement bs of
+              Left err             -> throw $ CborListDeserialiseError desc err
+              Right (_, Nothing)   -> []
+              Right (rest, Just x) -> x : go rest
 
-    go :: ST s (CBOR.IDecode s a) -> [BS.ByteString] -> ST s [a]
-    go action xs = do
-        r <- action
-        case (r, xs) of
-          (CBOR.Partial f, [])       -> go (f Nothing) []
-          (CBOR.Partial f, bs : bss) -> go (f (Just bs)) bss
-          (CBOR.Done bs _ x, bss)    -> do
-              rest <- unsafeInterleaveST $ start (bs : bss)
-              return (x : rest)
-          (CBOR.Fail _rest _ err, _) -> throw $ deserialiseFail err
+breakOrElement :: CBOR.Serialise a => CBOR.Decoder s (Maybe a)
+breakOrElement = do
+    ty <- CBOR.peekTokenType
+    case ty of
+      CBOR.TypeBreak -> return Nothing
+      _              -> Just <$> CBOR.decode
 
-data CborListDeserialiseError = CborListDeserialiseError FilePath CBOR.DeserialiseFailure
+data CborListHeaderDeserialiseError = CborListHeaderDeserialiseError String Read.DeserialiseFailure
+                              deriving (Show)
+instance Exception CborListHeaderDeserialiseError
+
+data CborListDeserialiseError = CborListDeserialiseError String Read.DeserialiseFailure
                               deriving (Show)
 instance Exception CborListDeserialiseError
 
-readCborList :: CBOR.Serialise a => FilePath -> IO [a]
-readCborList fname =
-    decodeCborList' (CborListDeserialiseError fname) <$> BSL.readFile fname
+readCborList :: forall hdr a. (CBOR.Serialise hdr, CBOR.Serialise a)
+             => FilePath -> IO (hdr, [a])
+readCborList fname = decodeCborList' fname <$> BSL.readFile fname
 
-encodeCborList :: CBOR.Serialise a => [a] -> BSB.Builder
-encodeCborList = CBOR.toBuilder . foldMap CBOR.encode
+encodeCborList :: (CBOR.Serialise hdr, CBOR.Serialise a) => hdr -> [a] -> BSB.Builder
+encodeCborList hdr xs = CBOR.toBuilder $
+    CBOR.encode hdr
+    <> CBOR.encodeListLenIndef
+    <> foldMap CBOR.encode xs
+    <> CBOR.encodeBreak
 
-writeCborList :: CBOR.Serialise a => FilePath -> [a] -> IO ()
-writeCborList out xs =
+writeCborList :: (CBOR.Serialise hdr, CBOR.Serialise a) => FilePath -> hdr -> [a] -> IO ()
+writeCborList out hdr xs =
     withFile out WriteMode $ \h -> do
-    BSB.hPutBuilder h $ encodeCborList xs
+    BSB.hPutBuilder h $ encodeCborList hdr xs
+
+readRawCborList :: forall a. (CBOR.Serialise a)
+                => FilePath -> IO [a]
+readRawCborList fname = decodeRawCborList @a fname <$> BSL.readFile fname

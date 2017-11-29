@@ -48,7 +48,7 @@ instance Hashable EdgeDoc where
         hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
 
 pageToEdgeDocs :: Page -> [EdgeDoc]
-pageToEdgeDocs (Page pageName pageId pageSkeleta) =
+pageToEdgeDocs (Page pageName pageId _ pageSkeleta) =
     filter (not . isNullPageId . edgeDocArticleId) -- discard edge docs when articleId is an empty entity
     $ foldMap (go mempty) pageSkeleta
   where

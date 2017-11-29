@@ -5,7 +5,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.HashMap.Strict as HM
 import qualified Codec.Serialise as CBOR
 import qualified Data.JsonStream.Parser as JS
-import CAR.Types (PageName(..))
+import CAR.Types (PageName(..), SiteId(..))
 import WikiData
 
 buildIndex :: BSL.ByteString -> LangIndex

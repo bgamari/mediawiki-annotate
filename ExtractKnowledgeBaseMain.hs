@@ -106,7 +106,7 @@
 -- main :: IO ()
 -- main = do
 --     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
---     pages <- decodeCborList <$> BSL.readFile inputFile
+--     pages <- readPagesFile inputFile
 --     let inlinkInfo   = collectInlinkInfo undefined pages  -- todo add redirect resolver instead of `undefined`
 -- --         inlinkCounts = resolveRedirects inlinkInfo
 -- --         inlinkTotals = mconcat $ HM.elems inlinkCounts    -- todo fix redirects

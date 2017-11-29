@@ -66,7 +66,7 @@ treeDepth _ = 1
 main :: IO ()
 main = do
     (thresh, outputFile, maybeNumParas, fanout, parasFile) <- execParser $ info (helper <*> opts) mempty
-    paras <- decodeCborList <$> BSL.readFile parasFile
+    paras <- readParagraphsFile parasFile
 
     let paras' :: V.Vector DedupPara
         paras' =

@@ -13,8 +13,13 @@ import qualified Data.Text as T
 import CAR.Types.AST
 
 prettyPage :: LinkStyle -> Page -> String
-prettyPage linkStyle (Page (PageName name) _ skeleton) =
-    unlines $ [ T.unpack name, replicate (T.length name) '=', "" ]
+prettyPage linkStyle (Page (PageName name) _ metaData skeleton) =
+    unlines $ [ T.unpack name
+              , replicate (T.length name) '='
+              , ""
+              , "   " ++ show metaData
+              , ""
+              ]
             ++ map (prettySkeleton linkStyle) skeleton
 
 prettySkeleton :: LinkStyle -> PageSkeleton -> String
@@ -29,10 +34,11 @@ prettySkeleton renderLink = go 1
     go _ (Para para) = prettyParagraph renderLink para
     go _ (Image target children) =
         "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
+    go _ (List n para) = replicate n '*' ++ " " ++ prettyParagraph renderLink para
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
-prettyParagraph renderLink (Paragraph paraId bodies) =
-    "{" ++ unpackParagraphId paraId ++ "} " ++ concatMap go bodies ++ "\n"
+prettyParagraph renderLink (Paragraph pid bodies) =
+    "{" ++ unpackParagraphId pid ++ "} " ++ concatMap go bodies ++ "\n"
   where
     go (ParaText t) = T.unpack t
     go (ParaLink l) = renderLink l

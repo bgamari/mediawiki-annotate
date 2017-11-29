@@ -132,10 +132,10 @@ normalize x                  = x
 interpret :: (PageName -> PageName) -> Pred Void -> Page -> Bool
 interpret pageNameTranslate pred page =
     case pred of
-      NameContains t                -> t `T.isInfixOf` T.toCaseFold (getPageName (pageNameTranslate $ pageName page))
-      NameHasPrefix prefix          -> prefix `T.isPrefixOf` getPageName (pageNameTranslate $ pageName page)
+      NameContains t                -> t `T.isInfixOf` (T.toCaseFold $ getPageName $ pageNameTranslate $ pageName page)
+      NameHasPrefix prefix          -> prefix `T.isPrefixOf` (getPageName $ pageNameTranslate $ pageName page)
       NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
-      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map T.toCaseFold $ map categoryNameTranslate $ pageCategories page
+      HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName . pageNameTranslate) $ fromMaybe [] $ pagemetaCategoryNames (pageMetadata page)
       PageHashMod salt n k          -> let h = hashWithSalt salt $ pageNameTranslate $ pageName page
                                        in h `mod` n == k
       IsRedirect                    -> isJust $ pageRedirect page
@@ -145,8 +145,3 @@ interpret pageNameTranslate pred page =
       Negate p                      -> not $ interpret pageNameTranslate p page
       TruePred                      -> True
       Pure _                        -> error "Impossible"
-
-    where
-      categoryNameTranslate :: T.Text -> T.Text
-      categoryNameTranslate foreignCategory =
-        getPageName $ pageNameTranslate (PageName foreignCategory)

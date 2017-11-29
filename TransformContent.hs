@@ -7,7 +7,6 @@ import Data.Monoid hiding (All, Any)
 import Options.Applicative
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as BSL
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 import Data.Maybe
@@ -42,7 +41,7 @@ opts =
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> (fullMode <|> sectionsCategoriesMode <|>  configurableMode)
-  where 
+  where
     fullMode = flag' transformFull (long "full" <> help "full  filtering of lead, category, hidden sections, and short page remainders")
     sectionsCategoriesMode = flag' transformCategoriesAndForbiddenSection  (long "sections-categories" <> help "partial filtering of category and hidden sections only")
     configurableMode = transformConf <$> (do includeLead  <- switch (long "lead" <> help "include lead paragraph")
@@ -86,14 +85,12 @@ forbiddenStdHeadings = HS.fromList ["see also", "references", "external links", 
     "external links and references", "notes and references" ] --new in v1.6
 
 isPara :: PageSkeleton -> Bool
-isPara (Para{})    = True
-isPara (Section{}) = False
-isPara (Image{})   = False
+isPara (Para{}) = True
+isPara _        = False
 
 isImage :: PageSkeleton -> Bool
-isImage (Para{})    = False
-isImage (Section{}) = False
 isImage (Image{})   = True
+isImage _           = False
 
 
 
@@ -134,32 +131,27 @@ recurseFilterSections _ skel = Just skel                          -- keep
 
 
 recurseFilterPage :: (PageSkeleton -> Bool) -> Page -> Page
-recurseFilterPage f (Page {..}) =
-    Page pageName pageId children'
-  where children' = mapMaybe (recurseFilterSections f) pageSkeleton
+recurseFilterPage f page@(Page {..}) =
+    page {pageSkeleton = mapMaybe (recurseFilterSections f) pageSkeleton}
 
 isCategoriesPara :: PageSkeleton -> Bool
-isCategoriesPara (Para (Paragraph paraId paraBody)) =
+isCategoriesPara (Para (Paragraph _ paraBody)) =
     all isCategoryLinks paraBody
   where
     isCategoryLinks :: ParaBody -> Bool
     isCategoryLinks (ParaText _) = False
-    isCategoryLinks (ParaLink (Link (PageName name) section _ anchor)) =
+    isCategoryLinks (ParaLink (Link (PageName name) _ _ _)) =
       "Category:" `T.isPrefixOf` name
 isCategoriesPara _ = False
 
 topLevelFilterPage :: (PageSkeleton -> Bool) -> Page  ->  Page
-topLevelFilterPage f (Page {pageName, pageId, pageSkeleton=pageSkeleta}) =
-    Page pageName pageId (filter f pageSkeleta)
-
-
+topLevelFilterPage f page =
+    page { pageSkeleton = filter f $ pageSkeleton page }
 
 dropPageIfShort :: Page -> Maybe Page
-dropPageIfShort page@(Page {pageName, pageId, pageSkeleton=pageSkeleta})
-  | length pageSkeleta > 3 =
-      Just page
-  | otherwise = Nothing
-  
+dropPageIfShort page@(Page {pageSkeleton=pageSkeleta})
+  | length pageSkeleta > 3 = Just page
+  | otherwise              = Nothing
 
 transformFull :: Page -> Maybe Page
 transformFull page =
@@ -189,6 +181,6 @@ transformCategoriesAndForbiddenSection page =
 main :: IO ()
 main = do
     (inputFile, outputFile, transformMode) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
-    pages <- decodeCborList <$> BSL.readFile inputFile
-    writeCborList outputFile $ mapMaybe transformMode pages
+    (prov, pages) <- readPagesFileWithProvenance inputFile
+    writeCarFile outputFile prov $ mapMaybe transformMode pages
 

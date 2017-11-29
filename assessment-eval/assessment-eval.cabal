@@ -12,7 +12,22 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable assessment-eval
+library
+  exposed-modules:     AssessmentEval
+  hs-source-dirs:      src
+  ghc-options:         -Wall
+  build-depends:       base >=4.9 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       filepath >= 1.4,
+                       optparse-applicative >=0.14 && <0.15,
+                       time,
+                       simplir
+  default-language:    Haskell2010
+
+
+executable agreement
   main-is:             Agreement.hs
   other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
   build-depends:       base >=4.9 && <4.11,
@@ -21,5 +36,56 @@ executable assessment-eval
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
                        optparse-applicative >=0.14 && <0.15,
+                       assessment-eval,
+                       tabular,
                        simplir
+  default-language:    Haskell2010
+
+executable merge-annotations
+  main-is:             MergeAnnotations.hs
+  other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
+  build-depends:       base >=4.9 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       filepath >= 1.4,
+                       optparse-applicative >=0.14 && <0.15,
+                       assessment-eval,
+                       time,
+                       simplir
+  default-language:    Haskell2010
+
+executable split-psg-entity-annotations
+  main-is:             SplitPsgEntityAnnotations.hs
+  other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
+  build-depends:       base >=4.9 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       filepath >= 1.4,
+                       optparse-applicative >=0.14 && <0.15,
+                       assessment-eval,
+                       time,
+                       simplir
+  default-language:    Haskell2010
+
+executable change-graded-scale
+  main-is:             ChangeGradedScale.hs
+  other-extensions:    ScopedTypeVariables, GeneralizedNewtypeDeriving, RecordWildCards, OverloadedStrings
+  build-depends:       base >=4.9 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       text >=1.2 && <1.3,
+                       filepath >= 1.4,
+                       optparse-applicative >=0.14 && <0.15,
+                       assessment-eval,
+                       simplir
+  default-language:    Haskell2010
+
+executable assessment-time
+  main-is:             AssessmentTime.hs
+  build-depends:       base >=4.9 && <4.11,
+                       time,
+                       unordered-containers,
+                       assessment-eval
   default-language:    Haskell2010

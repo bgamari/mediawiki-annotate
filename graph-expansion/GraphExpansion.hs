@@ -1,9 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE BangPatterns #-}
 
 module GraphExpansion where
 
@@ -54,12 +51,12 @@ wordVecToAttributes = Attrs . VI.map realToFrac . unWordVec
 
 pageTextEmbeddingAttributes :: KnownNat n => WordEmbedding n -> Page
                             -> WordVec n
-pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId pageSkeleta) =
+pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId _ pageSkeleta) =
      mconcat  -- merge wordvectors per skeleton
      $ fmap (computeTextEmbedding wordEmbedding)
      $ mconcat $ pageText
     where
-      pageText = fmap (map TL.toStrict . pageSkeletonText) pageSkeleta
+      pageText = fmap (map TL.toStrict . pageSkeletonFulltext) pageSkeleta
 
 pageNameEmbeddingAttributes :: KnownNat n => WordEmbedding n -> PageId
                             -> WordVec n

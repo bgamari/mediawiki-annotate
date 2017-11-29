@@ -8,7 +8,7 @@ import Data.Bifunctor
 import Data.Functor.Identity
 import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
-import Data.Monoid
+import Data.Semigroup (Semigroup(..))
 import GHC.Generics
 import System.FilePath
 import Control.Exception
@@ -52,9 +52,11 @@ type CarDiskIndex = DiskIdx.OnDiskIndex Term (ParagraphId, DocumentLength) Int
 
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
+instance Semigroup BagOfWords where
+    BagOfWords a <> BagOfWords b = BagOfWords (M.unionWith (+) a b)
 instance Monoid BagOfWords where
     mempty = BagOfWords mempty
-    BagOfWords a `mappend` BagOfWords b = BagOfWords (M.unionWith (+) a b)
+    mappend = (<>)
 
 oneWord :: Term -> BagOfWords
 oneWord t = BagOfWords $ M.singleton t 1
@@ -77,8 +79,7 @@ modeCorpusStats =
   where
     go outFile firstN paragraphsFile = do
         let maybeTakeN = maybe id take firstN
-        paras <- maybeTakeN <$> readCborList paragraphsFile
-            :: IO [Paragraph]
+        paras <- maybeTakeN <$> readParagraphsFile paragraphsFile
         let stats = Foldl.fold (documentTermStats Nothing) $ fmap paraBodyTerms $ foldMap paraBody paras
         writeCorpusStats outFile $ stats
 
@@ -108,8 +109,7 @@ modeIndex =
        <*> argument str (metavar "PARAS" <> help "paragraphs file")
   where
     go outFile paragraphsFile = do
-        paras <- readCborList paragraphsFile
-              :: IO [Paragraph]
+        paras <- readParagraphsFile paragraphsFile
         runSafeT $ Foldl.foldM (DiskIdx.buildIndex 100000 outFile)
                  $ statusList 1000 (\n -> show n <> " paragraphs")
                  $ fmap (\p -> let BagOfWords terms = foldMap paraBodyBag (paraBody p)
@@ -140,7 +140,7 @@ modeQuery =
   where
     go :: CarDiskIndex -> FilePath -> FilePath -> BS.ByteString -> Int -> Double -> String -> FilePath -> IO ()
     go diskIdx corpusStatsFile outlineFile runName k dropFreqTermsFactor modelName outputFile = do
-        outlines <- readCborList outlineFile
+        outlines <- readOutlinesFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
         idx <- DiskIdx.openOnDiskIndex diskIdx
 
@@ -197,7 +197,8 @@ modeQuery =
         CarRun.writeParagraphRun outputFile $ foldMap predictStub outlines
 
 stubPaths :: Stub -> [(BagOfWords, SectionPath)]
-stubPaths (Stub pageName pageId skel) = foldMap (go mempty pageNameWords) skel
+stubPaths (Stub pageName pageId _ skel) =
+    foldMap (go mempty pageNameWords) skel
   where
     go :: DList.DList HeadingId -> BagOfWords -> PageSkeleton -> [(BagOfWords, SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen
