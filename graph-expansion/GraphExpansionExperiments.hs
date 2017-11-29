@@ -270,15 +270,15 @@ marginalizeEdges graph =
 -- ----------------------------------------------------------------------
 
 data GraphNames = Top5PerNode | Top100PerGraph | SimpleGraph | RandomGraph | Random2000Graph  | Top10PerGraph | Top50PerGraph | Top200PerGraph | Top2000PerGraph | Top20000PerGraph
-    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic, Read)
 data WeightingNames = Count | Binary | Score | RecipRank | LinearRank| BucketRank
-    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic, Read)
 data GraphRankingNames = PageRank | PersPageRank | AttriRank | ShortPath | MargEdges
-    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic, Read)
 data EdgeFilteringNames = Unfiltered | BidiFiltered
-    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic, Read)
 data RetrievalFun = Bm25 | Ql | NoIr
-    deriving (Show, Enum, Bounded, Ord, Eq, Generic)
+    deriving (Show, Enum, Bounded, Ord, Eq, Generic, Read)
 data Method = Method GraphNames EdgeFilteringNames WeightingNames GraphRankingNames RetrievalFun
             | CandidateSet
     deriving ( Ord, Eq, Generic)

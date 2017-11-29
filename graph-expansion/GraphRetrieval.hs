@@ -92,11 +92,19 @@ opts =
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     <*> option (Index.OnDiskIndex <$> str)
                (short 'e' <> long "entityindex" <> metavar "EINDEX" <> help "simplir entity index")
+
     <*> method
     where
-      method :: Parser Method
+      method:: Parser Method
+      method = Method
+        <$> pure Top2000PerGraph
+        <*> pure Unfiltered
+        <*> option auto (short 'w' <> long "edge-weight" <> help ("edge weight function; one of "++show [minBound :: WeightingNames .. maxBound])) --  parses one of EdgeFilteringNames
+        <*> option auto (short 'g' <> long "graph-walk" <> help ("graph walk algorithm; one of "++ show [minBound :: GraphRankingNames .. maxBound])) -- parses GraphRankingName
+        <*> pure Bm25
+
+      --method :: Parser Method
       -- method =  pure $ Method Top2000PerGraph Unfiltered RecipRank PageRank Bm25
-      method =  pure $ Method Top2000PerGraph Unfiltered RecipRank PersPageRank Bm25
 --       methodMap = M.fromList [ (showMethodName m, m) | m <- allMethods ]
 
       querySource :: Parser QuerySource
