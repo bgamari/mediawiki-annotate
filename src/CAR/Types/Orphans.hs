@@ -21,6 +21,3 @@ deriving instance ToJSON PageName
 instance ToJSONKey PageName where
     toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
 
-instance CBOR.Serialise SBS.ShortByteString where
-    encode = CBOR.encode . SBS.fromShort
-    decode = SBS.toShort <$> CBOR.decode   -- FIXME: copy
