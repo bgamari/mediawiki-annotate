@@ -53,6 +53,7 @@ import CAR.Types
 import CAR.Retrieve
 import CAR.KnowledgeBase
 import CAR.Utils
+import CAR.Utils.Redirects
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
 
