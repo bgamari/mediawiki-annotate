@@ -22,7 +22,7 @@ executable multilang-car
                        bytestring >=0.10 && <0.11,
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
-                       serialise >=0.1 && <0.2,
+                       serialise >=0.2 && <0.3,
                        json-stream >=0.4 && <0.5,
                        trec-car-tools
   default-language:    Haskell2010
@@ -36,7 +36,7 @@ executable multilang-car-index
                        bytestring >=0.10 && <0.11,
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
-                       serialise >=0.1 && <0.2,
+                       serialise >=0.2 && <0.3,
                        json-stream >=0.4 && <0.5,
                        trec-car-tools
   default-language:    Haskell2010

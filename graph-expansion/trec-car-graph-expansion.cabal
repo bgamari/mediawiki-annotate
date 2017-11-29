@@ -204,7 +204,7 @@ executable graph-expansion-build-kb-index
                        simplir,
                        trec-car-tools,
                        profunctors,
-                       foldl >=1.2 && <1.3,
+                       foldl >=1.2 && <1.4,
                        pipes,
                        pipes-safe,
                        text,
