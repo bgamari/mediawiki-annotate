@@ -9,6 +9,15 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 You'll need `ghc >=8.0.1` and `cabal-install >=0.24`.
 
+Additionally, you will need to install a few native dependencies (citing
+Debian/Ubuntu package names),
+
+```
+sudo apt-get install libicu-dev zlib1g-dev libexpat1-dev libpq-dev liblzma-dev
+```
+
+Then,
+
  1. Checkout the repository: `git clone git://github.com/bgamari/mediawiki-annotate`
  2. Checkout the submodules: `cd mediawiki-annotate; git submodule update --init --recursive`
  3. Build it: `cabal new-build`
