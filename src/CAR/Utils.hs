@@ -1,6 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE BangPatterns #-}
-
 module CAR.Utils where
 
 import Control.Monad (guard)
@@ -12,7 +9,6 @@ import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import CAR.Types
-import SimplIR.Utils.Compact
 
 -- | Identify the target of a redirect page.
 pageRedirect :: Page -> Maybe PageId
@@ -24,17 +20,15 @@ pageRedirect Page { pageMetadata = meta } =
 -- | True if this is a disambiguation page (language-specifics already resolved)
 pageIsDisambiguation :: Page -> Bool
 pageIsDisambiguation (Page { pageMetadata = meta }) =
-    (pagemetaType meta) == DisambiguationPage
+    pagemetaType meta == DisambiguationPage
 
 pageIsCategory :: Page -> Bool
 pageIsCategory (Page { pageMetadata = meta }) =
-    (pagemetaType meta) == CategoryPage
+    pagemetaType meta == CategoryPage
 
 pageIsArticle :: Page -> Bool
 pageIsArticle (Page { pageMetadata = meta }) =
-    (pagemetaType meta) == ArticlePage
-
-
+    pagemetaType meta == ArticlePage
 
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
@@ -57,7 +51,6 @@ pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 
 pageParas :: Page -> [Paragraph]
 pageParas = foldMap pageSkeletonParas . pageSkeleton
-
 
 pageSkeletonParas :: PageSkeleton -> [Paragraph]
 pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
@@ -111,7 +104,6 @@ paraBodyLinks :: ParaBody -> [Link]
 paraBodyLinks (ParaText _text) = []
 paraBodyLinks (ParaLink link)  = [link]
 
-
 -- | Returns all visible text (including headers, page titles, and captions)  of the page.
 pageFulltext :: Page -> [TL.Text]
 pageFulltext (Page {pageName=pageName, pageSkeleton=skels}) =
@@ -127,39 +119,8 @@ pageSkeletonFulltext (Image _ children) =
     foldMap pageSkeletonFulltext children
 pageSkeletonFulltext (List _ para) = [paraToText para]
 
-
-
 paraToText :: Paragraph -> TL.Text
 paraToText (Paragraph  _ bodies) =
     TL.concat $ fmap toText bodies
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
-
-resolveRedirectFactory ::  [Page] -> PageId -> PageId
-resolveRedirectFactory  pages =
-    resolveRedirectFun entityRedirects
-  where
-    !entityRedirects = inCompact $ entityRedirectMap pages
-
-resolveRedirectFun :: HM.HashMap PageId PageId -> PageId -> PageId
-resolveRedirectFun entityRedirects origFromPageId = go mempty origFromPageId
-  where
-    go :: HS.HashSet PageId -> PageId -> PageId
-    go history fromPageId
-      | fromPageId `HS.member` history  = origFromPageId --  we are walking in circles, return original.
-      | Just toPageId <- HM.lookup fromPageId entityRedirects = go (fromPageId `HS.insert` history)  toPageId  -- follow redirect
-      | otherwise = fromPageId  -- success, we found a real page
-
-entityRedirectMap ::  [Page] -> HM.HashMap PageId PageId
-entityRedirectMap pages =
-    HM.fromList $ mapMaybe extractRedirect $ pages
-  where extractRedirect :: Page -> Maybe (PageId, PageId)
-        extractRedirect page@(Page {pageId=fromPageId})
-          | isNullPageId fromPageId = Nothing
-          | otherwise = do
-            toPageId <- pageRedirect page  -- MaybeMonad
-            guard $ not $ isNullPageId toPageId      -- if empty string -> Nothing
-            pure (fromPageId, toPageId)
-
-        isNullPageId :: PageId -> Bool
-        isNullPageId = null . unpackPageId

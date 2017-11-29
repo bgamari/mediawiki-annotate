@@ -10,9 +10,9 @@ import qualified Data.HashMap.Strict as HM
 import Options.Applicative
 
 import CAR.Types
-import CAR.Utils
+import CAR.Utils.Redirects
 import CAR.AnnotationsFile as AnnsFile
-                                      
+
 options :: Parser (FilePath, FilePath, Mode)
 options =
     (,,)
@@ -30,7 +30,6 @@ main :: IO ()
 main = do
     (unprocessedPagesFile, outputFile, mode) <- execParser $ info (helper <*> options) mempty
     unprocessedPages <- openAnnotations unprocessedPagesFile
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance unprocessedPagesFile
 
     let entityRedirects = entityRedirectMap $ AnnsFile.pages unprocessedPages
         resolveRedirect = resolveRedirectFun entityRedirects

@@ -13,6 +13,7 @@ import Options.Applicative
 
 import CAR.Types
 import CAR.Utils
+import CAR.Utils.Redirects
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 
@@ -76,7 +77,7 @@ main = do
             putStrLn "done"
 
 
-    let resolveRedirect = resolveRedirectFactory $ AnnsFile.pages unprocessedPages
+    let resolveRedirect = resolveRedirects $ AnnsFile.pages unprocessedPages
     -- entity annnotations
         writeEntityAnnotations ::  FilePath ->  (SectionPath -> SectionPath) -> IO ()
         writeEntityAnnotations relsFile cutSectionPath = do

@@ -22,6 +22,7 @@ library
                        CAR.AnnotationsFile
                        CAR.CarExports
                        CAR.Utils
+                       CAR.Utils.Redirects
                        CAR.TocFile
                        CAR.Retrieve
                        CAR.KnowledgeBase
