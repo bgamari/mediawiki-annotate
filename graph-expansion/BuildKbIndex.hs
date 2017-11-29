@@ -182,7 +182,7 @@ entityModes = subparser
       where
         go outputPath articlesPath textPart = do
             (prov, pages) <- readPagesFileWithProvenance articlesPath
-            let !resolveRedirect = resolveRedirectFactory pages
+            let !resolveRedirect = resolveRedirects pages
 
             !inlinkInfo <- collectInlinkInfo (wikiSite prov) resolveRedirect <$> readPagesFile articlesPath
             pages2 <- readPagesFile articlesPath
