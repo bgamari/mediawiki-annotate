@@ -14,8 +14,7 @@ module CAR.KnowledgeBase
     , InlinkCounts(..)
     ) where
 
-import qualified Data.Semigroup as S
-import Data.Monoid hiding (All, Any)
+import Data.Semigroup
 
 import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
@@ -48,9 +47,9 @@ data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageId InlinkCoun
                              }
                 deriving (Show)
 
-instance S.Semigroup InlinkInfo where
+instance Semigroup InlinkInfo where
     InlinkInfo a b <> InlinkInfo a' b' =
-        InlinkInfo (HM.unionWith mappend a a') (b<>b')
+        InlinkInfo (HM.unionWith (<>) a a') (b<>b')
 
 instance Monoid InlinkInfo where
     mempty = InlinkInfo mempty mempty
@@ -64,7 +63,7 @@ data InlinkCounts = InlinkCounts { -- | How many time each anchor is used to lin
                                  }
                   deriving (Show)
 
-instance S.Semigroup InlinkCounts where
+instance Semigroup InlinkCounts where
     InlinkCounts a b c d <> InlinkCounts a' b' c' d' =
         InlinkCounts (HM.unionWith (+) a a')
                      (HM.unionWith (+) b b')
