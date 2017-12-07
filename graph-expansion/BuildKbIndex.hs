@@ -22,6 +22,7 @@ import Data.Semigroup hiding (All, Any, option)
 import Data.Coerce
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -32,7 +33,7 @@ import System.IO
 import Numeric
 import GHC.TypeLits
 import Data.Aeson
-import Numeric.Log
+import Numeric.Log hiding (sum)
 import Data.Hashable
 import Text.PrettyPrint.ANSI.Leijen hiding ((<>), (<$>))
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
@@ -235,7 +236,7 @@ entityModes = subparser
                        [docText]
                     ++ (HM.keys $ anchorCount inlinks)
                     ++ (map getPageName $ HM.keys $ disambiguationCount inlinks)
-                    ++ "\n\n"
+                    ++ ["\n\n"]
                   where
                     docText = case textPart of
                       FullText -> foldMap (TL.toStrict) (kbDocFullText doc)
@@ -249,7 +250,7 @@ entityModes = subparser
                 [ Warc.Record hdr (mapM_ (yield . T.encodeUtf8) (docTerms doc))
                 | doc <- map pageToKbDoc pages2
                 , let hdr = Warc.addField Warc.warcRecordId recId
-                            Warc.addField Warc.contentLength len
+                            $ Warc.addField Warc.contentLength (fromIntegral len)
                             $ emptyRecordHeader
                       len = sum $ map (BS.length . T.encodeUtf8) (docTerms doc)
                       recId = pageIdToRecordId $ kbDocPageId doc
