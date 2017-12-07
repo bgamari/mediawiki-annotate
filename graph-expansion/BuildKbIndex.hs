@@ -239,20 +239,21 @@ entityModes = subparser
                     ++ ["\n\n"]
                   where
                     docText = case textPart of
-                      FullText -> foldMap (TL.toStrict) (kbDocFullText doc)
-                      LeadText -> fold (kbDocLeadText doc)
+                      FullText -> T.unwords $ fmap (TL.toStrict) (kbDocFullText doc)
+                      LeadText -> T.unwords $ (kbDocLeadText doc)
                     inlinks = fromMaybe mempty
                               $ HM.lookup (kbDocPageId doc) (documentInlinks inlinkInfo)
 
             let emptyRecordHeader = Warc.RecordHeader Warc.warc0_16 mempty
 
             writeRecords outputPath
-                [ Warc.Record hdr (mapM_ (yield . T.encodeUtf8) (docTerms doc))
+                [ Warc.Record hdr (yield payload)
                 | doc <- map pageToKbDoc pages2
                 , let hdr = Warc.addField Warc.warcRecordId recId
                             $ Warc.addField Warc.contentLength (fromIntegral len)
                             $ emptyRecordHeader
-                      len = sum $ map (BS.length . T.encodeUtf8) (docTerms doc)
+                      len = BS.length payload
+                      payload = T.encodeUtf8 $ T.unwords $ docTerms doc
                       recId = pageIdToRecordId $ kbDocPageId doc
                 ]
             return ()
