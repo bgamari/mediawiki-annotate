@@ -70,7 +70,7 @@ newtype SiteId = SiteId T.Text
                deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
 
 -- | An ASCII-only form of a page name.
-newtype PageId = PageId Utf8.SmallUtf8
+newtype PageId = PageId {unPageId :: Utf8.SmallUtf8}
                deriving (Show, Eq, Ord, Generic, IsString, NFData,
                          FromJSON, FromJSONKey, ToJSON, ToJSONKey, Binary)
 instance Hashable PageId
