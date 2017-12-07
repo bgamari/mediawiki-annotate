@@ -241,13 +241,11 @@ entityModes = subparser
                       LeadText -> fold (kbDocLeadText doc)
                     inlinks = fromMaybe mempty
                               $ HM.lookup (kbDocPageId doc) (documentInlinks inlinkInfo)
-                    tokenisePageId = textToTokens' . getPageName
-                    tokeniseText   = textToTokens'
 
             let emptyRecordHeader = Warc.RecordHeader Warc.warc0_16 mempty
 
-            writeRecords "out.warc"
-                [ Warc.Record emptyRecordHeader (mapM_ (yield . T.encodeUtf8) (docTerms doc))
+            writeRecords outputPath
+                [ Warc.Record hdr (mapM_ (yield . T.encodeUtf8) (docTerms doc))
                 | doc <- map pageToKbDoc pages2
                 , let hdr = Warc.addField Warc.warcRecordId recId emptyRecordHeader
                       recId = pageIdToRecordId $ kbDocPageId doc
