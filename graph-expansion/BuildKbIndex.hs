@@ -235,6 +235,7 @@ entityModes = subparser
                        [docText]
                     ++ (HM.keys $ anchorCount inlinks)
                     ++ (map getPageName $ HM.keys $ disambiguationCount inlinks)
+                    ++ "\n\n"
                   where
                     docText = case textPart of
                       FullText -> foldMap (TL.toStrict) (kbDocFullText doc)
@@ -247,7 +248,10 @@ entityModes = subparser
             writeRecords outputPath
                 [ Warc.Record hdr (mapM_ (yield . T.encodeUtf8) (docTerms doc))
                 | doc <- map pageToKbDoc pages2
-                , let hdr = Warc.addField Warc.warcRecordId recId emptyRecordHeader
+                , let hdr = Warc.addField Warc.warcRecordId recId
+                            Warc.addField Warc.contentLength len
+                            $ emptyRecordHeader
+                      len = sum $ map (BS.length . T.encodeUtf8) (docTerms doc)
                       recId = pageIdToRecordId $ kbDocPageId doc
                 ]
             return ()
