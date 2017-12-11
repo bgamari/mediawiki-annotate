@@ -1,18 +1,43 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE ApplicativeDo #-}
+
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import Data.Semigroup
+import Data.Semigroup hiding (option)
 import Data.Foldable (foldl')
+import Options.Applicative
 
 import CAR.Utils
 import CAR.Types
 
+
+data Opts = Opts { inputPath :: FilePath
+                 , outputPath :: FilePath
+                 }
+
+
+opts :: Parser Opts
+opts = do
+    inputPath <- option str (short 'i' <> long "input" <> metavar "INFILE" <> help "Input CBOR pages file" )
+    outputPath <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output CBOR pages file ")
+    return Opts {..}
+    
 main :: IO ()
 main = do
-    let inputPath = ""
-        outputPath = ""
+    Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
     categoryIds <- HS.fromList . map pageId . filter pageIsCategory <$> readPagesFile inputPath
 
-    acc <- foldl' (HM.unionWith (<>)) mempty . map (buildMap categoryIds) <$> readPagesFile inputPath
+    acc <- unionsWith (<>) . fmap (buildMap categoryIds) <$> readPagesFile inputPath
     (prov, pages) <- readPagesFileWithProvenance inputPath
     let pages' = map (fillMetadata acc) pages
     writeCarFile outputPath prov pages'
