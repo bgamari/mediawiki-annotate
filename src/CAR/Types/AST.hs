@@ -182,7 +182,7 @@ instance CBOR.Serialise Page where
     decode = do
         len <- CBOR.decodeListLen
         tag <- CBOR.decodeInt
-        when (tag /= 0) $ fail "Serialise(Page): Unknown tag"
+        when (tag /= 0) $ fail "Serialise(Page): Tag indicates this is not a page."
         case len of
           5 -> do
               pageName <- CBOR.decode
@@ -270,7 +270,7 @@ instance CBOR.Serialise Stub where
     decode = do
         len <- CBOR.decodeListLen
         tag <- CBOR.decodeInt
-        when (tag /= 1) $ fail "Serialise(Stub): Unknown tag"
+        when (tag /= 1 && tag /=0) $ fail "Serialise(Stub): Tag indicates this is neither a stub nor a page"
         case len of
           5 -> do
               stubName <- CBOR.decode
