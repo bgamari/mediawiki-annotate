@@ -35,17 +35,17 @@ opts = do
 main :: IO ()
 main = do
     Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
-    categoryIds <- HS.fromList . map pageId . filter pageIsCategory <$> readPagesFile inputPath
 
-    acc <- unionsWith (<>) . fmap (buildMap categoryIds) <$> readPagesFile inputPath
+    acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
     (prov, pages) <- readPagesFileWithProvenance inputPath
     let pages' = map (fillMetadata acc) pages
     writeCarFile outputPath prov pages'
 
-buildMap :: HS.HashSet PageId -- ^ set of known categories
-         -> Page -> HM.HashMap PageId Acc
-buildMap categoryIds page =
-    foldl' (HM.unionWith (<>)) mempty (redirect <> disambigs <> [categories] <> inlinks)
+
+-- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
+buildMap :: Page -> HM.HashMap PageId Acc
+buildMap page =
+    foldl' (HM.unionWith (<>)) mempty (redirect <> disambigs <> inlinks)
   where
     redirect =
         [ HM.singleton pid
@@ -59,6 +59,25 @@ buildMap categoryIds page =
         | DisambiguationPage <- pure (pagemetaType $ pageMetadata page)
         , link <- pageLinks page
         ]
+      where
+    inlinks =
+        [ HM.singleton (linkTargetId link)
+          $ mempty { accInlinkIds = HS.singleton (pageId page) }
+        | pageIsArticle page || pageIsCategory page
+        , link <- pageLinks page
+        ]
+
+
+extractAllCategoryIds :: FilePath -> IO (HS.HashSet PageId)
+extractAllCategoryIds inputPath = do
+    HS.fromList . map pageId . filter pageIsCategory <$> readPagesFile inputPath
+ 
+
+buildCategoryMap :: HS.HashSet PageId -- ^ set of known categories
+         -> Page -> HM.HashMap PageId Acc
+buildCategoryMap allCategoryIds page =
+    foldl' (HM.unionWith (<>)) mempty [categories]
+  where
     categories =
         HM.singleton (pageId page)
         $ mempty { accCategoryNames = HS.fromList $ map linkTarget categoryLinks
@@ -68,14 +87,9 @@ buildMap categoryIds page =
         categoryLinks =
             [ link
             | link <- pageLinks page
-            , linkTargetId link `HS.member` categoryIds
+            , linkTargetId link `HS.member` allCategoryIds
             ]
-    inlinks =
-        [ HM.singleton (linkTargetId link)
-          $ mempty { accInlinkIds = HS.singleton (pageId page) }
-        | pageIsArticle page || pageIsCategory page
-        , link <- pageLinks page
-        ]
+    
 
 data Acc = Acc { accRedirectNames :: !(HS.HashSet PageName)
                , accDisambigNames :: !(HS.HashSet PageName)
