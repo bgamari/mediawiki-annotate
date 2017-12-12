@@ -59,7 +59,6 @@ buildMap page =
         | DisambiguationPage <- pure (pagemetaType $ pageMetadata page)
         , link <- pageLinks page
         ]
-      where
     inlinks =
         [ HM.singleton (linkTargetId link)
           $ mempty { accInlinkIds = HS.singleton (pageId page) }
@@ -116,8 +115,9 @@ fillMetadata acc page =
                           { pagemetaRedirectNames       = HS.toList . accRedirectNames <$> things
                           , pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
                           , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
-                          , pagemetaCategoryNames       = HS.toList . accCategoryNames <$> things
-                          , pagemetaCategoryIds         = HS.toList . accCategoryIds <$> things
+                          , pagemetaInlinkIds           = HS.toList . accInlinkIds <$> things
+--                           , pagemetaCategoryNames       = HS.toList . accCategoryNames <$> things
+--                           , pagemetaCategoryIds         = HS.toList . accCategoryIds <$> things
                           }
          }
   where
