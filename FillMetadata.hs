@@ -19,10 +19,16 @@ import Options.Applicative
 
 import CAR.Utils
 import CAR.Types
+import CAR.Utils.Redirects
+                      
+data Stage = StageResolveRedirect
+            | StageResolveDisambiguationAndInlinks
+
 
 
 data Opts = Opts { inputPath :: FilePath
                  , outputPath :: FilePath
+                 , stage :: Stage
                  }
 
 
@@ -30,28 +36,63 @@ opts :: Parser Opts
 opts = do
     inputPath <- option str (short 'i' <> long "input" <> metavar "INFILE" <> help "Input CBOR pages file" )
     outputPath <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output CBOR pages file ")
+    stage <- flag StageResolveRedirect StageResolveDisambiguationAndInlinks (short 'r' <> long "redirect" <> help "If set, execute redirect resolution step")
     return Opts {..}
     
 main :: IO ()
 main = do
     Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
 
-    acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
-    (prov, pages) <- readPagesFileWithProvenance inputPath
-    let pages' = map (fillMetadata acc) pages
-    writeCarFile outputPath prov pages'
+    case stage of
+      StageResolveRedirect ->  do
+        acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
+        redirectResolver <- resolveRedirects <$> readPagesFile inputPath
+        
+        (prov, pages) <- readPagesFileWithProvenance inputPath
+        let pages' = map ((fixLinks redirectResolver) . (fillRedirectMetadata acc)) pages
+        writeCarFile outputPath prov pages'
+      StageResolveDisambiguationAndInlinks ->  do
+        acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
+        (prov, pages) <- readPagesFileWithProvenance inputPath
+        let pages' = map (fillMetadata acc) pages
+        writeCarFile outputPath prov pages'
+
+
+
+fixLinks:: (PageId -> PageId) -> Page -> Page
+fixLinks redirectResolver page =
+    page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
+      where
+        goSkeleton (Section x y children) = Section x y (fmap goSkeleton children)
+        goSkeleton (Para p) = Para (goParagraph p)
+        goSkeleton (Image x skel) = Image x (fmap goSkeleton skel)
+        goSkeleton (List x p) = List x (goParagraph p)
+
+        goParagraph (Paragraph x bodies) = Paragraph x (fmap goParaBody bodies)
+
+        goParaBody (ParaText t) = ParaText t
+        goParaBody (ParaLink l) = ParaLink l {linkTarget = pageIdToName  newLinkTargetId
+                                             , linkTargetId = newLinkTargetId}
+            where newLinkTargetId = redirectResolver (linkTargetId l)
 
 
 -- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
-buildMap :: Page -> HM.HashMap PageId Acc
-buildMap page =
-    foldl' (HM.unionWith (<>)) mempty (redirect <> disambigs <> inlinks)
+buildRedirectMap :: Page -> HM.HashMap PageId Acc
+buildRedirectMap page =
+    foldl' (HM.unionWith (<>)) mempty (redirect)
   where
     redirect =
         [ HM.singleton pid
           $ mempty { accRedirectNames = HS.singleton (pageName page) }
         | RedirectPage pid <- pure (pagemetaType $ pageMetadata page)
         ]
+
+-- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
+-- Also assume that redirect are already resolved
+buildMap :: Page -> HM.HashMap PageId Acc
+buildMap page =
+    foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinks)
+  where
     disambigs =
         [ HM.singleton (linkTargetId link)
           $ mempty { accDisambigNames = HS.singleton (pageName page)
@@ -113,11 +154,30 @@ fillMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillMetadata acc page =
     page { pageMetadata = (pageMetadata page)
                           { pagemetaRedirectNames       = HS.toList . accRedirectNames <$> things
-                          , pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
+                          }
+         }
+  where
+    things = HM.lookup (pageId page) acc
+
+
+
+fillRedirectMetadata :: HM.HashMap PageId Acc -> Page -> Page
+fillRedirectMetadata acc page =
+    page { pageMetadata = (pageMetadata page)
+                          { pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
                           , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
                           , pagemetaInlinkIds           = HS.toList . accInlinkIds <$> things
---                           , pagemetaCategoryNames       = HS.toList . accCategoryNames <$> things
---                           , pagemetaCategoryIds         = HS.toList . accCategoryIds <$> things
+                          }
+         }
+  where
+    things = HM.lookup (pageId page) acc
+
+
+fillCategoryMetadata :: HM.HashMap PageId Acc -> Page -> Page
+fillCategoryMetadata acc page =
+    page { pageMetadata = (pageMetadata page)
+                          { pagemetaCategoryNames       = HS.toList . accCategoryNames <$> things
+                          , pagemetaCategoryIds         = HS.toList . accCategoryIds <$> things
                           }
          }
   where
