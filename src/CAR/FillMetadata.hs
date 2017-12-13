@@ -11,53 +11,17 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ApplicativeDo #-}
 
+module CAR.FillMetadata  where
+
+
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Semigroup hiding (option)
 import Data.Foldable (foldl')
-import Options.Applicative
 
 import CAR.Utils
 import CAR.Types
 import CAR.Utils.Redirects
-                      
-data Stage = StageResolveRedirect
-            | StageResolveDisambiguationAndInlinks
-
-
-
-data Opts = Opts { inputPath :: FilePath
-                 , outputPath :: FilePath
-                 , stage :: Stage
-                 }
-
-
-opts :: Parser Opts
-opts = do
-    inputPath <- option str (short 'i' <> long "input" <> metavar "INFILE" <> help "Input CBOR pages file" )
-    outputPath <- option str (short 'o' <> long "output" <> metavar "OUTFILE" <> help "Output CBOR pages file ")
-    stage <- flag StageResolveRedirect StageResolveDisambiguationAndInlinks (short 'r' <> long "redirect" <> help "If set, execute redirect resolution step")
-    return Opts {..}
-    
-main :: IO ()
-main = do
-    Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
-
-    case stage of
-      StageResolveRedirect ->  do
-        acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
-        redirectResolver <- resolveRedirects <$> readPagesFile inputPath
-        
-        (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pages' = map ((fixLinks redirectResolver) . (fillRedirectMetadata acc)) pages
-        writeCarFile outputPath prov pages'
-      StageResolveDisambiguationAndInlinks ->  do
-        acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
-        (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pages' = map (fillMetadata acc) pages
-        writeCarFile outputPath prov pages'
-
-
 
 fixLinks:: (PageId -> PageId) -> Page -> Page
 fixLinks redirectResolver page =
