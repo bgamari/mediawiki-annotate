@@ -50,17 +50,10 @@ main :: IO ()
 main = do
     Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
 
-    case stage of
-      StageResolveRedirect ->  do
-        acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
-        redirectResolver <- resolveRedirects <$> readPagesFile inputPath
+    (prov, pages') <-
+      case stage of
+          StageResolveRedirect                 -> stageResolveRedirect inputPath
+          StageResolveDisambiguationAndInlinks -> stageResolveDisambiguationAndInlinks inputPath
+    writeCarFile outputPath prov pages'
 
-        (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pages' = map ((fixLinks redirectResolver) . (fillRedirectMetadata acc)) pages
-        writeCarFile outputPath prov pages'
-      StageResolveDisambiguationAndInlinks ->  do
-        acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
-        (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pages' = map (fillMetadata acc) pages
-        writeCarFile outputPath prov pages'
 

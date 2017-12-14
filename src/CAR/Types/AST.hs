@@ -67,7 +67,8 @@ unpackPageName (PageName t) = T.unpack t
 
 -- | A Wikipedia site ID. e.g. @enwiki@, @itwiki@, or @envoyage@.
 newtype SiteId = SiteId T.Text
-               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
+               deriving (Show, Eq, Ord, Hashable, IsString,
+                         FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
 
 -- | An ASCII-only form of a page name.
 newtype PageId = PageId {unPageId :: Utf8.SmallUtf8}

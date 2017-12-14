@@ -23,6 +23,27 @@ import CAR.Utils
 import CAR.Types
 import CAR.Utils.Redirects
 
+
+-- action for resolving redirects for all pages in inputPath
+stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
+stageResolveRedirect inputPath = do
+        acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
+        redirectResolver <- resolveRedirects <$> readPagesFile inputPath
+
+        (prov, pages) <- readPagesFileWithProvenance inputPath
+        let pages' = map ((fixLinks redirectResolver) . (fillRedirectMetadata acc)) pages
+        return (prov, pages')
+
+
+-- action for resoving disambig 
+stageResolveDisambiguationAndInlinks :: FilePath -> IO (Provenance, [Page])
+stageResolveDisambiguationAndInlinks inputPath = do
+    acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
+    (prov, pages) <- readPagesFileWithProvenance inputPath
+    let pages' = map (fillMetadata acc) pages
+    return (prov, pages')
+
+
 fixLinks:: (PageId -> PageId) -> Page -> Page
 fixLinks redirectResolver page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
@@ -72,9 +93,11 @@ buildMap page =
         ]
 
 
-extractAllCategoryIds :: FilePath -> IO (HS.HashSet PageId)
-extractAllCategoryIds inputPath = do
-    HS.fromList . map pageId . filter pageIsCategory <$> readPagesFile inputPath
+extractAllCategoryIds :: [Page] -> HS.HashSet PageId
+extractAllCategoryIds pages  = 
+    HS.fromList
+    $ map pageId
+    $ filter pageIsCategory pages
  
 
 buildCategoryMap :: HS.HashSet PageId -- ^ set of known categories
