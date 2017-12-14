@@ -22,8 +22,10 @@ import Data.Semigroup hiding (All, Any, option)
 import Data.Coerce
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 import qualified Data.SmallUtf8 as Utf8
@@ -31,10 +33,13 @@ import System.IO
 import Numeric
 import GHC.TypeLits
 import Data.Aeson
-import Numeric.Log
+import Numeric.Log hiding (sum)
 import Data.Hashable
 import Text.PrettyPrint.ANSI.Leijen hiding ((<>), (<$>))
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
+
+import Pipes
+import qualified Pipes.ByteString as PBS
 
 import Options.Applicative
 import EdgeDocCorpus
@@ -45,6 +50,7 @@ import CAR.Utils
 import CAR.Utils.Redirects
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
+import Data.Warc as Warc
 
 import CAR.AnnotationsFile as AnnsFile
 import qualified CAR.RunFile as CarRun
@@ -117,8 +123,13 @@ querySource =
         QueriesFromJson
           <$> option str (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
 
-      
 
+writeRecords :: FilePath -> [Record IO ()] -> IO ()
+writeRecords path recs = withFile path WriteMode $ \hdl ->
+    runEffect $ mapM_ encodeRecord recs >-> PBS.toHandle hdl
+
+pageIdToRecordId :: PageId -> Warc.RecordId
+pageIdToRecordId = RecordId . Uri . Utf8.toByteString . unPageId
 
 edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
@@ -172,6 +183,7 @@ edgeDocModes = subparser
 entityModes :: Parser (IO ())
 entityModes = subparser
     $ command "index" (info (helper <*> indexMode) mempty)
+   <> command "warc" (info (helper <*> warcMode) mempty)
    <> command "dump" (info (helper <*> dumpMode) mempty)
    <> command "query" (info (helper <*> queryMode) mempty)
   where
@@ -204,6 +216,45 @@ entityModes = subparser
             Index.buildTermFreq outputPath
                 [ (kbDocPageId doc, docTerms doc)
                 | doc <- map pageToKbDoc pages2
+                ]
+            return ()
+
+    warcMode =
+        go <$> option str (long "output" <> short 'o' <> help "output WARC path")
+           <*> argument str (metavar "CBOR" <> help "kb articles file")
+           <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
+      where
+        go outputPath articlesPath textPart = do
+            (prov, pages) <- readPagesFileWithProvenance articlesPath
+            let !resolveRedirect = resolveRedirects pages
+
+            !inlinkInfo <- collectInlinkInfo (wikiSite prov) resolveRedirect <$> readPagesFile articlesPath
+            pages2 <- readPagesFile articlesPath
+
+            let docTerms :: KbDoc -> [T.Text]
+                docTerms doc =
+                       [docText]
+                    ++ (HM.keys $ anchorCount inlinks)
+                    ++ (map getPageName $ HM.keys $ disambiguationCount inlinks)
+                    ++ ["\n\n"]
+                  where
+                    docText = case textPart of
+                      FullText -> T.unwords $ fmap (TL.toStrict) (kbDocFullText doc)
+                      LeadText -> T.unwords $ (kbDocLeadText doc)
+                    inlinks = fromMaybe mempty
+                              $ HM.lookup (kbDocPageId doc) (documentInlinks inlinkInfo)
+
+            let emptyRecordHeader = Warc.RecordHeader Warc.warc0_16 mempty
+
+            writeRecords outputPath
+                [ Warc.Record hdr (yield payload)
+                | doc <- map pageToKbDoc pages2
+                , let hdr = Warc.addField Warc.warcRecordId recId
+                            $ Warc.addField Warc.contentLength (fromIntegral len)
+                            $ emptyRecordHeader
+                      len = BS.length payload
+                      payload = T.encodeUtf8 $ T.unwords $ docTerms doc
+                      recId = pageIdToRecordId $ kbDocPageId doc
                 ]
             return ()
 

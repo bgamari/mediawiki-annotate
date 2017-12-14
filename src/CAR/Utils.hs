@@ -2,13 +2,20 @@ module CAR.Utils where
 
 import Control.Monad (guard)
 import Data.Maybe
+import Data.Hashable
 import qualified Data.DList as DList
 import           Data.DList (DList)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Data.Foldable
 import CAR.Types
+
+
+unionsWith :: (Foldable g, Eq k, Hashable k)  => (v -> v -> v) -> g (HM.HashMap k v) -> HM.HashMap k v
+unionsWith f = foldl' (HM.unionWith f) mempty
+
 
 -- | Identify the target of a redirect page.
 pageRedirect :: Page -> Maybe PageId

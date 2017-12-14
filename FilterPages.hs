@@ -18,7 +18,7 @@ import WikiData
 
 helpDescr :: PP.Doc
 helpDescr =
-    "Predicate syntax:" <$$> PP.indent 4 predicateHelp
+    "Predicate syntax:" <$$> PP.indent 4 predicateHelp <$$> "" <$$> " Example: trec-car-filter in.cbor -o out.cbor '( ! is-redirect )'   "
   where
     cmd a b = PP.nest 8 (a <$$> b)
     predicateHelp = PP.vsep

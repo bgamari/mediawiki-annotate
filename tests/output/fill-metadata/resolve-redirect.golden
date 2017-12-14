@@ -1,0 +1,24 @@
+page1
+=====
+
+   PageMetadata {pagemetaType = ArticlePage, pagemetaRedirectNames = Nothing, pagemetaDisambiguationNames = Nothing, pagemetaDisambiguationIds = Nothing, pagemetaCategoryNames = Nothing, pagemetaCategoryIds = Nothing, pagemetaInlinkIds = Nothing}
+
+{para1} [anchor text to page R](page2)
+
+
+page2
+=====
+
+   PageMetadata {pagemetaType = ArticlePage, pagemetaRedirectNames = Just [PageName {getPageName = "redirect2"}], pagemetaDisambiguationNames = Nothing, pagemetaDisambiguationIds = Nothing, pagemetaCategoryNames = Nothing, pagemetaCategoryIds = Nothing, pagemetaInlinkIds = Nothing}
+
+{para2} This is page 2
+
+
+redirect2
+=========
+
+   PageMetadata {pagemetaType = RedirectPage (PageId {unPageId = SmallUtf8 "enwiki:page2"}), pagemetaRedirectNames = Nothing, pagemetaDisambiguationNames = Nothing, pagemetaDisambiguationIds = Nothing, pagemetaCategoryNames = Nothing, pagemetaCategoryIds = Nothing, pagemetaInlinkIds = Nothing}
+
+{paraR} #REDIRECT [anchor text to page 2](page2)
+
+

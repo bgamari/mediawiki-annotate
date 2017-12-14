@@ -67,10 +67,11 @@ unpackPageName (PageName t) = T.unpack t
 
 -- | A Wikipedia site ID. e.g. @enwiki@, @itwiki@, or @envoyage@.
 newtype SiteId = SiteId T.Text
-               deriving (Show, Eq, Ord, Hashable, FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
+               deriving (Show, Eq, Ord, Hashable, IsString,
+                         FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
 
 -- | An ASCII-only form of a page name.
-newtype PageId = PageId Utf8.SmallUtf8
+newtype PageId = PageId {unPageId :: Utf8.SmallUtf8}
                deriving (Show, Eq, Ord, Generic, IsString, NFData,
                          FromJSON, FromJSONKey, ToJSON, ToJSONKey, Binary)
 instance Hashable PageId
@@ -182,7 +183,7 @@ instance CBOR.Serialise Page where
     decode = do
         len <- CBOR.decodeListLen
         tag <- CBOR.decodeInt
-        when (tag /= 0) $ fail "Serialise(Page): Unknown tag"
+        when (tag /= 0) $ fail "Serialise(Page): Tag indicates this is not a page."
         case len of
           5 -> do
               pageName <- CBOR.decode
@@ -270,7 +271,7 @@ instance CBOR.Serialise Stub where
     decode = do
         len <- CBOR.decodeListLen
         tag <- CBOR.decodeInt
-        when (tag /= 1) $ fail "Serialise(Stub): Unknown tag"
+        when (tag /= 1 && tag /=0) $ fail "Serialise(Stub): Tag indicates this is neither a stub nor a page"
         case len of
           5 -> do
               stubName <- CBOR.decode

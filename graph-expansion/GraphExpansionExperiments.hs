@@ -19,6 +19,7 @@ import Data.Monoid
 import Data.List (intercalate)
 import GHC.Generics
 import Data.Tuple
+import Options.Applicative
 
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
@@ -45,8 +46,6 @@ import Graph
 mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v
 mapKeys f = HM.fromList . map (first f) . HM.toList
 
-unionsWith :: (Hashable k, Eq k) => (v -> v -> v) -> [HM.HashMap k v] -> HM.HashMap k v
-unionsWith f = foldl' (HM.unionWith f) mempty
 
 data QueryDoc = QueryDoc { queryDocQueryId      :: !CarRun.QueryId
                          , queryDocPageId       :: !PageId
