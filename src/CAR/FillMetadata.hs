@@ -140,7 +140,9 @@ instance Semigroup Acc where
 fillMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillMetadata acc page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaRedirectNames       = HS.toList . accRedirectNames <$> things
+                          { pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
+                          , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
+                          , pagemetaInlinkIds           = HS.toList . accInlinkIds <$> things
                           }
          }
   where
@@ -151,9 +153,7 @@ fillMetadata acc page =
 fillRedirectMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillRedirectMetadata acc page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
-                          , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
-                          , pagemetaInlinkIds           = HS.toList . accInlinkIds <$> things
+                          { pagemetaRedirectNames       = HS.toList . accRedirectNames <$> things
                           }
          }
   where

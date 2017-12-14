@@ -9,7 +9,7 @@ page1
 page2
 =====
 
-   PageMetadata {pagemetaType = ArticlePage, pagemetaRedirectNames = Just ["redirect2"], pagemetaDisambiguationNames = Just [], pagemetaDisambiguationIds = Just [], pagemetaCategoryNames = Nothing, pagemetaCategoryIds = Nothing, pagemetaInlinkIds = Just []}
+   PageMetadata {pagemetaType = ArticlePage, pagemetaRedirectNames = Just [PageName {getPageName = "redirect2"}], pagemetaDisambiguationNames = Nothing, pagemetaDisambiguationIds = Nothing, pagemetaCategoryNames = Nothing, pagemetaCategoryIds = Nothing, pagemetaInlinkIds = Nothing}
 
 {para2} This is page 2
 
