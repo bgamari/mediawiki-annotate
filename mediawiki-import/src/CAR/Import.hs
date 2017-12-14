@@ -75,7 +75,6 @@ pageRedirect :: Page -> Maybe PageId
 pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)) : _})
   | Just word <- T.pack "#" `T.stripPrefix` T.toCaseFold (T.strip t)
   , not $ T.null word
-  , T.all isAlpha word
   = Just (linkTargetId l)
 pageRedirect _ = Nothing
 
