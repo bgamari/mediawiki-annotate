@@ -18,6 +18,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Semigroup hiding (option)
 import Data.Foldable (foldl')
+import Data.Maybe
 
 import CAR.Utils
 import CAR.Types
@@ -151,32 +152,32 @@ instance Semigroup Acc where
 fillDisambigInlinkMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillDisambigInlinkMetadata acc page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
-                          , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
-                          , pagemetaInlinkIds           = HS.toList . accInlinkIds <$> things
+                          { pagemetaDisambiguationNames = Just . HS.toList . accDisambigNames $ things
+                          , pagemetaDisambiguationIds   = Just . HS.toList . accDisambigIds $ things
+                          , pagemetaInlinkIds           = Just . HS.toList . accInlinkIds $ things
                           }
          }
   where
-    things = HM.lookup (pageId page) acc
+    things = fromMaybe mempty $ HM.lookup (pageId page) acc
 
 
 
 fillRedirectMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillRedirectMetadata acc page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaRedirectNames       = HS.toList . accRedirectNames <$> things
+                          { pagemetaRedirectNames       = Just . HS.toList . accRedirectNames $ things
                           }
          }
   where
-    things = HM.lookup (pageId page) acc
+    things = fromMaybe mempty $ HM.lookup (pageId page) acc
 
 
 fillCategoryMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillCategoryMetadata acc page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaCategoryNames       = HS.toList . accCategoryNames <$> things
-                          , pagemetaCategoryIds         = HS.toList . accCategoryIds <$> things
+                          { pagemetaCategoryNames       = Just . HS.toList . accCategoryNames $ things
+                          , pagemetaCategoryIds         = Just . HS.toList . accCategoryIds $ things
                           }
          }
   where
-    things = HM.lookup (pageId page) acc
+    things = fromMaybe mempty $ HM.lookup (pageId page) acc
