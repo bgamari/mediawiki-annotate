@@ -35,12 +35,23 @@ stageResolveRedirect inputPath = do
         return (prov, pages')
 
 
--- action for resoving disambig 
+
+-- action for resolving disambiguation names and inlinks
 stageResolveDisambiguationAndInlinks :: FilePath -> IO (Provenance, [Page])
 stageResolveDisambiguationAndInlinks inputPath = do
-    acc <- unionsWith (<>) . fmap buildMap <$> readPagesFile inputPath
+    acc <- unionsWith (<>) . fmap buildDisambiguateInlinksMap <$> readPagesFile inputPath
     (prov, pages) <- readPagesFileWithProvenance inputPath
-    let pages' = map (fillMetadata acc) pages
+    let pages' = map (fillDisambigInlinkMetadata acc) pages
+    return (prov, pages')
+
+
+-- action for loading category tags into metadata
+stageResolveCategoryTags :: FilePath -> IO (Provenance, [Page])
+stageResolveCategoryTags inputPath = do
+    allCategoryIds <- extractAllCategoryIds <$> readPagesFile inputPath
+    acc <- unionsWith (<>) . fmap (buildCategoryMap allCategoryIds) <$> readPagesFile inputPath
+    (prov, pages) <- readPagesFileWithProvenance inputPath
+    let pages' = map (fillCategoryMetadata acc) pages
     return (prov, pages')
 
 
@@ -74,8 +85,8 @@ buildRedirectMap page =
 
 -- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
 -- Also assume that redirect are already resolved
-buildMap :: Page -> HM.HashMap PageId Acc
-buildMap page =
+buildDisambiguateInlinksMap :: Page -> HM.HashMap PageId Acc
+buildDisambiguateInlinksMap page =
     foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinks)
   where
     disambigs =
@@ -137,8 +148,8 @@ instance Semigroup Acc where
     Acc a1 b1 c1 d1 e1 f1 <> Acc a2 b2 c2 d2 e2 f2 =
         Acc (a1<>a2) (b1<>b2) (c1<>c2) (d1<>d2) (e1<>e2) (f1<>f2)
 
-fillMetadata :: HM.HashMap PageId Acc -> Page -> Page
-fillMetadata acc page =
+fillDisambigInlinkMetadata :: HM.HashMap PageId Acc -> Page -> Page
+fillDisambigInlinkMetadata acc page =
     page { pageMetadata = (pageMetadata page)
                           { pagemetaDisambiguationNames = HS.toList . accDisambigNames <$> things
                           , pagemetaDisambiguationIds   = HS.toList . accDisambigIds <$> things
