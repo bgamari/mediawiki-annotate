@@ -7,7 +7,7 @@ args :: Parser (FilePath, [FilePath])
 args =
     (,)
     <$> option str (short 'o' <> long "output" <> help "output file")
-    <*> some (argument str (help "pages file"))
+    <*> some (argument str (help "pages file" <> metavar "PAGES"))
 
 main :: IO ()
 main = do
