@@ -3,34 +3,25 @@
 {-# LANGUAGE BangPatterns #-}
 
 import Data.Bits
-import Data.Char
 import Data.Foldable
 import Data.Monoid
-import Data.Maybe
 import Data.List
 import Data.Hashable
-import Control.DeepSeq
 import Control.Monad (replicateM)
 import GHC.TypeLits
 import GHC.Conc
 
-import qualified Data.Text as T
-import qualified Data.Text.Lazy as TL
 import qualified Data.Vector as V
 import qualified Data.Vector.Algorithms.Intro as Sort
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as M
 import qualified Data.HashSet as HS
 import Options.Applicative
 import Control.Parallel.Strategies
-import System.CPUTime
 import System.Random.MWC
 import System.Random.MWC.Distributions (standard)
 
-import SimplIR.StopWords
 import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.Parse
-import NLP.Snowball
 
 import CAR.Types
 import CAR.Utils
