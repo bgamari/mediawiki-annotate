@@ -64,8 +64,9 @@ outlineToHtml FileNameLookup{..} (Stub pageName pageId _ skeleta) = H.docTypeHtm
           Nothing -> ""
 
     renderHtml :: [HeadingId] -> PageSkeleton -> H.Html
-    renderHtml headingPath (Para _) = mempty
-    renderHtml headingPath (Image _ _) = mempty
+    renderHtml _ (Para _) = mempty
+    renderHtml _ (Image _ _) = mempty
+    renderHtml _ (List _ _) = mempty
     renderHtml headingPath (Section sectionHeading headingId children)  =  do
         let headingPath' = headingPath ++ [headingId]
         let sectionPath = SectionPath pageId headingPath'
