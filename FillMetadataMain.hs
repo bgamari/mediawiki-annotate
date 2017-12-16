@@ -14,9 +14,7 @@
 import Data.Semigroup hiding (option)
 import Options.Applicative
 
-import CAR.Utils
 import CAR.Types
-import CAR.Utils.Redirects
 import CAR.FillMetadata
 
 data Stage = StageResolveRedirect
