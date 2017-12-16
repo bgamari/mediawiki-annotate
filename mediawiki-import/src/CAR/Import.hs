@@ -10,7 +10,6 @@ module CAR.Import
     ) where
 
 import Data.Maybe
-import Data.Char
 
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
