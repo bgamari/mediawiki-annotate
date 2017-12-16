@@ -212,9 +212,37 @@ instance CBOR.Serialise Page where
 data PageType = ArticlePage
               | CategoryPage
               | DisambiguationPage
-              | RedirectPage PageId
-              deriving (Show, Generic, Eq, Ord)
-instance CBOR.Serialise PageType
+              | RedirectPage Link
+              deriving (Show, Generic)
+
+instance CBOR.Serialise PageType where
+    decode = do
+        len <- CBOR.decodeListLen
+        tag <- CBOR.decodeInt
+        let variant t = do
+              when (len /= 1) $ fail $ "Unknown "++show t++" encoding"
+              pure t
+        case tag of
+          0 -> variant ArticlePage
+          1 -> variant CategoryPage
+          2 -> variant DisambiguationPage
+          3 -> do
+              when (len /= 2) $ fail $ "Unknown RedirectPage encoding"
+              RedirectPage <$> CBOR.decode
+          _ -> fail "Unknown PageType"
+
+    encode x =
+        case x of
+          ArticlePage        -> simple 0
+          CategoryPage       -> simple 1
+          DisambiguationPage -> simple 2
+          RedirectPage l     ->
+                 CBOR.encodeListLen 2
+              <> CBOR.encodeInt 3
+              <> CBOR.encode l
+      where
+        simple n = CBOR.encodeListLen 1 <> CBOR.encodeInt n
+
 
 -- data MetadataItem = RedirectNames [PageName]
 --                   | RedirectIds [PageId]

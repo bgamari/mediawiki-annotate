@@ -55,10 +55,10 @@ toPage Config{..} site WikiDoc{..} =
                      $ foldMap pageSkeletonLinks skeleton
 
         pageType
-          | isCategory name                     = CategoryPage
-          | isDisambiguation name contents      = DisambiguationPage
-          | Just toPageId <- pageRedirect page  = RedirectPage toPageId
-          | otherwise                           = ArticlePage
+          | isCategory name                 = CategoryPage
+          | isDisambiguation name contents  = DisambiguationPage
+          | Just l <- pageRedirect page     = RedirectPage l
+          | otherwise                       = ArticlePage
         metadata =
             emptyPageMetadata  { pagemetaType          = pageType
                                , pagemetaCategoryNames = Just (map linkTarget categories)
@@ -70,11 +70,11 @@ toPage Config{..} site WikiDoc{..} =
 -- In English redirect pages begin with a paragraph starting with @#redirect@. However,
 -- to be langauge-agnostic we instead just look for any page beginning with a word starting
 -- with a hash sign, followed by a link.
-pageRedirect :: Page -> Maybe PageId
+pageRedirect :: Page -> Maybe Link
 pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)) : _})
   | Just word <- T.pack "#" `T.stripPrefix` T.toCaseFold (T.strip t)
   , not $ T.null word
-  = Just (linkTargetId l)
+  = Just l
 pageRedirect _ = Nothing
 
 docsToSkeletons :: (TemplateTag -> TemplateHandler) -> SiteId -> PageId -> [Doc] -> [PageSkeleton]

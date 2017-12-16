@@ -73,14 +73,15 @@ fixLinks redirectResolver page =
             where newLinkTargetId = redirectResolver (linkTargetId l)
 
 
--- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
+-- Assume that category page ids are already filled in from the import stage;
+-- otherwise call buildCategoryMap
 buildRedirectMap :: Page -> HM.HashMap PageId Acc
 buildRedirectMap page =
     HM.fromListWith (<>)
-    [ ( pid
+    [ ( linkTargetId l
       , mempty { accRedirectNames = HS.singleton (pageName page) }
       )
-    | RedirectPage pid <- pure (pagemetaType $ pageMetadata page)
+    | RedirectPage l <- pure (pagemetaType $ pageMetadata page)
     ]
 
 -- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap

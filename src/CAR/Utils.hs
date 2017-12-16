@@ -1,12 +1,9 @@
 module CAR.Utils where
 
-import Control.Monad (guard)
-import Data.Maybe
 import Data.Hashable
 import qualified Data.DList as DList
 import           Data.DList (DList)
 import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import Data.Foldable
@@ -19,23 +16,25 @@ unionsWith f = foldl' (HM.unionWith f) mempty
 
 -- | Identify the target of a redirect page.
 pageRedirect :: Page -> Maybe PageId
-pageRedirect Page { pageMetadata = meta } =
-    case (pagemetaType meta) of
-    RedirectPage toPage -> Just toPage
-    _                   -> Nothing
+pageRedirect Page { pageMetadata = meta }
+  | RedirectPage l <- pagemetaType meta = Just $ linkTargetId l
+  | otherwise = Nothing
 
 -- | True if this is a disambiguation page (language-specifics already resolved)
 pageIsDisambiguation :: Page -> Bool
-pageIsDisambiguation (Page { pageMetadata = meta }) =
-    pagemetaType meta == DisambiguationPage
+pageIsDisambiguation (Page { pageMetadata = meta })
+  | DisambiguationPage <- pagemetaType meta = True
+  | otherwise = False
 
 pageIsCategory :: Page -> Bool
-pageIsCategory (Page { pageMetadata = meta }) =
-    pagemetaType meta == CategoryPage
+pageIsCategory (Page { pageMetadata = meta })
+  | CategoryPage <- pagemetaType meta = True
+  | otherwise = False
 
 pageIsArticle :: Page -> Bool
-pageIsArticle (Page { pageMetadata = meta }) =
-    pagemetaType meta == ArticlePage
+pageIsArticle (Page { pageMetadata = meta })
+  | ArticlePage <- pagemetaType meta = True
+  | otherwise = False
 
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
