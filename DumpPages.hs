@@ -64,8 +64,7 @@ opts = subparser
 
     dumpPages =
         f <$> argument str (help "input file" <> metavar "FILE")
-          <*> fmap S.fromList (many (argument (PageName . T.pack <$> str)
-                                      (metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+          <*> fmap S.fromList (many (option  (PageName . T.pack <$> str) (short 'p' <> long "page" <> metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
           <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
           <*> (many (option (flip pageNameToId <$> (packPageName <$> str)) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
           <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> help "dump only pages with links to this target page id (and the page itself)")))
