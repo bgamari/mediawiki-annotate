@@ -6,7 +6,7 @@
 
 module CAR.Types.AST
     ( -- * Identifiers
-      PageName(..), unpackPageName
+      PageName(..), packPageName, unpackPageName
     , SiteId(..)
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
@@ -91,6 +91,9 @@ pageIdToName (PageId pid) =
     PageName
     $ T.tail $ T.dropWhile (/=':')
     $ T.pack $ unEscapeString $ Utf8.toString pid
+
+packPageName :: String -> PageName
+packPageName = PageName . T.pack
 
 packPageId :: String -> PageId
 packPageId = PageId . Utf8.fromString
