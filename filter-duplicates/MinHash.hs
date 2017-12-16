@@ -7,7 +7,7 @@ import Data.Foldable
 import Data.Monoid
 import Data.List
 import Data.Hashable
-import Control.Monad (replicateM, replicateM_)
+import Control.Monad (when, replicateM, replicateM_)
 import Control.DeepSeq
 import GHC.TypeLits
 import GHC.Conc
@@ -181,15 +181,16 @@ main = do
 
     -- Finally compute all-pairs similarity
     withSharedFile outputFile WriteMode $ \outHdl -> do
-        let worker :: [(ParagraphId, ParagraphId)] -> IO ()
-            worker dups = do
-                evaluate $ force dups
+        let worker :: Int -> [(ParagraphId, ParagraphId)] -> IO ()
+            worker n dups = do
+                when (n `mod` 1000 == 0) $ print n
+                _ <- evaluate $ force dups
                 withSharedHandle outHdl $ \h ->
                     hPutStrLn h $ unlines
                       [ unpackParagraphId a <> "\t" <> unpackParagraphId b
                       | (a, b) <- dups ]
 
-        parMapIOUnordered ncaps worker
+        parMapIOUnordered ncaps (uncurry worker) $ zip [0..]
             $ foldMap (hashSimilarities thresh) $ M.elems partitions
 
 
@@ -201,16 +202,16 @@ withSharedFile path mode =
     bracket (openSharedFile path mode) closeSharedFile
 
 openSharedFile :: FilePath -> IOMode -> IO SharedHandle
-openSharedFile path mode = do
+openSharedFile path mode =
     SharedHandle <$> (openFile path mode >>= newTMVarIO)
 
 closeSharedFile :: SharedHandle -> IO ()
-closeSharedFile (SharedHandle hdl) = do
+closeSharedFile (SharedHandle hdl) =
     atomically (takeTMVar hdl) >>= hClose
 
 withSharedHandle :: SharedHandle -> (Handle -> IO a) -> IO a
-withSharedHandle (SharedHandle var) m =
-    bracket (atomically $ takeTMVar var) (atomically . putTMVar var) m
+withSharedHandle (SharedHandle var) =
+    bracket (atomically $ takeTMVar var) (atomically . putTMVar var)
 
 parMapIOUnordered :: Monoid b
                   => Int
