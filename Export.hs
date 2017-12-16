@@ -15,11 +15,11 @@ import CAR.Types
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 
-options :: Parser (FilePath, FilePath, FilePath, [SiteId -> PageId])
+options :: Parser (FilePath, FilePath, [SiteId -> PageId])
 options =
-    (,,,) <$> argument str (help "annotations file" <> metavar "FILE")
+    (,,)
+        <$> argument str (help "annotations file" <> metavar "FILE")
         <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-        <*> option str (long "unproc" <> metavar "FILE" <> help "unprocessed all.cbor file")
         <*> many (option (flip pageNameToId . PageName . T.pack <$> str)
                          (short 'p' <> long "page"
                           <> metavar "PAGE NAME" <> help "Export only this page")
@@ -78,7 +78,7 @@ exportPages outPath prov pagesToExport = do
 
 main :: IO ()
 main = do
-    (path, outPath, unprocessedPagesFile, names) <- execParser $ info (helper <*> options) mempty
+    (path, outPath, names) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
