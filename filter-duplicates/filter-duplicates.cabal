@@ -89,6 +89,8 @@ executable trec-car-minhash-duplicates
                        hashable >=1.2 && <1.3,
                        containers >= 0.5,
                        deepseq >= 1.4,
+                       stm,
+                       async,
                        text >= 1.2,
                        vector >= 0.12,
                        vector-algorithms,

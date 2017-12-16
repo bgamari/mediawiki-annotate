@@ -7,9 +7,15 @@ import Data.Foldable
 import Data.Monoid
 import Data.List
 import Data.Hashable
-import Control.Monad (replicateM)
+import Control.Monad (replicateM, replicateM_)
+import Control.DeepSeq
 import GHC.TypeLits
 import GHC.Conc
+import Control.Exception
+import Control.Concurrent.Async
+import Control.Concurrent.STM
+import Control.Concurrent.STM.TSem
+import System.IO
 
 import qualified Data.Vector as V
 import qualified Data.Vector.Algorithms.Intro as Sort
@@ -167,13 +173,62 @@ main = do
 
     putStrLn "Computed embedding"
 
+    -- First compute minhash buckets
     let partitions :: M.Map Bucket (V.Vector (ParagraphId, [Term]))
         !partitions = partitionParas projs embeddedParas
     putStrLn "Bucket counts:"
     putStrLn $ unlines $ map show $ parMap rseq (fmap length) $ M.toList partitions
 
-    let duplicates :: [(ParagraphId, ParagraphId)]
-        duplicates = concat $ listStatus "dup-chunk" 1000 $ withStrategy (parBuffer 1024 rdeepseq)
-                     $ foldMap (hashSimilarities thresh) $ M.elems partitions
-    writeFile outputFile $ unlines [ unpackParagraphId a <> "\t" <> unpackParagraphId b
-                                   | (a, b) <- duplicates ]
+    -- Finally compute all-pairs similarity
+    withSharedFile outputFile WriteMode $ \outHdl -> do
+        let worker :: [(ParagraphId, ParagraphId)] -> IO ()
+            worker dups = do
+                evaluate $ force dups
+                withSharedHandle outHdl $ \h ->
+                    hPutStrLn h $ unlines
+                      [ unpackParagraphId a <> "\t" <> unpackParagraphId b
+                      | (a, b) <- dups ]
+
+        parMapIOUnordered ncaps worker
+            $ foldMap (hashSimilarities thresh) $ M.elems partitions
+
+
+newtype SharedHandle = SharedHandle (TMVar Handle)
+
+withSharedFile :: FilePath -> IOMode
+               -> (SharedHandle -> IO a) -> IO a
+withSharedFile path mode =
+    bracket (openSharedFile path mode) closeSharedFile
+
+openSharedFile :: FilePath -> IOMode -> IO SharedHandle
+openSharedFile path mode = do
+    SharedHandle <$> (openFile path mode >>= newTMVarIO)
+
+closeSharedFile :: SharedHandle -> IO ()
+closeSharedFile (SharedHandle hdl) = do
+    atomically (takeTMVar hdl) >>= hClose
+
+withSharedHandle :: SharedHandle -> (Handle -> IO a) -> IO a
+withSharedHandle (SharedHandle var) m =
+    bracket (atomically $ takeTMVar var) (atomically . putTMVar var) m
+
+parMapIOUnordered :: Monoid b
+                  => Int
+                  -> (a -> IO b)
+                  -> [a]
+                  -> IO b
+parMapIOUnordered n f xs = do
+    ahead <- atomically $ newTSem n
+    accum <- newTVarIO mempty
+    forM_ xs $ \x -> do
+        atomically $ waitTSem ahead
+        worker <- async $ do
+            r <- f x
+            atomically $ do
+                r0 <- readTVar accum
+                writeTVar accum $! r0 <> r
+            atomically $ signalTSem ahead
+        link worker
+
+    replicateM_ n $ atomically $ readTVar accum
+    atomically $ readTVar accum
