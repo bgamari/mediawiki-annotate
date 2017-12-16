@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiWayIf #-}
+
 import Control.Monad
 import Data.List (intersperse)
 import Data.Maybe
@@ -5,6 +7,7 @@ import Data.Monoid
 
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
@@ -64,19 +67,26 @@ opts = subparser
           <*> fmap S.fromList (many (argument (PageName . T.pack <$> str)
                                       (metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
           <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
+          <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "target" <> short 't' <> help "dump only pages with links to this target page id (and the page itself)")))
       where
-        f :: FilePath -> S.Set PageName -> LinkStyle -> IO ()
-        f inputFile pageNames linkStyle
+        f :: FilePath -> S.Set PageName -> LinkStyle -> HS.HashSet PageId-> IO ()
+        f inputFile pageNames linkStyle targetPageIds
           | S.null pageNames = do
                 pages <- readPagesFile inputFile
-                mapM_ printPage pages
+                let pages' =  filter (searchTargets targetPageIds) pages
+                mapM_ printPage pages'
           | otherwise = do
                 anns <- CAR.openAnnotations inputFile
                 siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
                 let pageIds = map (pageNameToId siteId) $ S.toList pageNames
-                mapM_ printPage $ mapMaybe (`CAR.lookupPage` anns) pageIds
+                mapM_ printPage $ filter (searchTargets targetPageIds)
+                                $ mapMaybe (`CAR.lookupPage` anns) pageIds
 
           where printPage = putStrLn . prettyPage linkStyle
+                searchTargets targets page =
+                    if | HS.null targetPageIds -> True
+                       | (pageId page) `HS.member` targets -> True
+                       | otherwise     -> any ( `HS.member` targets) (pageLinkTargetIds page)
 
     dumpEntityIds =
         f <$> argument str (help "input file" <> metavar "FILE")

@@ -53,6 +53,9 @@ pageContainsText str = any goSkeleton . pageSkeleton
 pageLinkTargets :: Page -> [PageName]
 pageLinkTargets = map linkTarget . pageLinks
 
+pageLinkTargetIds :: Page -> [PageId]
+pageLinkTargetIds = map linkTargetId . pageLinks
+
 pageLinks :: Page -> [Link]
 pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 
