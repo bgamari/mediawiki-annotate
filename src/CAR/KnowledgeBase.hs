@@ -88,8 +88,8 @@ instance Monoid InlinkCounts where
 
 
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: SiteId -> (PageId -> PageId) -> [Page] -> InlinkInfo
-collectInlinkInfo siteId resolveRedirects' = foldMap pageInlinkInfo
+collectInlinkInfo :: (PageId -> PageId) -> [Page] -> InlinkInfo
+collectInlinkInfo resolveRedirects' = foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1

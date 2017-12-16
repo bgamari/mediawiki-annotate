@@ -107,7 +107,7 @@
 -- main = do
 --     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
 --     pages <- readPagesFile inputFile
---     let inlinkInfo   = collectInlinkInfo undefined pages  -- todo add redirect resolver instead of `undefined`
+--     let inlinkInfo   = collectInlinkInfo pages  -- todo add redirect resolver instead of `undefined`
 -- --         inlinkCounts = resolveRedirects inlinkInfo
 -- --         inlinkTotals = mconcat $ HM.elems inlinkCounts    -- todo fix redirects
 --         inlinkTotals = HM.size $ inLinkCounts $  $ (documentInlinks inlinkInfo)
