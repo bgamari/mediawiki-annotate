@@ -44,7 +44,6 @@ import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
-import CAR.Utils
 import CAR.Utils.Redirects
 import qualified CAR.RunFile as CarRun
 
@@ -221,7 +220,7 @@ computeRankingsForQuery
               in HM.unionWith (++) graph seedNodes
 
 
-        retrievalResults :: [(_, _)]
+        retrievalResults :: [(RetrievalFun, [(EdgeDoc, Log Double)])]
         retrievalResults = [ (irname, retrievalResult)
                            | (irname, retrievalModel) <- retrievalModels
                            , let retrievalResult = filter (isNotFromQueryPage . fst)
