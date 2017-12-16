@@ -86,7 +86,8 @@ opts = subparser
                 searchTargets targets page =
                     if | HS.null targetPageIds -> True
                        | (pageId page) `HS.member` targets -> True
-                       | otherwise     -> any ( `HS.member` targets) (pageLinkTargetIds page)
+                       | otherwise     -> let pageTargets = HS.fromList (pageLinkTargetIds page)
+                                          in any (  `HS.member` pageTargets) targets
 
     dumpEntityIds =
         f <$> argument str (help "input file" <> metavar "FILE")
