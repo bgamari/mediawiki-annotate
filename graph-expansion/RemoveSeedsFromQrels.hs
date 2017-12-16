@@ -40,7 +40,7 @@ main = do
 
         pagesToForbiddenEntities :: [Page] -> [(PageId, HS.HashSet PageId)]
         pagesToForbiddenEntities pages = [ (queryDocPageId queryDoc, toSeeds queryDoc)
-                                         | queryDoc <- pagesToQueryDocs siteId id QueryFromPageTitle pages
+                                         | queryDoc <- pagesToQueryDocs siteId QueryFromPageTitle pages
                                          ]
 
 

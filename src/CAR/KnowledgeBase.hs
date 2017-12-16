@@ -10,7 +10,6 @@ module CAR.KnowledgeBase
       -- * Inlink statistics
     , InlinkInfo(..)
     , collectInlinkInfo
---     , resolveRedirects
     , InlinkCounts(..)
     ) where
 
@@ -74,22 +73,9 @@ instance Monoid InlinkCounts where
     mempty = InlinkCounts mempty mempty mempty mempty
     mappend = (<>)
 
---  sourcepage targetpage anchortext => attach anchortext to targetpage
---  redirect sourcepage targetpage   => attach sourcepage to targetpage
---   similar for disambiguation
--- resolveRedirects :: InlinkInfo -> HM.HashMap PageName InlinkCounts
--- resolveRedirects (InlinkInfo {..}) =
---     fmap resolve documentInlinks
---   where
---     resolve :: InlinkCounts -> InlinkCounts
---     resolve inlinkCounts =
---         inlinkCounts <> mconcat [ assert (n==1) $ fromMaybe mempty $ HM.lookup rpage documentInlinks
---                           | (rpage, n) <- HM.toList $ redirectCount inlinkCounts ]
-
-
 -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: (PageId -> PageId) -> [Page] -> InlinkInfo
-collectInlinkInfo resolveRedirects' = foldMap pageInlinkInfo
+collectInlinkInfo :: [Page] -> InlinkInfo
+collectInlinkInfo = foldMap pageInlinkInfo
   where
     one :: Hashable a => a -> HM.HashMap a Int
     one x = HM.singleton x 1
@@ -97,14 +83,14 @@ collectInlinkInfo resolveRedirects' = foldMap pageInlinkInfo
     pageInlinkInfo :: Page -> InlinkInfo
     pageInlinkInfo page
       | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton (resolveRedirects' redirTargetId)
+            mempty { documentInlinks = HM.singleton redirTargetId
                                        $ mempty { redirectCount = one $ pageName page }
                    , redirectPages = HS.singleton (pageName page)
                    }
 
       | pageIsDisambiguation page  =
             let toInlinkInfo link =
-                    mempty { documentInlinks = HM.singleton (resolveRedirects' $ linkTargetId link)
+                    mempty { documentInlinks = HM.singleton (linkTargetId link)
                                                $ mempty { disambiguationCount = one $ pageName page }
                            }
             in foldMap toInlinkInfo (pageLinks page)
@@ -113,7 +99,7 @@ collectInlinkInfo resolveRedirects' = foldMap pageInlinkInfo
             let toInlinkInfo link =
                    mempty { documentInlinks =
                                HM.singleton
-                                   (resolveRedirects' (linkTargetId link))
+                                   (linkTargetId link)
                                    (mempty { anchorCount = one $ linkAnchor link
                                            , inLinkCounts = one $ linkTarget link })
                           }

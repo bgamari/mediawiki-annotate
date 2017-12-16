@@ -77,8 +77,7 @@ main = do
             putStrLn "done"
 
 
-    let resolveRedirect = resolveRedirects $ AnnsFile.pages unprocessedPages
-    -- entity annnotations
+    let -- entity annnotations
         writeEntityAnnotations ::  FilePath ->  (SectionPath -> SectionPath) -> IO ()
         writeEntityAnnotations relsFile cutSectionPath = do
             putStr "Writing section relevance annotations..."
@@ -89,7 +88,7 @@ main = do
                   $ map prettyEntityAnnotation
                   $ S.toList
                   $ S.map cutAnnotation
-                  $ foldMap (Exports.toEntityAnnotations resolveRedirect) pagesToExport
+                  $ foldMap Exports.toEntityAnnotations pagesToExport
             putStrLn "done"
 
 

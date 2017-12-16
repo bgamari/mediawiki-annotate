@@ -5,62 +5,35 @@ import Data.List
 
 import qualified Data.Text.Lazy.Builder as TB
 import qualified Data.Text.Lazy.IO as TL
-import qualified Data.HashMap.Strict as HM
 
 import Options.Applicative
 
 import CAR.Types
-import CAR.Utils.Redirects
 import CAR.AnnotationsFile as AnnsFile
 
-options :: Parser (FilePath, FilePath, Mode)
+-- TODO: This should get moved to trec-car-dump
+
+options :: Parser (FilePath, FilePath)
 options =
-    (,,)
+    (,)
       <$> argument str (help "annotations file" <> metavar "FILE" <> help "unprocessed all.cbor file")
       <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-      <*> mode
-  where
-    mode = flag' LegalPageIds (long "legal-page-ids" <> help "Write list of legal page IDs")
-       <|> flag' Redirects (long "redirects" <> help "Write list of redirects")
-
-
-data Mode = LegalPageIds | Redirects
 
 main :: IO ()
 main = do
-    (unprocessedPagesFile, outputFile, mode) <- execParser $ info (helper <*> options) mempty
+    (unprocessedPagesFile, outputFile) <- execParser $ info (helper <*> options) mempty
     unprocessedPages <- openAnnotations unprocessedPagesFile
 
-    let entityRedirects = entityRedirectMap $ AnnsFile.pages unprocessedPages
-        resolveRedirect = resolveRedirectFun entityRedirects
-        redirectedPageIds =  HM.keys entityRedirects
-        legalPageIds = filter (\pgId -> pgId == resolveRedirect pgId)
-                     $ HM.elems entityRedirects
+    let legalPageIds = pages unprocessedPages
 
-    case mode of
-      LegalPageIds ->
-        let formatPageIdToName :: PageId -> TB.Builder
-            formatPageIdToName pgId =
-                (TB.fromString $ unpackPageId pgId)
-                <> "\t"
-                <> (TB.fromString $ unpackPageName finalPageName)
-              where finalPageName = pageIdToName pgId
-        in TL.writeFile outputFile $ TB.toLazyText
-                $ mconcat
-                $ intersperse "\n"
-                $ fmap formatPageIdToName
-                legalPageIds
+        formatPageIdToName :: Page -> TB.Builder
+        formatPageIdToName page =
+            (TB.fromString $ unpackPageId $ pageId page)
+            <> "\t"
+            <> (TB.fromString $ unpackPageName $ pageName page)
 
-      Redirects ->
-        let formatPageIdToRedirect :: PageId -> TB.Builder
-            formatPageIdToRedirect pageId =
-                (TB.fromString $ unpackPageId pageId)
-                <> "\t"
-                <> (TB.fromString $ unpackPageId finalPageId)
-              where finalPageId = resolveRedirect pageId
-
-        in TL.writeFile outputFile $ TB.toLazyText
-                $ mconcat
-                $ intersperse "\n"
-                $ fmap formatPageIdToRedirect
-                redirectedPageIds
+    TL.writeFile outputFile $ TB.toLazyText
+         $ mconcat
+         $ intersperse "\n"
+         $ fmap formatPageIdToName
+         legalPageIds

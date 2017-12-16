@@ -64,14 +64,13 @@ instance ToJSON QueryDocList
 data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
 
 pagesToQueryDocs :: SiteId
-                 -> (PageId -> PageId)
                  -> QueryDerivation
                  -> [Page]
                  -> [QueryDoc]
-pagesToQueryDocs siteId resolveRedirect deriv pages =
+pagesToQueryDocs siteId deriv pages =
     queryDocs
   where
-    leadEntities = HS.fromList . fmap (resolveRedirect . pageNameToId siteId) . KB.kbDocOutLinks
+    leadEntities = HS.fromList . fmap (pageNameToId siteId) . KB.kbDocOutLinks
     queryDocs = case deriv of
       QueryFromPageTitle ->
           [ QueryDoc { queryDocQueryId      = CarRun.pageIdToQueryId $ KB.kbDocPageId kbDoc

@@ -194,9 +194,8 @@ entityModes = subparser
       where
         go outputPath articlesPath textPart = do
             (prov, pages) <- readPagesFileWithProvenance articlesPath
-            let !resolveRedirect = resolveRedirects pages
 
-            !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readPagesFile articlesPath
+            !inlinkInfo <- collectInlinkInfo <$> readPagesFile articlesPath
             pages2 <- readPagesFile articlesPath
 
             let docTerms :: KbDoc -> [Term]
@@ -226,9 +225,8 @@ entityModes = subparser
       where
         go outputPath articlesPath textPart = do
             (prov, pages) <- readPagesFileWithProvenance articlesPath
-            let !resolveRedirect = resolveRedirects pages
 
-            !inlinkInfo <- collectInlinkInfo resolveRedirect <$> readPagesFile articlesPath
+            !inlinkInfo <- collectInlinkInfo <$> readPagesFile articlesPath
             pages2 <- readPagesFile articlesPath
 
             let docTerms :: KbDoc -> [T.Text]
