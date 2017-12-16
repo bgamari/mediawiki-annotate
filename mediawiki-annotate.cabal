@@ -233,6 +233,9 @@ test-suite tests
                        text,
                        tasty,
                        tasty-silver,
-                       trec-car-tools
+                       tasty-hunit,
+                       unordered-containers,
+                       trec-car-tools,
+                       tagged
   hs-source-dirs:      ./, tests
   default-language:    Haskell2010
