@@ -30,9 +30,12 @@ stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
 stageResolveRedirect inputPath = do
         acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
         redirectResolver <- resolveRedirects <$> readPagesFile inputPath
+        pageNameMap <- HM.fromList . fmap (\p -> (pageId p, pageName p)) <$> readPagesFile inputPath
 
         (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pages' = map ((fixLinks redirectResolver) . (fillRedirectMetadata acc)) pages
+        let pageResolver :: PageId -> Maybe PageName
+            pageResolver pid = HM.lookup pageNameMap pid'
+        let pages' = map (fixLinks redirectResolver pageResolver . fillRedirectMetadata acc) pages
         return (prov, pages')
 
 
@@ -56,8 +59,8 @@ stageResolveCategoryTags inputPath = do
     return (prov, pages')
 
 
-fixLinks:: (PageId -> PageId) -> Page -> Page
-fixLinks redirectResolver page =
+fixLinks :: (PageId -> PageId) -> (PageId -> Maybe PageName) -> Page -> Page
+fixLinks redirectResolver getPageName page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
       where
         goSkeleton (Section x y children) = Section x y (fmap goSkeleton children)
@@ -68,9 +71,15 @@ fixLinks redirectResolver page =
         goParagraph (Paragraph x bodies) = Paragraph x (fmap goParaBody bodies)
 
         goParaBody (ParaText t) = ParaText t
-        goParaBody (ParaLink l) = ParaLink l {linkTarget = pageIdToName  newLinkTargetId
-                                             , linkTargetId = newLinkTargetId}
-            where newLinkTargetId = redirectResolver (linkTargetId l)
+        goParaBody (ParaLink l) =
+            case getPageName newLinkTargetId of
+              Just newLinkTargetName ->
+                ParaLink l { linkTarget = newLinkTargetName
+                           , linkTargetId = newLinkTargetId
+                           }
+              -- In cases where the target page does not exist simply drop the link
+              Nothing -> ParaText (linkAnchor l)
+          where newLinkTargetId = redirectResolve (linkTargetId l)
 
 
 -- Assume that category page ids are already filled in from the import stage;
@@ -128,7 +137,6 @@ buildCategoryMap allCategoryIds page =
             | link <- pageLinks page
             , linkTargetId link `HS.member` allCategoryIds
             ]
-    
 
 data Acc = Acc { accRedirectNames :: !(HS.HashSet PageName)
                , accDisambigNames :: !(HS.HashSet PageName)
