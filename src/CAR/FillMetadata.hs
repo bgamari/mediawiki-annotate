@@ -1,11 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
@@ -13,7 +6,7 @@
 
 module CAR.FillMetadata  where
 
-
+import qualified Control.Foldl as Foldl
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Semigroup hiding (option)
@@ -28,15 +21,16 @@ import CAR.Utils.Redirects
 -- action for resolving redirects for all pages in inputPath
 stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
 stageResolveRedirect inputPath = do
-        acc <- unionsWith (<>) . fmap buildRedirectMap <$> readPagesFile inputPath
-        redirectResolver <- resolveRedirects <$> readPagesFile inputPath
-        pageNameMap <- HM.fromList . fmap (\p -> (pageId p, pageName p)) <$> readPagesFile inputPath
+    redirectResolver <- resolveRedirects <$> readPagesFile inputPath
 
-        (prov, pages) <- readPagesFileWithProvenance inputPath
-        let pageResolver :: PageId -> Maybe PageName
-            pageResolver pid = HM.lookup pageNameMap pid'
-        let pages' = map (fixLinks redirectResolver pageResolver . fillRedirectMetadata acc) pages
-        return (prov, pages')
+    let theFold = ((,) <$> buildPageNameMap) <*> buildRedirectMap
+    (pageNameMap, redirectMap) <- Foldl.fold theFold <$> readPagesFile inputPath
+
+    (prov, pages) <- readPagesFileWithProvenance inputPath
+    let pageNameResolver :: PageId -> Maybe PageName
+        pageNameResolver = flip HM.lookup pageNameMap
+    let pages' = map (fixLinks redirectResolver pageNameResolver . fillRedirectMetadata redirectMap) pages
+    return (prov, pages')
 
 
 
@@ -60,7 +54,7 @@ stageResolveCategoryTags inputPath = do
 
 
 fixLinks :: (PageId -> PageId) -> (PageId -> Maybe PageName) -> Page -> Page
-fixLinks redirectResolver getPageName page =
+fixLinks redirectResolver pageNameResolver page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
       where
         goSkeleton (Section x y children) = Section x y (fmap goSkeleton children)
@@ -72,26 +66,35 @@ fixLinks redirectResolver getPageName page =
 
         goParaBody (ParaText t) = ParaText t
         goParaBody (ParaLink l) =
-            case getPageName newLinkTargetId of
+            case pageNameResolver newLinkTargetId of
               Just newLinkTargetName ->
                 ParaLink l { linkTarget = newLinkTargetName
                            , linkTargetId = newLinkTargetId
                            }
               -- In cases where the target page does not exist simply drop the link
               Nothing -> ParaText (linkAnchor l)
-          where newLinkTargetId = redirectResolve (linkTargetId l)
+          where newLinkTargetId = redirectResolver (linkTargetId l)
 
+
+buildPageNameMap :: Foldl.Fold Page (HM.HashMap PageId PageName)
+buildPageNameMap =
+    Foldl.Fold (\acc page -> HM.insert (pageId page) (pageName page) acc) mempty id
 
 -- Assume that category page ids are already filled in from the import stage;
 -- otherwise call buildCategoryMap
-buildRedirectMap :: Page -> HM.HashMap PageId Acc
-buildRedirectMap page =
-    HM.fromListWith (<>)
-    [ ( linkTargetId l
-      , mempty { accRedirectNames = HS.singleton (pageName page) }
-      )
-    | RedirectPage l <- pure (pagemetaType $ pageMetadata page)
-    ]
+
+-- | Map of pages that redirect to the given page.
+newtype RedirectMap = RedirectMap (HM.HashMap PageId (HS.HashSet PageName))
+
+-- | Collect a map of the in-bound redirect links
+buildRedirectMap :: Foldl.Fold Page RedirectMap
+buildRedirectMap =
+    Foldl.Fold step mempty RedirectMap
+  where
+    step acc page
+      | RedirectPage l <- pagemetaType $ pageMetadata page
+      = HM.insertWith (<>) (linkTargetId l) (HS.singleton (pageName page)) acc
+      | otherwise = acc
 
 -- Assume that category page ids are already filled in from the inport stage;  otherwise call buildCategoryMap
 -- Also assume that redirect are already resolved
@@ -170,10 +173,10 @@ fillDisambigInlinkMetadata acc page =
 
 
 
-fillRedirectMetadata :: HM.HashMap PageId Acc -> Page -> Page
-fillRedirectMetadata acc page =
+fillRedirectMetadata :: RedirectMap -> Page -> Page
+fillRedirectMetadata (RedirectMap acc) page =
     page { pageMetadata = (pageMetadata page)
-                          { pagemetaRedirectNames       = Just . HS.toList . accRedirectNames $ things
+                          { pagemetaRedirectNames       = Just $ HS.toList things
                           }
          }
   where
