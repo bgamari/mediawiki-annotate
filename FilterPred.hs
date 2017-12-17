@@ -31,6 +31,7 @@ data Pred a = NameContains T.Text
             | PageHashMod Int Int Int -- ^ for training/test split
             | IsRedirect
             | IsDisambiguation
+            | IsCategory
 
             | Any [Pred a]
             | All [Pred a]
@@ -47,6 +48,7 @@ runPred _ (HasCategoryContaining x)  = pure $ HasCategoryContaining x
 runPred _ (PageHashMod s x y)  = pure $ PageHashMod s x y
 runPred _ IsRedirect           = pure IsRedirect
 runPred _ IsDisambiguation     = pure IsDisambiguation
+runPred _ IsCategory           = pure IsCategory
 runPred f (Any x)     = Any <$> traverse (runPred f) x
 runPred f (All x)     = All <$> traverse (runPred f) x
 runPred f (Negate x)  = Negate <$> runPred f x
@@ -75,7 +77,8 @@ parsePred inj = term
 
     simple =
         asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
-             , testSet, trainSet, foldPred, isRedirect, isDisambiguation, truePred
+             , testSet, trainSet, foldPred, isRedirect, isDisambiguation, isCategory
+             , truePred
              , Pure <$> inj
              ]
 
@@ -88,6 +91,7 @@ parsePred inj = term
                              , PageHashMod defaultSalt 10 (2*k+1) ]
     isRedirect = textSymbol "is-redirect" >> pure IsRedirect
     isDisambiguation = textSymbol "is-disambiguation" >> pure IsDisambiguation
+    isCategory = textSymbol "is-category" >> pure IsCategory
 
 
     nameContains = do
@@ -140,6 +144,7 @@ interpret pageNameTranslate pred page =
                                        in h `mod` n == k
       IsRedirect                    -> isJust $ pageRedirect page
       IsDisambiguation              -> pageIsDisambiguation page
+      IsCategory                    -> pageIsCategory page
       Any preds                     -> any (\pred' -> interpret pageNameTranslate pred' page) preds
       All preds                     -> all (\pred' -> interpret pageNameTranslate pred' page) preds
       Negate p                      -> not $ interpret pageNameTranslate p page
