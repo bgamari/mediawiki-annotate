@@ -100,9 +100,6 @@ main = do
     putStrLn $ "# Edgedoc index: "++ show entityIndexFile
     putStrLn $ "# RankingType: " ++ show rankingType
 
---     let !resolveRedirect = resolveRedirectFactory $ AnnsFile.pages annsFile
---     putStrLn $ "# computed redirects"
-
     let seedMethod :: SeedDerivation -> IO (QueryDoc -> QueryDoc)
 --         seedMethod SeedsFromLeadSection = return id
         seedMethod (SeedsFromEntityIndex entityIndexFile) = do

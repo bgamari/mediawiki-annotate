@@ -7,9 +7,7 @@ import CAR.Types
 import GraphExpansionExperiments
 
 opts :: Parser (FilePath)
-opts =
-    id
-    <$> argument str (help "queryFile file" <> metavar "PAGES FILE")
+opts = argument str (help "queryFile file" <> metavar "PAGES FILE")
 
 main :: IO ()
 main = do
@@ -17,7 +15,7 @@ main = do
         execParser $ info (helper <*> opts) mempty
 
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
-    queriesToSeedEntities <- pagesToQueryDocs siteId id QueryFromPageTitle <$> readPagesFile queryFile
+    queriesToSeedEntities <- pagesToQueryDocs siteId QueryFromPageTitle <$> readPagesFile queryFile
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where
     toSeedLines queryDoc =

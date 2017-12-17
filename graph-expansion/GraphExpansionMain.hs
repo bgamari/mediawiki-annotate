@@ -44,7 +44,6 @@ import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
-import CAR.Utils.Redirects
 import qualified CAR.RunFile as CarRun
 
 import Graph
@@ -176,14 +175,12 @@ computeRankingsForQuery :: --forall n. (KnownNat n) =>
 --                         -> UniverseGraph
 --                         -> BinarySymmetricGraph
 --                         -> WordEmbedding n
-                        -> (PageId -> PageId)
                         -> [(Method, [(PageId, Maybe ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
-      annsFile queryId queryPageId query seeds radius
--- --       universeGraph binarySymmetricGraph wordEmbedding resolveRedirect =
-      resolveRedirect =
+      annsFile queryId queryPageId query seeds radius =
+-- --       universeGraph binarySymmetricGraph wordEmbedding =
       let
 --  LD        nodes :: HS.HashSet PageId
 --   LD       nodes = expandNodesK binarySymmetricGraph seeds radius
@@ -194,14 +191,8 @@ computeRankingsForQuery
 -- LD--         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
 -- LD         universeSubset = subsetOfUniverseGraph universeGraph nodes
 
--- LD2        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
--- LD2        fixRedirectEdgeDocs edgeDoc =
--- LD2            edgeDoc { edgeDocArticleId = resolveRedirect (edgeDocArticleId edgeDoc)
--- LD2                    , edgeDocNeighbors = HS.map resolveRedirect (edgeDocNeighbors edgeDoc)
--- LD2                    }
-
 -- LD         edgeDocsSubset :: [EdgeDoc]
--- LD         edgeDocsSubset = HS.toList $ HS.fromList $ fmap fixRedirectEdgeDocs $ concat $ HM.elems universeSubset
+-- LD         edgeDocsSubset = HS.toList $ HS.fromList $ concat $ HM.elems universeSubset
 
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
@@ -317,25 +308,17 @@ computeRankingsForQuery
 
 
 computeSimpleGraphs :: UniverseGraph
-                    -> (PageId -> PageId)
                     -> HS.HashSet PageId
                     -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
 
-computeSimpleGraphs universeGraph resolveRedirect queryPageIds =
+computeSimpleGraphs universeGraph queryPageIds =
     let universeSubset ::  HM.HashMap PageId [EdgeDoc]
         universeSubset = universeGraph
-
-        fixRedirectEdgeDocs :: EdgeDoc -> EdgeDoc
-        fixRedirectEdgeDocs edgeDoc@EdgeDoc{..} =
-            edgeDoc { edgeDocArticleId = resolveRedirect edgeDocArticleId
-                    , edgeDocNeighbors = HS.map resolveRedirect edgeDocNeighbors
-                    }
 
         edgeDocsSubset :: [EdgeDoc]
         edgeDocsSubset =
             HS.toList $ HS.fromList
           $ filter isNotFromQueryPage
-          $ fmap fixRedirectEdgeDocs
           $ concat $ HM.elems universeSubset
           where
             isNotFromQueryPage :: EdgeDoc -> Bool
@@ -500,10 +483,6 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
-    let resolveRedirect :: PageId -> PageId
-        !resolveRedirect = resolveRedirects $ AnnsFile.pages annsFile
-    putStrLn $ "# computed redirects"
-
 -- LD     let universeGraph :: UniverseGraph
 -- LD        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
 -- LD     putStrLn $ "# nodes in KB = " <> show (HM.size universeGraph)
@@ -530,7 +509,7 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
-              map populateSeeds . pagesToQueryDocs siteId resolveRedirect queryDeriv
+              map populateSeeds . pagesToQueryDocs siteId queryDeriv
                   <$> readPagesFile queryFile
 
           QueriesFromJson queryFile -> do
@@ -623,7 +602,7 @@ main = do
                 mapM_ (uncurry $ runMethod queryId query)
                     $ filter (\(method, _) -> filterMethods method) rankings
           where
-            simpleWeightedGraphs = computeSimpleGraphs universeGraph resolveRedirect queryPageIds
+            simpleWeightedGraphs = computeSimpleGraphs universeGraph queryPageIds
             queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
 -}
 
@@ -635,8 +614,7 @@ main = do
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
-                                          resolveRedirect
---                                           universeGraph binarySymmetricGraph wordEmbeddings resolveRedirect
+--                                           universeGraph binarySymmetricGraph wordEmbeddings
 
                 case dotFilenameMaybe of
                     Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename
