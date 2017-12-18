@@ -9,7 +9,7 @@ module CAR.KnowledgeBase
 
       -- * Inlink statistics
     , InlinkInfo(..)
-    , collectInlinkInfo
+    -- TODO Obsolete, collectInlinkInfo
     , InlinkCounts(..)
     ) where
 
@@ -73,37 +73,39 @@ instance Monoid InlinkCounts where
     mempty = InlinkCounts mempty mempty mempty mempty
     mappend = (<>)
 
--- | Given a set of documents, build a map from target document to its 'InlinkCounts'
-collectInlinkInfo :: [Page] -> InlinkInfo
-collectInlinkInfo = foldMap pageInlinkInfo
-  where
-    one :: Hashable a => a -> HM.HashMap a Int
-    one x = HM.singleton x 1
-
-    pageInlinkInfo :: Page -> InlinkInfo
-    pageInlinkInfo page
-      | Just redirTargetId <- pageRedirect page  =
-            mempty { documentInlinks = HM.singleton redirTargetId
-                                       $ mempty { redirectCount = one $ pageName page }
-                   , redirectPages = HS.singleton (pageName page)
-                   }
-
-      | pageIsDisambiguation page  =
-            let toInlinkInfo link =
-                    mempty { documentInlinks = HM.singleton (linkTargetId link)
-                                               $ mempty { disambiguationCount = one $ pageName page }
-                           }
-            in foldMap toInlinkInfo (pageLinks page)
-
-      | otherwise  =
-            let toInlinkInfo link =
-                   mempty { documentInlinks =
-                               HM.singleton
-                                   (linkTargetId link)
-                                   (mempty { anchorCount = one $ linkAnchor link
-                                           , inLinkCounts = one $ linkTarget link })
-                          }
-            in foldMap toInlinkInfo (pageLinks page)    -- Map [toPage, InLinkInfo (fromPage's outlinks)]
+-- TODO: Obsolete: Use the information from page meta data
+--
+-- -- | Given a set of documents, build a map from target document to its 'InlinkCounts'
+-- collectInlinkInfo :: [Page] -> InlinkInfo
+-- collectInlinkInfo = foldMap pageInlinkInfo
+--   where
+--     one :: Hashable a => a -> HM.HashMap a Int
+--     one x = HM.singleton x 1
+--
+--     pageInlinkInfo :: Page -> InlinkInfo
+--     pageInlinkInfo page
+--       | Just redirTargetId <- pageRedirect page  =
+--             mempty { documentInlinks = HM.singleton redirTargetId
+--                                        $ mempty { redirectCount = one $ pageName page }
+--                    , redirectPages = HS.singleton (pageName page)
+--                    }
+--
+--       | pageIsDisambiguation page  =
+--             let toInlinkInfo link =
+--                     mempty { documentInlinks = HM.singleton (linkTargetId link)
+--                                                $ mempty { disambiguationCount = one $ pageName page }
+--                            }
+--             in foldMap toInlinkInfo (pageLinks page)
+--
+--       | otherwise  =
+--             let toInlinkInfo link =
+--                    mempty { documentInlinks =
+--                                HM.singleton
+--                                    (linkTargetId link)
+--                                    (mempty { anchorCount = one $ linkAnchor link
+--                                            , inLinkCounts = one $ linkTarget link })
+--                           }
+--             in foldMap toInlinkInfo (pageLinks page)    -- Map [toPage, InLinkInfo (fromPage's outlinks)]
 
 -- #(anchor, target) / #(anchor, *)
 pageToKbDoc :: Page -> KbDoc

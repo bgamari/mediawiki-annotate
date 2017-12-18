@@ -15,9 +15,9 @@ unionsWith f = foldl' (HM.unionWith f) mempty
 
 
 -- | Identify the target of a redirect page.
-pageRedirect :: Page -> Maybe PageId
+pageRedirect :: Page -> Maybe Link
 pageRedirect Page { pageMetadata = meta }
-  | RedirectPage l <- pagemetaType meta = Just $ linkTargetId l
+  | RedirectPage l <- pagemetaType meta = Just l
   | otherwise = Nothing
 
 -- | True if this is a disambiguation page (language-specifics already resolved)

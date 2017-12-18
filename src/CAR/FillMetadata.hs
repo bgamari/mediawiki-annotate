@@ -12,6 +12,7 @@ import qualified Data.HashSet as HS
 import Data.Semigroup hiding (option)
 import Data.Foldable (foldl')
 import Data.Maybe
+import qualified Data.Text as T
 
 import CAR.Utils
 import CAR.Types
@@ -21,7 +22,7 @@ import CAR.Utils.Redirects
 -- action for resolving redirects for all pages in inputPath
 stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
 stageResolveRedirect inputPath = do
-    redirectResolver <- resolveRedirects <$> readPagesFile inputPath
+    redirectResolver <- resolveRedirectsWithSection <$> readPagesFile inputPath
 
     let theFold = ((,) <$> buildPageNameMap) <*> buildRedirectMap
     (pageNameMap, redirectMap) <- Foldl.fold theFold <$> readPagesFile inputPath
@@ -53,7 +54,7 @@ stageResolveCategoryTags inputPath = do
     return (prov, pages')
 
 
-fixLinks :: (PageId -> PageId) -> (PageId -> Maybe PageName) -> Page -> Page
+fixLinks :: (PageId -> (PageId, Maybe T.Text)) -> (PageId -> Maybe PageName) -> Page -> Page
 fixLinks redirectResolver pageNameResolver page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
       where
@@ -68,12 +69,21 @@ fixLinks redirectResolver pageNameResolver page =
         goParaBody (ParaLink l) =
             case pageNameResolver newLinkTargetId of
               Just newLinkTargetName ->
-                ParaLink l { linkTarget = newLinkTargetName
-                           , linkTargetId = newLinkTargetId
-                           }
+                case maybeSection of
+                    -- redirect with Section
+                    Just section ->
+                        ParaLink l { linkTarget = newLinkTargetName
+                                   , linkTargetId = newLinkTargetId
+                                   , linkSection = Just section
+                                   }
+                    -- redirect without section, respect section of this link
+                    Nothing ->
+                        ParaLink l { linkTarget = newLinkTargetName
+                                   , linkTargetId = newLinkTargetId
+                                   }
               -- In cases where the target page does not exist simply drop the link
               Nothing -> ParaText (linkAnchor l)
-          where newLinkTargetId = redirectResolver (linkTargetId l)
+          where (newLinkTargetId, maybeSection) = redirectResolver (linkTargetId l)
 
 
 buildPageNameMap :: Foldl.Fold Page (HM.HashMap PageId PageName)
