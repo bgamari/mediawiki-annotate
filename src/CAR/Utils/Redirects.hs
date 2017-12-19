@@ -13,12 +13,12 @@ import CAR.Utils
 import CAR.Types.AST
 import SimplIR.Utils.Compact
 
-resolveRedirects :: [Page]
-                 -> (PageId -> PageId)
-resolveRedirects pages =
-    fst . resolveRedirectFun entityRedirects
-  where
-    !entityRedirects = inCompact $ entityRedirectMap pages
+-- resolveRedirects :: [Page]
+--                  -> (PageId -> PageId)
+-- resolveRedirects pages =
+--     fst . resolveRedirectFun entityRedirects
+--   where
+--     !entityRedirects = inCompact $ entityRedirectMap pages
 
 resolveRedirectsWithSection :: [Page]
                  -> (PageId -> (PageId, Maybe T.Text))

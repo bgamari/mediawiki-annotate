@@ -86,6 +86,7 @@ fixLinks redirectResolver pageNameResolver page =
           where (newLinkTargetId, maybeSection) = redirectResolver (linkTargetId l)
 
 
+-- Todo  pageNameResolver: package up and move to utils
 buildPageNameMap :: Foldl.Fold Page (HM.HashMap PageId PageName)
 buildPageNameMap =
     Foldl.Fold (\acc page -> HM.insert (pageId page) (pageName page) acc) mempty id
@@ -110,7 +111,7 @@ buildRedirectMap =
 -- Also assume that redirect are already resolved
 buildDisambiguateInlinksMap :: Page -> HM.HashMap PageId Acc
 buildDisambiguateInlinksMap page =
-    foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinks)
+    foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinkIds ) -- <> inlinkAnchors)
   where
     disambigs =
         [ HM.singleton (linkTargetId link)
@@ -119,12 +120,18 @@ buildDisambiguateInlinksMap page =
         | DisambiguationPage <- pure (pagemetaType $ pageMetadata page)
         , link <- pageLinks page
         ]
-    inlinks =
+    inlinkIds =
         [ HM.singleton (linkTargetId link)
           $ mempty { accInlinkIds = HS.singleton (pageId page) }
         | pageIsArticle page || pageIsCategory page
         , link <- pageLinks page
         ]
+--     inlinkAnchors =
+--         [ HM.singleton (linkAnchor link)
+--           $ mempty { accInlinkIds = HS.singleton (pageId page) }
+--         | pageIsArticle page || pageIsCategory page
+--         , link <- pageLinks page
+--         ]
 
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId

@@ -39,6 +39,7 @@ data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocOutMentions :: [T.Text] -- ^ Anchor text of page's outgoing links
                    , kbDocLeadPara :: [PageSkeleton]   -- ^ 'PageSkeleton's of lead paragraph text
                    , kbDocFullText :: [TL.Text]   -- ^ 'Page's full text including title
+                   , kbDocMetadata :: PageMetadata
                    }
 
 data InlinkInfo = InlinkInfo { documentInlinks :: !(HM.HashMap PageId InlinkCounts)
@@ -120,4 +121,5 @@ pageToKbDoc page =
       --kbDocCategories = pageCategories $ pageMetadata page
       kbDocCanonicalName = pageName page
       kbDocFullText = pageFulltext page
+      kbDocMetadata = pageMetadata page
   in KbDoc {..}
