@@ -195,8 +195,8 @@ instance Aeson.ToJSON Entity
 -- | A page on Wikipedia (which coincides with an Entity in this case)
 data Page = Page { pageName     :: !PageName
                  , pageId       :: !PageId
-                 , pageType     :: !PageType
-                 , pageMetadata :: !PageMetadata
+                 , pageType     :: PageType
+                 , pageMetadata :: PageMetadata
                  , pageSkeleton :: [PageSkeleton]
                  }
           deriving (Show, Generic)
