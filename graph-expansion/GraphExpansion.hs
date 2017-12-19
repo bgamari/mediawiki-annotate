@@ -51,7 +51,7 @@ wordVecToAttributes = Attrs . VI.map realToFrac . unWordVec
 
 pageTextEmbeddingAttributes :: KnownNat n => WordEmbedding n -> Page
                             -> WordVec n
-pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId _ pageSkeleta) =
+pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId _ _ pageSkeleta) =
      mconcat  -- merge wordvectors per skeleton
      $ fmap (computeTextEmbedding wordEmbedding)
      $ mconcat $ pageText
@@ -61,7 +61,7 @@ pageTextEmbeddingAttributes wordEmbedding (Page pageName pageId _ pageSkeleta) =
 pageNameEmbeddingAttributes :: KnownNat n => WordEmbedding n -> PageId
                             -> WordVec n
 pageNameEmbeddingAttributes wordEmbedding pageId =
-     mconcat  -- merge wordvectors per skeleton                
+     mconcat  -- merge wordvectors per skeleton
      $ fmap (computeTextEmbedding wordEmbedding) [T.pack $ unpackPageName pageName]
     where
       pageName :: PageName

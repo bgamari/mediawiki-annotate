@@ -46,6 +46,7 @@ toPage Config{..} site WikiDoc{..} =
         page = Page { pageName     = name
                     , pageId       = pageId
                     , pageSkeleton = skeleton
+                    , pageType     = pageType
                     , pageMetadata = metadata
                     }
         pageId   = pageNameToId site name
@@ -60,10 +61,9 @@ toPage Config{..} site WikiDoc{..} =
           | Just l <- pageRedirect page     = RedirectPage l
           | otherwise                       = ArticlePage
         metadata =
-            emptyPageMetadata  { pagemetaType          = pageType
-                               , pagemetaCategoryNames = Just (map linkTarget categories)
-                               , pagemetaCategoryIds   = Just (map linkTargetId categories)
-                               }
+            setMetadata _CategoryNames (map linkTarget categories)
+            $ setMetadata _CategoryIds (map linkTargetId categories)
+            $ emptyPageMetadata
 
 -- | Identify the target of a redirect page.
 --

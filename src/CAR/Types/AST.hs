@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module CAR.Types.AST
     ( -- * Identifiers
@@ -20,8 +22,22 @@ module CAR.Types.AST
     , PageSkeleton(..)
     , Page(..)
     , PageType(..)
+      -- ** Metadata
     , PageMetadata(..)
+    , MetadataField
     , emptyPageMetadata
+    , getMetadata
+    , setMetadata
+    , clearMetadata
+      -- *** Fields
+    , _RedirectNames
+    , _DisambiguationNames
+    , _DisambiguationIds
+    , _CategoryNames
+    , _CategoryIds
+    , _InlinkIds
+    , _InlinkAnchors
+    , _UnknownMetadata
       -- * Outline documents
     , Stub(..)
       -- * Entity
@@ -38,6 +54,7 @@ import GHC.Generics
 import qualified Codec.Serialise.Class as CBOR
 import qualified Codec.Serialise.Decoding as CBOR
 import qualified Codec.Serialise.Encoding as CBOR
+import qualified Codec.CBOR.Term as CBOR
 import qualified Data.ByteString.Short as SBS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -49,6 +66,7 @@ import Data.Aeson.Types
 import qualified Data.Aeson as Aeson
 import Data.Hashable
 import Data.String
+import qualified Control.Lens as L
 
 import Data.MediaWiki.Markup
 import CAR.Types.Orphans ()
@@ -177,6 +195,7 @@ instance Aeson.ToJSON Entity
 -- | A page on Wikipedia (which coincides with an Entity in this case)
 data Page = Page { pageName     :: !PageName
                  , pageId       :: !PageId
+                 , pageType     :: !PageType
                  , pageMetadata :: !PageMetadata
                  , pageSkeleton :: [PageSkeleton]
                  }
@@ -188,25 +207,28 @@ instance CBOR.Serialise Page where
         tag <- CBOR.decodeInt
         when (tag /= 0) $ fail "Serialise(Page): Tag indicates this is not a page."
         case len of
-          5 -> do
+          6 -> do
               pageName <- CBOR.decode
               pageId <- CBOR.decode
               pageSkeleton <- CBOR.decode
+              pageType <- CBOR.decode
               pageMetadata <- CBOR.decode
               return Page{..}
           4 -> do
               pageName <- CBOR.decode
               pageId <- CBOR.decode
               pageSkeleton <- CBOR.decode
-              let pageMetadata = emptyPageMetadata
+              let pageType = ArticlePage
+                  pageMetadata = emptyPageMetadata
               return Page{..}
           _ -> fail "Serialise(Page): Unknown length"
     encode (Page{..}) =
-           CBOR.encodeListLen 5
+           CBOR.encodeListLen 6
         <> CBOR.encodeInt 0
         <> CBOR.encode pageName
         <> CBOR.encode pageId
         <> CBOR.encode pageSkeleton
+        <> CBOR.encode pageType
         <> CBOR.encode pageMetadata
 
 data PageType = ArticlePage
@@ -243,39 +265,70 @@ instance CBOR.Serialise PageType where
       where
         simple n = CBOR.encodeListLen 1 <> CBOR.encodeInt n
 
-
--- data MetadataItem = RedirectNames [PageName]
---                   | RedirectIds [PageId]
---                   | DisambiguationNames [PageName]
---                   | DisambiguationIds [PageId]
---                   | CategoryNames [PageName]
---                   | CategoryIds [PageId]
---                   | InlinkPageNames [PageName]
---                   | InlinkPageIds [PageId]
---                   deriving (Show, Generic)
--- instance CBOR.Serialise MetadataItem
-
-data PageMetadata = PageMetadata
-    { pagemetaType                 :: PageType
-      -- ^ what kind of page is this?
-    , pagemetaRedirectNames        :: Maybe [PageName]
-      -- ^ the names of pages that redirect here
-    , pagemetaDisambiguationNames  :: Maybe [PageName]
-      -- ^ the names of disambiguation pages that link here
-    , pagemetaDisambiguationIds    :: Maybe [PageId]
-      -- ^ the 'PageId's of disambiguation pages that link here
-    , pagemetaCategoryNames        :: Maybe [PageName]
-      -- ^ the names of the categories to which the page belongs
-    , pagemetaCategoryIds          :: Maybe [PageId]
-      -- ^ the 'PageId's of the categories to which the page belongs
-    , pagemetaInlinkIds            :: Maybe [PageId]
-      -- ^ the 'PageId's of 'ArticlePage's and 'CategoryPage's that link here
-    }
-    deriving (Show, Generic)
-instance CBOR.Serialise PageMetadata
+newtype PageMetadata = PageMetadata [MetadataItem]
+                     deriving (Show, CBOR.Serialise)
 
 emptyPageMetadata :: PageMetadata
-emptyPageMetadata = PageMetadata ArticlePage Nothing Nothing Nothing Nothing Nothing Nothing
+emptyPageMetadata = PageMetadata []
+
+data MetadataItem = RedirectNames [PageName]
+                  | DisambiguationNames [PageName]
+                  | DisambiguationIds [PageId]
+                  | CategoryNames [PageName]
+                  | CategoryIds [PageId]
+                  | InlinkIds [PageId]
+                  | InlinkAnchors [T.Text]
+                  | UnknownMetadata !Int !Int CBOR.Term
+                  deriving (Show, Generic)
+
+instance CBOR.Serialise MetadataItem where
+    decode = do
+        len <- CBOR.decodeListLen
+        tag <- CBOR.decodeInt
+        case tag of
+          0 -> RedirectNames <$> CBOR.decode
+          1 -> DisambiguationNames <$> CBOR.decode
+          2 -> DisambiguationIds <$> CBOR.decode
+          3 -> CategoryNames <$> CBOR.decode
+          4 -> CategoryIds <$> CBOR.decode
+          5 -> InlinkIds <$> CBOR.decode
+          6 -> InlinkAnchors <$> CBOR.decode
+          _ -> UnknownMetadata len tag <$> CBOR.decodeTerm
+
+    encode val =
+        case val of
+          RedirectNames xs -> simple 0 xs
+          DisambiguationNames xs -> simple 1 xs
+          DisambiguationIds xs -> simple 2 xs
+          CategoryNames xs -> simple 3 xs
+          CategoryIds xs -> simple 4 xs
+          InlinkIds xs -> simple 5 xs
+          InlinkAnchors xs -> simple 6 xs
+          UnknownMetadata len tag y ->
+                 CBOR.encodeListLen (fromIntegral len)
+              <> CBOR.encodeInt tag
+              <> CBOR.encodeTerm y
+      where
+        simple :: CBOR.Serialise a => Int -> a -> CBOR.Encoding
+        simple tag x =
+            CBOR.encodeListLen 1 <> CBOR.encodeInt tag <> CBOR.encode x
+
+$(L.makePrisms ''MetadataItem)
+
+type MetadataField a = L.Prism' MetadataItem a
+
+getMetadata :: MetadataField a -> PageMetadata -> Maybe a
+getMetadata p (PageMetadata metas) =
+    metas L.^? L.each . p
+
+clearMetadata :: MetadataField a -> PageMetadata -> PageMetadata
+clearMetadata p (PageMetadata metas) =
+    PageMetadata $ filter (L.isn't p) metas
+
+setMetadata :: MetadataField a -> a -> PageMetadata -> PageMetadata
+setMetadata p x (PageMetadata metas) =
+    PageMetadata $ meta : filter (L.isn't p) metas
+  where meta = x L.^. L.re p
 
 -- | Path from heading to page title in a page outline
 data SectionPath = SectionPath { sectionPathPageId   :: !PageId
@@ -293,6 +346,7 @@ escapeSectionPath (SectionPath page headings) =
 -- in the page skeleton
 data Stub = Stub { stubName     :: PageName
                  , stubPageId   :: PageId
+                 , stubType     :: PageType
                  , stubMetadata :: PageMetadata
                  , stubSkeleton :: [PageSkeleton]
                  }
@@ -304,23 +358,26 @@ instance CBOR.Serialise Stub where
         tag <- CBOR.decodeInt
         when (tag /= 1 && tag /=0) $ fail "Serialise(Stub): Tag indicates this is neither a stub nor a page"
         case len of
-          5 -> do
+          6 -> do
               stubName <- CBOR.decode
               stubPageId <- CBOR.decode
               stubSkeleton <- CBOR.decode
+              stubType <- CBOR.decode
               stubMetadata <- CBOR.decode
               return Stub{..}
           4 -> do
               stubName <- CBOR.decode
               stubPageId <- CBOR.decode
               stubSkeleton <- CBOR.decode
-              let stubMetadata = emptyPageMetadata
+              let stubType = ArticlePage
+                  stubMetadata = emptyPageMetadata
               return Stub{..}
           _ -> fail "Serialise(Stub): Unknown length"
     encode (Stub{..}) =
-           CBOR.encodeListLen 5
+           CBOR.encodeListLen 6
         <> CBOR.encodeInt 1
         <> CBOR.encode stubName
         <> CBOR.encode stubPageId
+        <> CBOR.encode stubType
         <> CBOR.encode stubSkeleton
         <> CBOR.encode stubMetadata

@@ -35,6 +35,7 @@ library
                        aeson >= 1.0,
                        binary,
                        cborg,
+                       lens,
                        serialise >= 0.1,
                        bytestring >= 0.10,
                        deepseq,

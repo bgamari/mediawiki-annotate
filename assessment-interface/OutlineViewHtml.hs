@@ -18,7 +18,7 @@ import FileNameLookup
 -- todo generate links to both passageView and entityView  (separate page for ground truth?)
 
 outlineToHtml :: FileNameLookup -> Stub -> H.Html
-outlineToHtml FileNameLookup{..} (Stub pageName pageId _ skeleta) = H.docTypeHtml $ do
+outlineToHtml FileNameLookup{..} (Stub pageName pageId _ _ skeleta) = H.docTypeHtml $ do
     H.head prologue
     H.body $ do
         H.h1 $ "Title "

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 import Data.Monoid hiding (All, Any)
 
@@ -52,7 +52,7 @@ data LinkDoc = LinkDoc { linkDocParagraphId    :: ParagraphId
 -- todo handle links to Disambiguation pages and redirects
 
 transformContent :: SiteId -> Page -> [LinkDoc]
-transformContent siteId page@(Page pageName pageId _ pageSkeleta) =
+transformContent siteId page@(Page {pageName, pageId, pageSkeleton = pageSkeleta}) =
     foldMap (go mempty) pageSkeleta
   where
     go :: DList.DList SectionHeading -> PageSkeleton -> [LinkDoc]

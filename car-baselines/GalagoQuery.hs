@@ -2,6 +2,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -126,14 +127,14 @@ instance ToJSON GalagoQuerySet where
     toJSON (GalagoQuerySet qs) = object [ "queries" .= qs ]
 
 stubPaths :: Stub -> [([Term], SectionPath)]
-stubPaths (Stub pageName pageId _ skel) =
-    foldMap (go mempty (titleWords pageName)) skel
+stubPaths (Stub {stubName, stubPageId, stubSkeleton = skel}) =
+    foldMap (go mempty (titleWords stubName)) skel
   where
     go :: DList.DList HeadingId -> [Term] -> PageSkeleton -> [([Term], SectionPath)]
     go _ _ (Para _) = [] -- this should really never happen
     go _ _ (Image {}) = [] -- this should really never happen
     go parents parentTerms (Section heading headingId children) =
-        (terms, SectionPath pageId (toList me)) : foldMap (go me terms) children
+        (terms, SectionPath stubPageId (toList me)) : foldMap (go me terms) children
       where
         terms = parentTerms <> headingWords heading
         me = parents `DList.snoc` headingId

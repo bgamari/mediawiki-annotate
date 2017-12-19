@@ -103,7 +103,7 @@ buildRedirectMap =
     Foldl.Fold step mempty RedirectMap
   where
     step acc page
-      | RedirectPage l <- pagemetaType $ pageMetadata page
+      | RedirectPage l <- pageType page
       = HM.insertWith (<>) (linkTargetId l) (HS.singleton (pageName page)) acc
       | otherwise = acc
 
@@ -117,7 +117,7 @@ buildDisambiguateInlinksMap page =
         [ HM.singleton (linkTargetId link)
           $ mempty { accDisambigNames = HS.singleton (pageName page)
                    , accDisambigIds = HS.singleton (pageId page) }
-        | DisambiguationPage <- pure (pagemetaType $ pageMetadata page)
+        | DisambiguationPage <- pure $ pageType page
         , link <- pageLinks page
         ]
     inlinkIds =
@@ -139,7 +139,6 @@ extractAllCategoryIds pages  =
     HS.fromList
     $ map pageId
     $ filter pageIsCategory pages
- 
 
 buildCategoryMap :: HS.HashSet PageId -- ^ set of known categories
          -> Page -> HM.HashMap PageId Acc
@@ -179,11 +178,11 @@ instance Semigroup Acc where
 
 fillDisambigInlinkMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillDisambigInlinkMetadata acc page =
-    page { pageMetadata = (pageMetadata page)
-                          { pagemetaDisambiguationNames = Just . HS.toList . accDisambigNames $ things
-                          , pagemetaDisambiguationIds   = Just . HS.toList . accDisambigIds $ things
-                          , pagemetaInlinkIds           = Just . HS.toList . accInlinkIds $ things
-                          }
+    page { pageMetadata =
+               setMetadata _DisambiguationNames (HS.toList $ accDisambigNames things)
+               $ setMetadata _DisambiguationIds (HS.toList $ accDisambigIds things)
+               $ setMetadata _InlinkIds (HS.toList $ accInlinkIds things)
+               $ pageMetadata page
          }
   where
     things = fromMaybe mempty $ HM.lookup (pageId page) acc
@@ -192,9 +191,8 @@ fillDisambigInlinkMetadata acc page =
 
 fillRedirectMetadata :: RedirectMap -> Page -> Page
 fillRedirectMetadata (RedirectMap acc) page =
-    page { pageMetadata = (pageMetadata page)
-                          { pagemetaRedirectNames       = Just $ HS.toList things
-                          }
+    page { pageMetadata = setMetadata _RedirectNames (HS.toList things)
+                          $ pageMetadata page
          }
   where
     things = fromMaybe mempty $ HM.lookup (pageId page) acc
@@ -202,10 +200,10 @@ fillRedirectMetadata (RedirectMap acc) page =
 
 fillCategoryMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillCategoryMetadata acc page =
-    page { pageMetadata = (pageMetadata page)
-                          { pagemetaCategoryNames       = Just . HS.toList . accCategoryNames $ things
-                          , pagemetaCategoryIds         = Just . HS.toList . accCategoryIds $ things
-                          }
+    page { pageMetadata =
+               setMetadata _CategoryNames (HS.toList $ accCategoryNames things)
+               $ setMetadata _CategoryIds (HS.toList $ accCategoryIds things)
+               $ pageMetadata page
          }
   where
     things = fromMaybe mempty $ HM.lookup (pageId page) acc

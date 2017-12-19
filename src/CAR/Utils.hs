@@ -16,25 +16,21 @@ unionsWith f = foldl' (HM.unionWith f) mempty
 
 -- | Identify the target of a redirect page.
 pageRedirect :: Page -> Maybe Link
-pageRedirect Page { pageMetadata = meta }
-  | RedirectPage l <- pagemetaType meta = Just l
-  | otherwise = Nothing
+pageRedirect Page {pageType = RedirectPage l} = Just l
+pageRedirect _ = Nothing
 
 -- | True if this is a disambiguation page (language-specifics already resolved)
 pageIsDisambiguation :: Page -> Bool
-pageIsDisambiguation (Page { pageMetadata = meta })
-  | DisambiguationPage <- pagemetaType meta = True
-  | otherwise = False
+pageIsDisambiguation (Page { pageType = DisambiguationPage }) = True
+pageIsDisambiguation _ = False
 
 pageIsCategory :: Page -> Bool
-pageIsCategory (Page { pageMetadata = meta })
-  | CategoryPage <- pagemetaType meta = True
-  | otherwise = False
+pageIsCategory (Page { pageType = CategoryPage }) = True
+pageIsCategory _ = False
 
 pageIsArticle :: Page -> Bool
-pageIsArticle (Page { pageMetadata = meta })
-  | ArticlePage <- pagemetaType meta = True
-  | otherwise = False
+pageIsArticle (Page { pageType = ArticlePage }) = True
+pageIsArticle _ = False
 
 pageContainsText :: T.Text -> Page -> Bool
 pageContainsText str = any goSkeleton . pageSkeleton
