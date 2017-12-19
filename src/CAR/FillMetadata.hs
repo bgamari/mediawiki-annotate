@@ -183,6 +183,7 @@ fillDisambigInlinkMetadata acc page =
                setMetadata _DisambiguationNames (HS.toList $ accDisambigNames things)
                $ setMetadata _DisambiguationIds (HS.toList $ accDisambigIds things)
                $ setMetadata _InlinkIds (HS.toList $ accInlinkIds things)
+               $ setMetadata _InlinkAnchors (HS.toList $ accInlinkAnchors things)
                $ pageMetadata page
          }
   where
