@@ -111,7 +111,7 @@ buildRedirectMap =
 -- Also assume that redirect are already resolved
 buildDisambiguateInlinksMap :: Page -> HM.HashMap PageId Acc
 buildDisambiguateInlinksMap page =
-    foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinkIds ) -- <> inlinkAnchors)
+    foldl' (HM.unionWith (<>)) mempty (disambigs <> inlinkIds <> inlinkAnchors)
   where
     disambigs =
         [ HM.singleton (linkTargetId link)
@@ -126,12 +126,12 @@ buildDisambiguateInlinksMap page =
         | pageIsArticle page || pageIsCategory page
         , link <- pageLinks page
         ]
---     inlinkAnchors =
---         [ HM.singleton (linkAnchor link)
---           $ mempty { accInlinkIds = HS.singleton (pageId page) }
---         | pageIsArticle page || pageIsCategory page
---         , link <- pageLinks page
---         ]
+    inlinkAnchors =
+        [ HM.singleton (linkTargetId link)
+          $ mempty { accInlinkAnchors = HS.singleton (linkAnchor link) }
+        | pageIsArticle page || pageIsCategory page
+        , link <- pageLinks page
+        ]
 
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId
@@ -163,18 +163,19 @@ data Acc = Acc { accRedirectNames :: !(HS.HashSet PageName)
                , accCategoryNames :: !(HS.HashSet PageName)
                , accCategoryIds   :: !(HS.HashSet PageId)
                , accInlinkIds     :: !(HS.HashSet PageId)
+               , accInlinkAnchors :: !(HS.HashSet T.Text)
                }
 
 instance Monoid Acc where
-    mempty = Acc m m m m m m
+    mempty = Acc m m m m m m m
       where
         m :: Monoid m => m
         m = mempty
     mappend = (<>)
 
 instance Semigroup Acc where
-    Acc a1 b1 c1 d1 e1 f1 <> Acc a2 b2 c2 d2 e2 f2 =
-        Acc (a1<>a2) (b1<>b2) (c1<>c2) (d1<>d2) (e1<>e2) (f1<>f2)
+    Acc a1 b1 c1 d1 e1 f1 g1 <> Acc a2 b2 c2 d2 e2 f2 g2 =
+        Acc (a1<>a2) (b1<>b2) (c1<>c2) (d1<>d2) (e1<>e2) (f1<>f2) (g1<>g2)
 
 fillDisambigInlinkMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillDisambigInlinkMetadata acc page =
