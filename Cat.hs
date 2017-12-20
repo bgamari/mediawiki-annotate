@@ -15,5 +15,8 @@ main = do
     pages <- mapM readPagesFileWithProvenance files
     let prov = fst $ head pages
     unless (all (== prov) $ map fst pages)
-        $ fail "provenance mismatch"
+        $ fail $ unlines $ "provenance mismatch:"
+                         : [ fname ++ "\t" ++ show p
+                           | (fname, p) <- zip files (map fst pages)
+                           ]
     writeCarFile output prov (foldMap snd pages)
