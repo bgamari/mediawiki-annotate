@@ -266,7 +266,14 @@ instance CBOR.Serialise PageType where
         simple n = CBOR.encodeListLen 1 <> CBOR.encodeInt n
 
 newtype PageMetadata = PageMetadata [MetadataItem]
-                     deriving (Show, CBOR.Serialise)
+                     deriving (CBOR.Serialise)
+
+instance Show PageMetadata where
+  show (PageMetadata list) =
+      unlines $ fmap show' list
+    where show' x = "\n" ++ show x
+
+
 
 emptyPageMetadata :: PageMetadata
 emptyPageMetadata = PageMetadata []
