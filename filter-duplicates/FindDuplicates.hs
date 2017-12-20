@@ -20,6 +20,11 @@ import CAR.Types
 import CAR.Utils
 import Utils
 
+
+-- ------------------------------------------------
+--     Not used!                                 --
+-- ------------------------------------------------
+
 opts :: Parser (Double, FilePath, Maybe Int, Int, FilePath)
 opts = (,,,,)
     <$> option auto (long "threshold" <> short 't' <> help "similarity threshold" <> value 0.9)
