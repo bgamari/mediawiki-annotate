@@ -378,6 +378,6 @@ instance CBOR.Serialise Stub where
         <> CBOR.encodeInt 1
         <> CBOR.encode stubName
         <> CBOR.encode stubPageId
-        <> CBOR.encode stubType
         <> CBOR.encode stubSkeleton
+        <> CBOR.encode stubType
         <> CBOR.encode stubMetadata
