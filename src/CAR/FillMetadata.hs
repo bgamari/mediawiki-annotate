@@ -118,7 +118,7 @@ buildDisambiguateInlinksMap page =
           $ mempty { accDisambigNames = HS.singleton (pageName page)
                    , accDisambigIds = HS.singleton (pageId page) }
         | DisambiguationPage <- pure $ pageType page
-        , link <- pageLinks page
+        , link <- listItemFirstLinks page
         ]
     inlinkIds =
         [ HM.singleton (linkTargetId link)
@@ -133,6 +133,19 @@ buildDisambiguateInlinksMap page =
         , link <- pageLinks page
         ]
 
+    -- | For disambiguation names/ids: only take the first link of every list item.
+    listItemFirstLinks :: Page -> [Link]
+    listItemFirstLinks = foldMap listItemFirstskeletonLinks . pageSkeleton
+
+    listItemFirstskeletonLinks :: PageSkeleton -> [Link]
+    listItemFirstskeletonLinks (Section _ _ children) = foldMap listItemFirstskeletonLinks children
+    listItemFirstskeletonLinks (Para (Paragraph _ bodies)) = []
+    listItemFirstskeletonLinks (Image {}) = []
+    listItemFirstskeletonLinks (List _ (Paragraph _ bodies)) =
+        case foldMap paraBodyLinks bodies of
+        [] -> []
+        (a:_) -> [a]
+    
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId
 extractAllCategoryIds pages  = 
