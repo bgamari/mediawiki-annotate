@@ -148,18 +148,17 @@ hashSimilarities thresh paras =
     !bigramHashes = fmap toBigramHashes paras
 
 
-opts :: Parser (FilePath, Double, Int, Maybe FilePath, FilePath, FilePath)
-opts = (,,,,,)
+opts :: Parser (FilePath, Double, Int, FilePath, FilePath)
+opts = (,,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
     <*> option auto (long "projections" <> metavar "N" <> help "number of splitting hyperplanes for partitioning" <> value 10)
-    <*> optional (option auto (long "table" <> help "deduplication table for preserving choices of canonical page ids"))
     <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
 
 main :: IO ()
 main = do
-    (embeddingFile, thresh, nProjections, previousTableOpt, outputFile, parasFile) <-
+    (embeddingFile, thresh, nProjections, outputFile, parasFile) <-
         execParser $ info (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
