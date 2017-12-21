@@ -105,8 +105,8 @@ centerWordEmbedding uncenteredParas =
   where
     center (pid, terms, v) = (pid, terms, subtractWordVec embeddingMean v)
     !embeddingMean =
-        scaleWordVec (recip $ realToFrac $ V.length uncenteredParas)
-        $ sumWordVecs
+        scaleWordVec (recip $ realToFrac $ V.length uncenteredParas)   -- average = sum / N  -- component-wise!
+        $ sumWordVecs                                     -- this and next lines: efficient sumWordVecs across all paras
         $ withStrategy (parBuffer 256 rseq)
         $ map (sumWordVecs . map (\(_,_,v) -> v) . V.toList)
         $ chunksOf 100000 uncenteredParas
