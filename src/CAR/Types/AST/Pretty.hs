@@ -17,7 +17,7 @@ prettyPage linkStyle (Page (PageName name) pageId pageType metaData skeleton) =
     unlines $ [ T.unpack name
               , replicate (T.length name) '='
               , ""
-              , "   " ++  show pageId  ++ " ("++show pageType ++") "
+              , "   " ++ show pageId  ++ " ("++show pageType ++") "
               , "   " ++ show metaData
               , ""
               ]
