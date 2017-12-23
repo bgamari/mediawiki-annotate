@@ -285,7 +285,7 @@ data MetadataItem = RedirectNames [PageName]
                   | CategoryIds [PageId]
                   | InlinkIds [PageId]
                   | InlinkAnchors [T.Text]
-                  | UnknownMetadata !Int !Int CBOR.Term
+                  | UnknownMetadata !Int !Int [CBOR.Term]
                   deriving (Show, Generic)
 
 instance CBOR.Serialise MetadataItem where
@@ -300,7 +300,7 @@ instance CBOR.Serialise MetadataItem where
           4 -> CategoryIds <$> CBOR.decode
           5 -> InlinkIds <$> CBOR.decode
           6 -> InlinkAnchors <$> CBOR.decode
-          _ -> UnknownMetadata len tag <$> CBOR.decodeTerm
+          _ -> UnknownMetadata len tag <$> replicateM (len-1) CBOR.decodeTerm
 
     encode val =
         case val of
@@ -314,7 +314,7 @@ instance CBOR.Serialise MetadataItem where
           UnknownMetadata len tag y ->
                  CBOR.encodeListLen (fromIntegral len)
               <> CBOR.encodeInt tag
-              <> CBOR.encodeTerm y
+              <> foldMap CBOR.encodeTerm y
       where
         simple :: CBOR.Serialise a => Int -> a -> CBOR.Encoding
         simple tag x =
