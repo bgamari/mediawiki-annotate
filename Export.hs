@@ -78,8 +78,8 @@ exportParagraphs outPath prov pagesToExport = do
 exportParagraphAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Exporter
 exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
-    let cutAnnotation (Annotation sectionPath paraId rel) =
-          Annotation (cutSectionPath sectionPath) paraId rel
+    let cutAnnotation (Annotation sectionPath paragId rel) =
+          Annotation (cutSectionPath sectionPath) paragId rel
     writeFile outPath
           $ unlines
           $ map prettyAnnotation
@@ -88,6 +88,7 @@ exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
           $ foldMap Exports.toAnnotations pagesToExport
     putStrLn "done"
 
+cutSectionPathArticle, cutSectionPathTopLevel :: SectionPath -> SectionPath
 cutSectionPathArticle (SectionPath pgId _headinglist)  =
     SectionPath pgId mempty
 cutSectionPathTopLevel  (SectionPath pgId headinglist) =
@@ -125,6 +126,6 @@ main = do
         let pagesToExport
               | null names = pages anns
               | otherwise  = mapMaybe (`lookupPage` anns)
-                            $ map ($ siteId) names
+                           $ map ($ siteId) names
             {-# INLINE pagesToExport #-}
         in exporter prov pagesToExport
