@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Control.Monad
+import Data.Foldable
 import Data.Maybe
 import Data.Monoid
 
@@ -29,7 +30,7 @@ options =
         <*> some exporter
   where
     exporter :: Parser Exporter
-    exporter = msum
+    exporter = asum
         [ exportPages
           <$> option str (long "pages" <> short 'p' <> help "Export pages")
 
