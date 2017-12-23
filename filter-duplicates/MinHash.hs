@@ -105,8 +105,8 @@ centerWordEmbedding uncenteredParas =
   where
     center (pid, terms, v) = (pid, terms, subtractWordVec embeddingMean v)
     !embeddingMean =
-        scaleWordVec (recip $ realToFrac $ V.length uncenteredParas)
-        $ sumWordVecs
+        scaleWordVec (recip $ realToFrac $ V.length uncenteredParas)   -- average = sum / N  -- component-wise!
+        $ sumWordVecs                                     -- this and next lines: efficient sumWordVecs across all paras
         $ withStrategy (parBuffer 256 rseq)
         $ map (sumWordVecs . map (\(_,_,v) -> v) . V.toList)
         $ chunksOf 100000 uncenteredParas
@@ -119,16 +119,25 @@ hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, 
 hashSimilarities thresh paras =
     [ [ (pid1, pid2)
       | (pid1, toks1, bigrams1) <- V.toList chunk
-      , (pid2, toks2, bigrams2) <- takeWhile (\(pid,_,_) -> pid < pid1) $ V.toList bigramHashes
-      , let (denom, num) = IS.unionIntersectSize bigrams1 bigrams2
-            sim = realToFrac num / realToFrac denom
-      , sim > thresh
-      , let realSim = jaccard (HS.fromList $ toBigrams toks1) (HS.fromList $ toBigrams toks2)
-      , realSim > thresh
+      , (pid2, toks2, bigrams2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
+      , isBigramSimilar bigrams1 bigrams2
+      , isJaccardSimilar toks1 toks2
       ]
     | chunk <- chunksOf 100 bigramHashes
     ]
   where
+    inUpperTriangle pid1 (pid,_,_) = pid < pid1
+
+    isBigramSimilar :: IS.IntSet -> IS.IntSet -> Bool
+    isBigramSimilar bigrams1 bigrams2 =
+        let (denom, num) = IS.unionIntersectSize bigrams1 bigrams2
+            sim = realToFrac num / realToFrac denom
+        in sim > thresh
+
+    isJaccardSimilar toks1 toks2 =
+        let realSim = jaccard (HS.fromList $ toBigrams toks1) (HS.fromList $ toBigrams toks2)
+        in realSim > thresh
+
     toBigramHashes :: (ParagraphId, [Term]) -> (ParagraphId, [Term], IS.IntSet)
     toBigramHashes (pid, toks) =
         let hashes =
@@ -190,8 +199,10 @@ main = do
                       [ unpackParagraphId a <> "\t" <> unpackParagraphId b
                       | (a, b) <- dups ]
 
-        parMapIOUnordered ncaps (uncurry worker) $ zip [0..]
-            $ foldMap (hashSimilarities thresh) $ M.elems partitions
+        parMapIOUnordered ncaps (uncurry worker)
+            $ zip [0..]
+            $ foldMap (hashSimilarities thresh)
+            $ M.elems partitions
 
 
 newtype SharedHandle = SharedHandle (TMVar Handle)

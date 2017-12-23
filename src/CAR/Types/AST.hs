@@ -271,7 +271,7 @@ newtype PageMetadata = PageMetadata [MetadataItem]
 instance Show PageMetadata where
   show (PageMetadata list) =
       unlines $ fmap show' list
-    where show' x = "\n" ++ show x
+    where show' x = "- " ++ show x
 
 
 
