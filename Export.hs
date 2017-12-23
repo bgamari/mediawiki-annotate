@@ -15,9 +15,9 @@ import CAR.Types
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 
-options :: Parser (FilePath, FilePath, [SiteId -> PageId])
+options :: Parser (FilePath, FilePath, [SiteId -> PageId], [Exporter])
 options =
-    (,,)
+    (,,,)
         <$> argument str (help "annotations file" <> metavar "FILE")
         <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
         <*> many (option (flip pageNameToId . PageName . T.pack <$> str)
@@ -26,15 +26,48 @@ options =
               <|> option (const . packPageId <$> str)
                          (short 'P' <> long "page-id"
                           <> metavar "PAGE ID" <> help "Export only this page"))
+        <*> some exporter
+  where
+    exporter :: Parser Exporter
+    exporter = msum
+        [ exportPages
+          <$> option str (long "pages" <> short 'p' <> help "Export pages")
 
-exportOutlines :: FilePath -> Provenance -> [Page] -> IO ()
+        , exportOutlines
+          <$> option str (long "outlines" <> short 'O' <> help "Export outlines")
+
+        , exportParagraphs
+          <$> option str (long "paragraphs" <> short 'p' <> help "Export paragraphs")
+
+        , exportParagraphAnnotations id
+          <$> option str (long "para-hier-qrel" <> help "Export hierarchical qrel for paragraphs")
+
+        , exportParagraphAnnotations cutSectionPathArticle
+          <$> option str (long "para-article-qrel" <> help "Export hierarchical qrel for paragraphs")
+
+        , exportParagraphAnnotations cutSectionPathTopLevel
+          <$> option str (long "para-toplevel-qrel" <> help "Export hierarchical qrel for paragraphs")
+
+        , exportEntityAnnotations id
+          <$> option str (long "entity-hier-qrel" <> help "Export hierarchical qrel for entities")
+
+        , exportEntityAnnotations cutSectionPathArticle
+          <$> option str (long "entity-article-qrel" <> help "Export hierarchical qrel for entities")
+
+        , exportEntityAnnotations cutSectionPathTopLevel
+          <$> option str (long "entity-toplevel-qrel" <> help "Export hierarchical qrel for entities")
+        ]
+
+type Exporter = Provenance -> [Page] -> IO ()
+
+exportOutlines :: FilePath -> Exporter
 exportOutlines outPath prov pagesToExport = do
     putStr "Writing outlines..."
     let skeletonFile = outPath <.> "outlines"
     writeCarFile skeletonFile prov $ map toStubSkeleton pagesToExport
     putStrLn "done"
 
-exportParagraphs :: FilePath -> Provenance -> [Page] -> IO ()
+exportParagraphs :: FilePath -> Exporter
 exportParagraphs outPath prov pagesToExport = do
     putStr "Writing paragraphs..."
     let paragraphsFile = outPath <.> "paragraphs"
@@ -42,7 +75,7 @@ exportParagraphs outPath prov pagesToExport = do
     writeCarFile paragraphsFile prov $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
-exportParagraphAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Provenance -> [Page] -> IO ()
+exportParagraphAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Exporter
 exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (Annotation sectionPath paraId rel) =
@@ -55,7 +88,12 @@ exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
           $ foldMap Exports.toAnnotations pagesToExport
     putStrLn "done"
 
-exportEntityAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Provenance -> [Page] -> IO ()
+cutSectionPathArticle (SectionPath pgId _headinglist)  =
+    SectionPath pgId mempty
+cutSectionPathTopLevel  (SectionPath pgId headinglist) =
+    SectionPath pgId (take 1 headinglist)
+
+exportEntityAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Exporter
 exportEntityAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
@@ -69,7 +107,7 @@ exportEntityAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStrLn "done"
 
 
-exportPages :: FilePath -> Provenance -> [Page] -> IO ()
+exportPages :: FilePath -> Exporter
 exportPages outPath prov pagesToExport = do
     putStr "Writing articles..."
     let articleFile = outPath <.> "articles"
@@ -78,30 +116,15 @@ exportPages outPath prov pagesToExport = do
 
 main :: IO ()
 main = do
-    (path, outPath, names) <- execParser $ info (helper <*> options) mempty
+    (path, outPath, names, exporters) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
-    let pagesToExport
-          | null names = pages anns
-          | otherwise  = mapMaybe (`lookupPage` anns)
-                         $ map ($ siteId) names
-        {-# INLINE pagesToExport #-}
 
-    unless (null names) $ exportPages outPath prov pagesToExport
-    exportOutlines outPath prov pagesToExport
-    exportParagraphs outPath prov pagesToExport
-
-    let cutSectionPathArticle (SectionPath pgId _headinglist)  =
-            SectionPath pgId mempty
-    let cutSectionPathTopLevel  (SectionPath pgId headinglist) =
-            SectionPath pgId (take 1 headinglist)
-
-    exportParagraphAnnotations id                     (outPath <.> "hierarchical.qrels")        prov pagesToExport
-    exportParagraphAnnotations cutSectionPathArticle  (outPath <.> "article.qrels")             prov pagesToExport
-    exportParagraphAnnotations cutSectionPathTopLevel (outPath <.> "toplevel.qrels")            prov pagesToExport
-    exportEntityAnnotations    id                     (outPath <.> "hierarchical.entity.qrels") prov pagesToExport
-    exportEntityAnnotations    cutSectionPathArticle  (outPath <.> "article.entity.qrels")      prov pagesToExport
-    exportEntityAnnotations    cutSectionPathTopLevel (outPath <.> "toplevel.entity.qrels")     prov pagesToExport
-
-    return ()
+    forM_ exporters $ \exporter ->
+        let pagesToExport
+              | null names = pages anns
+              | otherwise  = mapMaybe (`lookupPage` anns)
+                            $ map ($ siteId) names
+            {-# INLINE pagesToExport #-}
+        in exporter prov pagesToExport
