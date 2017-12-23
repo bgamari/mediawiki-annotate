@@ -22,7 +22,7 @@ module CAR.Types.Files
       -- ** Pages
     , readPagesFile, readPagesFileWithProvenance
       -- ** Paragraphs
-    , readParagraphsFile
+    , readParagraphsFile, readParagraphsFileWithProvenance
       -- ** Outlines
     , readOutlinesFile
       -- * Header type
@@ -133,6 +133,10 @@ readPagesFileWithProvenance = readCarFile
 
 readParagraphsFile :: FilePath -> IO [Paragraph]
 readParagraphsFile = fmap snd . readCarFile
+
+readParagraphsFileWithProvenance :: FilePath -> IO (Provenance, [Paragraph])
+readParagraphsFileWithProvenance = readCarFile
+
 
 readOutlinesFile :: FilePath -> IO [Stub]
 readOutlinesFile = fmap snd . readCarFile
