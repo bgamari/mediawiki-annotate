@@ -49,7 +49,7 @@ import Data.Char (ord, chr)
 import Data.List (intercalate)
 import Data.Semigroup
 import Control.DeepSeq
-import Control.Monad (when)
+import Control.Monad (when, replicateM)
 import GHC.Generics
 import qualified Codec.Serialise.Class as CBOR
 import qualified Codec.Serialise.Decoding as CBOR
