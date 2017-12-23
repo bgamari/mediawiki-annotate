@@ -139,7 +139,7 @@ buildDisambiguateInlinksMap page =
 
     listItemFirstskeletonLinks :: PageSkeleton -> [Link]
     listItemFirstskeletonLinks (Section _ _ children) = foldMap listItemFirstskeletonLinks children
-    listItemFirstskeletonLinks (Para (Paragraph _ bodies)) = []
+    listItemFirstskeletonLinks (Para (Paragraph _ _)) = []
     listItemFirstskeletonLinks (Image {}) = []
     listItemFirstskeletonLinks (List _ (Paragraph _ bodies)) =
         case foldMap paraBodyLinks bodies of
