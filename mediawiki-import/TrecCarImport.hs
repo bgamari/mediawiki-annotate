@@ -10,6 +10,7 @@ import System.IO
 
 import qualified Data.Yaml as Yaml
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.Text as T
 import qualified Codec.Serialise as CBOR
 import qualified Codec.Serialise.Encoding as CBOR
 import qualified Codec.CBOR.Write as CBOR
@@ -46,7 +47,7 @@ instance B.Binary Format
 instance B.Binary XmlDump.PageId
 instance B.Binary WikiDoc
 
-commit :: String
+commit :: T.Text
 commit = $(gitHash)
 
 opts :: Parser (Int, Maybe FilePath, SiteId -> Provenance)
@@ -56,15 +57,21 @@ opts =
        <*> optional (option str (short 'c' <> long "config" <> metavar "CONFIG" <> help "Configuration file"))
        <*> prov
   where
+    text = T.pack <$> str
     prov = do
-        wikiDumpDate <- option str (short 'D' <> long "dump-date" <> metavar "DATE" <> help "Wikipedia dump date" <> value "unknown")
+        sourceName <- option str (short 'D' <> long "dump-date" <> metavar "DATE" <> help "Wikipedia dump date" <> value "unknown")
         dataReleaseName <- option str (short 'N' <> long "release-name" <> metavar "NAME" <> help "Data release name" <> value "unknown")
-        comments <- fmap unlines $ many $ option str (short 'C' <> long "comments" <> metavar "NAME" <> help "Other comments about data release")
-        return (\wikiSite -> Provenance {toolsCommit = commit, ..})
+        comments <- many $ option str (short 'C' <> long "comments" <> metavar "NAME" <> help "Other comments about data release")
+        language <- option (Language <$> text) (short 'L' <> long "language" <> metavar "LANG" <> help "The IETF language code of the text collection" <> value "en-US")
+        pure $ \provSiteId ->
+            Provenance { siteProvenances = [ SiteProvenance {siteComments = [], ..} ]
+                       , dataReleaseName = dataReleaseName
+                       , comments = comments
+                       , transforms = [transform "trec-car-import" commit ()] -- TODO
+                       }
 
 
-
-isInteresting :: SiteInfo ->  WikiDoc -> Bool
+isInteresting :: SiteInfo -> WikiDoc -> Bool
 isInteresting siteInfo  =
 -- lookup (XmlDump.NamespaceId 14) (XmlDump.siteNamespaces siteInfo)
     let interestingNamesSpaceId = [NamespaceId 0, NamespaceId 14] -- (0, Article), (14, Category), (100, Portal)

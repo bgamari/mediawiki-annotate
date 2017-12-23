@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     CAR.Types
+                       CAR.Types.Provenance
                        CAR.Types.AST
                        CAR.Types.AST.Pretty
                        CAR.Types.CborList
@@ -35,6 +36,7 @@ library
                        aeson >= 1.0,
                        binary,
                        cborg,
+                       cborg-json,
                        lens,
                        serialise >= 0.1,
                        bytestring >= 0.10,

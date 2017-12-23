@@ -6,10 +6,15 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-
--- Utilities for reading CAR cbor files with headers. Use this module rather than CborList
+-- | Utilities for reading CAR CBOR files with headers. Use this module rather than "CborList".
 module CAR.Types.Files
-    ( Provenance(..)
+    ( -- * Provenance
+      Provenance(..)
+    , Language(..)
+    , SiteProvenance(..)
+    , Transform(..)
+    , transform
+    , wikiSite
       -- * File types
     , File
     , writeCarFile
@@ -34,6 +39,9 @@ import System.IO
 import qualified Codec.Serialise          as CBOR
 import qualified Codec.Serialise.Encoding as CBOR
 import qualified Codec.Serialise.Decoding as CBOR
+import CAR.Types.Provenance
+
+
 
 import CAR.Types.AST
 import CAR.Types.CborList
@@ -77,23 +85,8 @@ instance CBOR.Serialise Header where
 magicWord :: String
 magicWord = "CAR"
 
-data Provenance = Provenance { wikiDumpDate     :: String
-                             , wikiSite         :: SiteId
-                             , dataReleaseName  :: String
-                             , comments         :: String
-                             , toolsCommit      :: String
-                             }
-                deriving (Show, Generic, Eq)
-instance CBOR.Serialise Provenance
 
-invalidProvenance :: Provenance
-invalidProvenance =
-    Provenance { wikiDumpDate    = ""
-               , wikiSite        = SiteId ""
-               , dataReleaseName = ""
-               , comments        = ""
-               , toolsCommit     = ""
-               }
+
 
 data NoHeader = NoHeader
 

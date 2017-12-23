@@ -10,7 +10,6 @@ import qualified Data.Text as T
 
 import CAR.Types
 import CAR.Utils
-import CAR.Types.AST
 import SimplIR.Utils.Compact
 
 -- resolveRedirects :: [Page]
