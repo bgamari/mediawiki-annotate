@@ -40,7 +40,7 @@ import Utils
 
 modes = subparser
     $ command "filter"  (info (helper <*> filterparasModes) mempty)
---    <> command "test" (info (helper <*> edgeDocModes) mempty)
+   <> command "test" (info (helper <*> testMode) mempty)
 
 main :: IO ()
 main = do
