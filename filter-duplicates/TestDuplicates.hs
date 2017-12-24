@@ -73,8 +73,8 @@ filterparasModes = go
 
 testMode :: Parser (IO ())
 testMode = go
-    <$> option auto (short 'T' <> long "true-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
-    <*> option auto (short 't' <> long "test-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
+    <$> option str (short 'T' <> long "true-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
+    <*> option str (short 't' <> long "test-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
   where
     go :: FilePath -> FilePath -> IO ()
     go trueDuplicatesFile testDuplicatesFile = do
