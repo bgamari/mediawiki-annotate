@@ -110,10 +110,11 @@ testPages = [page1, page2, pageR]
                                 ] )
                      ]
                    }
-                   
+
      pageR =  Page { pageName = pagenameR
                    , pageId = pageidR
-                   , pageMetadata = emptyPageMetadata  {pagemetaType = RedirectPage ( pageid2 )}
+                   , pageType = RedirectPage $ Link pagename2 Nothing pageid2 "hello"
+                   , pageMetadata = emptyPageMetadata
                    , pageSkeleton = [
                          Para (Paragraph (ParagraphId "paraR") [
                                   ParaText "#REDIRECT "
@@ -127,6 +128,7 @@ testPages = [page1, page2, pageR]
 
      page2 =  Page { pageName = pagename2
                    , pageId = pageid2
+                   , pageType = ArticlePage
                    , pageMetadata = emptyPageMetadata
                    , pageSkeleton = [
                          Para (Paragraph (ParagraphId "para2") [
@@ -141,9 +143,14 @@ generateInputData :: IO ()
 generateInputData =
     writeCarFile datapath prov testPages
   where
-    prov =  Provenance { wikiDumpDate    = "gen"
-                       , wikiSite         = siteId
+    prov =  Provenance { siteProvenances  =
+                           [ SiteProvenance { provSiteId = siteId
+                                            , language = "en-US"
+                                            , sourceName = "gen"
+                                            , siteComments = []
+                                            }
+                           ]
                        , dataReleaseName  = "gen"
-                       , comments         = ""
-                       , toolsCommit      = "gen"
+                       , comments         = []
+                       , transforms       = []
                        }
