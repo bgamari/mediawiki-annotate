@@ -56,6 +56,9 @@ options =
 
         , exportEntityAnnotations cutSectionPathTopLevel
           <$> option str (long "entity-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
+          
+        , exportAllWithPrefix
+          <$> option str (short 'o' <> long "output-prefix" <> metavar "PREFIX" <> help "Export all under prefix (backwards compatibility)")
         ]
 
 type Exporter = Provenance -> [Page] -> IO ()
@@ -63,14 +66,14 @@ type Exporter = Provenance -> [Page] -> IO ()
 exportOutlines :: FilePath -> Exporter
 exportOutlines outPath prov pagesToExport = do
     putStr "Writing outlines..."
-    let skeletonFile = outPath <.> "outlines"
+    let skeletonFile = outPath 
     writeCarFile skeletonFile prov $ map toStubSkeleton pagesToExport
     putStrLn "done"
 
 exportParagraphs :: FilePath -> Exporter
 exportParagraphs outPath prov pagesToExport = do
     putStr "Writing paragraphs..."
-    let paragraphsFile = outPath <.> "paragraphs"
+    let paragraphsFile = outPath
     let sortIt = map snd . M.toAscList . foldMap (\para -> M.singleton (paraId para) para)
     writeCarFile paragraphsFile prov $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
@@ -111,9 +114,24 @@ exportEntityAnnotations cutSectionPath outPath _prov pagesToExport = do
 exportPages :: FilePath -> Exporter
 exportPages outPath prov pagesToExport = do
     putStr "Writing articles..."
-    let articleFile = outPath <.> "articles"
+    let articleFile = outPath
     writeCarFile articleFile prov pagesToExport
     putStrLn "done"
+
+
+
+exportAllWithPrefix :: FilePath -> Exporter
+exportAllWithPrefix outpath = do
+    exportPages (outpath <.> "articles")
+    exportOutlines (outpath <.> "outlines")
+    exportParagraphs ( outpath <.> "paragraphs")
+    exportParagraphAnnotations id (outpath <.> "hierarchical.qrels")
+    exportParagraphAnnotations cutSectionPathArticle  (outpath <.> "article.qrels")
+    exportParagraphAnnotations cutSectionPathTopLevel (outpath <.> "toplevel.qrels")
+    exportEntityAnnotations id  (outpath <.> "hierarchical.entity.qrels")
+    exportEntityAnnotations cutSectionPathArticle (outpath <.> "article.entity.qrels")
+    exportEntityAnnotations cutSectionPathTopLevel  (outpath <.> "toplevel.entity.qrels") 
+
 
 main :: IO ()
 main = do
