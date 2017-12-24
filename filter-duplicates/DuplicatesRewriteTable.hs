@@ -14,7 +14,7 @@ opts :: Parser (FilePath, FilePath, Maybe FilePath)
 opts = (,,)
     <$> option str (short 'o' <> long "output" <> help "output rewrite table file")
     <*> option str (short 'd' <> long "duplicates" <> help "duplicates file")
-    <*> optional (option auto (long "table" <> help "deduplication table for preserving choices of canonical page ids"))
+    <*> optional (option str (long "table" <> help "deduplication table for preserving choices of canonical page ids"))
 
 main :: IO ()
 main = do

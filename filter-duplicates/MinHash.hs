@@ -192,7 +192,7 @@ main = do
     withSharedFile outputFile WriteMode $ \outHdl -> do
         let worker :: Int -> [(ParagraphId, ParagraphId)] -> IO ()
             worker n dups = do
-                when (n `mod` 1000 == 0) $ print n
+                when (n `mod` 1000 == 0) $ putStrLn ("Number of buckets processed: " <> show n)
                 _ <- evaluate $ force dups
                 withSharedHandle outHdl $ \h ->
                     hPutStrLn h $ unlines
