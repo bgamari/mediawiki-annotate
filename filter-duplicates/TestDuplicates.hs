@@ -48,14 +48,12 @@ main = do
     mode
 
 
--- opts :: Parser (FilePath, FilePath)
--- opts = (,)
 filterparasModes :: Parser (IO ())
 filterparasModes = go
-    <$> option auto (long "duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
-    <*> option auto (long "paragraphs" <> metavar "CBOR" <> help "paragraph CBOR")
+    <$> option str  (long "duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
+    <*> option str (long "paragraphs" <> metavar "CBOR" <> help "paragraph CBOR")
     <*> optional (option auto (short 'n' <> long "take" <> metavar "INT" <> help "number of edges to include"))
-    <*> option auto (short 'o' <> long "output" <> metavar "FILE" <> help "file to write filtered paragraphs to")
+    <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "file to write filtered paragraphs to")
   where
     go :: FilePath -> FilePath -> Maybe Int -> FilePath -> IO ()
     go duplicatesFile paragraphsFile nTake outFile = do
