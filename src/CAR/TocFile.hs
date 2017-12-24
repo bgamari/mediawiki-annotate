@@ -18,6 +18,7 @@ module CAR.TocFile
 
 import Control.Exception (Exception, throw)
 import Data.Foldable hiding (toList)
+import Control.DeepSeq
 import qualified Codec.CBOR.Read as CBOR.Read
 import qualified Codec.CBOR.Decoding as CBOR (decodeListLenIndef)
 import qualified Codec.CBOR.Term as CBOR
@@ -30,6 +31,7 @@ import System.IO.MMap
 import System.FilePath
 import Prelude hiding (lookup)
 
+import SimplIR.Utils.Compact
 import CAR.Types.CborList
 
 type Offset = Int
@@ -80,24 +82,24 @@ createIndex toIndex path = do
 
 data IndexedCbor i a = IndexedCbor (HM.HashMap i Offset) BS.ByteString String
 
-open :: (Hashable i, Eq i, CBOR.Serialise i)
+open :: (Hashable i, Eq i, CBOR.Serialise i, NFData i)
      => IndexedCborPath i a -> IO (IndexedCbor i a)
 open (IndexedCborPath fname) = do
     cbor <- mmapFileByteString fname Nothing
     toc <- either onError snd . CBOR.Read.deserialiseFromBytes CBOR.decode
            <$> BSL.readFile tocName
-    return $ IndexedCbor toc cbor fname
+    return $ IndexedCbor (inCompact toc) cbor fname
   where
     onError err =
         error $ "Deserialisation error while deserialising TOC "++show tocName++": "++show err
     tocName = fname <.> "toc"
 
 -- | Build a TOC in-memory
-openInMem :: (Hashable i, Eq i, CBOR.Serialise a)
+openInMem :: (Hashable i, Eq i, CBOR.Serialise a, NFData i)
           => (a -> i) -> FilePath -> IO (IndexedCbor i a)
 openInMem toIndex fname = do
     cbor <- mmapFileByteString fname Nothing
-    toc <- buildIndex toIndex fname
+    toc <- inCompactM $ buildIndex toIndex fname
     return $ IndexedCbor toc cbor fname
 
 lookup :: (Hashable i, Eq i, CBOR.Serialise a)

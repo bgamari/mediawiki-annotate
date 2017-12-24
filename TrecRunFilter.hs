@@ -6,6 +6,7 @@
 import Data.Monoid
 import Options.Applicative
 import Control.Monad
+import Control.DeepSeq
 import Data.Maybe
 import Data.Hashable
 import Codec.Serialise as CBOR
@@ -44,7 +45,7 @@ mode = subparser
               packParagraphId . T.unpack
 
 
-filterRankings :: (CBOR.Serialise i, Hashable i, Eq i, CBOR.Serialise a)
+filterRankings :: (CBOR.Serialise i, Hashable i, Eq i, NFData i, CBOR.Serialise a)
                => (TrecRunFile.DocumentName -> i) -> IndexedCborPath i a -> FilePath -> FilePath -> IO ()
 filterRankings docNameToTocKey indexPath inputRunFile outputRunFile = do
     index <- Toc.open indexPath

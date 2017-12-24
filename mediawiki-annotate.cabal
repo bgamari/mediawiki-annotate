@@ -207,6 +207,7 @@ executable trec-car-trec-run-filter
   main-is:             TrecRunFilter.hs
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base,
+                       deepseq,
                        trec-car-tools,
                        optparse-applicative,
                        simplir,
