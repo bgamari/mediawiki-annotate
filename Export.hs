@@ -16,11 +16,10 @@ import CAR.Types
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 
-options :: Parser (FilePath, FilePath, [SiteId -> PageId], [Exporter])
+options :: Parser (FilePath, [SiteId -> PageId], [Exporter])
 options =
-    (,,,)
+    (,,)
         <$> argument str (help "annotations file" <> metavar "FILE")
-        <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
         <*> many (option (flip pageNameToId . PageName . T.pack <$> str)
                          (short 'p' <> long "page"
                           <> metavar "PAGE NAME" <> help "Export only this page")
@@ -32,31 +31,31 @@ options =
     exporter :: Parser Exporter
     exporter = asum
         [ exportPages
-          <$> option str (long "pages" <> short 'p' <> help "Export pages")
+          <$> option str (long "pages" <> metavar "OUTPUT" <> help "Export pages")
 
         , exportOutlines
-          <$> option str (long "outlines" <> short 'O' <> help "Export outlines")
+          <$> option str (long "outlines" <> metavar "OUTPUT" <> help "Export outlines")
 
         , exportParagraphs
-          <$> option str (long "paragraphs" <> short 'p' <> help "Export paragraphs")
+          <$> option str (long "paragraphs" <> metavar "OUTPUT" <> help "Export paragraphs")
 
         , exportParagraphAnnotations id
-          <$> option str (long "para-hier-qrel" <> help "Export hierarchical qrel for paragraphs")
+          <$> option str (long "para-hier-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
         , exportParagraphAnnotations cutSectionPathArticle
-          <$> option str (long "para-article-qrel" <> help "Export hierarchical qrel for paragraphs")
+          <$> option str (long "para-article-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
         , exportParagraphAnnotations cutSectionPathTopLevel
-          <$> option str (long "para-toplevel-qrel" <> help "Export hierarchical qrel for paragraphs")
+          <$> option str (long "para-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
         , exportEntityAnnotations id
-          <$> option str (long "entity-hier-qrel" <> help "Export hierarchical qrel for entities")
+          <$> option str (long "entity-hier-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
 
         , exportEntityAnnotations cutSectionPathArticle
-          <$> option str (long "entity-article-qrel" <> help "Export hierarchical qrel for entities")
+          <$> option str (long "entity-article-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
 
         , exportEntityAnnotations cutSectionPathTopLevel
-          <$> option str (long "entity-toplevel-qrel" <> help "Export hierarchical qrel for entities")
+          <$> option str (long "entity-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
         ]
 
 type Exporter = Provenance -> [Page] -> IO ()
@@ -117,7 +116,7 @@ exportPages outPath prov pagesToExport = do
 
 main :: IO ()
 main = do
-    (path, outPath, names, exporters) <- execParser $ info (helper <*> options) mempty
+    (path, names, exporters) <- execParser $ info (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
