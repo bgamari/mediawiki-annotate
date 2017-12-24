@@ -148,17 +148,18 @@ hashSimilarities thresh paras =
     !bigramHashes = fmap toBigramHashes paras
 
 
-opts :: Parser (FilePath, Double, Int, FilePath, FilePath)
-opts = (,,,,)
+opts :: Parser (FilePath, Double, Int, FilePath, Maybe FilePath, FilePath)
+opts = (,,,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
     <*> option auto (long "projections" <> metavar "N" <> help "number of splitting hyperplanes for partitioning" <> value 10)
     <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
+    <*> optional (option str (long "bucket-counts" <> short 'c' <> metavar "OUTPUT" <> help "Output bucket counts file"))
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
 
 main :: IO ()
 main = do
-    (embeddingFile, thresh, nProjections, outputFile, parasFile) <-
+    (embeddingFile, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
         execParser $ info (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
@@ -185,8 +186,11 @@ main = do
     -- First compute minhash buckets
     let partitions :: M.Map Bucket (V.Vector (ParagraphId, [Term]))
         !partitions = partitionParas projs embeddedParas
-    putStrLn "Bucket counts:"
-    putStrLn $ unlines $ map show $ parMap rseq (fmap length) $ M.toList partitions
+        bucketCounts =
+            unlines
+            $ map (\(Bucket a,b) -> unwords [show a, show b])
+            $ parMap rseq (fmap length) $ M.toList partitions
+    traverse_ (`writeFile` bucketCounts) bucketCountsFile
 
     -- Finally compute all-pairs similarity
     withSharedFile outputFile WriteMode $ \outHdl -> do
