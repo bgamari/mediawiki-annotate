@@ -34,6 +34,8 @@ import CAR.Utils
 import qualified IntSet as IS
 import Utils
 
+import Debug.Trace
+
 -- | Identifier of a bucket (think: fingerprint by which paragraphs are
 -- bucketized)
 newtype Bucket = Bucket Integer
@@ -206,9 +208,22 @@ main = do
 
         parMapIOUnordered ncaps (uncurry worker)
             $ zip [0..]
-            $ foldMap (hashSimilarities thresh)
+            $ foldMap (hashSimilarities' thresh)
             $ M.elems partitions
 
+hashSimilarities' :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
+hashSimilarities' thresh paras =
+    let result = hashSimilarities thresh paras
+        numInBucket = realToFrac $ V.length paras
+        numPairs =  (((numInBucket*numInBucket) - numInBucket) / 2)
+        foundPairs = (length result )
+    in trace ( if numInBucket > 100
+              then  "%false positives= "<> show (100.0 * (1.0 - (realToFrac  foundPairs / realToFrac numPairs )))
+                 <> " =| num pairs= "<> show numPairs
+                 <> " =| num matches = "<> show foundPairs
+                 <> " =| bucket size=" <> show numInBucket
+              else "" )
+              $   result
 
 newtype SharedHandle = SharedHandle (TMVar Handle)
 
