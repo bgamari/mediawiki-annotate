@@ -191,6 +191,7 @@ main = do
             $ map (\(Bucket a,b) -> unwords [show a, show b])
             $ parMap rseq (fmap length) $ M.toList partitions
     traverse_ (`writeFile` bucketCounts) bucketCountsFile
+    putStrLn "Finished bucketing"
 
     -- Finally compute all-pairs similarity
     withSharedFile outputFile WriteMode $ \outHdl -> do
