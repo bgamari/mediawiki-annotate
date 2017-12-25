@@ -33,6 +33,7 @@ import SimplIR.WordEmbedding.Parse
 import CAR.Types
 import CAR.Types.Files
 import CAR.Utils
+import CAR.TocFile  as TocFile
 import qualified IntSet as IS
 import Utils
 {-# ANN module ("HLint: ignore Redundant $"::String) #-}
@@ -74,12 +75,15 @@ filterparasModes = go
 testMode :: Parser (IO ())
 testMode = go
     <$> option str (short 'T' <> long "true-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
-    <*> option str (short 't' <> long "test-duplicates" <> metavar "FILE" <> help "True duplicate table for comparison")
+    <*> option str (short 't' <> long "test-duplicates" <> metavar "FILE" <> help "Test duplicate table for comparison")
+    <*> optional (option (IndexedCborPath <$> str)
+                         (short 'p' <> long "paragraphs" <> metavar "FILE" <> help "Paragraphs file for full text lookup"))
   where
-    go :: FilePath -> FilePath -> IO ()
-    go trueDuplicatesFile testDuplicatesFile = do
+    go :: FilePath -> FilePath -> Maybe (IndexedCborPath ParagraphId Paragraph) -> IO ()
+    go trueDuplicatesFile testDuplicatesFile paragraphsFile = do
         trueEdges <- parseDuplicates <$> readFile trueDuplicatesFile
         testEdges <- parseDuplicates <$> readFile testDuplicatesFile
+        paragraphs <- traverse TocFile.open paragraphsFile
 
         let trueEdgeSet = HS.fromList $ [ HS.fromList [a,b] | (a,b) <- trueEdges]
             testEdgeSet = HS.fromList $ [ HS.fromList [a,b] | (a,b) <- testEdges]
@@ -90,11 +94,15 @@ testMode = go
 
         putStrLn $ "Sample: "
                 <> unlines
-                 ( fmap prettyEdge
+                 ( fmap (prettyEdge paragraphs)
                  $ take 5
                  $ HS.toList missingEdges
                  )
-          where prettyEdge :: HS.HashSet ParagraphId -> String
-                prettyEdge edge =
-                  let [a, b] =  HS.toList edge
-                  in show a <> " -- " <> show b
+      where prettyEdge :: Maybe (IndexedCbor ParagraphId Paragraph) -> HS.HashSet ParagraphId -> String
+            prettyEdge paragraphs edge
+              | Just paras <- paragraphs =
+                 let Just pa = TocFile.lookup a paras
+                     Just pb = TocFile.lookup b paras
+                 in unlines $ map (prettyParagraph anchorOnly) [pa,pb]
+              | otherwise = show a <> " -- " <> show b
+              where [a, b] =  HS.toList edge
