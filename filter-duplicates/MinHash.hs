@@ -125,15 +125,13 @@ centerWordEmbedding uncenteredParas =
 -- we will parallelise pair-wise similarity computation over. (paras are all from
 -- the same bucket). Only pairs with sufficintly high jaccard will be returned.
 -- (Needs final testing on real bigrams)
-hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
+hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [(ParagraphId, ParagraphId)]
 hashSimilarities thresh paras =
-    [ [ (pid1, pid2)
-      | (pid1, toks1, bigrams1) <- V.toList chunk
-      , (pid2, toks2, bigrams2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
-      , isBigramSimilar bigrams1 bigrams2
-      , isJaccardSimilar toks1 toks2
-      ]
-    | chunk <- chunksOf 100 bigramHashes
+    [ (pid1, pid2)
+    | (pid1, toks1, bigrams1) <- V.toList bigramHashes
+    , (pid2, toks2, bigrams2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
+    , isBigramSimilar bigrams1 bigrams2
+    , isJaccardSimilar toks1 toks2
     ]
   where
     inUpperTriangle pid1 (pid,_,_) = pid < pid1
@@ -217,22 +215,24 @@ main = do
 
         parMapIOUnordered ncaps (uncurry worker)
             $ zip [0..]
-            $ foldMap (hashSimilarities' thresh)
+            $ fmap (hashSimilarities' thresh)
             $ M.elems partitions
 
-hashSimilarities' :: Double -> V.Vector (ParagraphId, [Term]) -> [[(ParagraphId, ParagraphId)]]
-hashSimilarities' thresh paras =
-    let result = hashSimilarities thresh paras
-        numInBucket = realToFrac $ V.length paras
-        numPairs =  (((numInBucket*numInBucket) - numInBucket) / 2)
-        foundPairs = (length result )
-    in trace ( if numInBucket > 100
-              then  "%false positives= "<> show (100.0 * (1.0 - (realToFrac  foundPairs / realToFrac numPairs )))
-                 <> " =| num pairs= "<> show numPairs
-                 <> " =| num matches = "<> show foundPairs
-                 <> " =| bucket size=" <> show numInBucket
-              else "" )
-              $   result
+hashSimilarities' :: Double -> V.Vector (ParagraphId, [Term]) -> [(ParagraphId, ParagraphId)]
+hashSimilarities' thresh paras = map traceBucket $ hashSimilarities thresh paras
+  where
+    traceBucket result
+      | numInBucket > 100 =
+        trace (   "% false positives = " <> show (100.0 * (1.0 - (realToFrac foundPairs / realToFrac numPairs)))
+               <> " =| num pairs     = " <> show numPairs
+               <> " =| num matches   = " <> show foundPairs
+               <> " =| bucket size   = " <> show numInBucket)
+              result
+      | otherwise = result
+      where
+        numInBucket = V.length paras
+        numPairs = (numInBucket^2 - numInBucket) `div` 2
+        foundPairs = length result
 
 newtype SharedHandle = SharedHandle (TMVar Handle)
 
