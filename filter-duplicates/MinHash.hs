@@ -183,6 +183,7 @@ main = do
         . internTerms (L.each . L._2 . L.each)
         . map toTuple
         <$> readParagraphsFile parasFile
+    _ <- evaluate $ force paras
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
