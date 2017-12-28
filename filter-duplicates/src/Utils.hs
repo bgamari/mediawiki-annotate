@@ -12,7 +12,7 @@ import qualified Data.Vector as V
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
-import qualified Data.HashMap.Strict as HM
+import qualified Data.Map.Strict as M
 import Control.Parallel.Strategies
 
 import CAR.Types
@@ -74,7 +74,7 @@ parseDuplicates = map (toPair . words) . filter (not . null) . lines
 internTerms :: Traversal' a Term -> a -> a
 internTerms trv = snd . mapAccumLOf trv f mempty
   where
-    f :: HM.HashMap Term Term -> Term -> (HM.HashMap Term Term, Term)
+    f :: M.Map Term Term -> Term -> (M.Map Term Term, Term)
     f acc t
       | Just t' <- acc ^. at t = (acc, t')
-      | otherwise = (HM.insert t t acc, t)
+      | otherwise = (M.insert t t acc, t)
