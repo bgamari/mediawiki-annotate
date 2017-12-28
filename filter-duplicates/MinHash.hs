@@ -68,8 +68,8 @@ randomProjections nProjs gen =
 -- | Partition paragraphs into buckets via random projections of the accumulated
 -- word embedding vector.
 partitionParas :: forall n. KnownNat n => Projections n
-               -> V.Vector (ParagraphId, [Term], WordVec n)
-               -> M.Map Bucket (V.Vector (ParagraphId, [Term]))
+               -> V.Vector (ParagraphId, V.Vector Term, WordVec n)
+               -> M.Map Bucket (V.Vector (ParagraphId, V.Vector Term))
 partitionParas projs paras =
     withStrategy (parTraversable rseq)
     $ fmap (V.modify Sort.sort . V.fromList . toList) unsorted
@@ -81,15 +81,15 @@ partitionParas projs paras =
         $ map chunkToBuckets
         $ chunksOf 10000 paras
 
-    chunkToBuckets :: V.Vector (ParagraphId, [Term], WordVec n)
-                   -> M.Map Bucket (Bag (ParagraphId, [Term]))
+    chunkToBuckets :: V.Vector (ParagraphId, V.Vector Term, WordVec n)
+                   -> M.Map Bucket (Bag (ParagraphId, V.Vector Term))
     chunkToBuckets ps =
         M.fromListWith (<>)
         [ (bucketForPara projs v, One (pid, toks))
         | (pid, toks, v) <- V.toList ps
         ]
 
-    strat :: Strategy [M.Map Bucket (Bag (ParagraphId, [Term]))]
+    strat :: Strategy [M.Map Bucket (Bag (ParagraphId, V.Vector Term))]
     strat = parBuffer 256 $ evalTraversable $ evalTraversable r0
 
 -- | Given a list of projections of an n-dimensional embedding space and a word
@@ -108,8 +108,8 @@ bucketForPara projs v =
 
 -- | Mean-center word embeddings
 centerWordEmbedding :: (KnownNat n)
-                    => V.Vector (ParagraphId, [Term], WordVec n)
-                    -> V.Vector (ParagraphId, [Term], WordVec n)
+                    => V.Vector (ParagraphId, V.Vector Term, WordVec n)
+                    -> V.Vector (ParagraphId, V.Vector Term, WordVec n)
 centerWordEmbedding uncenteredParas =
     V.map center uncenteredParas
   where
@@ -125,7 +125,7 @@ centerWordEmbedding uncenteredParas =
 -- we will parallelise pair-wise similarity computation over. (paras are all from
 -- the same bucket). Only pairs with sufficintly high jaccard will be returned.
 -- (Needs final testing on real bigrams)
-hashSimilarities :: Double -> V.Vector (ParagraphId, [Term]) -> [(ParagraphId, ParagraphId)]
+hashSimilarities :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
 hashSimilarities thresh paras =
     [ (pid1, pid2)
     | (pid1, toks1, bigrams1) <- V.toList bigramHashes
@@ -143,16 +143,17 @@ hashSimilarities thresh paras =
         in sim > thresh
 
     isJaccardSimilar toks1 toks2 =
-        let realSim = jaccard (HS.fromList $ toBigrams toks1) (HS.fromList $ toBigrams toks2)
+        let toTokenSet = HS.fromList . toBigrams . V.toList
+            realSim = jaccard (toTokenSet toks1) (toTokenSet toks2)
         in realSim > thresh
 
-    toBigramHashes :: (ParagraphId, [Term]) -> (ParagraphId, [Term], IS.IntSet)
+    toBigramHashes :: (ParagraphId, V.Vector Term) -> (ParagraphId, V.Vector Term, IS.IntSet)
     toBigramHashes (pid, toks) =
         let hashes =
-              IS.fromAscList $ sort $ map hash $ toBigrams toks
+              IS.fromAscList $ sort $ map hash $ toBigrams $ V.toList toks
         in (pid, toks, hashes)
     -- for each paragraph: bigrams are hashed onto integers
-    bigramHashes :: V.Vector (ParagraphId, [Term], IS.IntSet)
+    bigramHashes :: V.Vector (ParagraphId, V.Vector Term, IS.IntSet)
     !bigramHashes = fmap toBigramHashes paras
 
 
@@ -171,8 +172,8 @@ main = do
     (embeddingFile, seed, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    let toTuple :: Paragraph -> (ParagraphId, [Term])
-        toTuple p = (paraId p, tokenise $ paraToText p)
+    let toTuple :: Paragraph -> (ParagraphId, V.Vector Term)
+        toTuple p = (paraId p, V.fromList $ tokenise $ paraToText p)
     ncaps <- getNumCapabilities
     setNumCapabilities 1
     paras <- V.fromList . listStatus "read" 100000 . map toTuple <$> readParagraphsFile parasFile
@@ -185,15 +186,15 @@ main = do
 
     let !embeddedParas = centerWordEmbedding uncenteredParas
 
-        uncenteredParas :: V.Vector (ParagraphId, [Term], WordVec n)
+        uncenteredParas :: V.Vector (ParagraphId, V.Vector Term, WordVec n)
         uncenteredParas = V.map embed paras
           where
-            embed (pid, terms) = (pid, terms, embedTerms embedding terms)
+            embed (pid, terms) = (pid, terms, embedTerms embedding $ V.toList terms)
 
     putStrLn "Computed embedding"
 
     -- First compute minhash buckets
-    let partitions :: M.Map Bucket (V.Vector (ParagraphId, [Term]))
+    let partitions :: M.Map Bucket (V.Vector (ParagraphId, V.Vector Term))
         !partitions = partitionParas projs embeddedParas
         bucketCounts =
             unlines
@@ -218,7 +219,7 @@ main = do
             $ fmap (hashSimilarities' thresh)
             $ M.elems partitions
 
-hashSimilarities' :: Double -> V.Vector (ParagraphId, [Term]) -> [(ParagraphId, ParagraphId)]
+hashSimilarities' :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
 hashSimilarities' thresh paras = map traceBucket $ hashSimilarities thresh paras
   where
     traceBucket result
