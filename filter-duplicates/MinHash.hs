@@ -6,6 +6,7 @@ import Data.Bits
 import Data.Foldable
 import Data.Monoid
 import Data.List
+import Data.Word
 import Data.Hashable
 import Control.Monad (when, replicateM, replicateM_)
 import Control.DeepSeq
@@ -15,6 +16,7 @@ import Control.Exception
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
+import Control.Monad.ST
 import System.IO
 
 import qualified Data.Vector as V
@@ -51,8 +53,14 @@ instance Monoid (Bag a) where
 type Projections n = [WordVec n]
 
 -- | Generate @n@ random splitting hyperplanes
-randomProjections :: KnownNat n => Int -> IO (Projections n)
-randomProjections nProjs = withSystemRandom $ asGenST $ \gen ->
+genRandomProjections :: KnownNat n => Maybe Word32 -> Int -> IO (Projections n)
+genRandomProjections Nothing nProjs = withSystemRandom $ asGenST $ randomProjections nProjs
+genRandomProjections (Just seed) nProjs = return $ runST $ do
+    gen <- initialize (V.singleton seed)
+    randomProjections nProjs gen
+
+randomProjections :: KnownNat n => Int -> GenST s -> ST s (Projections n)
+randomProjections nProjs gen =
     replicateM nProjs $ generateWordVec (const $ fmap realToFrac $ standard gen)
 
 -- | Partition paragraphs into buckets via random projections of the accumulated
@@ -148,9 +156,10 @@ hashSimilarities thresh paras =
     !bigramHashes = fmap toBigramHashes paras
 
 
-opts :: Parser (FilePath, Double, Int, FilePath, Maybe FilePath, FilePath)
-opts = (,,,,,)
+opts :: Parser (FilePath, Maybe Word32, Double, Int, FilePath, Maybe FilePath, FilePath)
+opts = (,,,,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
+    <*> optional (option auto (long "seed" <> metavar "SEED" <> help "PRNG seed value"))
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
     <*> option auto (long "projections" <> metavar "N" <> help "number of splitting hyperplanes for partitioning" <> value 10)
     <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
@@ -159,7 +168,7 @@ opts = (,,,,,)
 
 main :: IO ()
 main = do
-    (embeddingFile, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
+    (embeddingFile, seed, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
         execParser $ info (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, [Term])
@@ -170,7 +179,7 @@ main = do
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
-    projs <- randomProjections nProjections
+    projs <- genRandomProjections seed nProjections
     putStrLn "Read embeddings"
     setNumCapabilities ncaps
 
