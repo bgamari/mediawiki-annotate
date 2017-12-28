@@ -129,10 +129,10 @@ centerWordEmbedding uncenteredParas =
 hashSimilarities :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
 hashSimilarities thresh paras =
     [ (pid1, pid2)
-    | (pid1, toks1, bigrams1) <- V.toList bigramHashes
-    , (pid2, toks2, bigrams2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
-    , isBigramSimilar bigrams1 bigrams2
-    , isJaccardSimilar toks1 toks2
+    | (pid1, bigrams1, bigramHash1) <- V.toList bigramHashes
+    , (pid2, bigrams2, bigramHash2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
+    , isBigramSimilar bigramHash1 bigramHash2
+    , isJaccardSimilar bigrams1 bigrams2
     ]
   where
     inUpperTriangle pid1 (pid,_,_) = pid < pid1
@@ -143,18 +143,18 @@ hashSimilarities thresh paras =
             sim = realToFrac num / realToFrac denom
         in sim > thresh
 
-    isJaccardSimilar toks1 toks2 =
-        let toTokenSet = HS.fromList . toBigrams . V.toList
-            realSim = jaccard (toTokenSet toks1) (toTokenSet toks2)
+    isJaccardSimilar bigrams1 bigrams2 =
+        let realSim = jaccard bigrams1 bigrams2
         in realSim > thresh
 
-    toBigramHashes :: (ParagraphId, V.Vector Term) -> (ParagraphId, V.Vector Term, IS.IntSet)
+    toBigramHashes :: (ParagraphId, V.Vector Term) -> (ParagraphId, HS.HashSet (Term,Term), IS.IntSet)
     toBigramHashes (pid, toks) =
         let hashes =
               IS.fromAscList $ sort $ map hash $ toBigrams $ V.toList toks
-        in (pid, toks, hashes)
+        in (pid, HS.fromList $ toBigrams $ V.toList toks, hashes)
+        
     -- for each paragraph: bigrams are hashed onto integers
-    bigramHashes :: V.Vector (ParagraphId, V.Vector Term, IS.IntSet)
+    bigramHashes :: V.Vector (ParagraphId, HS.HashSet (Term, Term), IS.IntSet)
     !bigramHashes = fmap toBigramHashes paras
 
 
@@ -227,20 +227,19 @@ main = do
             $ M.elems partitions
 
 hashSimilarities' :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
-hashSimilarities' thresh paras = map traceBucket $ hashSimilarities thresh paras
+hashSimilarities' thresh paras
+  | numInBucket > 100 =
+    trace (   "% false positives = " <> show (100.0 * (1.0 - (realToFrac numMatches / realToFrac numPairs)))
+           <> " =| num pairs     = " <> show numPairs
+           <> " =| num matches   = " <> show numMatches
+           <> " =| bucket size   = " <> show numInBucket)
+          matches
+  | otherwise = matches
   where
-    traceBucket result
-      | numInBucket > 100 =
-        trace (   "% false positives = " <> show (100.0 * (1.0 - (realToFrac foundPairs / realToFrac numPairs)))
-               <> " =| num pairs     = " <> show numPairs
-               <> " =| num matches   = " <> show foundPairs
-               <> " =| bucket size   = " <> show numInBucket)
-              result
-      | otherwise = result
-      where
-        numInBucket = V.length paras
-        numPairs = (numInBucket^2 - numInBucket) `div` 2
-        foundPairs = length result
+    matches = hashSimilarities thresh paras
+    numInBucket = V.length paras
+    numPairs = (numInBucket^2 - numInBucket) `div` 2
+    numMatches = length matches
 
 newtype SharedHandle = SharedHandle (TMVar Handle)
 
