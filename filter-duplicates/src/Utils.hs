@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Utils where
 
 import Data.Char
@@ -5,10 +7,12 @@ import Data.Maybe
 import Data.List (tails)
 import Debug.Trace
 
+import Control.Lens
 import qualified Data.Vector as V
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
+import qualified Data.HashMap.Strict as HM
 import Control.Parallel.Strategies
 
 import CAR.Types
@@ -66,3 +70,11 @@ parseDuplicates = map (toPair . words) . filter (not . null) . lines
   where
     toPair [a,b] = (packParagraphId a, packParagraphId b)
     toPair x = error $ "parseDuplicates: "++show x
+
+internTerms :: Traversal' a Term -> a -> a
+internTerms trv = snd . mapAccumLOf trv f mempty
+  where
+    f :: HM.HashMap Term Term -> Term -> (HM.HashMap Term Term, Term)
+    f acc t
+      | Just t' <- acc ^. at t = (acc, t')
+      | otherwise = (HM.insert t t acc, t)

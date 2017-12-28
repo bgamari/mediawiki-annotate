@@ -9,6 +9,7 @@ import Data.List
 import Data.Word
 import Data.Hashable
 import Control.Monad (when, replicateM, replicateM_)
+import qualified Control.Lens as L
 import Control.DeepSeq
 import GHC.TypeLits
 import GHC.Conc
@@ -174,9 +175,14 @@ main = do
 
     let toTuple :: Paragraph -> (ParagraphId, V.Vector Term)
         toTuple p = (paraId p, V.fromList $ tokenise $ paraToText p)
+
     ncaps <- getNumCapabilities
     setNumCapabilities 1
-    paras <- V.fromList . listStatus "read" 100000 . map toTuple <$> readParagraphsFile parasFile
+    paras <- V.fromList
+        . listStatus "read" 100000
+        . internTerms (L.each . L._2 . L.each)
+        . map toTuple
+        <$> readParagraphsFile parasFile
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
     SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
