@@ -134,7 +134,7 @@ writeRecords path recs = withFile path WriteMode $ \hdl ->
 pageIdToRecordId :: PageId -> Warc.RecordId
 pageIdToRecordId = RecordId . Uri . Utf8.toByteString . unPageId
 
--- ds
+-- dsx
 edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
     $ command "index" (info (helper <*> buildMode) mempty)
