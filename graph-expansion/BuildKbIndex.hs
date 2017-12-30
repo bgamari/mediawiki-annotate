@@ -78,8 +78,8 @@ data QuerySource = QueriesFromCbor FilePath QueryDerivation
 data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
 
 
-desc :: PP.Doc
-desc = "Retrieve entities from entity index `index`." <$$>
+queryHelpDesc :: PP.Doc
+queryHelpDesc = "Retrieve entities from entity index `index`." <$$>
        "Supports queries with cbor outlines or custom through JSON." <$$>
        "JSON format : " <$$>
        indent 4 (vcat [ "{\"queryDocListContent\":["
@@ -139,7 +139,7 @@ edgeDocModes :: Parser (IO ())
 edgeDocModes = subparser
     $ command "index" (info (helper <*> buildMode) mempty)
    <> command "dump" (info (helper <*> dumpMode) mempty)
-   <> command "query" (info (helper <*> queryMode) mempty)
+   <> command "query" (info (helper <*> queryMode) (progDescDoc (Just queryHelpDesc)))
   where
     buildMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
@@ -196,7 +196,7 @@ entityModes = subparser
     $ command "index" (info (helper <*> indexMode) mempty)
    <> command "warc" (info (helper <*> warcMode) mempty)
    <> command "dump" (info (helper <*> dumpMode) mempty)
-   <> command "query" (info (helper <*> queryMode) mempty)
+   <> command "query" (info (helper <*> queryMode) (progDescDoc (Just queryHelpDesc)))
   where
     indexMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
@@ -322,7 +322,7 @@ paragraphModes :: Parser (IO ())
 paragraphModes = subparser
     $ command "index" (info (helper <*> indexMode) mempty)
    <> command "dump" (info (helper <*> dumpMode) mempty)
-   <> command "query" (info (helper <*> queryMode) mempty)
+   <> command "query" (info (helper <*> queryMode) (progDescDoc (Just queryHelpDesc)))
   where
     indexMode =
         go <$> option str (long "output" <> short 'o' <> help "output index path")
