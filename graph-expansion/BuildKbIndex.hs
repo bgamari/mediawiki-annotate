@@ -84,7 +84,7 @@ queryHelpDesc = "Retrieve entities from entity index `index`." <$$>
        "JSON format : " <$$>
        indent 4 (vcat [ "{\"queryDocListContent\":["
                       , "    {\"queryDocPageId\":\"pageId\""
-                      , "    ,\"queryDocQueryText\":\"stemmed query text\""
+                      , "    ,\"queryDocQueryText\":\"query text\""
                       , "    ,\"queryDocQueryId\":\"qidForRun\"}"
                       , ",...]}"
                       ])
