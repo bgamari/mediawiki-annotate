@@ -64,6 +64,27 @@ formatEntityPassageRankings runName queryId scoredItems =
             TB.fromString (unpackPageId entity)
 
 
+formatPassageRankings :: T.Text -> T.Text -> [(ParagraphId, Double)] -> TL.Text
+formatPassageRankings runName queryId scoredItems =
+      TB.toLazyText
+    $ mconcat
+    $ intersperse "\n"
+    $ zipWith formatEntry [1..]
+    $ take rankingLength
+    $ toRanking
+    $ scoredItems
+  where formatEntry :: Int -> (ParagraphId, Double) -> TB.Builder
+        formatEntry rank (element, score) =
+            mconcat
+            $ intersperse " "
+            [ TB.fromText queryId
+            , "Q0"
+            , TB.fromString $ unpackParagraphId element
+            , TB.decimal rank
+            , TB.realFloat score
+            , TB.fromText runName]
+
+
 
 toRanking ::  [(elem, Double)] -> [(elem, Double)]
 toRanking =
