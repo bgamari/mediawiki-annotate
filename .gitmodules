@@ -13,7 +13,8 @@
 [submodule "simplir"]
 	path = simplir
 	urlGithub = git@github.com:bgamari/simplir.git
-	url = https://git@git.smart-cactus.org/ben/simpl-ir
+	urlGitlab = https://git@git.smart-cactus.org/ben/simpl-ir
+	url = ../simpl-ir
 [submodule "vendor/xml"]
 	path = vendor/xml
 	url = git://github.com/snoyberg/xml
