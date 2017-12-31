@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Utilities for reading CAR CBOR files with headers. Use this module rather than "CborList".
 module CAR.Types.Files
@@ -94,27 +95,42 @@ instance CBOR.Serialise NoHeader where
     decode = return NoHeader
     encode = mempty
 
-checkFileType :: FileType -> FileType -> IO ()
-checkFileType expected actual =
+checkFileType :: FilePath-> FileType -> FileType -> IO ()
+checkFileType fileName expected actual =
     when (actual /= expected) $
-        fail $ concat [ "Expected file type "
-                      , show expected
-                      , ", saw file type "
-                      , show actual
-                      ]
+        fail $ "File " <> (show fileName) <> " is of file type " <> (show actual) <>
+               ", but is expected to be of file type " <> (show expected)
 
 readCarFile :: forall a.
                (File a, CBOR.Serialise a)
             => FilePath -> IO (Provenance, [a])
 readCarFile path = handle tryWithoutHeader $ do
         (hdr, xs) <- readCborList path
-        checkFileType (fileType $ Proxy @a) (headerType hdr)
+        checkFileType path (fileType $ Proxy @a) (headerType hdr)
         return (provenance hdr, xs)
   where
     tryWithoutHeader (CborListHeaderDeserialiseError _ _) = do
         hPutStrLn stderr $ "Failed to deserialise header of "++path++"; provenance unavailable."
         xs <- readRawCborList path
         return (invalidProvenance, xs)
+
+
+readCarPagesOrOutline :: FilePath -> IO (Either [Page] [Stub])
+readCarPagesOrOutline path = do
+    hdr <- readCarHeader path
+    case fmap headerType hdr of
+        Nothing -> Left <$> readPagesFile path
+        Just PagesFile -> Left <$> readPagesFile path
+        Just OutlinesFile -> Right <$> readOutlinesFile path
+        Just other -> fail $ "File "<> (show path) <> " of type " <> (show other) <> ", but expected PagesFile or OutlinesFile here."
+
+
+readCarHeader :: FilePath -> IO (Maybe Header)
+readCarHeader path = handle tryWithoutHeader (Just . fst <$> readCborList @Header @() path)
+  where
+    tryWithoutHeader (CborListHeaderDeserialiseError _ _) = do
+        hPutStrLn stderr $ "Failed to deserialise header of "++path++"; provenance unavailable."
+        return Nothing
 
 writeCarFile :: forall a.
                 (File a, CBOR.Serialise a)
@@ -140,3 +156,20 @@ readParagraphsFileWithProvenance = readCarFile
 
 readOutlinesFile :: FilePath -> IO [Stub]
 readOutlinesFile = fmap snd . readCarFile
+
+readOutlinesFileWithProvenance :: FilePath -> IO (Provenance, [Stub])
+readOutlinesFileWithProvenance = readCarFile
+
+readPagesOrOutlinesAsPages :: FilePath -> IO [Page]
+readPagesOrOutlinesAsPages path = do
+    result <- readCarPagesOrOutline path
+    case result of
+        Left pages -> return pages
+        Right stubs -> return $ fmap stubToPage stubs
+  where stubToPage Stub{..} =
+          Page { pageName = stubName
+               , pageId = stubPageId
+               , pageType = stubType
+               , pageMetadata = stubMetadata
+               , pageSkeleton = stubSkeleton
+               }
