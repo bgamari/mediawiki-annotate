@@ -12,8 +12,8 @@
 	url = git://github.com/bgamari/b-tree
 [submodule "simplir"]
 	path = simplir
-	url = git@github.com:bgamari/simplir.git
-	urlGitlab = https://git@git.smart-cactus.org/ben/simpl-ir
+	urlGithub = git@github.com:bgamari/simplir.git
+	url = https://git@git.smart-cactus.org/ben/simpl-ir
 [submodule "vendor/xml"]
 	path = vendor/xml
 	url = git://github.com/snoyberg/xml
