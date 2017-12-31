@@ -144,21 +144,14 @@ opts =
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
 
-candidateSetList :: HS.HashSet PageId -> Int -> BinarySymmetricGraph
-                ->  [(PageId, Double)]
-candidateSetList seeds radius binarySymmetricGraph  =
-    let nodes :: HS.HashSet PageId
-        nodes = expandNodesK binarySymmetricGraph seeds radius
-   in [ (pageId, 1.0) | pageId <- HS.toList nodes]
 
 
-
-nodesToAttributes :: forall n. (KnownNat n)
+nodesToWordVector :: forall n. (KnownNat n)
                  => AnnotationsFile
                  -> WordEmbedding n
                  -> HS.HashSet PageId
                  -> HM.HashMap PageId (Attributes (EmbeddingDim n))
-nodesToAttributes annsFile wordEmbedding nodes =
+nodesToWordVector annsFile wordEmbedding nodes =
     zScoreStandardize
     $ HM.mapWithKey (\pid _ -> toWordVec pid)
     $ HS.toMap nodes
@@ -335,7 +328,7 @@ computeFullgraphRankingsForQuery annsFile wordEmbedding simpleWeightedGraphs = \
             ]
     in computeRankings'
   where
-    nodeAttributes = nodesToAttributes annsFile wordEmbedding (foldMap (nodeSet . snd) simpleWeightedGraphs)
+    nodeAttributes = nodesToWordVector annsFile wordEmbedding (foldMap (nodeSet . snd) simpleWeightedGraphs)
 
 
 
