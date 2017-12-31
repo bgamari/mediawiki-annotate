@@ -168,32 +168,15 @@ nodesToAttributes annsFile wordEmbedding nodes =
         $ maybe (pageNameEmbeddingAttributes wordEmbedding pid) (pageTextEmbeddingAttributes wordEmbedding)
         $ AnnsFile.lookupPage pid annsFile
 
-computeRankingsForQuery :: --forall n. (KnownNat n) =>
-                          (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
+computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> AnnotationsFile
                         -> CarRun.QueryId -> PageId ->  [Term] -> HS.HashSet PageId -> Int
---                         -> UniverseGraph
---                         -> BinarySymmetricGraph
---                         -> WordEmbedding n
                         -> [(Method, [(PageId, Maybe ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
       annsFile queryId queryPageId query seeds radius =
--- --       universeGraph binarySymmetricGraph wordEmbedding =
       let
---  LD        nodes :: HS.HashSet PageId
---   LD       nodes = expandNodesK binarySymmetricGraph seeds radius
---   LD
---    LD      nodeAttributes = nodesToAttributes annsFile wordEmbedding nodes
-
--- LD         universeSubset ::  HM.HashMap PageId [EdgeDoc]
--- LD--         universeSubset = trace (" empty in nodeSet " ++ show ("" `HS.member` nodeSet)) $ subsetOfUniverseGraph universeGraph nodeSet
--- LD         universeSubset = subsetOfUniverseGraph universeGraph nodes
-
--- LD         edgeDocsSubset :: [EdgeDoc]
--- LD         edgeDocsSubset = HS.toList $ HS.fromList $ concat $ HM.elems universeSubset
-
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
         edgeFilters = [(BidiFiltered,  onlySymmetricEdges)
@@ -219,8 +202,7 @@ computeRankingsForQuery
                            ]
 
         fancyGraphs :: [(GraphNames, RetrievalFun, HM.HashMap PageId [EdgeDocWithScores])]
-        fancyGraphs = concat [--(Top5PerNode,     const $ filterGraphByTop5NodeEdges  retrieveDocs      query)
-                               [ (Top100PerGraph,   irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 100)
+        fancyGraphs = concat [ [ (Top100PerGraph,   irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 100)
                                , (Top10PerGraph,    irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 10)
                                , (Top50PerGraph,    irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 50)
                                , (Top200PerGraph,   irname, addSeedNodes seeds $ filterGraphByTopNGraphEdges retrievalResult 200)
@@ -230,12 +212,6 @@ computeRankingsForQuery
                              | (irname, retrievalResult) <- retrievalResults
                              ]
 
---  LD        simpleGraphs :: [(GraphNames, [EdgeDoc] -> Graph PageId [EdgeDoc])]
---  LD       simpleGraphs =  [(SimpleGraph, noFilterTwice)
--- LD                         ,(RandomGraph, randomFilter 100)
--- LD                         ,(Random2000Graph, randomFilter 2000)
--- LD                         ]
-                                     
         weightings :: [(WeightingNames, EdgeDocWithScores -> Double)]
         weightings =  [ (Count, realToFrac . withScoreCount)
                       , (Score, realToFrac . withScoreScore)
@@ -257,8 +233,6 @@ computeRankingsForQuery
         graphRankings :: [(GraphRankingNames, Graph PageId Double -> [(PageId, Double)])]
         graphRankings = [(PageRank, \graph -> rankByPageRank graph 0.15 20)
                         ,(PersPageRank, \graph -> rankByPersonalizedPageRank graph 0.15 seeds 20)
---  LD                        ,(AttriRank, \graph ->  let embeddingBounds = wordEmbeddingDimBounds wordEmbedding
---   LD                                               in rankByAttriPageRank graph 0.15 embeddingBounds nodeAttributes 20)
                         ,(ShortPath, \graph -> rankByShortestPaths (fmap (max $ Sum 0.001) $ coerce graph) (toList seeds))
                         ,(MargEdges, \graph -> marginalizeEdges graph)
                         ]
@@ -268,23 +242,6 @@ computeRankingsForQuery
                                | (gname, irname, graph) <- fancyGraphs
                                , (wname, weighting) <- weightings
                                ]
-
--- LD        simpleWeightedGraphs :: [((GraphNames, EdgeFilteringNames, WeightingNames, RetrievalFun), Graph PageId Double)]
--- LD         simpleWeightedGraphs = [ ((gname, ename, wname, NoIr), graph)
--- LD                                | (ename, edgeFilter) <- edgeFilters
--- LD                                , (gname, mkGraph) <- simpleGraphs
--- LD                                , (wname, weighting) <- [ (Count, fmap (realToFrac . length))
--- LD                                                        , (Binary, fmap (const 1))
--- LD                                                        ]
--- LD                                , let graph = weighting $ mkGraph $ edgeFilter edgeDocsSubset
--- LD                                ]
-
---         computeRankings'' :: [(Method,  [(PageId, Double)])]
---         computeRankings'' =
---             [ (Method gname ename wname rname irname,  graphRanking graph )
---             | ((gname, ename, wname, irname), graph) <- simpleWeightedGraphs ++ fancyWeightedGraphs,
---               (rname, graphRanking) <- graphRankings
---             ] ++ [(CandidateSet, candidateSetList seeds radius binarySymmetricGraph)]
 
         attachParagraphs :: RetrievalFun ->  [(PageId, Double)] -> [(PageId, Maybe ParagraphId, Double)]
         attachParagraphs irname entityRanking
@@ -301,7 +258,6 @@ computeRankingsForQuery
             | ((gname, ename, wname, irname), graph) <- fancyWeightedGraphs,
               (rname, graphRanking) <- graphRankings
             ]
---     in (fancyGraphs, simpleGraphs) `deepseq` computeRankings'
     in computeRankings'
 
 
@@ -483,14 +439,6 @@ main = do
     SomeWordEmbedding wordEmbeddings <- readGlove embeddingsFile
     putStrLn $ "# Embedding: " ++ show embeddingsFile ++ ", dimension=" ++ show (wordEmbeddingDim wordEmbeddings)
 
--- LD     let universeGraph :: UniverseGraph
--- LD        !universeGraph = edgeDocsToUniverseGraph $ pagesToEdgeDocs $ AnnsFile.pages annsFile
--- LD     putStrLn $ "# nodes in KB = " <> show (HM.size universeGraph)
--- LD
--- LD    let binarySymmetricGraph :: BinarySymmetricGraph
--- LD         !binarySymmetricGraph = universeToBinaryGraph universeGraph
--- LD     putStrLn $ "# symmetric graph size = " <> show (HM.size binarySymmetricGraph)
-
     let seedMethod :: SeedDerivation -> IO (QueryDoc -> QueryDoc)
         seedMethod SeedsFromLeadSection = return id
         seedMethod (SeedsFromEntityIndex entityIndexFile) = do
@@ -577,36 +525,8 @@ main = do
             onError (SomeException exc) =
                 putStrLn $ concat [ "error: exception while running "
                                   , show method, " on ", show queryId, ": ", show exc ]
-{-
-    let fullgraphExpansion = do
-            putStrLn "full graph"
-            forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocLeadEntities=seedEntities} -> do
-                when (null $ seedEntities) $
-                    T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
-                T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
-
-                let rankings :: [(Method, [(PageId, Double)])]
-                    rankings = computeFullgraphRankingsForQuery
-                                   annsFile wordEmbeddings simpleWeightedGraphs
-                                   seedEntities
-
-                let methodsAvailable = S.fromList (map fst rankings)
-                    badMethods
-                      | Just ms <- runMethods = S.fromList ms `S.difference` methodsAvailable
-                      | otherwise             = S.empty
-                    filterMethods
-                      | Just ms <- runMethods = (`elem` ms)
-                      | otherwise             = const True
-                when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
-                mapM_ (uncurry $ runMethod queryId query)
-                    $ filter (\(method, _) -> filterMethods method) rankings
-          where
-            simpleWeightedGraphs = computeSimpleGraphs universeGraph queryPageIds
-            queryPageIds = HS.fromList $ map queryDocPageId queriesWithSeedEntities
--}
-
-    let subgraphExpansion = --do
+    let subgraphExpansion =
             forM_' queriesWithSeedEntities $ \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
                 when (null $ seedEntities) $
                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
@@ -614,7 +534,6 @@ main = do
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
---                                           universeGraph binarySymmetricGraph wordEmbeddings
 
                 case dotFilenameMaybe of
                     Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename
@@ -632,7 +551,7 @@ main = do
                     $ filter (filterMethods . fst) rankings
 
     case graphset of
-      --Fullgraph -> fullgraphExpansion
+      Fullgraph -> fail "Fullgraph not supported anymore "
       Subgraph ->  subgraphExpansion
 
     mapM_ (\h -> takeMVar h >>= hClose) handles
