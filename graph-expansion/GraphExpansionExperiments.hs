@@ -1,11 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
@@ -14,12 +9,10 @@
 module GraphExpansionExperiments where
 
 import Control.DeepSeq
-import Data.Foldable
 import Data.Monoid
 import Data.List (intercalate)
 import GHC.Generics
 import Data.Tuple
-import Options.Applicative
 
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
