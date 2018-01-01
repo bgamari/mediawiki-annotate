@@ -18,12 +18,12 @@ import CAR.QRelFile
 
 main :: IO ()
 main = do
-    mode <- execParser $ info modes (progDesc "Converting paragraph ids from run files and qrels files according to duplicates mapping.\n\n")
+    mode <- execParser $ info (helper <*> modes) (progDesc "Converting paragraph ids from run files and qrels files according to duplicates mapping.\n\n")
     mode
 
-modes = subparser $ command "run" ( info runMode mempty)
+modes = subparser $ command "run" ( info (helper <*> runMode) mempty)
 --                     <> command "entitypassage-run" $ info (run <$> argument str (help "run file with entity passage entries"))
-                   <> command "qrel"  ( info qrelMode mempty)
+                   <> command "qrel"  ( info (helper <*> qrelMode) mempty)
 
 duplicatesArg :: Parser FilePath
 duplicatesArg = option str (short 'd' <> long "duplicates" <> help "duplicates file")
