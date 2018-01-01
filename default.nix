@@ -16,7 +16,7 @@ let
 
   haskellOverrides = self: super:
     let
-      localPkgs = {
+      trecCarPackages = {
         trec-car-tools       = dontCheck (self.callCabal2nix "trec-car-tools" (localDir ./.) {});
         mediawiki-parser     = self.callCabal2nix "mediawiki-parser" (localDir ./mediawiki-parser) {};
         mediawiki-import     = self.callCabal2nix "mediawiki-import" (localDir ./mediawiki-import) {};
@@ -27,13 +27,13 @@ let
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
       };
-    in localPkgs // { inherit localPkgs; };
+    in trecCarPackages // { inherit trecCarPackages; };
 
   haskellPackages = nixpkgs.haskell.packages.ghc821.override {
     overrides = lib.composeExtensions simplirNix.haskellOverrides haskellOverrides;
   };
 in {
   inherit haskellPackages haskellOverrides;
-  inherit (haskellPackages) localPkgs;
-  env = haskellPackages.ghcWithHoogle (pkgs: builtins.attrValues haskellPackages.localPkgs);
+  inherit (haskellPackages) trecCarPackages;
+  env = haskellPackages.ghcWithHoogle (pkgs: builtins.attrValues haskellPackages.trecCarPackages ++ builtins.attrValues haskellPackages.simplirPackages);
 }
