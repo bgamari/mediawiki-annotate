@@ -22,6 +22,7 @@ library
                        CAR.RunFile
                        CAR.AnnotationsFile
                        CAR.CarExports
+                       CAR.QRelFile
                        CAR.Utils
                        CAR.Utils.Redirects
                        CAR.TocFile

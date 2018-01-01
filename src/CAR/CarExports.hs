@@ -27,20 +27,11 @@ import qualified Data.Set as S
 import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types hiding (paraId)
 import CAR.Utils
+import CAR.QRelFile
 
 -- Passage file
 type PassageFile = [Paragraph]
 
--- Ground truth
-data Relevance = Relevant | NonRelevant
-               deriving (Show, Eq, Ord)
-
--- | A relevance annotation of a paragraph in a section
-data Annotation = Annotation SectionPath ParagraphId Relevance
-                deriving (Show, Eq, Ord)
-
-data EntityAnnotation = EntityAnnotation SectionPath PageId Relevance
-                deriving (Show, Eq, Ord)
 
 -- | In TREC @qrel@ format.
 prettyAnnotation :: Annotation -> String

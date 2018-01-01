@@ -13,9 +13,9 @@ module CAR.Types.AST
     , Link(..)
     , PageId(..), packPageId, unpackPageId, pageNameToId
     , SectionHeading(..)
-    , HeadingId(..), unpackHeadingId, sectionHeadingToId
+    , HeadingId(..), unpackHeadingId, packHeadingId, sectionHeadingToId
     , ParagraphId(..), unpackParagraphId, packParagraphId
-    , SectionPath(..), escapeSectionPath
+    , SectionPath(..), escapeSectionPath, parseSectionPath
       -- * Documents
     , Paragraph(..)
     , ParaBody(..), paraBodiesToId
@@ -77,6 +77,9 @@ import qualified Data.SmallUtf8 as Utf8
 unpackSBS :: SBS.ShortByteString -> String
 unpackSBS = map (chr . fromIntegral) . SBS.unpack
 
+packSBS :: String -> SBS.ShortByteString
+packSBS = SBS.pack . map (fromIntegral . ord)
+
 urlEncodeText :: String -> SBS.ShortByteString
 urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
 
@@ -129,6 +132,9 @@ sectionHeadingToId (SectionHeading h) = HeadingId $ urlEncodeText $ T.unpack h
 unpackHeadingId :: HeadingId -> String
 unpackHeadingId (HeadingId s) = unpackSBS s
 
+packHeadingId :: String -> HeadingId
+packHeadingId = HeadingId . packSBS
+
 -- | The text of a section heading.
 newtype SectionHeading = SectionHeading { getSectionHeading :: T.Text }
                        deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData)
@@ -149,7 +155,7 @@ unpackParagraphId (ParagraphId s) = unpackSBS s
 
 -- | Not generally safe.
 packParagraphId :: String -> ParagraphId
-packParagraphId = ParagraphId . SBS.pack . map (fromIntegral . ord)
+packParagraphId = ParagraphId . packSBS
 
 data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
@@ -348,6 +354,12 @@ instance NFData SectionPath
 escapeSectionPath :: SectionPath -> String
 escapeSectionPath (SectionPath page headings) =
     intercalate "/" $ (unpackPageId page) : map unpackHeadingId headings
+
+parseSectionPath :: T.Text -> Maybe SectionPath
+parseSectionPath s
+  | pid:hs <- T.split (== '/') s =
+        Just $ SectionPath (packPageId $ T.unpack pid) (map (packHeadingId . T.unpack) hs)
+  | otherwise = Nothing
 
 -- | 'Stub' is like 'Page', but with the guarantee that there are no paragraphs
 -- in the page skeleton
