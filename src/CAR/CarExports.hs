@@ -15,8 +15,6 @@ module CAR.CarExports
     , EntityAnnotation(..)
     , toAnnotations
     , toEntityAnnotations
-    , prettyAnnotation
-    , prettyEntityAnnotation
     ) where
 
 import Data.Maybe
@@ -32,26 +30,6 @@ import CAR.QRelFile
 -- Passage file
 type PassageFile = [Paragraph]
 
-
--- | In TREC @qrel@ format.
-prettyAnnotation :: Annotation -> String
-prettyAnnotation (Annotation sectionPath paraId rel) =
-    unwords [ escapeSectionPath sectionPath
-            , "0"
-            , unpackParagraphId paraId
-            , case rel of
-                Relevant    -> "1"
-                NonRelevant -> "0"
-            ]
-prettyEntityAnnotation :: EntityAnnotation -> String
-prettyEntityAnnotation (EntityAnnotation sectionPath entityId rel) =
-    unwords [ escapeSectionPath sectionPath
-            , "0"
-            , unpackPageId entityId
-            , case rel of
-                Relevant    -> "1"
-                NonRelevant -> "0"
-            ]
 
 toStubSkeleton :: Page -> Stub
 toStubSkeleton (Page name pageId ty meta skeleton) =

@@ -83,9 +83,7 @@ exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (Annotation sectionPath paragId rel) =
           Annotation (cutSectionPath sectionPath) paragId rel
-    writeFile outPath
-          $ unlines
-          $ map prettyAnnotation
+    writeParagraphQRel outPath
           $ S.toList
           $ S.map cutAnnotation
           $ foldMap Exports.toAnnotations pagesToExport
@@ -102,9 +100,7 @@ exportEntityAnnotations cutSectionPath outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
           EntityAnnotation (cutSectionPath sectionPath) entityId rel
-    writeFile outPath
-          $ unlines
-          $ map prettyEntityAnnotation
+    writeEntityQRel outPath
           $ S.toList
           $ S.map cutAnnotation
           $ foldMap Exports.toEntityAnnotations pagesToExport
