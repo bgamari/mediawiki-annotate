@@ -4,7 +4,7 @@ import Numeric
 import Data.Foldable
 import Data.Bits
 import Test.QuickCheck hiding ((.&.))
-import Word1024
+import CAR.FilterDuplicates.Word1024
 
 newtype N = N {getN :: Integer}
           deriving (Eq, Ord, Num, Enum, Bits)
