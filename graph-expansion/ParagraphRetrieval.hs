@@ -223,6 +223,13 @@ main = do
 
 
 
+    let nubWithKey :: Ord b => (a -> b) -> [a] -> [a]
+        nubWithKey f list = go mempty list
+          where
+            go seen (x:xs)
+              | (f x) `S.member` seen = go seen xs
+              | otherwise              = x : go (S.insert (f x) seen) xs
+
 
 
     index <- Index.open simplirIndexFilepath
@@ -245,8 +252,8 @@ main = do
         runIrMethod :: CarRun.QueryId -> QueryDoc -> RetrievalFun -> [(ParagraphId, Double)] -> IO ()
         runIrMethod queryId query method ranking' = handle onError $ do
             let Just hdl = M.lookup method runHandles
-                ranking = fmap head . groupBy eq' $  ranking'
-                  where eq' (pid1, _) (pid2, _) = (pid1 == pid2)
+                ranking = nubWithKey fst ranking'
+
 
             logMsg queryId method $ "evaluating"
             --logTimed "evaluating graph" $ evaluate $ rnf graph
