@@ -29,6 +29,7 @@ import Numeric.Log
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+import Data.List
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
@@ -242,8 +243,10 @@ main = do
         forM_' = forConcurrentlyN_ ncaps
 
         runIrMethod :: CarRun.QueryId -> QueryDoc -> RetrievalFun -> [(ParagraphId, Double)] -> IO ()
-        runIrMethod queryId query method ranking = handle onError $ do
+        runIrMethod queryId query method ranking' = handle onError $ do
             let Just hdl = M.lookup method runHandles
+                ranking = fmap head . groupBy eq' $  ranking'
+                  where eq' (pid1, _) (pid2, _) = (pid1 == pid2)
 
             logMsg queryId method $ "evaluating"
             --logTimed "evaluating graph" $ evaluate $ rnf graph
