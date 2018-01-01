@@ -26,13 +26,6 @@ let
         annotate-server      = self.callCabal2nix "annotate-server" (localDir ./assessment-interface/annotation/server) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
-
-        #cborg = self.callHackage "cborg" "0.2.0.0" {};
-        #serialise = self.callHackage "serialise" "0.2.0.0" {};
-        #cborg = self.callCabal2nix "cborg" git://github.com/well-typed/binary-serialise-cbor {subpath = "cborg";};
-        #serialise = self.callCabal2nix "serialise" ./vendor/binary-serialise-cbor/serialise {};
-        #binary-serialise-cbor = self.callCabal2nix "binary-serialise-cbor" ./vendor/binary-serialise-cbor/binary-serialise-cbor {};
-        #cborg-json            = self.callCabal2nix "cborg-json" ./vendor/binary-serialise-cbor/cborg-json {};
       };
     in localPkgs // { inherit localPkgs; };
 
