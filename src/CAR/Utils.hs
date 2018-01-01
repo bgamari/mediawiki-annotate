@@ -6,6 +6,8 @@ import           Data.DList (DList)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import qualified Data.Set as S
+import Data.List
 import Data.Foldable
 import CAR.Types
 
@@ -129,3 +131,13 @@ paraToText (Paragraph  _ bodies) =
     TL.concat $ fmap toText bodies
   where toText (ParaText text) = TL.fromStrict text
         toText (ParaLink link) = TL.fromStrict $ linkAnchor link
+
+
+nubWithKey :: Ord b => (a -> b) -> [a] -> [a]
+nubWithKey f list = go mempty list
+  where
+    go seen (x:xs)
+      | (f x) `S.member` seen = go seen xs
+      | otherwise             = x : go (S.insert (f x) seen) xs
+    go _ [] = []
+

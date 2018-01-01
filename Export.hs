@@ -15,6 +15,8 @@ import Options.Applicative
 import CAR.Types
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
+import CAR.QRelFile
+
 
 options :: Parser (FilePath, [SiteId -> PageId], [Exporter])
 options =

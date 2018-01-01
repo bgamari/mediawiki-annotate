@@ -71,6 +71,18 @@ executable trec-car-rewrite-duplicates
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
 
+executable trec-car-map-paragraphids
+  main-is:             MapParagraphIds.hs
+  build-depends:       base,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       bytestring >=0.10 && <0.11,
+                       optparse-applicative >= 0.13,
+                       trec-car-filter-duplicates,
+                       trec-car-tools
+  ghc-options:         -rtsopts -threaded
+  default-language:    Haskell2010
+
 executable trec-car-duplicates-rewrite-table
   main-is:             DuplicatesRewriteTable.hs
   build-depends:       base,
