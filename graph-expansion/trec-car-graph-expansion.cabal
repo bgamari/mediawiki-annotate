@@ -150,6 +150,52 @@ executable trec-car-paragraph-retrieval
                        trec-car-tools
   default-language:    Haskell2010
 
+executable trec-car-edgedoc-retrieval
+  main-is:             EdgeDocRetrieval.hs
+  other-modules:       GraphExpansion
+                       Dijkstra
+                       DenseMapping
+                       PageRank
+                       Graph
+                       AttriRank
+                       ZScore
+                       WriteRanking
+                       GraphExpansionExperiments
+                       EdgeDocCorpus
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       pipes,
+                       binary,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 
 executable trec-car-seeds
   main-is:             SeedEntities.hs
