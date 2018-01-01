@@ -228,8 +228,8 @@ main = do
           where
             go seen (x:xs)
               | (f x) `S.member` seen = go seen xs
-              | otherwise              = x : go (S.insert (f x) seen) xs
-
+              | otherwise             = x : go (S.insert (f x) seen) xs
+            go _ [] = []
 
 
     index <- Index.open simplirIndexFilepath
