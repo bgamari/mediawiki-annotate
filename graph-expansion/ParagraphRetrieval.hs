@@ -46,6 +46,7 @@ import CAR.Types
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
+import CAR.Utils (nubWithKey)
 
 import Graph
 import EdgeDocCorpus
@@ -57,6 +58,7 @@ import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import ZScore
+
 
 
 type EntityIndex = Index.OnDiskIndex Term PageId Int
@@ -221,15 +223,6 @@ main = do
 --               map populateSeeds . pagesToQueryDocs siteId queryDeriv
 --                   <$> readPagesOrOutlinesAsPages queryFile
 
-
-
-    let nubWithKey :: Ord b => (a -> b) -> [a] -> [a]
-        nubWithKey f list = go mempty list
-          where
-            go seen (x:xs)
-              | (f x) `S.member` seen = go seen xs
-              | otherwise             = x : go (S.insert (f x) seen) xs
-            go _ [] = []
 
 
     index <- Index.open simplirIndexFilepath
