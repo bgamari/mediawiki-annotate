@@ -3,7 +3,7 @@
 {-# LANGUAGE UnliftedFFITypes #-}
 {-# LANGUAGE BangPatterns #-}
 
-module Word1024 where
+module CAR.FilterDuplicates.Word1024 where
 
 import Foreign.C.Types
 import Data.Bits

@@ -13,12 +13,12 @@ import Control.Parallel.Strategies
 import System.IO
 import System.CPUTime
 
---import Bloom.Naive
-import Bloom.Opt
---import Bloom.IntSet
+--import CAR.FilterDuplicates.Bloom.Naive
+import CAR.FilterDuplicates.Bloom.Opt
+--import CAR.FilterDuplicates.Bloom.IntSet
+import CAR.FilterDuplicates.Utils
 import CAR.Types
 import CAR.Utils
-import Utils
 
 
 -- ------------------------------------------------

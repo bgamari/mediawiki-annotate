@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
-module IntSet where
+
+module CAR.FilterDuplicates.IntSet where
 
 import qualified Data.Vector.Unboxed as VU
 import Control.DeepSeq

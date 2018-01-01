@@ -2,7 +2,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnliftedFFITypes #-}
 
-module Bloom.Opt where
+module CAR.FilterDuplicates.Bloom.Opt where
 
 import Numeric
 import Data.Bits
@@ -11,7 +11,7 @@ import GHC.Exts
 import Data.Hashable
 import Data.Primitive
 
-import Word1024
+import CAR.FilterDuplicates.Word1024 as Word1024
 
 data Bloom = Bloom { getBloom :: !Word1024 }
            deriving (Eq)

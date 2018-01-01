@@ -1,41 +1,13 @@
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE BangPatterns #-}
 
-
-import Data.Bits
-import Data.Foldable
 import Data.Monoid
-import Data.List
-import Data.Hashable
-import Control.Monad (when, replicateM, replicateM_)
-import Control.DeepSeq
-import GHC.TypeLits
-import GHC.Conc
-import Control.Exception
-import Control.Concurrent.Async
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TSem
-import System.IO
 
-import qualified Data.Vector as V
-import qualified Data.Vector.Algorithms.Intro as Sort
-import qualified Data.Map.Strict as M
 import qualified Data.HashSet as HS
 import Options.Applicative
-import Control.Parallel.Strategies
-import System.Random.MWC
-import System.Random.MWC.Distributions (standard)
-
-import SimplIR.WordEmbedding
-import SimplIR.WordEmbedding.Parse
 
 import CAR.Types
-import CAR.Types.Files
-import CAR.Utils
 import CAR.TocFile  as TocFile
-import qualified IntSet as IS
-import Utils
+import CAR.FilterDuplicates.Utils
 {-# ANN module ("HLint: ignore Redundant $"::String) #-}
 
 

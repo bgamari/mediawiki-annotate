@@ -9,8 +9,8 @@ import Options.Applicative
 
 import CAR.CarExports
 import CAR.Types
-import ConnectedComponent
-import Utils
+import CAR.FilterDuplicates.ConnectedComponent
+import CAR.FilterDuplicates.Utils
 
 opts :: Parser (FilePath, FilePath, FilePath)
 opts = (,,)

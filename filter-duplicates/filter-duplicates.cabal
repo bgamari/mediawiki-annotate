@@ -13,13 +13,13 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Bloom.IntSet
-                       Bloom.Naive
-                       Bloom.Opt
-                       Word1024
-                       Utils
-                       ConnectedComponent
-                       IntSet
+  exposed-modules:     CAR.FilterDuplicates.Bloom.IntSet
+                       CAR.FilterDuplicates.Bloom.Naive
+                       CAR.FilterDuplicates.Bloom.Opt
+                       CAR.FilterDuplicates.Word1024
+                       CAR.FilterDuplicates.Utils
+                       CAR.FilterDuplicates.ConnectedComponent
+                       CAR.FilterDuplicates.IntSet
   hs-source-dirs:      src
   c-sources:           cbits/bloom.c
   cc-options:          -march=haswell

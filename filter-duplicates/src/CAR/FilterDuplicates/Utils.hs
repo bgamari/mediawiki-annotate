@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 
-module Utils where
+module CAR.FilterDuplicates.Utils where
 
 import Data.Char
 import Data.Maybe

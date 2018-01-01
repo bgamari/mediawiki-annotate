@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module ConnectedComponent (connectedComponents, Edge(..)) where
+module CAR.FilterDuplicates.ConnectedComponent (connectedComponents, Edge(..)) where
 
 import Data.Monoid
 import Data.Foldable

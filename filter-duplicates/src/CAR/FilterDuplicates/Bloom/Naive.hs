@@ -1,6 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
-module Bloom.Naive where
+module CAR.FilterDuplicates.Bloom.Naive where
 
 import Data.Hashable
 import Data.Foldable

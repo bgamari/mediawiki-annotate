@@ -34,8 +34,8 @@ import SimplIR.WordEmbedding.Parse
 
 import CAR.Types
 import CAR.Utils
-import qualified IntSet as IS
-import Utils
+import qualified CAR.FilterDuplicates.IntSet as IS
+import CAR.FilterDuplicates.Utils
 
 import Debug.Trace
 

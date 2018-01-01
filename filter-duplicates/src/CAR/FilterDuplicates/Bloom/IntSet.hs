@@ -1,11 +1,7 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
-module Bloom.IntSet where
+module CAR.FilterDuplicates.Bloom.IntSet where
 
 import Data.Hashable
 import qualified Data.IntervalSet as IS
-
-import Debug.Trace
 
 newtype Bloom = Bloom { getBloom :: IS.IntSet }
               deriving (Eq)
