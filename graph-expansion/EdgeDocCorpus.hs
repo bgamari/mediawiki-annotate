@@ -49,11 +49,8 @@ instance Hashable EdgeDoc where
 
 pageToEdgeDocs :: Page -> [EdgeDoc]
 pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
-    filter (not . isNullPageId . edgeDocArticleId) -- discard edge docs when articleId is an empty entity
-    $ foldMap (go mempty) pageSkeleta
+    foldMap (go mempty) pageSkeleta
   where
-    isNullPageId = null . unpackPageId
-
     go :: [SectionHeading] -> PageSkeleton -> [EdgeDoc]
     go headings (Section heading _ children) =
         concatMap (go (heading : headings)) $ children
@@ -69,7 +66,7 @@ pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
       let
         edgeDocParagraphId    = paraId para
         edgeDocArticleId      = pageId
-        edgeDocNeighbors      = HS.fromList $ filter (not . isNullPageId) -- kick out links to empty entity ids
+        edgeDocNeighbors      = HS.fromList
                               $ [pageId] ++ fmap linkTargetId (paraLinks para)
         edgeDocContent        = paragraphContent para headings
       in EdgeDoc {..}

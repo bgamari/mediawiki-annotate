@@ -17,6 +17,7 @@ import Options.Applicative hiding (action)
 import qualified Codec.Serialise as CBOR
 import qualified Data.ByteString.Lazy as BSL
 
+import qualified CAR.TocFile as TocFile
 import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
 import CAR.Utils
@@ -110,11 +111,15 @@ opts = subparser
     dumpParagraphs =
         f <$> argument str (help "input paragraph file" <> metavar "FILE")
           <*> flag anchorOnly withLink (long "links" <> help "Show link targets")
+          <*> many (option (packParagraphId <$> str) (long "paragraph" <> short 'p' <> help "dump only paragraphs with the given paragraph id"))
       where
-        f :: FilePath -> LinkStyle -> IO ()
-        f inputFile linkStyle = do
-                paragraphs <- readParagraphsFile inputFile
-                mapM_ printParagraph paragraphs
+        f :: FilePath -> LinkStyle -> [ParagraphId] -> IO ()
+        f inputFile linkStyle paraIds = do
+            paragraphs <- if null paraIds
+              then readParagraphsFile inputFile
+              else do paras <- TocFile.open $ TocFile.IndexedCborPath inputFile
+                      return $ mapMaybe (`TocFile.lookup` paras) paraIds
+            mapM_ printParagraph paragraphs
 
           where printParagraph = putStrLn . prettyParagraph linkStyle
 

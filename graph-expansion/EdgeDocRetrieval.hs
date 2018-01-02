@@ -57,8 +57,6 @@ import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
-import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
-
 import ZScore
 
 
@@ -82,7 +80,7 @@ opts :: Parser ( FilePath
                , QuerySource
 --                , Maybe [Method]
 --                , Int
-               , Index.OnDiskIndex Term ParagraphId Int
+               , Index.OnDiskIndex Term EdgeDoc Int
 --                , RankingType
 --                , Graphset
                , [CarRun.QueryId]
@@ -97,7 +95,7 @@ opts =
 --     <*> optional methods
 --     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     <*> option (Index.OnDiskIndex <$> str)
-               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir paragraph index")
+               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
 --     <*> flag EntityRanking EntityPassageRanking (long "entity-psg" <> help "If set, include provenance paragraphs")
 --     <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
@@ -125,13 +123,8 @@ opts =
                 <*> queryDeriv
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
-retrievalModels' :: [(RetrievalFun, Index.RetrievalModel Term ParagraphId Int)]
-retrievalModels' =
-    [ (Ql,   QL.queryLikelihood $ QL.Dirichlet 100)
-    , (Bm25, BM25.bm25 $ BM25.sensibleParams)
-    ]
 
-computeRankingsForQuery :: (Index.RetrievalModel Term ParagraphId Int -> RetrievalFunction ParagraphId)
+computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> AnnotationsFile
                         -> CarRun.QueryId  ->  [Term]
                         -> [(RetrievalFun, [(ParagraphId, Double)])]
@@ -143,12 +136,21 @@ computeRankingsForQuery
 
         retrievalResults :: [(RetrievalFun, [(ParagraphId, Double)])]
         retrievalResults = [ (irname, retrievalResult)
-                           | (irname, retrievalModel) <- retrievalModels'
+                           | (irname, retrievalModel) <- retrievalModels
                            , let retrievalResult =
-                                   fmap (\(ed, ld) -> (ed, ln ld)) $
+                                   fmap (\(ed, ld) -> (edgeDocParagraphId ed, ln ld)) $
                                    retrieveDocs retrievalModel query
                            ]
 
+--
+--         attachParagraphs :: RetrievalFun ->  [(PageId, Double)] -> [(PageId, Maybe ParagraphId, Double)]
+--         attachParagraphs irname entityRanking
+--           | Just results <- lookup irname retrievalResults =
+--              let psgOf :: HM.HashMap PageId ParagraphId
+--                  psgOf = HM.fromListWith (\x _ -> x)
+--                          $ foldMap (\(EdgeDoc{..}, _) -> fmap (\x -> (x, edgeDocParagraphId)) (HS.toList edgeDocNeighbors ++ [edgeDocArticleId]))
+--                          $ results
+--              in fmap (\(entity, score) -> (entity, (entity `HM.lookup` psgOf), score)) entityRanking
 
     in retrievalResults
 
@@ -170,7 +172,7 @@ main = do
     annsFile <- AnnsFile.openAnnotations articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
-    putStrLn $ "# Paragraph index: "++ show simplirIndexFilepath
+    putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 --
 --     let seedMethod :: SeedDerivation -> IO (QueryDoc -> QueryDoc)
 --         seedMethod SeedsFromLeadSection = return id
@@ -224,9 +226,9 @@ main = do
 
 
     index <- Index.open simplirIndexFilepath
-    let retrieveDocs :: Index.RetrievalModel Term ParagraphId Int -> RetrievalFunction ParagraphId
+    let retrieveDocs :: Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc
         retrieveDocs model = map swap . Index.score index model
-    putStrLn "# opened paragraph index"
+    putStrLn "# opened edgedoc index"
 
     let allIrMethods = [minBound :: RetrievalFun .. maxBound]
 
