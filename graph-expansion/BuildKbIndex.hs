@@ -434,13 +434,10 @@ queryIndexToTrecRun getDocName indexFile querySource output selectedQueries meth
          where retrievalModel = case retrievalModelName of
                                   "bm25" -> bm25
                                   "ql" -> ql
-
-
-
     queries <-
         case querySource of
           QueriesFromCbor queryFile queryDeriv -> do
-              pagesToQueryDocs queryDeriv <$> readPagesFile queryFile
+              pagesToQueryDocs queryDeriv <$> readPagesOrOutlinesAsPages queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
