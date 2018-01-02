@@ -161,7 +161,8 @@ edgeDocModes = subparser
         go indexPath terms = do
             idx <- Index.open indexPath
             let postings = fold $ map (Index.lookupPostings idx) terms
-            print postings
+--             print postings
+            mapM_ print $ sortBy (flip $ comparing snd) postings
 
     queryMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
