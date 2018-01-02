@@ -161,7 +161,6 @@ edgeDocModes = subparser
         go indexPath terms = do
             idx <- Index.open indexPath
             let postings = fold $ map (Index.lookupPostings idx) terms
---             print postings
             mapM_ print $ sortBy (flip $ comparing snd) postings
 
     queryMode =
@@ -428,7 +427,16 @@ queryDocRawTerms = textToTokens' . queryDocQueryText
 
 
 
-queryIndexToTrecRun :: forall t. Binary t => (t -> TrecRun.DocumentName) -> Index.OnDiskIndex Term t Int -> QuerySource -> FilePath -> HS.HashSet TrecRun.QueryId->  T.Text -> Int -> T.Text -> IO ()
+queryIndexToTrecRun :: forall t. Binary t
+                    => (t -> TrecRun.DocumentName)
+                    -> Index.OnDiskIndex Term t Int
+                    -> QuerySource
+                    -> FilePath    -- ^ output path
+                    -> HS.HashSet TrecRun.QueryId
+                    -> TrecRun.MethodName
+                    -> Int         -- ^ k
+                    -> T.Text      -- ^ retrieval model name
+                    -> IO ()
 queryIndexToTrecRun getDocName indexFile querySource output selectedQueries methodName topK retrievalModelName = do
     index <- Index.open indexFile
     let retrieve = sortBy Index.descending . Index.score index retrievalModel
@@ -444,14 +452,13 @@ queryIndexToTrecRun getDocName indexFile querySource output selectedQueries meth
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
-
     let retrieveQuery :: QueryDoc -> [TrecRun.RankingEntry]
         retrieveQuery QueryDoc{..} =
             fmap toTrecEntry
                 $ zip [1.. ]
                 $ take topK
                 $ retrieve (textToTokens' queryDocQueryText)
-          where toTrecEntry::  (Int, (Log Double, t)) -> TrecRun.RankingEntry
+          where toTrecEntry :: (Int, (Log Double, t)) -> TrecRun.RankingEntry
                 toTrecEntry (rank, (score, doc)) =
                     TrecRun.RankingEntry {
                                    queryId  = queryDocQueryId
