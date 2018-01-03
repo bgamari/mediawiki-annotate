@@ -7,41 +7,24 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 
-import Control.Monad (when, void)
 import Control.Concurrent
 import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
 import Control.Exception
-import Data.List (sortBy)
-import Data.Maybe
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
-import Data.Foldable
-import Data.Coerce
 import Options.Applicative
 import System.IO
-import Data.Time.Clock
-import Numeric
-import GHC.TypeLits
 import Data.Aeson
 import Numeric.Log
 
 import qualified Data.Map.Strict as M
-import qualified Data.Set as S
-import Data.List
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.IO as TL
 
-import qualified Data.GraphViz as Dot
-import qualified Data.GraphViz.Printing as Dot
-import qualified Data.GraphViz.Attributes.Complete as Dot
-import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.ToolVersion
 import CAR.AnnotationsFile as AnnsFile
@@ -49,16 +32,10 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.Utils (nubWithKey)
 
-import Graph
 import EdgeDocCorpus
 import WriteRanking
-import GraphExpansion
 import GraphExpansionExperiments
-import SimplIR.WordEmbedding
-import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
-import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
-import ZScore
 
 
 
