@@ -12,6 +12,7 @@ import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import qualified Data.Binary.Serialise.CBOR as CBOR
 import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 
+import CAR.ToolVersion
 import CAR.Types
 import FilterPred
 import WikiData
@@ -92,7 +93,7 @@ runPredFromFile = runPred go
 main :: IO ()
 main = do
     (inputFile, outputFile, takeN, multiLangOptsMaybe, predicate) <-
-        execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
+        execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
     (prov, pages) <- readPagesFileWithProvenance inputFile
     predicate' <- runPredFromFile predicate
 

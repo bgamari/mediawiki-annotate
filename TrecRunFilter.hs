@@ -14,7 +14,7 @@ import qualified Data.Text as T
 
 import CAR.Types
 import CAR.TocFile as Toc
-
+import CAR.ToolVersion
 
 import SimplIR.Format.TrecRunFile as TrecRunFile
 
@@ -54,4 +54,4 @@ filterRankings docNameToTocKey indexPath inputRunFile outputRunFile = do
     writeRunFile outputRunFile filteredRankings
 
 main :: IO ()
-main = join $ execParser $ info (helper <*> mode) mempty
+main = join $ execParser' 1 (helper <*> mode) mempty

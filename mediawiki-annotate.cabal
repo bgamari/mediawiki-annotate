@@ -23,6 +23,7 @@ library
                        CAR.AnnotationsFile
                        CAR.CarExports
                        CAR.QRelFile
+                       CAR.ToolVersion
                        CAR.Utils
                        CAR.Utils.Redirects
                        CAR.TocFile
@@ -57,6 +58,7 @@ library
                        cryptohash-sha1,
                        text,
                        simplir,
+                       optparse-applicative,
                        mediawiki-parser >= 0.1
 
 executable trec-car-cat

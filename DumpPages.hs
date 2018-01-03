@@ -21,6 +21,7 @@ import qualified CAR.TocFile as TocFile
 import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
 import CAR.Utils
+import CAR.ToolVersion
 
 opts :: Parser (IO ())
 opts = subparser
@@ -153,4 +154,4 @@ sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children
 sectionHeadings _ = []
 
 main :: IO ()
-main = join $ execParser $ info (helper <*> opts) mempty
+main = join $ execParser' 1 (helper <*> opts) mempty

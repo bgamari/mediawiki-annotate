@@ -33,6 +33,7 @@ import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.Parse
 
 import CAR.Types
+import CAR.ToolVersion
 import CAR.Utils
 import qualified CAR.FilterDuplicates.IntSet as IS
 import CAR.FilterDuplicates.Utils
@@ -171,7 +172,7 @@ opts = (,,,,,,)
 main :: IO ()
 main = do
     (embeddingFile, seed, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
-        execParser $ info (helper <*> opts) mempty
+        execParser' 1 (helper <*> opts) mempty
 
     let toTuple :: Paragraph -> (ParagraphId, V.Vector Term)
         toTuple p = (paraId p, V.fromList $ tokenise $ paraToText p)

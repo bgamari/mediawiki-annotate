@@ -50,6 +50,7 @@ import CAR.Types
 import CAR.Retrieve
 import CAR.KnowledgeBase
 import CAR.Utils
+import CAR.ToolVersion
 import CAR.Utils.Redirects
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
@@ -387,7 +388,7 @@ modes = subparser
 
 main :: IO ()
 main = do
-    mode <- execParser $ info (helper <*> modes) mempty
+    mode <- execParser' 1 (helper <*> modes) mempty
     mode
 
 

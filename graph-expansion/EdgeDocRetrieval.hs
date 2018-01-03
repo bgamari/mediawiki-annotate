@@ -43,6 +43,7 @@ import qualified Data.GraphViz.Printing as Dot
 import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
+import CAR.ToolVersion
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
@@ -167,7 +168,7 @@ main = do
 
     (articlesFile, outputFilePrefix, querySrc, simplirIndexFilepath,
       queryRestriction) <-
-        execParser $ info (helper <*> opts) mempty
+        execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile

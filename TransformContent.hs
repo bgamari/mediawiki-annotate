@@ -13,6 +13,7 @@ import Data.Maybe
 import Data.Char
 
 import CAR.Types
+import CAR.ToolVersion
 
 
 helpDescr :: PP.Doc
@@ -180,7 +181,7 @@ transformCategoriesAndForbiddenSection page =
 
 main :: IO ()
 main = do
-    (inputFile, outputFile, transformMode) <- execParser $ info (helper <*> opts) (progDescDoc $ Just helpDescr)
+    (inputFile, outputFile, transformMode) <- execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
     (prov, pages) <- readPagesFileWithProvenance inputFile
     writeCarFile outputFile prov $ mapMaybe transformMode pages
 

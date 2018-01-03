@@ -6,6 +6,7 @@ import Data.Monoid
 import Options.Applicative
 import Control.Monad
 
+import CAR.ToolVersion
 import CAR.Types
 import CAR.TocFile as Toc
 
@@ -21,4 +22,4 @@ mode = subparser
 
 
 main :: IO ()
-main = join $ execParser $ info (helper <*> mode) mempty
+main = join $ execParser' 1 (helper <*> mode) mempty

@@ -31,6 +31,7 @@ import qualified Data.MediaWiki.XmlDump as XmlDump
 import CAR.Types
 import CAR.Import
 import CAR.Import.ConfigFile
+import CAR.ToolVersion
 import Data.MediaWiki.XmlDump
 
 newtype EncodedCbor a = EncodedCbor {getEncodedCbor :: BSL.ByteString}
@@ -110,7 +111,7 @@ isEnInteresting WikiDoc{..} = not $
 
 main :: IO ()
 main = do
-    (workers, maybeConfig, prov) <- execParser $ info (helper <*> opts) mempty
+    (workers, maybeConfig, prov) <- execParser' 1 (helper <*> opts) mempty
     (siteInfo, docs) <- parseWikiDocs <$> BSL.getContents
 
     let Just (XmlDump.Namespace categoryNamespaceName) =

@@ -15,6 +15,7 @@ import Data.Semigroup hiding (option)
 import Options.Applicative
 
 import CAR.Types
+import CAR.ToolVersion
 import CAR.FillMetadata
 
 data Stage = StageResolveRedirect
@@ -41,7 +42,7 @@ opts = do
 
 main :: IO ()
 main = do
-    Opts{..} <- execParser $ info (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
+    Opts{..} <- execParser' 1 (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
 
     (prov, pages') <-
       case stage of
