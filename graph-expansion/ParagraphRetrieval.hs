@@ -37,8 +37,9 @@ import GraphExpansionExperiments
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
+import SimplIR.TopK (collectTopK)
 
-
+type NumResults = Int
 
 type EntityIndex = Index.OnDiskIndex Term PageId Int
 
@@ -55,30 +56,20 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 opts :: Parser ( FilePath
                , FilePath
---                , FilePath
                , QuerySource
---                , Maybe [Method]
---                , Int
                , Index.OnDiskIndex Term ParagraphId Int
---                , RankingType
---                , Graphset
                , [CarRun.QueryId]
---                , Maybe FilePath
+               , NumResults
                )
 opts =
-    (,,,,)
+    (,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
---     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
     <*> querySource
---     <*> optional methods
---     <*> option auto (long "hops" <> metavar "INT" <> help "number of hops for initial outward expansion" <> value 3)
     <*> option (Index.OnDiskIndex <$> str)
                (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir paragraph index")
---     <*> flag EntityRanking EntityPassageRanking (long "entity-psg" <> help "If set, include provenance paragraphs")
---     <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
---     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
+    <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     where
 
       querySource :: Parser QuerySource
@@ -141,46 +132,13 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, querySrc, simplirIndexFilepath,
-      queryRestriction) <-
+      queryRestriction, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Paragraph index: "++ show simplirIndexFilepath
---
---     let seedMethod :: SeedDerivation -> IO (QueryDoc -> QueryDoc)
---         seedMethod SeedsFromLeadSection = return id
---         seedMethod (SeedsFromEntityIndex entityIndexFile) = do
---             retrieve <- retrieveEntities entityIndexFile
---             putStrLn $ "# entity index: " ++ show entityIndexFile
---             let entitiesFromIndex :: QueryDoc -> QueryDoc
---                 entitiesFromIndex qdoc =
---                     qdoc { queryDocLeadEntities = seeds }
---                   where
---                     queryTerms = textToTokens' $ queryDocQueryText qdoc
---                     seeds = HS.fromList $ map snd
---                             $ take 5 $ retrieve queryTerms
---             return entitiesFromIndex
---
---     queriesWithSeedEntities' <-
---         case querySrc of
---           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
---               populateSeeds <- seedMethod seedDerivation
---               map populateSeeds . pagesToQueryDocs siteId queryDeriv
---                   <$> readPagesOrOutlinesAsPages queryFile
---
---           QueriesFromJson queryFile -> do
---               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
---               return queriesWithSeedEntities
---
---     queriesWithSeedEntities <-
---         if null queryRestriction
---           then return queriesWithSeedEntities'
---           else do putStrLn $ "# using only queries "<>show queryRestriction
---                   return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queriesWithSeedEntities'
---     putStrLn $ "# query count: " ++ show (length queriesWithSeedEntities)
-
 
     queries <-
         case querySrc of
@@ -191,18 +149,11 @@ main = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
---     queriesWithSeedEntities <-
---         case querySrc of
---           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
---               populateSeeds <- seedMethod seedDerivation
---               map populateSeeds . pagesToQueryDocs siteId queryDeriv
---                   <$> readPagesOrOutlinesAsPages queryFile
-
 
 
     index <- Index.open simplirIndexFilepath
     let retrieveDocs :: Index.RetrievalModel Term ParagraphId Int -> RetrievalFunction ParagraphId
-        retrieveDocs model = map swap . Index.score index model
+        retrieveDocs model = map swap . collectTopK numResults  . Index.score index model
     putStrLn "# opened paragraph index"
 
     let allIrMethods = [minBound :: RetrievalFun .. maxBound]
@@ -244,25 +195,12 @@ main = do
     let subgraphExpansion =
             forM_' queries $ -- was: queriesWithSeedEntities
               \query@QueryDoc{queryDocQueryId=queryId, queryDocPageId=queryPage, queryDocLeadEntities=seedEntities} -> do
---                 when (null $ seedEntities) $
---                     T.putStr $ T.pack $ "# Query with no lead entities: "++show query++"\n"
 
 
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(RetrievalFun, [(ParagraphId,  Double)])]
                     rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query)
-
---                 let methodsAvailable = S.fromList (map fst rankings)
---                     badMethods
---                       | Just ms <- runMethods = S.fromList ms `S.difference` methodsAvailable
---                       | otherwise             = S.empty
---                     filterMethods
---                       | Just ms <- runMethods = (`elem` ms)
---                       | otherwise             = const True
---                 when (not $ S.null badMethods) $ putStrLn $ "\n\nwarning: unknown methods: "++show badMethods++"\n"
---                 mapM_ (uncurry $ runIrMethod queryId query)
---                     $ filter (filterMethods . fst) rankings
 
 
                 mapM_ (\(method, ranking) -> runIrMethod queryId query method ranking) rankings
