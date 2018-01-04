@@ -56,7 +56,10 @@ import SimplIR.WordEmbedding
 import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
+import SimplIR.TopK (collectTopK)
 import ZScore
+
+type NumResults = Int
 
 type EntityIndex = Index.OnDiskIndex Term PageId Int
 
@@ -75,9 +78,12 @@ opts :: Parser ( FilePath, FilePath, FilePath, QuerySource
                , Maybe [Method], Int, Index.OnDiskIndex Term EdgeDoc Int
                , RankingType
                , Graphset
-               , [CarRun.QueryId], Maybe FilePath)
+               , [CarRun.QueryId]
+               , Maybe FilePath
+               , NumResults
+               )
 opts =
-    (,,,,,,,,,,)
+    (,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> option str (short 'e' <> long "embedding" <> metavar "FILE" <> help "Glove embeddings file")
@@ -90,6 +96,7 @@ opts =
     <*> flag Subgraph Fullgraph (long "fullgraph" <> help "Run on full graph, not use subgraph retrieval")
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> optional (option str (long "dot" <> metavar "FILE" <> help "export dot graph to this file"))
+    <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     where
       methods :: Parser [Method]
       methods = fmap concat $ some
@@ -420,7 +427,7 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, embeddingsFile, querySrc, runMethods, expansionHops, simplirIndexFilepath,
-      rankingType, graphset, queryRestriction, dotFilenameMaybe) <-
+      rankingType, graphset, queryRestriction, dotFilenameMaybe, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     annsFile <- AnnsFile.openAnnotations articlesFile
@@ -467,7 +474,7 @@ main = do
 
     index <- Index.open simplirIndexFilepath
     let retrieveDocs :: Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc
-        retrieveDocs model = map swap . Index.score index model
+        retrieveDocs model = map swap . collectTopK numResults  . Index.score index model
     putStrLn "# opened edgedoc index"
 
     handles <- sequence $ M.fromList  -- todo if we run different models in parallel, this will overwrite previous results.
@@ -513,8 +520,9 @@ main = do
                                      (T.pack $ show method)
                                      (CarRun.unQueryId queryId)
                                      (map (\(a,_,c) -> (a,c)) ranking'')
-            bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
+            bracket (takeMVar hdl) (putMVar hdl) $ \ h -> do
                 TL.hPutStrLn h formatted
+                hFlush h
           where
             onError (SomeException exc) =
                 putStrLn $ concat [ "error: exception while running "

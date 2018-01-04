@@ -13,6 +13,7 @@ module EdgeDocCorpus
 
 import Data.Monoid hiding (All, Any)
 import Data.Maybe
+import Data.Ord
 import Control.DeepSeq
 import GHC.Generics
 
@@ -31,6 +32,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: !ParagraphId
                        , edgeDocContent         :: !T.Text
                        }
            deriving (Show, Generic)
+
+instance Ord EdgeDoc where
+    compare = comparing $ \x -> (edgeDocParagraphId x, edgeDocArticleId x)
 
 instance (Hashable a, Eq a, Binary a) => Binary (HS.HashSet a) where
     put = put . HS.toList
@@ -79,9 +83,10 @@ pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
       <> TL.intercalate " " (fmap (TL.fromStrict . getSectionHeading) headings)
       <> "\n"
       <> paraToText para
+
 edgeDocHasLinks :: EdgeDoc -> Bool
 edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
-    foldMap (filter edgeDocHasLinks . pageToEdgeDocs) . filter (isNothing . pageRedirect)
+    foldMap (filter edgeDocHasLinks . pageToEdgeDocs)
