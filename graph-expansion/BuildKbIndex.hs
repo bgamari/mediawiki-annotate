@@ -230,7 +230,8 @@ entityModes = subparser
                     tokenisePageName = textToTokens' . getPageName
                     tokeniseText   = textToTokens'
                     anchorNames :: [T.Text]
-                    anchorNames = fromMaybe mempty $ getMetadata _InlinkAnchors $ kbDocMetadata $ doc
+                    anchorNames = fromMaybe mempty $ fmap (map fst . toList)
+                                  $ getMetadata _InlinkAnchors $ kbDocMetadata $ doc
                     disambiguationNames :: [PageName]
                     disambiguationNames =  fromMaybe mempty $ getMetadata _DisambiguationNames $ kbDocMetadata $ doc
                     inlinkPagenames :: [PageName]
@@ -266,7 +267,8 @@ entityModes = subparser
                       LeadText -> T.unwords $ (kbDocLeadText doc)
 
                     anchorNames :: [T.Text]
-                    anchorNames = fromMaybe mempty $ getMetadata _InlinkAnchors $ kbDocMetadata $ doc
+                    anchorNames = fromMaybe mempty $ fmap (map fst . toList)
+                                  $ getMetadata _InlinkAnchors $ kbDocMetadata $ doc
                     disambiguationNames :: [T.Text]
                     disambiguationNames = map getPageName $ fromMaybe mempty $ getMetadata _DisambiguationNames $ kbDocMetadata $ doc
 
