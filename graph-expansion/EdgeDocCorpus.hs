@@ -13,6 +13,7 @@ module EdgeDocCorpus
 
 import Data.Monoid hiding (All, Any)
 import Data.Maybe
+import Data.Ord
 import Control.DeepSeq
 import GHC.Generics
 
@@ -31,6 +32,9 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: !ParagraphId
                        , edgeDocContent         :: !T.Text
                        }
            deriving (Show, Generic)
+
+instance Ord EdgeDoc where
+    compare = comparing $ \x -> (edgeDocParagraphId x, edgeDocArticleId x)
 
 instance (Hashable a, Eq a, Binary a) => Binary (HS.HashSet a) where
     put = put . HS.toList
