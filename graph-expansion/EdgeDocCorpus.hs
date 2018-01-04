@@ -79,9 +79,10 @@ pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
       <> TL.intercalate " " (fmap (TL.fromStrict . getSectionHeading) headings)
       <> "\n"
       <> paraToText para
+
 edgeDocHasLinks :: EdgeDoc -> Bool
 edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
-    foldMap (filter edgeDocHasLinks . pageToEdgeDocs) . filter (isNothing . pageRedirect)
+    foldMap (filter edgeDocHasLinks . pageToEdgeDocs)

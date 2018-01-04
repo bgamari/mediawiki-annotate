@@ -236,8 +236,9 @@ main = do
                              (T.pack $ show method)
                              (CarRun.unQueryId queryId)
                              $ ranking
-            bracket (takeMVar hdl) (putMVar hdl) $ \ h ->
+            bracket (takeMVar hdl) (putMVar hdl) $ \ h -> do
                 TL.hPutStrLn h formatted
+                hFlush h
           where
             onError (SomeException exc) =
                 putStrLn $ concat [ "error: exception while running "
