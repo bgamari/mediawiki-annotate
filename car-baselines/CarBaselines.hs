@@ -4,21 +4,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 import Data.Foldable
-import Data.Bifunctor
 import Data.Functor.Identity
-import Data.List (intersperse)
 import Data.Maybe (fromMaybe)
 import Data.Semigroup (Semigroup(..))
-import GHC.Generics
-import System.FilePath
 import Control.Exception
 
 import Data.Binary
 import qualified Codec.Serialise as CBOR
-import qualified Data.Aeson as Aeson
 import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -27,7 +21,6 @@ import qualified Data.DList as DList
 import qualified Numeric.Log as Log
 
 import CAR.Types
-import CAR.CarExports
 import CAR.RunFile as CarRun
 import SimplIR.RetrievalModels.CorpusStats
 import SimplIR.RetrievalModels.QueryLikelihood
