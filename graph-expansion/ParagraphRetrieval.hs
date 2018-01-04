@@ -140,7 +140,7 @@ main = do
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Paragraph index: "++ show simplirIndexFilepath
 
-    queries <-
+    queries' <-
         case querySrc of
           QueriesFromCbor queryFile queryDeriv _seedDeriv -> do
               pagesToQueryDocs siteId queryDeriv <$> readPagesOrOutlinesAsPages queryFile
@@ -149,6 +149,13 @@ main = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
+
+    queries <-
+        if null queryRestriction
+          then return queries'
+          else do putStrLn $ "# using only queries "<>show queryRestriction
+                  return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
+    putStrLn $ "# query count: " ++ show (length queries)
 
 
     index <- Index.open simplirIndexFilepath
