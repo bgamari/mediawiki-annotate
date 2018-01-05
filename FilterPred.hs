@@ -115,9 +115,9 @@ parsePred inj = term
         let natural' = fmap fromIntegral natural
         n <- natural'
         k <- natural'
-        when (k > n) $ fail "pageHashMod: k > n"
+        when (k >= n) $ fail "pageHashMod: k must be less than n"
         salt <- natural' <|> pure defaultSalt
-        return $ PageHashMod salt k n
+        return $ PageHashMod salt n k
 
     listOf :: Parser a -> Parser [a]
     listOf element = brackets $ commaSep element
