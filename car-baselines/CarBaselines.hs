@@ -41,7 +41,7 @@ import Options.Applicative
 
 import CAR.Retrieve (textToTokens')
 
-type CarDiskIndex = DiskIdx.OnDiskIndex Term (ParagraphId, DocumentLength) Int
+type CarDiskIndex = DiskIdx.DiskIndexPath Term (ParagraphId, DocumentLength) Int
 
 newtype BagOfWords = BagOfWords (M.Map Term Int)
 
@@ -115,14 +115,14 @@ modeMerge :: Parser (IO ())
 modeMerge =
     go
       <$> option str (long "output" <> short 'o' <> help "output path")
-      <*> many (argument (DiskIdx.OnDiskIndex <$> str) (metavar "INDEX" <> help "index file"))
+      <*> many (argument (DiskIdx.DiskIndexPath <$> str) (metavar "INDEX" <> help "index file"))
   where
     go :: FilePath -> [CarDiskIndex] -> IO ()
-    go outPath parts = mapM DiskIdx.openOnDiskIndex parts >>= DiskIdx.merge outPath
+    go outPath parts = void $ DiskIdx.merge outPath parts
 
 modeQuery :: Parser (IO ())
 modeQuery =
-    go <$> option (DiskIdx.OnDiskIndex <$> str) (long "index" <> short 'i' <> help "Index directory")
+    go <$> option (DiskIdx.DiskIndexPath <$> str) (long "index" <> short 'i' <> help "Index directory")
        <*> option str (long "stats" <> short 's' <> help "Corpus statistics")
        <*> option str (long "outlines" <> short 'O' <> help "File containing page outlines to predict (one per line)")
        <*> option (BS.pack <$> str) (long "run" <> short 'r' <> help "The run name" <> value (BS.pack "run"))
@@ -135,7 +135,7 @@ modeQuery =
     go diskIdx corpusStatsFile outlineFile runName k dropFreqTermsFactor modelName outputFile = do
         outlines <- readOutlinesFile outlineFile
         corpusStats <- readCorpusStats corpusStatsFile
-        idx <- DiskIdx.openOnDiskIndex diskIdx
+        idx <- DiskIdx.open diskIdx
 
 
 
@@ -146,7 +146,7 @@ modeQuery =
             termIsFrequent t =
                  let avgTermFreq = realToFrac (corpusTokenCount corpusStats) /  (realToFrac $ HM.size $ corpusTerms corpusStats)
                  in termFreq t > dropFreqTermsFactor * avgTermFreq
-                 
+
             filterQueryTerms queryTerms =
                  let queryTerms' = filter (not . termIsFrequent . fst) queryTerms
                  in if null queryTerms' then
@@ -170,7 +170,8 @@ modeQuery =
 
             model = case modelName of
                   "bm25" -> modelBM25
-                  "ql" -> modelQL
+                  "ql"   -> modelQL
+                  _      -> error "unknown model name"
 
         let predictStub :: Stub -> [CarRun.ParagraphRankingEntry]
             predictStub = foldMap (uncurry predictSection) . stubPaths
@@ -179,12 +180,12 @@ modeQuery =
             predictSection query sectionPath =
                     [ CarRun.RankingEntry
                           { carQueryId    = CarRun.sectionPathToQueryId sectionPath
-                          , carDocument   = paraId
+                          , carDocument   = paraid
                           , carRank       = rank
                           , carScore      = Log.ln score
                           , carMethodName = CarRun.MethodName $ T.pack $ BS.unpack runName
                           }
-                    | (rank, (paraId, score)) <- zip [1..] $ scoreQuery model idx k query
+                    | (rank, (paraid, score)) <- zip [1..] $ scoreQuery model idx k query
                     ]
 
         CarRun.writeParagraphRun outputFile $ foldMap predictStub outlines
@@ -219,7 +220,7 @@ main = do
     mode <- execParser $ info (helper <*> modes) fullDesc
     mode
 
-termPostings :: (Monad m, Ord p, Binary docmeta, Binary p)
+termPostings :: (Monad m, Ord p, Binary docmeta, CBOR.Serialise p)
              => DiskIdx.DiskIndex Term docmeta p
              -> [Term]
              -> Producer (docmeta, [(Term, p)]) m ()
