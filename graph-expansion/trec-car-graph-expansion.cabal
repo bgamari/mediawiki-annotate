@@ -283,6 +283,7 @@ executable graph-expansion-build-kb-index
                        optparse-applicative >= 0.13,
                        serialise,
                        binary,
+                       parallel,
                        filepath,
                        hashable,
                        deepseq,
