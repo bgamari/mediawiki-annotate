@@ -113,9 +113,7 @@ textToTokens' =
     . killStopwords enInquery
     . T.words
     . T.toCaseFold
-    . T.filter (/= '\'')
-    . killPunctuation
-    . killCharSet notLatin1Letters
+    . killCharSet (notLatin1Letters <> punctuationChars <> CS.singleton '\'')
 
 textToTokens :: TermFilter -> T.Text -> TermCounts
 textToTokens termFilter = foldMap oneTerm . filter termFilter . textToTokens'
