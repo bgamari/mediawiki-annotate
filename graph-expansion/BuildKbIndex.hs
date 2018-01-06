@@ -358,13 +358,16 @@ paragraphModes = subparser
 
     dumpMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
-           <*> some (argument (Term.fromString <$> str) (metavar "TERM" <> help "query terms"))
+           <*> flag (\s -> [Term.fromText s]) textToTokens' (long "tokenise" <> short 'T' <> help "Tokenise terms")
+           <*> some (argument (T.pack <$> str) (metavar "TERM" <> help "query terms"))
       where
-        go :: Index.OnDiskIndex Term ParagraphId Int -> [Term] -> IO ()
-        go indexPath terms = do
+        go :: Index.OnDiskIndex Term ParagraphId Int -> (T.Text -> [Term]) -> [T.Text] -> IO ()
+        go indexPath toTokens terms = do
+            hPutStrLn stderr "building index" >> hFlush stderr
             idx <- Index.open indexPath
-            let postings = fold $ map (Index.lookupPostings idx) terms
-            mapM_ print $ sortBy (flip $ comparing snd) postings
+            hPutStrLn stderr "done building index" >> hFlush stderr
+            let postings = fold $ map (Index.lookupPostings idx) $ foldMap toTokens terms
+            mapM_ print $ postings -- $ sortBy (flip $ comparing snd) postings
 
     queryMode =
         go <$> option (OnDiskIndex <$> str) (long "index" <> short 'i' <> help "index path")
