@@ -220,7 +220,7 @@ main = do
     mode <- execParser $ info (helper <*> modes) fullDesc
     mode
 
-termPostings :: (Monad m, Ord p, Binary docmeta, CBOR.Serialise p)
+termPostings :: (Monad m, Ord p, CBOR.Serialise docmeta, CBOR.Serialise p)
              => DiskIdx.DiskIndex Term docmeta p
              -> [Term]
              -> Producer (docmeta, [(Term, p)]) m ()

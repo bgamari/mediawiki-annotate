@@ -10,7 +10,7 @@
 
 import GHC.Generics
 import Data.List
-import Data.Binary
+import Codec.Serialise
 import Data.Ord
 import Control.Applicative
 import Control.Parallel.Strategies
@@ -434,7 +434,7 @@ queryDocRawTerms = textToTokens' . queryDocQueryText
 
 
 
-queryIndexToTrecRun :: forall t. Binary t
+queryIndexToTrecRun :: forall t. (Serialise t, NFData t)
                     => (t -> TrecRun.DocumentName)
                     -> Index.OnDiskIndex Term t Int
                     -> QuerySource
