@@ -13,6 +13,7 @@ import Data.List
 import Data.Binary
 import Data.Ord
 import Control.Applicative
+import Control.Parallel.Strategies
 import Data.Foldable
 import Data.Maybe
 import qualified Data.HashMap.Strict as HM
@@ -52,6 +53,7 @@ import CAR.KnowledgeBase
 import CAR.Utils
 import CAR.ToolVersion
 import CAR.Utils.Redirects
+import SimplIR.Utils
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
 import Data.Warc as Warc
@@ -347,7 +349,9 @@ paragraphModes = subparser
                     tokeniseText   = textToTokens'
 
             Index.buildTermFreq outputPath
-                [ (paraId psg, docTerms psg)
+                $ statusList 1000 (\n->"paragraph"++show n)
+                $ withStrategy (parBuffer 128 rdeepseq)
+                [ (paraId psg, {-# SCC "docTerms" #-}docTerms psg)
                 | psg <- paragraphs
                 ]
             return ()
