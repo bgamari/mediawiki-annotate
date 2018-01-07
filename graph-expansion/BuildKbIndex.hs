@@ -381,7 +381,7 @@ modes = subparser
 
 main :: IO ()
 main = do
-    mode <- execParser' 2 (helper <*> modes) mempty
+    mode <- execParser' 3 (helper <*> modes) mempty
     mode
 
 
