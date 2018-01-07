@@ -64,6 +64,7 @@ import Crypto.Hash.SHA1 as SHA
 import qualified Data.ByteString.Base16 as Base16
 import Data.Aeson.Types
 import qualified Data.Aeson as Aeson
+import qualified Data.Vector as V
 import Data.Hashable
 import Data.String
 import qualified Control.Lens as L
@@ -290,7 +291,8 @@ data MetadataItem = RedirectNames [PageName]
                   | CategoryNames [PageName]
                   | CategoryIds [PageId]
                   | InlinkIds [PageId]
-                  | InlinkAnchors [T.Text]
+                  | OldInlinkAnchors [T.Text] -- ^ deprecated
+                  | InlinkAnchors (V.Vector (T.Text, Int))
                   | UnknownMetadata !Int !Int [CBOR.Term]
                   deriving (Show, Generic)
 
@@ -305,7 +307,8 @@ instance CBOR.Serialise MetadataItem where
           3 -> CategoryNames <$> CBOR.decode
           4 -> CategoryIds <$> CBOR.decode
           5 -> InlinkIds <$> CBOR.decode
-          6 -> InlinkAnchors <$> CBOR.decode
+          6 -> OldInlinkAnchors <$> CBOR.decode
+          7 -> InlinkAnchors <$> CBOR.decode
           _ -> UnknownMetadata len tag <$> replicateM (len-1) CBOR.decodeTerm
 
     encode val =
@@ -316,7 +319,8 @@ instance CBOR.Serialise MetadataItem where
           CategoryNames xs -> simple 3 xs
           CategoryIds xs -> simple 4 xs
           InlinkIds xs -> simple 5 xs
-          InlinkAnchors xs -> simple 6 xs
+          OldInlinkAnchors xs -> simple 6 xs
+          InlinkAnchors xs -> simple 7 xs
           UnknownMetadata len tag y ->
                  CBOR.encodeListLen (fromIntegral len)
               <> CBOR.encodeInt tag

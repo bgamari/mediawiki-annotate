@@ -12,12 +12,11 @@ module EdgeDocCorpus
   ) where
 
 import Data.Monoid hiding (All, Any)
-import Data.Maybe
 import Data.Ord
 import Control.DeepSeq
 import GHC.Generics
 
-import Data.Binary
+import Codec.Serialise
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
@@ -36,10 +35,7 @@ data EdgeDoc = EdgeDoc { edgeDocParagraphId     :: !ParagraphId
 instance Ord EdgeDoc where
     compare = comparing $ \x -> (edgeDocParagraphId x, edgeDocArticleId x)
 
-instance (Hashable a, Eq a, Binary a) => Binary (HS.HashSet a) where
-    put = put . HS.toList
-    get = HS.fromList <$> get
-instance Binary EdgeDoc
+instance Serialise EdgeDoc
 instance NFData EdgeDoc
 
 instance Eq EdgeDoc where

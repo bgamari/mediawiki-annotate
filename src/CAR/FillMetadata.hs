@@ -13,6 +13,8 @@ import Data.Semigroup hiding (option)
 import Data.Foldable (foldl')
 import Data.Maybe
 import qualified Data.Text as T
+import qualified Data.Vector as V
+import Data.Coerce
 
 import CAR.Utils
 import CAR.Types
@@ -128,7 +130,7 @@ buildDisambiguateInlinksMap page =
         ]
     inlinkAnchors =
         [ HM.singleton (linkTargetId link)
-          $ mempty { accInlinkAnchors = HS.singleton (linkAnchor link) }
+          $ mempty { accInlinkAnchors = HM.singleton (linkAnchor link) (Sum 1) }
         | pageIsArticle page || pageIsCategory page
         , link <- pageLinks page
         ]
@@ -145,10 +147,9 @@ buildDisambiguateInlinksMap page =
         case foldMap paraBodyLinks bodies of
         [] -> []
         (a:_) -> [a]
-    
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId
-extractAllCategoryIds pages  = 
+extractAllCategoryIds pages  =
     HS.fromList
     $ map pageId
     $ filter pageIsCategory pages
@@ -176,7 +177,7 @@ data Acc = Acc { accRedirectNames :: !(HS.HashSet PageName)
                , accCategoryNames :: !(HS.HashSet PageName)
                , accCategoryIds   :: !(HS.HashSet PageId)
                , accInlinkIds     :: !(HS.HashSet PageId)
-               , accInlinkAnchors :: !(HS.HashSet T.Text)
+               , accInlinkAnchors :: !(HM.HashMap T.Text (Sum Int))
                }
 
 instance Monoid Acc where
@@ -188,7 +189,7 @@ instance Monoid Acc where
 
 instance Semigroup Acc where
     Acc a1 b1 c1 d1 e1 f1 g1 <> Acc a2 b2 c2 d2 e2 f2 g2 =
-        Acc (a1<>a2) (b1<>b2) (c1<>c2) (d1<>d2) (e1<>e2) (f1<>f2) (g1<>g2)
+        Acc (a1<>a2) (b1<>b2) (c1<>c2) (d1<>d2) (e1<>e2) (f1<>f2) (HM.unionWith (<>) g1 g2)
 
 fillDisambigInlinkMetadata :: HM.HashMap PageId Acc -> Page -> Page
 fillDisambigInlinkMetadata acc page =
@@ -196,10 +197,11 @@ fillDisambigInlinkMetadata acc page =
                setMetadata _DisambiguationNames (HS.toList $ accDisambigNames things)
                $ setMetadata _DisambiguationIds (HS.toList $ accDisambigIds things)
                $ setMetadata _InlinkIds (HS.toList $ accInlinkIds things)
-               $ setMetadata _InlinkAnchors (HS.toList $ accInlinkAnchors things)
+               $ setMetadata _InlinkAnchors (coerce inlinkAnchors)
                $ pageMetadata page
          }
   where
+    inlinkAnchors = V.fromListN (HM.size $ accInlinkAnchors things) $ HM.toList $ accInlinkAnchors things
     things = fromMaybe mempty $ HM.lookup (pageId page) acc
 
 

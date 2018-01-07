@@ -52,6 +52,7 @@ library
                        foldl,
                        network-uri,
                        dlist,
+                       vector,
                        mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
