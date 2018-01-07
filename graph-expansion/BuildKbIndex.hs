@@ -18,28 +18,19 @@ import Data.Foldable
 import Data.Maybe
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
-import Data.Coerce
-import qualified Data.Map.Strict as M
-import qualified Data.Set as S
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy.IO as TL
 import qualified Data.SmallUtf8 as Utf8
 import System.IO
-import Numeric
-import GHC.TypeLits
 import Data.Aeson
 import Numeric.Log hiding (sum)
 import Data.Hashable
 import Text.PrettyPrint.ANSI.Leijen hiding ((<>), (<$>))
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import qualified Control.Foldl as Foldl
-import Data.Foldable (foldl')
 
 
 import Pipes
@@ -52,15 +43,11 @@ import CAR.Retrieve
 import CAR.KnowledgeBase
 import CAR.Utils
 import CAR.ToolVersion
-import CAR.Utils.Redirects
 import SimplIR.Utils
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
 import Data.Warc as Warc
 
-import CAR.AnnotationsFile as AnnsFile
-import qualified CAR.RunFile as CarRun
-import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 
