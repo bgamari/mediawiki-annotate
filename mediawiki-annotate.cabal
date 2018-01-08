@@ -53,6 +53,7 @@ library
                        network-uri,
                        dlist,
                        vector,
+                       vector-algorithms,
                        mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
