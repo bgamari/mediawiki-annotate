@@ -78,8 +78,8 @@ isInteresting siteInfo  =
     let interestingNamesSpaceId = [NamespaceId 0, NamespaceId 14] -- (0, Article), (14, Category), (100, Portal)
         uninterestingNameSpaces = HS.fromList
                                   $ [ T.encodeUtf8 nameSpaceText
-                                  | (id, name) <- (XmlDump.siteNamespaces siteInfo)
-                                  , not $ (id `elem` interestingNamesSpaceId)
+                                  | (nsId, name) <- (XmlDump.siteNamespaces siteInfo)
+                                  , not $ (nsId `elem` interestingNamesSpaceId)
                                   , Namespace nameSpaceText <- pure name
                                   ]
     in \WikiDoc{..} ->
@@ -87,8 +87,8 @@ isInteresting siteInfo  =
               (prefix, rest) | not $ BS.null rest -> not $ prefix `HS.member` uninterestingNameSpaces
               _                                -> True
 
-isEnInteresting :: WikiDoc -> Bool
-isEnInteresting WikiDoc{..} = not $
+_isEnInteresting :: WikiDoc -> Bool
+_isEnInteresting WikiDoc{..} = not $
        "Category talk:" `BS.isPrefixOf` docTitle
     || "Talk:" `BS.isPrefixOf` docTitle
     || "File:" `BS.isPrefixOf` docTitle
