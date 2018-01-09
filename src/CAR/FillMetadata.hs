@@ -22,6 +22,7 @@ import CAR.Utils
 import CAR.Types
 import CAR.Utils.Redirects
 
+import Debug.Trace
 
 -- action for resolving redirects for all pages in inputPath
 stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
@@ -205,7 +206,7 @@ fillDisambigInlinkMetadata acc page =
   where
     inlinkAnchors :: V.Vector (T.Text, Int)
     inlinkAnchors =
-        V.modify (sortBy $ comparing $ Down . snd)
+        trace "\n sorted inlinkAnchors: " $ V.modify (sortBy $ comparing $ Down . snd)
         $ coerce
         $ V.fromListN (HM.size $ accInlinkAnchors things)
         $ HM.toList $ accInlinkAnchors things
