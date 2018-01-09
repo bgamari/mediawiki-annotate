@@ -42,7 +42,7 @@ opts = do
 
 main :: IO ()
 main = do
-    Opts{..} <- execParser' 1 (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
+    Opts{..} <- execParser' 2 (helper <*> opts) $ progDescDoc (Just "Fill in derived page metadata. ")
 
     (prov, pages') <-
       case stage of
