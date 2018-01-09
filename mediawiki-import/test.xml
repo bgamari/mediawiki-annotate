@@ -178,4 +178,35 @@ This page contains a lot of anchors for [[critter|critter]]:
       <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
     </revision>
   </page>
+
+  <page>
+    <title>New York City</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+        
+{{Infobox settlement
+| name = New York City
+| official_name = City of New York
+| settlement_type = [[City (New York)|City]]
+| named_for = [[James II of England|James, Duke of York]]
+| image_skyline = NYC Montage 2014 4 - Jleon.jpg
+| imagesize = 305px
+| image_caption = Clockwise, from top: [[Midtown Manhattan]], [[Times Square]], the [[Unisphere]] in [[Queens]], the [[Brooklyn Bridge]], [[Lower Manhattan]] with [[One World Trade Center]], [[Central Park]], the [[headquarters of the United Nations]], and the [[Statue of Liberty]]
+| image_flag = Flag of New York City.svg
+| image_seal = Seal_of_New_York_City_BW.svg
+| nickname = ''See [[Nicknames of New York City]]''
+}}
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
 </mediwiki>

@@ -38,9 +38,10 @@ toStubSkeleton (Page name pageId ty meta skeleton) =
     go :: PageSkeleton -> Maybe PageSkeleton
     go (Section heading headingId children) =
         Just $ Section heading headingId (mapMaybe go children)
-    go (Para _)  = Nothing
-    go (Image{}) = Nothing
-    go (List{})  = Nothing
+    go (Para _)    = Nothing
+    go (Image{})   = Nothing
+    go (List{})    = Nothing
+    go (Infobox{}) = Nothing
 
 prettyStub :: Stub -> String
 prettyStub (Stub (PageName name) _ _ _ skeleton) =
@@ -56,6 +57,7 @@ toParagraphs =
     go (Para para) = [para]
     go (Image{})   = [] -- ignore images
     go (List{})    = []
+    go (Infobox{}) = []
 
 toAnnotations :: Page -> S.Set Annotation
 toAnnotations (Page _ pageId _ _ skeleton) =
@@ -70,8 +72,9 @@ toAnnotations (Page _ pageId _ _ skeleton) =
         S.singleton $ Annotation sectionPath paraId Relevant
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
-    go _parentIds (Image{}) = mempty
-    go _parentIds (List{})  = mempty
+    go _parentIds (Image{})  = mempty
+    go _parentIds (List{})   = mempty
+    go _parentIds (Infobox{})= mempty
 
 toEntityAnnotations :: Page ->  S.Set EntityAnnotation
 toEntityAnnotations (Page { pageId, pageSkeleton = skeleton }) =
@@ -93,5 +96,6 @@ toEntityAnnotations (Page { pageId, pageSkeleton = skeleton }) =
       where
         sectionPath = SectionPath pageId (DList.toList parentIds)
         badEntityId entityId = null $ unpackPageId entityId
-    go _parentIds (Image{}) = mempty
-    go _parentIds (List{})  = mempty
+    go _parentIds (Image{})   = mempty
+    go _parentIds (List{})    = mempty
+    go _parentIds (Infobox{}) = mempty

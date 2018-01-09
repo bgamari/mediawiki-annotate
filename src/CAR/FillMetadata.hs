@@ -63,9 +63,10 @@ fixLinks redirectResolver pageNameResolver page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
       where
         goSkeleton (Section x y children) = Section x y (fmap goSkeleton children)
-        goSkeleton (Para p) = Para (goParagraph p)
-        goSkeleton (Image x skel) = Image x (fmap goSkeleton skel)
-        goSkeleton (List x p) = List x (goParagraph p)
+        goSkeleton (Para p)        = Para (goParagraph p)
+        goSkeleton (Image x skel)  = Image x (fmap goSkeleton skel)
+        goSkeleton (List x p)      = List x (goParagraph p)
+        goSkeleton (Infobox tag p) = Infobox tag $ map (fmap $ map goSkeleton) p
 
         goParagraph (Paragraph x bodies) = Paragraph x (fmap goParaBody bodies)
 
@@ -149,6 +150,7 @@ buildDisambiguateInlinksMap page =
         case foldMap paraBodyLinks bodies of
         [] -> []
         (a:_) -> [a]
+    listItemFirstskeletonLinks (Infobox {}) = []
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId
 extractAllCategoryIds pages  =
