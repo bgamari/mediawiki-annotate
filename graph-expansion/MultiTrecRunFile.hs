@@ -1,4 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 
 module MultiTrecRunFile where
 
@@ -7,6 +10,7 @@ import Data.Foldable
 import Data.Ord
 import Data.List
 import Data.Monoid
+import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
 import qualified CAR.RunFile as RunFile
@@ -33,23 +37,23 @@ type QueryId = RunFile.QueryId
 --                                  }
 --                   deriving (Show)
 
-type RankingEntry = RunFile.RankingEntry' ParagraphId -- CAR.RunFile definition
+type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 
-data MultiRankingEntry =  MultiRankingEntry { multiRankingEntryCollapsed :: !RankingEntry
-                                            , multiRankingEntryAll       :: [RankingEntry]
-                                            }
-
-type MultiRankingEntryMap = M.Map QueryId [MultiRankingEntry]
+data MultiRankingEntry doc =  MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
+                                                , multiRankingEntryAll       :: [RankingEntry doc]
+                                                }
 
 
-multiAsRankingEntry :: MultiRankingEntry -> RankingEntry
+
+
+multiAsRankingEntry :: MultiRankingEntry doc -> RankingEntry doc
 multiAsRankingEntry multiRankingEntry = multiRankingEntryCollapsed multiRankingEntry
 
 -- Precondition: MethodNames need to be unique!
 
-collapseRuns :: [[RankingEntry]]  -> MultiRankingEntryMap
+collapseRuns :: forall doc . (Eq doc, Hashable doc) =>  [[RankingEntry doc]]  -> M.Map QueryId [MultiRankingEntry doc]
 collapseRuns runs =
-    let listOfRunMaps :: M.Map QueryId [RankingEntry]
+    let listOfRunMaps :: M.Map QueryId [RankingEntry doc]
         listOfRunMaps = fmap toList . RunFile.groupByQuery $ concat runs
 
      in M.fromList $ [ (query, collapseRankings rankings)
@@ -58,7 +62,7 @@ collapseRuns runs =
 
 
 -- rankings: rank entries for the same query, across different run files
-collapseRankings :: [RankingEntry] -> [MultiRankingEntry]
+collapseRankings ::  forall doc . (Eq doc, Hashable doc) => [RankingEntry doc] -> [MultiRankingEntry doc]
 collapseRankings rankingEntries =
     -- docid -> [ entries ]
     -- groupBy (docId) rankingEntries
@@ -67,7 +71,7 @@ collapseRankings rankingEntries =
                   $ [ ((RunFile.carDocument entry), DList.singleton entry ) |  entry <- rankingEntries ]
 
         -- with score but not sorted
-        scoredMultiRankings :: [ ( Score,  [RankingEntry] ) ]
+        scoredMultiRankings :: [ ( Score,  [RankingEntry doc] ) ]
         scoredMultiRankings = [ ( aggregatedScore rankingsPerDoc', rankingsPerDoc')
                               | rankingsPerDoc <- groupByDoc
                               , let rankingsPerDoc' = toList rankingsPerDoc
@@ -78,7 +82,7 @@ collapseRankings rankingEntries =
     in zipWith buildData [1 .. ]
        $ sortOn (Down . fst) scoredMultiRankings
 
-  where buildData :: Rank -> (Score, [RankingEntry]) -> MultiRankingEntry
+  where buildData :: Rank -> (Score, [RankingEntry doc]) -> MultiRankingEntry doc
         buildData r (s, rankings) =  MultiRankingEntry {
                                     multiRankingEntryCollapsed =
                                         RunFile.RankingEntry { RunFile.carQueryId = qId
@@ -97,7 +101,7 @@ collapseRankings rankingEntries =
 
 -- precondition: all RankingEntry share the same queryId
 -- precondition2: all RankingEntry share the same documentName
-aggregatedScore :: [RankingEntry] -> Score
+aggregatedScore :: [RankingEntry doc] -> Score
 aggregatedScore rankings =
     recipRankAggregation $ fmap  ( RunFile.carRank ) rankings
   where
