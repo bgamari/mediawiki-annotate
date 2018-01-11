@@ -12,6 +12,49 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
+
+
+library
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  hs-source-dirs:      .
+  other-modules:
+      MultiTrecRunFile
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       dlist,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 executable graph-retrieval
   main-is:             GraphRetrieval.hs
   other-modules:       GraphExpansion
