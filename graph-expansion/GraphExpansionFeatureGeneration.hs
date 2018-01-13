@@ -35,6 +35,8 @@ import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.Utils (nubWithKey)
+import CAR.TocFile as Toc
+
 
 import EdgeDocCorpus
 import WriteRanking
@@ -53,6 +55,7 @@ import MultiTrecRunFile
 
 import qualified Data.Vector.Unboxed as VU
 
+import Debug.Trace
 
 type NumResults = Int
 
@@ -80,11 +83,12 @@ opts :: Parser ( FilePath
                , NumResults
                , [FilePath]
                , [FilePath]
+               , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , FilePath
                )
 opts =
-    (,,,,,,,,)
+    (,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -94,6 +98,7 @@ opts =
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
     <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
+    <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
     where
@@ -152,8 +157,8 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, querySrc, -- simplirIndexFilepath,
-      queryRestriction, numResults, entityRunFiles, edgedocRunFiles,
-      qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
+      queryRestriction, numResults, entityRunFiles, edgedocRunFiles, edgeDocsCborFile
+      , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
 --     annsFile <- AnnsFile.openAnnotations articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
@@ -184,11 +189,13 @@ main = do
                   return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
     putStrLn $ "# query count: " ++ show (length queries)
 
+    edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
 
     entityRuns <-  mapM CAR.RunFile.readEntityRun entityRunFiles
     edgedocRuns <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
 
-    let collapsedEntityRun = collapseRuns entityRuns
+    let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
+        collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgedocRuns
 
         docFeatures :: M.Map (QueryId, QRel.DocumentName) Features
@@ -196,22 +203,25 @@ main = do
                      [ ((qid, T.pack $ unpackPageId pid), features)
                      | (query, edgeRun) <- M.toList collapsedEdgedocRun
                      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-                     , ((qid, pid), features) <- generateEntityFeatures featuresOf query edgeRun entityRun
+                     , ((qid, pid), features) <- generateEntityFeatures edgeDocsLookup featuresOf query edgeRun entityRun
                      ]
         featureNames = fmap (FeatureName . T.pack . show) (entityRunFiles ++ edgedocRunFiles)        -- Todo Fix featureNames
 
-        franking :: M.Map _ [(QRel.DocumentName, Features, IsRelevant)]
+        franking :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
         franking = augmentWithQrels qrel docFeatures Relevant
 
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
 --         trainData = changeKey RunFile.unQueryId franking
 
-        trainData :: M.Map _ [(QRel.DocumentName, Features, IsRelevant)]
+        trainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
         trainData = franking
         metric = avgMetricData trainData
 
-    putStrLn $ "Training model with "++ show (M.size trainData) ++ " queries."
+    putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++ " queries."
+    putStrLn $ "Training model with (franking) "++ show (M.size franking) ++ " queries."
+    putStrLn $ "Training model with (docfeatures) "++ show (M.size docFeatures) ++ " queries/documents."
+    putStrLn $ "Training model with (collapsedEntityRun) "++ show (M.size collapsedEntityRun) ++ " queries."
 
     let (model, trainScore) = learnToRank trainData featureNames metric gen0
     putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
@@ -233,15 +243,18 @@ changeKey f map_ =
 
 
 generateEntityFeatures
-    :: (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> Features)
+    :: EdgeDocsLookup
+    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> Features)
     -> QueryId
     -> [MultiRankingEntry ParagraphId]
     -> [MultiRankingEntry PageId]
     -> [((QueryId, PageId), Features)]
-generateEntityFeatures featuresOf' query edgeRun entityRun =
+generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-        edgeDocs = fetchEdgeDocs $ HM.keys paraIdToEdgedocRun
-        universalGraph = edgeDocsToUniverseGraph edgeDocs               -- node 2 edge
+        edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun  -- ToDo create consistent edgedocs  NOW
+
+        universalGraph = edgeDocsToUniverseGraph edgeDocs
+                                                               -- Todo or features below will be empty!
 
     in  [ ((query, entity), featuresOf' entity edgeDocs entityRankEntry edgeDocsRankEntries)
         | entityRankEntry <- entityRun
@@ -287,15 +300,12 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
     in fconcat entityScoreVec edgeDocScoreVec
 
 
-fetchEdgeDocs :: [ParagraphId] -> [EdgeDoc]
-fetchEdgeDocs paragraphIds =
---     ... -- Todo   Load from Edgedoc / ParagraphToc
-    fmap fetchSingle paragraphIds
-  where fetchSingle pid = EdgeDoc { edgeDocParagraphId = pid,
-                                    edgeDocArticleId = packPageId "X",
-                                    edgeDocNeighbors = HS.fromList [packPageId "X", packPageId "Y", packPageId "Z"],
-                                    edgeDocContent = "Hallo my name is T!"
-                                    }
+type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
+
+readEdgeDocsToc :: Toc.IndexedCborPath ParagraphId EdgeDoc -> IO EdgeDocsLookup
+readEdgeDocsToc edgeDocsFileWithToc = do
+    toc <- Toc.open edgeDocsFileWithToc
+    return $ \paragraphIds -> mapMaybe ( `Toc.lookup` toc) paragraphIds
 
 
 dropUnjudged :: Ord q
