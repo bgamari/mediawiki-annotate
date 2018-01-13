@@ -86,3 +86,4 @@ edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
     foldMap (filter edgeDocHasLinks . pageToEdgeDocs)
+
