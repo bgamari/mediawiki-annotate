@@ -43,7 +43,8 @@ data MultiRankingEntry doc =  MultiRankingEntry { multiRankingEntryCollapsed :: 
                                                 , multiRankingEntryAll       :: [RankingEntry doc]
                                                 }
 
-
+multiRankingEntryGetDocumentName :: MultiRankingEntry doc -> doc
+multiRankingEntryGetDocumentName mre =  RunFile.carDocument $ multiRankingEntryCollapsed mre
 
 
 multiAsRankingEntry :: MultiRankingEntry doc -> RankingEntry doc
