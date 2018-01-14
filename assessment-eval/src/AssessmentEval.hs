@@ -1,8 +1,8 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module AssessmentEval where
 
@@ -31,7 +31,7 @@ newtype Assessor = Assessor {unAssessor :: T.Text}
 readAssessments :: FilePath -> IO Assessments
 readAssessments = fmap (foldMap toAssessments) . QRel.readQRel
   where
-    toAssessments :: QRel.Entry QRel.GradedRelevance -> Assessments
+    toAssessments :: QRel.Entry QRel.QueryId QRel.DocumentName QRel.GradedRelevance -> Assessments
     toAssessments QRel.Entry{..} =
         HM.singleton (QueryId queryId, DocumentId documentName) relevance
 
