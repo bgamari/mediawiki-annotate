@@ -261,10 +261,10 @@ generateEntityFeatures
     -> [((QueryId, PageId), Features)]
 generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-        edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun  -- ToDo create consistent edgedocs  NOW
+        edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun
 
         universalGraph = edgeDocsToUniverseGraph edgeDocs
-                                                               -- Todo or features below will be empty!
+
 
     in  [ ((query, entity), featuresOf' entity edgeDocs entityRankEntry edgeDocsRankEntries)
         | entityRankEntry <- entityRun
