@@ -79,7 +79,6 @@ data RankingType = EntityRanking | EntityPassageRanking
 opts :: Parser ( FilePath
                , FilePath
                , QuerySource
---               , Index.OnDiskIndex Term EdgeDoc Int
                , [CarRun.QueryId]
                , NumResults
                , [FilePath]
@@ -93,8 +92,6 @@ opts =
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
---    <*> option (Index.OnDiskIndex <$> str)
---               (short 'i' <> long "index" <> metavar "INDEX" <> help "simplir edgedoc index")
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
@@ -157,14 +154,12 @@ main :: IO ()
 main = do
     hSetBuffering stdout LineBuffering
 
-    (articlesFile, outputFilePrefix, querySrc, -- simplirIndexFilepath,
+    (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, entityRunFiles, edgedocRunFiles, edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
---     annsFile <- AnnsFile.openAnnotations articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
---     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) entityRunFiles)
     putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) edgedocRunFiles)
@@ -232,10 +227,6 @@ main = do
     putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++
                " queries and "++ show totalElems ++" items total of which "++
                show totalPos ++" are positive."
---     putStrLn $ "Training model with (franking) "++ show (M.size franking) ++ " queries."
---     putStrLn $ "Training model with (docfeatures) "++ show (M.size docFeatures) ++ " queries/documents."
---     putStrLn $ "Training model with (collapsedEntityRun) "++ show (M.size collapsedEntityRun) ++ " queries."
-
 
     let displayTrainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
                          -> [String]
@@ -255,11 +246,6 @@ main = do
     putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
 
 
--- learnToRank :: M.Map Run.QueryId [(QRel.DocumentName, Features, IsRelevant)]
---              -> [FeatureName]
---              -> ScoringMetric IsRelevant Run.QueryId QRel.DocumentName
---              -> StdGen
---              -> (Model, Double)
 
 changeKey :: Ord k' => (k-> k') -> M.Map k v -> M.Map k' v
 changeKey f map_ =
@@ -341,12 +327,4 @@ dropUnjudged featureMap =
    where dropUnjudged' (doc, feat, Just rel) = Just $ (doc, feat, rel)
          dropUnjudged' (_ , _, Nothing) = Nothing
 
-
-
--- exportTrain :: M.Map QueryId [(QRel.DocumentName, Features, IsRelevant)]
--- learnToRank :: M.Map Run.QueryId [(QRel.DocumentName, Features, IsRelevant)]
---              -> [FeatureName]
---              -> ScoringMetric IsRelevant Run.QueryId QRel.DocumentName
---              -> StdGen
---              -> (Model, Double)
 
