@@ -47,6 +47,7 @@ import qualified SimplIR.SimpleIndex as Index
 import SimplIR.TopK (collectTopK)
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
+import SimplIR.FeatureSpace
 
 import qualified CAR.RunFile as CAR.RunFile
 import qualified CAR.QRelFile as CAR.QRelFile
