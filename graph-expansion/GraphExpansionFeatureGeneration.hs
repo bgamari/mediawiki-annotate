@@ -27,6 +27,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
+import Data.List
 import Data.Maybe
 
 import CAR.Types
@@ -213,15 +214,38 @@ main = do
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
 --         trainData = changeKey RunFile.unQueryId franking
+        discardUntrainable :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)] -> M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+        discardUntrainable franking =
+            M.filter hasPosAndNeg  franking
+          where hasPosAndNeg list =
+                  let hasPos = any (\(_,_,r) -> r == Relevant) list
+                      hasNeg = any (\(_,_,r) -> r /= Relevant) list
+                  in hasPos && hasNeg
 
         trainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
-        trainData = franking
+        trainData = discardUntrainable franking
         metric = avgMetricData trainData
+--         metric = avgMetricQrel qrel
+        totalElems = getSum . foldMap ( Sum . length ) $ trainData
+        totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
 
-    putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++ " queries."
-    putStrLn $ "Training model with (franking) "++ show (M.size franking) ++ " queries."
-    putStrLn $ "Training model with (docfeatures) "++ show (M.size docFeatures) ++ " queries/documents."
-    putStrLn $ "Training model with (collapsedEntityRun) "++ show (M.size collapsedEntityRun) ++ " queries."
+    putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++
+               " queries and "++ show totalElems ++" items total of which "++
+               show totalPos ++" are positive."
+--     putStrLn $ "Training model with (franking) "++ show (M.size franking) ++ " queries."
+--     putStrLn $ "Training model with (docfeatures) "++ show (M.size docFeatures) ++ " queries/documents."
+--     putStrLn $ "Training model with (collapsedEntityRun) "++ show (M.size collapsedEntityRun) ++ " queries."
+
+
+    let displayTrainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+                         -> [String]
+        displayTrainData trainData =
+          [ show k ++ " -> "++ show elem
+          | (k,list) <- M.toList trainData
+          , elem <- list]
+
+    putStrLn $ "Training Data = \n" ++ intercalate "\n" (displayTrainData trainData)
+
 
     let (model, trainScore) = learnToRank trainData featureNames metric gen0
     putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
