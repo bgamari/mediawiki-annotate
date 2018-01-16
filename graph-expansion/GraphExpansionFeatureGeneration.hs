@@ -47,7 +47,9 @@ import qualified SimplIR.SimpleIndex as Index
 import SimplIR.TopK (collectTopK)
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
-import SimplIR.FeatureSpace
+import qualified SimplIR.FeatureSpace as F
+import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
+
 
 import qualified CAR.RunFile as CAR.RunFile
 import qualified CAR.QRelFile as CAR.QRelFile
@@ -75,7 +77,6 @@ data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
 -- type IsRelevant = LearningToRank.IsRelevant
-
 
 opts :: Parser ( FilePath
                , FilePath
@@ -195,17 +196,20 @@ main = do
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgedocRuns
 
-        docFeatures :: M.Map (QueryId, QRel.DocumentName) Features
+        docFeatures :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
         docFeatures = M.fromList
                      [ ((qid, T.pack $ unpackPageId pid), features)
                      | (query, edgeRun) <- M.toList collapsedEdgedocRun
                      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
                      , ((qid, pid), features) <- generateEntityFeatures edgeDocsLookup featuresOf query edgeRun entityRun
                      ]
-        featureNames = fmap (FeatureName . T.pack . show) (entityRunFiles ++ edgedocRunFiles)        -- Todo Fix featureNames
+--         featureNames = fmap (FeatureName . T.pack . show) (entityRunFiles ++ edgedocRunFiles)        -- Todo Fix featureNames
+
+        docFeatures' = fmap (Features . F.toVector) docFeatures
+        featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace
 
         franking :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
-        franking = augmentWithQrels qrel docFeatures Relevant
+        franking = augmentWithQrels qrel docFeatures' Relevant
 
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
@@ -253,13 +257,49 @@ changeKey f map_ =
     M.fromList $ fmap (\(key,val) -> (f key, val)) $ M.toList map_
 
 
+
+-- Set up the feature space
+
+data EntityFeatures = EntBM25 | EntBM25RecipRank  | EntDegree | EntQL
+        deriving (Show, Ord, Eq, Enum, Bounded)
+data EdgeFeatures = EdgeBM25 | EdgeCount
+        deriving (Show, Ord, Eq, Enum, Bounded)
+-- data EntityEdgeFeatures = TextSimBetweenEntityAndEdgeDoc
+--         deriving (Show, Ord, Eq, Enum, Bounded)
+type CombinedFeatures = Either EntityFeatures EdgeFeatures
+
+entFSpace :: FeatureSpace EntityFeatures
+entFSpace = mkFeatureSpace [minBound .. maxBound]
+
+edgeFSpace :: FeatureSpace EdgeFeatures
+edgeFSpace = mkFeatureSpace [minBound .. maxBound]
+
+combinedFSpace :: FeatureSpace CombinedFeatures
+combinedFSpace = concatSpace entFSpace edgeFSpace
+
+
+makeEntFeatVector :: [(EntityFeatures,Double)] -> F.FeatureVec EntityFeatures Double
+makeEntFeatVector xs =
+    F.modify entFSpace defaults xs
+ where defaults = F.fromList entFSpace [(EntBM25, -1000.0), (EntBM25RecipRank, 0.0), (EntDegree, 0.0), (EntQL, -1000.0)]
+
+makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
+makeEdgeFeatVector xs =
+    F.modify edgeFSpace defaults xs
+ where defaults = F.fromList edgeFSpace [(EdgeBM25, -1000.0), (EdgeCount, 0.0)]
+
+
+-- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
+-- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
+
+
 generateEntityFeatures
     :: EdgeDocsLookup
-    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> Features)
+    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> (FeatureVec CombinedFeatures Double))
     -> QueryId
     -> [MultiRankingEntry ParagraphId]
     -> [MultiRankingEntry PageId]
-    -> [((QueryId, PageId), Features)]
+    -> [((QueryId, PageId), (FeatureVec CombinedFeatures Double))]
 generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
         edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun
@@ -290,25 +330,41 @@ featuresOf :: PageId
            -> [EdgeDoc]
            -> MultiRankingEntry PageId
            -> [MultiRankingEntry ParagraphId]
-           -> Features
+           -> FeatureVec CombinedFeatures Double
 featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 --     let vec = Features VU.fromList [1,3,4,5]
 
-    let entityScoreVec = Features . VU.fromList
-                       $ fmap CAR.RunFile.carScore -- todo named features; other features
-                       $ multiRankingEntryAll entityRankEntry
+    let
+        recipRank rank =  1.0/ (1.0+ realToFrac rank)
+        entityScoreVec entityEntry = makeEntFeatVector $
+                                            [ (EntBM25, CAR.RunFile.carScore $ multiRankingEntryCollapsed entityEntry)
+                                            , (EntBM25RecipRank, recipRank $ CAR.RunFile.carRank $ multiRankingEntryCollapsed $ entityEntry)
+                                            ]
 
 
-        singleEdgeDocFeatureVec :: MultiRankingEntry ParagraphId -> Features
-        singleEdgeDocFeatureVec edgedocRankEntry =
-           Features . VU.fromList
-           $ fmap CAR.RunFile.carScore -- todo named features; other features
-           $ multiRankingEntryAll edgedocRankEntry
+        edgeScoreVec edgeEntry = makeEdgeFeatVector $
+                                            [ (EdgeBM25, CAR.RunFile.carScore $ multiRankingEntryCollapsed edgeEntry)
+                                            , (EdgeCount, recipRank $ CAR.RunFile.carRank $ multiRankingEntryCollapsed $ edgeEntry)
+                                            ]
 
-        (eHead: eRest) = fmap singleEdgeDocFeatureVec edgedocsRankEntries
-        edgeDocScoreVec = foldr fsum eHead eRest
 
-    in fconcat entityScoreVec edgeDocScoreVec
+    in concatFeatureVec (entityScoreVec entityRankEntry) (edgeScoreVec (head edgedocsRankEntries))
+--
+--     let entityScoreVec = Features . VU.fromList
+--                        $ fmap CAR.RunFile.carScore -- todo named features; other features
+--                        $ multiRankingEntryAll entityRankEntry
+--
+--
+--         singleEdgeDocFeatureVec :: MultiRankingEntry ParagraphId -> Features
+--         singleEdgeDocFeatureVec edgedocRankEntry =
+--            Features . VU.fromList
+--            $ fmap CAR.RunFile.carScore -- todo named features; other features
+--            $ multiRankingEntryAll edgedocRankEntry
+--
+--         (eHead: eRest) = fmap singleEdgeDocFeatureVec edgedocsRankEntries
+--         edgeDocScoreVec = foldr fsum eHead eRest
+--
+--     in fconcat entityScoreVec edgeDocScoreVec
 
 
 type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
