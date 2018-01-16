@@ -332,7 +332,6 @@ featuresOf :: PageId
            -> [MultiRankingEntry ParagraphId]
            -> FeatureVec CombinedFeatures Double
 featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
---     let vec = Features VU.fromList [1,3,4,5]
 
     let
         recipRank rank =  1.0/ (1.0+ realToFrac rank)
@@ -349,22 +348,6 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 
 
     in concatFeatureVec (entityScoreVec entityRankEntry) (edgeScoreVec (head edgedocsRankEntries))
---
---     let entityScoreVec = Features . VU.fromList
---                        $ fmap CAR.RunFile.carScore -- todo named features; other features
---                        $ multiRankingEntryAll entityRankEntry
---
---
---         singleEdgeDocFeatureVec :: MultiRankingEntry ParagraphId -> Features
---         singleEdgeDocFeatureVec edgedocRankEntry =
---            Features . VU.fromList
---            $ fmap CAR.RunFile.carScore -- todo named features; other features
---            $ multiRankingEntryAll edgedocRankEntry
---
---         (eHead: eRest) = fmap singleEdgeDocFeatureVec edgedocsRankEntries
---         edgeDocScoreVec = foldr fsum eHead eRest
---
---     in fconcat entityScoreVec edgeDocScoreVec
 
 
 type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
