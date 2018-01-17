@@ -153,7 +153,7 @@ hashSimilarities thresh paras =
         let hashes =
               IS.fromAscList $ sort $ map hash $ toBigrams $ V.toList toks
         in (pid, HS.fromList $ toBigrams $ V.toList toks, hashes)
-        
+
     -- for each paragraph: bigrams are hashed onto integers
     bigramHashes :: V.Vector (ParagraphId, HS.HashSet (Term, Term), IS.IntSet)
     !bigramHashes = fmap toBigramHashes paras

@@ -29,6 +29,8 @@ import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 import Data.List
 import Data.Maybe
+import Data.Foldable as Foldable
+
 
 import CAR.Types
 import CAR.ToolVersion
@@ -56,6 +58,9 @@ import qualified CAR.QRelFile as CAR.QRelFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Format.TrecRunFile as Run
 import MultiTrecRunFile
+
+
+import qualified CAR.Retrieve as Retrieve
 
 import qualified Data.Vector.Unboxed as VU
 
@@ -85,12 +90,13 @@ opts :: Parser ( FilePath
                , NumResults
                , [FilePath]
                , [FilePath]
+               , FilePath, FilePath, FilePath, FilePath
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , FilePath
                )
 opts =
-    (,,,,,,,,,)
+    (,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -98,6 +104,10 @@ opts =
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
     <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
+    <*> option str (long "entity-bm25" <> metavar "RUN" <> help "entity BM25 run")
+    <*> option str (long "entity-ql" <> metavar "RUN" <> help "entity Query Likelihood run")
+    <*> option str (long "edgedoc-bm25" <> metavar "RUN" <> help "edgedoc BM25 run")
+    <*> option str (long "edgedoc-ql" <> metavar "RUN" <> help "edge Query Likelihood run")
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
@@ -150,6 +160,10 @@ logMsg :: CarRun.QueryId -> RetrievalFun -> String -> IO ()
 logMsg queryId method t = T.putStr $ (CarRun.unQueryId queryId)<>"\t"<>T.pack (show method)<>"\t"<>T.pack t<>"\n"
 
 
+bm25MethodName :: CarRun.MethodName
+bm25MethodName = CarRun.MethodName "BM25"
+qlMethodName :: CarRun.MethodName
+qlMethodName = CarRun.MethodName "QL"
 
 
 main :: IO ()
@@ -157,14 +171,16 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, querySrc,
-      queryRestriction, numResults, entityRunFiles, edgedocRunFiles, edgeDocsCborFile
+      queryRestriction, numResults, entityRunFiles, edgedocRunFiles
+      , entityBm25RunFile, entityQlRunFile, edgedocBm25RunFile, edgedocQlRunFile
+      , edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
-    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) entityRunFiles)
-    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) edgedocRunFiles)
+    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ++ [entityBm25RunFile, entityQlRunFile]))
+    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles ++ [edgedocBm25RunFile, edgedocQlRunFile]))
 
     gen0 <- newStdGen
 
@@ -189,8 +205,18 @@ main = do
 
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
 
-    entityRuns <-  mapM CAR.RunFile.readEntityRun entityRunFiles
-    edgedocRuns <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
+
+    let fixRun methodName entries = fmap (\entry -> entry {CarRun.carMethodName = methodName} ) entries
+
+    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun entityBm25RunFile
+    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun entityQlRunFile
+    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun edgedocBm25RunFile
+    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun edgedocQlRunFile
+
+    entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
+    edgedocRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
+    let entityRuns = entityRuns' ++ [entityBm25Run, entityQlRun]
+    let edgedocRuns = edgedocRuns' ++ [edgedocBm25Run, edgedocQlRun]
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
         collapsedEntityRun = collapseRuns entityRuns
@@ -260,9 +286,17 @@ changeKey f map_ =
 
 -- Set up the feature space
 
-data EntityFeatures = EntBM25 | EntBM25RecipRank  | EntDegree | EntQL
+data EntityFeatures = EntIncidentEdgeDocsRecip | EntDegreeRecip | EntDegree
+                  | EntAggrScore | EntAggrRecipRank | EntAggrLinearRank | EntAggrBucketRank| EntAggrCount
+                    | EntBm25Score | EntBm25RecipRank | EntBm25LinearRank | EntBm25BucketRank| EntBm25Count
+                    | EntQlScore | EntQlRecipRank | EntQlLinearRank | EntQlBucketRank| EntQlCount
+
         deriving (Show, Ord, Eq, Enum, Bounded)
-data EdgeFeatures = EdgeBM25 | EdgeCount
+data EdgeFeatures =  EdgeCount | EdgeDocKL
+                  | EdgeAggrScore | EdgeAggrRecipRank | EdgeAggrLinearRank | EdgeAggrBucketRank| EdgeAggrCount
+                  | EdgeBm25Score | EdgeBm25RecipRank | EdgeBm25LinearRank | EdgeBm25BucketRank| EdgeBm25Count
+                  | EdgeQlScore | EdgeQlRecipRank | EdgeQlLinearRank | EdgeQlBucketRank| EdgeQlCount
+
         deriving (Show, Ord, Eq, Enum, Bounded)
 -- data EntityEdgeFeatures = TextSimBetweenEntityAndEdgeDoc
 --         deriving (Show, Ord, Eq, Enum, Bounded)
@@ -281,21 +315,78 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 makeEntFeatVector :: [(EntityFeatures,Double)] -> F.FeatureVec EntityFeatures Double
 makeEntFeatVector xs =
     F.modify entFSpace defaults xs
- where defaults = F.fromList entFSpace [(EntBM25, -1000.0), (EntBM25RecipRank, 0.0), (EntDegree, 0.0), (EntQL, -1000.0)]
+ where defaults = F.fromList entFSpace ([ (EntIncidentEdgeDocsRecip, 0.0)
+                                       , (EntDegreeRecip, 0.0)
+                                       , (EntDegree, 0.0)
+                                       ]
+                                        ++ defaultRankFeatures EntAggrScore  EntAggrRecipRank  EntAggrLinearRank EntAggrBucketRank EntAggrCount
+                                        ++ defaultRankFeatures EntBm25Score  EntBm25RecipRank  EntBm25LinearRank EntBm25BucketRank EntBm25Count
+                                        ++ defaultRankFeatures EntQlScore  EntQlRecipRank  EntQlLinearRank EntQlBucketRank EntQlCount
+                                        )
 
 makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
 makeEdgeFeatVector xs =
     F.modify edgeFSpace defaults xs
- where defaults = F.fromList edgeFSpace [(EdgeBM25, -1000.0), (EdgeCount, 0.0)]
-
+ where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
+                                        , (EdgeDocKL, 0.0)
+                                        ]
+                                        ++ defaultRankFeatures EdgeAggrScore  EdgeAggrRecipRank  EdgeAggrLinearRank EdgeAggrBucketRank EdgeAggrCount
+                                        ++ defaultRankFeatures EdgeBm25Score  EdgeBm25RecipRank  EdgeBm25LinearRank EdgeBm25BucketRank EdgeBm25Count
+                                        ++ defaultRankFeatures EdgeQlScore  EdgeQlRecipRank  EdgeQlLinearRank EdgeQlBucketRank EdgeQlCount
+                                        )
 
 -- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
 -- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
 
 
+defaultRankFeatures:: f -> f -> f -> f  -> f -> [(f, Double)]
+defaultRankFeatures scoreF recipRankF linearRankF bucketRankF countF =
+    [ (scoreF, -1000.0)
+    , (recipRankF, 0.0)
+    , (linearRankF, 0.0)
+    , (bucketRankF, 0.0)
+    , (countF, 0.0)
+    ]
+
+
+score :: RankingEntry d -> Double
+score entry  = CAR.RunFile.carScore entry
+
+recipRank :: RankingEntry d  -> Double
+recipRank entry = 1.0/ (1.0 + realToFrac rank)
+  where rank = CAR.RunFile.carRank entry
+
+linearRank :: Int -> RankingEntry d  -> Double
+linearRank maxLen entry
+    | rank > maxLen = 0.0
+    | otherwise = realToFrac $ maxLen - rank
+  where rank = CAR.RunFile.carRank entry
+
+bucketRank :: RankingEntry d  -> Double
+bucketRank entry
+    | rank >= 5 = 3.0
+    | rank >= 20 = 2.0
+    | otherwise = 1.0
+  where rank = CAR.RunFile.carRank entry
+
+
+count :: RankingEntry d -> Double
+count _ = 1.0
+
+rankFeatures :: f -> f -> f -> f  -> f -> RankingEntry d -> [(f, Double)]
+rankFeatures scoreF recipRankF linearRankF bucketRankF countF entry =
+    [ (scoreF, score entry)
+    , (recipRankF, recipRank entry)
+    , (linearRankF, linearRank 100 entry)
+    , (bucketRankF, bucketRank entry)
+    , (countF, count entry)
+    ]
+
+
+
 generateEntityFeatures
     :: EdgeDocsLookup
-    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> (FeatureVec CombinedFeatures Double))
+    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> FeatureVec CombinedFeatures Double)
     -> QueryId
     -> [MultiRankingEntry ParagraphId]
     -> [MultiRankingEntry PageId]
@@ -334,20 +425,83 @@ featuresOf :: PageId
 featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 
     let
-        recipRank rank =  1.0/ (1.0+ realToFrac rank)
-        entityScoreVec entityEntry = makeEntFeatVector $
-                                            [ (EntBM25, CAR.RunFile.carScore $ multiRankingEntryCollapsed entityEntry)
-                                            , (EntBM25RecipRank, recipRank $ CAR.RunFile.carRank $ multiRankingEntryCollapsed $ entityEntry)
-                                            ]
+        indicentEdgeDocs = realToFrac $ length edgeDocs
+        degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors edgeDocs
 
+        recipRank rank =  1.0/ (1.0 + realToFrac rank)
+
+        edgeDocsByPara = HM.fromList [ (edgeDocParagraphId edgeDoc, edgeDoc )
+                                    | edgeDoc <- edgeDocs
+                                    ]
+
+        entityScoreVec entityEntry = makeEntFeatVector  (
+                                            [ (EntIncidentEdgeDocsRecip, recip indicentEdgeDocs)
+                                            , (EntDegreeRecip, recip degree)
+                                            , (EntDegree, degree)
+                                            ]
+                                             ++ rankFeatures EntAggrScore  EntAggrRecipRank  EntAggrLinearRank EntAggrBucketRank EntAggrCount  (multiRankingEntryCollapsed entityEntry)
+                                             ++ foldMap (rankFeatures EntBm25Score  EntBm25RecipRank  EntBm25LinearRank EntBm25BucketRank EntBm25Count) (findEntry' bm25MethodName entityEntry)
+                                             ++ foldMap (rankFeatures EntQlScore  EntQlRecipRank  EntQlLinearRank EntQlBucketRank EntQlCount) (findEntry' qlMethodName entityEntry)
+                                           )
 
         edgeScoreVec edgeEntry = makeEdgeFeatVector $
-                                            [ (EdgeBM25, CAR.RunFile.carScore $ multiRankingEntryCollapsed edgeEntry)
-                                            , (EdgeCount, recipRank $ CAR.RunFile.carRank $ multiRankingEntryCollapsed $ edgeEntry)
+                                            [ (EdgeCount, 1.0)
+                                            , (EdgeDocKL, (edgeDocKullbackLeibler edgeDocs ) ( fromJust $ (multiRankingEntryGetDocumentName edgeEntry) `HM.lookup` edgeDocsByPara) )
+                                            ]
+                                             ++ rankFeatures EdgeAggrScore  EdgeAggrRecipRank  EdgeAggrLinearRank EdgeAggrBucketRank EdgeAggrCount  (multiRankingEntryCollapsed edgeEntry)
+                                             ++ foldMap (rankFeatures EdgeBm25Score  EdgeBm25RecipRank  EdgeBm25LinearRank EdgeBm25BucketRank EdgeBm25Count) (findEntry' bm25MethodName edgeEntry)
+                                             ++ foldMap (rankFeatures EdgeQlScore  EdgeQlRecipRank  EdgeQlLinearRank EdgeQlBucketRank EdgeQlCount) (findEntry' qlMethodName edgeEntry)
+
+    in concatFeatureVec (entityScoreVec entityRankEntry) (F.aggregateWith (+) (fmap edgeScoreVec edgedocsRankEntries))
+  where
+        findEntry' :: CarRun.MethodName -> MultiRankingEntry d  -> [RankingEntry d]
+        findEntry' methodName entry =
+            maybeToList $ findEntry methodName $ multiRankingEntryAll entry
+
+
+        findEntry :: CarRun.MethodName -> [RankingEntry doc] -> Maybe (RankingEntry doc)
+        findEntry method entries = find  ((== method). CarRun.carMethodName)  entries
+
+        edgeDocKullbackLeibler :: [EdgeDoc] -> EdgeDoc -> Double
+        edgeDocKullbackLeibler otherEdgeDocsOfConnectedEntities edgeDoc =
+
+          let (backTermCounts, backTotal) =
+                termCountsAndTotal
+                $ fmap edgeDocContent
+                $ HS.toList $ HS.fromList
+                $ otherEdgeDocsOfConnectedEntities
+
+              (termCounts, total) =
+                termCountsAndTotal [(edgeDocContent edgeDoc)]
+          in kullbackLeibler (termCounts, total) (backTermCounts, backTotal)
+
+
+        kullbackLeibler :: (TermCounts, Int) -> (TermCounts, Int) -> Double
+        kullbackLeibler (termCounts, total) (backTermCounts, backTotal) =
+                            Foldable.sum $ [ pi * (log pi - log qi)
+                                            | (term,count) <- HM.toList (getTermCounts termCounts)
+                                            , let pi = (realToFrac count) / (realToFrac total)
+                                            , let bcount = fromJust $ term `HM.lookup` (getTermCounts backTermCounts)
+                                            , let qi = (realToFrac bcount) / (realToFrac backTotal)
                                             ]
 
 
-    in concatFeatureVec (entityScoreVec entityRankEntry) (edgeScoreVec (head edgedocsRankEntries))
+
+        termCountsAndTotal :: [T.Text] -> (Retrieve.TermCounts, Int)
+        termCountsAndTotal texts =
+                              let termCounts =
+                                    foldMap (textToTokens) texts
+                                  total = Foldable.sum $ HM.elems $ getTermCounts $ termCounts
+                              in (termCounts, total)
+
+
+
+
+
+textToTokens :: T.Text -> Retrieve.TermCounts
+textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
+
+
 
 
 type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
