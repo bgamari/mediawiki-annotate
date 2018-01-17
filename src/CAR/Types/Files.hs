@@ -111,7 +111,7 @@ readCarFile path = handle tryWithoutHeader $ do
         return (provenance hdr, xs)
   where
     tryWithoutHeader (CborListHeaderDeserialiseError _ _) = do
-        hPutStrLn stderr $ "Failed to deserialise header of "++path++"; provenance unavailable."
+        hPutStrLn stderr $ "Warning: Failed to deserialise header of "++path++"; provenance unavailable."
         xs <- readRawCborList path
         return (invalidProvenance, xs)
 
@@ -130,7 +130,7 @@ readCarHeader :: FilePath -> IO (Maybe Header)
 readCarHeader path = handle tryWithoutHeader (Just . fst <$> readCborList @Header @() path)
   where
     tryWithoutHeader (CborListHeaderDeserialiseError _ _) = do
-        hPutStrLn stderr $ "Failed to deserialise header of "++path++"; provenance unavailable."
+        hPutStrLn stderr $ "Warning: Failed to deserialise header of "++path++"; provenance unavailable."
         return Nothing
 
 writeCarFile :: forall a.
