@@ -250,8 +250,8 @@ main = do
 
         trainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
         trainData = discardUntrainable franking
-        metric = avgMetricData trainData
---         metric = avgMetricQrel qrel
+--         metric = avgMetricData trainData
+        metric = avgMetricQrel qrel
         totalElems = getSum . foldMap ( Sum . length ) $ trainData
         totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
 
