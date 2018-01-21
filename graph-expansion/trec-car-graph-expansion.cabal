@@ -453,6 +453,7 @@ executable graph-expansion-feature-generation
                        log-domain,
                        snowball,
                        time,
+                       split,
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010

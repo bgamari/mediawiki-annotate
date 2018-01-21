@@ -28,6 +28,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy.IO as TL
 import Data.List
+import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
 
@@ -266,15 +267,43 @@ main = do
           | (k,list) <- M.toList trainData
           , elem <- list]
 
-    putStrLn $ "Training Data = \n" ++ intercalate "\n" (displayTrainData trainData)
+    putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 5 $ (displayTrainData trainData))
 
-
+    -- Train model on all data
     let (model, trainScore) = learnToRank trainData featureNames metric gen0
     putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
 
     BSL.writeFile modelFile $ Data.Aeson.encode model
 
     putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
+    -- todo write reranked train run file
+
+    -- Train model in CV
+    -- todo load external folds
+
+    let folds = chunksOf 5 $ M.keys trainData
+        trainProcedure trainData = learnToRank trainData featureNames metric gen0
+        -- ranking :: M.Map CAR.RunFile.QueryId (Ranking QRel.DocumentName)
+        ranking = kFoldCross (trainProcedure) folds trainData
+        testScore = metric ranking
+    putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
+    -- todo write reranked test run file
+
+  where
+      kFoldCross :: Ord q
+                 => (M.Map q [(docId, Features, rel)] -> (Model, Double))
+                 -> [[q]]
+                 -> M.Map q [(docId, Features, rel)]
+                 -> M.Map q (Ranking (docId, rel))
+      kFoldCross trainProcedure folds dat =
+          M.unions $ fmap trainSingleFold folds
+        where
+          trainSingleFold testQueries =
+            let testData =  M.filterWithKey (\query _ -> query `elem` testQueries) dat
+                trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) dat
+                (model, trainScore) = trainProcedure trainData
+                testRanking = rerankRankings' model testData
+            in testRanking
 
 
 
