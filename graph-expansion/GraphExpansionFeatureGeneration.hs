@@ -296,7 +296,7 @@ main = do
     -- write test ranking
     CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
-        $ rerankRankings' model predictRanking
+        $ predictRanking
   where
 
       l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
