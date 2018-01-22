@@ -1,11 +1,11 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 import Options.Applicative
 import Data.Monoid
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import PageRank
-import EdgeDocCorpus
 import Graph
 import GraphExpansion
 import CAR.Types
@@ -20,10 +20,11 @@ opts =
 main :: IO ()
 main = do
     (outPath, inPath) <- execParser $ info (helper <*> opts) mempty
-    ((), edgeDocs) <- readCborList inPath
+    (Just 0 :: Maybe Int, edgeDocs) <- readCborList inPath
     let uniGraph = edgeDocsToUniverseGraph edgeDocs
         binGraph = universeToBinaryGraph uniGraph
-        graph :: Graph PageId Float
-        graph = Graph $ fmap (HM.fromList . flip zip (repeat 0) . HS.toList) binGraph
+        graph :: Graph PageId Double
+        graph = Graph $ fmap (HM.fromList . flip zip (repeat 1) . HS.toList) binGraph
         res = pageRank 0 graph
-    writeFileSerialise outPath $ toEntries $ head $ drop 10 res
+    --mapM_ (print . take 100 . map snd . toEntries) $ res
+    writeFileSerialise outPath $ toEntries $ head $ drop 20 res
