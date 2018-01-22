@@ -8,7 +8,6 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Set as S
 import Data.List
-import Data.Foldable
 import CAR.Types
 
 
@@ -41,6 +40,7 @@ pageContainsText str = any goSkeleton . pageSkeleton
     goSkeleton (Para p) = goParagraph p
     goSkeleton (Image {}) = False
     goSkeleton (List _ p) = goParagraph p
+    goSkeleton (Infobox tag args) = any (any goSkeleton . snd) args
 
     goParagraph (Paragraph _ bodies) = any goParaBody bodies
 
@@ -64,12 +64,14 @@ pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
 pageSkeletonParas (Para paragraph) = [paragraph]
 pageSkeletonParas (Image {}) = []
 pageSkeletonParas (List _ paragraph) = [paragraph]
+pageSkeletonParas (Infobox tag args) = foldMap (foldMap pageSkeletonParas . snd) args
 
 pageSkeletonLinks :: PageSkeleton -> [Link]
 pageSkeletonLinks (Section _ _ children) = foldMap pageSkeletonLinks children
 pageSkeletonLinks (Para (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
 pageSkeletonLinks (Image {}) = []
 pageSkeletonLinks (List _ (Paragraph _ bodies)) = foldMap paraBodyLinks bodies
+pageSkeletonLinks (Infobox tag args) = foldMap (foldMap pageSkeletonLinks . snd) args
 
 pageSectionPaths :: Page -> [SectionPath]
 pageSectionPaths = map (\(path,_,_) -> path) . pageSections
@@ -125,6 +127,7 @@ pageSkeletonFulltext (Para para) = [paraToText para]
 pageSkeletonFulltext (Image _ children) =
     foldMap pageSkeletonFulltext children
 pageSkeletonFulltext (List _ para) = [paraToText para]
+pageSkeletonFulltext (Infobox _ args) = foldMap (foldMap pageSkeletonFulltext . snd) args
 
 paraToText :: Paragraph -> TL.Text
 paraToText (Paragraph  _ bodies) =

@@ -25,6 +25,7 @@ import CAR.Import.Utils
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
+                     , isInfoboxTemplate :: TemplateTag -> Bool
                      , resolveTemplate :: TemplateTag -> TemplateHandler
                      }
 
@@ -32,11 +33,12 @@ defaultConfig :: Config
 defaultConfig =
     Config { isCategory = \name -> "Category" `T.isPrefixOf` getPageName name
            , isDisambiguation = \name _ -> "(disambiguation)" `T.isPrefixOf` getPageName name
+           , isInfoboxTemplate = (== "infobox settlement")
            , resolveTemplate = defaultTemplateHandler
            }
 
 toPage :: Config -> SiteId -> WikiDoc -> Either String Page
-toPage Config{..} site WikiDoc{..} =
+toPage config@Config{..} site WikiDoc{..} =
     toPage' <$> Markup.parse (T.unpack $ TE.decodeUtf8 docText)
   where
     toPage' contents =
@@ -51,7 +53,7 @@ toPage Config{..} site WikiDoc{..} =
                     }
         pageId   = pageNameToId site name
         name     = normPageName $ PageName $ TE.decodeUtf8 docTitle
-        skeleton = docsToSkeletons resolveTemplate site pageId contents
+        skeleton = docsToSkeletons config site pageId contents
         categories =  filter (isCategory . linkTarget)
                      $ foldMap pageSkeletonLinks skeleton
 
@@ -77,12 +79,13 @@ pageRedirect (Page {pageSkeleton=Para (Paragraph _ (ParaText t : ParaLink l : _)
   = Just l
 pageRedirect _ = Nothing
 
-docsToSkeletons :: (TemplateTag -> TemplateHandler) -> SiteId -> PageId -> [Doc] -> [PageSkeleton]
-docsToSkeletons resolveTemplate siteId thisPage =
-      toSkeleton siteId thisPage
+docsToSkeletons :: Config
+                -> SiteId -> PageId -> [Doc] -> [PageSkeleton]
+docsToSkeletons config siteId thisPage =
+      toSkeleton config siteId thisPage
       -- drop unknown templates here so they don't break up paragraphs
-    . filter (isNothing . isTemplate)
-    . concatMap (runTemplateHandler resolveTemplate)
+    . filter (not . isUnknownTemplate)
+    . concatMap (runTemplateHandler $ resolveTemplate config)
     . filter (not . isComment)
     . takeXml "code"
     . takeXml "s"
@@ -92,11 +95,15 @@ docsToSkeletons resolveTemplate siteId thisPage =
     . dropXml "sub"
     . dropXml "ref"
     . dropXml "timeline"
+  where
+    isUnknownTemplate doc
+      | Just tag <- isTemplate doc = not $ isInfoboxTemplate config tag
+      | otherwise                  = False
 
 -- | For testing.
 parseSkeleton :: String -> Either String [PageSkeleton]
 parseSkeleton =
-    fmap (docsToSkeletons defaultTemplateHandler (SiteId "Test Site") (PageId "Test Page")) . Markup.parse
+    fmap (docsToSkeletons defaultConfig (SiteId "Test Site") (PageId "Test Page")) . Markup.parse
 
 -- | Is a 'Doc' an image element?
 isImage :: Doc -> Maybe (T.Text, [Doc])
@@ -185,8 +192,8 @@ splitParagraph siteId thisPage docs
   | otherwise
   = Nothing
 
-toSkeleton :: SiteId -> PageId -> [Doc] -> [PageSkeleton]
-toSkeleton siteId thisPage = go
+toSkeleton :: Config -> SiteId -> PageId -> [Doc] -> [PageSkeleton]
+toSkeleton config siteId thisPage = go
   where
     go [] = []
     go docs
@@ -204,4 +211,11 @@ toSkeleton siteId thisPage = go
             isParentHeader _                = False
             heading = SectionHeading $ resolveEntities $ T.pack $ getAllText title
         in Section heading (sectionHeadingToId heading) (go children) : go docs'
+    go (Template [Text tag] args : docs)
+      | isInfoboxTemplate config tag' =
+        Infobox tag' (mapMaybe f args) : go docs
+      where
+        tag' = T.toCaseFold $ T.pack tag
+        f (Just key, val) = Just (key, go val)
+        f _               = Nothing
     go (_ : docs) = go docs

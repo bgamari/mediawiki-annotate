@@ -30,6 +30,7 @@ isLead (Para{}) = True
 isLead (Section{}) = False
 isLead (Image{}) = False
 isLead (List{}) = False
+isLead (Infobox{}) = False
 
 data KbDoc = KbDoc { kbDocPageId :: PageId
                    , kbDocCanonicalName :: PageName

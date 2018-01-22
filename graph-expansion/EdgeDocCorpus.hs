@@ -60,6 +60,8 @@ pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
         concatMap (go (headings)) $ children
     go headings (List _ paragraph) =
       [convertPara paragraph headings]
+    go headings (Infobox _ args) =
+        concatMap (concatMap (go headings) . snd) args
 
     convertPara :: Paragraph -> [SectionHeading] -> EdgeDoc
     convertPara para headings=
