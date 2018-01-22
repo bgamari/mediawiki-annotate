@@ -15,11 +15,14 @@ import Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Vector as V
 import Data.Coerce
+import Data.Vector.Algorithms.Intro
+import Data.Ord
 
 import CAR.Utils
 import CAR.Types
 import CAR.Utils.Redirects
 
+import Debug.Trace
 
 -- action for resolving redirects for all pages in inputPath
 stageResolveRedirect :: FilePath -> IO (Provenance, [Page])
@@ -61,9 +64,10 @@ fixLinks redirectResolver pageNameResolver page =
     page {pageSkeleton = fmap goSkeleton (pageSkeleton  page)}
       where
         goSkeleton (Section x y children) = Section x y (fmap goSkeleton children)
-        goSkeleton (Para p) = Para (goParagraph p)
-        goSkeleton (Image x skel) = Image x (fmap goSkeleton skel)
-        goSkeleton (List x p) = List x (goParagraph p)
+        goSkeleton (Para p)        = Para (goParagraph p)
+        goSkeleton (Image x skel)  = Image x (fmap goSkeleton skel)
+        goSkeleton (List x p)      = List x (goParagraph p)
+        goSkeleton (Infobox tag p) = Infobox tag $ map (fmap $ map goSkeleton) p
 
         goParagraph (Paragraph x bodies) = Paragraph x (fmap goParaBody bodies)
 
@@ -147,6 +151,7 @@ buildDisambiguateInlinksMap page =
         case foldMap paraBodyLinks bodies of
         [] -> []
         (a:_) -> [a]
+    listItemFirstskeletonLinks (Infobox {}) = []
 
 extractAllCategoryIds :: [Page] -> HS.HashSet PageId
 extractAllCategoryIds pages  =
@@ -197,11 +202,16 @@ fillDisambigInlinkMetadata acc page =
                setMetadata _DisambiguationNames (HS.toList $ accDisambigNames things)
                $ setMetadata _DisambiguationIds (HS.toList $ accDisambigIds things)
                $ setMetadata _InlinkIds (HS.toList $ accInlinkIds things)
-               $ setMetadata _InlinkAnchors (coerce inlinkAnchors)
+               $ setMetadata _InlinkAnchors inlinkAnchors
                $ pageMetadata page
          }
   where
-    inlinkAnchors = V.fromListN (HM.size $ accInlinkAnchors things) $ HM.toList $ accInlinkAnchors things
+    inlinkAnchors :: V.Vector (T.Text, Int)
+    inlinkAnchors =
+        trace "\n sorted inlinkAnchors: " $ V.modify (sortBy $ comparing $ Down . snd)
+        $ coerce
+        $ V.fromListN (HM.size $ accInlinkAnchors things)
+        $ HM.toList $ accInlinkAnchors things
     things = fromMaybe mempty $ HM.lookup (pageId page) acc
 
 

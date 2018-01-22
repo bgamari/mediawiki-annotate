@@ -342,6 +342,8 @@ pageSkeletonToSectionPathsWithName Stub{..}  = empty : foldMap (go empty) stubSk
           sectionPathWithName' : foldMap (go sectionPathWithName') children
         where
           sectionPathWithName' = append sectionPathWithName sectionId sectionHeading
-      go sectionPathWithName (Para _) = []
-      go sectionPathWithName (Image _ _) = []
+      go _sectionPathWithName (Para _)     = []
+      go _sectionPathWithName (Image _ _)  = []
+      go _sectionPathWithName (List {})    = []
+      go _sectionPathWithName (Infobox {}) = []
 

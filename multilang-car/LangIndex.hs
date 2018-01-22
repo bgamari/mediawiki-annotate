@@ -13,6 +13,8 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
 import qualified Codec.Serialise as CBOR
+import System.Environment
+import Control.Monad
 
 import qualified Data.JsonStream.Parser as JS
 
@@ -84,5 +86,8 @@ buildIndex =
 
 main :: IO ()
 main = do
+    args <- getArgs
+    -- since --tool-version isn't supported
+    when (not $ null args) $ fail "no arguments expected"
     --BSL.getContents >>= print . eitherDecode @[Entity]
     BSL.getContents >>= pure . buildIndex >>= BSL.writeFile "out" . CBOR.serialise

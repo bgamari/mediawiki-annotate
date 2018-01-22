@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE BangPatterns #-}
 
 -- Stop! Use Files module for reading car cbor files with headers!
 module CAR.Types.CborList
@@ -20,7 +21,6 @@ import qualified Codec.Serialise.Class as CBOR
 import qualified Codec.CBOR.Write as CBOR
 import qualified Codec.CBOR.Decoding as CBOR
 import qualified Codec.CBOR.Encoding as CBOR
-import qualified Codec.CBOR.Term as CBOR
 import qualified Codec.CBOR.Read as Read
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Builder as BSB
@@ -70,7 +70,9 @@ instance Exception CborListDeserialiseError
 
 readCborList :: forall hdr a. (CBOR.Serialise hdr, CBOR.Serialise a)
              => FilePath -> IO (hdr, [a])
-readCborList fname = decodeCborList' fname <$> BSL.readFile fname
+readCborList fname = do
+    !ret <- decodeCborList' fname <$> BSL.readFile fname
+    return ret
 
 encodeCborList :: (CBOR.Serialise hdr, CBOR.Serialise a) => hdr -> [a] -> BSB.Builder
 encodeCborList hdr xs = CBOR.toBuilder $

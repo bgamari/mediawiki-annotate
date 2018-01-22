@@ -12,6 +12,49 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
+
+
+library
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  hs-source-dirs:      .
+  other-modules:
+      MultiTrecRunFile
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       dlist,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 executable graph-retrieval
   main-is:             GraphRetrieval.hs
   other-modules:       GraphExpansion
@@ -316,4 +359,141 @@ executable graph-expansion-build-kb-index
                        trec-car-tools,
                        ansi-wl-pprint,
                        hashable
+  default-language:    Haskell2010
+
+
+executable graph-expansion-edge-doc
+  main-is:             EdgeDocCorpusMain.hs
+  ghc-options:         -Wall -rtsopts
+  other-modules:       EdgeDocCorpus
+  build-depends:       base,
+                       text >= 1.2,
+                       bytestring,
+                       optparse-applicative >= 0.13,
+                       serialise,
+                       parallel,
+                       filepath,
+                       hashable,
+                       deepseq,
+                       foldl,
+                       unordered-containers >= 0.2,
+                       containers,
+                       pipes,
+                       pipes-safe,
+                       pipes-bytestring,
+                       snowball,
+                       trec-car-tools,
+                       simplir,
+                       warc,
+                       filepath,
+                       containers >=0.5 && <0.6,
+                       unordered-containers >= 0.2,
+                       dlist >= 0.7,
+                       log-domain,
+                       simplir,
+                       simplir-disk-index,
+                       trec-car-tools,
+                       profunctors,
+                       foldl >=1.2 && <1.4,
+                       pipes,
+                       pipes-safe,
+                       text,
+                       serialise,
+                       aeson,
+                       bytestring,
+                       optparse-applicative >= 0.12,
+                       trec-car-tools,
+                       ansi-wl-pprint,
+                       hashable
+  default-language:    Haskell2010
+
+
+executable graph-expansion-feature-generation
+  main-is:             GraphExpansionFeatureGeneration.hs
+  other-modules:       GraphExpansion
+                       Dijkstra
+                       DenseMapping
+                       PageRank
+                       Graph
+                       AttriRank
+                       ZScore
+                       WriteRanking
+                       GraphExpansionExperiments
+                       EdgeDocCorpus
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       random,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       dlist,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       split,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
+
+executable graph-expansion-pagerank-on-all
+  main-is:             PageRankOnAll.hs
+  ghc-options:         -Wall
+  build-depends:       base,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       random,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       dlist,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       split,
+                       simplir-word-embedding,
+                       trec-car-tools
   default-language:    Haskell2010

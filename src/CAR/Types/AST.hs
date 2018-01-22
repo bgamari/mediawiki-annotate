@@ -162,6 +162,7 @@ data PageSkeleton = Section !SectionHeading !HeadingId [PageSkeleton]
                   | Para !Paragraph
                   | Image T.Text [PageSkeleton]
                   | List !Int Paragraph
+                  | Infobox T.Text [(T.Text, [PageSkeleton])]
                   deriving (Show, Generic)
 instance CBOR.Serialise PageSkeleton
 

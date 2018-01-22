@@ -1,0 +1,212 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <dbname>enwiki</dbname>
+    <base>https://en.wikipedia.org/wiki/Main_Page</base>
+    <generator>MediaWiki 1.28.0-wmf.16</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal talk</namespace>
+      <namespace key="108" case="first-letter">Book</namespace>
+      <namespace key="109" case="first-letter">Book talk</namespace>
+      <namespace key="118" case="first-letter">Draft</namespace>
+      <namespace key="119" case="first-letter">Draft talk</namespace>
+      <namespace key="446" case="first-letter">Education Program</namespace>
+      <namespace key="447" case="first-letter">Education Program talk</namespace>
+      <namespace key="710" case="first-letter">TimedText</namespace>
+      <namespace key="711" case="first-letter">TimedText talk</namespace>
+      <namespace key="828" case="first-letter">Module</namespace>
+      <namespace key="829" case="first-letter">Module talk</namespace>
+      <namespace key="2300" case="first-letter">Gadget</namespace>
+      <namespace key="2301" case="first-letter">Gadget talk</namespace>
+      <namespace key="2302" case="case-sensitive">Gadget definition</namespace>
+      <namespace key="2303" case="case-sensitive">Gadget definition talk</namespace>
+      <namespace key="2600" case="first-letter">Topic</namespace>
+    </namespaces>
+  </siteinfo>
+
+  <page>
+    <title>Turtle</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+A '''turtle''' is an [[cute|adorable]] little [[critter]] with a [[shell]].
+
+==Notable turtles==
+"T!" is one particularly cute, yet at times mildly aggressive, specimen. He is
+characterised by extreme [[self-confidence]] and an infatiguable desire to climb
+backpacks.
+
+[[Category:Participants in the Les Houches Physics Summer School]]</text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>Critter</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+#REDIRECT [[Animal]]
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>Animal</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+An '''animal''' is a [[organism]] belonging to ''animalia''.
+
+[[Turtle|Turtles]] are an important class of animal.
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>Organism</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+{{Stub}}
+
+Also known as a [[critter|creature]].
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>Disambiguation:Shell</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+"shell" may refer to:
+
+* The protective over-garment worn by [[turtle|adorable turtles]].        
+* a small object often found on [[beaches]] previously produced by a [[sea]] [[critter]].
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>Critter Links</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+This page contains a lot of anchors for [[critter|critter]]:
+
+[[critter|creature]]
+[[critter|vertebrates]]
+[[critter|vertebrates]]
+[[critter|vertebrates]]
+[[critter|vertebrates]]
+[[critter|vertebrates]]
+[[critter|vertebrates]]
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+
+  <page>
+    <title>New York City</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>735514735</id>
+      <parentid>735514641</parentid>
+      <timestamp>2016-08-21T07:54:40Z</timestamp>
+      <contributor><username>Serols</username><id>9929111</id></contributor>
+      <comment></comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">
+        
+{{Infobox settlement
+| name = New York City
+| official_name = City of New York
+| settlement_type = [[City (New York)|City]]
+| named_for = [[James II of England|James, Duke of York]]
+| image_skyline = NYC Montage 2014 4 - Jleon.jpg
+| imagesize = 305px
+| image_caption = Clockwise, from top: [[Midtown Manhattan]], [[Times Square]], the [[Unisphere]] in [[Queens]], the [[Brooklyn Bridge]], [[Lower Manhattan]] with [[One World Trade Center]], [[Central Park]], the [[headquarters of the United Nations]], and the [[Statue of Liberty]]
+| image_flag = Flag of New York City.svg
+| image_seal = Seal_of_New_York_City_BW.svg
+| nickname = ''See [[Nicknames of New York City]]''
+}}
+      </text>
+      <sha1>lhdvi9jalgapzs9f0yq5efus1s9u6ht</sha1>
+    </revision>
+  </page>
+</mediwiki>

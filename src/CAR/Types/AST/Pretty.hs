@@ -9,6 +9,7 @@ module CAR.Types.AST.Pretty
     ) where
 
 import Data.Semigroup
+import Data.List
 import qualified Data.Text as T
 import CAR.Types.AST
 
@@ -36,6 +37,9 @@ prettySkeleton renderLink = go 1
     go _ (Image target children) =
         "![" ++ unlines (map (go 1) children) ++ "](" ++ T.unpack target ++ ")"
     go _ (List n para) = replicate n '*' ++ " " ++ prettyParagraph renderLink para
+    go _ (Infobox tag args) = "{{"<>T.unpack tag<>"|"<>pairs<>"}}"
+      where
+        pairs = intercalate "," $ map (\(k,v) -> T.unpack k <> "=" <> foldMap (go 0) v) args
 
 prettyParagraph :: LinkStyle -> Paragraph -> String
 prettyParagraph renderLink (Paragraph pid bodies) =

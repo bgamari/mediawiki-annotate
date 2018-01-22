@@ -48,13 +48,13 @@ main = do
                             <$> readPagesFile queryFile
         :: IO (HM.HashMap PageId (HS.HashSet PageId))
 
-    let notEntryWithSeed :: Entry IsRelevant -> Bool
+    let notEntryWithSeed :: Entry QueryId DocumentName IsRelevant -> Bool
         notEntryWithSeed Entry {queryId = queryId, documentName = entityId } =
             case (packPageId $ T.unpack queryId) `HM.lookup` query2ForbiddenEntities of
               Just seeds -> not $ (packPageId $ T.unpack entityId) `HS.member` seeds
               _          -> True
     qrelEntries <- filter notEntryWithSeed <$> readQRel qrelfile
-    let formatQrels :: Entry IsRelevant -> T.Text
+    let formatQrels :: Entry QueryId DocumentName IsRelevant -> T.Text
         formatQrels Entry {..} =
           T.unwords [ queryId
                   , "0"

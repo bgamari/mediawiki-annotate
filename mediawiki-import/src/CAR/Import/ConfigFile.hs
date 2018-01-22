@@ -12,6 +12,7 @@ import Control.Monad
 import qualified Text.Trifecta as Tri
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HM
+import qualified Data.HashSet as HS
 import Data.Aeson
 
 import Data.MediaWiki.Markup
@@ -82,6 +83,7 @@ showResolutionPart (TRNamedArg n) = "{{"++T.unpack n++"}}"
 
 data ConfigFile = ConfigFile { disambiguationTemplates :: [TemplateTag]
                              , templateResolutions :: HM.HashMap TemplateTag TemplateResolution
+                             , infoboxTemplates :: HS.HashSet TemplateTag
                              }
                 deriving (Generic)
 instance FromJSON ConfigFile
@@ -91,6 +93,7 @@ configFileToConfig :: T.Text -> ConfigFile -> Config
 configFileToConfig categoryNamespaceName c =
     Config { isCategory = \name -> categoryNamespaceName `T.isPrefixOf` getPageName name
            , isDisambiguation = \_ -> any (`elem` disambiguationTemplates c) . mapMaybe isTemplate
+           , isInfoboxTemplate = \tag -> tag `HS.member` infoboxTemplates c
            , resolveTemplate = \tag args -> do
                  res <- HM.lookup tag (templateResolutions c)
                  runTemplateResolution res args

@@ -80,3 +80,4 @@ outlineToHtml FileNameLookup{..} (Stub pageName pageId _ _ skeleta) = H.docTypeH
             nbsp
             optHyperlink maybeEntityFileURL "entity"
             H.ol $ mapM_ (H.li . (renderHtml headingPath' ) ) children
+    renderHtml _ (Infobox _ _) = mempty
