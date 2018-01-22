@@ -288,15 +288,15 @@ main = do
     -- todo load external folds
     let folds = chunksOf 5 $ M.keys trainData
         trainProcedure trainData = learnToRank trainData featureNames metric gen0
-        ranking = kFoldCross (trainProcedure) folds trainData franking
-        testScore = metric ranking
+        predictRanking = kFoldCross (trainProcedure) folds trainData franking
+        testScore = metric predictRanking
 
     putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
 
     -- write test ranking
     CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
-        $ rerankRankings' model franking
+        $ rerankRankings' model predictRanking
   where
 
       l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
