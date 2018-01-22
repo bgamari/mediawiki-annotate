@@ -276,36 +276,60 @@ main = do
     BSL.writeFile modelFile $ Data.Aeson.encode model
 
     putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
-    -- todo write reranked train run file
 
-    -- Train model in CV
+
+    -- write train ranking
+    CAR.RunFile.writeEntityRun (outputFilePrefix++"-train.run")
+         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r train")
+         $ rerankRankings' model franking
+
+
     -- todo load external folds
-
     let folds = chunksOf 5 $ M.keys trainData
         trainProcedure trainData = learnToRank trainData featureNames metric gen0
-        -- ranking :: M.Map CAR.RunFile.QueryId (Ranking QRel.DocumentName)
-        ranking = kFoldCross (trainProcedure) folds trainData
+        ranking = kFoldCross (trainProcedure) folds trainData franking
         testScore = metric ranking
+
     putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
-    -- todo write reranked test run file
 
+    -- write test ranking
+    CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
+        $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
+        $ rerankRankings' model franking
   where
-      kFoldCross :: Ord q
-                 => (M.Map q [(docId, Features, rel)] -> (Model, Double))
-                 -> [[q]]
-                 -> M.Map q [(docId, Features, rel)]
-                 -> M.Map q (Ranking (docId, rel))
-      kFoldCross trainProcedure folds dat =
-          M.unions $ fmap trainSingleFold folds
-        where
-          trainSingleFold testQueries =
-            let testData =  M.filterWithKey (\query _ -> query `elem` testQueries) dat
-                trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) dat
-                (model, trainScore) = trainProcedure trainData
-                testRanking = rerankRankings' model testData
-            in testRanking
+
+      l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
+      l2rRankingToRankEntries methodName rankings =
+        [ CAR.RunFile.RankingEntry { carQueryId = query
+                      , carDocument = packPageId $ T.unpack doc
+                      , carRank = rank
+                      , carScore = score
+                     , carMethodName = methodName
+                     }
+        | (query, Ranking ranking) <- M.toList rankings
+        , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
+        ]
 
 
+kFoldCross :: forall q docId rel. (Ord q)
+           => (M.Map q [(docId, Features, rel)] -> (Model, Double))
+           -> [[q]]
+           -> M.Map q [(docId, Features, rel)]
+           -> M.Map q [(docId, Features, rel)]
+           -> M.Map q (Ranking (docId, rel))
+kFoldCross trainProcedure folds allTrainData allTestData =
+    M.unions $ fmap trainSingleFold folds
+  where
+    trainSingleFold :: [q]  -> M.Map q (Ranking (docId, rel))
+    trainSingleFold testQueries =
+      let testData :: M.Map q [(docId, Features, rel)]
+          testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
+          trainData :: M.Map q [(docId, Features, rel)]
+          trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allTrainData
+          (model, trainScore) = trainProcedure trainData
+          testRanking :: M.Map q (Ranking (docId, rel))
+          testRanking = rerankRankings' model testData
+      in testRanking
 
 changeKey :: Ord k' => (k-> k') -> M.Map k v -> M.Map k' v
 changeKey f map_ =
