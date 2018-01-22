@@ -267,7 +267,12 @@ main = do
           | (k,list) <- M.toList trainData
           , elem <- list]
 
+<<<<<<< Updated upstream
     putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 5 $ (displayTrainData trainData))
+=======
+    putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
+
+>>>>>>> Stashed changes
 
     -- Train model on all data
     let (model, trainScore) = learnToRank trainData featureNames metric gen0
