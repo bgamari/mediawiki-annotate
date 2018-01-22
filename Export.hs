@@ -13,6 +13,7 @@ import System.FilePath
 import Options.Applicative
 
 import CAR.Types
+import CAR.ToolVersion
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 import CAR.QRelFile
@@ -133,7 +134,7 @@ exportAllWithPrefix outpath = do
 
 main :: IO ()
 main = do
-    (path, names, exporters) <- execParser $ info (helper <*> options) mempty
+    (path, names, exporters) <- execParser' 1 (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
