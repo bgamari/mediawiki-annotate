@@ -7,22 +7,12 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 
-import System.IO
-
-import qualified Data.Map.Strict as M
-import qualified Data.ByteString.Lazy as BSL
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy.IO as TL
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Data.Monoid
 import Control.Monad
 
-import CAR.AnnotationsFile as AnnsFile
-
 import Options.Applicative
 import EdgeDocCorpus
-import CAR.Utils
 import CAR.ToolVersion
 import CAR.TocFile as Toc
 import CAR.Types

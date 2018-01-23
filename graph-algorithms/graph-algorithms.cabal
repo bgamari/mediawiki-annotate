@@ -1,0 +1,38 @@
+name:                graph-algorithms
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Ben Gamari
+maintainer:          ben@smart-cactus.org
+copyright:           (c) 2017 Ben Gamari
+category:            Math
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Dijkstra,
+                       AttriRank,
+                       Graph,
+                       DenseMapping,
+                       PageRank,
+                       ZScore
+
+  other-extensions:    ScopedTypeVariables, FlexibleContexts, TupleSections,
+                       MultiWayIf, GeneralizedNewtypeDeriving, BangPatterns,
+                       GADTs, DeriveFunctor
+
+  build-depends:       base >=4.10 && <4.11,
+                       hashable >=1.2 && <1.3,
+                       unordered-containers >=0.2 && <0.3,
+                       containers >=0.5 && <0.6,
+                       transformers >=0.5 && <0.6,
+                       vector >=0.12 && <0.13,
+                       vector-th-unbox,
+                       indexed-vector,
+                       psqueues,
+                       heaps,
+                       deepseq >=1.4 && <1.5
+  hs-source-dirs:      src
+  default-language:    Haskell2010

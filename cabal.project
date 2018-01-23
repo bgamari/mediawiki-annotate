@@ -9,6 +9,7 @@ packages:
     mediawiki-import/
     db-export/
     graph-expansion/
+    graph-algorithms/
     simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal

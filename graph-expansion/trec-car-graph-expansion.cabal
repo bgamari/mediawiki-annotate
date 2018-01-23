@@ -17,9 +17,11 @@ cabal-version:       >=1.10
 library
   default-language:    Haskell2010
   ghc-options:         -Wall
-  hs-source-dirs:      .
-  other-modules:
-      MultiTrecRunFile
+  hs-source-dirs:      src
+  exposed-modules:     EdgeDocCorpus,
+                       GraphExpansion,
+                       MultiTrecRunFile,
+                       GraphExpansionExperiments
   build-depends:       base >=4.9 && <4.11,
                        async,
                        bytestring,
@@ -51,22 +53,14 @@ library
                        snowball,
                        time,
                        dlist,
+                       graph-algorithms,
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010
 
 executable graph-retrieval
   main-is:             GraphRetrieval.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
-                       EdgeDocCorpus
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
@@ -81,8 +75,6 @@ executable graph-retrieval
                        simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
-                       heaps,
-                       psqueues,
                        graphviz,
                        transformers,
                        aeson,
@@ -99,21 +91,14 @@ executable graph-retrieval
                        snowball,
                        time,
                        simplir-word-embedding,
+                       trec-car-graph-expansion,
+                       graph-algorithms,
                        trec-car-tools
   default-language:    Haskell2010
   
 executable trec-car-graph-expansion
   main-is:             GraphExpansionMain.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
-                       EdgeDocCorpus
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
@@ -145,22 +130,15 @@ executable trec-car-graph-expansion
                        log-domain,
                        snowball,
                        time,
+                       graph-algorithms,
                        simplir-word-embedding,
+                       trec-car-graph-expansion,
                        trec-car-tools
   default-language:    Haskell2010
 
 executable trec-car-paragraph-retrieval
   main-is:             ParagraphRetrieval.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
-                       EdgeDocCorpus
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
@@ -193,21 +171,13 @@ executable trec-car-paragraph-retrieval
                        snowball,
                        time,
                        simplir-word-embedding,
+                       trec-car-graph-expansion,
                        trec-car-tools
   default-language:    Haskell2010
 
 executable trec-car-edgedoc-retrieval
   main-is:             EdgeDocRetrieval.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
-                       EdgeDocCorpus
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
@@ -239,6 +209,8 @@ executable trec-car-edgedoc-retrieval
                        log-domain,
                        snowball,
                        time,
+                       graph-algorithms,
+                       trec-car-graph-expansion,
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010
@@ -246,15 +218,7 @@ executable trec-car-edgedoc-retrieval
 
 executable trec-car-seeds
   main-is:             SeedEntities.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base,
                        async,
@@ -262,7 +226,6 @@ executable trec-car-seeds
                        unordered-containers,
                        text,
                        vector,
-                       indexed-vector,
                        containers,
                        stm,
                        deepseq,
@@ -270,8 +233,6 @@ executable trec-car-seeds
                        simplir-word-embedding,
                        optparse-applicative >= 0.12,
                        hashable,
-                       heaps,
-                       psqueues,
                        aeson,
                        transformers,
                        simplir,
@@ -281,6 +242,8 @@ executable trec-car-seeds
                        foldl,
                        log-domain,
                        time,
+                       graph-algorithms,
+                       trec-car-graph-expansion,
                        trec-car-tools
   default-language:    Haskell2010
   
@@ -313,13 +276,13 @@ executable trec-car-remove-seeds-from-qrels
                        foldl,
                        log-domain,
                        time,
+                       trec-car-graph-expansion,
                        trec-car-tools
   default-language:    Haskell2010
 
 executable graph-expansion-build-kb-index
   main-is:             BuildKbIndex.hs
   ghc-options:         -Wall -threaded -rtsopts
-  other-modules:       EdgeDocCorpus
   build-depends:       base,
                        text >= 1.2,
                        bytestring,
@@ -357,6 +320,7 @@ executable graph-expansion-build-kb-index
                        bytestring,
                        optparse-applicative >= 0.12,
                        trec-car-tools,
+                       trec-car-graph-expansion,
                        ansi-wl-pprint,
                        hashable
   default-language:    Haskell2010
@@ -365,7 +329,6 @@ executable graph-expansion-build-kb-index
 executable graph-expansion-edge-doc
   main-is:             EdgeDocCorpusMain.hs
   ghc-options:         -Wall -rtsopts
-  other-modules:       EdgeDocCorpus
   build-depends:       base,
                        text >= 1.2,
                        bytestring,
@@ -403,6 +366,7 @@ executable graph-expansion-edge-doc
                        bytestring,
                        optparse-applicative >= 0.12,
                        trec-car-tools,
+                       trec-car-graph-expansion,
                        ansi-wl-pprint,
                        hashable
   default-language:    Haskell2010
@@ -410,16 +374,7 @@ executable graph-expansion-edge-doc
 
 executable graph-expansion-feature-generation
   main-is:             GraphExpansionFeatureGeneration.hs
-  other-modules:       GraphExpansion
-                       Dijkstra
-                       DenseMapping
-                       PageRank
-                       Graph
-                       AttriRank
-                       ZScore
-                       WriteRanking
-                       GraphExpansionExperiments
-                       EdgeDocCorpus
+  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base >=4.9 && <4.11,
                        async,
@@ -454,6 +409,8 @@ executable graph-expansion-feature-generation
                        snowball,
                        time,
                        split,
+                       graph-algorithms,
+                       trec-car-graph-expansion,
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010
@@ -495,6 +452,8 @@ executable graph-expansion-pagerank-on-all
                        snowball,
                        time,
                        split,
+                       trec-car-graph-expansion,
+                       graph-algorithms,
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010
