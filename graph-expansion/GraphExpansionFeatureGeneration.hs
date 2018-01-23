@@ -452,8 +452,11 @@ makeEntFeatVector xs =
 
 makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
 makeEdgeFeatVector xs =
+    traceShow defs $
+    traceShow edgeFSpace $
     F.modify edgeFSpace defaults xs
- where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
+ where defaults = F.fromList edgeFSpace  defs
+       defs = ([ (EdgeCount, 0.0)
                                         , (EdgeDocKL, 0.0)
                                         ]
                                        ++ defaultEdgeRankFeatures Aggr
