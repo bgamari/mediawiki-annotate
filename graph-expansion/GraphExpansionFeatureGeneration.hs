@@ -40,6 +40,7 @@ import Data.List
 import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
+import Data.Function
 
 
 import CAR.Types hiding (Entity)
@@ -316,11 +317,25 @@ main = do
 
 
     -- Train model on all data
-    let (model, trainScore) = learnToRank trainData featureNames metric gen0
+
+    let trainModel i gen = do
+          let (model, trainScore) = learnToRank trainData featureNames metric gen
+
+          putStrLn $ "Model "++(show i)++ " train evaluation "++ (show trainScore) ++ " MAP."
+
+          let modelFile' = modelFile++"-model-"++(show i)++".json"
+          BSL.writeFile modelFile' $ Data.Aeson.encode model
+          putStrLn $ "Written model "++(show i)++ " to file "++ (show modelFile') ++ " ."
+          return (model, trainScore)
+
+    let trainWithDifferentGens gen i = let (genA, genB) = System.Random.split gen
+                  in (genA, trainModel i genB)
+    models <- sequence $ snd $ mapAccumL trainWithDifferentGens gen0 [0..4]
+    let (model, trainScore) = maximumBy (compare `on` snd) models
+
+--     let (model, trainScore) = learnToRank trainData featureNames metric gen0
     putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
-
     BSL.writeFile modelFile $ Data.Aeson.encode model
-
     putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
 
 
@@ -429,7 +444,7 @@ data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
-allRunFeatures = [minBound..maxBound]
+allRunFeatures = [ScoreF] --[minBound..maxBound]
 
 data EntityOrEdge = Entity | Edge
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
@@ -627,7 +642,7 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 
         entityScoreVec entityEntry = makeEntFeatVector  (
                                             [ (EntIncidentEdgeDocsRecip, recip indicentEdgeDocs)
-                                            , (EntDegreeRecip, recip degree)
+--                                             , (EntDegreeRecip, recip degree)
                                             , (EntDegree, degree)
                                             ]
                                             ++ rankEntFeatures Aggr (multiRankingEntryCollapsed entityEntry)

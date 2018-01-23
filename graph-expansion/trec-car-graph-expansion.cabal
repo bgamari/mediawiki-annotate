@@ -460,7 +460,7 @@ executable graph-expansion-feature-generation
 
 executable graph-expansion-pagerank-on-all
   main-is:             PageRankOnAll.hs
-  ghc-options:         -Wall
+  ghc-options:         -Wall -threaded -rtsopts
   build-depends:       base,
                        async,
                        bytestring,
