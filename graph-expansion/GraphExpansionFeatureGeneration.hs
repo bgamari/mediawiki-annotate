@@ -93,25 +93,12 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 -- type IsRelevant = LearningToRank.IsRelevant
 
-gridRunParser :: ReadM GridRun
-gridRunParser = GridRun <$> auto <*> auto <*> auto <*> auto
-
-gridRunOptParser :: Parser (GridRun, EntityOrEdge, FilePath)
-gridRunOptParser =
-    option ((,,) <$> gridRunParser <*> auto <*> str)
-      (long "grid-run"
-      <> metavar "QueryModel RetrievalModel ExpansionModel IndexType (Edge|Entity) RUN"
-      <> help ("one run file with GridRun configuration"++
-                "\nQueryModel: "++ (show [minBound @QueryModel .. maxBound]) ++
-                "\nRetrievalModel: "++ (show [minBound @RetrievalModel .. maxBound]) ++
-                "\nExpansionModel: "++ (show [minBound @ExpansionModel .. maxBound]) ++
-                "\nIndexType: "++ (show [minBound @IndexType .. maxBound])
-               )
-    )
-
---grid-run All Bm25 NoneX ParagraphIdx $file
---grid-run Ben Ben WithLaura BedIndex $upstairs
-
+gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
+gridRunParser = option (parseGridRunFile <$> str) (long "grid-run")
+  where
+    parseGridRunFile s
+      | a:b:c:d:e:rest <- words s
+      = (GridRun (read a) (read b) (read c) (read d), read e, unwords rest)
 
 opts :: Parser ( FilePath
                , FilePath
@@ -130,14 +117,7 @@ opts =
     <*> querySource
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
---     <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
---     <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
---     <*> option str (long "entity-bm25" <> metavar "RUN" <> help "entity BM25 run")
---     <*> option str (long "entity-ql" <> metavar "RUN" <> help "entity Query Likelihood run")
---     <*> option str (long "edgedoc-bm25" <> metavar "RUN" <> help "edgedoc BM25 run")
---     <*> option str (long "edgedoc-ql" <> metavar "RUN" <> help "edge Query Likelihood run")
-    <*> some gridRunOptParser
-
+    <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
@@ -222,6 +202,7 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
+    let gridRunFiles = undefined :: [(GridRun, EntityOrEdge, FilePath)]
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -262,8 +243,8 @@ main = do
 
     entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
     entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
-    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX EntityIdx, Edge, r) <- gridRunFiles])
-    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX EntityIdx, Edge, r) <- gridRunFiles])
+    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
+    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
 
     entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
     edgeRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
