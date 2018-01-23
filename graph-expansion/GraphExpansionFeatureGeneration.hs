@@ -318,8 +318,8 @@ main = do
 
     -- Train model on all data
 
-    let trainModel i = do
-          let (model, trainScore) = learnToRank trainData featureNames metric gen0
+    let trainModel i gen = do
+          let (model, trainScore) = learnToRank trainData featureNames metric gen
 
           putStrLn $ "Model "++(show i)++ " train evaluation "++ (show trainScore) ++ " MAP."
 
@@ -328,7 +328,9 @@ main = do
           putStrLn $ "Written model "++(show i)++ " to file "++ (show modelFile') ++ " ."
           return (model, trainScore)
 
-    models <- sequence [trainModel i | i <- [0..4]]
+    let trainWithDifferentGens gen i = let (genA, genB) = System.Random.split gen
+                  in (genA, trainModel i genB)
+    models <- sequence $ snd $ mapAccumL trainWithDifferentGens gen0 [0..4]
     let (model, trainScore) = maximumBy (compare `on` snd) models
 
 --     let (model, trainScore) = learnToRank trainData featureNames metric gen0
@@ -640,7 +642,7 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 
         entityScoreVec entityEntry = makeEntFeatVector  (
                                             [ (EntIncidentEdgeDocsRecip, recip indicentEdgeDocs)
-                                            , (EntDegreeRecip, recip degree)
+--                                             , (EntDegreeRecip, recip degree)
                                             , (EntDegree, degree)
                                             ]
                                             ++ rankEntFeatures Aggr (multiRankingEntryCollapsed entityEntry)
