@@ -93,12 +93,26 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 -- type IsRelevant = LearningToRank.IsRelevant
 
+-- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
 gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
-gridRunParser = option (parseGridRunFile <$> str) (long "grid-run")
+gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
   where
+    parseGridRunFile :: String -> ReadM (GridRun, EntityOrEdge, FilePath)
     parseGridRunFile s
       | a:b:c:d:e:rest <- words s
-      = (GridRun (read a) (read b) (read c) (read d), read e, unwords rest)
+      = do !a' <- safeRead "QueryModel" a
+           !b' <- safeRead "RetrievalModel" b
+           !c' <- safeRead "ExpansionModel" c
+           !d' <- safeRead "IndexType" d
+           !e' <- safeRead "EntityOrEdge" e
+           return (GridRun a' b' c' d', e', unwords rest)
+      | otherwise
+      = fail $ "Failed to tokenise: " ++ s
+      where
+        safeRead :: Read a => String -> String -> ReadM a
+        safeRead thing s'
+          | (x,""):_ <- reads s' = return x
+          | otherwise = fail $ "failed to parse "++thing++": "++s'
 
 opts :: Parser ( FilePath
                , FilePath
