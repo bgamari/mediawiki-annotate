@@ -224,13 +224,13 @@ main = do
     edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun edgedocQlRunFile
 
     entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
-    edgedocRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
+    edgeRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
     let entityRuns = entityRuns' ++ [entityBm25Run, entityQlRun]
-    let edgedocRuns = edgedocRuns' ++ [edgedocBm25Run, edgedocQlRun]
+    let edgeRuns = edgeRuns' ++ [edgedocBm25Run, edgedocQlRun]
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
         collapsedEntityRun = collapseRuns entityRuns
-        collapsedEdgedocRun = collapseRuns edgedocRuns
+        collapsedEdgedocRun = collapseRuns edgeRuns
 
         docFeatures :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
         docFeatures = M.fromList
@@ -360,8 +360,8 @@ data ExpansionModel = NoneX | Rm | EcmX | EcmRm
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
-entityRuns :: [GridRun]
-entityRuns = [ GridRun qm rm em it
+entityRunsF :: [GridRun]
+entityRunsF = [ GridRun qm rm em it
              | qm <- enumAll
              , rm <- enumAll
              , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
@@ -370,8 +370,8 @@ entityRuns = [ GridRun qm rm em it
              ]
 
 
-edgeDocRuns :: [GridRun]
-edgeDocRuns = [ GridRun qm rm em it
+edgeRunsF :: [GridRun]
+edgeRunsF = [ GridRun qm rm em it
              | qm <- enumAll
              , rm <- enumAll
              , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm)
@@ -383,24 +383,24 @@ edgeDocRuns = [ GridRun qm rm em it
 
 data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
          deriving (Show, Ord, Eq, Generic, Serialise)
-allGridRuns = GridRun <$> enumAll <*> enumAll <*> enumAll <*> enumAll
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Ord, Eq, Generic, Serialise)
-allRuns = (GridRun' <$> allGridRuns) <> [Aggr]
+allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
+allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 data EntityOrEdge = Entity | Edge
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 data Feature (ty :: EntityOrEdge) where
-    RetrievalFeature :: Run -> RunFeature -> Feature ty
+    EntRetrievalFeature :: Run -> RunFeature -> Feature 'Entity
     EntIncidentEdgeDocsRecip :: Feature 'Entity
     EntDegreeRecip :: Feature 'Entity
     EntDegree  :: Feature 'Entity
+    EdgeRetrievalFeature :: Run -> RunFeature -> Feature 'Edge
     EdgeDocKL  :: Feature 'Edge
     EdgeCount  :: Feature 'Edge
-    --deriving (Show, Ord, Eq, Generic, Serialise)
 
 deriving instance Show (Feature a)
 deriving instance Ord (Feature a)
@@ -408,7 +408,7 @@ deriving instance Eq (Feature a)
 
 allEntityFeatures :: [Feature 'Entity]
 allEntityFeatures =
-    (RetrievalFeature <$> allRuns <*> enumAll)
+    (EntRetrievalFeature <$> allEntityRunsF <*> enumAll)
     <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
 
 enumAll :: (Enum a, Bounded a) => [a]
@@ -416,7 +416,7 @@ enumAll = [minBound..maxBound]
 
 allEdgeFeatures :: [Feature 'Edge]
 allEdgeFeatures =
-    (RetrievalFeature <$> allRuns <*> enumAll) <> [EdgeDocKL, EdgeCount]
+    (EdgeRetrievalFeature <$> allEdgeRunsF <*> enumAll) <> [EdgeDocKL, EdgeCount]
 
 
 type EntityFeatures = Feature 'Entity
@@ -442,9 +442,9 @@ makeEntFeatVector xs =
                                        , (EntDegreeRecip, 0.0)
                                        , (EntDegree, 0.0)
                                        ]
-                                       ++ defaultRankFeatures' Aggr
-                                       ++ defaultRankFeatures' (GridRun' $ GridRun All Bm25 NoneX EntityIdx)
-                                       ++ defaultRankFeatures' (GridRun' $ GridRun All Ql NoneX EntityIdx)
+                                       ++ defaultEntRankFeatures Aggr
+                                       ++ defaultEntRankFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx)
+                                       ++ defaultEntRankFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx)
                                         )
 
 makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
@@ -453,9 +453,9 @@ makeEdgeFeatVector xs =
  where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
                                         , (EdgeDocKL, 0.0)
                                         ]
-                                       ++ defaultRankFeatures' Aggr
-                                       ++ defaultRankFeatures' (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx)
-                                       ++ defaultRankFeatures' (GridRun' $ GridRun All Ql NoneX ParagraphIdx)                                        )
+                                       ++ defaultEdgeRankFeatures Aggr
+                                       ++ defaultEdgeRankFeatures (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx)
+                                       ++ defaultEdgeRankFeatures (GridRun' $ GridRun All Ql NoneX ParagraphIdx)                                        )
 
 -- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
 -- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
@@ -471,9 +471,15 @@ defaultRankFeatures runF =
       BucketRankF -> 0.0
       CountF -> 0.0
 
-defaultRankFeatures' :: Run -> [(Feature ty, Double)]
-defaultRankFeatures' run =
-    [ (RetrievalFeature run runF, defaultRankFeatures runF)
+defaultEntRankFeatures :: Run -> [(Feature 'Entity, Double)]
+defaultEntRankFeatures run =
+    [ (EntRetrievalFeature run runF, defaultRankFeatures runF)
+    | runF <- enumAll
+    ]
+
+defaultEdgeRankFeatures :: Run -> [(Feature 'Edge, Double)]
+defaultEdgeRankFeatures run =
+    [ (EdgeRetrievalFeature run runF, defaultRankFeatures runF)
     | runF <- enumAll
     ]
 
@@ -513,9 +519,15 @@ rankFeatures runF entry =
       BucketRankF -> bucketRank entry
       CountF -> count entry
 
-rankFeatures' :: Run -> RankingEntry d -> [(Feature ty, Double)]
-rankFeatures' run entry =
-    [ (RetrievalFeature run runF, rankFeatures runF entry)
+rankEntFeatures :: Run -> RankingEntry d -> [(Feature 'Entity, Double)]
+rankEntFeatures run entry =
+    [ (EntRetrievalFeature run runF, rankFeatures runF entry)
+    | runF <- enumAll
+    ]
+
+rankEdgeFeatures :: Run -> RankingEntry d -> [(Feature 'Edge, Double)]
+rankEdgeFeatures run entry =
+    [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
     | runF <- enumAll
     ]
 
@@ -577,10 +589,10 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             , (EntDegreeRecip, recip degree)
                                             , (EntDegree, degree)
                                             ]
-                                            ++ rankFeatures' Aggr (multiRankingEntryCollapsed entityEntry)
+                                            ++ rankEntFeatures Aggr (multiRankingEntryCollapsed entityEntry)
                                             ++ concat (catMaybes
-                                            [ rankFeatures' (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName entityEntry)
-                                            , rankFeatures' (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName entityEntry)
+                                            [ rankEntFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName entityEntry)
+                                            , rankEntFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName entityEntry)
                                             ] )
                                            )
 
@@ -588,10 +600,10 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             [ (EdgeCount, 1.0)
                                             , (EdgeDocKL, (edgeDocKullbackLeibler edgeDocs ) ( fromJust $ (multiRankingEntryGetDocumentName edgeEntry) `HM.lookup` edgeDocsByPara) )
                                             ]
-                                            ++ rankFeatures' Aggr (multiRankingEntryCollapsed edgeEntry)
+                                            ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgeEntry)
                                             ++ concat (catMaybes
-                                            [ rankFeatures' (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName edgeEntry)
-                                            , rankFeatures' (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName edgeEntry)
+                                            [ rankEdgeFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName edgeEntry)
+                                            , rankEdgeFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName edgeEntry)
                                             ] )
 
 
