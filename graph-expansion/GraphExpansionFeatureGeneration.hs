@@ -202,7 +202,6 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
-    let gridRunFiles = undefined :: [(GridRun, EntityOrEdge, FilePath)]
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
