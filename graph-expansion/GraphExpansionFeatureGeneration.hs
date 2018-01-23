@@ -429,7 +429,7 @@ data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
-allRunFeatures = [RecipRankF] --[minBound..maxBound]
+allRunFeatures = [ScoreF] --[minBound..maxBound]
 
 data EntityOrEdge = Entity | Edge
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
