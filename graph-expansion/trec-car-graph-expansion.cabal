@@ -491,6 +491,7 @@ executable graph-expansion-pagerank-on-all
                        serialise,
                        filepath,
                        log-domain,
+                       parallel,
                        snowball,
                        time,
                        split,

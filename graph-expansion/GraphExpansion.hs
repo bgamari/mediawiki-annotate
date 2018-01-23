@@ -13,6 +13,7 @@ module GraphExpansion (
   , subsetOfUniverseGraph
   -- * BinarySymmetric Graph
   , BinarySymmetricGraph
+  , edgeDocsToBinaryGraph
   , universeToBinaryGraph
   , nHopGraphExpansion
   -- * Shortest Paths
@@ -119,6 +120,16 @@ subsetOfUniverseGraph universe nodeset =
 -- ------------------------------------------------
 
 type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
+
+edgeDocsToBinaryGraph :: [EdgeDoc] -> BinarySymmetricGraph
+edgeDocsToBinaryGraph edgeDocs =
+    HM.fromListWith (<>)
+    [ (a, HS.singleton b)
+    | edgeDoc <- edgeDocs
+    , a <- HS.toList $ edgeDocNeighbors edgeDoc
+    , b <- HS.toList $ edgeDocNeighbors edgeDoc
+    , a /= b
+    ]
 
 universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
 universeToBinaryGraph universeGraph =
