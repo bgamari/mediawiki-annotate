@@ -362,18 +362,18 @@ data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
 
 entityRunsF :: [GridRun]
 entityRunsF = [ GridRun qm rm em it
-             | qm <- enumAll
-             , rm <- enumAll
+             | qm <- [minBound..maxBound]
+             , rm <- [minBound..maxBound]
              , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
                            , (PageIdx, NoneX), (PageIdx, Rm)]
-                           ++ [(EntityIdx, em) | em <- enumAll]
+                           ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
              ]
 
 
 edgeRunsF :: [GridRun]
 edgeRunsF = [ GridRun qm rm em it
-             | qm <- enumAll
-             , rm <- enumAll
+             | qm <- [minBound..maxBound]
+             , rm <- [minBound..maxBound]
              , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm)
                            , (ParagraphIdx, NoneX), (ParagraphIdx, Rm)
                            ]
@@ -391,6 +391,10 @@ allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+
+allRunFeatures :: [RunFeature]
+allRunFeatures = [minBound..maxBound]
+
 data EntityOrEdge = Entity | Edge
          deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
 data Feature (ty :: EntityOrEdge) where
@@ -408,15 +412,13 @@ deriving instance Eq (Feature a)
 
 allEntityFeatures :: [Feature 'Entity]
 allEntityFeatures =
-    (EntRetrievalFeature <$> allEntityRunsF <*> enumAll)
+    (EntRetrievalFeature <$> allEntityRunsF <*> allRunFeatures)
     <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
 
-enumAll :: (Enum a, Bounded a) => [a]
-enumAll = [minBound..maxBound]
 
 allEdgeFeatures :: [Feature 'Edge]
 allEdgeFeatures =
-    (EdgeRetrievalFeature <$> allEdgeRunsF <*> enumAll) <> [EdgeDocKL, EdgeCount]
+    (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures) <> [EdgeDocKL, EdgeCount]
 
 
 type EntityFeatures = Feature 'Entity
@@ -474,13 +476,13 @@ defaultRankFeatures runF =
 defaultEntRankFeatures :: Run -> [(Feature 'Entity, Double)]
 defaultEntRankFeatures run =
     [ (EntRetrievalFeature run runF, defaultRankFeatures runF)
-    | runF <- enumAll
+    | runF <- allRunFeatures
     ]
 
 defaultEdgeRankFeatures :: Run -> [(Feature 'Edge, Double)]
 defaultEdgeRankFeatures run =
     [ (EdgeRetrievalFeature run runF, defaultRankFeatures runF)
-    | runF <- enumAll
+    | runF <- allRunFeatures
     ]
 
 
@@ -522,13 +524,13 @@ rankFeatures runF entry =
 rankEntFeatures :: Run -> RankingEntry d -> [(Feature 'Entity, Double)]
 rankEntFeatures run entry =
     [ (EntRetrievalFeature run runF, rankFeatures runF entry)
-    | runF <- enumAll
+    | runF <- allRunFeatures
     ]
 
 rankEdgeFeatures :: Run -> RankingEntry d -> [(Feature 'Edge, Double)]
 rankEdgeFeatures run entry =
     [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
-    | runF <- enumAll
+    | runF <- allRunFeatures
     ]
 
 
