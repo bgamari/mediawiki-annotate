@@ -40,6 +40,7 @@ import Data.List
 import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
+import Data.Function
 
 
 import CAR.Types hiding (Entity)
@@ -316,11 +317,23 @@ main = do
 
 
     -- Train model on all data
-    let (model, trainScore) = learnToRank trainData featureNames metric gen0
+
+    let trainModel i = do
+          let (model, trainScore) = learnToRank trainData featureNames metric gen0
+
+          putStrLn $ "Model "++(show i)++ " train evaluation "++ (show trainScore) ++ " MAP."
+
+          let modelFile' = modelFile++"-model-"++(show i)++".json"
+          BSL.writeFile modelFile' $ Data.Aeson.encode model
+          putStrLn $ "Written model "++(show i)++ " to file "++ (show modelFile') ++ " ."
+          return (model, trainScore)
+
+    models <- sequence [trainModel i | i <- [0..4]]
+    let (model, trainScore) = maximumBy (compare `on` snd) models
+
+--     let (model, trainScore) = learnToRank trainData featureNames metric gen0
     putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
-
     BSL.writeFile modelFile $ Data.Aeson.encode model
-
     putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
 
 
