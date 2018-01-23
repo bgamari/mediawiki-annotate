@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 import Debug.Trace
 import Options.Applicative
@@ -32,7 +33,7 @@ main = do
 
 readEdgeDocs :: FilePath -> IO [EdgeDoc]
 readEdgeDocs inPath = do
-    ((), edgeDocs) <- readCborList inPath
+    (Just (0::Int), edgeDocs) <- readCborList inPath
     return edgeDocs
 
 pageRankMode :: Parser (IO ())

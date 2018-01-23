@@ -6,6 +6,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 import Control.Concurrent
 import Control.Concurrent.Async
@@ -19,6 +26,8 @@ import System.IO
 import Data.Aeson
 import Numeric.Log
 import System.Random
+import GHC.Generics
+import Codec.Serialise
 
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
@@ -33,7 +42,7 @@ import Data.Maybe
 import Data.Foldable as Foldable
 
 
-import CAR.Types
+import CAR.Types hiding (Entity)
 import CAR.ToolVersion
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
@@ -44,8 +53,8 @@ import CAR.TocFile as Toc
 
 import EdgeDocCorpus
 import WriteRanking
-import GraphExpansionExperiments
-import GraphExpansion
+import GraphExpansionExperiments hiding (Bm25, Ql)
+import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.TopK (collectTopK)
 import SimplIR.LearningToRank
@@ -84,34 +93,66 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 -- type IsRelevant = LearningToRank.IsRelevant
 
+-- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
+gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
+gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
+  where
+    parseGridRunFile :: String -> ReadM (GridRun, EntityOrEdge, FilePath)
+    parseGridRunFile s
+      | a:b:c:d:e:rest <- words s
+      = do !a' <- safeRead "QueryModel" a
+           !b' <- safeRead "RetrievalModel" b
+           !c' <- safeRead "ExpansionModel" c
+           !d' <- safeRead "IndexType" d
+           !e' <- safeRead "EntityOrEdge" e
+           return (GridRun a' b' c' d', e', unwords rest)
+      | otherwise
+      = fail $ "Failed to tokenise: " ++ s
+      where
+        safeRead :: Read a => String -> String -> ReadM a
+        safeRead thing s'
+          | (x,""):_ <- reads s' = return x
+          | otherwise = fail $ "failed to parse "++thing++": "++s'
+
 opts :: Parser ( FilePath
                , FilePath
                , QuerySource
                , [CarRun.QueryId]
                , NumResults
-               , [FilePath]
-               , [FilePath]
-               , FilePath, FilePath, FilePath, FilePath
+               , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , FilePath
                )
 opts =
-    (,,,,,,,,,,,,,)
+    (,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
-    <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
-    <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
-    <*> option str (long "entity-bm25" <> metavar "RUN" <> help "entity BM25 run")
-    <*> option str (long "entity-ql" <> metavar "RUN" <> help "entity Query Likelihood run")
-    <*> option str (long "edgedoc-bm25" <> metavar "RUN" <> help "edgedoc BM25 run")
-    <*> option str (long "edgedoc-ql" <> metavar "RUN" <> help "edge Query Likelihood run")
+    <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
+
+--           -entity--entity-page--all-bm25-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-bm25-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-bm25-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-rm--Text-test200.v201.cbor.outlines.run
+
+
     where
 
       querySource :: Parser QuerySource
@@ -172,16 +213,20 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, querySrc,
-      queryRestriction, numResults, entityRunFiles, edgedocRunFiles
-      , entityBm25RunFile, entityQlRunFile, edgedocBm25RunFile, edgedocQlRunFile
+      queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
-    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ++ [entityBm25RunFile, entityQlRunFile]))
-    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles ++ [edgedocBm25RunFile, edgedocQlRunFile]))
+    let entityRunFiles = [ r | (_, Entity, r) <- gridRunFiles]
+
+        edgedocRunFiles = [ r | (_, Edge, r) <- gridRunFiles]
+
+    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles )) -- ++ [entityBm25RunFile, entityQlRunFile]))
+    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles)) --  ++ [edgedocBm25RunFile, edgedocQlRunFile]))
+
 
     gen0 <- newStdGen
 
@@ -209,19 +254,19 @@ main = do
 
     let fixRun methodName entries = fmap (\entry -> entry {CarRun.carMethodName = methodName} ) entries
 
-    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun entityBm25RunFile
-    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun entityQlRunFile
-    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun edgedocBm25RunFile
-    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun edgedocQlRunFile
+    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
+    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
+    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
+    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
 
     entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
-    edgedocRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
+    edgeRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
     let entityRuns = entityRuns' ++ [entityBm25Run, entityQlRun]
-    let edgedocRuns = edgedocRuns' ++ [edgedocBm25Run, edgedocQlRun]
+    let edgeRuns = edgeRuns' ++ [edgedocBm25Run, edgedocQlRun]
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
         collapsedEntityRun = collapseRuns entityRuns
-        collapsedEdgedocRun = collapseRuns edgedocRuns
+        collapsedEdgedocRun = collapseRuns edgeRuns
 
         docFeatures :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
         docFeatures = M.fromList
@@ -340,27 +385,90 @@ changeKey f map_ =
 
 -- Set up the feature space
 
-data EntityFeatures = EntIncidentEdgeDocsRecip | EntDegreeRecip | EntDegree
-                  | EntAggrScore | EntAggrRecipRank | EntAggrLinearRank | EntAggrBucketRank| EntAggrCount
-                    | EntBm25Score | EntBm25RecipRank | EntBm25LinearRank | EntBm25BucketRank| EntBm25Count
-                    | EntQlScore | EntQlRecipRank | EntQlLinearRank | EntQlBucketRank| EntQlCount
 
-        deriving (Show, Ord, Eq, Enum, Bounded)
-data EdgeFeatures =  EdgeCount | EdgeDocKL
-                  | EdgeAggrScore | EdgeAggrRecipRank | EdgeAggrLinearRank | EdgeAggrBucketRank| EdgeAggrCount
-                  | EdgeBm25Score | EdgeBm25RecipRank | EdgeBm25LinearRank | EdgeBm25BucketRank| EdgeBm25Count
-                  | EdgeQlScore | EdgeQlRecipRank | EdgeQlLinearRank | EdgeQlBucketRank| EdgeQlCount
 
-        deriving (Show, Ord, Eq, Enum, Bounded)
--- data EntityEdgeFeatures = TextSimBetweenEntityAndEdgeDoc
---         deriving (Show, Ord, Eq, Enum, Bounded)
+data QueryModel = All | Title
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+data RetrievalModel = Bm25 | Ql
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+data ExpansionModel = NoneX | Rm | EcmX | EcmRm
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+
+entityRunsF :: [GridRun]
+entityRunsF = [ GridRun qm rm em it
+             | qm <- [minBound..maxBound]
+             , rm <- [minBound..maxBound]
+             , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
+                           , (PageIdx, NoneX), (PageIdx, Rm)]
+                           ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
+             ]
+
+
+edgeRunsF :: [GridRun]
+edgeRunsF = [ GridRun qm rm em it
+             | qm <- [minBound..maxBound]
+             , rm <- [minBound..maxBound]
+             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm)
+                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm)
+                           ]
+             ]
+
+
+
+data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
+         deriving (Show, Ord, Eq, Generic, Serialise, Read)
+
+data Run = GridRun' GridRun | Aggr
+         deriving (Show, Ord, Eq, Generic, Serialise)
+allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
+allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
+
+data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+
+allRunFeatures :: [RunFeature]
+allRunFeatures = [minBound..maxBound]
+
+data EntityOrEdge = Entity | Edge
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+data Feature (ty :: EntityOrEdge) where
+    EntRetrievalFeature :: Run -> RunFeature -> Feature 'Entity
+    EntIncidentEdgeDocsRecip :: Feature 'Entity
+    EntDegreeRecip :: Feature 'Entity
+    EntDegree  :: Feature 'Entity
+    EdgeRetrievalFeature :: Run -> RunFeature -> Feature 'Edge
+    EdgeDocKL  :: Feature 'Edge
+    EdgeCount  :: Feature 'Edge
+
+deriving instance Show (Feature a)
+deriving instance Ord (Feature a)
+deriving instance Eq (Feature a)
+
+allEntityFeatures :: [Feature 'Entity]
+allEntityFeatures =
+    (EntRetrievalFeature <$> allEntityRunsF <*> allRunFeatures)
+    <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
+
+
+allEdgeFeatures :: [Feature 'Edge]
+allEdgeFeatures =
+    (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures)
+    <> [EdgeDocKL, EdgeCount]
+
+
+type EntityFeatures = Feature 'Entity
+
+type EdgeFeatures = Feature 'Edge
+
 type CombinedFeatures = Either EntityFeatures EdgeFeatures
 
 entFSpace :: FeatureSpace EntityFeatures
-entFSpace = mkFeatureSpace [minBound .. maxBound]
+entFSpace = mkFeatureSpace allEntityFeatures
 
 edgeFSpace :: FeatureSpace EdgeFeatures
-edgeFSpace = mkFeatureSpace [minBound .. maxBound]
+edgeFSpace = mkFeatureSpace allEdgeFeatures
 
 combinedFSpace :: FeatureSpace CombinedFeatures
 combinedFSpace = concatSpace entFSpace edgeFSpace
@@ -373,33 +481,47 @@ makeEntFeatVector xs =
                                        , (EntDegreeRecip, 0.0)
                                        , (EntDegree, 0.0)
                                        ]
-                                        ++ defaultRankFeatures EntAggrScore  EntAggrRecipRank  EntAggrLinearRank EntAggrBucketRank EntAggrCount
-                                        ++ defaultRankFeatures EntBm25Score  EntBm25RecipRank  EntBm25LinearRank EntBm25BucketRank EntBm25Count
-                                        ++ defaultRankFeatures EntQlScore  EntQlRecipRank  EntQlLinearRank EntQlBucketRank EntQlCount
-                                        )
+                                       ++ [ feat
+                                          | entityRun <- allEntityRunsF
+                                          , feat <- defaultEntRankFeatures entityRun
+                                          ]
+                                       )
 
 makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
 makeEdgeFeatVector xs =
     F.modify edgeFSpace defaults xs
  where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
-                                        , (EdgeDocKL, 0.0)
-                                        ]
-                                        ++ defaultRankFeatures EdgeAggrScore  EdgeAggrRecipRank  EdgeAggrLinearRank EdgeAggrBucketRank EdgeAggrCount
-                                        ++ defaultRankFeatures EdgeBm25Score  EdgeBm25RecipRank  EdgeBm25LinearRank EdgeBm25BucketRank EdgeBm25Count
-                                        ++ defaultRankFeatures EdgeQlScore  EdgeQlRecipRank  EdgeQlLinearRank EdgeQlBucketRank EdgeQlCount
+                                         , (EdgeDocKL, 0.0)
+                                         ]
+                                        ++ [ feat
+                                           | edgeRun <- allEdgeRunsF
+                                           , feat <- defaultEdgeRankFeatures edgeRun
+                                           ]
                                         )
-
 -- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
 -- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
 
 
-defaultRankFeatures:: f -> f -> f -> f  -> f -> [(f, Double)]
-defaultRankFeatures scoreF recipRankF linearRankF bucketRankF countF =
-    [ (scoreF, -1000.0)
-    , (recipRankF, 0.0)
-    , (linearRankF, 0.0)
-    , (bucketRankF, 0.0)
-    , (countF, 0.0)
+
+defaultRankFeatures :: RunFeature -> Double
+defaultRankFeatures runF =
+    case runF of
+      ScoreF -> -1000.0
+      RecipRankF -> 0.0
+      LinearRankF -> 0.0
+      BucketRankF -> 0.0
+      CountF -> 0.0
+
+defaultEntRankFeatures :: Run -> [(Feature 'Entity, Double)]
+defaultEntRankFeatures run =
+    [ (EntRetrievalFeature run runF, defaultRankFeatures runF)
+    | runF <- allRunFeatures
+    ]
+
+defaultEdgeRankFeatures :: Run -> [(Feature 'Edge, Double)]
+defaultEdgeRankFeatures run =
+    [ (EdgeRetrievalFeature run runF, defaultRankFeatures runF)
+    | runF <- allRunFeatures
     ]
 
 
@@ -427,14 +549,29 @@ bucketRank entry
 count :: RankingEntry d -> Double
 count _ = 1.0
 
-rankFeatures :: f -> f -> f -> f  -> f -> RankingEntry d -> [(f, Double)]
-rankFeatures scoreF recipRankF linearRankF bucketRankF countF entry =
-    [ (scoreF, score entry)
-    , (recipRankF, recipRank entry)
-    , (linearRankF, linearRank 100 entry)
-    , (bucketRankF, bucketRank entry)
-    , (countF, count entry)
+
+
+rankFeatures :: RunFeature -> RankingEntry d -> Double
+rankFeatures runF entry =
+    case runF of
+      ScoreF -> score entry
+      RecipRankF -> recipRank entry
+      LinearRankF -> linearRank 100  entry
+      BucketRankF -> bucketRank entry
+      CountF -> count entry
+
+rankEntFeatures :: Run -> RankingEntry d -> [(Feature 'Entity, Double)]
+rankEntFeatures run entry =
+    [ (EntRetrievalFeature run runF, rankFeatures runF entry)
+    | runF <- allRunFeatures
     ]
+
+rankEdgeFeatures :: Run -> RankingEntry d -> [(Feature 'Edge, Double)]
+rankEdgeFeatures run entry =
+    [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
+    | runF <- allRunFeatures
+    ]
+
 
 
 
@@ -493,24 +630,29 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             , (EntDegreeRecip, recip degree)
                                             , (EntDegree, degree)
                                             ]
-                                             ++ rankFeatures EntAggrScore  EntAggrRecipRank  EntAggrLinearRank EntAggrBucketRank EntAggrCount  (multiRankingEntryCollapsed entityEntry)
-                                             ++ foldMap (rankFeatures EntBm25Score  EntBm25RecipRank  EntBm25LinearRank EntBm25BucketRank EntBm25Count) (findEntry' bm25MethodName entityEntry)
-                                             ++ foldMap (rankFeatures EntQlScore  EntQlRecipRank  EntQlLinearRank EntQlBucketRank EntQlCount) (findEntry' qlMethodName entityEntry)
+                                            ++ rankEntFeatures Aggr (multiRankingEntryCollapsed entityEntry)
+                                            ++ concat (catMaybes
+                                            [ rankEntFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName entityEntry)
+                                            , rankEntFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName entityEntry)
+                                            ] )
                                            )
 
         edgeScoreVec edgeEntry = makeEdgeFeatVector $
                                             [ (EdgeCount, 1.0)
                                             , (EdgeDocKL, (edgeDocKullbackLeibler edgeDocs ) ( fromJust $ (multiRankingEntryGetDocumentName edgeEntry) `HM.lookup` edgeDocsByPara) )
                                             ]
-                                             ++ rankFeatures EdgeAggrScore  EdgeAggrRecipRank  EdgeAggrLinearRank EdgeAggrBucketRank EdgeAggrCount  (multiRankingEntryCollapsed edgeEntry)
-                                             ++ foldMap (rankFeatures EdgeBm25Score  EdgeBm25RecipRank  EdgeBm25LinearRank EdgeBm25BucketRank EdgeBm25Count) (findEntry' bm25MethodName edgeEntry)
-                                             ++ foldMap (rankFeatures EdgeQlScore  EdgeQlRecipRank  EdgeQlLinearRank EdgeQlBucketRank EdgeQlCount) (findEntry' qlMethodName edgeEntry)
+                                            ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgeEntry)
+                                            ++ concat (catMaybes
+                                            [ rankEdgeFeatures (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx) <$> (findEntry' bm25MethodName edgeEntry)
+                                            , rankEdgeFeatures (GridRun' $ GridRun All Ql NoneX ParagraphIdx) <$> (findEntry' qlMethodName edgeEntry)
+                                            ] )
+
 
     in concatFeatureVec (entityScoreVec entityRankEntry) (F.aggregateWith (+) (fmap edgeScoreVec edgedocsRankEntries))
   where
-        findEntry' :: CarRun.MethodName -> MultiRankingEntry d  -> [RankingEntry d]
+        findEntry' :: CarRun.MethodName -> MultiRankingEntry d  -> Maybe (RankingEntry d)
         findEntry' methodName entry =
-            maybeToList $ findEntry methodName $ multiRankingEntryAll entry
+            findEntry methodName $ multiRankingEntryAll entry
 
 
         findEntry :: CarRun.MethodName -> [RankingEntry doc] -> Maybe (RankingEntry doc)

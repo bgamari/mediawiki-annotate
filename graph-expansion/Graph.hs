@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Graph
     ( Graph(..)
@@ -8,6 +9,7 @@ module Graph
     , filterEdges
     ) where
 
+import Control.DeepSeq
 import Data.Semigroup
 import Data.Maybe
 import Data.Hashable
@@ -15,8 +17,8 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 
 -- | For each node, its outgoing neighbors.
-data Graph n e = Graph { getGraph :: HM.HashMap n (HM.HashMap n e) }
-               deriving (Functor, Show)
+newtype Graph n e = Graph { getGraph :: HM.HashMap n (HM.HashMap n e) }
+                  deriving (Functor, Show, NFData)
 
 instance (Hashable n, Eq n, Semigroup e) => Semigroup (Graph n e) where
     Graph a <> Graph b = Graph $ HM.unionWith (HM.unionWith (<>)) a b
