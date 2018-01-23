@@ -445,24 +445,23 @@ makeEntFeatVector xs =
                                        , (EntDegreeRecip, 0.0)
                                        , (EntDegree, 0.0)
                                        ]
-                                       ++ defaultEntRankFeatures Aggr
-                                       ++ defaultEntRankFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx)
-                                       ++ defaultEntRankFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx)
-                                        )
+                                       ++ [ feat
+                                          | entityRun <- allEntityRunsF
+                                          , feat <- defaultEntRankFeatures entityRun
+                                          ]
+                                       )
 
 makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
 makeEdgeFeatVector xs =
-    traceShow defs $
-    traceShow edgeFSpace $
     F.modify edgeFSpace defaults xs
- where defaults = F.fromList edgeFSpace  defs
-       defs = ([ (EdgeCount, 0.0)
-                                        , (EdgeDocKL, 0.0)
-                                        ]
-                                       ++ defaultEdgeRankFeatures Aggr
-                                       ++ defaultEdgeRankFeatures (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx)
-                                       ++ defaultEdgeRankFeatures (GridRun' $ GridRun All Ql NoneX ParagraphIdx)                                        )
-
+ where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
+                                         , (EdgeDocKL, 0.0)
+                                         ]
+                                        ++ [ feat
+                                           | edgeRun <- allEdgeRunsF
+                                           , feat <- defaultEdgeRankFeatures edgeRun
+                                           ]
+                                        )
 -- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
 -- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
 
