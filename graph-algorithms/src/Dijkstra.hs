@@ -1,12 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Dijkstra
    ( Distance(..)
    , Path
    , dijkstra
+   , denseDijkstra
    , lazyDijkstra
    , lazyDijkstraK
    , shortestPaths
@@ -21,13 +25,28 @@ import qualified Data.HashPSQ as PSQ
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Sequence as Seq
 import qualified Data.Heap as H
+import qualified Data.Vector.Indexed as VI
+import qualified Data.Vector.Indexed.Mutable as VIM
+import qualified Data.Vector.Unboxed as VU
+import Data.Vector.Unboxed.Deriving
+import Data.Vector.Unboxed (Unbox)
+import Control.Monad.Trans.Class
 import Control.Monad.Trans.State.Strict
+import Control.Monad.ST
 import GHC.Stack
 
+import DenseMapping
 import Graph
 
 data Distance e = Finite !e | Infinite
                 deriving (Show, Eq, Ord)
+
+$(derivingUnbox "Distance"
+     [t| forall a. (Num a, Unbox a) => Distance a -> (Bool, a) |]
+     [| \dist -> case dist of Finite x -> (True, x)
+                              Infinite -> (False, 0) |]
+     [| \(finite,x) -> if finite then Finite x else Infinite |]
+ )
 
 instance Monoid e => Monoid (Distance e) where
     mempty = Finite mempty
@@ -88,6 +107,54 @@ dijkstra graph =
                      | otherwise -> return ()
 
               go
+
+--------------------------------------------------
+-- Dense Dijkstra
+
+-- | The monad 'denseDijkstra' operates within.
+type DenseM s n e = StateT (PSQ.HashPSQ n (Distance e) ()) (ST s)
+
+densePopS :: (Ord n, Hashable n, Ord e)
+          => DenseM s n e (Maybe (n, Distance e))
+densePopS = do
+    s <- get
+    case PSQ.minView s of
+     Just (k,p,_,rest) -> do put $! rest
+                             return $ Just (k,p)
+     Nothing           -> return Nothing
+
+denseDijkstra :: forall n e. (Hashable n, Eq n, Ord n, Show n, Ord e, Monoid e, Show e, Num e, Unbox e)
+              => DenseMapping n
+              -> Graph n e
+              -> n
+              -> VI.Vector VU.Vector (DenseId n) (Distance e)
+denseDijkstra mapping graph =
+    \src -> VI.create $ do
+        accum <- VIM.replicate (denseRange mapping) (Finite mempty)
+        let q0 = PSQ.singleton src (Finite mempty) ()
+        evalStateT (go accum) q0
+        return accum
+  where
+    go :: VIM.MVector VU.MVector s (DenseId n) (Distance e)
+       -> DenseM s n e ()
+    go accum = do
+        mNext <- densePopS
+        case mNext of
+          Nothing -> return ()
+          Just (u, distU) -> do
+              forM_ (HM.toList $ getNeighbors graph u) $ \(v, len) -> do
+                  let vi = toDense mapping v
+                  distV <- lift $ VIM.read accum vi
+                  let alt = distU <> Finite len
+                  if -- sanity check
+                     | alt <= distU ->
+                         error $ "denseDijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
+                     | alt < distV -> do
+                         modify $ PSQ.insert v alt ()
+                         lift $ VIM.write accum vi alt
+                     | otherwise -> return ()
+
+              go accum
 
 ----------------------------------------------------------
 -- Lazy Dijkstra
