@@ -418,7 +418,8 @@ allEntityFeatures =
 
 allEdgeFeatures :: [Feature 'Edge]
 allEdgeFeatures =
-    (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures) <> [EdgeDocKL, EdgeCount]
+    (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures)
+    <> [EdgeDocKL, EdgeCount]
 
 
 type EntityFeatures = Feature 'Entity
@@ -604,8 +605,8 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             ]
                                             ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgeEntry)
                                             ++ concat (catMaybes
-                                            [ rankEdgeFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName edgeEntry)
-                                            , rankEdgeFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName edgeEntry)
+                                            [ rankEdgeFeatures (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx) <$> (findEntry' bm25MethodName edgeEntry)
+                                            , rankEdgeFeatures (GridRun' $ GridRun All Ql NoneX ParagraphIdx) <$> (findEntry' qlMethodName edgeEntry)
                                             ] )
 
 
