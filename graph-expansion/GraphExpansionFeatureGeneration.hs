@@ -93,34 +93,72 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 -- type IsRelevant = LearningToRank.IsRelevant
 
+gridRunParser :: ReadM GridRun
+gridRunParser = GridRun <$> auto <*> auto <*> auto <*> auto
+
+gridRunOptParser :: Parser (GridRun, EntityOrEdge, FilePath)
+gridRunOptParser =
+    option ((,,) <$> gridRunParser <*> auto <*> str)
+      (long "grid-run"
+      <> metavar "QueryModel RetrievalModel ExpansionModel IndexType (Edge|Entity) RUN"
+      <> help ("one run file with GridRun configuration"++
+                "\nQueryModel: "++ (show [minBound @QueryModel .. maxBound]) ++
+                "\nRetrievalModel: "++ (show [minBound @RetrievalModel .. maxBound]) ++
+                "\nExpansionModel: "++ (show [minBound @ExpansionModel .. maxBound]) ++
+                "\nIndexType: "++ (show [minBound @IndexType .. maxBound])
+               )
+    )
+
+--grid-run All Bm25 NoneX ParagraphIdx $file
+--grid-run Ben Ben WithLaura BedIndex $upstairs
+
+
 opts :: Parser ( FilePath
                , FilePath
                , QuerySource
                , [CarRun.QueryId]
                , NumResults
-               , [FilePath]
-               , [FilePath]
-               , FilePath, FilePath, FilePath, FilePath
+               , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , FilePath
                )
 opts =
-    (,,,,,,,,,,,,,)
+    (,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
-    <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
-    <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
-    <*> option str (long "entity-bm25" <> metavar "RUN" <> help "entity BM25 run")
-    <*> option str (long "entity-ql" <> metavar "RUN" <> help "entity Query Likelihood run")
-    <*> option str (long "edgedoc-bm25" <> metavar "RUN" <> help "edgedoc BM25 run")
-    <*> option str (long "edgedoc-ql" <> metavar "RUN" <> help "edge Query Likelihood run")
+--     <*> many (option str (long "entityrun" <> metavar "ERUN" <> help "run files for entities/page ids"))
+--     <*> many (option str (long "edgedocrun" <> metavar "RUN" <> help "run files with edgedocs/paragraph ids"))
+--     <*> option str (long "entity-bm25" <> metavar "RUN" <> help "entity BM25 run")
+--     <*> option str (long "entity-ql" <> metavar "RUN" <> help "entity Query Likelihood run")
+--     <*> option str (long "edgedoc-bm25" <> metavar "RUN" <> help "edgedoc BM25 run")
+--     <*> option str (long "edgedoc-ql" <> metavar "RUN" <> help "edge Query Likelihood run")
+    <*> some gridRunOptParser
+
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
+
+--           -entity--entity-page--all-bm25-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-bm25-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-bm25-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--all-ql-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-bm25-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-ecm--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-none--Text-test200.v201.cbor.outlines.run
+--           -entity--entity-page--title-ql-rm--Text-test200.v201.cbor.outlines.run
+
+
     where
 
       querySource :: Parser QuerySource
@@ -181,16 +219,20 @@ main = do
     hSetBuffering stdout LineBuffering
 
     (articlesFile, outputFilePrefix, querySrc,
-      queryRestriction, numResults, entityRunFiles, edgedocRunFiles
-      , entityBm25RunFile, entityQlRunFile, edgedocBm25RunFile, edgedocQlRunFile
+      queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
-    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ++ [entityBm25RunFile, entityQlRunFile]))
-    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles ++ [edgedocBm25RunFile, edgedocQlRunFile]))
+    let entityRunFiles = [ r | (_, Entity, r) <- gridRunFiles]
+
+        edgedocRunFiles = [ r | (_, Edge, r) <- gridRunFiles]
+
+    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles )) -- ++ [entityBm25RunFile, entityQlRunFile]))
+    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles)) --  ++ [edgedocBm25RunFile, edgedocQlRunFile]))
+
 
     gen0 <- newStdGen
 
@@ -218,10 +260,10 @@ main = do
 
     let fixRun methodName entries = fmap (\entry -> entry {CarRun.carMethodName = methodName} ) entries
 
-    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun entityBm25RunFile
-    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun entityQlRunFile
-    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun edgedocBm25RunFile
-    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun edgedocQlRunFile
+    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
+    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
+    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX EntityIdx, Edge, r) <- gridRunFiles])
+    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX EntityIdx, Edge, r) <- gridRunFiles])
 
     entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
     edgeRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
@@ -352,13 +394,13 @@ changeKey f map_ =
 
 
 data QueryModel = All | Title
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
 data RetrievalModel = Bm25 | Ql
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
 data ExpansionModel = NoneX | Rm | EcmX | EcmRm
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
 
 entityRunsF :: [GridRun]
 entityRunsF = [ GridRun qm rm em it
@@ -382,7 +424,7 @@ edgeRunsF = [ GridRun qm rm em it
 
 
 data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
-         deriving (Show, Ord, Eq, Generic, Serialise)
+         deriving (Show, Ord, Eq, Generic, Serialise, Read)
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Ord, Eq, Generic, Serialise)
@@ -396,7 +438,7 @@ allRunFeatures :: [RunFeature]
 allRunFeatures = [minBound..maxBound]
 
 data EntityOrEdge = Entity | Edge
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
 data Feature (ty :: EntityOrEdge) where
     EntRetrievalFeature :: Run -> RunFeature -> Feature 'Entity
     EntIncidentEdgeDocsRecip :: Feature 'Entity
