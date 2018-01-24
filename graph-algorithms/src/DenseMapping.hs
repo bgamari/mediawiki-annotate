@@ -1,6 +1,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module DenseMapping
     ( -- * Dense Node indexes
@@ -19,6 +22,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Indexed as VI
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
+import Data.Vector.Unboxed.Deriving
 import Data.Hashable
 import Data.Ix
 import Data.Maybe
@@ -39,6 +43,12 @@ elems = map snd . assocs
 -- | A dense node index.
 newtype DenseId a = DenseId Int
                deriving (Eq, Ord, Show, Enum, Ix, Hashable)
+
+$(derivingUnbox "DenseId"
+     [t| forall a. DenseId a -> Int |]
+     [| \(DenseId n) -> n |]
+     [| DenseId |]
+ )
 
 fromDense :: DenseMapping a -> DenseId a -> a
 fromDense m = (fromDenseArr m VI.!)
