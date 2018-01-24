@@ -269,20 +269,25 @@ main = do
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgeRuns
 
-        docFeatures :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
-        docFeatures = M.fromList
+        docFeatures'' :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
+        docFeatures'' = M.fromList
                      [ ((qid, T.pack $ unpackPageId pid), features)
                      | (query, edgeRun) <- M.toList collapsedEdgedocRun
                      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
                      , ((qid, pid), features) <- generateEntityFeatures edgeDocsLookup featuresOf query edgeRun entityRun
                      ]
+
 --         featureNames = fmap (FeatureName . T.pack . show) (entityRunFiles ++ edgedocRunFiles)        -- Todo Fix featureNames
 
-        docFeatures' = fmap (Features . F.toVector) docFeatures
+        docFeatures' = fmap (Features . F.toVector) docFeatures''
+
+        normalizer = zNormalizer $ M.elems docFeatures'
+        docFeatures = fmap (normFeatures normalizer) docFeatures'
+
         featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace
 
         franking :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
-        franking = augmentWithQrels qrel docFeatures' Relevant
+        franking = augmentWithQrels qrel docFeatures Relevant
 
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
