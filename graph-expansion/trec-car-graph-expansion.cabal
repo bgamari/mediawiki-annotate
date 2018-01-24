@@ -439,6 +439,7 @@ executable graph-expansion-pagerank-on-all
                        aeson,
                        simplir,
                        simplir-disk-index,
+                       vector-th-unbox,
                        pipes,
                        serialise,
                        pipes-safe,

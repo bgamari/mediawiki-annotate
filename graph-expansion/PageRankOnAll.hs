@@ -1,5 +1,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 
 import Debug.Trace
 import Options.Applicative
@@ -7,14 +10,24 @@ import Control.Parallel.Strategies
 import Data.Monoid
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
+import qualified Data.Vector.Indexed as VI
+import qualified Data.Vector.Unboxed as VU
+import Data.Vector.Unboxed.Deriving
 import PageRank
 import EdgeDocCorpus
 import Graph
+import DenseMapping
 import Dijkstra
 import GraphExpansion
 import CAR.Types
 import CAR.Types.CborList
 import Codec.Serialise
+
+$(derivingUnbox "Sum"
+     [t| forall a. VU.Unbox a => Sum a -> a |]
+     [| \(Sum n) -> n |]
+     [| Sum |]
+ )
 
 edgeDocsPath :: Parser FilePath
 edgeDocsPath = argument str (help "input EdgeDoc list path")
@@ -71,16 +84,16 @@ distancesMode =
     run :: FilePath -> IO ()
     run inPath = do
         graph <- readEdgeDocGraph @(Sum Int) inPath
-        let distToMaybe (Finite x) = Just x
-            distToMaybe Infinite   = Nothing
 
-            distances :: [(PageId, HM.HashMap PageId (Maybe (Sum Int)))]
+        let mapping = mkDenseMapping $ nodeSet graph
+
+            distances :: [(PageId, VI.Vector VU.Vector (DenseId PageId) (Distance (Sum Int)))]
             distances =
                 withStrategy (parBuffer 1000 rdeepseq)
-                $ fmap (\n -> (n, fmap (distToMaybe . fst) $ dijkstra graph $ traceShow n n))
+                $ fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
                 $ HM.keys
                 $ getGraph graph
-        writeFileSerialise "distances.cbor" distances
+        print distances
 
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
@@ -93,4 +106,3 @@ graphStatsMode =
             avgDegree :: Double
             avgDegree = realToFrac sumDegree / realToFrac (HM.size $ getGraph graph)
         print $ "average degree: "++show avgDegree
-
