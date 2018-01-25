@@ -94,7 +94,7 @@ data Graphset = Fullgraph | Subgraph
 data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
-data ExperimentSettings = NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 -- type IsRelevant = LearningToRank.IsRelevant
@@ -418,16 +418,17 @@ kFoldCross :: forall q docId rel. (Ord q, Show q)
             -- -> ML.Map q (Ranking (docId, rel))
            -> ReturnWithModelDiagnostics (ML.Map q (Ranking (docId, rel)))
 kFoldCross trainProcedure folds allTrainData allTestData =
-    let (result, modelDiag) = unzip $ fmap trainSingleFold folds
+    let (result, modelDiag) = unzip $ fmap (\(fidx, queries) -> trainSingleFold fidx queries) $ zip [0 .. ] folds
     in (M.unions result, concat modelDiag)
   where
-    trainSingleFold :: Show q => [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
-    trainSingleFold testQueries =
+    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
+    trainSingleFold foldIdx testQueries =
       let testData :: M.Map q [(docId, Features, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
           trainData :: M.Map q [(docId, Features, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allTrainData
-          foldId = show (head testQueries)
+
+          foldId = show foldIdx
           ((model, trainScore), modelDiag) = trainProcedure ("fold-"++foldId) trainData
           testRanking :: M.Map q (Ranking (docId, rel))
           testRanking = rerankRankings' model testData
@@ -579,6 +580,7 @@ expSettingToCrit exps fname =
   where
     convert :: ExperimentSettings -> (CombinedFeatures -> Bool)
     convert exp = case exp of
+                    AllExp -> const True
                     NoEdgeFeats -> noEdge
                     NoEntityFeats -> noEntity
                     AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
