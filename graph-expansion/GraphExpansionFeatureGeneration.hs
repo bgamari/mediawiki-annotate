@@ -42,6 +42,7 @@ import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
 import Data.Function
+import Data.Hashable
 
 
 import CAR.Types hiding (Entity)
@@ -208,8 +209,8 @@ main = do
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
-    let entityRunFiles  = [ r | (_, Entity, r) <- gridRunFiles]
-        edgedocRunFiles = [ r | (_, Edge, r) <- gridRunFiles]
+    let entityRunFiles  = [ (g, r) | (g, Entity, r) <- gridRunFiles]
+        edgedocRunFiles = [ (g, r) | (g, Edge, r) <- gridRunFiles]
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
     putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles))
@@ -246,10 +247,10 @@ main = do
 --     edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
 --     edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
 
-    entityRuns <-  mapM CAR.RunFile.readEntityRun entityRunFiles
-    edgeRuns <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
+    entityRuns <-  mapM (mapM CAR.RunFile.readEntityRun) entityRunFiles  -- mapM mapM -- first map over list, then map of the snd of a tuple
+    edgeRuns <-  mapM (mapM CAR.RunFile.readParagraphRun) edgedocRunFiles
 
-    let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
+    let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgeRuns
 
@@ -425,13 +426,13 @@ changeKey f map_ =
 
 
 data QueryModel = All | Title
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
 data RetrievalModel = Bm25 | Ql
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
 data ExpansionModel = NoneX | Rm | EcmX | EcmRm
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
+         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
 
 entityRunsF :: [GridRun]
 entityRunsF = [ GridRun qm rm em it
@@ -455,7 +456,7 @@ edgeRunsF = [ GridRun qm rm em it
 
 
 data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
-         deriving (Show, Ord, Eq, Generic, Serialise, Read)
+         deriving (Show, Ord, Eq, Generic, Serialise, Read, Hashable)
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Ord, Eq, Generic, Serialise)
@@ -610,10 +611,10 @@ rankEdgeFeatures run entry =
 
 generateEntityFeatures
     :: EdgeDocsLookup
-    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId -> [MultiRankingEntry ParagraphId] -> FeatureVec CombinedFeatures Double)
+    -> (PageId -> [EdgeDoc] -> MultiRankingEntry PageId GridRun -> [MultiRankingEntry ParagraphId GridRun] -> FeatureVec CombinedFeatures Double)
     -> QueryId
-    -> [MultiRankingEntry ParagraphId]
-    -> [MultiRankingEntry PageId]
+    -> [MultiRankingEntry ParagraphId GridRun]
+    -> [MultiRankingEntry PageId GridRun]
     -> [((QueryId, PageId), (FeatureVec CombinedFeatures Double))]
 generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
@@ -625,7 +626,7 @@ generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
         | entityRankEntry <- entityRun
         , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
         , Just edgeDocs <-  pure $entity `HM.lookup` universalGraph             -- fetch adjacent edgedocs
-        , let edgeDocsRankEntries :: [MultiRankingEntry ParagraphId]
+        , let edgeDocsRankEntries :: [MultiRankingEntry ParagraphId GridRun]
               edgeDocsRankEntries =
                 [ entry
                 | edgeDoc <- edgeDocs
@@ -642,8 +643,8 @@ fsum (Features xs) (Features ys) = Features $ VU.zipWith (+) xs ys
 
 featuresOf :: PageId
            -> [EdgeDoc]
-           -> MultiRankingEntry PageId
-           -> [MultiRankingEntry ParagraphId]
+           -> MultiRankingEntry PageId GridRun
+           -> [MultiRankingEntry ParagraphId GridRun]
            -> FeatureVec CombinedFeatures Double
 featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
 
@@ -663,10 +664,9 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             , (EntDegree, degree)
                                             ]
                                             ++ rankEntFeatures Aggr (multiRankingEntryCollapsed entityEntry)
-                                            ++ concat (catMaybes
-                                            [ rankEntFeatures (GridRun' $ GridRun All Bm25 NoneX EntityIdx) <$> (findEntry' bm25MethodName entityEntry)
-                                            , rankEntFeatures (GridRun' $ GridRun All Ql NoneX EntityIdx) <$> (findEntry' qlMethodName entityEntry)
-                                            ] )
+                                            ++ concat [ rankEntFeatures (GridRun' g) entry
+                                               | (g, entry) <- multiRankingEntryAll entityEntry
+                                               ]
                                            )
 
         edgeScoreVec edgeEntry = makeEdgeFeatVector $
@@ -674,18 +674,22 @@ featuresOf entity edgeDocs entityRankEntry edgedocsRankEntries =
                                             , (EdgeDocKL, (edgeDocKullbackLeibler edgeDocs ) ( fromJust $ (multiRankingEntryGetDocumentName edgeEntry) `HM.lookup` edgeDocsByPara) )
                                             ]
                                             ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgeEntry)
-                                            ++ concat (catMaybes
-                                            [ rankEdgeFeatures (GridRun' $ GridRun All Bm25 NoneX ParagraphIdx) <$> (findEntry' bm25MethodName edgeEntry)
-                                            , rankEdgeFeatures (GridRun' $ GridRun All Ql NoneX ParagraphIdx) <$> (findEntry' qlMethodName edgeEntry)
-                                            ] )
+                                            ++ concat [ rankEdgeFeatures (GridRun' g) entry
+                                               | (g, entry) <- multiRankingEntryAll edgeEntry
+                                               ]
+
+
 
 
     in concatFeatureVec (entityScoreVec entityRankEntry) (F.aggregateWith (+) (fmap edgeScoreVec edgedocsRankEntries))
   where
-        findEntry' :: CarRun.MethodName -> MultiRankingEntry d  -> Maybe (RankingEntry d)
+        findEntry' :: CarRun.MethodName -> MultiRankingEntry d GridRun -> Maybe (RankingEntry d)
         findEntry' methodName entry =
-            findEntry methodName $ multiRankingEntryAll entry
+            findEntry methodName $ fmap snd $ multiRankingEntryAll entry
 
+        findEntry'' :: GridRun -> MultiRankingEntry d GridRun -> Maybe (RankingEntry d)
+        findEntry'' gridRunPattern entry =
+            fmap snd $ find (\(k, _) -> k == gridRunPattern) $ multiRankingEntryAll entry
 
         findEntry :: CarRun.MethodName -> [RankingEntry doc] -> Maybe (RankingEntry doc)
         findEntry method entries = find  ((== method). CarRun.carMethodName)  entries
