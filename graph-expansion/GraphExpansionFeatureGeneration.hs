@@ -138,23 +138,6 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
 
---           -entity--entity-page--all-bm25-ecm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-bm25-none--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-bm25-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-ql-ecm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-ql-none--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--all-ql-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-bm25-ecm-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-bm25-ecm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-bm25-none--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-bm25-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-ql-ecm-rm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-ql-ecm--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-ql-none--Text-test200.v201.cbor.outlines.run
---           -entity--entity-page--title-ql-rm--Text-test200.v201.cbor.outlines.run
-
-
     where
 
       querySource :: Parser QuerySource
@@ -225,15 +208,14 @@ main = do
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
-    let entityRunFiles = [ r | (_, Entity, r) <- gridRunFiles]
-
+    let entityRunFiles  = [ r | (_, Entity, r) <- gridRunFiles]
         edgedocRunFiles = [ r | (_, Edge, r) <- gridRunFiles]
 
-    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles )) -- ++ [entityBm25RunFile, entityQlRunFile]))
-    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles)) --  ++ [edgedocBm25RunFile, edgedocQlRunFile]))
+    putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
+    putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles))
 
 
-    gen0 <- newStdGen
+    gen0 <- newStdGen  -- needed by learning to rank
 
     queries' <-
         case querySrc of
@@ -259,15 +241,13 @@ main = do
 
     let fixRun methodName entries = fmap (\entry -> entry {CarRun.carMethodName = methodName} ) entries
 
-    entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
-    entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
-    edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
-    edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
+--     entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
+--     entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
+--     edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
+--     edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
 
-    entityRuns' <-  mapM CAR.RunFile.readEntityRun entityRunFiles
-    edgeRuns' <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
-    let entityRuns = entityRuns' ++ [entityBm25Run, entityQlRun]
-    let edgeRuns = edgeRuns' ++ [edgedocBm25Run, edgedocQlRun]
+    entityRuns <-  mapM CAR.RunFile.readEntityRun entityRunFiles
+    edgeRuns <-  mapM CAR.RunFile.readParagraphRun edgedocRunFiles
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId]
         collapsedEntityRun = collapseRuns entityRuns
@@ -280,9 +260,6 @@ main = do
                      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
                      , ((qid, pid), features) <- generateEntityFeatures edgeDocsLookup featuresOf query edgeRun entityRun
                      ]
-
---         featureNames = fmap (FeatureName . T.pack . show) (entityRunFiles ++ edgedocRunFiles)        -- Todo Fix featureNames
-
         docFeatures' = fmap (Features . F.toVector) docFeatures''
 
         normalizer = zNormalizer $ M.elems docFeatures'
@@ -295,7 +272,6 @@ main = do
 
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
---         trainData = changeKey RunFile.unQueryId franking
         discardUntrainable :: TrainData -> TrainData
         discardUntrainable franking =
             M.filter hasPosAndNeg  franking
@@ -306,7 +282,6 @@ main = do
 
         trainData :: TrainData
         trainData = discardUntrainable franking
---         metric = avgMetricData trainData
         metric = avgMetricQrel qrel
         totalElems = getSum . foldMap ( Sum . length ) $ trainData
         totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
@@ -341,7 +316,7 @@ main = do
                 modelsWithTrainScore:: [(Model, Double)]
                 (modelsWithTrainScore, modelDiag) = unzip other
                 (model, trainScore) = maximumBy (compare `on` snd) modelsWithTrainScore
-            in ((model, trainScore), concat modelDiag)   -- Todo ++[(modelDesc ++"-best", model, trainScore)]))
+            in ((model, trainScore), [(modelDesc ++"-best", model, trainScore)] ++ concat modelDiag)
 
 
     let modelDiag :: [(String, Model, Double)]
@@ -369,11 +344,10 @@ main = do
 
     putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
 
-    -- write test ranking
+    -- write test ranking that results from k-fold cv
     CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
         $ predictRanking
-  --where
 
 l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
@@ -561,10 +535,6 @@ makeEdgeFeatVector xs =
                                            , feat <- defaultEdgeRankFeatures edgeRun
                                            ]
                                         )
--- concatVectors :: FeatureVec EntityFeatures Double -> FeatureVec EdgeFeatures Double -> FeatureVec CombinedFeatures Double
--- concatVectors entFeats edgeFeats =  concatFeatureVec entFeats edgeFeats
-
-
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
@@ -648,7 +618,6 @@ generateEntityFeatures
 generateEntityFeatures edgeDocsLookup featuresOf' query edgeRun entityRun =
     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
         edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun
-
         universalGraph = edgeDocsToUniverseGraph edgeDocs
 
 
