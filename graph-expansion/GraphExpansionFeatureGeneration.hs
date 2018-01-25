@@ -333,20 +333,15 @@ main = do
             in ((model, trainScore), [(modelDesc ++"-best", model, trainScore)] ++ concat modelDiag)
 
 
-    let modelDiag :: [(String, Model, Double)]
-        ((model, trainScore), modelDiag) = trainProcedure "train" trainData
-
-
-
     let outputDiagnostics :: (String, Model, Double) -> IO ()
         outputDiagnostics (modelDesc,model, trainScore) = do
            storeModelData outputFilePrefix modelFile model trainScore modelDesc
            storeRankingData outputFilePrefix franking metric model modelDesc
-    mapConcurrently_ outputDiagnostics $ modelDiag
 
---    eval and write train ranking (on all data)
-    storeModelData outputFilePrefix modelFile model trainScore "train"
-    storeRankingData outputFilePrefix franking metric model "train"
+        modelDiag :: [(String, Model, Double)]
+        ((model, trainScore), modelDiag) = trainProcedure "train" trainData
+
+
 
     -- todo load external folds
     let folds = chunksOf 5 $ M.keys trainData
@@ -354,10 +349,14 @@ main = do
         (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
         testScore = metric predictRanking
 
-    mapConcurrently_ outputDiagnostics $ modelDiag'
+    -- evaluate all work here!
+    mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
+
+--    eval and write train ranking (on all data)
+    storeModelData outputFilePrefix modelFile model trainScore "train"
+    storeRankingData outputFilePrefix franking metric model "train"
 
     putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
-
     -- write test ranking that results from k-fold cv
     CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
