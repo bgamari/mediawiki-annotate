@@ -94,6 +94,9 @@ data Graphset = Fullgraph | Subgraph
 data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
+data ExperimentSettings = NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
 -- type IsRelevant = LearningToRank.IsRelevant
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
@@ -126,9 +129,10 @@ opts :: Parser ( FilePath
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , FilePath
+               , [ExperimentSettings]
                )
 opts =
-    (,,,,,,,,)
+    (,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -138,6 +142,7 @@ opts =
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
+    <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
 
     where
 
@@ -204,7 +209,7 @@ main = do
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
-      , qrelFile, modelFile) <- execParser' 1 (helper <*> opts) mempty
+      , qrelFile, modelFile, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -254,19 +259,27 @@ main = do
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgeRuns
 
-        docFeatures'' :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
-        docFeatures'' = M.fromList
+        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) (FeatureVec CombinedFeatures Double)
+        docFeatures''' = M.fromList
                      [ ((qid, T.pack $ unpackPageId pid), features)
                      | (query, edgeRun) <- M.toList collapsedEdgedocRun
                      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
                      , ((qid, pid), features) <- generateEntityFeatures edgeDocsLookup featuresOf query edgeRun entityRun
                      ]
+
+        combinedFSpace' =  mkFeatureSpace
+                        $  filter (expSettingToCrit experimentSettings)
+                        $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
+        docFeatures'' = fmap crit docFeatures'''
+                        where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+
         docFeatures' = fmap (Features . F.toVector) docFeatures''
+
 
         normalizer = zNormalizer $ M.elems docFeatures'
         docFeatures = fmap (normFeatures normalizer) docFeatures'
 
-        featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace
+        featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
 
         franking :: TrainData
         franking = augmentWithQrels qrel docFeatures Relevant
@@ -350,6 +363,12 @@ main = do
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
         $ predictRanking
 
+
+
+-- -------------------------------------------
+--   Learning to Rank, k-fold Cross, restarts
+-- -------------------------------------------
+
 l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
@@ -421,7 +440,9 @@ changeKey f map_ =
 
 
 
+-- -------------------------------------------
 -- Set up the feature space
+-- -------------------------------------------
 
 
 
@@ -510,6 +531,71 @@ edgeFSpace = mkFeatureSpace allEdgeFeatures
 
 combinedFSpace :: FeatureSpace CombinedFeatures
 combinedFSpace = concatSpace entFSpace edgeFSpace
+
+
+
+
+-- -------------------------------------------
+-- filtering of feature spaces
+-- -------------------------------------------
+
+
+filterExpSettings ::  FeatureSpace CombinedFeatures
+                  ->  FeatureSpace CombinedFeatures
+                  -> (CombinedFeatures -> Bool)
+                  ->  (FeatureVec CombinedFeatures Double)
+                  ->  (FeatureVec CombinedFeatures Double)
+filterExpSettings fromFeatSpace toFeatSpace pred features =
+    F.fromList toFeatSpace
+    $ [ pair
+      | pair@(fname, _) <- F.toList fromFeatSpace features
+      , pred fname
+      ]
+noEntity :: CombinedFeatures -> Bool
+noEntity (Left _) = False
+noEntity _  = True
+
+noEdge :: CombinedFeatures -> Bool
+noEdge (Right _) = False
+noEdge _  = True
+
+onlyAggr :: CombinedFeatures -> Bool
+onlyAggr (Left (EntRetrievalFeature Aggr runf)) = True
+onlyAggr (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlyAggr _  = False
+
+onlyScore :: CombinedFeatures -> Bool
+onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
+onlyScore (Right (EdgeRetrievalFeature _ ScoreF)) = True
+onlyScore _  = False
+
+onlyRR :: CombinedFeatures -> Bool
+onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
+onlyRR (Right (EdgeRetrievalFeature _ RecipRankF)) = True
+onlyRR _  = False
+
+expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeatures -> Bool)
+expSettingToCrit exps fname =
+    all (`convert` fname) exps
+  where
+    convert :: ExperimentSettings -> (CombinedFeatures -> Bool)
+    convert exp = case exp of
+                    NoEdgeFeats -> noEdge
+                    NoEntityFeats -> noEntity
+                    AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
+                    JustAggr -> onlyAggr
+                    JustScore -> onlyScore
+                    JustRecip -> onlyRR
+
+
+
+-- -------------------------------------------
+-- make feature vectors with defaults and stuff
+-- -------------------------------------------
+
+
+
+
 
 
 makeEntFeatVector :: [(EntityFeatures,Double)] -> F.FeatureVec EntityFeatures Double
