@@ -30,6 +30,7 @@ import GHC.Generics
 import Codec.Serialise
 
 import qualified Data.Map.Strict as M
+import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
@@ -208,6 +209,9 @@ bm25MethodName = CarRun.MethodName "BM25"
 qlMethodName :: CarRun.MethodName
 qlMethodName = CarRun.MethodName "QL"
 
+type TrainData =  M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
+
 
 main :: IO ()
 main = do
@@ -286,13 +290,13 @@ main = do
 
         featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace
 
-        franking :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+        franking :: TrainData
         franking = augmentWithQrels qrel docFeatures Relevant
 
     -- Option a) drop in an svmligh style features annsFile
     -- Option b) stick into learning to rank
 --         trainData = changeKey RunFile.unQueryId franking
-        discardUntrainable :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)] -> M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+        discardUntrainable :: TrainData -> TrainData
         discardUntrainable franking =
             M.filter hasPosAndNeg  franking
           where hasPosAndNeg list =
@@ -300,7 +304,7 @@ main = do
                       hasNeg = any (\(_,_,r) -> r /= Relevant) list
                   in hasPos && hasNeg
 
-        trainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+        trainData :: TrainData
         trainData = discardUntrainable franking
 --         metric = avgMetricData trainData
         metric = avgMetricQrel qrel
@@ -311,7 +315,7 @@ main = do
                " queries and "++ show totalElems ++" items total of which "++
                show totalPos ++" are positive."
 
-    let displayTrainData :: M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+    let displayTrainData :: TrainData
                          -> [String]
         displayTrainData trainData =
           [ show k ++ " -> "++ show elem
@@ -321,40 +325,47 @@ main = do
     putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
 
 
-    -- Train model on all data
-
-    let trainModel i gen = do
-          let (model, trainScore) = learnToRank trainData featureNames metric gen
-
-          putStrLn $ "Model "++(show i)++ " train evaluation "++ (show trainScore) ++ " MAP."
-
-          let modelFile' = modelFile++"-model-"++(show i)++".json"
-          BSL.writeFile modelFile' $ Data.Aeson.encode model
-          putStrLn $ "Written model "++(show i)++ " to file "++ (show modelFile') ++ " ."
-          return (model, trainScore)
-
-    let trainWithDifferentGens gen i = let (genA, genB) = System.Random.split gen
-                  in (genA, trainModel i genB)
-    models <- sequence $ snd $ mapAccumL trainWithDifferentGens gen0 [0..4]
-    let (model, trainScore) = maximumBy (compare `on` snd) models
-
---     let (model, trainScore) = learnToRank trainData featureNames metric gen0
-    putStrLn $ "Model train evaluation "++ show trainScore ++ " MAP."
-    BSL.writeFile modelFile $ Data.Aeson.encode model
-    putStrLn $ "Written model to file "++ (show modelFile) ++ " ."
+    let trainProcedure:: String -> TrainData -> ReturnWithModelDiagnostics (Model, Double)
+        trainProcedure modelDesc trainData =
+            let trainWithDifferentGens :: StdGen -> Int -> (StdGen, ReturnWithModelDiagnostics (Model, Double))
+                trainWithDifferentGens gen i =
+                          let (genA, genB) = System.Random.split gen
+                          in (genA, restartModel i genB)
+                  where restartModel i gen =
+                          let (model, trainScore) = learnToRank trainData featureNames metric gen
+                          in ((model, trainScore), [((modelDesc ++ "-restart-"++show i), model, trainScore)])
 
 
-    -- write train ranking
-    CAR.RunFile.writeEntityRun (outputFilePrefix++"-train.run")
-         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r train")
-         $ rerankRankings' model franking
+                other:: [ReturnWithModelDiagnostics (Model, Double)]
+                (_, other) = mapAccumL trainWithDifferentGens gen0 [0..4]
+                modelsWithTrainScore:: [(Model, Double)]
+                (modelsWithTrainScore, modelDiag) = unzip other
+                (model, trainScore) = maximumBy (compare `on` snd) modelsWithTrainScore
+            in ((model, trainScore), concat modelDiag)   -- Todo ++[(modelDesc ++"-best", model, trainScore)]))
 
+
+    let modelDiag :: [(String, Model, Double)]
+        ((model, trainScore), modelDiag) = trainProcedure "train" trainData
+
+
+
+    let outputDiagnostics :: (String, Model, Double) -> IO ()
+        outputDiagnostics (modelDesc,model, trainScore) = do
+           storeModelData outputFilePrefix modelFile model trainScore modelDesc
+           storeRankingData outputFilePrefix franking metric model modelDesc
+    mapConcurrently_ outputDiagnostics $ modelDiag
+
+--    eval and write train ranking (on all data)
+    storeModelData outputFilePrefix modelFile model trainScore "train"
+    storeRankingData outputFilePrefix franking metric model "train"
 
     -- todo load external folds
     let folds = chunksOf 5 $ M.keys trainData
-        trainProcedure trainData = learnToRank trainData featureNames metric gen0
-        predictRanking = kFoldCross (trainProcedure) folds trainData franking
+--         trainProcedure trainData = learnToRank trainData featureNames metric gen0
+        (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
         testScore = metric predictRanking
+
+    mapConcurrently_ outputDiagnostics $ modelDiag'
 
     putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
 
@@ -362,40 +373,72 @@ main = do
     CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
         $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
         $ predictRanking
-  where
+  --where
 
-      l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
-      l2rRankingToRankEntries methodName rankings =
-        [ CAR.RunFile.RankingEntry { carQueryId = query
-                      , carDocument = packPageId $ T.unpack doc
-                      , carRank = rank
-                      , carScore = score
-                     , carMethodName = methodName
-                     }
-        | (query, Ranking ranking) <- M.toList rankings
-        , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
-        ]
+l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
+l2rRankingToRankEntries methodName rankings =
+  [ CAR.RunFile.RankingEntry { carQueryId = query
+                , carDocument = packPageId $ T.unpack doc
+                , carRank = rank
+                , carScore = score
+               , carMethodName = methodName
+               }
+  | (query, Ranking ranking) <- M.toList rankings
+  , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
+  ]
 
 
-kFoldCross :: forall q docId rel. (Ord q)
-           => (M.Map q [(docId, Features, rel)] -> (Model, Double))
+-- Train model on all data
+storeModelData :: FilePath
+               -> FilePath
+               -> Model
+               -> Double
+               -> [Char]
+               -> IO ()
+storeModelData outputFilePrefix modelFile model trainScore modelDesc = do
+  putStrLn $ "Model "++modelDesc++ " train metric "++ (show trainScore) ++ " MAP."
+  let modelFile' = outputFilePrefix++modelFile++"-model-"++modelDesc++".json"
+  BSL.writeFile modelFile' $ Data.Aeson.encode model
+  putStrLn $ "Written model "++modelDesc++ " to file "++ (show modelFile') ++ " ."
+
+storeRankingData ::  FilePath
+               -> TrainData
+               -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+               -> Model
+               -> [Char]
+               -> IO ()
+storeRankingData outputFilePrefix franking metric model modelDesc = do
+
+  let rerankedFranking = rerankRankings' model franking
+  putStrLn $ "Model "++modelDesc++" test metric "++ show (metric rerankedFranking) ++ "MAP."
+  CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
+       $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
+       $ rerankedFranking
+
+-- type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
+
+kFoldCross :: forall q docId rel. (Ord q, Show q)
+           => (String -> M.Map q [(docId, Features, rel)] -> ReturnWithModelDiagnostics (Model, Double))
            -> [[q]]
            -> M.Map q [(docId, Features, rel)]
            -> M.Map q [(docId, Features, rel)]
-           -> M.Map q (Ranking (docId, rel))
+            -- -> ML.Map q (Ranking (docId, rel))
+           -> ReturnWithModelDiagnostics (ML.Map q (Ranking (docId, rel)))
 kFoldCross trainProcedure folds allTrainData allTestData =
-    M.unions $ fmap trainSingleFold folds
+    let (result, modelDiag) = unzip $ fmap trainSingleFold folds
+    in (M.unions result, concat modelDiag)
   where
-    trainSingleFold :: [q]  -> M.Map q (Ranking (docId, rel))
+    trainSingleFold :: Show q => [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
     trainSingleFold testQueries =
       let testData :: M.Map q [(docId, Features, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
           trainData :: M.Map q [(docId, Features, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allTrainData
-          (model, trainScore) = trainProcedure trainData
+          foldId = show (head testQueries)
+          ((model, trainScore), modelDiag) = trainProcedure ("fold-"++foldId) trainData
           testRanking :: M.Map q (Ranking (docId, rel))
           testRanking = rerankRankings' model testData
-      in testRanking
+      in (testRanking, modelDiag)
 
 changeKey :: Ord k' => (k-> k') -> M.Map k v -> M.Map k' v
 changeKey f map_ =
