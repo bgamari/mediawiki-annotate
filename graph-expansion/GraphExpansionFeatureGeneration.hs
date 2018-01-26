@@ -345,7 +345,11 @@ main = do
        -- todo  exportGraphs model
 
     -- todo load external folds
-    let folds = chunksOf 5 $ M.keys trainData
+    -- this is wrong, because if gives many folds with 5 elements.
+    -- let folds = chunksOf 5 $ M.keys trainData
+    let folds = chunksOf foldLen $ M.keys trainData
+                where foldLen = ((M.size trainData) `div` 5 ) +1
+
 --         trainProcedure trainData = learnToRank trainData featureNames metric gen0
         (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
         testScore = metric predictRanking
