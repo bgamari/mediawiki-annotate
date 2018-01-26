@@ -50,16 +50,18 @@ multiRankingEntryGetDocumentName mre =  RunFile.carDocument $ multiRankingEntryC
 multiAsRankingEntry :: MultiRankingEntry doc key -> RankingEntry doc
 multiAsRankingEntry multiRankingEntry = multiRankingEntryCollapsed multiRankingEntry
 
--- Precondition: MethodNames need to be unique!
-
-collapseRuns :: forall doc key . (Eq doc, Hashable doc, Hashable key) =>  [(key, [RankingEntry doc])]  -> M.Map QueryId [MultiRankingEntry doc key]
+-- | Given a list of runs, compute the "collapsed" ranking that would result
+-- summing the reciprocol rank of each item under all rankings.
+collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key)
+             => [(key, [RankingEntry doc])]
+             -> M.Map QueryId [MultiRankingEntry doc key]
 collapseRuns runs =
     let listOfRunMaps :: M.Map QueryId [(key, RankingEntry doc)]
         listOfRunMaps = fmap toList . RunFile.groupByQuery' $ [(key, elem) | (key, run) <- runs, elem <- run]
 
      in M.fromList $ [ (query, collapseRankings rankings)
-                      | (query, rankings) <- M.toList listOfRunMaps  -- fetch rankings for query
-                      ]
+                     | (query, rankings) <- M.toList listOfRunMaps  -- fetch rankings for query
+                     ]
 
 
 -- rankings: rank entries for the same query, across different run files

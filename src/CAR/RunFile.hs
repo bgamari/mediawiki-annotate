@@ -40,6 +40,7 @@ import Data.Ord
 import Data.Maybe
 import Data.Monoid
 import Data.Aeson
+import Data.Hashable
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
@@ -48,7 +49,7 @@ import qualified Data.SmallUtf8 as Utf8
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord, Show, FromJSON, ToJSON)
+                deriving (Eq, Ord, Show, FromJSON, ToJSON, Hashable)
 
 newtype MethodName = MethodName { unMethodName :: T.Text }
                    deriving (Eq, Ord, Show, FromJSON, ToJSON)
