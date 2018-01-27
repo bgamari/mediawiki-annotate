@@ -711,7 +711,9 @@ generateEdgeFeatureGraph:: EdgeDocsLookup
                         -> Graph PageId EdgeFeatureVec
 generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun =
     let
-        edgeDoc paraId = head $ edgeDocsLookup [paraId]
+        edgeDoc paraId = case edgeDocsLookup [paraId] of
+                           [] -> error $ "No edgedoc for paraId "++show paraId
+                           (a:_) -> a
 
         edgeFeat :: ParagraphId -> _
         edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry (connectedEdgeDocs paraId)
