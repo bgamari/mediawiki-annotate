@@ -842,8 +842,8 @@ combineEntityEdgeFeatures' edgeDocsLookup query edgeRun entityRun =
                                             | (pageId, entityEntry) <- pageIdToEntityRun
                                             , edgeDoc <- edgeDocs
                                             , pageId `HS.member` (edgeDocNeighbors edgeDoc)
-                                            , (paraId, edgeEntry) <- HM.toList paraIdToEdgeRun
-                                            , paraId == (edgeDocParagraphId edgeDoc)
+                                            , let paraId = edgeDocParagraphId edgeDoc
+                                            , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
                                             ]
 
         entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
