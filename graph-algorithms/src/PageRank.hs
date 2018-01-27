@@ -5,6 +5,7 @@
 
 module PageRank
    ( Eigenvector(..)
+   , relChange
    , toHashMap
    , toEntries
    , pageRank
