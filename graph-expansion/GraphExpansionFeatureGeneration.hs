@@ -840,10 +840,10 @@ combineEntityEdgeFeatures' edgeDocsLookup query edgeRun entityRun =
         (entityRun', edgeRun', edgeDocs')  = unzip3
                                           $ [ (entityEntry, edgeEntry, edgeDoc)
                                             | (pageId, entityEntry) <- pageIdToEntityRun
-                                            , (paraId, edgeEntry) <- HM.toList paraIdToEdgeRun
                                             , edgeDoc <- edgeDocs
-                                            , paraId == (edgeDocParagraphId edgeDoc)
                                             , pageId `HS.member` (edgeDocNeighbors edgeDoc)
+                                            , (paraId, edgeEntry) <- HM.toList paraIdToEdgeRun
+                                            , paraId == (edgeDocParagraphId edgeDoc)
                                             ]
 
         entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
