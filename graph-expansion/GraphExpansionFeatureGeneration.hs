@@ -809,11 +809,18 @@ combineEntityEdgeFeatures
     -> [MultiRankingEntry PageId GridRun]
     -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
 combineEntityEdgeFeatures edgeDocsLookup query edgeRun entityRun =
-    let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-        allEdgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun
+    let paraIdToEdgedocRun' = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
+        allEdgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun'
+
+        restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
+        restrict keys m =
+            let m2 = HM.fromList [(k, ()) | k <- keys]
+            in m `HM.intersection` m2
+
+        paraIdToEdgedocRun = restrict (fmap edgeDocParagraphId allEdgeDocs) paraIdToEdgedocRun'
 
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
-        edgeFeatureGraph = generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun
+        edgeFeatureGraph = generateEdgeFeatureGraph edgeDocsLookup query (HM.elems paraIdToEdgedocRun) entityRun
         Graph edgeFeatureGraph' = edgeFeatureGraph
 
         nodeFeatures :: HM.HashMap PageId EntityFeatureVec
