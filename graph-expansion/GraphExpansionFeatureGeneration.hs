@@ -109,7 +109,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq)
 
-data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear
+data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 -- type IsRelevant = LearningToRank.IsRelevant
@@ -299,8 +299,8 @@ main = do
                               $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
 
 
-          let weights :: EdgeFeatureVec
-              weights = tr $ F.fromList edgeFSpace'
+          let params :: EdgeFeatureVec
+              params = tr $ F.fromList edgeFSpace'
                   [ (k'', v)
                   | (k, v) <- M.toList $ modelWeights model
                   , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeatures EdgeFeatures
@@ -321,9 +321,9 @@ main = do
                       entityRun = collapsedEntityRun M.! query
 
                   -- TODO: very unsafe
---                   weights' = F.unsafeFeatureVecFromVector $ getFeatures
---                             $ Features $ F.getFeatureVec weights
-                  weights' = weights
+--                   params' = F.unsafeFeatureVecFromVector $ getFeatures
+--                             $ Features $ F.getFeatureVec params
+                  params' = params
 
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
@@ -337,16 +337,17 @@ main = do
                   graph' :: Graph PageId Double
                   graph' = fmap posifyDot graph
                   -- for debugging...
---                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot weights' feats))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params' feats))) graph
                     where
                           posifyDot:: EdgeFeatureVec  -> Double
                           posifyDot feats =
                               let computedWeight =
                                     case posifyEdgeWeightsOpt of
-                                        Just Exponentiate ->  exp (F.dotFeatureVecs weights' feats)
+                                        Just Exponentiate ->  exp (F.dotFeatureVecs params' feats)
+                                        Just Logistic ->  logistic (F.dotFeatureVecs params' feats)
                                         Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
-                                        Just Linear  -> (F.dotFeatureVecs weights' feats) - minimumVal
-                                        _ -> exp (F.dotFeatureVecs weights' feats)
+                                        Just Linear  -> (F.dotFeatureVecs params' feats) - minimumVal
+                                        _ -> exp (F.dotFeatureVecs params' feats)
                               in case prExperimentSettings of
                                     PageRankNormal -> computedWeight
                                     PageRankJustStructure -> 1.0
@@ -354,7 +355,7 @@ main = do
                                     PageRankWeightOffset01 -> computedWeight + 0.1
 
                           minimumVal =
-                              minimum $ fmap (\feats -> F.dotFeatureVecs weights' feats) graph
+                              minimum $ fmap (\feats -> F.dotFeatureVecs params' feats) graph
 
 
                           normFeats :: EdgeFeatureVec -> EdgeFeatureVec
@@ -370,7 +371,7 @@ main = do
                           denormWeights' :: EdgeFeatureVec
                           denormWeights' =
                               let v :: VU.Vector Double
-                                  v = (F.getFeatureVec weights')
+                                  v = (F.getFeatureVec params')
                                   f = Features v
                                   normedF = (denormWeights normalizer) f
                                   normedV :: VU.Vector Double
@@ -510,7 +511,9 @@ main = do
               $ predictRanking
 
 
-
+logistic :: Double -> Double
+logistic t =
+    1.0 / (1.0 + exp (-1 * t))
 -- -------------------------------------------
 --   Learning to Rank, k-fold Cross, restarts
 -- -------------------------------------------
