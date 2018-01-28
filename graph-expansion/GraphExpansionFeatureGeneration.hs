@@ -278,7 +278,7 @@ main = do
     -- save predicted node ranking as run-file
     case modelSource of
       ModelFromFile modelFile -> do
-          Just model <- Data.Aeson.decode @Model <$> BSL.readFile modelFile
+          Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
           let weights :: EdgeFeatureVec
               weights = F.fromList edgeFSpace
                   [ (k'', v)
@@ -291,7 +291,7 @@ main = do
 
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query =
-                  Ranking.fromList $ map swap $ toEntries eigv
+                  trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   eigv :: Eigenvector PageId Double
                   eigv =
@@ -327,11 +327,14 @@ main = do
 
 
               runRanking query = do
-                  let ranking = graphWalkRanking query
+                  let ranking = trace ("runRanking Query: "++show query) $ graphWalkRanking query
+                      rankEntries =  (\x -> traceShow (length x) x)
+                                   $ [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
+                                    | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
+                                    ]
+
                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
-                      [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
-                      | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
-                      ]
+                                    $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
           --CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
