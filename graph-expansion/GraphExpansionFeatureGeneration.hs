@@ -324,8 +324,8 @@ main = do
 
                   graph' :: Graph PageId Double
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( exp (F.dotFeatureVecs weights' feats)))) graph
---                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
-                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs denormWeights' feats))) graph
+                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  (exp (F.dotFeatureVecs denormWeights' feats)))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
                     where
                           normFeats :: EdgeFeatureVec -> EdgeFeatureVec
