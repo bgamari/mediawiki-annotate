@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE RankNTypes #-}
@@ -19,6 +20,7 @@ import Control.Concurrent.Async
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TSem
 import Control.Exception
+import Control.Monad
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
@@ -70,7 +72,9 @@ import qualified CAR.RunFile as CAR.RunFile
 import qualified CAR.QRelFile as CAR.QRelFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Format.TrecRunFile as Run
+import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
+import PageRank
 
 import Graph
 
@@ -94,6 +98,9 @@ data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
 data Graphset = Fullgraph | Subgraph
 data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
+
+data ModelSource = ModelFromFile FilePath -- filename to read model from
+                 | TrainModel FilePath -- filename to write resulting file to
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
@@ -129,7 +136,7 @@ opts :: Parser ( FilePath
                , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
-               , FilePath
+               , ModelSource
                , [ExperimentSettings]
                )
 opts =
@@ -142,9 +149,8 @@ opts =
     <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
-    <*> (option str (short 'm' <> long "model" <> metavar "Model-FILE"))
+    <*> modelSource
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
-
     where
 
       querySource :: Parser QuerySource
@@ -167,6 +173,11 @@ opts =
                 <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
                 <*> queryDeriv
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+
+      modelSource :: Parser ModelSource
+      modelSource =
+            option (TrainModel <$> str) (long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
+        <|> option (ModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
 
 
 computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
@@ -210,7 +221,7 @@ main = do
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
-      , qrelFile, modelFile, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
+      , qrelFile, modelSource, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -260,112 +271,173 @@ main = do
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgeRuns
 
-        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-        docFeatures''' = M.fromList
-                     [ ((qid, T.pack $ unpackPageId pid), features)
-                     | (query, edgeRun) <- M.toList collapsedEdgedocRun
-                     , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-                     , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures' edgeDocsLookup query edgeRun entityRun
-                     ]
 
-        combinedFSpace' =  mkFeatureSpace
-                        $  filter (expSettingToCrit experimentSettings)
-                        $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
-        docFeatures'' = fmap crit docFeatures'''
-                        where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+    -- predict mode
+    -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
+    -- use pagerank on this graph to predict an alternative node ranking
+    -- save predicted node ranking as run-file
+    case modelSource of
+      ModelFromFile modelFile -> do
+          Just model <- Data.Aeson.decode @Model <$> BSL.readFile modelFile
+          let weights :: EdgeFeatureVec
+              weights = F.fromList edgeFSpace
+                  [ (k'', v)
+                  | (k, v) <- M.toList $ modelWeights model
+                  , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeatures EdgeFeatures
+                  , Right k'' <- pure k'
+                  ]
 
-        docFeatures' = fmap (Features . F.toVector) docFeatures''
+          -- unless (all (>= 0) $ map snd $ F.toList edgeFSpace weights') $ fail "negative weights"
 
+          let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
+              graphWalkRanking query =
+                  Ranking.fromList $ map swap $ toEntries eigv
+                where
+                  eigv :: Eigenvector PageId Double
+                  eigv =
+                      snd $ last
+                      $ takeWhile (\(x,y) -> relChange x y > 1e-3)
+                      $ zip walkIters (tail walkIters)
+                  walkIters = pageRank teleportation graph'
+                  teleportation = 0.1
 
-        normalizer = zNormalizer $ M.elems docFeatures'
-        docFeatures = fmap (normFeatures normalizer) docFeatures'
+                  graph' :: Graph PageId Double
+                  graph' = fmap (F.dotFeatureVecs weights') graph
 
-        featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
+                  graph :: Graph PageId EdgeFeatureVec
+                  graph = generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun
+                    where
+                      edgeRun = collapsedEdgedocRun M.! query
+                      entityRun = collapsedEntityRun M.! query
 
-        franking :: TrainData
-        franking = augmentWithQrels qrel docFeatures Relevant
+                  normalizer :: Normalization
+                  normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
 
-    -- Option a) drop in an svmligh style features annsFile
-    -- Option b) stick into learning to rank
-        discardUntrainable :: TrainData -> TrainData
-        discardUntrainable franking =
-            M.filter hasPosAndNeg  franking
-          where hasPosAndNeg list =
-                  let hasPos = any (\(_,_,r) -> r == Relevant) list
-                      hasNeg = any (\(_,_,r) -> r /= Relevant) list
-                  in hasPos && hasNeg
-
-        trainData :: TrainData
-        trainData = discardUntrainable franking
-        metric = avgMetricQrel qrel
-        totalElems = getSum . foldMap ( Sum . length ) $ trainData
-        totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
-
-    putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++
-               " queries and "++ show totalElems ++" items total of which "++
-               show totalPos ++" are positive."
-
-    let displayTrainData :: TrainData
-                         -> [String]
-        displayTrainData trainData =
-          [ show k ++ " -> "++ show elem
-          | (k,list) <- M.toList trainData
-          , elem <- list]
-
-    putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
+                  -- TODO: very unsafe
+                  weights' = F.unsafeFeatureVecFromVector $ getFeatures
+                            $ denormWeights normalizer
+                            $ Features $ F.getFeatureVec weights
 
 
-    let trainProcedure:: String -> TrainData -> ReturnWithModelDiagnostics (Model, Double)
-        trainProcedure modelDesc trainData =
-            let trainWithDifferentGens :: StdGen -> Int -> (StdGen, ReturnWithModelDiagnostics (Model, Double))
-                trainWithDifferentGens gen i =
-                          let (genA, genB) = System.Random.split gen
-                          in (genA, restartModel i genB)
-                  where restartModel i gen =
-                          let (model, trainScore) = learnToRank trainData featureNames metric gen
-                          in ((model, trainScore), [((modelDesc ++ "-restart-"++show i), model, trainScore)])
+              runRanking query = do
+                  let ranking = graphWalkRanking query
+                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-pagerank-test.run") 
+                      [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
+                      | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
+                      ]
+          mapM_ (runRanking . queryDocQueryId) queries
+
+          --CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
+          --    $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
+          --    $ predictRanking
+      TrainModel modelFile -> do
+          let docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+              docFeatures''' = M.fromList
+                          [ ((qid, T.pack $ unpackPageId pid), features)
+                          | (query, edgeRun) <- M.toList collapsedEdgedocRun
+                          , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
+                          , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                          , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
+                          ]
+
+              combinedFSpace' =  mkFeatureSpace
+                              $  filter (expSettingToCrit experimentSettings)
+                              $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
+              docFeatures'' = fmap crit docFeatures'''
+                              where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+
+              docFeatures' = fmap (Features . F.toVector) docFeatures''
 
 
-                other:: [ReturnWithModelDiagnostics (Model, Double)]
-                (_, other) = mapAccumL trainWithDifferentGens gen0 [0..4]
-                modelsWithTrainScore:: [(Model, Double)]
-                (modelsWithTrainScore, modelDiag) = unzip other
-                (model, trainScore) = maximumBy (compare `on` snd) modelsWithTrainScore
-            in ((model, trainScore), [(modelDesc ++"-best", model, trainScore)] ++ concat modelDiag)
+              normalizer = zNormalizer $ M.elems docFeatures'
+              docFeatures = fmap (normFeatures normalizer) docFeatures'
+
+              featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
+
+              franking :: TrainData
+              franking = augmentWithQrels qrel docFeatures Relevant
+
+              -- Option a) drop in an svmligh style features annsFile
+              -- Option b) stick into learning to rank
+              discardUntrainable :: TrainData -> TrainData
+              discardUntrainable franking =
+                  M.filter hasPosAndNeg  franking
+                where hasPosAndNeg list =
+                        let hasPos = any (\(_,_,r) -> r == Relevant) list
+                            hasNeg = any (\(_,_,r) -> r /= Relevant) list
+                        in hasPos && hasNeg
+
+              trainData :: TrainData
+              trainData = discardUntrainable franking
+              metric = avgMetricQrel qrel
+              totalElems = getSum . foldMap ( Sum . length ) $ trainData
+              totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
+
+          putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++
+                    " queries and "++ show totalElems ++" items total of which "++
+                    show totalPos ++" are positive."
+
+          let displayTrainData :: TrainData
+                              -> [String]
+              displayTrainData trainData =
+                [ show k ++ " -> "++ show elem
+                | (k,list) <- M.toList trainData
+                , elem <- list]
+
+          putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
 
 
-    let outputDiagnostics :: (String, Model, Double) -> IO ()
-        outputDiagnostics (modelDesc,model, trainScore) = do
-           storeModelData outputFilePrefix modelFile model trainScore modelDesc
-           storeRankingData outputFilePrefix franking metric model modelDesc
+          let trainProcedure:: String -> TrainData -> ReturnWithModelDiagnostics (Model, Double)
+              trainProcedure modelDesc trainData =
+                  let trainWithDifferentGens :: StdGen -> Int -> (StdGen, ReturnWithModelDiagnostics (Model, Double))
+                      trainWithDifferentGens gen i =
+                                let (genA, genB) = System.Random.split gen
+                                in (genA, restartModel i genB)
+                        where restartModel i gen =
+                                let (model, trainScore) = learnToRank trainData featureNames metric gen
+                                in ((model, trainScore), [((modelDesc ++ "-restart-"++show i), model, trainScore)])
 
-        modelDiag :: [(String, Model, Double)]
-        ((model, trainScore), modelDiag) = trainProcedure "train" trainData
 
-       -- todo  exportGraphs model
+                      other:: [ReturnWithModelDiagnostics (Model, Double)]
+                      (_, other) = mapAccumL trainWithDifferentGens gen0 [0..4]
+                      modelsWithTrainScore:: [(Model, Double)]
+                      (modelsWithTrainScore, modelDiag) = unzip other
+                      (model, trainScore) = maximumBy (compare `on` snd) modelsWithTrainScore
+                  in ((model, trainScore), [(modelDesc ++"-best", model, trainScore)] ++ concat modelDiag)
 
-    -- todo load external folds
-    -- this is wrong, because if gives many folds with 5 elements.
-    -- let folds = chunksOf 5 $ M.keys trainData
-    let folds = chunksOf foldLen $ M.keys trainData
-                where foldLen = ((M.size trainData) `div` 5 ) +1
+
+          let outputDiagnostics :: (String, Model, Double) -> IO ()
+              outputDiagnostics (modelDesc,model, trainScore) = do
+                      storeModelData outputFilePrefix modelFile model trainScore modelDesc
+                      storeRankingData outputFilePrefix franking metric model modelDesc
+
+              modelDiag :: [(String, Model, Double)]
+              ((model, trainScore), modelDiag) = trainProcedure "train" trainData
+
+            -- todo  exportGraphs model
+
+                                -- todo load external folds
+                                -- this is wrong, because if gives many folds with 5 elements.
+                                -- let folds = chunksOf 5 $ M.keys trainData
+          let folds = chunksOf foldLen $ M.keys trainData
+                      where foldLen = ((M.size trainData) `div` 5 ) +1
 
 --         trainProcedure trainData = learnToRank trainData featureNames metric gen0
-        (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
-        testScore = metric predictRanking
+              (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
+              testScore = metric predictRanking
 
-    -- evaluate all work here!
-    mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
+          -- evaluate all work here!
+          mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
 
---    eval and write train ranking (on all data)
-    storeModelData outputFilePrefix modelFile model trainScore "train"
-    storeRankingData outputFilePrefix franking metric model "train"
+                -- eval and write train ranking (on all data)
+          storeModelData outputFilePrefix modelFile model trainScore "train"
+          storeRankingData outputFilePrefix franking metric model "train"
 
-    putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
-    -- write test ranking that results from k-fold cv
-    CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
-        $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
-        $ predictRanking
+          putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
+          -- write test ranking that results from k-fold cv
+          CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
+              $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
+              $ predictRanking
 
 
 
@@ -452,13 +524,13 @@ changeKey f map_ =
 
 
 data QueryModel = All | Title
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data RetrievalModel = Bm25 | Ql
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data ExpansionModel = NoneX | Rm | EcmX | EcmRm
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read, Hashable)
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 
 entityRunsF :: [GridRun]
 entityRunsF = [ GridRun qm rm em it
@@ -482,33 +554,39 @@ edgeRunsF = [ GridRun qm rm em it
 
 
 data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
-         deriving (Show, Ord, Eq, Generic, Serialise, Read, Hashable)
+         deriving (Show, Read, Ord, Eq, Generic, Serialise, Hashable)
 
 data Run = GridRun' GridRun | Aggr
-         deriving (Show, Ord, Eq, Generic, Serialise)
+         deriving (Show, Read, Ord, Eq, Generic, Serialise)
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise)
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
 allRunFeatures = [ScoreF] --[minBound..maxBound]
 
-data EntityOrEdge = Entity | Edge
-         deriving (Show, Ord, Eq, Enum, Bounded, Generic, Serialise, Read)
-data Feature (ty :: EntityOrEdge) where
-    EntRetrievalFeature :: Run -> RunFeature -> Feature 'Entity
-    EntIncidentEdgeDocsRecip :: Feature 'Entity
-    EntDegreeRecip :: Feature 'Entity
-    EntDegree  :: Feature 'Entity
-    EdgeRetrievalFeature :: Run -> RunFeature -> Feature 'Edge
-    EdgeDocKL  :: Feature 'Edge
-    EdgeCount  :: Feature 'Edge
+data EntityFeature where
+    EntRetrievalFeature :: Run -> RunFeature -> EntityFeature
+    EntIncidentEdgeDocsRecip :: EntityFeature
+    EntDegreeRecip :: EntityFeature
+    EntDegree  :: EntityFeature
+    deriving (Show, Read, Ord, Eq)
 
-deriving instance Show (Feature a)
-deriving instance Ord (Feature a)
-deriving instance Eq (Feature a)
+data EdgeFeature where
+    EdgeRetrievalFeature :: Run -> RunFeature -> EdgeFeature
+    EdgeDocKL  :: EdgeFeature
+    EdgeCount  :: EdgeFeature
+    deriving (Show, Read, Ord, Eq)
+
+-- Compatibility hack
+type family Feature (a :: EntityOrEdge) where
+    Feature 'Entity = EntityFeature
+    Feature 'Edge = EdgeFeature
+
+data EntityOrEdge = Entity | Edge
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allEntityFeatures :: [Feature 'Entity]
 allEntityFeatures =
@@ -803,84 +881,67 @@ connectedEdgeDocs :: ParagraphId -> [EdgeDoc]
 connectedEdgeDocs = undefined
 
 
+data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
+                             , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
+                             , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
+                             }
 
-combineEntityEdgeFeatures'
+selectCandidateGraph
     :: EdgeDocsLookup
     -> QueryId
     -> [MultiRankingEntry ParagraphId GridRun]
     -> [MultiRankingEntry PageId GridRun]
-    -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
-combineEntityEdgeFeatures' edgeDocsLookup query edgeRun entityRun =
-    let restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
-        restrict keys m =
-            let m2 = HM.fromList [(k, ()) | k <- keys]
-            in m `HM.intersection` m2
+    -> Candidates
+selectCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
+    Candidates { candidateEdgeDocs = edgeDocs''
+               , candidateEdgeRuns = edgeRun''
+               , candidateEntityRuns = entityRun''
+               }
+  where
+    restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
+    restrict keys m =
+        let m2 = HM.fromList [(k, ()) | k <- keys]
+        in m `HM.intersection` m2
 
-        uniqBy :: (Eq b, Hashable b) => (a->b) -> [a] -> [a]
-        uniqBy keyF elems =
-            HM.elems $ HM.fromList [ (keyF e, e) | e <- elems]
+    uniqBy :: (Eq b, Hashable b) => (a->b) -> [a] -> [a]
+    uniqBy keyF elems =
+        HM.elems $ HM.fromList [ (keyF e, e) | e <- elems]
 
-        -- goal: select the subset of entityRunEntries, edgesRunEntries, and edgeDocs that
-        -- fulfill these criteria:
-        --
-        -- edgeDocs has entry in edgeRuns
-        -- entities have entityRun entries
-        -- entities have indicent edgeDocs
-        --
-        -- but otherwise edgeFeatures are only considered,
-        -- if a) they belong to one indicent endgeDoc
-        -- and b) they have an edgeRun entry
+    -- goal: select the subset of entityRunEntries, edgesRunEntries, and edgeDocs that
+    -- fulfill these criteria:
+    --
+    -- edgeDocs has entry in edgeRuns
+    -- entities have entityRun entries
+    -- entities have indicent edgeDocs
+    --
+    -- but otherwise edgeFeatures are only considered,
+    -- if a) they belong to one indicent endgeDoc
+    -- and b) they have an edgeRun entry
 
-        paraIdToEdgeRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-        pageIdToEntityRun = [(multiRankingEntryGetDocumentName run, run)  | run <- entityRun]
+    paraIdToEdgeRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
+    pageIdToEntityRun = [(multiRankingEntryGetDocumentName run, run)  | run <- entityRun]
 
-        edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
-
-
-        (entityRun', edgeRun', edgeDocs')  = unzip3
-                                          $ [ (entityEntry, edgeEntry, edgeDoc)
-                                            | (pageId, entityEntry) <- pageIdToEntityRun
-                                            , edgeDoc <- edgeDocs
-                                            , pageId `HS.member` (edgeDocNeighbors edgeDoc)
-                                            , let paraId = edgeDocParagraphId edgeDoc
-                                            , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
-                                            ]
-
-        entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
-        edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
-        edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
+    edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
 
 
--- previously....
---
---     let paraIdToEdgedocRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
---         edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgedocRun
---         universalGraph = edgeDocsToUniverseGraph edgeDocs
---
---
---     in  [ ((query, entity), featuresOf' entity edgeDocs entityRankEntry edgeDocsRankEntries)
---         | entityRankEntry <- entityRun
---         , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
---         , Just edgeDocs <-  pure $entity `HM.lookup` universalGraph             -- fetch adjacent edgedocs
---         , let edgeDocsRankEntries :: [MultiRankingEntry ParagraphId GridRun]
---               edgeDocsRankEntries =
---                 [ entry
---                 | edgeDoc <- edgeDocs
---                 , let paraId = edgeDocParagraphId edgeDoc
---                 , Just entry <- pure $ paraId `HM.lookup` paraIdToEdgeRun   -- get edgedoc rank entries
---                 ]
---         ]
+    (entityRun', edgeRun', edgeDocs')  = unzip3
+                                      $ [ (entityEntry, edgeEntry, edgeDoc)
+                                        | (pageId, entityEntry) <- pageIdToEntityRun
+                                        , edgeDoc <- edgeDocs
+                                        , pageId `HS.member` (edgeDocNeighbors edgeDoc)
+                                        , let paraId = edgeDocParagraphId edgeDoc
+                                        , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
+                                        ]
 
-
-     in combineEntityEdgeFeatures edgeDocs query edgeRun' entityRun'
+    entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
+    edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
+    edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
 
 combineEntityEdgeFeatures
-    :: [EdgeDoc]
-    -> QueryId
-    -> [MultiRankingEntry ParagraphId GridRun]
-    -> [MultiRankingEntry PageId GridRun]
+    :: QueryId
+    -> Candidates
     -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
-combineEntityEdgeFeatures allEdgeDocs query edgeRun entityRun =
+combineEntityEdgeFeatures query Candidates{candidateEdgeDocs = allEdgeDocs, candidateEdgeRuns = edgeRun, candidateEntityRuns = entityRun} =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
