@@ -284,6 +284,7 @@ main = do
         collapsedEntityRun = collapseRuns entityRuns
         collapsedEdgedocRun = collapseRuns edgeRuns
 
+        tr x = traceShow x x
 
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
@@ -292,13 +293,14 @@ main = do
     case modelSource of
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
-          let edgeFSpace' =  mkFeatureSpace
+          let edgeFSpace' = mkFeatureSpace
+                              $ tr
                               $  filter (expSettingToCritEdge experimentSettings)
                               $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
 
 
           let weights :: EdgeFeatureVec
-              weights = F.fromList edgeFSpace'
+              weights = tr $ F.fromList edgeFSpace'
                   [ (k'', v)
                   | (k, v) <- M.toList $ modelWeights model
                   , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeatures EdgeFeatures
@@ -319,8 +321,9 @@ main = do
                       entityRun = collapsedEntityRun M.! query
 
                   -- TODO: very unsafe
-                  weights' = F.unsafeFeatureVecFromVector $ getFeatures
-                            $ Features $ F.getFeatureVec weights
+--                   weights' = F.unsafeFeatureVecFromVector $ getFeatures
+--                             $ Features $ F.getFeatureVec weights
+                  weights' = weights
 
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
@@ -375,7 +378,6 @@ main = do
 
                           prExperimentSettings = fromMaybe PageRankNormal pageRankExperimentSettings
 
-                  tr x = traceShow x x
 
                   teleportation = fromMaybe 0.1 teleportOpt
 
