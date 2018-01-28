@@ -302,22 +302,27 @@ main = do
                   teleportation = 0.1
 
                   graph' :: Graph PageId Double
-                  graph' = fmap (F.dotFeatureVecs weights') graph
+                  graph' = (\x -> traceShow (HS.size (nodeSet x)) x)
+                         $ fmap (F.dotFeatureVecs weights') graph
 
-                  candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+
+                  candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
+                             $ (\x -> traceShow (length (candidateEdgeDocs x)) x)
+                             $ selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
 
                   graph :: Graph PageId EdgeFeatureVec
-                  graph = generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+                  graph = (\x -> traceShow (HS.size (nodeSet x)) x)
+                         $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
                   normalizer :: Normalization
                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
 
                   -- TODO: very unsafe
                   weights' = F.unsafeFeatureVecFromVector $ getFeatures
-                            $ denormWeights normalizer
+ -- Todo bring back normalizer      -- $ denormWeights normalizer
                             $ Features $ F.getFeatureVec weights
 
 
@@ -791,7 +796,7 @@ generateEdgeFeatureGraph:: QueryId
                         -> Graph PageId EdgeFeatureVec
 generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                                                , candidateEdgeRuns = edgeRun
-                                               , candidateEntityRuns = _sentityRun} = -- edgeDocsLookup query edgeRun entityRun =
+                                               , candidateEntityRuns = _entityRun} = -- edgeDocsLookup query edgeRun entityRun =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeDoc paraId = case edgeDocsLookup [paraId] of
@@ -799,7 +804,7 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                            (a:_) -> a
 
         edgeFeat :: ParagraphId -> _
-        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry (connectedEdgeDocs paraId)
+        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
         edgeCardinality ed = HS.size $ edgeDocNeighbors ed
@@ -882,8 +887,6 @@ mergeGraphAndNodeFeatures edgeFeatureGraph' nodeFeatures  =
 --
 -}
 
-connectedEdgeDocs :: ParagraphId -> [EdgeDoc]
-connectedEdgeDocs = undefined
 
 
 data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
@@ -995,9 +998,8 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
    degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors incidentEdgeDocs
 
 edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
-             -> [EdgeDoc]
              -> FeatureVec EdgeFeatures Double
-edgeScoreVec edgedocsRankEntry connectedEdgeDocs = makeEdgeFeatVector $
+edgeScoreVec edgedocsRankEntry = makeEdgeFeatVector $
                                     [ (EdgeCount, 1.0)
                                     -- TODO
                                     --, ( EdgeDocKL
@@ -1009,7 +1011,12 @@ edgeScoreVec edgedocsRankEntry connectedEdgeDocs = makeEdgeFeatVector $
                                     ++ concat [ rankEdgeFeatures (GridRun' g) entry
                                        | (g, entry) <- multiRankingEntryAll edgedocsRankEntry
                                        ]
+{-
   where
+
+        connectedEdgeDocs :: ParagraphId -> [EdgeDoc]
+        connectedEdgeDocs = undefined
+
         edgeDocKullbackLeibler :: [EdgeDoc] -> EdgeDoc -> Double
         edgeDocKullbackLeibler otherEdgeDocsOfConnectedEntities edgeDoc =
 
@@ -1039,7 +1046,7 @@ edgeScoreVec edgedocsRankEntry connectedEdgeDocs = makeEdgeFeatVector $
                                     foldMap (textToTokens) texts
                                   total = Foldable.sum $ HM.elems $ getTermCounts $ termCounts
                               in (termCounts, total)
-
+-}
 
 textToTokens :: T.Text -> Retrieve.TermCounts
 textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
