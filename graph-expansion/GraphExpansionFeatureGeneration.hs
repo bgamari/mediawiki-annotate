@@ -107,7 +107,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
-data PageRankConvergence = L2Convergence | Iteration10
+data PageRankConvergence = L2Convergence | Iteration10 | Iteration2
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
@@ -401,6 +401,7 @@ main = do
                                            $ dropWhile (\(x,y) -> relChange x y > 1e-4)
                                            $ pageRankIters
                             Iteration10 ->  snd $ (!! 10)  pageRankIters
+                            Iteration2 ->  snd $ (!! 2)  pageRankIters
                   walkIters = pageRank teleportation graph'
 
 
