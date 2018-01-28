@@ -17,8 +17,6 @@
 
 import Control.Concurrent
 import Control.Concurrent.Async
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TSem
 import Control.Exception
 import Control.Monad
 import Data.Tuple
@@ -383,12 +381,10 @@ main = do
                   teleportation = fromMaybe 0.1 teleportOpt
 
                   eigv :: Eigenvector PageId Double
-                  eigv =   (!! 10) walkIters
---                       snd
---                       $ `!!` 5
---                       $ last
---                       $ takeWhile (\(x,y) -> relChange x y > 1e-3)
---                       $ zip walkIters (tail walkIters)
+                  eigv = snd
+                       $ head
+                       $ dropWhile (\(x,y) -> relChange x y > 1e-4)
+                       $ zip walkIters (tail walkIters)
                   walkIters = pageRank teleportation graph'
 
 
