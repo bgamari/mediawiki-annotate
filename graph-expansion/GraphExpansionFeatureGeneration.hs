@@ -105,7 +105,10 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
-  deriving (Show, Read, Ord, Eq)
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
+data PageRankConvergence = L2Convergence | Iteration10
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
@@ -146,9 +149,10 @@ opts :: Parser ( FilePath
                , Maybe Double
                , [ExperimentSettings]
                , Maybe PageRankExperimentSettings
+               , Maybe PageRankConvergence
                )
 opts =
-    (,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -162,6 +166,7 @@ opts =
     <*> optional (option auto (long "teleport" <> help "teleport probability (for page rank)"))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> optional (option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01]))))
+    <*> optional (option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound]))))
     where
 
       querySource :: Parser QuerySource
@@ -234,7 +239,7 @@ main = do
       , edgeDocsCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportOpt, experimentSettings
-      , pageRankExperimentSettings) <- execParser' 1 (helper <*> opts) mempty
+      , pageRankExperimentSettings, pageRankConvergence  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -333,12 +338,12 @@ main = do
 
 
                   graph' :: Graph PageId Double
-                  graph' = fmap posifyDot graph
+                  graph' = fmap (posifyDot params') graph
                   -- for debugging...
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params' feats))) graph
                     where
-                          posifyDot:: EdgeFeatureVec  -> Double
-                          posifyDot feats =
+                          posifyDot:: EdgeFeatureVec  -> EdgeFeatureVec  -> Double
+                          posifyDot params' feats =
                               let computedWeight =
                                     case posifyEdgeWeightsOpt of
                                         Just Exponentiate ->  exp (F.dotFeatureVecs params' feats)
@@ -387,10 +392,15 @@ main = do
                   teleportation = fromMaybe 0.1 teleportOpt
 
                   eigv :: Eigenvector PageId Double
-                  eigv = snd
-                       $ head
-                       $ dropWhile (\(x,y) -> relChange x y > 1e-4)
-                       $ zip walkIters (tail walkIters)
+                  eigv =
+                       let pageRankIters = zip walkIters (tail walkIters)
+
+                       in case fromMaybe Iteration10 pageRankConvergence of
+                            L2Convergence -> snd
+                                           $ head
+                                           $ dropWhile (\(x,y) -> relChange x y > 1e-4)
+                                           $ pageRankIters
+                            Iteration10 ->  snd $ (!! 10)  pageRankIters
                   walkIters = pageRank teleportation graph'
 
 
