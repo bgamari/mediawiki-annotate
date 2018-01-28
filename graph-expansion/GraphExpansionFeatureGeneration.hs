@@ -141,10 +141,11 @@ opts :: Parser ( FilePath
                , FilePath
                , ModelSource
                , Maybe PosifyEdgeWeights
+               , Maybe Double
                , [ExperimentSettings]
                )
 opts =
-    (,,,,,,,,,,)
+    (,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -155,6 +156,7 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> optional (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))))
+    <*> optional (option auto (long "teleport" <> help "teleport probability (for page rank)"))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     where
 
@@ -226,7 +228,8 @@ main = do
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
-      , qrelFile, modelSource, posifyEdgeWeightsOpt,  experimentSettings) <- execParser' 1 (helper <*> opts) mempty
+      , qrelFile, modelSource
+      , posifyEdgeWeightsOpt,  teleportOpt, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -375,7 +378,7 @@ main = do
 --                       $ takeWhile (\(x,y) -> relChange x y > 1e-3)
 --                       $ zip walkIters (tail walkIters)
                   walkIters = pageRank teleportation graph'
-                  teleportation = 0.1
+                  teleportation = fromMaybe 0.1 teleportOpt
 
 
               runRanking query = do
