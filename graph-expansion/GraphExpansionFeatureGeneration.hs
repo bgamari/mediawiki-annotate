@@ -270,13 +270,6 @@ main = do
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
 
 
-    let fixRun methodName entries = fmap (\entry -> entry {CarRun.carMethodName = methodName} ) entries
-
---     entityBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readEntityRun     (head [ r | (GridRun All Bm25 NoneX EntityIdx, Entity, r) <- gridRunFiles])
---     entityQlRun <- fixRun qlMethodName <$> CAR.RunFile.readEntityRun         (head [ r | (GridRun All Ql NoneX EntityIdx, Entity, r) <- gridRunFiles])
---     edgedocBm25Run <- fixRun bm25MethodName <$> CAR.RunFile.readParagraphRun (head [ r | (GridRun All Bm25 NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
---     edgedocQlRun <- fixRun qlMethodName <$> CAR.RunFile.readParagraphRun     (head [ r | (GridRun All Ql NoneX ParagraphIdx, Edge, r) <- gridRunFiles])
-
     entityRuns <-  mapM (mapM CAR.RunFile.readEntityRun) entityRunFiles  -- mapM mapM -- first map over list, then map of the snd of a tuple
     edgeRuns <-  mapM (mapM CAR.RunFile.readParagraphRun) edgedocRunFiles
 
@@ -397,9 +390,6 @@ main = do
                                     $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
-          --CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
-          --    $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
-          --    $ predictRanking
       TrainModel modelFile -> do
           let docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
               docFeatures''' = M.fromList
@@ -487,8 +477,6 @@ main = do
             -- todo  exportGraphs model
 
                                 -- todo load external folds
-                                -- this is wrong, because if gives many folds with 5 elements.
-                                -- let folds = chunksOf 5 $ M.keys trainData
           let folds = chunksOf foldLen $ M.keys trainData
                       where foldLen = ((M.size trainData) `div` 5 ) +1
 
@@ -1064,10 +1052,6 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
 
         nodeFeatures :: HM.HashMap PageId EntityFeatureVec
         nodeFeatures = generateNodeFeatures query entityRun allEdgeDocs
-
-        -- we only need this of we want to graphWalk:
-        --nodeEdgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
-        --nodeEdgeFeatureGraph = mergeGraphAndNodeFeatures edgeFeatureGraph nodeFeatures
 
         -- stack node vector on top of projected edge feature vector
         -- no need to use nodeEdgeFeatureGraph
