@@ -25,6 +25,7 @@ let
         assessment-interface = self.callCabal2nix "trec-car-annotation-interface" (localDir ./assessment-interface) {};
         annotate-server      = self.callCabal2nix "annotate-server" (localDir ./assessment-interface/annotation/server) {};
         trec-car-graph-expansion      = self.callCabal2nix "trec-car-graph-expansion" (localDir ./graph-expansion) {};
+        graph-algorithms     = self.callCabal2nix "graph-algorithms" (localDir ./graph-algorithms) {};
         db-export = self.callCabal2nix "db-export" (localDir ./db-export) {};
         multilang-car = self.callCabal2nix "multilang-car" (localDir ./multilang-car) {};
 
