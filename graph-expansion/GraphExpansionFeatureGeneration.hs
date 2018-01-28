@@ -106,7 +106,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
-data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset Double
+data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq)
 
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear
@@ -163,7 +163,7 @@ opts =
     <*> optional (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))))
     <*> optional (option auto (long "teleport" <> help "teleport probability (for page rank)"))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
-    <*> optional (option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset 0.5]))))
+    <*> optional (option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01]))))
     where
 
       querySource :: Parser QuerySource
@@ -350,7 +350,8 @@ main = do
                               in case prExperimentSettings of
                                     PageRankNormal -> computedWeight
                                     PageRankJustStructure -> 1.0
-                                    PageRankWeightOffset offset -> computedWeight + offset
+                                    PageRankWeightOffset1 -> computedWeight + 1.0
+                                    PageRankWeightOffset01 -> computedWeight + 0.1
 
                           minimumVal =
                               minimum $ fmap (\feats -> F.dotFeatureVecs weights' feats) graph
