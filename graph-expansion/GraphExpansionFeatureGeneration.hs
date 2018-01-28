@@ -323,11 +323,11 @@ main = do
 
               runRanking query = do
                   let ranking = graphWalkRanking query
-                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-pagerank-test.run") 
+                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
                       [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
                       | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
                       ]
-          mapM_ (runRanking . queryDocQueryId) queries
+          mapConcurrently_(runRanking . queryDocQueryId) queries
 
           --CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
           --    $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
