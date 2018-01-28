@@ -105,7 +105,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
-data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | ExpNormFeat | Linear
+data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 -- type IsRelevant = LearningToRank.IsRelevant
@@ -302,21 +302,18 @@ main = do
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
-                 | otherwise = trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
+                 | otherwise = Ranking.fromList $ map swap $ toEntries eigv
                 where
                   count pred = getSum . foldMap f
                     where f x = if pred x then Sum 1 else Sum 0
 
-                  candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
-                             $ (\x -> traceShow (length (candidateEdgeDocs x)) x)
-                             $ selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                  candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
 
                   -- TODO: very unsafe
                   weights' = F.unsafeFeatureVecFromVector $ getFeatures
- -- Todo bring back normalizer      -- $ denormWeights normalizer
                             $ Features $ F.getFeatureVec weights
 
                   graph :: Graph PageId EdgeFeatureVec
@@ -329,17 +326,16 @@ main = do
 
 
                   graph' :: Graph PageId Double
-                  graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot weights' feats))) graph
---                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
---                   graph' = fmap (\feats -> trace (show feats) ( tr  (exp (F.dotFeatureVecs denormWeights' feats)))) graph
---                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
+                  graph' = fmap posifyDot graph
+                  -- for debugging...
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot weights' feats))) graph
                     where
-                          posifyDot:: EdgeFeatureVec -> EdgeFeatureVec  -> Double
-                          posifyDot weights' feats =
+                          posifyDot:: EdgeFeatureVec  -> Double
+                          posifyDot feats =
                               case posifyEdgeWeightsOpt of
                                   Just Exponentiate ->  exp (F.dotFeatureVecs weights' feats)
-                                  Just ExpDenormWeight ->  exp (F.dotFeatureVecs (denormWeights' weights') feats)
-                                  Just ExpNormFeat ->  exp (F.dotFeatureVecs weights' (normFeats feats))
+                                  Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
+                                  --   identical to ExpDenormWeight:        Just ExpNormFeat ->  exp (F.dotFeatureVecs weights' (normFeats feats))
                                   Just Linear  -> (F.dotFeatureVecs weights' feats) - minimumVal
                                   _ -> exp (F.dotFeatureVecs weights' feats)
 
@@ -357,8 +353,8 @@ main = do
                                   normedV =  getFeatures normedF
                               in F.unsafeFeatureVecFromVector normedV
 
-                          denormWeights' :: EdgeFeatureVec -> EdgeFeatureVec
-                          denormWeights' weights' =
+                          denormWeights' :: EdgeFeatureVec
+                          denormWeights' =
                               let v :: VU.Vector Double
                                   v = (F.getFeatureVec weights')
                                   f = Features v
@@ -372,7 +368,7 @@ main = do
                   tr x = traceShow x x
 
                   eigv :: Eigenvector PageId Double
-                  eigv =   (!! 5) walkIters
+                  eigv =   (!! 10) walkIters
 --                       snd
 --                       $ `!!` 5
 --                       $ last
