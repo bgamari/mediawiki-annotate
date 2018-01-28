@@ -101,6 +101,7 @@ data RankingType = EntityRanking | EntityPassageRanking
 
 data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
+  deriving (Show)
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
@@ -240,6 +241,10 @@ main = do
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
     putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles))
 
+    putStrLn $ " Experimentation settins: "++ (show experimentSettings)
+    putStrLn $ " model comes from : "++ (show modelSource)
+    putStrLn $ " teleport (only for page rank) : "++ (show teleportOpt)
+    putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
 
     gen0 <- newStdGen  -- needed by learning to rank
 
