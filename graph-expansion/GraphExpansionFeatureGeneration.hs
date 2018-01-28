@@ -311,8 +311,7 @@ main = do
                             $ Features $ F.getFeatureVec weights
 
                   graph :: Graph PageId EdgeFeatureVec
-                  graph = (\x -> traceShow (HS.size (nodeSet x)) x)
-                         $ fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
+                  graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
                          $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
 
@@ -320,9 +319,8 @@ main = do
 --                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
 
                   graph' :: Graph PageId Double
-                  graph' = (\x -> traceShow (HS.size (nodeSet x)) x)
-                         $ fmap (F.dotFeatureVecs weights') graph
-
+                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
+                  tr x = traceShow x x
 
                   eigv :: Eigenvector PageId Double
                   eigv =
