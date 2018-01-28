@@ -319,12 +319,13 @@ main = do
                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
 
                   graph' :: Graph PageId Double
---                   graph' = fmap (\feats -> trace (show feats) ( tr  ( exp (F.dotFeatureVecs weights' feats)))) graph
-                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats))) graph
+                  graph' = fmap (\feats -> trace (show feats) ( tr  ( exp (F.dotFeatureVecs weights' feats)))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs denormWeights' feats))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
-                           where -- denormWeights' = (denormWeights normalizer) weights'
-                                 normFeats f = (normFeatures normalizer) f
+                    where
+                       -- denormWeights' = (denormWeights normalizer) weights'
+                          normFeats f = (normFeatures normalizer) f
                   tr x = traceShow x x
 
                   eigv :: Eigenvector PageId Double
