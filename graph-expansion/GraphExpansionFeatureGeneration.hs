@@ -304,11 +304,13 @@ main = do
                   graph' :: Graph PageId Double
                   graph' = fmap (F.dotFeatureVecs weights') graph
 
-                  graph :: Graph PageId EdgeFeatureVec
-                  graph = generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun
+                  candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
+
+                  graph :: Graph PageId EdgeFeatureVec
+                  graph = generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
                   normalizer :: Normalization
                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
@@ -782,13 +784,16 @@ type EdgeFeatureVec = FeatureVec EdgeFeatures Double
 type EntityFeatureVec = FeatureVec EntityFeatures Double
 type CombinedFeatureVec = FeatureVec CombinedFeatures Double
 
-generateEdgeFeatureGraph:: EdgeDocsLookup
-                        -> QueryId
-                        -> [MultiRankingEntry ParagraphId GridRun]
-                        -> [MultiRankingEntry PageId GridRun]
+generateEdgeFeatureGraph:: QueryId
+                        -> Candidates
+--                         -> [MultiRankingEntry ParagraphId GridRun]
+--                         -> [MultiRankingEntry PageId GridRun]
                         -> Graph PageId EdgeFeatureVec
-generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun =
+generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
+                                               , candidateEdgeRuns = edgeRun
+                                               , candidateEntityRuns = _sentityRun} = -- edgeDocsLookup query edgeRun entityRun =
     let
+        edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeDoc paraId = case edgeDocsLookup [paraId] of
                            [] -> error $ "No edgedoc for paraId "++show paraId
                            (a:_) -> a
@@ -797,7 +802,7 @@ generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun =
         edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry (connectedEdgeDocs paraId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
-        edgeCardinality edgeDoc = HS.size $ edgeDocNeighbors edgeDoc
+        edgeCardinality ed = HS.size $ edgeDocNeighbors ed
 
         aggrFeatVecs :: EdgeFeatureVec -> EdgeFeatureVec -> EdgeFeatureVec
         aggrFeatVecs features1 features2 =
@@ -941,11 +946,11 @@ combineEntityEdgeFeatures
     :: QueryId
     -> Candidates
     -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
-combineEntityEdgeFeatures query Candidates{candidateEdgeDocs = allEdgeDocs, candidateEdgeRuns = edgeRun, candidateEntityRuns = entityRun} =
+combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs, candidateEdgeRuns = edgeRun, candidateEntityRuns = entityRun} =
     let
-        edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
+--         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
-        edgeFeatureGraph = generateEdgeFeatureGraph edgeDocsLookup query edgeRun entityRun
+        edgeFeatureGraph = generateEdgeFeatureGraph query cands -- edgeDocsLookup query edgeRun entityRun
         Graph edgeFeatureGraph' = edgeFeatureGraph
 
         nodeFeatures :: HM.HashMap PageId EntityFeatureVec
