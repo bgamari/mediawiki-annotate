@@ -296,7 +296,7 @@ main = do
 
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
-                 | any (< 0) graph' = error "negative entries in graph'"
+                 | any (< 0) graph' = error ("negative entries in graph' for query "++ show query)
                  | otherwise = trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
