@@ -105,6 +105,9 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
+data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | ExpNormFeat | Linear
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
 -- type IsRelevant = LearningToRank.IsRelevant
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
@@ -137,10 +140,11 @@ opts :: Parser ( FilePath
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , ModelSource
+               , Maybe PosifyEdgeWeights
                , [ExperimentSettings]
                )
 opts =
-    (,,,,,,,,,)
+    (,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -150,6 +154,7 @@ opts =
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
+    <*> optional (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     where
 
@@ -221,7 +226,7 @@ main = do
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
-      , qrelFile, modelSource, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
+      , qrelFile, modelSource, posifyEdgeWeightsOpt,  experimentSettings) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -322,12 +327,26 @@ main = do
                   normalizer :: Normalization
                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
 
+
                   graph' :: Graph PageId Double
---                   graph' = fmap (\feats -> trace (show feats) ( tr  ( exp (F.dotFeatureVecs weights' feats)))) graph
-                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
+                  graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot weights' feats))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (exp (F.dotFeatureVecs denormWeights' feats)))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
                     where
+                          posifyDot:: EdgeFeatureVec -> EdgeFeatureVec  -> Double
+                          posifyDot weights' feats =
+                              case posifyEdgeWeightsOpt of
+                                  Just Exponentiate ->  exp (F.dotFeatureVecs weights' feats)
+                                  Just ExpDenormWeight ->  exp (F.dotFeatureVecs (denormWeights' weights') feats)
+                                  Just ExpNormFeat ->  exp (F.dotFeatureVecs weights' (normFeats feats))
+                                  Just Linear  -> (F.dotFeatureVecs weights' feats) - minimumVal
+                                  _ -> exp (F.dotFeatureVecs weights' feats)
+
+                          minimumVal =
+                              minimum $ fmap (\feats -> F.dotFeatureVecs weights' feats) graph
+
+
                           normFeats :: EdgeFeatureVec -> EdgeFeatureVec
                           normFeats fv =
                               let v :: VU.Vector Double
@@ -338,8 +357,8 @@ main = do
                                   normedV =  getFeatures normedF
                               in F.unsafeFeatureVecFromVector normedV
 
-                          denormWeights' :: EdgeFeatureVec
-                          denormWeights' =
+                          denormWeights' :: EdgeFeatureVec -> EdgeFeatureVec
+                          denormWeights' weights' =
                               let v :: VU.Vector Double
                                   v = (F.getFeatureVec weights')
                                   f = Features v
