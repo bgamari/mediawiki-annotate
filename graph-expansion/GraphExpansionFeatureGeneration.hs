@@ -329,10 +329,12 @@ main = do
                   tr x = traceShow x x
 
                   eigv :: Eigenvector PageId Double
-                  eigv =
-                      snd $ last
-                      $ takeWhile (\(x,y) -> relChange x y > 1e-3)
-                      $ zip walkIters (tail walkIters)
+                  eigv =   (!! 5) walkIters
+--                       snd
+--                       $ `!!` 5
+--                       $ last
+--                       $ takeWhile (\(x,y) -> relChange x y > 1e-3)
+--                       $ zip walkIters (tail walkIters)
                   walkIters = pageRank teleportation graph'
                   teleportation = 0.1
 
