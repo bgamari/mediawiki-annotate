@@ -296,9 +296,12 @@ main = do
 
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
-                 | any (< 0) graph' = error ("negative entries in graph' for query "++ show query)
+                 | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
                  | otherwise = trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
                 where
+                  count pred = getSum . foldMap f
+                    where f x = if pred x then Sum 1 else Sum 0
+
                   candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
                              $ (\x -> traceShow (length (candidateEdgeDocs x)) x)
                              $ selectCandidateGraph edgeDocsLookup query edgeRun entityRun
@@ -321,11 +324,10 @@ main = do
 
                   graph' :: Graph PageId Double
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( exp (F.dotFeatureVecs weights' feats)))) graph
-                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
---                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs denormWeights' feats))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' (normFeats feats)))) graph
+                  graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs denormWeights' feats))) graph
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  (F.dotFeatureVecs weights' feats))) graph
                     where
-                       -- denormWeights' = (denormWeights normalizer) weights'
                           normFeats :: EdgeFeatureVec -> EdgeFeatureVec
                           normFeats fv =
                               let v :: VU.Vector Double
@@ -335,6 +337,18 @@ main = do
                                   normedV :: VU.Vector Double
                                   normedV =  getFeatures normedF
                               in F.unsafeFeatureVecFromVector normedV
+
+                          denormWeights' :: EdgeFeatureVec
+                          denormWeights' =
+                              let v :: VU.Vector Double
+                                  v = (F.getFeatureVec weights')
+                                  f = Features v
+                                  normedF = (denormWeights normalizer) f
+                                  normedV :: VU.Vector Double
+                                  normedV =  getFeatures normedF
+                              in F.unsafeFeatureVecFromVector normedV
+
+
 
                   tr x = traceShow x x
 
