@@ -279,8 +279,13 @@ main = do
     case modelSource of
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
+          let edgeFSpace' =  mkFeatureSpace
+                              $  filter (expSettingToCritEdge experimentSettings)
+                              $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
+
+
           let weights :: EdgeFeatureVec
-              weights = F.fromList edgeFSpace
+              weights = F.fromList edgeFSpace'
                   [ (k'', v)
                   | (k, v) <- M.toList $ modelWeights model
                   , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeatures EdgeFeatures
@@ -293,19 +298,6 @@ main = do
               graphWalkRanking query =
                   trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
                 where
-                  eigv :: Eigenvector PageId Double
-                  eigv =
-                      snd $ last
-                      $ takeWhile (\(x,y) -> relChange x y > 1e-3)
-                      $ zip walkIters (tail walkIters)
-                  walkIters = pageRank teleportation graph'
-                  teleportation = 0.1
-
-                  graph' :: Graph PageId Double
-                  graph' = (\x -> traceShow (HS.size (nodeSet x)) x)
-                         $ fmap (F.dotFeatureVecs weights') graph
-
-
                   candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
                              $ (\x -> traceShow (length (candidateEdgeDocs x)) x)
                              $ selectCandidateGraph edgeDocsLookup query edgeRun entityRun
@@ -313,17 +305,32 @@ main = do
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
 
-                  graph :: Graph PageId EdgeFeatureVec
-                  graph = (\x -> traceShow (HS.size (nodeSet x)) x)
-                         $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
-
-                  normalizer :: Normalization
-                  normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
-
                   -- TODO: very unsafe
                   weights' = F.unsafeFeatureVecFromVector $ getFeatures
  -- Todo bring back normalizer      -- $ denormWeights normalizer
                             $ Features $ F.getFeatureVec weights
+
+                  graph :: Graph PageId EdgeFeatureVec
+                  graph = (\x -> traceShow (HS.size (nodeSet x)) x)
+                         $ fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
+                         $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+
+
+--                   normalizer :: Normalization
+--                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
+
+                  graph' :: Graph PageId Double
+                  graph' = (\x -> traceShow (HS.size (nodeSet x)) x)
+                         $ fmap (F.dotFeatureVecs weights') graph
+
+
+                  eigv :: Eigenvector PageId Double
+                  eigv =
+                      snd $ last
+                      $ takeWhile (\(x,y) -> relChange x y > 1e-3)
+                      $ zip walkIters (tail walkIters)
+                  walkIters = pageRank teleportation graph'
+                  teleportation = 0.1
 
 
               runRanking query = do
@@ -631,6 +638,49 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 -- -------------------------------------------
 -- filtering of feature spaces
 -- -------------------------------------------
+
+
+
+filterExpSettingsEdge ::  FeatureSpace EdgeFeatures
+                  ->  FeatureSpace EdgeFeatures
+                  -> (EdgeFeatures -> Bool)
+                  ->  (FeatureVec EdgeFeatures Double)
+                  ->  (FeatureVec EdgeFeatures Double)
+filterExpSettingsEdge fromFeatSpace toFeatSpace pred features =
+    F.fromList toFeatSpace
+    $ [ pair
+      | pair@(fname, _) <- F.toList fromFeatSpace features
+      , pred fname
+      ]
+
+onlyAggrEdge :: EdgeFeatures -> Bool
+onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
+onlyAggrEdge _  = False
+
+onlyScoreEdge :: EdgeFeatures -> Bool
+onlyScoreEdge (EdgeRetrievalFeature _ ScoreF) = True
+onlyScoreEdge _  = False
+
+onlyRREdge :: EdgeFeatures -> Bool
+onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
+onlyRREdge _  = False
+
+expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeatures -> Bool)
+expSettingToCritEdge exps fname =
+    all (`convertEdge` fname) exps
+
+convertEdge :: ExperimentSettings -> (EdgeFeatures -> Bool)
+convertEdge exp = case exp of
+                AllExp -> const True
+                NoEdgeFeats -> const False
+                NoEntityFeats -> const True
+                AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
+                JustAggr -> onlyAggrEdge
+                JustScore -> onlyScoreEdge
+                JustRecip -> onlyRREdge
+
+
+
 
 
 filterExpSettings ::  FeatureSpace CombinedFeatures
