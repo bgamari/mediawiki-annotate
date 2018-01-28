@@ -106,6 +106,9 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
+data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset Double
+  deriving (Show, Read, Ord, Eq)
+
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
@@ -144,9 +147,10 @@ opts :: Parser ( FilePath
                , Maybe PosifyEdgeWeights
                , Maybe Double
                , [ExperimentSettings]
+               , Maybe PageRankExperimentSettings
                )
 opts =
-    (,,,,,,,,,,,)
+    (,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -159,6 +163,7 @@ opts =
     <*> optional (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))))
     <*> optional (option auto (long "teleport" <> help "teleport probability (for page rank)"))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
+    <*> optional (option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset 0.5]))))
     where
 
       querySource :: Parser QuerySource
@@ -230,7 +235,8 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelSource
-      , posifyEdgeWeightsOpt,  teleportOpt, experimentSettings) <- execParser' 1 (helper <*> opts) mempty
+      , posifyEdgeWeightsOpt,  teleportOpt, experimentSettings
+      , pageRankExperimentSettings) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -245,6 +251,7 @@ main = do
     putStrLn $ " model comes from : "++ (show modelSource)
     putStrLn $ " teleport (only for page rank) : "++ (show teleportOpt)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
+    putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
 
     gen0 <- newStdGen  -- needed by learning to rank
 
@@ -298,8 +305,6 @@ main = do
                   , Right k'' <- pure k'
                   ]
 
-          -- unless (all (>= 0) $ map snd $ F.toList edgeFSpace weights') $ fail "negative weights"
-
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
@@ -333,12 +338,16 @@ main = do
                     where
                           posifyDot:: EdgeFeatureVec  -> Double
                           posifyDot feats =
-                              case posifyEdgeWeightsOpt of
-                                  Just Exponentiate ->  exp (F.dotFeatureVecs weights' feats)
-                                  Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
-                                  --   identical to ExpDenormWeight:        Just ExpNormFeat ->  exp (F.dotFeatureVecs weights' (normFeats feats))
-                                  Just Linear  -> (F.dotFeatureVecs weights' feats) - minimumVal
-                                  _ -> exp (F.dotFeatureVecs weights' feats)
+                              let computedWeight =
+                                    case posifyEdgeWeightsOpt of
+                                        Just Exponentiate ->  exp (F.dotFeatureVecs weights' feats)
+                                        Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
+                                        Just Linear  -> (F.dotFeatureVecs weights' feats) - minimumVal
+                                        _ -> exp (F.dotFeatureVecs weights' feats)
+                              in case prExperimentSettings of
+                                    PageRankNormal -> computedWeight
+                                    PageRankJustStructure -> 1.0
+                                    PageRankWeightOffset offset -> computedWeight + offset
 
                           minimumVal =
                               minimum $ fmap (\feats -> F.dotFeatureVecs weights' feats) graph
@@ -364,9 +373,11 @@ main = do
                                   normedV =  getFeatures normedF
                               in F.unsafeFeatureVecFromVector normedV
 
-
+                          prExperimentSettings = fromMaybe PageRankNormal pageRankExperimentSettings
 
                   tr x = traceShow x x
+
+                  teleportation = fromMaybe 0.1 teleportOpt
 
                   eigv :: Eigenvector PageId Double
                   eigv =   (!! 10) walkIters
@@ -376,13 +387,11 @@ main = do
 --                       $ takeWhile (\(x,y) -> relChange x y > 1e-3)
 --                       $ zip walkIters (tail walkIters)
                   walkIters = pageRank teleportation graph'
-                  teleportation = fromMaybe 0.1 teleportOpt
 
 
               runRanking query = do
-                  let ranking = trace ("runRanking Query: "++show query) $ graphWalkRanking query
-                      rankEntries =  (\x -> traceShow (length x) x)
-                                   $ [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
+                  let ranking = graphWalkRanking query
+                      rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
                                     ]
 
