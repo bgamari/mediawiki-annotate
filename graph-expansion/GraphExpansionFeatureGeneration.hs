@@ -295,8 +295,9 @@ main = do
           -- unless (all (>= 0) $ map snd $ F.toList edgeFSpace weights') $ fail "negative weights"
 
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
-              graphWalkRanking query =
-                  trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
+              graphWalkRanking query
+                 | any (< 0) graph' = error "negative entries in graph'"
+                 | otherwise = trace "graphWalkRanking" $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   candidates = (\x -> traceShow (length (candidateEdgeRuns x)) x)
                              $ (\x -> traceShow (length (candidateEdgeDocs x)) x)
