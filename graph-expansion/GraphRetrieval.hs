@@ -191,6 +191,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
+                    -- todo this is not a ranking, just a scored list
                     rankings = computeRankingsForQuery retrieveDocs  queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
 
                 let methodsAvailable = S.fromList (map fst rankings)
@@ -223,7 +224,7 @@ retrieveEntities entityIndexFile = do
 
 
 
-
+                    -- todo this is not a ranking, just a scored list
 computeRankingsForQuery :: 
                           (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
                         -> CarRun.QueryId -> PageId ->  [Term] -> HS.HashSet PageId -> Int
@@ -287,7 +288,7 @@ computeRankingsForQuery
                                       ))
                       ]
 
-
+                            -- todo this is not a ranking, just a scored list
         graphRankings :: [(GraphRankingNames, Graph PageId Double -> [(PageId, Double)])]
         graphRankings = [(PageRank, \graph -> rankByPageRank graph 0.15 20)
                         ,(PersPageRank, \graph -> rankByPersonalizedPageRank graph 0.15 seeds 20)
@@ -310,11 +311,12 @@ computeRankingsForQuery
                          $ results
              in fmap (\(entity, score) -> (entity, (entity `HM.lookup` psgOf), score)) entityRanking
 
+                    -- todo this is not a ranking, just a scored list
         computeRankings' :: [(Method, [(PageId, Maybe ParagraphId, Double)])]
         computeRankings' =
             [ (Method gname ename wname rname irname, attachParagraphs irname $ graphRanking graph )
             | ((gname, ename, wname, irname), graph) <- fancyWeightedGraphs,
-              (rname, graphRanking) <- graphRankings
+              (rname, graphRanking) <- graphRankings                       -- todo this is not a ranking, just a scored list
             ]
    in computeRankings'
 
