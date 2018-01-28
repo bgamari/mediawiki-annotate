@@ -109,7 +109,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq)
 
-data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic
+data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 -- type IsRelevant = LearningToRank.IsRelevant
@@ -345,6 +345,11 @@ main = do
                                     case posifyEdgeWeightsOpt of
                                         Just Exponentiate ->  exp (F.dotFeatureVecs params' feats)
                                         Just Logistic ->  logistic (F.dotFeatureVecs params' feats)
+                                        Just CutNegative ->
+                                            case F.dotFeatureVecs params' feats of
+                                              x | x > 0.0 -> x
+                                              _ -> 0.0
+
                                         Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
                                         Just Linear  -> (F.dotFeatureVecs params' feats) - minimumVal
                                         _ -> exp (F.dotFeatureVecs params' feats)
