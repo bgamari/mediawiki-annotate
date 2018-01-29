@@ -33,6 +33,8 @@ import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Data.Vector.Indexed as VI
+import qualified Data.Vector.Unboxed as VU
 import Data.List
 import Data.List.Split
 import Data.Maybe
@@ -64,10 +66,9 @@ import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 import PageRank
-
+import DenseMapping
 import Graph
 
-import qualified Data.Vector.Unboxed as VU
 
 import Debug.Trace
 
@@ -124,6 +125,9 @@ gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
           | (x,""):_ <- reads s' = return x
           | otherwise = fail $ "failed to parse "++thing++": "++s'
 
+-- | PageRank teleportation \(\alpha\)
+type TeleportationProb = Double
+
 opts :: Parser ( FilePath
                , FilePath
                , QuerySource
@@ -133,11 +137,11 @@ opts :: Parser ( FilePath
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , ModelSource
-               , Maybe PosifyEdgeWeights
-               , Maybe Double
+               , PosifyEdgeWeights
+               , TeleportationProb
                , [ExperimentSettings]
-               , Maybe PageRankExperimentSettings
-               , Maybe PageRankConvergence
+               , PageRankExperimentSettings
+               , PageRankConvergence
                )
 opts =
     (,,,,,,,,,,,,,)
@@ -150,11 +154,11 @@ opts =
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
-    <*> optional (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))))
-    <*> optional (option auto (long "teleport" <> help "teleport probability (for page rank)"))
+    <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
+    <*> option auto (long "teleport" <> help "teleport probability (for page rank)" <> value 0.1)
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
-    <*> optional (option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01]))))
-    <*> optional (option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound]))))
+    <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
+    <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
     where
 
       querySource :: Parser QuerySource
@@ -226,7 +230,7 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile
       , qrelFile, modelSource
-      , posifyEdgeWeightsOpt,  teleportOpt, experimentSettings
+      , posifyEdgeWeightsOpt,  teleportation, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
@@ -240,7 +244,7 @@ main = do
 
     putStrLn $ " Experimentation settins: "++ (show experimentSettings)
     putStrLn $ " model comes from : "++ (show modelSource)
-    putStrLn $ " teleport (only for page rank) : "++ (show teleportOpt)
+    putStrLn $ " teleport (only for page rank) : "++ (show teleportation)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
 
@@ -326,70 +330,30 @@ main = do
 
 
                   graph' :: Graph PageId Double
-                  graph' = fmap (posifyDot params') graph
+                  graph' = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
                   -- for debugging...
 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params' feats))) graph
                     where
-                          posifyDot:: EdgeFeatureVec  -> EdgeFeatureVec  -> Double
-                          posifyDot params' feats =
-                              let computedWeight =
-                                    case posifyEdgeWeightsOpt of
-                                        Just Exponentiate ->  exp (F.dotFeatureVecs params' feats)
-                                        Just Logistic ->  logistic (F.dotFeatureVecs params' feats)
-                                        Just CutNegative ->
-                                            case F.dotFeatureVecs params' feats of
-                                              x | x > 0.0 -> x
-                                              _ -> 0.0
-
-                                        Just ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
-                                        Just Linear  -> (F.dotFeatureVecs params' feats) - minimumVal
-                                        _ -> exp (F.dotFeatureVecs params' feats)
-                              in case prExperimentSettings of
-                                    PageRankNormal -> computedWeight
-                                    PageRankJustStructure -> 1.0
-                                    PageRankWeightOffset1 -> computedWeight + 1.0
-                                    PageRankWeightOffset01 -> computedWeight + 0.1
-
-                          minimumVal =
-                              minimum $ fmap (\feats -> F.dotFeatureVecs params' feats) graph
-
-
-                          normFeats :: EdgeFeatureVec -> EdgeFeatureVec
-                          normFeats fv =
-                              let v :: VU.Vector Double
-                                  v = (F.getFeatureVec fv)
-                                  f = Features v
-                                  normedF = (normFeatures normalizer) f
-                                  normedV :: VU.Vector Double
-                                  normedV =  getFeatures normedF
-                              in F.unsafeFeatureVecFromVector normedV
-
-                          denormWeights' :: EdgeFeatureVec
-                          denormWeights' =
-                              let v :: VU.Vector Double
-                                  v = (F.getFeatureVec params')
-                                  f = Features v
-                                  normedF = (denormWeights normalizer) f
-                                  normedV :: VU.Vector Double
-                                  normedV =  getFeatures normedF
-                              in F.unsafeFeatureVecFromVector normedV
-
-                          prExperimentSettings = fromMaybe PageRankNormal pageRankExperimentSettings
-
-
-                  teleportation = fromMaybe 0.1 teleportOpt
+                      normFeats :: EdgeFeatureVec -> EdgeFeatureVec
+                      normFeats fv =
+                          let v :: VU.Vector Double
+                              v = F.getFeatureVec fv
+                              normedF = normFeatures normalizer (Features v)
+                              normedV :: VU.Vector Double
+                              normedV =  getFeatures normedF
+                          in F.unsafeFeatureVecFromVector normedV
 
                   eigv :: Eigenvector PageId Double
                   eigv =
                        let pageRankIters = zip walkIters (tail walkIters)
 
-                       in case fromMaybe Iteration10 pageRankConvergence of
+                       in case pageRankConvergence of
                             L2Convergence -> snd
                                            $ head
                                            $ dropWhile (\(x,y) -> relChange x y > 1e-4)
                                            $ pageRankIters
-                            Iteration10 ->  snd $ (!! 10)  pageRankIters
-                            Iteration2 ->  snd $ (!! 2)  pageRankIters
+                            Iteration10   -> snd $ (!! 10)  pageRankIters
+                            Iteration2    -> snd $ (!! 2)  pageRankIters
                   walkIters = pageRank teleportation graph'
 
 
@@ -413,8 +377,8 @@ main = do
                           , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
                           ]
 
-              combinedFSpace' =  mkFeatureSpace
-                              $  filter (expSettingToCrit experimentSettings)
+              combinedFSpace' = mkFeatureSpace
+                              $ filter (expSettingToCrit experimentSettings)
                               $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
               docFeatures'' = fmap crit docFeatures'''
                               where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
@@ -425,6 +389,7 @@ main = do
               normalizer = zNormalizer $ M.elems docFeatures'
               docFeatures = fmap (normFeatures normalizer) docFeatures'
 
+              featureNames :: _
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
 
               franking :: TrainData
@@ -1154,3 +1119,84 @@ dropUnjudged featureMap =
          dropUnjudged' (_ , _, Nothing) = Nothing
 
 
+-- -----------------------------------
+-- iterative optimization
+-- -----------------------------------
+
+-- | Compute a dot product between a feature and weight vector, ensuring
+-- positivity.
+posifyDot :: PageRankExperimentSettings -> PosifyEdgeWeights
+          -> Normalization
+          -> EdgeFeatureVec   -- ^ parameter vector
+          -> [EdgeFeatureVec] -- ^ all features
+          -> EdgeFeatureVec
+          -> Double
+posifyDot expSettings posifyOpt normalizer params' allFeatures =
+    \feats ->
+    let computedWeight =
+          case posifyOpt of
+              Exponentiate ->  exp (F.dotFeatureVecs params' feats)
+              Logistic ->  logistic (F.dotFeatureVecs params' feats)
+              CutNegative ->
+                  case F.dotFeatureVecs params' feats of
+                    x | x > 0.0 -> x
+                    _ -> 0.0
+
+              ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
+              Linear  -> (F.dotFeatureVecs params' feats) - minimumVal
+    in case expSettings of
+          PageRankNormal -> computedWeight
+          PageRankJustStructure -> 1.0
+          PageRankWeightOffset1 -> computedWeight + 1.0
+          PageRankWeightOffset01 -> computedWeight + 0.1
+
+  where
+    !minimumVal = minimum $ fmap (\feats -> F.dotFeatureVecs params' feats) allFeatures
+
+    denormWeights' :: EdgeFeatureVec
+    denormWeights' =
+        let v :: VU.Vector Double
+            v = F.getFeatureVec params'
+            normedF = denormWeights normalizer (Features v)
+            normedV :: VU.Vector Double
+            normedV =  getFeatures normedF
+        in F.unsafeFeatureVecFromVector normedV
+
+
+-- | Quite unsafe
+featureVecToFeatures :: FeatureVec a Double -> Features
+featureVecToFeatures = Features . F.getFeatureVec
+
+-- | Quite unsafe
+featuresToFeatureVec :: Features -> FeatureVec a Double
+featuresToFeatureVec = F.unsafeFeatureVecFromVector . getFeatures
+
+interleavedPageRankTraining
+    :: ()
+    => (EdgeFeatureVec -> EdgeFeatureVec -> Double)
+    -> Graph PageId (FeatureVec EdgeFeature Double)
+    -> FeatureSpace EdgeFeatureVec
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> TrainData
+    -> StdGen
+    -> [(Eigenvector PageId Double, Weight)]
+interleavedPageRankTraining dotProduct graph fspace metric trainData =
+    go initialPR initialL2R
+  where
+    go :: VI.Vector VU.Vector (DenseId PageId) Double
+       -> Weight -> StdGen
+       -> [(Eigenvector PageId Double, Weight)]
+    go x0 y0 gen0 =
+        let graph' = fmap (dotProduct (featuresToFeatureVec y0)) graph
+            x = head $ drop 3 $ persPageRankWithSeedsAndInitial mapping x0 alpha mempty graph'
+            (score, y) = head $ drop 3 $ coordAscent gen metric y0 trainData
+            (gen, gen1) = System.Random.split gen0
+        in (x,y) : go (eigenvectorValues x) y gen1
+
+    alpha = 0.1
+    mapping  = mkDenseMapping (nodeSet graph)
+    initialPR = VI.replicate (denseRange mapping) (1 / realToFrac (DenseMapping.size mapping))
+    initialL2R = Features $ VU.replicate (featureDimension fspace) 1
+
+    featureNames :: [FeatureName]
+    featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames fspace

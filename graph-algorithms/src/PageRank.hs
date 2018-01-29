@@ -30,7 +30,9 @@ import Data.Bifunctor
 import DenseMapping
 import Graph
 
-data Eigenvector n a = Eigenvector (DenseMapping n) (VI.Vector VU.Vector (DenseId n) a)
+data Eigenvector n a = Eigenvector { eigenvectorMapping :: !(DenseMapping n)
+                                   , eigenvectorValues  :: !(VI.Vector VU.Vector (DenseId n) a)
+                                   }
 
 -- | A transition matrix
 type Transition n = VI.Vector VU.Vector (DenseId n, DenseId n)
