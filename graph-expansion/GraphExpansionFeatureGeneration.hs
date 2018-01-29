@@ -41,6 +41,7 @@ import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
 import Data.Function
+import Data.Bifunctor
 import Data.Hashable
 
 
@@ -298,8 +299,15 @@ main = do
               docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
               degreeCentrality = fmap (modelWeights `F.dotFeatureVecs`) docFeatures
                 where modelWeights = modelToFeatureVec combinedFSpace' model
-              ranking = sortBy (comparing snd) (M.toList degreeCentrality)
-              nodeDistr = nodeRankingToDistribution ranking
+              queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
+              ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
+              ranking = fmap (Ranking.fromList . map swap) queryToScoredList
+
+              rankingPageId :: M.Map QueryId (Ranking.Ranking Double PageId)
+              rankingPageId = fmap (fmap qrelDocNameToPageId) ranking
+
+              nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
+              nodeDistr = fmap nodeRankingToDistribution rankingPageId
 
           let edgeFSpace' = mkFeatureSpace
                               $ tr
@@ -366,7 +374,10 @@ main = do
                                            $ pageRankIters
                             Iteration10   -> snd $ (!! 10)  pageRankIters
                             Iteration2    -> snd $ (!! 2)  pageRankIters
-                  walkIters = pageRank teleportation graph'
+                  _walkIters = pageRank teleportation graph'
+                  betaTotal = 0.2
+                  seedNodeDistr = fmap (* teleportation) (nodeDistr M.! query )
+                  walkIters = persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
 
 
               runRanking query = do
@@ -473,6 +484,9 @@ main = do
               $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
               $ predictRanking
 
+
+qrelDocNameToPageId :: QRel.DocumentName -> PageId
+qrelDocNameToPageId docname = packPageId $ T.unpack docname
 
 makeStackedFeatures :: EdgeDocsLookup
                     ->  M.Map QueryId [MultiRankingEntry PageId GridRun]
@@ -1240,5 +1254,13 @@ interleavedPageRankTraining dotProduct graph fspace metric trainData =
 -- Node rankings to teleportation distribution
 -- ---------------------------------------------
 
-nodeRankingToDistribution :: _
-nodeRankingToDistribution = undefined
+nodeRankingToDistribution :: Ranking.Ranking Double PageId
+                          -> HM.HashMap PageId Double -- only positive entries, expected to sum to 1.0
+nodeRankingToDistribution ranking =
+    let proportions = HM.fromList
+                    $ [ (node, 1.0 / (realToFrac (rank+1)))
+                      | (rank, (_score, node)) <- zip [1..] $ Ranking.toSortedList ranking
+                      , rank <= 20
+                      ]
+        totals = Foldable.sum proportions
+    in fmap (/ totals) proportions
