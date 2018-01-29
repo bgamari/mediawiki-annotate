@@ -375,11 +375,12 @@ main = do
                               $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
 
 
-              docFeatures'' = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+              docFeatures = fmap featureVecToFeatures
+                          $ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
 
-              docFeatures' = fmap (Features . F.toVector) docFeatures''
-              normalizer = zNormalizer $ M.elems docFeatures'
-              docFeatures = fmap (normFeatures normalizer) docFeatures'
+--               docFeatures' = fmap (Features . F.toVector) docFeatures''
+--               normalizer = zNormalizer $ M.elems docFeatures'
+--               docFeatures = fmap (normFeatures normalizer) docFeatures'
 
               featureNames :: _
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
@@ -488,7 +489,11 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
         docFeatures'' = fmap crit docFeatures'''
                         where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
 
-    in docFeatures''
+        docFeatures' = fmap (Features . F.toVector) docFeatures''
+        normalizer = zNormalizer $ M.elems docFeatures'
+        docFeatures = fmap (normFeatures normalizer) docFeatures'
+
+    in fmap featuresToFeatureVec docFeatures
 
 
 logistic :: Double -> Double
