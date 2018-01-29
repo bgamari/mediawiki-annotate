@@ -91,11 +91,13 @@ persPageRankWithSeeds
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 persPageRankWithSeeds alpha beta seeds graph =
-    persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph
+    persPageRankWithSeedsAndInitial mapping initial alpha seeds' graph
   where
     !mapping  = mkDenseMapping (nodeSet graph)
     !numNodes = rangeSize (denseRange mapping)
     !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+    seeds' = w <$ HS.toMap seeds
+      where w = beta / realToFrac (HS.size seeds)
 
 -- | Like 'persPagerankWithSeeds' but allowing the user to specify a
 -- 'DenseMapping' and an initial principle eigenvector.
@@ -104,18 +106,14 @@ persPageRankWithSeedsAndInitial
     => DenseMapping n
     -> VI.Vector VU.Vector (DenseId n) a
     -> a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
-    -> a                  -- ^ teleportation probability \(\beta\) to be distributed across the seeds
-    -> HS.HashSet n       -- ^ seed node set
+    -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) to be distributed across the seeds
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
-persPageRankWithSeedsAndInitial _ _ _ beta seeds _
-  | beta /= 0
-  , HS.null seeds =
-    error "persPageRankWithSeeds: empty seed set"
-persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph@(Graph nodeMap) =
+persPageRankWithSeedsAndInitial _ _ alpha seeds _
+  | alpha + sum seeds > 1 = error "persPageRank: teleportation probability exceeds 1"
+persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap) =
     let !nodeRng  = denseRange mapping
         !numNodes = rangeSize nodeRng
-        !numSeeds = HS.size seeds
 
         -- normalized flow of nodes flowing into each node
         inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
@@ -142,10 +140,12 @@ persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph@(Graph no
           where
             !c = VI.sum pagerank
 
+        beta = sum seeds
+
         teleportation :: VI.Vector VU.Vector (DenseId n) a
         teleportation = VI.accum' nodeRng (+) (alpha / realToFrac numNodes)
-            [ (toDense mapping n, beta / realToFrac numSeeds)
-            | n <- HS.toList seeds
+            [ (toDense mapping n, w)
+            | (n, w) <- HM.toList seeds
             ]
 
     in map (Eigenvector mapping)
