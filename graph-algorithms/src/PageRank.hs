@@ -13,6 +13,7 @@ module PageRank
    , pageRank
      -- * Personalized PageRank
    , persPageRankWithSeeds
+   , persPageRankWithNonUniformSeeds
    , persPageRankWithSeedsAndInitial
    ) where
 
@@ -85,8 +86,9 @@ pageRank alpha = persPageRankWithSeeds alpha 0 HS.empty
 -- \(\mathcal{S}\).
 persPageRankWithSeeds
     :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
-    => a                  -- ^ uniform teleportation probability \(\alpha\)
-    -> a                  -- ^ seed teleportation probability \(\beta\)
+    => a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
+    -> a                  -- ^ teleportation probability \(\beta\) to be uniformly distributed
+                          -- across the seeds
     -> HS.HashSet n       -- ^ seed node set
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
@@ -99,6 +101,22 @@ persPageRankWithSeeds alpha beta seeds graph =
     seeds' = w <$ HS.toMap seeds
       where w = beta / realToFrac (HS.size seeds)
 
+-- | Like 'persPageRankWithSeeds' but allowing the weight of each seed to be
+-- given independently. Note that \( \alpha + \sum_i \beta_i \) must sum to less
+-- than one.
+persPageRankWithNonUniformSeeds
+    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
+    => a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
+    -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) for each seed
+    -> Graph n a          -- ^ the graph
+    -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+persPageRankWithNonUniformSeeds alpha seeds graph =
+    persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
+  where
+    !mapping  = mkDenseMapping (nodeSet graph)
+    !numNodes = rangeSize (denseRange mapping)
+    !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+
 -- | Like 'persPagerankWithSeeds' but allowing the user to specify a
 -- 'DenseMapping' and an initial principle eigenvector.
 persPageRankWithSeedsAndInitial
@@ -106,7 +124,7 @@ persPageRankWithSeedsAndInitial
     => DenseMapping n
     -> VI.Vector VU.Vector (DenseId n) a
     -> a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
-    -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) to be distributed across the seeds
+    -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) for each seed
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 persPageRankWithSeedsAndInitial _ _ alpha seeds _
