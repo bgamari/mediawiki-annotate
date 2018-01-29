@@ -103,8 +103,8 @@ persPageRankWithSeedsAndInitial
     :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
     => DenseMapping n
     -> VI.Vector VU.Vector (DenseId n) a
-    -> a                  -- ^ uniform teleportation probability \(\alpha\)
-    -> a                  -- ^ seed teleportation probability \(\beta\)
+    -> a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
+    -> a                  -- ^ teleportation probability \(\beta\) to be distributed across the seeds
     -> HS.HashSet n       -- ^ seed node set
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
@@ -132,7 +132,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph@(Graph no
         nextiter pagerank = VI.accum' nodeRng (+) 0
                    [ (v, weight)
                    | (v, inEdges) <- VI.assocs inbound
-                   , let !outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta')
+                   , let !outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta)
                                            | (u, normWeight) <- HM.toList inEdges
                                            , let uPR = pagerank VI.! u
                                            ]
