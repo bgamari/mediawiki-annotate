@@ -4,12 +4,16 @@
 {-# LANGUAGE BangPatterns #-}
 
 module PageRank
-   ( Eigenvector(..)
+   ( -- * Principle eigenvector representation
+     Eigenvector(..)
    , relChange
    , toHashMap
    , toEntries
+     -- * PageRank
    , pageRank
+     -- * Personalized PageRank
    , persPageRankWithSeeds
+   , persPageRankWithSeedsAndInitial
    ) where
 
 import qualified Data.Vector as V
@@ -86,17 +90,32 @@ persPageRankWithSeeds
     -> HS.HashSet n       -- ^ seed node set
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
-persPageRankWithSeeds _ beta seeds _
+persPageRankWithSeeds alpha beta seeds graph =
+    persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph
+  where
+    !mapping  = mkDenseMapping (nodeSet graph)
+    !numNodes = rangeSize (denseRange mapping)
+    !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+
+-- | Like 'persPagerankWithSeeds' but allowing the user to specify a
+-- 'DenseMapping' and an initial principle eigenvector.
+persPageRankWithSeedsAndInitial
+    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n)
+    => DenseMapping n
+    -> VI.Vector VU.Vector (DenseId n) a
+    -> a                  -- ^ uniform teleportation probability \(\alpha\)
+    -> a                  -- ^ seed teleportation probability \(\beta\)
+    -> HS.HashSet n       -- ^ seed node set
+    -> Graph n a          -- ^ the graph
+    -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+persPageRankWithSeedsAndInitial _ _ _ beta seeds _
   | beta /= 0
   , HS.null seeds =
     error "persPageRankWithSeeds: empty seed set"
-persPageRankWithSeeds alpha beta seeds graph@(Graph nodeMap) =
-    let !mapping  = mkDenseMapping (nodeSet graph)
-        !nodeRng  = denseRange mapping
+persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph@(Graph nodeMap) =
+    let !nodeRng  = denseRange mapping
         !numNodes = rangeSize nodeRng
         !numSeeds = HS.size seeds
-
-        !initial = VI.replicate nodeRng (1 / realToFrac numNodes)
 
         -- normalized flow of nodes flowing into each node
         inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
