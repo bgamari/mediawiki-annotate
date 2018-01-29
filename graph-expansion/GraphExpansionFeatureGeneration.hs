@@ -15,10 +15,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
-import Control.Concurrent
 import Control.Concurrent.Async
-import Control.Exception
-import Control.Monad
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
@@ -36,7 +33,6 @@ import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy.IO as TL
 import Data.List
 import Data.List.Split
 import Data.Maybe
@@ -50,16 +46,13 @@ import CAR.ToolVersion
 import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
-import CAR.Utils (nubWithKey)
 import CAR.TocFile as Toc
 
 
 import EdgeDocCorpus
-import WriteRanking
 import GraphExpansionExperiments hiding (Bm25, Ql)
 import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
-import SimplIR.TopK (collectTopK)
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
@@ -67,16 +60,12 @@ import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, feature
 
 
 import qualified CAR.RunFile as CAR.RunFile
-import qualified CAR.QRelFile as CAR.QRelFile
 import qualified SimplIR.Format.QRel as QRel
-import qualified SimplIR.Format.TrecRunFile as Run
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 import PageRank
 
 import Graph
-
-import qualified CAR.Retrieve as Retrieve
 
 import qualified Data.Vector.Unboxed as VU
 
@@ -93,7 +82,6 @@ data SeedDerivation = SeedsFromLeadSection
 data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
                  | QueriesFromJson FilePath
 
-data Graphset = Fullgraph | Subgraph
 data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
@@ -306,7 +294,7 @@ main = do
               params = tr $ F.fromList edgeFSpace'
                   [ (k'', v)
                   | (k, v) <- M.toList $ modelWeights model
-                  , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeatures EdgeFeatures
+                  , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeature EdgeFeature
                   , Right k'' <- pure k'
                   ]
 
@@ -463,7 +451,7 @@ main = do
                     show totalPos ++" are positive."
 
           let displayTrainData :: TrainData
-                              -> [String]
+                               -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
                 | (k,list) <- M.toList trainData
@@ -526,6 +514,7 @@ main = do
 logistic :: Double -> Double
 logistic t =
     1.0 / (1.0 + exp (-1 * t))
+
 -- -------------------------------------------
 --   Learning to Rank, k-fold Cross, restarts
 -- -------------------------------------------
@@ -570,8 +559,6 @@ storeRankingData outputFilePrefix franking metric model modelDesc = do
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
        $ rerankedFranking
 
--- type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
-
 kFoldCross :: forall q docId rel. (Ord q, Show q)
            => (String -> M.Map q [(docId, Features, rel)] -> ReturnWithModelDiagnostics (Model, Double))
            -> [[q]]
@@ -603,10 +590,8 @@ changeKey f map_ =
 
 
 -- -------------------------------------------
--- Set up the feature space
+-- the feature space
 -- -------------------------------------------
-
-
 
 data QueryModel = All | Title
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
@@ -665,39 +650,29 @@ data EdgeFeature where
     EdgeCount  :: EdgeFeature
     deriving (Show, Read, Ord, Eq)
 
--- Compatibility hack
-type family Feature (a :: EntityOrEdge) where
-    Feature 'Entity = EntityFeature
-    Feature 'Edge = EdgeFeature
-
 data EntityOrEdge = Entity | Edge
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
-allEntityFeatures :: [Feature 'Entity]
+type CombinedFeature = Either EntityFeature EdgeFeature
+
+allEntityFeatures :: [EntityFeature]
 allEntityFeatures =
     (EntRetrievalFeature <$> allEntityRunsF <*> allRunFeatures)
     <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
 
 
-allEdgeFeatures :: [Feature 'Edge]
+allEdgeFeatures :: [EdgeFeature]
 allEdgeFeatures =
     (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures)
     <> [EdgeDocKL, EdgeCount]
 
-
-type EntityFeatures = Feature 'Entity
-
-type EdgeFeatures = Feature 'Edge
-
-type CombinedFeatures = Either EntityFeatures EdgeFeatures
-
-entFSpace :: FeatureSpace EntityFeatures
+entFSpace :: FeatureSpace EntityFeature
 entFSpace = mkFeatureSpace allEntityFeatures
 
-edgeFSpace :: FeatureSpace EdgeFeatures
+edgeFSpace :: FeatureSpace EdgeFeature
 edgeFSpace = mkFeatureSpace allEdgeFeatures
 
-combinedFSpace :: FeatureSpace CombinedFeatures
+combinedFSpace :: FeatureSpace CombinedFeature
 combinedFSpace = concatSpace entFSpace edgeFSpace
 
 
@@ -708,12 +683,11 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 -- -------------------------------------------
 
 
-
-filterExpSettingsEdge ::  FeatureSpace EdgeFeatures
-                  ->  FeatureSpace EdgeFeatures
-                  -> (EdgeFeatures -> Bool)
-                  ->  (FeatureVec EdgeFeatures Double)
-                  ->  (FeatureVec EdgeFeatures Double)
+filterExpSettingsEdge ::  FeatureSpace EdgeFeature
+                  ->  FeatureSpace EdgeFeature
+                  -> (EdgeFeature -> Bool)
+                  ->  (FeatureVec EdgeFeature Double)
+                  ->  (FeatureVec EdgeFeature Double)
 filterExpSettingsEdge fromFeatSpace toFeatSpace pred features =
     F.fromList toFeatSpace
     $ [ pair
@@ -721,23 +695,23 @@ filterExpSettingsEdge fromFeatSpace toFeatSpace pred features =
       , pred fname
       ]
 
-onlyAggrEdge :: EdgeFeatures -> Bool
+onlyAggrEdge :: EdgeFeature -> Bool
 onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
 onlyAggrEdge _  = False
 
-onlyScoreEdge :: EdgeFeatures -> Bool
+onlyScoreEdge :: EdgeFeature -> Bool
 onlyScoreEdge (EdgeRetrievalFeature _ ScoreF) = True
 onlyScoreEdge _  = False
 
-onlyRREdge :: EdgeFeatures -> Bool
+onlyRREdge :: EdgeFeature -> Bool
 onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
 onlyRREdge _  = False
 
-expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeatures -> Bool)
+expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeature -> Bool)
 expSettingToCritEdge exps fname =
     all (`convertEdge` fname) exps
 
-convertEdge :: ExperimentSettings -> (EdgeFeatures -> Bool)
+convertEdge :: ExperimentSettings -> (EdgeFeature -> Bool)
 convertEdge exp = case exp of
                 AllExp -> const True
                 NoEdgeFeats -> const False
@@ -747,49 +721,45 @@ convertEdge exp = case exp of
                 JustScore -> onlyScoreEdge
                 JustRecip -> onlyRREdge
 
-
-
-
-
-filterExpSettings ::  FeatureSpace CombinedFeatures
-                  ->  FeatureSpace CombinedFeatures
-                  -> (CombinedFeatures -> Bool)
-                  ->  (FeatureVec CombinedFeatures Double)
-                  ->  (FeatureVec CombinedFeatures Double)
+filterExpSettings ::  FeatureSpace CombinedFeature
+                  ->  FeatureSpace CombinedFeature
+                  -> (CombinedFeature -> Bool)
+                  ->  (FeatureVec CombinedFeature Double)
+                  ->  (FeatureVec CombinedFeature Double)
 filterExpSettings fromFeatSpace toFeatSpace pred features =
     F.fromList toFeatSpace
     $ [ pair
       | pair@(fname, _) <- F.toList fromFeatSpace features
       , pred fname
       ]
-noEntity :: CombinedFeatures -> Bool
+noEntity :: CombinedFeature -> Bool
 noEntity (Left _) = False
 noEntity _  = True
 
-noEdge :: CombinedFeatures -> Bool
+noEdge :: CombinedFeature -> Bool
 noEdge (Right _) = False
 noEdge _  = True
 
-onlyAggr :: CombinedFeatures -> Bool
+onlyAggr :: CombinedFeature -> Bool
 onlyAggr (Left (EntRetrievalFeature Aggr runf)) = True
 onlyAggr (Right (EdgeRetrievalFeature Aggr runf)) = True
 onlyAggr _  = False
 
-onlyScore :: CombinedFeatures -> Bool
+onlyScore :: CombinedFeature -> Bool
 onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
 onlyScore (Right (EdgeRetrievalFeature _ ScoreF)) = True
 onlyScore _  = False
 
-onlyRR :: CombinedFeatures -> Bool
+onlyRR :: CombinedFeature -> Bool
 onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
 onlyRR (Right (EdgeRetrievalFeature _ RecipRankF)) = True
 onlyRR _  = False
 
-expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeatures -> Bool)
+expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
 expSettingToCrit exps fname =
     all (`convert` fname) exps
   where
-    convert :: ExperimentSettings -> (CombinedFeatures -> Bool)
+    convert :: ExperimentSettings -> (CombinedFeature -> Bool)
     convert exp = case exp of
                     AllExp -> const True
                     NoEdgeFeats -> noEdge
@@ -805,12 +775,11 @@ expSettingToCrit exps fname =
 -- make feature vectors with defaults and stuff
 -- -------------------------------------------
 
+type EdgeFeatureVec = FeatureVec EdgeFeature Double
+type EntityFeatureVec = FeatureVec EntityFeature Double
+type CombinedFeatureVec = FeatureVec CombinedFeature Double
 
-
-
-
-
-makeEntFeatVector :: [(EntityFeatures,Double)] -> F.FeatureVec EntityFeatures Double
+makeEntFeatVector :: [(EntityFeature, Double)] -> F.FeatureVec EntityFeature Double
 makeEntFeatVector xs =
     F.modify entFSpace defaults xs
  where defaults = F.fromList entFSpace ([ (EntIncidentEdgeDocsRecip, 0.0)
@@ -823,7 +792,7 @@ makeEntFeatVector xs =
                                           ]
                                        )
 
-makeEdgeFeatVector :: [(EdgeFeatures,Double)] -> F.FeatureVec EdgeFeatures Double
+makeEdgeFeatVector :: [(EdgeFeature, Double)] -> F.FeatureVec EdgeFeature Double
 makeEdgeFeatVector xs =
     F.modify edgeFSpace defaults xs
  where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
@@ -844,44 +813,17 @@ defaultRankFeatures runF =
       BucketRankF -> 0.0
       CountF -> 0.0
 
-defaultEntRankFeatures :: Run -> [(Feature 'Entity, Double)]
+defaultEntRankFeatures :: Run -> [(EntityFeature, Double)]
 defaultEntRankFeatures run =
     [ (EntRetrievalFeature run runF, defaultRankFeatures runF)
     | runF <- allRunFeatures
     ]
 
-defaultEdgeRankFeatures :: Run -> [(Feature 'Edge, Double)]
+defaultEdgeRankFeatures :: Run -> [(EdgeFeature, Double)]
 defaultEdgeRankFeatures run =
     [ (EdgeRetrievalFeature run runF, defaultRankFeatures runF)
     | runF <- allRunFeatures
     ]
-
-
-score :: RankingEntry d -> Double
-score entry  = CAR.RunFile.carScore entry
-
-recipRank :: RankingEntry d  -> Double
-recipRank entry = 1.0/ (1.0 + realToFrac rank)
-  where rank = CAR.RunFile.carRank entry
-
-linearRank :: Int -> RankingEntry d  -> Double
-linearRank maxLen entry
-    | rank > maxLen = 0.0
-    | otherwise = realToFrac $ maxLen - rank
-  where rank = CAR.RunFile.carRank entry
-
-bucketRank :: RankingEntry d  -> Double
-bucketRank entry
-    | rank >= 5 = 3.0
-    | rank >= 20 = 2.0
-    | otherwise = 1.0
-  where rank = CAR.RunFile.carRank entry
-
-
-count :: RankingEntry d -> Double
-count _ = 1.0
-
-
 
 rankFeatures :: RunFeature -> RankingEntry d -> Double
 rankFeatures runF entry =
@@ -891,24 +833,41 @@ rankFeatures runF entry =
       LinearRankF -> linearRank 100  entry
       BucketRankF -> bucketRank entry
       CountF -> count entry
+  where
+    score :: RankingEntry d -> Double
+    score entry  = CAR.RunFile.carScore entry
 
-rankEntFeatures :: Run -> RankingEntry d -> [(Feature 'Entity, Double)]
+    recipRank :: RankingEntry d  -> Double
+    recipRank entry = 1.0/ (1.0 + realToFrac rank)
+      where rank = CAR.RunFile.carRank entry
+
+    linearRank :: Int -> RankingEntry d  -> Double
+    linearRank maxLen entry
+        | rank > maxLen = 0.0
+        | otherwise = realToFrac $ maxLen - rank
+      where rank = CAR.RunFile.carRank entry
+
+    bucketRank :: RankingEntry d  -> Double
+    bucketRank entry
+        | rank >= 5 = 3.0
+        | rank >= 20 = 2.0
+        | otherwise = 1.0
+      where rank = CAR.RunFile.carRank entry
+
+    count :: RankingEntry d -> Double
+    count _ = 1.0
+
+rankEntFeatures :: Run -> RankingEntry d -> [(EntityFeature, Double)]
 rankEntFeatures run entry =
     [ (EntRetrievalFeature run runF, rankFeatures runF entry)
     | runF <- allRunFeatures
     ]
 
-rankEdgeFeatures :: Run -> RankingEntry d -> [(Feature 'Edge, Double)]
+rankEdgeFeatures :: Run -> RankingEntry d -> [(EdgeFeature, Double)]
 rankEdgeFeatures run entry =
     [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
     | runF <- allRunFeatures
     ]
-
-
-
-type EdgeFeatureVec = FeatureVec EdgeFeatures Double
-type EntityFeatureVec = FeatureVec EntityFeatures Double
-type CombinedFeatureVec = FeatureVec CombinedFeatures Double
 
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates
@@ -1115,7 +1074,7 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
    degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors incidentEdgeDocs
 
 edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
-             -> FeatureVec EdgeFeatures Double
+             -> FeatureVec EdgeFeature Double
 edgeScoreVec edgedocsRankEntry = makeEdgeFeatVector $
                                     [ (EdgeCount, 1.0)
                                     -- TODO
