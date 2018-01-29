@@ -16,6 +16,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
 import Control.Concurrent.Async
+import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
@@ -259,6 +260,10 @@ main = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
+    let combinedFSpace' = mkFeatureSpace
+                          $ filter (expSettingToCrit experimentSettings)
+                          $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
+
     let fixQRel (QRel.Entry qid docId rel) = QRel.Entry (CAR.RunFile.QueryId qid) docId rel
     qrel <- map fixQRel <$> QRel.readQRel @IsRelevant qrelFile
 
@@ -288,14 +293,21 @@ main = do
     case modelSource of
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
+
+          let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+              docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+              degreeCentrality = fmap (modelWeights `F.dotFeatureVecs`) docFeatures
+                where modelWeights = modelToFeatureVec combinedFSpace' model
+              ranking = sortBy (comparing snd) (M.toList degreeCentrality)
+              nodeDistr = nodeRankingToDistribution ranking
+
           let edgeFSpace' = mkFeatureSpace
                               $ tr
                               $  filter (expSettingToCritEdge experimentSettings)
                               $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
 
-
           let params :: EdgeFeatureVec
-              params = tr $ F.fromList edgeFSpace'
+              params = tr $ F.fromList edgeFSpace' -- TODO: Use modelToFeatureVec
                   [ (k'', v)
                   | (k, v) <- M.toList $ modelWeights model
                   , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeature EdgeFeature
@@ -368,14 +380,7 @@ main = do
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
       TrainModel modelFile -> do
-          let
-
-              combinedFSpace' = mkFeatureSpace
-                              $ filter (expSettingToCrit experimentSettings)
-                              $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
-
-
-              docFeatures = fmap featureVecToFeatures
+          let docFeatures = fmap featureVecToFeatures
                           $ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
 
 --               docFeatures' = fmap (Features . F.toVector) docFeatures''
@@ -1191,10 +1196,19 @@ featureVecToFeatures = Features . F.getFeatureVec
 featuresToFeatureVec :: Features -> FeatureVec a Double
 featuresToFeatureVec = F.unsafeFeatureVecFromVector . getFeatures
 
+modelToFeatureVec :: (Show a, Read a, Ord a)
+                  => FeatureSpace a -> Model -> FeatureVec a Double
+modelToFeatureVec fspace model =
+    F.fromList fspace
+    [ (k', v)
+    | (k, v) <- M.toList $ modelWeights model
+    , let k' = read $ T.unpack $ getFeatureName k
+    ]
+
 interleavedPageRankTraining
     :: ()
-    => (EdgeFeatureVec -> EdgeFeatureVec -> Double)
-    -> Graph PageId (FeatureVec EdgeFeature Double)
+    => (EdgeFeatureVec -> EdgeFeatureVec -> Double) -- ^ edge feature dot product
+    -> Graph PageId (FeatureVec EdgeFeature Double) -- ^ graph for single query FIXME
     -> FeatureSpace EdgeFeatureVec
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> TrainData
@@ -1209,7 +1223,7 @@ interleavedPageRankTraining dotProduct graph fspace metric trainData =
     go x0 y0 gen0 =
         let graph' = fmap (dotProduct (featuresToFeatureVec y0)) graph
             x = head $ drop 3 $ persPageRankWithSeedsAndInitial mapping x0 alpha mempty graph'
-            (score, y) = head $ drop 3 $ coordAscent gen metric y0 trainData
+            (_score, y) = head $ drop 3 $ coordAscent gen metric y0 trainData
             (gen, gen1) = System.Random.split gen0
         in (x,y) : go (eigenvectorValues x) y gen1
 
@@ -1220,3 +1234,11 @@ interleavedPageRankTraining dotProduct graph fspace metric trainData =
 
     featureNames :: [FeatureName]
     featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames fspace
+
+
+-- ---------------------------------------------
+-- Node rankings to teleportation distribution
+-- ---------------------------------------------
+
+nodeRankingToDistribution :: _
+nodeRankingToDistribution = undefined
