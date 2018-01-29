@@ -416,24 +416,16 @@ main = do
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
       TrainModel modelFile -> do
-          let docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-              docFeatures''' = M.fromList
-                          [ ((qid, T.pack $ unpackPageId pid), features)
-                          | (query, edgeRun) <- M.toList collapsedEdgedocRun
-                          , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-                          , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
-                          , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
-                          ]
+          let
 
               combinedFSpace' =  mkFeatureSpace
                               $  filter (expSettingToCrit experimentSettings)
                               $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
-              docFeatures'' = fmap crit docFeatures'''
-                              where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+
+
+              docFeatures'' = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
 
               docFeatures' = fmap (Features . F.toVector) docFeatures''
-
-
               normalizer = zNormalizer $ M.elems docFeatures'
               docFeatures = fmap (normFeatures normalizer) docFeatures'
 
@@ -521,6 +513,29 @@ main = do
           CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
               $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
               $ predictRanking
+
+
+makeStackedFeatures :: EdgeDocsLookup
+                    ->  M.Map QueryId [MultiRankingEntry PageId GridRun]
+                    ->  M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+                    ->  FeatureSpace CombinedFeatures
+                    -> [ExperimentSettings]
+                    ->  M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings =
+    let
+        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+        docFeatures''' = M.fromList
+                    [ ((qid, T.pack $ unpackPageId pid), features)
+                    | (query, edgeRun) <- M.toList collapsedEdgedocRun
+                    , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
+                    , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                    , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
+                    ]
+
+        docFeatures'' = fmap crit docFeatures'''
+                        where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+
+    in docFeatures''
 
 
 logistic :: Double -> Double
