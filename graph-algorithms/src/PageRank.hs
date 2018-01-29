@@ -130,23 +130,23 @@ persPageRankWithSeedsAndInitial mapping initial alpha beta seeds graph@(Graph no
 
         nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
         nextiter pagerank = VI.accum' nodeRng (+) 0
-                   [ (v, weight)
+                   [ (v, outlinkSum + teleport)
                    | (v, inEdges) <- VI.assocs inbound
                    , let !outlinkSum = sum [ uPR * normWeight * (1 - alpha - beta)
                                            | (u, normWeight) <- HM.toList inEdges
                                            , let uPR = pagerank VI.! u
                                            ]
-                         !teleportationSum = alpha / realToFrac numNodes * c
-                         !seedTeleportSum
-                           | beta == 0 = 0
-                           | otherwise = beta' / realToFrac numSeeds * c
-                         !beta'
-                           | fromDense mapping v `HS.member` seeds = beta
-                           | otherwise = 0
-                         !weight = teleportationSum + outlinkSum + seedTeleportSum
+                         -- probability mass added by teleportation
+                         !teleport = (teleportation VI.! v) * c
                    ]
           where
             !c = VI.sum pagerank
+
+        teleportation :: VI.Vector VU.Vector (DenseId n) a
+        teleportation = VI.accum' nodeRng (+) (alpha / realToFrac numNodes)
+            [ (toDense mapping n, beta / realToFrac numSeeds)
+            | n <- HS.toList seeds
+            ]
 
     in map (Eigenvector mapping)
        $ initial : iterate nextiter initial
