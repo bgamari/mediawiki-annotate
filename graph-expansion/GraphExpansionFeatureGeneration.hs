@@ -104,7 +104,10 @@ data PageRankConvergence = L2Convergence | Iteration10 | Iteration2
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
--- type IsRelevant = LearningToRank.IsRelevant
+data GraphWalkModel = PageRankWalk | BiasedPersPageRankWalk
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
+
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
 gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
@@ -144,9 +147,10 @@ opts :: Parser ( FilePath
                , [ExperimentSettings]
                , PageRankExperimentSettings
                , PageRankConvergence
+               , GraphWalkModel
                )
 opts =
-    (,,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -161,6 +165,7 @@ opts =
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
+    <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     where
 
       querySource :: Parser QuerySource
@@ -233,7 +238,7 @@ main = do
       , edgeDocsCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
-      , pageRankExperimentSettings, pageRankConvergence  ) <- execParser' 1 (helper <*> opts) mempty
+      , pageRankExperimentSettings, pageRankConvergence, graphWalkModel  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -249,6 +254,7 @@ main = do
     putStrLn $ " teleport (only for page rank) : "++ (show teleportation)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
+    putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
 
     gen0 <- newStdGen  -- needed by learning to rank
 
@@ -374,10 +380,13 @@ main = do
                                            $ pageRankIters
                             Iteration10   -> snd $ (!! 10)  pageRankIters
                             Iteration2    -> snd $ (!! 2)  pageRankIters
-                  _walkIters = pageRank teleportation graph'
-                  betaTotal = 0.2
-                  seedNodeDistr = fmap (* teleportation) (nodeDistr M.! query )
-                  walkIters = persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
+                  walkIters :: [Eigenvector PageId Double]
+                  walkIters = case graphWalkModel of
+                                PageRankWalk -> pageRank teleportation graph'
+                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
+                                  where  betaTotal = teleportation
+                                         seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
+
 
 
               runRanking query = do
