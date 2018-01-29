@@ -471,7 +471,7 @@ main = do
 makeStackedFeatures :: EdgeDocsLookup
                     ->  M.Map QueryId [MultiRankingEntry PageId GridRun]
                     ->  M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                    ->  FeatureSpace CombinedFeatures
+                    ->  FeatureSpace CombinedFeature
                     -> [ExperimentSettings]
                     ->  M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
 makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings =
