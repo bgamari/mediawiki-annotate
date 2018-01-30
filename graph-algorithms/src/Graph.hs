@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Graph
@@ -18,7 +19,7 @@ import qualified Data.HashSet as HS
 
 -- | For each node, its outgoing neighbors.
 newtype Graph n e = Graph { getGraph :: HM.HashMap n (HM.HashMap n e) }
-                  deriving (Functor, Show, NFData)
+                  deriving (Functor, Show, NFData, Foldable)
 
 instance (Hashable n, Eq n, Semigroup e) => Semigroup (Graph n e) where
     Graph a <> Graph b = Graph $ HM.unionWith (HM.unionWith (<>)) a b

@@ -13,6 +13,7 @@ module DenseMapping
     , denseRange
     , assocs
     , elems
+    , size
     , toDense
     , fromDense
     , mkDenseMapping
@@ -39,6 +40,10 @@ assocs = VI.assocs . fromDenseArr
 
 elems :: DenseMapping a -> [a]
 elems = map snd . assocs
+
+-- | How many elements are in the domain of the mapping?
+size :: DenseMapping a -> Int
+size = rangeSize . denseRange
 
 -- | A dense node index.
 newtype DenseId a = DenseId Int

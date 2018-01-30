@@ -26,7 +26,7 @@ module CAR.RunFile
     , writeEntityRun
 
       -- * Grouping and sorting runs
-    , groupByQuery
+    , groupByQuery, groupByQuery'
 
       -- * Conversion
     , pageIdToQueryId
@@ -40,6 +40,7 @@ import Data.Ord
 import Data.Maybe
 import Data.Monoid
 import Data.Aeson
+import Data.Hashable
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
@@ -48,7 +49,7 @@ import qualified Data.SmallUtf8 as Utf8
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord, Show, FromJSON, ToJSON)
+                deriving (Eq, Ord, Show, FromJSON, ToJSON, Hashable)
 
 newtype MethodName = MethodName { unMethodName :: T.Text }
                    deriving (Eq, Ord, Show, FromJSON, ToJSON)
@@ -176,3 +177,9 @@ groupByQuery :: [RankingEntry' doc] -> M.Map QueryId (Seq.Seq (RankingEntry' doc
 groupByQuery run =
     fmap (Seq.sortBy $ comparing carScore)
     $ M.fromListWith mappend [ (carQueryId r, Seq.singleton r) | r <- run ]
+
+-- | Group a run by query and sort each query by score
+groupByQuery' :: [(key, RankingEntry' doc)] -> M.Map QueryId (Seq.Seq ((key, RankingEntry' doc)))
+groupByQuery' run =
+    fmap (Seq.sortBy $ comparing (carScore . snd))
+    $ M.fromListWith mappend [ (carQueryId r, Seq.singleton (k, r)) | (k, r) <- run ]

@@ -162,7 +162,7 @@ nHopGraphExpansion seeds radius binarySymmetricGraph  =
 -- ------------------------------------------------
 
 
-
+                    -- todo this is not a ranking, just a scored list
 rankByPageRank :: Graph PageId Double -> Double -> Int -> [(PageId, Double)]
 rankByPageRank graph teleport iterations
   | nullGraph graph = []
