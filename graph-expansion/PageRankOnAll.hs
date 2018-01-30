@@ -76,7 +76,7 @@ readEdgeDocGraph :: (Num a, NFData a) => FilePath -> IO (Graph PageId a)
 readEdgeDocGraph inPath = singleThreaded $ do
     binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
     putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
-    return $! inCompact $ Graph $ fmap (\xs -> 1 <$ HS.toMap xs) binGraph
+    return $! inCompact $ Graph $ HM.map (\xs -> 1 <$ HS.toMap xs) binGraph
 
 type PageRankScores = [(PageId, Float)]
 
