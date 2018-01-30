@@ -69,7 +69,7 @@ singleThreaded m = do
 
 readEdgeDocs :: FilePath -> IO [EdgeDoc]
 readEdgeDocs inPath = do
-    (Just (0::Int), edgeDocs) <- inCompactM $ readCborList inPath
+    (Just (0::Int), edgeDocs) <- readCborList inPath
     return edgeDocs
 
 readEdgeDocGraph :: (Num a, NFData a) => FilePath -> IO (Graph PageId a)
@@ -159,13 +159,17 @@ distancesMode =
                 $ HM.keys
                 $ getGraph graph
 
-            distToMaybe (Finite e) = Just $ getSum e
-            distToMaybe Infinite   = Nothing
-
-            distances' :: [(PageId, [Maybe Int])]
+            distances' :: [(PageId, [(Int, Count)])]
             distances' =
-                withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
-                $ map (fmap $ map distToMaybe . VI.elems) distances
+                withStrategy (parBuffer 1000 $ evalTuple2 r0 $ evalTraversable $ evalTuple2 rseq rseq)
+                $ map (fmap $ nonEmptyBinCounts . histogramFoldable binning . map clampDist . VI.elems) distances
+              where
+                binning = integralBinning @22 0
+
+                clampDist (Finite e)
+                    | e > 20       = 21
+                    | otherwise    = getSum e
+                clampDist Infinite = 22
 
         --print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
         --      $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
