@@ -147,6 +147,7 @@ distancesMode =
 
         putStrLn "mapping evaluated"
 
+        ncaps <- getNumCapabilities
         let --folds :: Foldl.Fold ((Distance (Sum Int), _)) (Mean (Distance Int), Max (Distance Int))
             --folds =
             --    Foldl.premap (fmap getSum . fst)
@@ -161,7 +162,7 @@ distancesMode =
 
             distances' :: [(PageId, [(Int, Count)])]
             distances' =
-                withStrategy (parBuffer 1000 $ evalTuple2 r0 $ evalTraversable $ evalTuple2 rseq rseq)
+                withStrategy (parBuffer (ncaps+4) $ evalTuple2 r0 $ evalTraversable $ evalTuple2 rseq rseq)
                 $ map (fmap $ nonEmptyBinCounts . histogramFoldable binning . map clampDist . VI.elems) distances
               where
                 binning = integralBinning @22 0
