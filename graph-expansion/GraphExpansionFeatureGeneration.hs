@@ -41,6 +41,7 @@ import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
 import Data.Function
+import Data.Bifunctor
 import Data.Hashable
 
 
@@ -103,7 +104,10 @@ data PageRankConvergence = L2Convergence | Iteration10 | Iteration2
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
--- type IsRelevant = LearningToRank.IsRelevant
+data GraphWalkModel = PageRankWalk | BiasedPersPageRankWalk
+  deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
+
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
 gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
@@ -143,9 +147,10 @@ opts :: Parser ( FilePath
                , [ExperimentSettings]
                , PageRankExperimentSettings
                , PageRankConvergence
+               , GraphWalkModel
                )
 opts =
-    (,,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -160,6 +165,7 @@ opts =
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
+    <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     where
 
       querySource :: Parser QuerySource
@@ -232,7 +238,7 @@ main = do
       , edgeDocsCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
-      , pageRankExperimentSettings, pageRankConvergence  ) <- execParser' 1 (helper <*> opts) mempty
+      , pageRankExperimentSettings, pageRankConvergence, graphWalkModel  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -248,6 +254,7 @@ main = do
     putStrLn $ " teleport (only for page rank) : "++ (show teleportation)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
+    putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
 
     gen0 <- newStdGen  -- needed by learning to rank
 
@@ -298,8 +305,15 @@ main = do
               docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
               degreeCentrality = fmap (modelWeights `F.dotFeatureVecs`) docFeatures
                 where modelWeights = modelToFeatureVec combinedFSpace' model
-              ranking = sortBy (comparing snd) (M.toList degreeCentrality)
-              nodeDistr = nodeRankingToDistribution ranking
+              queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
+              ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
+              ranking = fmap (Ranking.fromList . map swap) queryToScoredList
+
+              rankingPageId :: M.Map QueryId (Ranking.Ranking Double PageId)
+              rankingPageId = fmap (fmap qrelDocNameToPageId) ranking
+
+              nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
+              nodeDistr = fmap nodeRankingToDistribution rankingPageId
 
           let edgeFSpace' = mkFeatureSpace
                               $ tr
@@ -366,7 +380,13 @@ main = do
                                            $ pageRankIters
                             Iteration10   -> snd $ (!! 10)  pageRankIters
                             Iteration2    -> snd $ (!! 2)  pageRankIters
-                  walkIters = pageRank teleportation graph'
+                  walkIters :: [Eigenvector PageId Double]
+                  walkIters = case graphWalkModel of
+                                PageRankWalk -> pageRank teleportation graph'
+                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
+                                  where  betaTotal = teleportation
+                                         seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
+
 
 
               runRanking query = do
@@ -473,6 +493,9 @@ main = do
               $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
               $ predictRanking
 
+
+qrelDocNameToPageId :: QRel.DocumentName -> PageId
+qrelDocNameToPageId docname = packPageId $ T.unpack docname
 
 makeStackedFeatures :: EdgeDocsLookup
                     ->  M.Map QueryId [MultiRankingEntry PageId GridRun]
@@ -1240,5 +1263,13 @@ interleavedPageRankTraining dotProduct graph fspace metric trainData =
 -- Node rankings to teleportation distribution
 -- ---------------------------------------------
 
-nodeRankingToDistribution :: _
-nodeRankingToDistribution = undefined
+nodeRankingToDistribution :: Ranking.Ranking Double PageId
+                          -> HM.HashMap PageId Double -- only positive entries, expected to sum to 1.0
+nodeRankingToDistribution ranking =
+    let proportions = HM.fromList
+                    $ [ (node, 1.0 / (realToFrac (rank+1)))
+                      | (rank, (_score, node)) <- zip [1..] $ Ranking.toSortedList ranking
+                      , rank <= 20
+                      ]
+        totals = Foldable.sum proportions
+    in fmap (/ totals) proportions
