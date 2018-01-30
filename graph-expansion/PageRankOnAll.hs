@@ -11,13 +11,16 @@ import GHC.Conc
 import Debug.Trace
 import Options.Applicative
 import Control.Parallel.Strategies
+import Data.Ord
 import Data.Monoid
 import Data.Foldable
 import qualified Control.Foldl as Foldl
+import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Vector.Indexed as VI
 import qualified Data.Vector.Unboxed as VU
+import qualified Data.Sequence as Seq
 import Data.Vector.Unboxed.Deriving
 import PageRank
 import EdgeDocCorpus
@@ -26,6 +29,7 @@ import DenseMapping
 import Dijkstra
 import GraphExpansion
 import SimplIR.Histogram
+import CAR.RunFile as Run
 import CAR.Types
 import CAR.Types.CborList
 import SimplIR.Utils.Compact
@@ -42,10 +46,11 @@ edgeDocsPath = argument str (help "input EdgeDoc list path")
 
 modes :: Parser (IO ())
 modes = subparser
-    $ command "page-rank"  (info (helper <*> pageRankMode) mempty)
+    $ command "page-rank"  (info (helper <*> pageRankMode) (progDesc "Compute PageRank on a graph"))
    <> command "degree-centrality" (info (helper <*> degreeCentralityMode) mempty)
    <> command "graph-stats" (info (helper <*> graphStatsMode) mempty)
    <> command "distances" (info (helper <*> distancesMode) mempty)
+   <> command "rerank" (info (helper <*> rerankMode) (progDesc "Rerank a run file with results from a PageRank run"))
 
 main :: IO ()
 main = do
@@ -66,6 +71,8 @@ readEdgeDocGraph inPath = do
     putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
     return $ Graph $ fmap (HM.fromList . flip zip (repeat 1) . HS.toList) binGraph
 
+type PageRankScores = [(PageId, Float)]
+
 pageRankMode :: Parser (IO ())
 pageRankMode =
     run
@@ -76,7 +83,33 @@ pageRankMode =
     run outPath inPath = do
         graph <- readEdgeDocGraph @Float inPath
         let res = pageRank 0 graph
-        writeFileSerialise outPath $ toEntries $ head $ drop 10 res
+            contents :: PageRankScores
+            contents = toEntries $ head $ drop 10 res
+        writeFileSerialise outPath contents
+
+rerankMode :: Parser (IO ())
+rerankMode =
+    run
+      <$> option str (long "output" <> short 'o' <> metavar "RUN" <> help "output run file")
+      <*> argument str (metavar "RUN" <> help "retrieval run file")
+      <*> argument str (metavar "PAGERANK" <> help "PageRank run")
+  where
+    run :: FilePath -> FilePath -> FilePath -> IO ()
+    run outFile runFile pageRankRunFile = do
+        rankings <- groupByQuery <$> Run.readEntityRun runFile
+        pageRanks <- M.fromList <$> readFileDeserialise pageRankRunFile
+            :: IO (M.Map PageId Float)
+
+        let mapRanking = Seq.sortBy (comparing carScore)
+                         . fmap fixScore
+            fixScore :: Run.EntityRankingEntry -> Run.EntityRankingEntry
+            fixScore e
+              | Just s <- M.lookup (carDocument e) pageRanks
+              = e { carScore = realToFrac s }
+              | otherwise
+              = error $ "Couldn't find pagerank score for " ++ show (carDocument e)
+
+        Run.writeEntityRun outFile $ foldMap (toList . mapRanking) rankings
 
 degreeCentralityMode :: Parser (IO ())
 degreeCentralityMode =
