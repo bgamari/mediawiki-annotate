@@ -5,6 +5,7 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Dijkstra
    ( Distance(..)
@@ -17,6 +18,7 @@ module Dijkstra
    , test
    ) where
 
+import Control.DeepSeq
 import Data.Foldable
 import Data.Monoid
 import Data.Maybe
@@ -39,7 +41,11 @@ import DenseMapping
 import Graph
 
 data Distance e = Finite !e | Infinite
-                deriving (Show, Eq, Ord)
+                deriving (Show, Eq, Ord, Functor)
+
+instance NFData e => NFData (Distance e) where
+    rnf (Finite x) = rnf x
+    rnf Infinite   = ()
 
 $(derivingUnbox "Distance"
      [t| forall a. (Num a, Unbox a) => Distance a -> (Bool, a) |]
