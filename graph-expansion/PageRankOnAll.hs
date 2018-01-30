@@ -156,7 +156,7 @@ graphStatsMode =
         print $ "average degree: "++show (avgDeg :: Double)
 
         -- degree histogram
-        let hist = histogramFoldable @200 (linearBinning (minDeg, maxDeg))
+        let hist = histogramFoldable @1000 (logBinning (minDeg, maxDeg))
                    $ fmap (realToFrac . HM.size) $ toList $ getGraph graph
         writeFile "degree-hist.txt" $ unlines
             [ show (l :: Double) ++ "\t" ++ show n
