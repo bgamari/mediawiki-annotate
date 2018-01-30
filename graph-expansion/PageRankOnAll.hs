@@ -1,13 +1,19 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 
+import GHC.Conc
+import Control.DeepSeq
+import Data.Coerce
+import Data.Foldable
+import qualified Control.Foldl as Foldl
 import Debug.Trace
 import Options.Applicative
 import Control.Parallel.Strategies
-import Data.Monoid
+import Data.Semigroup hiding (option)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Vector.Indexed as VI
@@ -21,6 +27,7 @@ import Dijkstra
 import GraphExpansion
 import CAR.Types
 import CAR.Types.CborList
+import SimplIR.Utils.Compact
 import Codec.Serialise
 
 $(derivingUnbox "Sum"
@@ -28,6 +35,23 @@ $(derivingUnbox "Sum"
      [| \(Sum n) -> n |]
      [| Sum |]
  )
+
+data Mean a = Mean !Int !a
+            deriving (Show, Functor)
+
+instance NFData (Mean a) where
+    rnf x = x `seq` ()
+instance Num a => Semigroup (Mean a) where
+    Mean n x <> Mean m y = Mean (n+m) (x+y)
+instance Num a => Monoid (Mean a) where
+    mempty = Mean 0 0
+    mappend = (<>)
+
+one :: a -> Mean a
+one = Mean 1
+
+getMean :: Fractional a => Mean a -> a
+getMean (Mean n x) = x / fromIntegral n
 
 edgeDocsPath :: Parser FilePath
 edgeDocsPath = argument str (help "input EdgeDoc list path")
@@ -46,12 +70,16 @@ main = do
 
 readEdgeDocs :: FilePath -> IO [EdgeDoc]
 readEdgeDocs inPath = do
-    (Just (0::Int), edgeDocs) <- readCborList inPath
+    ncaps <- getNumCapabilities
+    setNumCapabilities 1
+    (Just (0::Int), edgeDocs) <- inCompactM $ readCborList inPath
+    setNumCapabilities ncaps
     return edgeDocs
 
 readEdgeDocGraph :: Num a => FilePath -> IO (Graph PageId a)
 readEdgeDocGraph inPath = do
     binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
+    putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
     return $ Graph $ fmap (HM.fromList . flip zip (repeat 1) . HS.toList) binGraph
 
 pageRankMode :: Parser (IO ())
@@ -87,13 +115,18 @@ distancesMode =
 
         let mapping = mkDenseMapping $ nodeSet graph
 
+            --folds :: Foldl.Fold ((Distance (Sum Int), _)) (Mean (Distance Int), Max (Distance Int))
+            --folds =
+            --    Foldl.premap (fmap getSum . fst)
+            --    $ (,) <$> Foldl.premap one Foldl.mconcat <*> Foldl.premap Max Foldl.mconcat
+
             distances :: [(PageId, VI.Vector VU.Vector (DenseId PageId) (Distance (Sum Int)))]
             distances =
-                withStrategy (parBuffer 1000 rdeepseq)
-                $ fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
+                  fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
                 $ HM.keys
                 $ getGraph graph
-        print distances
+        print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
+              $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
 
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
@@ -101,8 +134,14 @@ graphStatsMode =
   where
     run inPath = do
         graph <- readEdgeDocGraph @Int inPath
-        let sumDegree = sum $ fmap HM.size $ getGraph graph
-
-            avgDegree :: Double
-            avgDegree = realToFrac sumDegree / realToFrac (HM.size $ getGraph graph)
-        print $ "average degree: "++show avgDegree
+        let degreeHist :: HM.HashMap Int Int
+            degreeHist = coerce @(HM.HashMap Int (Sum Int)) @(HM.HashMap Int Int)
+                         $ HM.fromListWith (<>)
+                         $ map (\neighs -> (HM.size neighs, Sum 1))
+                         $ HM.elems $ getGraph graph
+        putStrLn $ unlines [ unwords [show bin, show n]
+                           | (bin, n) <- HM.toList degreeHist
+                           ]
+        let avgDegree :: Double
+            avgDegree = getMean $ fmap realToFrac $ foldMap (\(bin,n) -> Mean n bin) (HM.toList degreeHist)
+        putStrLn $ "average degree: "++show avgDegree
