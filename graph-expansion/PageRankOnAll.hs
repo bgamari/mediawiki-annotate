@@ -169,7 +169,7 @@ distancesMode =
 
         --print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
         --      $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
-        writeFileSerialise "distances.cbor" distances'
+        writeCborList "distances.cbor" () distances'
 
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
