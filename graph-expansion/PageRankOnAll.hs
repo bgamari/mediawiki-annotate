@@ -72,11 +72,11 @@ readEdgeDocs inPath = do
     (Just (0::Int), edgeDocs) <- inCompactM $ readCborList inPath
     return edgeDocs
 
-readEdgeDocGraph :: Num a => FilePath -> IO (Graph PageId a)
+readEdgeDocGraph :: (Num a, NFData a) => FilePath -> IO (Graph PageId a)
 readEdgeDocGraph inPath = singleThreaded $ do
     binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
     putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
-    return $! Graph $ fmap (\xs -> 1 <$ HS.toMap xs) binGraph
+    return $! inCompact $ Graph $ fmap (\xs -> 1 <$ HS.toMap xs) binGraph
 
 type PageRankScores = [(PageId, Float)]
 
@@ -143,9 +143,11 @@ distancesMode =
     run inPath = do
         graph <- readEdgeDocGraph @(Sum Int) inPath
 
-        let mapping = mkDenseMapping $ nodeSet graph
+        let !mapping = mkDenseMapping $ nodeSet graph
 
-            --folds :: Foldl.Fold ((Distance (Sum Int), _)) (Mean (Distance Int), Max (Distance Int))
+        putStrLn "mapping evaluated"
+
+        let --folds :: Foldl.Fold ((Distance (Sum Int), _)) (Mean (Distance Int), Max (Distance Int))
             --folds =
             --    Foldl.premap (fmap getSum . fst)
             --    $ (,) <$> Foldl.premap one Foldl.mconcat <*> Foldl.premap Max Foldl.mconcat
