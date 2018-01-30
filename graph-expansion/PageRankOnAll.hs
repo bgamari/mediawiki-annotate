@@ -11,9 +11,11 @@ import GHC.Conc
 import Debug.Trace
 import Options.Applicative
 import Control.Parallel.Strategies
-import Data.Ord
-import Data.Monoid
+import Data.Either
 import Data.Foldable
+import Data.List
+import Data.Monoid
+import Data.Ord
 import qualified Control.Foldl as Foldl
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
@@ -100,16 +102,17 @@ rerankMode =
         pageRanks <- M.fromList <$> readFileDeserialise pageRankRunFile
             :: IO (M.Map PageId Float)
 
-        let mapRanking = Seq.sortBy (comparing carScore)
-                         . fmap fixScore
-            fixScore :: Run.EntityRankingEntry -> Run.EntityRankingEntry
+        let fixScore :: Run.EntityRankingEntry -> Either PageId Run.EntityRankingEntry
             fixScore e
               | Just s <- M.lookup (carDocument e) pageRanks
-              = e { carScore = realToFrac s }
+              = Right e { carScore = realToFrac s }
               | otherwise
-              = error $ "Couldn't find pagerank score for " ++ show (carDocument e)
+              = Left (carDocument e)
 
-        Run.writeEntityRun outFile $ foldMap (toList . mapRanking) rankings
+        let rankings' :: M.Map QueryId (Seq.Seq (Either PageId EntityRankingEntry))
+            rankings' = fmap (fmap fixScore) rankings
+        Run.writeEntityRun outFile $ foldMap (sortBy (flip $ comparing carScore) . rights . toList) rankings'
+        putStrLn $ "Missing entities:\n"++unlines (map show $ foldMap (lefts . toList) rankings')
 
 degreeCentralityMode :: Parser (IO ())
 degreeCentralityMode =
@@ -152,7 +155,8 @@ graphStatsMode =
     run inPath = do
         graph <- readEdgeDocGraph @Int inPath
         let folds = (,,) <$> Foldl.minimum <*> Foldl.maximum <*> Foldl.mean
-            (Just minDeg, Just maxDeg, avgDeg) = Foldl.fold (Foldl.premap (realToFrac . HM.size) folds) (getGraph graph)
+            (Just minDeg, Just maxDeg, avgDeg) =
+                Foldl.fold (Foldl.premap (realToFrac . HM.size) folds) (getGraph graph)
         print $ "average degree: "++show (avgDeg :: Double)
 
         -- degree histogram
