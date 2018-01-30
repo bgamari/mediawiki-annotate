@@ -136,7 +136,7 @@ denseDijkstra :: forall n e. (Hashable n, Eq n, Ord n, Show n, Ord e, Monoid e, 
               -> VI.Vector VU.Vector (DenseId n) (Distance e)
 denseDijkstra mapping graph =
     \src -> VI.create $ do
-        accum <- VIM.replicate (denseRange mapping) (Finite mempty)
+        accum <- VIM.replicate (denseRange mapping) Infinite
         let q0 = PSQ.singleton src (Finite mempty) ()
         evalStateT (go accum) q0
         return accum
