@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -6,6 +7,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
+import GHC.Conc
 import Debug.Trace
 import Options.Applicative
 import Control.Parallel.Strategies
@@ -26,6 +28,7 @@ import GraphExpansion
 import SimplIR.Histogram
 import CAR.Types
 import CAR.Types.CborList
+import SimplIR.Utils.Compact
 import Codec.Serialise
 
 $(derivingUnbox "Sum"
@@ -51,12 +54,16 @@ main = do
 
 readEdgeDocs :: FilePath -> IO [EdgeDoc]
 readEdgeDocs inPath = do
-    (Just (0::Int), edgeDocs) <- readCborList inPath
+    ncaps <- getNumCapabilities
+    setNumCapabilities 1
+    (Just (0::Int), edgeDocs) <- inCompactM $ readCborList inPath
+    setNumCapabilities ncaps
     return edgeDocs
 
 readEdgeDocGraph :: Num a => FilePath -> IO (Graph PageId a)
 readEdgeDocGraph inPath = do
     binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
+    putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
     return $ Graph $ fmap (HM.fromList . flip zip (repeat 1) . HS.toList) binGraph
 
 pageRankMode :: Parser (IO ())
@@ -92,13 +99,18 @@ distancesMode =
 
         let mapping = mkDenseMapping $ nodeSet graph
 
+            --folds :: Foldl.Fold ((Distance (Sum Int), _)) (Mean (Distance Int), Max (Distance Int))
+            --folds =
+            --    Foldl.premap (fmap getSum . fst)
+            --    $ (,) <$> Foldl.premap one Foldl.mconcat <*> Foldl.premap Max Foldl.mconcat
+
             distances :: [(PageId, VI.Vector VU.Vector (DenseId PageId) (Distance (Sum Int)))]
             distances =
-                withStrategy (parBuffer 1000 rdeepseq)
-                $ fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
+                  fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
                 $ HM.keys
                 $ getGraph graph
-        print distances
+        print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
+              $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
 
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
