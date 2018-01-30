@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
@@ -143,15 +144,15 @@ denseDijkstra mapping graph =
   where
     go :: VIM.MVector VU.MVector s (DenseId n) (Distance e)
        -> DenseM s n e ()
-    go accum = do
+    go !accum = do
         mNext <- densePopS
         case mNext of
           Nothing -> return ()
           Just (u, distU) -> do
               forM_ (HM.toList $ getNeighbors graph u) $ \(v, len) -> do
-                  let vi = toDense mapping v
+                  let !vi = toDense mapping v
                   distV <- lift $ VIM.read accum vi
-                  let alt = distU <> Finite len
+                  let !alt = distU <> Finite len
                   if -- sanity check
                      | alt <= distU ->
                          error $ "denseDijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
