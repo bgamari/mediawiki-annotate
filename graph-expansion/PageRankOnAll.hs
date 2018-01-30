@@ -59,16 +59,21 @@ main = do
     mode <- execParser $ info (helper <*> modes) mempty
     mode
 
-readEdgeDocs :: FilePath -> IO [EdgeDoc]
-readEdgeDocs inPath = do
+singleThreaded :: IO a -> IO a
+singleThreaded m = do
     ncaps <- getNumCapabilities
     setNumCapabilities 1
+    r <- m
+    r `seq` setNumCapabilities ncaps
+    return r
+
+readEdgeDocs :: FilePath -> IO [EdgeDoc]
+readEdgeDocs inPath = do
     (Just (0::Int), edgeDocs) <- inCompactM $ readCborList inPath
-    setNumCapabilities ncaps
     return edgeDocs
 
 readEdgeDocGraph :: Num a => FilePath -> IO (Graph PageId a)
-readEdgeDocGraph inPath = do
+readEdgeDocGraph inPath = singleThreaded $ do
     binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
     putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
     return $ Graph $ fmap (HM.fromList . flip zip (repeat 1) . HS.toList) binGraph
@@ -124,6 +129,11 @@ degreeCentralityMode =
         let degreeCentralities = fmap HM.size $ getGraph graph
         print degreeCentralities
 
+takeEvery :: Int -> [a] -> [a]
+takeEvery n = go
+  where go [] = []
+        go (x:xs) = x : go (drop n xs)
+
 distancesMode :: Parser (IO ())
 distancesMode =
     run
@@ -143,10 +153,21 @@ distancesMode =
             distances :: [(PageId, VI.Vector VU.Vector (DenseId PageId) (Distance (Sum Int)))]
             distances =
                   fmap (\n -> (n, denseDijkstra mapping graph $ traceShow n n))
+                $ takeEvery 5000
                 $ HM.keys
                 $ getGraph graph
-        print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
-              $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
+
+            distToMaybe (Finite e) = Just $ getSum e
+            distToMaybe Infinite   = Nothing
+
+            distances' :: [(PageId, [Maybe Int])]
+            distances' =
+                withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
+                $ map (fmap $ map distToMaybe . VI.elems) distances
+
+        --print $ withStrategy (parBuffer 1000 $ evalTuple2 r0 rdeepseq)
+        --      $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
+        writeFileSerialise "distances.cbor" distances'
 
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
