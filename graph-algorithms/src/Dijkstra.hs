@@ -105,11 +105,11 @@ dijkstra graph =
                      | alt <= distU ->
                          error $ "dijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
                      | alt < distV ->
-                         modify $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
+                         modify' $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
                                           , sPSQ   = PSQ.insert v alt () (sPSQ s)
                                           }
                      | alt == distV ->
-                         modify $ \s -> s { sAccum = HM.update (\(_, ns) -> Just (alt, u:ns)) v (sAccum s)
+                         modify' $ \s -> s { sAccum = HM.update (\(_, ns) -> Just (alt, u:ns)) v (sAccum s)
                                           }
                      | otherwise -> return ()
 
@@ -157,7 +157,7 @@ denseDijkstra mapping graph =
                      | alt <= distU ->
                          error $ "denseDijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
                      | alt < distV -> do
-                         modify $ PSQ.insert v alt ()
+                         modify' $ PSQ.insert v alt ()
                          lift $ VIM.write accum vi alt
                      | otherwise -> return ()
 
