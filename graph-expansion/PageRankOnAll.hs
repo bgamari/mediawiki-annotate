@@ -159,6 +159,8 @@ graphStatsMode =
                 Foldl.fold (Foldl.premap (realToFrac . HM.size) folds) (getGraph graph)
         print $ "average degree: "++show (avgDeg :: Double)
 
+        writeFile "degree.txt" $ unlines $ map (show . HM.size) $ toList $ getGraph graph
+
         -- degree histogram
         let hist = histogramFoldable @1000 (logBinning (minDeg, maxDeg))
                    $ fmap (realToFrac . HM.size) $ toList $ getGraph graph
