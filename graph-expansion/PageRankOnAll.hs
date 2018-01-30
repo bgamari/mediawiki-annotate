@@ -3,11 +3,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 import Debug.Trace
 import Options.Applicative
 import Control.Parallel.Strategies
 import Data.Monoid
+import Data.Foldable
+import qualified Control.Foldl as Foldl
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Vector.Indexed as VI
@@ -19,6 +23,7 @@ import Graph
 import DenseMapping
 import Dijkstra
 import GraphExpansion
+import SimplIR.Histogram
 import CAR.Types
 import CAR.Types.CborList
 import Codec.Serialise
@@ -101,8 +106,14 @@ graphStatsMode =
   where
     run inPath = do
         graph <- readEdgeDocGraph @Int inPath
-        let sumDegree = sum $ fmap HM.size $ getGraph graph
+        let folds = (,,) <$> Foldl.minimum <*> Foldl.maximum <*> Foldl.mean
+            (Just minDeg, Just maxDeg, avgDeg) = Foldl.fold (Foldl.premap (realToFrac . HM.size) folds) (getGraph graph)
+        print $ "average degree: "++show (avgDeg :: Double)
 
-            avgDegree :: Double
-            avgDegree = realToFrac sumDegree / realToFrac (HM.size $ getGraph graph)
-        print $ "average degree: "++show avgDegree
+        -- degree histogram
+        let hist = histogramFoldable @200 (linearBinning (minDeg, maxDeg))
+                   $ fmap (realToFrac . HM.size) $ toList $ getGraph graph
+        writeFile "degree-hist.txt" $ unlines
+            [ show (l :: Double) ++ "\t" ++ show n
+            | ((l,_), n) <- binCounts hist
+            ]
