@@ -32,8 +32,7 @@ nullGraph :: Graph n e -> Bool
 nullGraph = HM.null . getGraph
 
 nodeSet :: (Hashable n, Eq n) => Graph n e -> HS.HashSet n
-nodeSet (Graph g) = mapToSet g <> foldMap mapToSet g
-  where mapToSet = HS.fromMap . fmap (const ())
+nodeSet (Graph g) = HS.fromMap (() <$ g) <> foldMap (HS.fromMap . (() <$)) g
 
 getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e
