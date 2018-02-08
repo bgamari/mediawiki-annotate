@@ -1,0 +1,96 @@
+name:                benchquality
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Laura Dietz
+maintainer:          dietz@cs.unh.edu
+-- copyright:           
+-- category:            
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+
+
+library
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  hs-source-dirs:      src
+  exposed-modules:     TrecEvalFile
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       trifecta,
+                       time,
+                       dlist,
+                       graph-algorithms,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
+
+executable kendall
+  main-is:             Kendall.hs
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       trifecta,
+                       time,
+                       simplir-word-embedding,
+                       trec-car-graph-expansion,
+                       graph-algorithms,
+                       trec-car-tools,
+                       benchquality
+  default-language:    Haskell2010
