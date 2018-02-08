@@ -175,11 +175,11 @@ writeEntityRun path = Run.writeRunFile path . map (fromCarRankingEntry construct
 -- | Group a run by query and sort each query by score
 groupByQuery :: [RankingEntry' doc] -> M.Map QueryId (Seq.Seq (RankingEntry' doc))
 groupByQuery run =
-    fmap (Seq.sortBy $ comparing carScore)
+    fmap (Seq.sortBy $ flip $ comparing carScore)
     $ M.fromListWith mappend [ (carQueryId r, Seq.singleton r) | r <- run ]
 
 -- | Group a run by query and sort each query by score
-groupByQuery' :: [(key, RankingEntry' doc)] -> M.Map QueryId (Seq.Seq ((key, RankingEntry' doc)))
+groupByQuery' :: [(key, RankingEntry' doc)] -> M.Map QueryId (Seq.Seq (key, RankingEntry' doc))
 groupByQuery' run =
-    fmap (Seq.sortBy $ comparing (carScore . snd))
+    fmap (Seq.sortBy $ flip $ comparing (carScore . snd))
     $ M.fromListWith mappend [ (carQueryId r, Seq.singleton (k, r)) | (k, r) <- run ]

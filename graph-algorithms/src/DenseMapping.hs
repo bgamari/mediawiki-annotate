@@ -30,10 +30,14 @@ import Data.Maybe
 import GHC.Stack
 
 -- | A mapping of a 'Hashable' type to a dense index space ('DenseId').
-data DenseMapping a = DenseMapping { denseRange :: (DenseId a, DenseId a)
-                                   , fromDenseArr :: VI.Vector V.Vector (DenseId a) a
-                                   , toDenseMap :: HM.HashMap a (DenseId a)
+data DenseMapping a = DenseMapping { denseMin :: !(DenseId a)
+                                   , denseMax :: !(DenseId a)
+                                   , fromDenseArr :: !(VI.Vector V.Vector (DenseId a) a)
+                                   , toDenseMap :: !(HM.HashMap a (DenseId a))
                                    }
+
+denseRange :: DenseMapping a -> (DenseId a, DenseId a)
+denseRange (DenseMapping a b _ _) = (a, b)
 
 assocs :: DenseMapping a -> [(DenseId a, a)]
 assocs = VI.assocs . fromDenseArr
@@ -70,7 +74,7 @@ mkDenseMapping
     => HS.HashSet a
     -> DenseMapping a
 mkDenseMapping things =
-    DenseMapping nodeRange toNodeArr fromNodeMap
+    DenseMapping minNodeId maxNodeId toNodeArr fromNodeMap
   where
     minNodeId = DenseId 0
     maxNodeId = DenseId $ HS.size things - 1

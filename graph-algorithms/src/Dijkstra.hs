@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
@@ -5,6 +6,7 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Dijkstra
    ( Distance(..)
@@ -17,6 +19,7 @@ module Dijkstra
    , test
    ) where
 
+import Control.DeepSeq
 import Data.Foldable
 import Data.Monoid
 import Data.Maybe
@@ -39,7 +42,11 @@ import DenseMapping
 import Graph
 
 data Distance e = Finite !e | Infinite
-                deriving (Show, Eq, Ord)
+                deriving (Show, Eq, Ord, Functor)
+
+instance NFData e => NFData (Distance e) where
+    rnf (Finite x) = rnf x
+    rnf Infinite   = ()
 
 $(derivingUnbox "Distance"
      [t| forall a. (Num a, Unbox a) => Distance a -> (Bool, a) |]
@@ -98,11 +105,11 @@ dijkstra graph =
                      | alt <= distU ->
                          error $ "dijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
                      | alt < distV ->
-                         modify $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
+                         modify' $ \s -> s { sAccum = HM.insert v (alt, [u]) (sAccum s)
                                           , sPSQ   = PSQ.insert v alt () (sPSQ s)
                                           }
                      | alt == distV ->
-                         modify $ \s -> s { sAccum = HM.update (\(_, ns) -> Just (alt, u:ns)) v (sAccum s)
+                         modify' $ \s -> s { sAccum = HM.update (\(_, ns) -> Just (alt, u:ns)) v (sAccum s)
                                           }
                      | otherwise -> return ()
 
@@ -130,27 +137,27 @@ denseDijkstra :: forall n e. (Hashable n, Eq n, Ord n, Show n, Ord e, Monoid e, 
               -> VI.Vector VU.Vector (DenseId n) (Distance e)
 denseDijkstra mapping graph =
     \src -> VI.create $ do
-        accum <- VIM.replicate (denseRange mapping) (Finite mempty)
+        accum <- VIM.replicate (denseRange mapping) Infinite
         let q0 = PSQ.singleton src (Finite mempty) ()
         evalStateT (go accum) q0
         return accum
   where
     go :: VIM.MVector VU.MVector s (DenseId n) (Distance e)
        -> DenseM s n e ()
-    go accum = do
+    go !accum = do
         mNext <- densePopS
         case mNext of
           Nothing -> return ()
           Just (u, distU) -> do
               forM_ (HM.toList $ getNeighbors graph u) $ \(v, len) -> do
-                  let vi = toDense mapping v
+                  let !vi = toDense mapping v
                   distV <- lift $ VIM.read accum vi
-                  let alt = distU <> Finite len
+                  let !alt = distU <> Finite len
                   if -- sanity check
                      | alt <= distU ->
                          error $ "denseDijkstra: Non-increasing distance "++show (alt, distU, distV)++")"
                      | alt < distV -> do
-                         modify $ PSQ.insert v alt ()
+                         modify' $ PSQ.insert v alt ()
                          lift $ VIM.write accum vi alt
                      | otherwise -> return ()
 
