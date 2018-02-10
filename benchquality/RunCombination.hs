@@ -108,9 +108,10 @@ opts :: Parser ( FilePath
                , FilePath
                , ModelSource
                , [FilePath]
+               , Int
                )
 opts =
-    (,,,,,,)
+    (,,,,,,,)
     <$> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
@@ -118,6 +119,7 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE" <> help "qrel file for training/testing"))
     <*> modelSource
     <*> many (option str (long "run" <> metavar "RUN" <> help "run files"))
+    <*> option auto (long  "relthresh" <> metavar "REL" <> help "lowest threshold for relevant qrel entries, default: 1" <> value 1)
     where
 
       querySource :: Parser QuerySource
@@ -169,7 +171,7 @@ main = do
 
     (outputFilePrefix, querySrc,
       queryRestriction, numResults
-      , qrelFile, modelSource, entityRunFiles) <- execParser' 1 (helper <*> opts) mempty
+      , qrelFile, modelSource, entityRunFiles, relthresh) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
@@ -185,8 +187,14 @@ main = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
-    let fixQRel (QRel.Entry qid docId rel) = QRel.Entry (CAR.RunFile.QueryId qid) docId rel
-    qrel <- map fixQRel <$> QRel.readQRel @IsRelevant qrelFile
+    let fixQRel (QRel.Entry qid docId rel) =
+          QRel.Entry (CAR.RunFile.QueryId qid) docId rel'
+            where rel' :: QRel.IsRelevant
+                  rel' = if (QRel.unGradedRelevance rel) < relthresh
+                            then QRel.NotRelevant
+                            else QRel.Relevant
+
+    qrel <- map fixQRel <$> QRel.readQRel @QRel.GradedRelevance qrelFile
 
     queries <-
         if null queryRestriction
