@@ -309,8 +309,7 @@ main = do
               testScore = metric predictRanking
 
           -- evaluate all work here!
-          mapConcurrently_ outputDiagnostics $ modelDiag
-          mapConcurrently_ outputDiagnostics $ modelDiag'
+          mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
 
                 -- eval and write train ranking (on all data)
           storeModelData outputFilePrefix modelFile model trainScore "train"
