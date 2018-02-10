@@ -94,3 +94,46 @@ executable kendall
                        trec-car-tools,
                        benchquality
   default-language:    Haskell2010
+
+
+executable runcombination
+  main-is:             RunCombination.hs
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base >=4.9 && <4.11,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       random,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       heaps,
+                       psqueues,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       dlist,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       time,
+                       split,
+                       graph-algorithms,
+                       trec-car-graph-expansion,
+                       simplir-word-embedding,
+                       trec-car-tools
+  default-language:    Haskell2010
