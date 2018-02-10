@@ -28,6 +28,7 @@ import GHC.Generics
 import Codec.Serialise
 
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -54,7 +55,9 @@ import CAR.TocFile as Toc
 
 
 import EdgeDocCorpus
-import GraphExpansionExperiments hiding (Bm25, Ql)
+import qualified CAR.KnowledgeBase as KB
+import CAR.Utils
+import GraphExpansionExperiments hiding (Bm25, Ql, pagesToQueryDocs)
 import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
@@ -169,16 +172,14 @@ main = do
       , qrelFile, modelSource, entityRunFiles) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
---     let entityRunFiles  = [ (g, r) | (GridRun "Test", r) <- entityRunFilesRaw]
-
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
 
     gen0 <- newStdGen  -- needed by learning to rank
-    let siteId = "endwiki" -- todo why do we need this here?
+--     let siteId = "enwiki" -- todo why do we need this here?
     queries' <-
         case querySrc of
           QueriesFromCbor queryFile queryDeriv -> do
-              pagesToQueryDocs siteId queryDeriv <$> readPagesOrOutlinesAsPages queryFile
+              pagesToQueryDocs queryDeriv <$> readPagesOrOutlinesAsPages queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
@@ -225,71 +226,18 @@ main = do
     -- use pagerank on this graph to predict an alternative node ranking
     -- save predicted node ranking as run-file
     case modelSource of
---       ModelFromFile modelFile -> do
---           Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
---
---           let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
---               docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
---               degreeCentrality = fmap (modelWeights `F.dotFeatureVecs`) docFeatures
---                 where modelWeights = modelToFeatureVec combinedFSpace' model
---               queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
---               ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
---               ranking = fmap (Ranking.fromList . map swap) queryToScoredList
---
---               rankingPageId :: M.Map QueryId (Ranking.Ranking Double PageId)
---               rankingPageId = fmap (fmap qrelDocNameToPageId) ranking
---
---               nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
---               nodeDistr = fmap nodeRankingToDistribution rankingPageId
---
---           let edgeFSpace' = mkFeatureSpace
---                               $ tr
---                               $  filter (expSettingToCritEdge experimentSettings)
---                               $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
---
---           let params :: EdgeFeatureVec
---               params = tr $ F.fromList edgeFSpace' -- TODO: Use modelToFeatureVec
---                   [ (k'', v)
---                   | (k, v) <- M.toList $ modelWeights model
---                   , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeature EdgeFeature
---                   , Right k'' <- pure k'
---                   ]
---
---           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
---               graphWalkRanking query
---                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
---                  | otherwise = Ranking.fromList $ map swap $ toEntries eigv
---                 where
---                   count pred = getSum . foldMap f
---                     where f x = if pred x then Sum 1 else Sum 0
---
---                     where
---                       entityRun = collapsedEntityRun M.! query
---
---                   params' = params
---
---                   normalizer :: Normalization
---                   normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
---
---               runRanking query = do
---                   let ranking = graphWalkRanking query
---                       rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
---                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
---                                     ]
---
---                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
---                                     $ rankEntries
---           mapConcurrently_(runRanking . queryDocQueryId) queries
-
       TrainModel modelFile -> do
           let docFeatures = fmap featureVecToFeatures
-                          $ makeStackedFeatures collapsedEntityRun entFInfo
-
+                          $ makeStackedFeatures collapsedEntityRun' entFInfo
+                             where collapsedEntityRun' =
+                                      if null queryRestriction
+                                          then collapsedEntityRun
+                                          else (M.restrictKeys collapsedEntityRun (S.fromList queryRestriction))
 --               docFeatures' = fmap (Features . F.toVector) docFeatures''
 --               normalizer = zNormalizer $ M.elems docFeatures'
 --               docFeatures = fmap (normFeatures normalizer) docFeatures'
 
-              featureNames :: _
+              featureNames :: [FeatureName]
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames entFSpace
 
               franking :: TrainData
@@ -352,8 +300,6 @@ main = do
               modelDiag :: [(String, Model, Double)]
               ((model, trainScore), modelDiag) = trainProcedure "train" trainData
 
-            -- todo  exportGraphs model
-
                                 -- todo load external folds
           let folds = chunksOf foldLen $ M.keys trainData
                       where foldLen = ((M.size trainData) `div` 5 ) +1
@@ -363,7 +309,8 @@ main = do
               testScore = metric predictRanking
 
           -- evaluate all work here!
-          mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
+          mapConcurrently_ outputDiagnostics $ modelDiag
+          mapConcurrently_ outputDiagnostics $ modelDiag'
 
                 -- eval and write train ranking (on all data)
           storeModelData outputFilePrefix modelFile model trainScore "train"
@@ -374,6 +321,36 @@ main = do
           CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
               $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
               $ predictRanking
+
+pagesToQueryDocs :: QueryDerivation
+                 -> [Page]
+                 -> [QueryDoc]
+pagesToQueryDocs deriv pages =
+    queryDocs
+  where
+    queryDocs = case deriv of
+      QueryFromPageTitle ->
+          [ QueryDoc { queryDocQueryId      = CarRun.pageIdToQueryId $ KB.kbDocPageId kbDoc
+                     , queryDocPageId       = KB.kbDocPageId kbDoc
+                     , queryDocQueryText    = getPageName $ pageName page
+                     , queryDocLeadEntities = mempty
+                     }
+          | page <- pages
+          , let kbDoc = KB.pageToKbDoc page
+          ]
+      QueryFromSectionPaths ->
+          [ QueryDoc { queryDocQueryId      = CarRun.sectionPathToQueryId sectionPath -- KB.kbDocPageId kbDoc
+                     , queryDocPageId       = pageId page
+                     , queryDocQueryText    = T.unwords
+                                            $ getPageName (pageName page) : getPageName (pageName page) -- twice factor
+                                              : map getSectionHeading headings
+                     , queryDocLeadEntities = mempty
+                     }
+          | page <- pages
+          , let kbDoc = KB.pageToKbDoc page
+          , (sectionPath, headings, _) <- pageSections page
+          ]
+
 
 
 qrelDocNameToPageId :: QRel.DocumentName -> PageId
@@ -438,7 +415,7 @@ storeRankingData ::  FilePath
 storeRankingData outputFilePrefix franking metric model modelDesc = do
 
   let rerankedFranking = rerankRankings' model franking
-  putStrLn $ "Model "++modelDesc++" test metric "++ show (metric rerankedFranking) ++ "MAP."
+  putStrLn $ "Model "++modelDesc++" test metric "++ show (metric rerankedFranking) ++ " MAP."
   CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
        $ rerankedFranking
