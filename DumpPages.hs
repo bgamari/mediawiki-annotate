@@ -95,6 +95,40 @@ opts = subparser
                        | otherwise     -> let pageTargets = HS.fromList (pageLinkTargetIds page)
                                           in any (  `HS.member` pageTargets) targets
 
+    paragraphIdsInPages =
+        f <$> argument str (help "input file" <> metavar "FILE")
+          <*> fmap S.fromList (many (option  (PageName . T.pack <$> str) (short 'p' <> long "page" <> metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+          <*> (many (option (flip pageNameToId <$> (packPageName <$> str)) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
+          <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> help "dump only pages with links to this target page id (and the page itself)")))
+      where
+        f :: FilePath -> S.Set PageName -> [SiteId -> PageId] -> HS.HashSet PageId -> IO ()
+        f inputFile pageNames targetPageIds1 targetPageIds2 = do
+            siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+            if S.null pageNames
+              then do
+                  pages <- readPagesFile inputFile
+                  let pages' =  filter (searchTargets (targetPageIds siteId)) pages
+                  mapM_ printParagraphId pages'
+              else do
+                  anns <- CAR.openAnnotations inputFile
+  --                 siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+                  let pageIds = map (pageNameToId siteId) $ S.toList pageNames
+                  mapM_ printParagraphId $ filter (searchTargets (targetPageIds siteId))
+                                $ mapMaybe (`CAR.lookupPage` anns) pageIds
+          where targetPageIds siteId =
+                    HS.fromList (map ($ siteId) targetPageIds1)
+                    `HS.union` targetPageIds2
+                searchTargets targets page =
+                    if | HS.null targets -> True
+                       | (pageId page) `HS.member` targets -> True
+                       | otherwise     -> let pageTargets = HS.fromList (pageLinkTargetIds page)
+                                          in any (  `HS.member` pageTargets) targets
+
+                printParagraphId page = mapM_ printParagraphIdPara $ pageParas page
+
+                printParagraphIdPara (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
+
+
     dumpEntityIds =
         f <$> argument str (help "input file" <> metavar "FILE")
       where
@@ -130,9 +164,9 @@ opts = subparser
         f :: FilePath -> IO ()
         f inputFile  = do
                 paragraphs <- readParagraphsFile inputFile
-                mapM_ printParagraph paragraphs
+                mapM_ printParagraphId paragraphs
 
-          where printParagraph (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
+          where printParagraphId (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
 
     histogramHeadings =
         f <$> argument str (help "input file" <> metavar "FILE")
