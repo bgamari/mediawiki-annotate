@@ -30,6 +30,7 @@ opts = subparser
     <> cmd "entityids"     dumpEntityIds
     <> cmd "paragraphs"    dumpParagraphs
     <> cmd "paragraphids"  dumpParagraphIds
+    <> cmd "paragraphids-pages"  paragraphIdsInPages
     <> cmd "sections"      dumpSections
     <> cmd "hist-headings" histogramHeadings
     <> cmd "dump-header"   dumpHeader
