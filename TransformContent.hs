@@ -33,6 +33,7 @@ data ConfOpts = ConfOpts { forbiddenHeadings :: HS.HashSet T.Text
                          , includeCategories :: Bool
                          , includeShortHeadings :: Bool
                          , includeLongHeadings :: Bool
+                         , deleteSections :: Bool
                          , includeShortPage :: Bool
                          }
 
@@ -52,7 +53,7 @@ opts =
                                              removeStdHeadings <- switch (long "forbiddenDefaultHeadings" <> help "remove default forbidden headings ")
                                              includeShortHeadings <-switch (long "shortHeading" <> help "include headings if less than 3 non-alpha characters")
                                              includeLongHeadings <-switch (long "longHeading" <> help "include headings if they are longer than 100 characters")
-
+                                             deleteSections <- switch (long "deleteSections" <> help "delete Sections")
                                              includeShortPage <- switch (long "shortpage" <> help "keep pages that contain less than three sections after filtering")
                                              return ConfOpts {..}
                                          )
@@ -66,6 +67,7 @@ opts =
                    , deactivate includeLongHeadings   $ recurseFilterPage (not . isLongHeading)
                    , deactivate includeImage          $ recurseFilterPage (not . isImage)
                    , deactivate includeCategories     $ recurseFilterPage (not . isCategoriesPara)
+                   , deactivate (not deleteSections) $ recurseFilterPage (not . isSection)
                    , deactivate includeLead           $ topLevelFilterPage (not . isPara)
                    ]
             deactivate :: Bool -> a -> Maybe a
@@ -92,6 +94,10 @@ isPara _        = False
 isImage :: PageSkeleton -> Bool
 isImage (Image{})   = True
 isImage _           = False
+
+isSection :: PageSkeleton -> Bool
+isSection (Section{})   = True
+isSection _           = False
 
 
 
