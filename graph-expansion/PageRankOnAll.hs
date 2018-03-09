@@ -53,6 +53,7 @@ modes = subparser
    <> command "graph-stats" (info (helper <*> graphStatsMode) mempty)
    <> command "distances" (info (helper <*> distancesMode) mempty)
    <> command "rerank" (info (helper <*> rerankMode) (progDesc "Rerank a run file with results from a PageRank run"))
+   <> command "dump-it" (info (helper <*> dumpIt) (progDesc "Rerank a run file with results from a PageRank run"))
 
 main :: IO ()
 main = do
@@ -176,6 +177,9 @@ distancesMode =
         --      $ fmap (fmap $ filter (/= Finite 0) . VI.elems) distances
         writeCborList "distances.cbor" () distances'
 
+readDistances :: FilePath -> IO [(PageId, [(Int, Count)])]
+readDistances = fmap snd . readCborList @()
+
 graphStatsMode :: Parser (IO ())
 graphStatsMode =
     run <$> edgeDocsPath
@@ -196,3 +200,17 @@ graphStatsMode =
             [ show (l :: Double) ++ "\t" ++ show n
             | ((l,_), n) <- binCounts hist
             ]
+
+dumpIt :: Parser (IO ())
+dumpIt =
+    run <$> argument str mempty
+  where
+    run inPath = do
+        xs <- readDistances inPath
+        mapM_ print
+            [ Foldl.fold ((,) <$> Foldl.length <*> Foldl.mean)
+              [ realToFrac n :: Double | (bin, n) <- ys ]
+            | (_, ys) <- xs
+            ]
+        --print $ Foldl.fold ((,) <$> Foldl.length <*> Foldl.mean) [ realToFrac n :: Double | Just n <- xs >>= snd ]
+

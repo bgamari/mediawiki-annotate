@@ -19,6 +19,7 @@ packages:
     filter-duplicates/
     vendor/*
     vendor/binary-serialise-cbor/*
+    benchquality/
 
 package mediawiki-parser
     tests: True
