@@ -246,6 +246,7 @@ executable trec-car-derive-toplevel
                        containers,
                        text,
                        optparse-applicative,
+                       unordered-containers,
                        filepath,
                        trec-car-tools,
                        mediawiki-parser >= 0.1

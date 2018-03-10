@@ -9,6 +9,7 @@ import Data.Monoid
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
+import qualified Data.HashMap.Strict as HM
 import qualified Data.Set as S
 import System.FilePath
 
@@ -19,6 +20,8 @@ import CAR.ToolVersion
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 import CAR.QRelFile
+
+
 
 
 
@@ -34,12 +37,17 @@ main = do
     (hierarchicalQrels, outPath) <- execParser' 1 (helper <*> opts) $ progDescDoc (Just "Derive top level qrels from hierarchical qrels.")
     hierarchicalAnnotations <- readParagraphQRel hierarchicalQrels
 
-    let topLevelAnnotations :: [Annotation GradedRelevance]
-        topLevelAnnotations = [ Annotation topLevelSectionpath paragraphId relevance
+    let topLevelAnnotations :: HM.HashMap (SectionPath, ParagraphId) (Annotation GradedRelevance)
+        topLevelAnnotations = HM.fromListWith maxAnnotation
+                              [ ((topLevelSectionpath, paragraphId) , Annotation topLevelSectionpath paragraphId relevance)
                               | Annotation hierarchicalSectionpath paragraphId relevance <- hierarchicalAnnotations
                               , let topLevelSectionpath = cutTopLevel hierarchicalSectionpath
                               ]
                                 where cutTopLevel (SectionPath {sectionPathPageId, sectionPathHeadings} ) =
                                           SectionPath sectionPathPageId $ take 1 sectionPathHeadings
+                                      maxAnnotation  ann1@(Annotation _ _ relevance1) ann2@( Annotation _ _ relevance2) =
+                                          if relevance1 > relevance2 then ann1
+                                                                     else ann2
 
-    writeParagraphQRel outPath topLevelAnnotations
+        topLevelAnnotations' = HM.elems topLevelAnnotations
+    writeParagraphQRel outPath topLevelAnnotations'
