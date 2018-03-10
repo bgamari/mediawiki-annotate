@@ -34,7 +34,7 @@ main = do
     (hierarchicalQrels, outPath) <- execParser' 1 (helper <*> opts) $ progDescDoc (Just "Derive top level qrels from hierarchical qrels.")
     hierarchicalAnnotations <- readParagraphQRel hierarchicalQrels
 
-    let topLevelAnnotations :: [Annotation]
+    let topLevelAnnotations :: [Annotation GradedRelevance]
         topLevelAnnotations = [ Annotation topLevelSectionpath paragraphId relevance
                               | Annotation hierarchicalSectionpath paragraphId relevance <- hierarchicalAnnotations
                               , let topLevelSectionpath = cutTopLevel hierarchicalSectionpath

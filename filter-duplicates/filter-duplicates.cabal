@@ -78,6 +78,7 @@ executable trec-car-map-paragraphids
                        unordered-containers >=0.2 && <0.3,
                        bytestring >=0.10 && <0.11,
                        optparse-applicative >= 0.13,
+                       text >= 1.2,
                        trec-car-filter-duplicates,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded

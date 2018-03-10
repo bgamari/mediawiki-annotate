@@ -10,7 +10,8 @@ module CAR.CarExports
       -- * Paragraphs
     , toParagraphs
       -- * Ground truth
-    , Relevance(..)
+    , Relevance
+    , IsRelevant(..)
     , Annotation(..)
     , EntityAnnotation(..)
     , toAnnotations
@@ -29,7 +30,7 @@ import CAR.QRelFile
 
 -- Passage file
 type PassageFile = [Paragraph]
-
+type Relevance = IsRelevant
 
 toStubSkeleton :: Page -> Stub
 toStubSkeleton (Page name pageId ty meta skeleton) =
@@ -59,12 +60,12 @@ toParagraphs =
     go (List{})    = []
     go (Infobox{}) = []
 
-toAnnotations :: Page -> S.Set Annotation
+toAnnotations :: Page -> S.Set (Annotation IsRelevant)
 toAnnotations (Page _ pageId _ _ skeleton) =
     -- recurse into sections, recursively collect section path, emit one annotation per paragraph
     foldMap (go mempty) skeleton
   where
-    go :: DList.DList HeadingId -> PageSkeleton -> S.Set Annotation
+    go :: DList.DList HeadingId -> PageSkeleton -> S.Set (Annotation IsRelevant)
     go parentIds (Section _ sectId children) =
         let parentIds' = parentIds `DList.snoc` sectId
         in foldMap (go parentIds') children
@@ -76,12 +77,12 @@ toAnnotations (Page _ pageId _ _ skeleton) =
     go _parentIds (List{})   = mempty
     go _parentIds (Infobox{})= mempty
 
-toEntityAnnotations :: Page ->  S.Set EntityAnnotation
+toEntityAnnotations :: Page ->  S.Set (EntityAnnotation IsRelevant)
 toEntityAnnotations (Page { pageId, pageSkeleton = skeleton }) =
     -- recurse into sections, recursively collect section path, emit one entity annotation per link
     foldMap (go mempty) skeleton
   where
-    go :: DList.DList HeadingId -> PageSkeleton -> S.Set EntityAnnotation
+    go :: DList.DList HeadingId -> PageSkeleton -> S.Set (EntityAnnotation IsRelevant)
     go parentIds (Section _ sectionId children) =
         let parentIds' = parentIds `DList.snoc` sectionId
         in foldMap (go parentIds') children
