@@ -123,15 +123,29 @@ centerWordEmbedding uncenteredParas =
         $ map (sumWordVecs . map (\(_,_,v) -> v) . V.toList)
         $ chunksOf 100000 uncenteredParas
 
+data MatchOrDedup a = Match a a
+                    | Dedup a
+                    deriving (Functor)
+
+matchFrom :: MatchOrDedup a -> a
+matchFrom (Match x _) = x
+matchFrom (Dedup x)   = x
+
+matchTo :: MatchOrDedup a -> a
+matchTo (Match _ x) = x
+matchTo (Dedup x)   = x
+
 -- | For all elements of a given bucket, compute the similarity and chunks which
 -- we will parallelise pair-wise similarity computation over. (paras are all from
 -- the same bucket). Only pairs with sufficintly high jaccard will be returned.
 -- (Needs final testing on real bigrams)
-hashSimilarities :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
+hashSimilarities :: Double
+                 -> MatchOrDedup (V.Vector (ParagraphId, V.Vector Term))
+                 -> [(ParagraphId, ParagraphId)]
 hashSimilarities thresh paras =
     [ (pid1, pid2)
-    | (pid1, bigrams1, bigramHash1) <- V.toList bigramHashes
-    , (pid2, bigrams2, bigramHash2) <- takeWhile (inUpperTriangle pid1) $ V.toList bigramHashes
+    | (pid1, bigrams1, bigramHash1) <- V.toList $ matchFrom bigramHashes
+    , (pid2, bigrams2, bigramHash2) <- takeWhile (inUpperTriangle pid1) $ V.toList $ matchTo bigramHashes
     , isBigramSimilar bigramHash1 bigramHash2
     , isJaccardSimilar bigrams1 bigrams2
     ]
@@ -155,12 +169,12 @@ hashSimilarities thresh paras =
         in (pid, HS.fromList $ toBigrams $ V.toList toks, hashes)
 
     -- for each paragraph: bigrams are hashed onto integers
-    bigramHashes :: V.Vector (ParagraphId, HS.HashSet (Term, Term), IS.IntSet)
-    !bigramHashes = fmap toBigramHashes paras
+    bigramHashes :: MatchOrDedup (V.Vector (ParagraphId, HS.HashSet (Term, Term), IS.IntSet))
+    !bigramHashes = fmap (fmap toBigramHashes) paras
 
 
-opts :: Parser (FilePath, Maybe Word32, Double, Int, FilePath, Maybe FilePath, FilePath)
-opts = (,,,,,,)
+opts :: Parser (FilePath, Maybe Word32, Double, Int, FilePath, Maybe FilePath, FilePath, Maybe FilePath)
+opts = (,,,,,,,)
     <$> option str (long "embeddings" <> short 'e' <> metavar "GLOVE" <> help "GloVe embeddings")
     <*> optional (option auto (long "seed" <> metavar "SEED" <> help "PRNG seed value"))
     <*> option auto (long "threshold" <> short 't' <> metavar "THRESH" <> help "Similarity threshold" <> value 0.9)
@@ -168,17 +182,17 @@ opts = (,,,,,,)
     <*> option str (long "output" <> short 'o' <> metavar "OUTPUT" <> help "Output duplicates file")
     <*> optional (option str (long "bucket-counts" <> short 'c' <> metavar "OUTPUT" <> help "Output bucket counts file"))
     <*> argument str (metavar "PARAGRAPHS" <> help "Paragraphs file")
+    <*> optional (argument str (metavar "PARAGRAPHS" <> help "Paragraphs file"))
 
-main :: IO ()
-main = do
-    (embeddingFile, seed, thresh, nProjections, outputFile, bucketCountsFile, parasFile) <-
-        execParser' 1 (helper <*> opts) mempty
-
+readPartitionParas :: forall n. KnownNat n
+                   => WordEmbedding n
+                   -> Projections n
+                   -> FilePath
+                   -> IO (M.Map Bucket (V.Vector (ParagraphId, V.Vector Term)))
+readPartitionParas embedding projs parasFile = do
     let toTuple :: Paragraph -> (ParagraphId, V.Vector Term)
         toTuple p = (paraId p, V.fromList $ tokenise $ paraToText p)
 
-    ncaps <- getNumCapabilities
-    setNumCapabilities 1
     paras <- V.fromList
         . listStatus "read" 100000
         . internTerms (L.each . L._2 . L.each)
@@ -187,29 +201,47 @@ main = do
     _ <- evaluate $ force paras
     putStrLn $ "Read "++show (V.length paras)++" paragraphs"
 
-    SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
-    projs <- genRandomProjections seed nProjections
-    putStrLn "Read embeddings"
-    setNumCapabilities ncaps
-
-    let !embeddedParas = centerWordEmbedding uncenteredParas
+    -- Perform rough bucketing via word embedding
+    let embeddedParas :: V.Vector (ParagraphId, V.Vector Term, WordVec n)
+        !embeddedParas = centerWordEmbedding uncenteredParas
 
         uncenteredParas :: V.Vector (ParagraphId, V.Vector Term, WordVec n)
         uncenteredParas = V.map embed paras
           where
             embed (pid, terms) = (pid, terms, embedTerms embedding $ V.toList terms)
-
     putStrLn "Computed embedding"
 
-    -- First compute minhash buckets
+    -- Compute minhash buckets
     let partitions :: M.Map Bucket (V.Vector (ParagraphId, V.Vector Term))
         !partitions = partitionParas projs embeddedParas
-        bucketCounts =
-            unlines
-            $ map (\(Bucket a,b) -> unwords [show a, show b])
-            $ parMap rseq (fmap length) $ M.toList partitions
-    traverse_ (`writeFile` bucketCounts) bucketCountsFile
     putStrLn "Finished bucketing"
+    return partitions
+
+writeBucketCounts :: FilePath -> M.Map Bucket (V.Vector (ParagraphId, V.Vector Term)) -> IO ()
+writeBucketCounts outFile partitions =
+    writeFile outFile
+        $ unlines
+        $ map (\(Bucket a,b) -> unwords [show a, show b])
+        $ parMap rseq (fmap length) $ M.toList partitions
+
+main :: IO ()
+main = do
+    (embeddingFile, seed, thresh, nProjections, outputFile, bucketCountsFile, fromParasFile, mbToParasFile) <-
+        execParser' 1 (helper <*> opts) mempty
+
+    SomeWordEmbedding (embedding :: WordEmbedding n) <- readWordEmbedding embeddingFile
+    projs <- genRandomProjections seed nProjections
+    putStrLn "Read embeddings"
+
+    partitions <- case mbToParasFile of
+                    Nothing -> do
+                        fromPartitions <- readPartitionParas embedding projs fromParasFile
+                        return $ Dedup fromPartitions
+                    Just toParasFile -> do
+                        fromPartitions <- readPartitionParas embedding projs fromParasFile
+                        toPartitions   <- readPartitionParas embedding projs toParasFile
+                        return $ Match fromPartitions toPartitions
+    traverse_ (`writeBucketCounts` matchFrom partitions) bucketCountsFile
 
     -- Finally compute all-pairs similarity
     withSharedFile outputFile WriteMode $ \outHdl -> do
@@ -222,12 +254,21 @@ main = do
                       [ unpackParagraphId a <> "\t" <> unpackParagraphId b
                       | (a, b) <- dups ]
 
+        ncaps <- getNumCapabilities
         parMapIOUnordered ncaps (uncurry worker)
             $ zip [0..]
             $ fmap (hashSimilarities' thresh)
-            $ M.elems partitions
+            $ M.elems
+            $ alignPartitions partitions
 
-hashSimilarities' :: Double -> V.Vector (ParagraphId, V.Vector Term) -> [(ParagraphId, ParagraphId)]
+alignPartitions :: MatchOrDedup (M.Map Bucket (V.Vector (ParagraphId, V.Vector Term)))
+                -> M.Map Bucket (MatchOrDedup (V.Vector (ParagraphId, V.Vector Term)))
+alignPartitions (Dedup x) = fmap Dedup x
+alignPartitions (Match from to) = M.intersectionWith Match from to
+
+hashSimilarities' :: Double
+                  -> MatchOrDedup (V.Vector (ParagraphId, V.Vector Term))
+                  -> [(ParagraphId, ParagraphId)]
 hashSimilarities' thresh paras
   | numInBucket > 100 =
     trace (   "% false positives = " <> show (100.0 * (1.0 - (realToFrac numMatches / realToFrac numPairs)))
@@ -238,7 +279,7 @@ hashSimilarities' thresh paras
   | otherwise = matches
   where
     matches = hashSimilarities thresh paras
-    numInBucket = V.length paras
+    numInBucket = V.length $ matchFrom paras
     numPairs = (numInBucket^2 - numInBucket) `div` 2
     numMatches = length matches
 
