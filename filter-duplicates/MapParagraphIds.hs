@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeApplications #-}
 
 import Data.Maybe
 import Data.Monoid
@@ -16,6 +17,7 @@ import CAR.QRelFile
 import CAR.Utils (nubWithKey)
 import Data.List
 
+import qualified Data.Text as T
 
 
 main :: IO ()
@@ -59,7 +61,7 @@ qrelMode =
     where
       run :: FilePath -> FilePath -> FilePath -> IO ()
       run runFile duplicatesFile outputFile = do
-          entries <- readParagraphQRel runFile
+          entries <- readParagraphQRel @T.Text runFile  -- Todo change IsRelevant to format of qrel file
           -- paragraphMapper :: ParagraphId -> ParagraphId
           paragraphMapper <- mapToNewParagraphIds . HM.fromList . parseDuplicates <$> readFile duplicatesFile
 

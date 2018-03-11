@@ -1,33 +1,41 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module CAR.QRelFile where
+module CAR.QRelFile
+  ( RelevanceScale (..)
+  , IsRelevant (..)
+  , GradedRelevance(..)
+  , Annotation (..)
+  , EntityAnnotation (..)
+  , readEntityQRel, writeEntityQRel
+  , readParagraphQRel, writeParagraphQRel
+  )  where
 
 import Data.Semigroup
 import qualified Data.Text as T
 
 import CAR.Types
-import SimplIR.Format.QRel hiding (IsRelevant(..))
+import SimplIR.Format.QRel -- hiding (IsRelevant(..))
 
 -- Ground truth
-data Relevance = Relevant | NonRelevant
-               deriving (Show, Eq, Ord)
-
-instance RelevanceScale Relevance where
-    parseRelevance "0" = NonRelevant
-    parseRelevance "1" = Relevant
-    parseRelevance s   = error $ "binaryRelevance: unknown relevance: "++show s
-
-    formatRelevance NonRelevant = "0"
-    formatRelevance Relevant    = "1"
+-- data Relevance = Relevant | NonRelevant
+--                deriving (Show, Eq, Ord)
+--
+-- instance RelevanceScale Relevance where
+--     parseRelevance "0" = NonRelevant
+--     parseRelevance "1" = Relevant
+--     parseRelevance s   = error $ "binaryRelevance: unknown relevance: "++show s
+--
+--     formatRelevance NonRelevant = "0"
+--     formatRelevance Relevant    = "1"
 
 -- | A relevance annotation of a paragraph in a section
-data Annotation = Annotation SectionPath ParagraphId Relevance
+data Annotation rel = Annotation SectionPath ParagraphId rel
                 deriving (Show, Eq, Ord)
 
-data EntityAnnotation = EntityAnnotation SectionPath PageId Relevance
+data EntityAnnotation rel = EntityAnnotation SectionPath PageId rel
                 deriving (Show, Eq, Ord)
 
-readEntityQRel :: FilePath -> IO [EntityAnnotation]
+readEntityQRel :: RelevanceScale rel => FilePath -> IO [EntityAnnotation rel]
 readEntityQRel path = map to <$> readQRel path
   where
     to (Entry qid doc rel)
@@ -35,13 +43,13 @@ readEntityQRel path = map to <$> readQRel path
         EntityAnnotation spath (packPageId $ T.unpack doc) rel
       | otherwise = error $ "readEntityQRel: Couldn't parse section path: " <> show qid
 
-writeEntityQRel :: FilePath -> [EntityAnnotation] -> IO ()
+writeEntityQRel :: RelevanceScale rel => FilePath -> [EntityAnnotation rel] -> IO ()
 writeEntityQRel path = writeQRel path . map to
   where
     to (EntityAnnotation qid doc rel) =
         Entry (T.pack $ escapeSectionPath qid) (T.pack $ unpackPageId doc) rel
 
-readParagraphQRel :: FilePath -> IO [Annotation]
+readParagraphQRel :: RelevanceScale rel => FilePath -> IO [Annotation rel]
 readParagraphQRel path = map to <$> readQRel path
   where
     to (Entry qid doc rel)
@@ -49,7 +57,7 @@ readParagraphQRel path = map to <$> readQRel path
         Annotation spath (packParagraphId $ T.unpack doc) rel
       | otherwise = error $ "readEntityQRel: Couldn't parse section path: " <> show qid
 
-writeParagraphQRel :: FilePath -> [Annotation] -> IO ()
+writeParagraphQRel :: RelevanceScale rel => FilePath -> [Annotation rel] -> IO ()
 writeParagraphQRel path = writeQRel path . map to
   where
     to (Annotation qid doc rel) =
