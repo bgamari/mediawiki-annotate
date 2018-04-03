@@ -98,9 +98,10 @@ pageSkeletonSections pageId = go mempty mempty
            , DList.toList parentHeadings'
            , children')
            : foldMap (go parentIds' parentHeadings') children
-    go _ _ (Para {})  = []
-    go _ _ (Image {}) = []
-    go _ _ (List {})  = []
+    go _ _ (Para {})    = []
+    go _ _ (Image {})   = []
+    go _ _ (List {})    = []
+    go _ _ (Infobox {}) = []
 
     isSection (Section {}) = True
     isSection _            = False
