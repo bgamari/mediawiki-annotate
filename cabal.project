@@ -20,6 +20,7 @@ packages:
     vendor/*
     vendor/binary-serialise-cbor/*
     benchquality/
+    tqa-import/
 
 package mediawiki-parser
     tests: True
