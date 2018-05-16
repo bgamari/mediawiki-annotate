@@ -620,6 +620,7 @@ entityRunsF = [ GridRun qm rm em it
              | qm <- [minBound..maxBound]
              , rm <- [minBound..maxBound]
              , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
+                           , (ParagraphIdx, EcmX), (ParagraphIdx, EcmRm)
                            , (PageIdx, NoneX), (PageIdx, Rm)]
                            ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
              ]
