@@ -41,5 +41,6 @@ let
 in {
   inherit haskellPackages haskellOverrides;
   inherit (haskellPackages) trecCarPackages;
+  inherit (simplirNix) simplirPackages trec-eval;
   env = haskellPackages.ghcWithHoogle (pkgs: builtins.attrValues haskellPackages.trecCarPackages ++ builtins.attrValues haskellPackages.simplirPackages);
 }
