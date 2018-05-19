@@ -383,7 +383,7 @@ main = do
                   walkIters :: [Eigenvector PageId Double]
                   walkIters = case graphWalkModel of
                                 PageRankWalk -> pageRank teleportation graph'
-                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
+                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds 0 seedNodeDistr graph'
                                   where  betaTotal = teleportation
                                          seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
 
