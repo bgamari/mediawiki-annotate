@@ -331,7 +331,7 @@ main = do
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
-                 | otherwise = traceShow (toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
+                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   count pred = getSum . foldMap f
                     where f x = if pred x then Sum 1 else Sum 0
