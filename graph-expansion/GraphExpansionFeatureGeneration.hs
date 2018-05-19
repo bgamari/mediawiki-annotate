@@ -532,16 +532,18 @@ logistic t =
 --   Learning to Rank, k-fold Cross, restarts
 -- -------------------------------------------
 
-l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
+l2rRankingToRankEntries :: CAR.RunFile.MethodName
+                        -> M.Map Car.RunFile.QueryId (Ranking Score rel QRel.DocumentName)
+                        -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
-                , carDocument = packPageId $ T.unpack doc
-                , carRank = rank
-                , carScore = score
-               , carMethodName = methodName
-               }
-  | (query, Ranking ranking) <- M.toList rankings
-  , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
+                             , carDocument = packPageId $ T.unpack doc
+                             , carRank = rank
+                             , carScore = score
+                             , carMethodName = methodName
+                             }
+  | (query, ranking) <- M.toList rankings
+  , ((score, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
   ]
 
 
