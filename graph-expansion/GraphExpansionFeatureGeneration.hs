@@ -533,7 +533,7 @@ logistic t =
 -- -------------------------------------------
 
 l2rRankingToRankEntries :: CAR.RunFile.MethodName
-                        -> M.Map Car.RunFile.QueryId (Ranking Score rel QRel.DocumentName)
+                        -> M.Map CAR.RunFile.QueryId (Ranking SimplIR.LearningToRank.Score (QRel.DocumentName, rel))
                         -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
@@ -580,12 +580,12 @@ kFoldCross :: forall q docId rel. (Ord q, Show q)
            -> M.Map q [(docId, Features, rel)]
            -> M.Map q [(docId, Features, rel)]
             -- -> ML.Map q (Ranking (docId, rel))
-           -> ReturnWithModelDiagnostics (ML.Map q (Ranking (docId, rel)))
+           -> ReturnWithModelDiagnostics (ML.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel)))
 kFoldCross trainProcedure folds allTrainData allTestData =
     let (result, modelDiag) = unzip $ fmap (\(fidx, queries) -> trainSingleFold fidx queries) $ zip [0 .. ] folds
     in (M.unions result, concat modelDiag)
   where
-    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
+    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel)))
     trainSingleFold foldIdx testQueries =
       let testData :: M.Map q [(docId, Features, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
@@ -594,7 +594,7 @@ kFoldCross trainProcedure folds allTrainData allTestData =
 
           foldId = show foldIdx
           ((model, trainScore), modelDiag) = trainProcedure ("fold-"++foldId) trainData
-          testRanking :: M.Map q (Ranking (docId, rel))
+          testRanking :: M.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel))
           testRanking = rerankRankings' model testData
       in (testRanking, modelDiag)
 
@@ -1271,7 +1271,7 @@ nodeRankingToDistribution :: Ranking.Ranking Double PageId
 nodeRankingToDistribution ranking =
     let proportions = HM.fromList
                     $ [ (node, 1.0 / (realToFrac (rank+1)))
-                      | (rank, (_score, node)) <- zip [1..] $ Ranking.toSortedList ranking
+                      | (rank, (_score, node)) <- zip [1 :: Int ..] $ Ranking.toSortedList ranking
                       , rank <= 20
                       ]
         totals = Foldable.sum proportions
