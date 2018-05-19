@@ -6,5 +6,5 @@ let
   trec-eval = callPackage ./simplir/trec-eval.nix {};
 in stdenv.mkDerivation {
   name = "hi";
-  buildInputs = [ zlib icu icu.out expat lzma trec-eval ];
+  buildInputs = [ zlib icu icu.out expat lzma trec-eval kyotocabinet ];
 }
