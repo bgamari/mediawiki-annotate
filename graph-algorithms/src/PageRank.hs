@@ -142,17 +142,6 @@ persPageRankWithSeedsAndInitial _ _ alpha seeds _
                                , "seeds = " <> show seeds
                                ]
 
-persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
-  | not $ null bads =
-    error $ unlines $
-    [ "persPageRank: nodes with non-positive outgoing weight"
-    , ""
-    ] ++ map show bads
-  where bads = [ (n,outs)
-               | (n,outs) <- HM.toList nodeMap
-               , sum outs <= 0
-               ]
-
 persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
   | otherwise =
     let !nodeRng  = denseRange mapping
