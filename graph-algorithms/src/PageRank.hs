@@ -143,7 +143,7 @@ persPageRankWithSeedsAndInitial _ _ alpha seeds _
                                ]
 
 persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
-  | any (any (< 0)) nodeMap
+  | not $ null badEdges
   = error $ unlines $
     [ "persPageRank: negative edge weights"
     , ""
@@ -151,7 +151,7 @@ persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
   where badEdges = [ (u,v,weight)
                    | (u, outEdges) <- HM.toList nodeMap
                    , (v, weight) <- HM.toList outEdges
-                   , weight < 0
+                   , not $ weight >= 0
                    ]
 
 persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
