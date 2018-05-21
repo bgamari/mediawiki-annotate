@@ -49,7 +49,10 @@ toEntries :: (VG.Vector VU.Vector a)
 toEntries (Eigenvector mapping arr) =
     map (first $ fromDense mapping) (VI.assocs arr)
 
-normalize arr = let n = VI.norm arr in VI.map (/ n) arr
+normalize arr = VI.map (/ n) arr
+  where n = case VI.norm arr of
+              0 -> error "PageRank.normalize: zero"
+              n -> n
 
 relChange :: (VG.Vector VU.Vector a, RealFrac a)
           => Eigenvector n a -> Eigenvector n a -> a
