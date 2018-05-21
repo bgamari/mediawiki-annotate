@@ -166,7 +166,9 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum outEdges
                   , (v, weightUV) <- HM.toList outEdges
-                  , weightUV > 0
+                  , if weightUSum < 1e-14
+                    then error ("persPageRank: zero sum" ++ show outEdges)
+                    else weightUV > 0
                   ]
 
         nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
@@ -201,6 +203,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
         , "alpha = " ++ show alpha
         , "seeds = " ++ show seeds
         , "graph = " ++ show graph
+        , "eigenvector = " ++ show xs
         ]
       | otherwise = xs
     !nodeRng  = denseRange mapping
