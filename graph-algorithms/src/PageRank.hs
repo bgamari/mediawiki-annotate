@@ -142,12 +142,22 @@ persPageRankWithSeedsAndInitial _ _ alpha seeds _
                                , "seeds = " <> show seeds
                                ]
 
-persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
-  | otherwise =
-    let !nodeRng  = denseRange mapping
-        !numNodes = rangeSize nodeRng
+persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
+  | any (any (< 0)) nodeMap
+  = error $ unlines $
+    [ "persPageRank: negative edge weights"
+    , ""
+    ] ++ map show badEdges
+  where badEdges = [ (u,v,weight)
+                   | (u, outEdges) <- HM.toList nodeMap
+                   , (v, weight) <- HM.toList outEdges
+                   , weight < 0
+                   ]
 
-        -- normalized flow of nodes flowing into each node
+persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
+  | numNodes == 0 = error "persPageRank: no nodes"
+  | otherwise =
+    let -- normalized flow of nodes flowing into each node
         inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
         !inbound = VI.accum' nodeRng (HM.unionWith (+)) mempty -- TODO mappend?
                   [ ( toDense mapping v,
@@ -183,6 +193,10 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
 
     in map (Eigenvector mapping)
        $ initial : iterate nextiter initial
+  where
+    !nodeRng  = denseRange mapping
+    !numNodes = rangeSize nodeRng
+
 {-# SPECIALISE persPageRankWithSeeds
                    :: (Eq n, Hashable n, Show n)
                    => Double -> Double -> HS.HashSet n
