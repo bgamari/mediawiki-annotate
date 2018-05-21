@@ -202,33 +202,6 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
                    => Double -> Double -> HS.HashSet n
                    -> Graph n Double -> [Eigenvector n Double] #-}
 
--- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
-addTeleportation :: (RealFrac a, VG.Vector VU.Vector a)
-                 => (DenseId n, DenseId n) -> a
-                 -> Transition n a -> Transition n a
-addTeleportation nodeRange teleportation =
-    VI.map (\w -> (1-teleportation) * w  + teleportation / realToFrac numNodes)
-  where numNodes = rangeSize nodeRange
-
--- | normalize rows to sum to one (also handle case of no outedges)
-normRows :: forall a n. (RealFrac a, VG.Vector VU.Vector a)
-         => (DenseId n, DenseId n) -> Transition n a -> Transition n a
-normRows nodeRange trans =
-    VI.imap (\(i,j) w ->
-        let total = totals VI.! i
-        in if abs total < 1e-6
-             then 1 / realToFrac (rangeSize nodeRange)  -- handle case of no outedges: every node is reachable by 1/N
-             else w / total                             -- outedges are normalized to sum to one
-        ) trans
-  where
-    totals :: VI.Vector VU.Vector (DenseId n) a
-    totals = VI.accum' nodeRange (+) 0
-             [ (i, w)
-             | i <- range nodeRange
-             , j <- range nodeRange
-             , let w = trans VI.! (i,j)
-             ]
-
 test :: Graph Char Double
 test = Graph $ fmap HM.fromList $ HM.fromList
     [ d0 .= [ d2 .= 1],
