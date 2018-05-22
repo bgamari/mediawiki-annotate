@@ -15,14 +15,13 @@ cabal-version:       >=1.10
 
 
 library
-  default-language:    Haskell2010
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:     EdgeDocCorpus,
                        GraphExpansion,
                        MultiTrecRunFile,
                        GraphExpansionExperiments
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base >=4.9 && <4.12,
                        async,
                        bytestring,
                        unordered-containers,
@@ -62,7 +61,7 @@ executable graph-retrieval
   main-is:             GraphRetrieval.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -100,7 +99,7 @@ executable trec-car-graph-expansion
   main-is:             GraphExpansionMain.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -140,7 +139,7 @@ executable trec-car-paragraph-retrieval
   main-is:             ParagraphRetrieval.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -179,7 +178,7 @@ executable trec-car-edgedoc-retrieval
   main-is:             EdgeDocRetrieval.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -311,7 +310,7 @@ executable graph-expansion-build-kb-index
                        simplir-disk-index,
                        trec-car-tools,
                        profunctors,
-                       foldl >=1.2 && <1.4,
+                       foldl,
                        pipes,
                        pipes-safe,
                        text,
@@ -357,7 +356,7 @@ executable graph-expansion-edge-doc
                        simplir-disk-index,
                        trec-car-tools,
                        profunctors,
-                       foldl >=1.2 && <1.4,
+                       foldl >=1.2 && <1.5,
                        pipes,
                        pipes-safe,
                        text,
@@ -376,7 +375,7 @@ executable graph-expansion-feature-generation
   main-is:             GraphExpansionFeatureGeneration.hs
   other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,

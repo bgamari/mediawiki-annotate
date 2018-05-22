@@ -15,11 +15,10 @@ cabal-version:       >=1.10
 
 
 library
-  default-language:    Haskell2010
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:     TrecEvalFile
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base >=4.9 && <4.12,
                        async,
                        bytestring,
                        unordered-containers,
@@ -59,7 +58,7 @@ library
 executable kendall
   main-is:             Kendall.hs
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -99,7 +98,7 @@ executable kendall
 executable runcombination
   main-is:             RunCombination.hs
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
@@ -141,7 +140,7 @@ executable runcombination
 executable qrelsInterset
   main-is:             QrelsIntersect.hs
   ghc-options:         -Wall -threaded -rtsopts -eventlog
-  build-depends:       base >=4.9 && <4.11,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,

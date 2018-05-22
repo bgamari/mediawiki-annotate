@@ -18,7 +18,6 @@ packages:
     assessment-interface/annotation/server
     filter-duplicates/
     vendor/*
-    vendor/binary-serialise-cbor/*
     benchquality/
     tqa-import/
 
