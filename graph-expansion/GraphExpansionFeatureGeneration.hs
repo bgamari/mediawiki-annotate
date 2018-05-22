@@ -331,7 +331,7 @@ main = do
           let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
-                 | otherwise = Ranking.fromList $ map swap $ toEntries eigv
+                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   count pred = getSum . foldMap f
                     where f x = if pred x then Sum 1 else Sum 0
@@ -383,8 +383,8 @@ main = do
                   walkIters :: [Eigenvector PageId Double]
                   walkIters = case graphWalkModel of
                                 PageRankWalk -> pageRank teleportation graph'
-                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds teleportation seedNodeDistr graph'
-                                  where  betaTotal = teleportation
+                                BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds (teleportation/2) seedNodeDistr graph'
+                                  where  betaTotal = teleportation/2
                                          seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
 
 
@@ -532,16 +532,18 @@ logistic t =
 --   Learning to Rank, k-fold Cross, restarts
 -- -------------------------------------------
 
-l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
+l2rRankingToRankEntries :: CAR.RunFile.MethodName
+                        -> M.Map CAR.RunFile.QueryId (Ranking SimplIR.LearningToRank.Score (QRel.DocumentName, rel))
+                        -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
-                , carDocument = packPageId $ T.unpack doc
-                , carRank = rank
-                , carScore = score
-               , carMethodName = methodName
-               }
-  | (query, Ranking ranking) <- M.toList rankings
-  , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
+                             , carDocument = packPageId $ T.unpack doc
+                             , carRank = rank
+                             , carScore = score
+                             , carMethodName = methodName
+                             }
+  | (query, ranking) <- M.toList rankings
+  , ((score, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
   ]
 
 
@@ -578,12 +580,12 @@ kFoldCross :: forall q docId rel. (Ord q, Show q)
            -> M.Map q [(docId, Features, rel)]
            -> M.Map q [(docId, Features, rel)]
             -- -> ML.Map q (Ranking (docId, rel))
-           -> ReturnWithModelDiagnostics (ML.Map q (Ranking (docId, rel)))
+           -> ReturnWithModelDiagnostics (ML.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel)))
 kFoldCross trainProcedure folds allTrainData allTestData =
     let (result, modelDiag) = unzip $ fmap (\(fidx, queries) -> trainSingleFold fidx queries) $ zip [0 .. ] folds
     in (M.unions result, concat modelDiag)
   where
-    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
+    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel)))
     trainSingleFold foldIdx testQueries =
       let testData :: M.Map q [(docId, Features, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
@@ -592,7 +594,7 @@ kFoldCross trainProcedure folds allTrainData allTestData =
 
           foldId = show foldIdx
           ((model, trainScore), modelDiag) = trainProcedure ("fold-"++foldId) trainData
-          testRanking :: M.Map q (Ranking (docId, rel))
+          testRanking :: M.Map q (Ranking SimplIR.LearningToRank.Score (docId, rel))
           testRanking = rerankRankings' model testData
       in (testRanking, modelDiag)
 
@@ -620,6 +622,7 @@ entityRunsF = [ GridRun qm rm em it
              | qm <- [minBound..maxBound]
              , rm <- [minBound..maxBound]
              , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
+                           , (ParagraphIdx, EcmX), (ParagraphIdx, EcmRm)
                            , (PageIdx, NoneX), (PageIdx, Rm)]
                            ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
              ]
@@ -1268,7 +1271,7 @@ nodeRankingToDistribution :: Ranking.Ranking Double PageId
 nodeRankingToDistribution ranking =
     let proportions = HM.fromList
                     $ [ (node, 1.0 / (realToFrac (rank+1)))
-                      | (rank, (_score, node)) <- zip [1..] $ Ranking.toSortedList ranking
+                      | (rank, (_score, node)) <- zip [1 :: Int ..] $ Ranking.toSortedList ranking
                       , rank <= 20
                       ]
         totals = Foldable.sum proportions

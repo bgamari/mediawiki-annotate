@@ -205,7 +205,7 @@ rankByShortestPaths graph seeds
   | nullGraph graph = []
   | otherwise =
       let seeds' = HS.fromList seeds
-          graph' = filterEdges (\s t -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph
+          graph' = filterEdges (\s t _ -> not (s `HS.member` seeds' && t `HS.member` seeds'))  $ graph
           shortestPaths =  [ (n1, n2, Dijkstra.shortestPaths paths n2)
                            | n1 <- toList seeds
                            , let paths = Dijkstra.dijkstra (graph') n1

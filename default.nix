@@ -29,6 +29,7 @@ let
         graph-algorithms     = self.callCabal2nix "graph-algorithms" (localDir ./graph-algorithms) {};
         db-export = self.callCabal2nix "db-export" (localDir ./db-export) {};
         multilang-car = self.callCabal2nix "multilang-car" (localDir ./multilang-car) {};
+        tqa-import = self.callCabal2nix "tqa-import" ./tqa-import {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
       };
@@ -40,5 +41,6 @@ let
 in {
   inherit haskellPackages haskellOverrides;
   inherit (haskellPackages) trecCarPackages;
+  inherit (simplirNix) simplirPackages trec-eval;
   env = haskellPackages.ghcWithHoogle (pkgs: builtins.attrValues haskellPackages.trecCarPackages ++ builtins.attrValues haskellPackages.simplirPackages);
 }
