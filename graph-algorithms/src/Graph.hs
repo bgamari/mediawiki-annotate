@@ -38,8 +38,8 @@ getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e
 getNeighbors (Graph ns) n = fromMaybe mempty $ HM.lookup n ns
 
-filterEdges :: (n -> n -> Bool)
+filterEdges :: (n -> n -> e -> Bool)
             -> Graph.Graph n e -> Graph.Graph n e
 filterEdges pred (Graph.Graph graph) =
     Graph.Graph $ HM.mapWithKey f $ graph
-  where f source = HM.filterWithKey (\target _ -> pred source target)
+  where f source = HM.filterWithKey (\target x -> pred source target x)
