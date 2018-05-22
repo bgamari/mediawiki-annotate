@@ -387,16 +387,18 @@ makeStackedFeatures  collapsedEntityRun entFInfo =
 --   Learning to Rank, k-fold Cross, restarts
 -- -------------------------------------------
 
-l2rRankingToRankEntries :: CAR.RunFile.MethodName -> Rankings rel CAR.RunFile.QueryId QRel.DocumentName -> [CAR.RunFile.EntityRankingEntry]
+l2rRankingToRankEntries :: CAR.RunFile.MethodName
+                        -> M.Map CAR.RunFile.QueryId (Ranking Double (QRel.DocumentName, rel))
+                        -> [CAR.RunFile.EntityRankingEntry]
 l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
-                , carDocument = packPageId $ T.unpack doc
-                , carRank = rank
-                , carScore = score
-               , carMethodName = methodName
-               }
-  | (query, Ranking ranking) <- M.toList rankings
-  , ((score, (doc, rel)), rank) <- ranking `zip` [1..]
+                             , carDocument = packPageId $ T.unpack doc
+                             , carRank = rank
+                             , carScore = score
+                             , carMethodName = methodName
+                             }
+  | (query, ranking) <- M.toList rankings
+  , ((score, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
   ]
 
 
@@ -433,12 +435,12 @@ kFoldCross :: forall q docId rel. (Ord q, Show q)
            -> M.Map q [(docId, Features, rel)]
            -> M.Map q [(docId, Features, rel)]
             -- -> ML.Map q (Ranking (docId, rel))
-           -> ReturnWithModelDiagnostics (ML.Map q (Ranking (docId, rel)))
+           -> ReturnWithModelDiagnostics (ML.Map q (Ranking Double (docId, rel)))
 kFoldCross trainProcedure folds allTrainData allTestData =
     let (result, modelDiag) = unzip $ fmap (\(fidx, queries) -> trainSingleFold fidx queries) $ zip [0 .. ] folds
     in (M.unions result, concat modelDiag)
   where
-    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking (docId, rel)))
+    trainSingleFold :: Int -> [q]  -> ReturnWithModelDiagnostics (M.Map q (Ranking Double (docId, rel)))
     trainSingleFold foldIdx testQueries =
       let testData :: M.Map q [(docId, Features, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allTestData
@@ -447,7 +449,7 @@ kFoldCross trainProcedure folds allTrainData allTestData =
 
           foldId = show foldIdx
           ((model, trainScore), modelDiag) = trainProcedure ("fold-"++foldId) trainData
-          testRanking :: M.Map q (Ranking (docId, rel))
+          testRanking :: M.Map q (Ranking Double (docId, rel))
           testRanking = rerankRankings' model testData
       in (testRanking, modelDiag)
 

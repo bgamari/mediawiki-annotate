@@ -50,6 +50,9 @@ data Bag a = None
            | Two (Bag a) (Bag a)
            deriving (Functor, Foldable, Traversable)
 
+instance Semigroup (Bag a) where
+    (<>) = Two
+
 instance Monoid (Bag a) where
     mempty = None
     mappend = Two

@@ -22,6 +22,7 @@ module Dijkstra
 import Control.DeepSeq
 import Data.Foldable
 import Data.Monoid
+import Data.Semigroup
 import Data.Maybe
 import Data.Hashable
 import qualified Data.HashPSQ as PSQ
@@ -55,10 +56,13 @@ $(derivingUnbox "Distance"
      [| \(finite,x) -> if finite then Finite x else Infinite |]
  )
 
+instance Semigroup e => Semigroup (Distance e) where
+    Finite a <> Finite b = Finite (a <> b)
+    _ <> _               = Infinite
+
 instance Monoid e => Monoid (Distance e) where
     mempty = Finite mempty
-    Finite a `mappend` Finite b = Finite (a <> b)
-    _ `mappend` _               = Infinite
+    mappend = (<>)
 
 --------------------------------------------------
 -- Dijkstra
