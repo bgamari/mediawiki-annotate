@@ -70,7 +70,7 @@ relChange (Eigenvector _ a) (Eigenvector _ b) =
 -- \]
 -- given a graph with edge weights \(e_{ij}\).
 pageRank
-    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
+    :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
     => a                  -- ^ teleportation probability \(\alpha\)
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
@@ -93,7 +93,7 @@ pageRank alpha = persPageRankWithSeeds alpha 0 HS.empty
 -- given a graph with edge weights \(e_{ij}\) and a seed node set
 -- \(\mathcal{S}\).
 persPageRankWithSeeds
-    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
+    :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
     => a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
     -> a                  -- ^ teleportation probability \(\beta\) to be uniformly distributed
                           -- across the seeds
@@ -113,7 +113,7 @@ persPageRankWithSeeds alpha beta seeds graph =
 -- given independently. Note that \( \alpha + \sum_i \beta_i \) must sum to less
 -- than one.
 persPageRankWithNonUniformSeeds
-    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
+    :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
     => a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
     -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) for each seed
     -> Graph n a          -- ^ the graph
@@ -128,7 +128,7 @@ persPageRankWithNonUniformSeeds alpha seeds graph =
 -- | Like 'persPagerankWithSeeds' but allowing the user to specify a
 -- 'DenseMapping' and an initial principle eigenvector.
 persPageRankWithSeedsAndInitial
-    :: forall n a. (RealFrac a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
+    :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
     => DenseMapping n
     -> VI.Vector VU.Vector (DenseId n) a
     -> a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
@@ -136,29 +136,28 @@ persPageRankWithSeedsAndInitial
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 persPageRankWithSeedsAndInitial _ _ alpha seeds _
-  | alpha + sum seeds > 1 = error $ unlines
+  | not (alpha + sum seeds <= 1) = error $ unlines
                                [ "persPageRank: teleportation probability exceeds 1."
                                , "alpha = " <> show alpha
                                , "seeds = " <> show seeds
                                ]
 
 persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
-  | not $ null bads =
-    error $ unlines $
-    [ "persPageRank: nodes with non-positive outgoing weight"
+  | not $ null badEdges
+  = error $ unlines $
+    [ "persPageRank: negative edge weights"
     , ""
-    ] ++ map show bads
-  where bads = [ (n,outs)
-               | (n,outs) <- HM.toList nodeMap
-               , sum outs <= 0
-               ]
+    ] ++ map show badEdges
+  where badEdges = [ (u,v,weight)
+                   | (u, outEdges) <- HM.toList nodeMap
+                   , (v, weight) <- HM.toList outEdges
+                   , not $ weight >= 0
+                   ]
 
 persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
+  | numNodes == 0 = error "persPageRank: no nodes"
   | otherwise =
-    let !nodeRng  = denseRange mapping
-        !numNodes = rangeSize nodeRng
-
-        -- normalized flow of nodes flowing into each node
+    let -- normalized flow of nodes flowing into each node
         inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
         !inbound = VI.accum' nodeRng (HM.unionWith (+)) mempty -- TODO mappend?
                   [ ( toDense mapping v,
@@ -167,7 +166,9 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
                   | (u, outEdges) <- HM.toList nodeMap
                   , let !weightUSum = sum outEdges
                   , (v, weightUV) <- HM.toList outEdges
-                  , weightUV > 0
+                  , if weightUSum < 1e-14
+                    then error ("persPageRank: zero sum" ++ show outEdges)
+                    else weightUV > 0
                   ]
 
         nextiter :: VI.Vector VU.Vector (DenseId n) a -> VI.Vector VU.Vector (DenseId n) a
@@ -192,39 +193,26 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
             | (n, w) <- HM.toList seeds
             ]
 
-    in map (Eigenvector mapping)
+    in map (Eigenvector mapping . checkNaN)
        $ initial : iterate nextiter initial
+  where
+    checkNaN xs
+      | VU.any isNaN $ VI.vector xs = error $ unlines $
+        [ "persPageRank: NaN in result"
+        , ""
+        , "alpha = " ++ show alpha
+        , "seeds = " ++ show seeds
+        , "graph = " ++ show graph
+        , "eigenvector = " ++ show xs
+        ]
+      | otherwise = xs
+    !nodeRng  = denseRange mapping
+    !numNodes = rangeSize nodeRng
+
 {-# SPECIALISE persPageRankWithSeeds
                    :: (Eq n, Hashable n, Show n)
                    => Double -> Double -> HS.HashSet n
                    -> Graph n Double -> [Eigenvector n Double] #-}
-
--- | Smooth transition matrix with teleportation:  (1-teleport) X + teleport 1/N
-addTeleportation :: (RealFrac a, VG.Vector VU.Vector a)
-                 => (DenseId n, DenseId n) -> a
-                 -> Transition n a -> Transition n a
-addTeleportation nodeRange teleportation =
-    VI.map (\w -> (1-teleportation) * w  + teleportation / realToFrac numNodes)
-  where numNodes = rangeSize nodeRange
-
--- | normalize rows to sum to one (also handle case of no outedges)
-normRows :: forall a n. (RealFrac a, VG.Vector VU.Vector a)
-         => (DenseId n, DenseId n) -> Transition n a -> Transition n a
-normRows nodeRange trans =
-    VI.imap (\(i,j) w ->
-        let total = totals VI.! i
-        in if abs total < 1e-6
-             then 1 / realToFrac (rangeSize nodeRange)  -- handle case of no outedges: every node is reachable by 1/N
-             else w / total                             -- outedges are normalized to sum to one
-        ) trans
-  where
-    totals :: VI.Vector VU.Vector (DenseId n) a
-    totals = VI.accum' nodeRange (+) 0
-             [ (i, w)
-             | i <- range nodeRange
-             , j <- range nodeRange
-             , let w = trans VI.! (i,j)
-             ]
 
 test :: Graph Char Double
 test = Graph $ fmap HM.fromList $ HM.fromList
