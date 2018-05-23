@@ -4,7 +4,7 @@
 
 import Data.Bits
 import Data.Foldable
-import Data.Monoid
+import Data.Semigroup hiding (option)
 import Data.List
 import Data.Word
 import Data.Hashable
@@ -49,6 +49,9 @@ data Bag a = None
            | One a
            | Two (Bag a) (Bag a)
            deriving (Functor, Foldable, Traversable)
+
+instance Semigroup (Bag a) where
+    (<>) = Two
 
 instance Monoid (Bag a) where
     mempty = None
@@ -302,7 +305,7 @@ withSharedHandle :: SharedHandle -> (Handle -> IO a) -> IO a
 withSharedHandle (SharedHandle var) =
     bracket (atomically $ takeTMVar var) (atomically . putTMVar var)
 
-parMapIOUnordered :: Monoid b
+parMapIOUnordered :: (Semigroup b, Monoid b)
                   => Int
                   -> (a -> IO b)
                   -> [a]

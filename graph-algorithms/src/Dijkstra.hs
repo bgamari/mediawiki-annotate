@@ -21,7 +21,7 @@ module Dijkstra
 
 import Control.DeepSeq
 import Data.Foldable
-import Data.Monoid
+import Data.Semigroup
 import Data.Maybe
 import Data.Hashable
 import qualified Data.HashPSQ as PSQ
@@ -55,10 +55,13 @@ $(derivingUnbox "Distance"
      [| \(finite,x) -> if finite then Finite x else Infinite |]
  )
 
-instance Monoid e => Monoid (Distance e) where
+instance Semigroup e => Semigroup (Distance e) where
+    Finite a <> Finite b = Finite (a <> b)
+    _ <> _               = Infinite
+
+instance (Semigroup e, Monoid e) => Monoid (Distance e) where
     mempty = Finite mempty
-    Finite a `mappend` Finite b = Finite (a <> b)
-    _ `mappend` _               = Infinite
+    mappend = (<>)
 
 --------------------------------------------------
 -- Dijkstra
@@ -83,7 +86,7 @@ popS = do
 -- | Compute the shortest path lengths and predecessor nodes from the given source node.
 -- By convention the source node has itself as a predecessor.
 dijkstra :: forall n e.
-            ( HasCallStack, Hashable n, Monoid e, Ord e, Ord n, Show e, Show n )
+            ( HasCallStack, Hashable n, Semigroup e, Monoid e, Ord e, Ord n, Show e, Show n )
          => Graph n e -> n -> HM.HashMap n (Distance e, [n])
 dijkstra graph =
     \src -> let s0 = S { sAccum = HM.singleton src (Finite mempty, [src])
@@ -130,7 +133,7 @@ densePopS = do
                              return $ Just (k,p)
      Nothing           -> return Nothing
 
-denseDijkstra :: forall n e. (Hashable n, Eq n, Ord n, Show n, Ord e, Monoid e, Show e, Num e, Unbox e)
+denseDijkstra :: forall n e. (Hashable n, Eq n, Ord n, Show n, Ord e, Semigroup e, Monoid e, Show e, Num e, Unbox e)
               => DenseMapping n
               -> Graph n e
               -> n
@@ -184,14 +187,14 @@ data LS n e acc = LS { -- | Nodes which we already have a distance-from-source f
 -- like the result to cover.
 lazyDijkstra
     :: forall n e.
-       ( Hashable n, Monoid e, Ord e, Ord n )
+       ( Hashable n, Semigroup e, Monoid e, Ord e, Ord n )
     => Graph n e -> n -> [(n, Distance e, [n])]
 lazyDijkstra = lazyDijkstra' (\_dist n _ -> [n])
 
 -- | Compute the @k@ predecessors with shortest paths for each node.
 lazyDijkstraK
     :: forall n e.
-       ( Hashable n, Monoid e, Ord e, Ord n )
+       ( Hashable n, Semigroup e, Monoid e, Ord e, Ord n )
     => Int -> Graph n e -> n -> [(n, Distance e, Seq.Seq (Distance e, n))]
 lazyDijkstraK k = lazyDijkstra' f
   where
@@ -200,7 +203,7 @@ lazyDijkstraK k = lazyDijkstra' f
 
 lazyDijkstra'
     :: forall n e acc.
-       ( Hashable n, Monoid e, Ord e, Ord n )
+       ( Hashable n, Semigroup e, Monoid e, Ord e, Ord n )
     => (Distance e -> n -> Maybe acc -> acc)
        -- ^ @collect dist pred@ collects a new shortest distance @dist@
        -- from the source node. This will be used to update a node's accumulator
