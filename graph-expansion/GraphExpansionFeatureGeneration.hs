@@ -36,6 +36,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Vector.Indexed as VI
 import qualified Data.Vector.Unboxed as VU
+import qualified Text.PrettyPrint.Leijen.Text as PP
 import Data.List
 import Data.List.Split
 import Data.Maybe
@@ -1290,7 +1291,7 @@ exportGraphViz fancyWeightedGraph dotFilename = do
 
 instance Dot.PrintDot PageId where
     unqtDot pageId = Dot.unqtDot $ unpackPageId pageId
-
+    toDot = pure . PP.dquotes . foldMap PP.char . unpackPageId
 
 dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
@@ -1300,7 +1301,7 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
                                                                               , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
                                     }
-    nodes = [ (a, $ unpackPageName $ pageIdToName a) | a <- HS.toList $ nodeSet graph ]
+    nodes = [ (a, unpackPageName $ pageIdToName a) | a <- HS.toList $ nodeSet graph ]
     edges = [ (a,b,w)
             | (a, ns) <- HM.toList $ getGraph graph
             , (b, w) <- HM.toList ns
