@@ -277,7 +277,7 @@ main = do
         dotFileName queryId = (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot")
 
         filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
-        filterGraphTopEdges graph =  filterEdges (\_ _ weight -> weight > 0.5) graph
+        filterGraphTopEdges graph =  filterEdges (\_ _ weight -> weight > 5.0) graph
 
     let combinedFSpace' = mkFeatureSpace
                           $ filter (expSettingToCrit experimentSettings)
