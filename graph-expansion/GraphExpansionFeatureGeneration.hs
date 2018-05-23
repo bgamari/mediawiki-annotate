@@ -71,6 +71,12 @@ import PageRank
 import DenseMapping
 import Graph
 
+import qualified Data.GraphViz as Dot
+import qualified Data.GraphViz.Printing as Dot
+import qualified Data.GraphViz.Attributes.Complete as Dot
+import qualified Data.GraphViz.Commands.IO as Dot
+import Control.Monad
+
 
 import Debug.Trace
 
@@ -267,6 +273,12 @@ main = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
+    let dotFileName :: QueryId -> FilePath
+        dotFileName queryId = (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot")
+
+        filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
+        filterGraphTopEdges graph =  filterEdges (\_ _ weight -> weight > 0.5) graph
+
     let combinedFSpace' = mkFeatureSpace
                           $ filter (expSettingToCrit experimentSettings)
                           $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
@@ -328,10 +340,14 @@ main = do
                   , Right k'' <- pure k'
                   ]
 
-          let graphWalkRanking :: QueryId -> Ranking.Ranking Double PageId
+          let graphWalkRanking :: QueryId -> IO (Ranking.Ranking Double PageId)
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
-                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
+                 | otherwise = do
+                   print $ (take 3 $ toEntries eigv)
+                   exportGraphViz (filterGraphTopEdges graph') (dotFileName query)
+                   return $ Ranking.fromList $ map swap $ toEntries eigv
+--                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
                 where
                   count pred = getSum . foldMap f
                     where f x = if pred x then Sum 1 else Sum 0
@@ -390,8 +406,8 @@ main = do
 
 
               runRanking query = do
-                  let ranking = graphWalkRanking query
-                      rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
+                  ranking <- graphWalkRanking query
+                  let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
                                     ]
 
@@ -1261,6 +1277,34 @@ interleavedPageRankTraining dotProduct graph fspace metric trainData =
     featureNames :: [FeatureName]
     featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames fspace
 
+
+-- ---------------------------------------------
+-- Graphviz export
+-- ---------------------------------------------
+
+exportGraphViz :: Graph PageId Double -> FilePath -> IO ()
+exportGraphViz fancyWeightedGraph dotFilename = do
+    let graph = dotGraph fancyWeightedGraph  --todo highlight seeds
+    Dot.writeDotFile (dotFilename ++ ".dot") graph
+    void $ Dot.runGraphvizCommand Dot.Neato graph Dot.Svg dotFilename
+
+instance Dot.PrintDot PageId where
+    unqtDot pageId = Dot.unqtDot $ unpackPageId pageId
+
+
+dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
+dotGraph graph = Dot.graphElemsToDot params nodes edges
+  where
+    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (w/10.0), Dot.Weight $ Dot.Int (ceiling w) ]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a]
+                                    , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
+                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
+                                    }
+    nodes = [ (a, unpackPageId a) | a <- HS.toList $ nodeSet graph ]
+    edges = [ (a,b,w)
+            | (a, ns) <- HM.toList $ getGraph graph
+            , (b, w) <- HM.toList ns
+            ]
 
 -- ---------------------------------------------
 -- Node rankings to teleportation distribution
