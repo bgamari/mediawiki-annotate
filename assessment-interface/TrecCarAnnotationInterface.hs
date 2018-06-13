@@ -265,9 +265,9 @@ main = do
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
-                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+                 fail $ "Got passage rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
              _  ->
-                 putStrLn $ "no results for section path "++show sectionPath
+                 putStrLn $ "no passage results for section path "++show sectionPath
 
     let createEntityView :: FileNameLookup -> TrecCarRenderHtml.SectionPathWithName -> IO ()
         createEntityView FileNameLookup{..} sectionPathWithNames = do
@@ -281,9 +281,9 @@ main = do
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
-                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+                 fail $ "Got entity rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
              _  ->
-                 putStrLn $ "no results for section path "++show sectionPath
+                 putStrLn $ "no entity results for section path "++show sectionPath
 
     let outlineToFiles FileNameLookup{..} outline = do
             outlineFile <- wrapDestDir $ outlinePathname outline
