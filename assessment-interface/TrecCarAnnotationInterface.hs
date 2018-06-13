@@ -189,7 +189,7 @@ main = do
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupResult sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
-          in queryId  `HM.lookup` trecResultMap
+          in traceShow queryId $  queryId  `HM.lookup` trecResultMap
 
     let lookupTruth :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupTruth sectionPath =
