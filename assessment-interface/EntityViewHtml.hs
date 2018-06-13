@@ -60,12 +60,10 @@ entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMayb
             case sprTruthsMaybe of
                 Just sprTruths -> do
                     let mixed = nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
-                               $ traceShow ("entityViewHtml", (sprQueryId), sprRanking)
                                $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
                 Nothing -> do
                     let mixed = nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
-                               $ traceShow ("entityViewHtml", (sprQueryId), sprRanking)
                                $ (sprRanking)
                     H.ol $ mapM_ renderHtml mixed
 

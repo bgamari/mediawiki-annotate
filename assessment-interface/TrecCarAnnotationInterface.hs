@@ -191,7 +191,7 @@ main = do
         lookupResult sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
               ranking = queryId  `HM.lookup` trecResultMap
-          in traceShow ("lookupResult", queryId, ranking) $ ranking
+          in ranking
 
     let lookupTruth :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupTruth sectionPath =
@@ -261,7 +261,7 @@ main = do
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
              -- todo PassageViewHtml --> EntityViewHtml
-                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
@@ -277,7 +277,7 @@ main = do
                maybeFilePath = entityViewPathname sectionPath
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
-                 let pageHtml = (trace $ "filePath"<> filePath) EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
