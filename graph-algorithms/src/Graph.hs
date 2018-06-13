@@ -8,6 +8,7 @@ module Graph
     , nodeSet
     , getNeighbors
     , filterEdges
+    , dropDisconnected
     ) where
 
 import Control.DeepSeq
@@ -38,8 +39,37 @@ getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e
 getNeighbors (Graph ns) n = fromMaybe mempty $ HM.lookup n ns
 
+-- TODO: This also drops nodes!
 filterEdges :: (n -> n -> e -> Bool)
             -> Graph.Graph n e -> Graph.Graph n e
 filterEdges pred (Graph.Graph graph) =
     Graph.Graph $ HM.mapWithKey f $ graph
   where f source = HM.filterWithKey (\target x -> pred source target x)
+
+-- | Filter nodes and their associated edges.
+filterNodes :: (n -> Bool) -> Graph.Graph n e -> Graph.Graph n e
+filterNodes pred (Graph.Graph g) =
+    Graph.Graph $ fmap (HM.filterWithKey f) $ HM.filterWithKey f g
+  where
+    f src _ = pred src
+
+nodeDegree :: (Eq n, Hashable n, Semigroup e) => Graph.Graph n e -> HM.HashMap n e
+nodeDegree (Graph.Graph g) = HM.fromListWith (<>)
+    [ (n, w)
+    | (n, ms) <- HM.toList g
+    , (m, w) <- HM.toList ms
+    ]
+
+dropDisconnected :: (Eq n, Hashable n) => Graph.Graph n e -> Graph.Graph n e
+dropDisconnected g =
+    filterNodes isDisconnected g
+  where
+    isDisconnected n
+      | Just deg <- HM.lookup n symNodeDegree  = deg == 0
+      | otherwise                              = True
+
+    symNodeDegree = HM.fromListWith (+) $ concat
+        [ [(n, 1), (m, 1)]
+        | (n, ms) <- HM.toList $ getGraph g
+        , (m, _) <- HM.toList ms
+        ]

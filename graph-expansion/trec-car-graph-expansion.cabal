@@ -388,6 +388,7 @@ executable graph-expansion-feature-generation
                        deepseq,
                        simplir-galago,
                        optparse-applicative >= 0.12,
+                       wl-pprint-text,
                        hashable,
                        heaps,
                        psqueues,
