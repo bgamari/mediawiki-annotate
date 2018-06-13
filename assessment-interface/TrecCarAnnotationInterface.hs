@@ -185,11 +185,12 @@ main = do
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems trecRunItemToEntryItemMaybePara optsQrelFile
 
+    print trecResultMap
 
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupResult sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
-          in traceShow queryId $  queryId  `HM.lookup` trecResultMap
+          in queryId  `HM.lookup` trecResultMap
 
     let lookupTruth :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupTruth sectionPath =
