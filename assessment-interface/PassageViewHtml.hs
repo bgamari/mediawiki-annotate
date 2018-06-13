@@ -60,7 +60,13 @@ passageMixedRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe
                                $ traceShow ("passageMixedRankingToHtml", (sprQueryId), sprRanking)
                                $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
-                Nothing -> mempty
+                Nothing -> do
+                    let mixed = nubBy ((==) `on` (paraId . entryItem)) $ sortBy (compare `on` (paraId . entryItem))
+                               $ traceShow ("passageMixedRankingToHtml", (sprQueryId), sprRanking)
+                               $ (sprRanking)
+                    H.ol $ mapM_ renderHtml mixed
+
+
 
 
 
