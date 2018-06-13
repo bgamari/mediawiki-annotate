@@ -115,16 +115,19 @@ readCarFile path = handle tryWithoutHeader $ do
         xs <- readRawCborList path
         return (invalidProvenance, xs)
 
-
 readCarPagesOrOutline :: FilePath -> IO (Either [Page] [Stub])
-readCarPagesOrOutline path = do
+readCarPagesOrOutline path =
+    snd <$> readCarPagesOrOutlineWithProvenance path
+
+readCarPagesOrOutlineWithProvenance :: FilePath -> IO (Provenance, Either [Page] [Stub])
+readCarPagesOrOutlineWithProvenance path = do
     hdr <- readCarHeader path
-    case fmap headerType hdr of
+    res <- case fmap headerType hdr of
         Nothing -> Left <$> readPagesFile path
         Just PagesFile -> Left <$> readPagesFile path
         Just OutlinesFile -> Right <$> readOutlinesFile path
         Just other -> fail $ "File "<> (show path) <> " of type " <> (show other) <> ", but expected PagesFile or OutlinesFile here."
-
+    return (maybe invalidProvenance provenance hdr, res)
 
 readCarHeader :: FilePath -> IO (Maybe Header)
 readCarHeader path = handle tryWithoutHeader (Just . fst <$> readCborList @Header @() path)
@@ -161,12 +164,12 @@ readOutlinesFile = fmap snd . readCarFile
 readOutlinesFileWithProvenance :: FilePath -> IO (Provenance, [Stub])
 readOutlinesFileWithProvenance = readCarFile
 
-readPagesOrOutlinesAsPages :: FilePath -> IO [Page]
-readPagesOrOutlinesAsPages path = do
-    result <- readCarPagesOrOutline path
+readPagesOrOutlinesAsPagesWithProvenance :: FilePath -> IO (Provenance, [Page])
+readPagesOrOutlinesAsPagesWithProvenance path = do
+    (prov, result) <- readCarPagesOrOutlineWithProvenance path
     case result of
-        Left pages -> return pages
-        Right stubs -> return $ fmap stubToPage stubs
+        Left pages -> return (prov, pages)
+        Right stubs -> return (prov, fmap stubToPage stubs)
   where stubToPage Stub{..} =
           Page { pageName = stubName
                , pageId = stubPageId
@@ -174,3 +177,8 @@ readPagesOrOutlinesAsPages path = do
                , pageMetadata = stubMetadata
                , pageSkeleton = stubSkeleton
                }
+
+readPagesOrOutlinesAsPages :: FilePath ->  IO [Page]
+readPagesOrOutlinesAsPages path = do
+    ( _ , pages ) <- readPagesOrOutlinesAsPagesWithProvenance path
+    return pages
