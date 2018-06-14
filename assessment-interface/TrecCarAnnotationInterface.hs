@@ -191,11 +191,13 @@ main = do
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems trecRunItemToEntryItemMaybePara optsQrelFile
 
+    -- print trecResultMap
 
     let lookupResult :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupResult sectionPath =
           let queryId = T.pack $ escapeSectionPath sectionPath
-          in queryId  `HM.lookup` trecResultMap
+              ranking = queryId  `HM.lookup` trecResultMap
+          in ranking
 
     let lookupTruth :: SectionPath -> Maybe [TrecCarRenderHtml.PassageRankingEntry]
         lookupTruth sectionPath =
@@ -265,13 +267,13 @@ main = do
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
              -- todo PassageViewHtml --> EntityViewHtml
-                 let pageHtml = (trace $ "filePath"<> filePath) PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = PassageViewHtml.passageMixedRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
-                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+                 fail $ "Got passage rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
              _  ->
-                 putStrLn $ "no results for section path "++show sectionPath
+                 putStrLn $ "no passage results for section path "++show sectionPath
 
     let createEntityView :: FileNameLookup -> TrecCarRenderHtml.SectionPathWithName -> IO ()
         createEntityView FileNameLookup{..} sectionPathWithNames = do
@@ -281,13 +283,13 @@ main = do
                maybeFilePath = entityViewPathname sectionPath
            case (sectionResults, maybeFilePath) of
              (Just rankingEntries, Just filePath) -> do
-                 let pageHtml = (trace $ "filePath"<> filePath) EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
+                 let pageHtml = EntityViewHtml.entityPassageRankingToHtml sectionPathWithNames rankingEntries sectionTruthsMaybe
                  passageFile <- wrapDestDir filePath
                  BSL.writeFile passageFile $ H.renderHtml pageHtml
              (Just _rankingEntries, Nothing) ->
-                 fail $ "Got rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
+                 fail $ "Got entity rankEntries but Nothing as filepath. SectionPath = "<> show sectionPath
              _  ->
-                 putStrLn $ "no results for section path "++show sectionPath
+                 putStrLn $ "no entity results for section path "++show sectionPath
 
     let outlineToFiles FileNameLookup{..} outline = do
             outlineFile <- wrapDestDir $ outlinePathname outline

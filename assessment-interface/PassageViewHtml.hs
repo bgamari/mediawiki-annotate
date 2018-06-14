@@ -10,7 +10,7 @@ import Data.Function
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ((!))
 import Text.Blaze.Html5.Attributes as HA
-
+import Debug.Trace
 import CAR.Types
 
 import TrecCarRenderHtml
@@ -56,9 +56,15 @@ passageMixedRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMaybe
 
             case sprTruthsMaybe of
                 Just sprTruths -> do
-                    let mixed = nubBy ((==) `on` (paraId . entryItem)) $ sortBy (compare `on` (paraId . entryItem)) $ (sprRanking ++ sprTruths)
+                    let mixed = nubBy ((==) `on` (paraId . entryItem)) $ sortBy (compare `on` (paraId . entryItem))
+                               $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
-                Nothing -> mempty
+                Nothing -> do
+                    let mixed = nubBy ((==) `on` (paraId . entryItem)) $ sortBy (compare `on` (paraId . entryItem))
+                               $ (sprRanking)
+                    H.ol $ mapM_ renderHtml mixed
+
+
 
 
 

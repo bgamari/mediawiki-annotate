@@ -47,7 +47,7 @@ opts = subparser
         f <$> argument str (help "input file" <> metavar "FILE")
       where
         f inputFile = do
-            pages <- readPagesFile inputFile
+            pages <- readPagesOrOutlinesAsPages inputFile
             mapM_ (T.putStrLn . getPageName . pageName) pages
 
     dumpSections =
@@ -55,7 +55,7 @@ opts = subparser
           <*> flag False True (long "raw" <> help "only section paths - no pagenames")
       where
         f inputFile raw = do
-            pages <- readPagesFile inputFile
+            pages <- readPagesOrOutlinesAsPages inputFile
             let sectionpathlist p = fmap escapeSectionPath
                                   $ pageSectionPaths p
                 pageNameStr p = (T.unpack $ getPageName $ pageName p)
@@ -74,15 +74,15 @@ opts = subparser
       where
         f :: FilePath -> S.Set PageName -> LinkStyle -> [SiteId -> PageId] -> HS.HashSet PageId-> IO ()
         f inputFile pageNames linkStyle targetPageIds1 targetPageIds2  = do
-            siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+            siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
             if S.null pageNames
               then do
-                  pages <- readPagesFile inputFile
+                  pages <- readPagesOrOutlinesAsPages inputFile
                   let pages' =  filter (searchTargets (targetPageIds siteId)) pages
                   mapM_ printPage pages'
               else do
                   anns <- CAR.openAnnotations inputFile
-  --                 siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+  --                 siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
                   let pageIds = map (pageNameToId siteId) $ S.toList pageNames
                   mapM_ printPage $ filter (searchTargets (targetPageIds siteId))
                                 $ mapMaybe (`CAR.lookupPage` anns) pageIds
@@ -104,15 +104,15 @@ opts = subparser
       where
         f :: FilePath -> S.Set PageName -> [SiteId -> PageId] -> HS.HashSet PageId -> IO ()
         f inputFile pageNames targetPageIds1 targetPageIds2 = do
-            siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+            siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
             if S.null pageNames
               then do
-                  pages <- readPagesFile inputFile
+                  pages <- readPagesOrOutlinesAsPages inputFile
                   let pages' =  filter (searchTargets (targetPageIds siteId)) pages
                   mapM_ printParagraphId pages'
               else do
                   anns <- CAR.openAnnotations inputFile
-  --                 siteId <- wikiSite . fst <$> readPagesFileWithProvenance inputFile
+  --                 siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
                   let pageIds = map (pageNameToId siteId) $ S.toList pageNames
                   mapM_ printParagraphId $ filter (searchTargets (targetPageIds siteId))
                                 $ mapMaybe (`CAR.lookupPage` anns) pageIds
@@ -135,7 +135,7 @@ opts = subparser
       where
         f :: FilePath -> IO ()
         f inputFile = do
-                pages <- readPagesFile inputFile
+                pages <- readPagesOrOutlinesAsPages inputFile
                 mapM_ printPage pages
 
           where printPage = putStrLn . entityIdFromPage
@@ -173,7 +173,7 @@ opts = subparser
         f <$> argument str (help "input file" <> metavar "FILE")
       where
         f inputFile = do
-            pages <- readPagesFile inputFile
+            pages <- readPagesOrOutlinesAsPages inputFile
             TL.putStrLn $ TB.toLazyText
                 $ mconcat
                 $ intersperse (TB.singleton '\n')

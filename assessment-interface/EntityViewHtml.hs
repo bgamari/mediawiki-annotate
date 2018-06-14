@@ -8,6 +8,10 @@ module EntityViewHtml where
 import qualified Text.Blaze.Html5 as H
 import Text.Blaze.Html5 ((!))
 import Text.Blaze.Html5.Attributes as HA
+import CAR.Types
+import Data.Function
+import Data.List
+import Debug.Trace
 
 import TrecCarRenderHtml
 
@@ -45,9 +49,24 @@ entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMayb
                 entityPassageToAnnotationHtml queryId (entryItem entry) []
               where queryId = sectionPathToQueryId sprQueryId
 
+            toId :: (Entity, Paragraph)  -> (PageId, ParagraphId)
+            toId (entity, paragraph) = (entityPageId entity, paraId paragraph)
+
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
             H.h1 "Entities with Passages"
-            H.ol $ mapM_ renderHtml sprRanking  -- todo urgent sort by entity
+            --H.ol $ mapM_ renderHtml sprRanking  -- todo urgent sort by entity
+
+
+            case sprTruthsMaybe of
+                Just sprTruths -> do
+                    let mixed = nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
+                               $ (sprRanking ++ sprTruths)
+                    H.ol $ mapM_ renderHtml mixed
+                Nothing -> do
+                    let mixed = nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
+                               $ (sprRanking)
+                    H.ol $ mapM_ renderHtml mixed
+
 
 
 

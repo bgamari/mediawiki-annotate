@@ -62,7 +62,7 @@ nodeDegree (Graph.Graph g) = HM.fromListWith (<>)
 
 dropDisconnected :: (Eq n, Hashable n) => Graph.Graph n e -> Graph.Graph n e
 dropDisconnected g =
-    filterNodes isDisconnected g
+    filterNodes (not . isDisconnected) g
   where
     isDisconnected n
       | Just deg <- HM.lookup n symNodeDegree  = deg == 0
