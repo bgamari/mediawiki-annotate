@@ -20,6 +20,7 @@ packages:
     vendor/*
     benchquality/
     tqa-import/
+    epfl-section-recommendation/
 
 package mediawiki-parser
     tests: True

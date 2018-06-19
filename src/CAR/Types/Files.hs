@@ -25,7 +25,7 @@ module CAR.Types.Files
       -- ** Paragraphs
     , readParagraphsFile, readParagraphsFileWithProvenance
       -- ** Outlines
-    , readOutlinesFile
+    , readOutlinesFile, readOutlinesFileWithProvenance
     , readPagesOrOutlinesAsPages, readPagesOrOutlinesAsPagesWithProvenance
       -- * Header type
     , FileType(..)
