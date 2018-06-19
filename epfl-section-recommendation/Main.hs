@@ -58,6 +58,11 @@ main = do
     (prov, outlines) <- readOutlinesFileWithProvenance inputOutlinesFile
        :: IO (Provenance, [Stub])
 
+    let renameCat (PageName cat) =
+            let cat' =  T.map space2Underscore $ fromJust  $ T.stripPrefix "Category:" cat
+            in PageName cat'
+          where space2Underscore ' ' = '_'
+                space2Underscore x = x
 
     let recommendSections :: Stub -> [SectionHeading] -- Ranking Double SectionHeading
         recommendSections outline =
@@ -81,12 +86,13 @@ main = do
         toStub headings stub =
             stub { stubSkeleton =  skel }
           where skel = [ Section sh (sectionHeadingToId sh) []
-                       | heading <- headings
-                       , let sh = (SectionHeading heading)
+                       | sh <- headings
                        ]
 
 
-    let newOutlines = fmap (toStub . recommendSections) $ take 2 $ outlines
+    let newOutlines :: [Stub]
+        newOutlines = fmap (\stub -> toStub (recommendSections stub) stub) $ outlines
+
 
     writeCarFile outputOutlinesfile prov newOutlines
 
