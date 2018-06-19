@@ -15,7 +15,6 @@ module CAR.KnowledgeBase
 
 import Data.Semigroup
 
-import Data.Hashable (Hashable)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T

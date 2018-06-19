@@ -26,6 +26,7 @@ executable trec-car-annotation-interface
                        blaze-html >=0.8 && <0.10,
                        optparse-applicative,
                        aeson >= 1.0,
+                       dlist,
                        text >= 1.2,
                        simplir,
                        random,

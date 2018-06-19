@@ -27,6 +27,7 @@ import System.Random.Shuffle
 import Control.Monad.Random
 
 import qualified Data.Aeson as Aeson
+import qualified Data.DList as DList
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashMap.Lazy as HM.Lazy
 import qualified Data.ByteString.Lazy as BSL
@@ -71,16 +72,19 @@ trecQrelItems :: forall item. (TrecRun.DocumentName -> Maybe item) -> FilePath
               -> IO (HM.Lazy.HashMap TrecQrel.QueryId [RankingEntry item] )
 trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
     qrelEntries <- TrecQrel.readQRel qrelfile
-    let qrelMap =   HM.fromListWith (++)
-                    [ ( TrecQrel.queryId entry
-                      , [QrelEntry { entryItem = item
-                                   , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
-                                   }]
-                      )
-                    | entry <- qrelEntries
-                    ,TrecQrel.relevance entry /= TrecQrel.NotRelevant
-                    ,Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
-                    ]
+    let qrelMap =
+            fmap DList.toList $
+            HM.fromListWith (<>)
+            [ ( TrecQrel.queryId entry
+              , DList.singleton
+                $ QrelEntry { entryItem = item
+                            , entryLabel = fromBinaryRelevance $ TrecQrel.relevance entry
+                            }
+              )
+            | entry <- qrelEntries
+            , TrecQrel.relevance entry /= TrecQrel.NotRelevant
+            , Just item <- pure $ trecRunItemToEntryItemMaybe $ TrecQrel.documentName entry
+            ]
     return qrelMap
 
 
@@ -92,11 +96,13 @@ readTrecRanking trecRunItemToEntryItem path = do
   where
     sortIt = sortBy (comparing entryScore)
     toMap contents =
-        HM.fromListWith (++) $
+        fmap DList.toList $
+        HM.fromListWith (<>)
         [ ( TrecRun.queryId entry
-          , [RankingEntry { entryItem = item
-                          , entryScore = TrecRun.documentScore entry
-                          }]
+          , DList.singleton
+            $ RankingEntry { entryItem = item
+                           , entryScore = TrecRun.documentScore entry
+                           }
           )
         | entry <- contents
         , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry
