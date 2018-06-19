@@ -59,7 +59,11 @@ main = do
        :: IO (Provenance, [Stub])
 
     let renameCat (PageName cat) =   -- TREC CAR cat -> epfl cat
-            let cat' =  T.map space2Underscore $ fromJust  $ T.stripPrefix "Category:" cat
+            let cat' =
+                  case T.stripPrefix "Category:" cat of
+                      Just name -> T.map space2Underscore name
+                      Nothing -> cat
+--                 cat' =  T.map space2Underscore $ fromJust  $ T.stripPrefix "Category:" cat
             in PageName cat'
           where space2Underscore ' ' = '_'
                 space2Underscore x = x
