@@ -59,6 +59,13 @@ pageLinks = foldMap pageSkeletonLinks . pageSkeleton
 pageParas :: Page -> [Paragraph]
 pageParas = foldMap pageSkeletonParas . pageSkeleton
 
+pageParasWithPaths :: Page -> [(SectionPath, Paragraph)]
+pageParasWithPaths page =
+    [ (sectionPath, p)
+    | (sectionPath, _, skels) <- pageSections page
+    , Para p <- skels -- TODO: handle paragraphs in other node types
+    ]
+
 pageSkeletonParas :: PageSkeleton -> [Paragraph]
 pageSkeletonParas (Section _ _ children) = foldMap pageSkeletonParas children
 pageSkeletonParas (Para paragraph) = [paragraph]
