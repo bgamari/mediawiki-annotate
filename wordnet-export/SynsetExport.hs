@@ -45,7 +45,7 @@ createTables =
                ( id integer PRIMARY KEY
                , dict_offset integer NOT NULL
                , pos char NOT NULL
-               , words array(text) NOT NULL
+               , words text[] NOT NULL
                )
       |]
 
