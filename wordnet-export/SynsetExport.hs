@@ -20,6 +20,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Char8 as BS
 import Data.List.Split (chunksOf)
 import System.FilePath
+import System.IO.Unsafe
 
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.Types
@@ -29,15 +30,22 @@ import Database.PostgreSQL.Simple.FromField
 
 import Options.Applicative
 
-import NLP.WordNet as WordNet
+import CAR.Types
+import CAR.Utils
+import qualified NLP.WordNet as WordNet
+import qualified POS
+import qualified UKB
 
 main :: IO ()
 main = do
-    let opts = (,) <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
-                   <*> argument str (metavar "DIR" <> help "WordNet dictionary directory")
-    (connStr, path) <- execParser $ info (helper <*> opts) mempty
+    let opts = (,,,)
+            <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
+            <*> option str (short 'D' <> long "ukb-dict" <> metavar "DICT" <> help "ukb dictionary file")
+            <*> option str (short 'K' <> long "ukb-kb" <> metavar "KB" <> help "ukb knowledge base file")
+            <*> option str (short 'W' <> long "wordnet-dict" <> metavar "DIR" <> help "WordNet dictionary directory")
+    (connStr, ukbDict, ukbKb, wnPath) <- execParser $ info (helper <*> opts) mempty
     let openConn = connectPostgreSQL (BS.pack connStr)
-    toPostgres openConn path
+    toPostgres openConn wnPath ukbDict ukbKb
 
 createTables :: [Query]
 createTables =
@@ -56,8 +64,8 @@ createTables =
       |]
     ]
 
-toPostgres :: IO Connection -> FilePath -> IO ()
-toPostgres openConn dictPath = do
+toPostgres :: IO Connection -> FilePath -> FilePath -> FilePath -> IO ()
+toPostgres openConn dictPath ukbDict ukbKb = do
     conn <- openConn
     mapM_ (execute_ conn) createTables
     mapM_ (exportSynsets openConn . (dictPath </>)) [ "data.verb", "data.noun", "data.adv", "data.adj" ]
@@ -74,10 +82,40 @@ exportSynsets openConn dbFile = do
         (map synsetToRow synsets)
   where
     synsetToRow :: WordNet.Synset -> (Int, String, PGArray T.Text)
-    synsetToRow Synset{ssOffset=Offset off, ..} =
-        (off, [toPosChar ssPos], PGArray $ map (TE.decodeUtf8 . ssWord) ssWords)
+    synsetToRow WordNet.Synset{ssOffset=WordNet.Offset off, ..} =
+        (off, [toPosChar ssPos], PGArray $ map (TE.decodeUtf8 . WordNet.ssWord) ssWords)
 
-    toPosChar Verb = 'v'
-    toPosChar Noun = 'n'
-    toPosChar Adj  = 'j'
-    toPosChar Adv  = 'r'
+    toPosChar WordNet.Verb = 'v'
+    toPosChar WordNet.Noun = 'n'
+    toPosChar WordNet.Adj  = 'j'
+    toPosChar WordNet.Adv  = 'r'
+
+exportMentions :: FilePath -> FilePath -> IO Connection -> [Page] -> IO ()
+exportMentions ukbDict ukbKb openConn pages = do
+    conn <- openConn
+    let paragraphs :: [(SectionPath, Paragraph)]
+        paragraphs = foldMap pageParasWithPaths pages
+    tagger <- POS.startTagger
+    ukb <- UKB.startUKB ukbDict ukbKb
+    print $ map (\(sp, para) -> (sp, paragraphMentions tagger ukb para)) paragraphs
+    return ()
+
+paragraphMentions :: POS.Tagger -> UKB.UKB -> Paragraph -> [UKB.ConceptId]
+paragraphMentions tagger ukb para = unsafePerformIO $ do
+    tags <- POS.posTag tagger $ TL.toStrict (paraToText para)
+    let tokens =
+            [ UKB.InputToken (UKB.Lemma tok) pos' (UKB.WordId n)
+            | (n, (tok, pos)) <- zip [0..] tags
+            , Just pos' <- pure $ toUkbPos pos
+            ]
+    res <- UKB.run ukb tokens
+    return [ concept | UKB.OutputToken _ concept <- res ]
+  where
+    toUkbPos :: POS.POS -> Maybe UKB.POS
+    toUkbPos pos =
+        case pos of
+          POS.Noun      -> Just UKB.Noun
+          POS.Verb      -> Just UKB.Verb
+          POS.Adjective -> Just UKB.Adj
+          POS.Adverb    -> Just UKB.Adv
+          _             -> Nothing
