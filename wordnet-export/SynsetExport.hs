@@ -60,19 +60,19 @@ toPostgres :: IO Connection -> FilePath -> IO ()
 toPostgres openConn dictPath = do
     conn <- openConn
     mapM_ (execute_ conn) createTables
+    mapM_ (exportSynsets openConn . (dictPath </>)) [ "data.verb", "data.noun", "data.adv", "data.adj" ]
 
-    mapM_ (exportSynsets . (dictPath </>)) [ "data.verb", "data.noun", "data.adv", "data.adj" ]
+exportSynsets :: IO Connection -> FilePath -> IO ()
+exportSynsets openConn dbFile = do
+    conn <- openConn
+    synsets <- WordNet.iterSynsets dbFile
+    void $ executeMany
+        conn
+        [sql| INSERT INTO synsets (dict_offset, pos, words)
+              SELECT x.column1, x.column2, x.column3
+              FROM (VALUES (?,?,?)) AS x |]
+        (map synsetToRow synsets)
   where
-    exportSynsets dbFile = do
-        conn <- openConn
-        synsets <- WordNet.iterSynsets dbFile
-        void $ executeMany
-            conn
-            [sql| INSERT INTO synsets (dict_offset, pos, words)
-                  SELECT x.column1, x.column2, x.column3
-                  FROM (VALUES (?,?,?)) AS x |]
-            (map synsetToRow synsets)
-
     synsetToRow :: WordNet.Synset -> (Int, String, PGArray T.Text)
     synsetToRow Synset{ssOffset=Offset off, ..} =
         (off, [toPosChar ssPos], PGArray $ map (TE.decodeUtf8 . ssWord) ssWords)
