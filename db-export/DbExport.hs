@@ -53,6 +53,7 @@ createTables =
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs
                ( id serial PRIMARY KEY
                , paragraph_id text NOT NULL
+               , section_path text NOT NULL UNIQUE
                , fragment integer REFERENCES fragments (id)
                , content text
                )
@@ -122,7 +123,8 @@ finishSchema =
     , [sql| ALTER TABLE paragraphs SET LOGGED |]
     , [sql| ALTER TABLE links SET LOGGED |]
     , [sql| CREATE INDEX ON fragments (title)  |]
-    , [sql| CREATE INDEX ON paragraphs (paragraph_id)  |]
+    , [sql| CREATE INDEX ON paragraphs (paragraph_id) |]
+    , [sql| CREATE INDEX ON paragraphs (section_path) |]
     , [sql| CREATE INDEX ON paragraphs USING GIN (to_tsvector('english', content)) |]
     , [sql| ANALYZE |]
     ]
@@ -200,9 +202,9 @@ toPostgres openConn pagesFile = do
     exportParagraphs conns lookupFragmentId = do
         putStrLn "exporting paragraphs..."
         pages <- readPagesFile pagesFile
-        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, TL.Text)]
+        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, String, TL.Text)]
             pageParaRows page =
-              [ (paraId para, fragId, text)
+              [ (paraId para, fragId, escapeSectionPath path, text)
               | (path, _, skel) <- pageSections page
               , Para para <- skel
               , let text = paraToText para
@@ -210,9 +212,9 @@ toPostgres openConn pagesFile = do
               ]
         insertChunks
             conns
-            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, content )
-                  SELECT x.column1, x.column2, x.column3
-                  FROM (VALUES (?,?,?)) AS x |]
+            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, section_path, content )
+                  SELECT x.column1, x.column2, x.column3, x.column4
+                  FROM (VALUES (?,?,?,?)) AS x |]
             (map (foldMap pageParaRows) $ chunksOf 100 pages)
 
     exportLinks conns lookupFragmentId = do
