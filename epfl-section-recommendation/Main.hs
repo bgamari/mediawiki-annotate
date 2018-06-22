@@ -58,8 +58,12 @@ main = do
     (prov, outlines) <- readOutlinesFileWithProvenance inputOutlinesFile
        :: IO (Provenance, [Stub])
 
-    let renameCat (PageName cat) =
-            let cat' =  T.map space2Underscore $ fromJust  $ T.stripPrefix "Category:" cat
+    let renameCat (PageName cat) =   -- TREC CAR cat -> epfl cat
+            let cat' =
+                  case T.stripPrefix "Category:" cat of
+                      Just name -> T.map space2Underscore name
+                      Nothing -> cat
+--                 cat' =  T.map space2Underscore $ fromJust  $ T.stripPrefix "Category:" cat
             in PageName cat'
           where space2Underscore ' ' = '_'
                 space2Underscore x = x
@@ -67,12 +71,12 @@ main = do
     let recommendSections :: Stub -> [SectionHeading] -- Ranking Double SectionHeading
         recommendSections outline =
            let sectionRanking =
-                   R.toSortedList
+                   R.toSortedList            -- [heading]
                    $ R.takeTop 10
                    $ R.fromList
-                   $ map swap
+                   $ map swap                -- [(score, heading)]
                    $ M.toList
-                   $ M.fromListWith (+)
+                   $ M.fromListWith (+)      -- now we have (heading -> aggregated score)
                    $ [ (sectionHeading, weight)
                     | Just cats <- pure $ getMetadata _CategoryNames $ stubMetadata outline
                     , cat <- cats
