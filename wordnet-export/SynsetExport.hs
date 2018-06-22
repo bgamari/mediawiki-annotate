@@ -34,7 +34,7 @@ import NLP.WordNet as WordNet
 main :: IO ()
 main = do
     let opts = (,) <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
-                   <*> argument str (help "WordNet dictionary directory")
+                   <*> argument str (metavar "DIR" <> help "WordNet dictionary directory")
     (connStr, path) <- execParser $ info (helper <*> opts) mempty
     let openConn = connectPostgreSQL (BS.pack connStr)
     toPostgres openConn path

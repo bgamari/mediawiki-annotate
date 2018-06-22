@@ -36,7 +36,7 @@ import CAR.Utils
 main :: IO ()
 main = do
     let opts = (,) <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
-                   <*> argument str (help "Articles file")
+                   <*> argument str (metavar "ARTICLES" <> help "Articles file")
     (connStr, path) <- execParser $ info (helper <*> opts) mempty
     let openConn = connectPostgreSQL (BS.pack connStr)
     toPostgres openConn path
