@@ -104,6 +104,8 @@ exportMentions ukbDict ukbKb openConn pages = do
     tagger <- POS.startTagger
     ukb <- UKB.startUKB ukbDict ukbKb
     print $ map (\(sp, para) -> (sp, paragraphMentions tagger ukb para)) paragraphs
+    POS.closeTagger tagger
+    UKB.closeUKB ukb
     return ()
 
 paragraphMentions :: POS.Tagger -> UKB.UKB -> Paragraph -> [UKB.ConceptId]
