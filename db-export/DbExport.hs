@@ -53,7 +53,7 @@ createTables =
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs
                ( id serial PRIMARY KEY
                , paragraph_id text NOT NULL
-               , section_path text NOT NULL UNIQUE
+               , section_path text NOT NULL
                , fragment integer REFERENCES fragments (id)
                , content text
                )

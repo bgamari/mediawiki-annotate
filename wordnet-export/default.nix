@@ -5,7 +5,7 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "ukb-hs";
-        rev = "f1bddbfc4113c719da549753141058ceae4c1ca3";
+        rev = "72cb17e22dd57caf36e11cf14565cf0e67a9a382";
         sha256 = null;
       };
     in import src { inherit haskellPackages; };
@@ -21,5 +21,5 @@ let
 in
   haskellPackages.callCabal2nix "wordnet-export" ./. {
     inherit ukb wordnet-parse;
-  }
+  } // { passthru.ukb = ukb; } # yuck
 

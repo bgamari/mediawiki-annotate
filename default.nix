@@ -40,6 +40,7 @@ let
     overrides = lib.composeExtensions simplirNix.haskellOverrides haskellOverrides;
   };
 in {
+  pkgs = nixpkgs;
   inherit haskellPackages haskellOverrides;
   inherit (haskellPackages) trecCarPackages;
   inherit (simplirNix) simplirPackages trec-eval;

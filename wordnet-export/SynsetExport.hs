@@ -38,19 +38,22 @@ import qualified UKB
 
 main :: IO ()
 main = do
-    let opts = (,,,)
+    let opts = (,,,,)
             <$> option str (short 'c' <> long "connect" <> help "PostgreSQL connection string")
             <*> option str (short 'D' <> long "ukb-dict" <> metavar "DICT" <> help "ukb dictionary file")
             <*> option str (short 'K' <> long "ukb-kb" <> metavar "KB" <> help "ukb knowledge base file")
             <*> option str (short 'W' <> long "wordnet-dict" <> metavar "DIR" <> help "WordNet dictionary directory")
-    (connStr, ukbDict, ukbKb, wnPath) <- execParser $ info (helper <*> opts) mempty
+            <*> option str (short 'p' <> long "pages" <> metavar "PAGES" <> help "Pages file")
+    (connStr, ukbDict, ukbKb, wnPath, pagesPath) <-
+        execParser $ info (helper <*> opts) mempty
     let openConn = connectPostgreSQL (BS.pack connStr)
-    toPostgres openConn wnPath ukbDict ukbKb
+    pages <- readPagesFile pagesPath
+    toPostgres openConn wnPath ukbDict ukbKb pages
 
 createTables :: [Query]
 createTables =
     [ [sql| CREATE UNLOGGED TABLE IF NOT EXISTS synsets
-               ( id integer PRIMARY KEY
+               ( id serial PRIMARY KEY
                , dict_offset integer NOT NULL
                , pos char NOT NULL
                , words text[] NOT NULL
@@ -59,19 +62,21 @@ createTables =
 
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS synset_mentions
                ( synset_id integer REFERENCES synsets (id)
-               , paragraph_id text REFERENCES paragraphs (paragraph_id)
+               , paragraph_id integer REFERENCES paragraphs (id)
                )
       |]
     ]
 
-toPostgres :: IO Connection -> FilePath -> FilePath -> FilePath -> IO ()
-toPostgres openConn dictPath ukbDict ukbKb = do
+toPostgres :: IO Connection -> FilePath -> FilePath -> FilePath -> [Page] -> IO ()
+toPostgres openConn dictPath ukbDict ukbKb pages = do
     conn <- openConn
     mapM_ (execute_ conn) createTables
     mapM_ (exportSynsets openConn . (dictPath </>)) [ "data.verb", "data.noun", "data.adv", "data.adj" ]
+    exportMentions ukbDict ukbKb openConn pages
 
 exportSynsets :: IO Connection -> FilePath -> IO ()
 exportSynsets openConn dbFile = do
+    putStrLn "Exporting synsets..."
     conn <- openConn
     synsets <- WordNet.iterSynsets dbFile
     void $ executeMany
@@ -92,6 +97,7 @@ exportSynsets openConn dbFile = do
 
 exportMentions :: FilePath -> FilePath -> IO Connection -> [Page] -> IO ()
 exportMentions ukbDict ukbKb openConn pages = do
+    putStrLn "Exporting mentions..."
     conn <- openConn
     let paragraphs :: [(SectionPath, Paragraph)]
         paragraphs = foldMap pageParasWithPaths pages
@@ -102,13 +108,16 @@ exportMentions ukbDict ukbKb openConn pages = do
 
 paragraphMentions :: POS.Tagger -> UKB.UKB -> Paragraph -> [UKB.ConceptId]
 paragraphMentions tagger ukb para = unsafePerformIO $ do
+    print $ paraToText para
     tags <- POS.posTag tagger $ TL.toStrict (paraToText para)
+    print tags
     let tokens =
             [ UKB.InputToken (UKB.Lemma tok) pos' (UKB.WordId n)
             | (n, (tok, pos)) <- zip [0..] tags
             , Just pos' <- pure $ toUkbPos pos
             ]
     res <- UKB.run ukb tokens
+    print res
     return [ concept | UKB.OutputToken _ concept <- res ]
   where
     toUkbPos :: POS.POS -> Maybe UKB.POS
