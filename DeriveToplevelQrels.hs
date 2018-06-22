@@ -1,29 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-
-import Control.Monad
-import Data.Foldable
-import Data.Maybe
 import Data.Monoid
-
-import qualified Data.Text as T
-import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
-import qualified Data.Set as S
-import System.FilePath
 
 import Options.Applicative
 
 import CAR.Types
 import CAR.ToolVersion
 import CAR.CarExports as Exports
-import CAR.AnnotationsFile as AnnsFile
 import CAR.QRelFile
-
-
-
-
 
 opts :: Parser (FilePath, FilePath)
 opts =
