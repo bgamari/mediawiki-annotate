@@ -2,7 +2,7 @@ allow-newer:
     base, template-haskell, pipes
 
 packages:
-    ./
+    trec-car-tools/
     multilang-car/
     assessment-eval/
     mediawiki-parser/

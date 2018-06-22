@@ -18,7 +18,7 @@ let
   haskellOverrides = self: super:
     let
       trecCarPackages = {
-        trec-car-tools       = dontCheck (self.callCabal2nix "mediawiki-annotate" (localDir ./.) {});
+        trec-car-tools       = dontCheck (self.callCabal2nix "trec-car-tools" (localDir ./trec-car-tools) {});
         mediawiki-parser     = self.callCabal2nix "mediawiki-parser" (localDir ./mediawiki-parser) {};
         mediawiki-import     = self.callCabal2nix "mediawiki-import" (localDir ./mediawiki-import) {};
         car-baselines        = self.callCabal2nix "car-baselines" (localDir ./car-baselines) {};
