@@ -62,7 +62,7 @@ createTables =
 
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS synset_mentions
                ( synset_id integer REFERENCES synsets (id)
-               , paragraph_id integer REFERENCES paragraphs (id)
+               , paragraph_id text REFERENCES paragraphs (id)
                )
       |]
     ]
@@ -103,23 +103,31 @@ exportMentions ukbDict ukbKb openConn pages = do
         paragraphs = foldMap pageParasWithPaths pages
     tagger <- POS.startTagger
     ukb <- UKB.startUKB ukbDict ukbKb
-    print $ map (\(sp, para) -> (sp, paragraphMentions tagger ukb para)) paragraphs
-    POS.closeTagger tagger
-    UKB.closeUKB ukb
-    return ()
+    --print $ map (\(sp, para) -> (sp, paragraphMentions tagger ukb para)) paragraphs
+    print $ length paragraphs
+    void $ executeMany
+        conn
+        [sql| INSERT INTO synset_mentions ( synset_id, paragraph_id )
+              SELECT synsets.id, x.column3
+              FROM (VALUES (?,?,?)) AS x, synsets
+              WHERE synsets.dict_offset = x.column1
+                AND synsets.pos = x.column2
+            |]
+        [ (n, [UKB.posChar pos], unpackParagraphId $ paraId para)
+        | (sp, para) <- paragraphs
+        , concept <- paragraphMentions tagger ukb para
+        , let (n, pos) = UKB.parseConceptId concept
+        ]
 
 paragraphMentions :: POS.Tagger -> UKB.UKB -> Paragraph -> [UKB.ConceptId]
 paragraphMentions tagger ukb para = unsafePerformIO $ do
-    print $ paraToText para
     tags <- POS.posTag tagger $ TL.toStrict (paraToText para)
-    print tags
     let tokens =
             [ UKB.InputToken (UKB.Lemma tok) pos' (UKB.WordId n)
             | (n, (tok, pos)) <- zip [0..] tags
             , Just pos' <- pure $ toUkbPos pos
             ]
     res <- UKB.run ukb tokens
-    print res
     return [ concept | UKB.OutputToken _ concept <- res ]
   where
     toUkbPos :: POS.POS -> Maybe UKB.POS
