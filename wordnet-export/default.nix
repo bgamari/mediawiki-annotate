@@ -5,7 +5,7 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "ukb-hs";
-        rev = "a7419d5076227e2d4e151694eaaf9573165d3a6d";
+        rev = "a9b0235dca2362a1f723476fed62db8a77210190";
         sha256 = null;
       };
     in import src { inherit haskellPackages; };

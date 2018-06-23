@@ -13,7 +13,7 @@ cabal-version:       >=1.10
 
 executable wordnet-export
   main-is:             SynsetExport.hs
-  ghc-options:         -threaded
+  ghc-options:         -threaded -with-rtsopts=-A64M
   other-extensions:    BangPatterns, OverloadedStrings, QuasiQuotes, StandaloneDeriving, RecordWildCards, ParallelListComp, GeneralizedNewtypeDeriving
   build-depends:       base >=4.10 && <4.11,
                        deepseq >=1.4 && <1.5,

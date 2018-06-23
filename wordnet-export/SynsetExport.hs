@@ -103,7 +103,8 @@ exportMentions :: FilePath -> FilePath -> IO Connection -> [Page] -> IO ()
 exportMentions ukbDict ukbKb openConn pages = do
     putStrLn "Exporting mentions..."
     (sq, rq, seal) <- PC.spawn' $ PC.bounded 1000
-    workers <- replicateM 16 $ async $ worker rq
+    n <- getNumCapabilities
+    workers <- replicateM n $ async $ worker rq
     mapM_ link workers
     mapM_ (atomically . PC.send sq) pages
     atomically seal
@@ -115,7 +116,7 @@ exportMentions ukbDict ukbKb openConn pages = do
         ukb <- UKB.startUKB ukbDict ukbKb
         runEffect $ for (PC.fromInput queue) $ \page -> liftIO $ do
             let paragraphs :: [(SectionPath, Paragraph)]
-                paragraphs = foldMap pageParasWithPaths pages
+                paragraphs = pageParasWithPaths page
             print $ length paragraphs
             void $ executeMany
                 conn

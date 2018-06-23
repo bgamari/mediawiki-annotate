@@ -42,9 +42,9 @@ rec {
     EOF
 
     echo "Exporting pages..."
-    ${trecCar.trecCarPackages.db-export}/bin/db-export -c postgres:///${dbName} $pages
+    ${trecCar.trecCarPackages.db-export}/bin/db-export -c postgres:///${dbName} $pages +RTS -N$CORES
 
     echo "Exporting wordnet..."
-    ${trecCar.trecCarPackages.wordnet-export}/bin/wordnet-export -c postgres:///${dbName} -W ${wordNet} -D ${lkbSources}/30/wnet30_dict.txt -K ${compiledKb}/wn30.bin -p $pages
+    ${trecCar.trecCarPackages.wordnet-export}/bin/wordnet-export -c postgres:///${dbName} -W ${wordNet} -D ${lkbSources}/30/wnet30_dict.txt -K ${compiledKb}/wn30.bin -p $pages +RTS -N$CORES
   '';
 }
