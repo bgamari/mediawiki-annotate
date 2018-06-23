@@ -22,6 +22,10 @@ import Data.List.Split (chunksOf)
 import System.FilePath
 import System.IO.Unsafe
 
+import Control.Concurrent.Async
+import Pipes
+import Pipes.Concurrent as PC
+
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.Types
 import Database.PostgreSQL.Simple.SqlQQ
@@ -98,26 +102,34 @@ exportSynsets openConn dbFile = do
 exportMentions :: FilePath -> FilePath -> IO Connection -> [Page] -> IO ()
 exportMentions ukbDict ukbKb openConn pages = do
     putStrLn "Exporting mentions..."
-    conn <- openConn
-    let paragraphs :: [(SectionPath, Paragraph)]
-        paragraphs = foldMap pageParasWithPaths pages
-    tagger <- POS.startTagger
-    ukb <- UKB.startUKB ukbDict ukbKb
-    --print $ map (\(sp, para) -> (sp, paragraphMentions tagger ukb para)) paragraphs
-    print $ length paragraphs
-    void $ executeMany
-        conn
-        [sql| INSERT INTO synset_mentions ( synset_id, paragraph_id )
-              SELECT synsets.id, x.column3
-              FROM (VALUES (?,?,?)) AS x, synsets
-              WHERE synsets.dict_offset = x.column1
-                AND synsets.pos = x.column2
-            |]
-        [ (n, [UKB.posChar pos], unpackParagraphId $ paraId para)
-        | (sp, para) <- paragraphs
-        , concept <- paragraphMentions tagger ukb para
-        , let (n, pos) = UKB.parseConceptId concept
-        ]
+    (sq, rq, seal) <- PC.spawn' $ PC.bounded 1000
+    workers <- replicateM 16 $ async $ worker rq
+    mapM_ link workers
+    mapM_ (atomically . PC.send sq) pages
+    atomically seal
+    mapM_ wait workers
+  where
+    worker queue = do
+        conn <- openConn
+        tagger <- POS.startTagger
+        ukb <- UKB.startUKB ukbDict ukbKb
+        runEffect $ for (PC.fromInput queue) $ \page -> liftIO $ do
+            let paragraphs :: [(SectionPath, Paragraph)]
+                paragraphs = foldMap pageParasWithPaths pages
+            print $ length paragraphs
+            void $ executeMany
+                conn
+                [sql| INSERT INTO synset_mentions ( synset_id, paragraph_id )
+                      SELECT synsets.id, x.column3
+                      FROM (VALUES (?,?,?)) AS x, synsets
+                      WHERE synsets.dict_offset = x.column1
+                        AND synsets.pos = x.column2
+                    |]
+                [ (n, [UKB.posChar pos], unpackParagraphId $ paraId para)
+                | (sp, para) <- paragraphs
+                , concept <- paragraphMentions tagger ukb para
+                , let (n, pos) = UKB.parseConceptId concept
+                ]
 
 paragraphMentions :: POS.Tagger -> UKB.UKB -> Paragraph -> [UKB.ConceptId]
 paragraphMentions tagger ukb para = unsafePerformIO $ do

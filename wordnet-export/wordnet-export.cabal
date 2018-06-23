@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 
 executable wordnet-export
   main-is:             SynsetExport.hs
+  ghc-options:         -threaded
   other-extensions:    BangPatterns, OverloadedStrings, QuasiQuotes, StandaloneDeriving, RecordWildCards, ParallelListComp, GeneralizedNewtypeDeriving
   build-depends:       base >=4.10 && <4.11,
                        deepseq >=1.4 && <1.5,
@@ -24,6 +25,10 @@ executable wordnet-export
                        optparse-applicative >= 0.13,
                        postgresql-simple,
                        filepath >= 1.4,
+                       async,
+                       pipes,
+                       pipes-concurrency,
+                       stm,
                        trec-car-tools,
                        ukb,
                        wordnet-parse
