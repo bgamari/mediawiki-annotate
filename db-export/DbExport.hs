@@ -227,7 +227,7 @@ toPostgres openConn pagesFile = do
               ]
         insertChunks
             conns
-            [sql| INSERT INTO paragraphs ( id, content )
+            [sql| INSERT INTO paragraphs_accum ( id, content )
                   SELECT x.column1, x.column2
                   FROM (VALUES (?,?)) AS x
                   ON CONFLICT DO NOTHING
