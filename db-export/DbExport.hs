@@ -51,17 +51,19 @@ createTables =
                )
       |]
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs
-               ( id serial PRIMARY KEY
-               , paragraph_id text NOT NULL
-               , section_path text NOT NULL
-               , fragment integer REFERENCES fragments (id)
+               ( id text PRIMARY KEY
                , content text
+               )
+      |]
+    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraph_fragments
+               ( paragraph_id text REFERENCES paragraphs (id)
+               , fragment integer REFERENCES fragments (id) -- parent
                )
       |]
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS links
                ( src_fragment integer NOT NULL REFERENCES fragments (id)
                , dest_fragment integer NOT NULL REFERENCES fragments (id)
-               , paragraph integer NOT NULL REFERENCES paragraphs (id)
+               , paragraph text NOT NULL REFERENCES paragraphs (id)
                , anchor text
                )
       |]
@@ -108,11 +110,12 @@ createViews =
               AND parent.fragment_id = src.id
       |]
     , [sql| CREATE VIEW paragraphs_view AS
-            SELECT paragraph_id,
+            SELECT id,
                    content,
                    parent_titles
-            FROM paragraphs, fragment_parents
-            WHERE fragment_parents.fragment_id = paragraphs.fragment
+            FROM paragraphs, paragraph_fragments, fragment_parents
+            WHERE paragraph_fragments.paragraph_id = paragraphs.id
+              AND fragment_parents.fragment_id = paragraph_fragments.fragment
       |]
     ]
 
@@ -123,8 +126,7 @@ finishSchema =
     , [sql| ALTER TABLE paragraphs SET LOGGED |]
     , [sql| ALTER TABLE links SET LOGGED |]
     , [sql| CREATE INDEX ON fragments (title)  |]
-    , [sql| CREATE INDEX ON paragraphs (paragraph_id) |]
-    , [sql| CREATE INDEX ON paragraphs (section_path) |]
+    , [sql| CREATE INDEX ON paragraphs (id) |]
     , [sql| CREATE INDEX ON paragraphs USING GIN (to_tsvector('english', content)) |]
     , [sql| ANALYZE |]
     ]
@@ -181,6 +183,7 @@ toPostgres openConn pagesFile = do
 
     exportFragments conns fragments lookupFragmentId
     exportParagraphs conns lookupFragmentId
+    exportParagraphFragments conns lookupFragmentId
     exportLinks conns lookupFragmentId
 
     mapM_ (execute_ conn) finishSchema
@@ -202,19 +205,37 @@ toPostgres openConn pagesFile = do
     exportParagraphs conns lookupFragmentId = do
         putStrLn "exporting paragraphs..."
         pages <- readPagesFile pagesFile
-        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId, String, TL.Text)]
+        let pageParaRows :: Page -> [(ParagraphId, TL.Text)]
             pageParaRows page =
-              [ (paraId para, fragId, escapeSectionPath path, text)
+              [ (paraId para, text)
               | (path, _, skel) <- pageSections page
               , Para para <- skel
               , let text = paraToText para
-                    fragId = lookupFragmentId path
               ]
         insertChunks
             conns
-            [sql| INSERT INTO paragraphs ( paragraph_id, fragment, section_path, content )
-                  SELECT x.column1, x.column2, x.column3, x.column4
-                  FROM (VALUES (?,?,?,?)) AS x |]
+            [sql| INSERT INTO paragraphs ( id, content )
+                  SELECT x.column1, x.column2
+                  FROM (VALUES (?,?)) AS x
+                  ON CONFLICT DO NOTHING
+                |]
+            (map (foldMap pageParaRows) $ chunksOf 100 pages)
+
+    exportParagraphFragments conns lookupFragmentId = do
+        putStrLn "exporting paragraph fragment relations..."
+        pages <- readPagesFile pagesFile
+        let pageParaRows :: Page -> [(ParagraphId, Maybe FragmentId)]
+            pageParaRows page =
+              [ (paraId para, fragId)
+              | (path, _, skel) <- pageSections page
+              , Para para <- skel
+              , let fragId = lookupFragmentId path
+              ]
+        insertChunks
+            conns
+            [sql| INSERT INTO paragraph_fragments ( paragraph_id, fragment )
+                  SELECT x.column1, x.column2
+                  FROM (VALUES (?,?)) AS x |]
             (map (foldMap pageParaRows) $ chunksOf 100 pages)
 
     exportLinks conns lookupFragmentId = do
@@ -236,6 +257,6 @@ toPostgres openConn pagesFile = do
             [sql| INSERT INTO links (src_fragment, dest_fragment, paragraph, anchor)
                   SELECT column1 AS src_fragment, column2 AS dest_fragment, paragraphs.id, column3 AS anchor
                   FROM (VALUES (?,?,?,?)) AS x, paragraphs
-                  WHERE paragraphs.paragraph_id = x.column4 |]
+                  WHERE paragraphs.id = x.column4 |]
             (map pagesLinkRows $ chunksOf 1000 pages)
 
