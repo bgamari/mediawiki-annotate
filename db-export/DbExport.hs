@@ -50,20 +50,27 @@ createTables =
                , parent integer -- REFERENCES fragments (id)
                )
       |]
-    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs
+       -- accumulate non-unique paragraphs, then insert into paragraphs
+    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraphs_accum
+               ( id serial PRIMARY KEY
+               , paragraph_id text
+               , content text
+               )
+      |]
+    , [sql| CREATE TABLE IF NOT EXISTS paragraphs
                ( id text PRIMARY KEY
                , content text
                )
       |]
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS paragraph_fragments
-               ( paragraph_id text REFERENCES paragraphs (id)
+               ( paragraph_id text -- later: REFERENCES paragraphs(id)
                , fragment integer REFERENCES fragments (id) -- parent
                )
       |]
     , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS links
                ( src_fragment integer NOT NULL REFERENCES fragments (id)
                , dest_fragment integer NOT NULL REFERENCES fragments (id)
-               , paragraph text NOT NULL REFERENCES paragraphs (id)
+               , paragraph text NOT NULL -- later: REFERENCES paragraphs (id)
                , anchor text
                )
       |]
@@ -123,7 +130,13 @@ finishSchema :: [Query]
 finishSchema =
     [ [sql| ALTER TABLE fragments ADD FOREIGN KEY (parent) REFERENCES fragments(id) |]
     , [sql| ALTER TABLE fragments SET LOGGED |]
-    , [sql| ALTER TABLE paragraphs SET LOGGED |]
+    , [sql| INSERT INTO paragraphs ( id, content )
+            SELECT DISTINCT ON(id) id, content
+            FROM paragraphs_accum
+          |]
+    , [sql| DROP TABLE paragraphs_accum |]
+    , [sql| ALTER TABLE paragraph_fragments ADD FOREIGN KEY (paragraph_id) REFERENCES paragraphs(id) |]
+    , [sql| ALTER TABLE links ADD FOREIGN KEY (paragraph) REFERENCES paragraphs(id) |]
     , [sql| ALTER TABLE links SET LOGGED |]
     , [sql| CREATE INDEX ON fragments (title)  |]
     , [sql| CREATE INDEX ON paragraphs (id) |]
