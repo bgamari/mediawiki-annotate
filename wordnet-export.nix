@@ -34,7 +34,6 @@ rec {
     #!/bin/sh
 
     pages=$1
-    pages=~/trec-car/data/enwiki-20161220/release-v2.0.1/test200/test200-train/train.pages.cbor
 
     psql <<EOF
     DROP DATABASE ${dbName};
