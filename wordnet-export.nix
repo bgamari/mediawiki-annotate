@@ -33,6 +33,8 @@ rec {
   script = writeScript "build.sh" ''
     #!/bin/sh
 
+    set -e
+
     pages=$1
 
     psql <<EOF
