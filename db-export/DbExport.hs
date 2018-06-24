@@ -130,11 +130,6 @@ finishSchema :: [Query]
 finishSchema =
     [ [sql| ALTER TABLE fragments ADD FOREIGN KEY (parent) REFERENCES fragments(id) |]
     , [sql| ALTER TABLE fragments SET LOGGED |]
-    , [sql| INSERT INTO paragraphs ( id, content )
-            SELECT DISTINCT ON(id) id, content
-            FROM paragraphs_accum
-          |]
-    , [sql| DROP TABLE paragraphs_accum |]
     , [sql| ALTER TABLE paragraph_fragments ADD FOREIGN KEY (paragraph_id) REFERENCES paragraphs(id) |]
     , [sql| ALTER TABLE links ADD FOREIGN KEY (paragraph) REFERENCES paragraphs(id) |]
     , [sql| ALTER TABLE links SET LOGGED |]
@@ -175,7 +170,7 @@ insertChunks conns query rowChunks = do
     atomically seal
     mapM_ wait inserters
   where
-    startInserter rq conn = async $ withTransaction conn $ do
+    startInserter rq conn = async $ do
         tid <- myThreadId
         runEffect $ for (PC.fromInput rq) $ \chunk -> do
             liftIO $ print (tid, length chunk)
@@ -199,6 +194,7 @@ toPostgres openConn pagesFile = do
     exportParagraphFragments conns lookupFragmentId
     exportLinks conns lookupFragmentId
 
+    putStrLn "Finishing..."
     mapM_ (execute_ conn) finishSchema
     mapM_ (execute_ conn) createViews
     return ()
@@ -208,7 +204,9 @@ toPostgres openConn pagesFile = do
       putStrLn "exporting fragments..."
       insertChunks conns
           [sql| INSERT INTO fragments ( id, title, parent )
-                VALUES (?,?,?) |]
+                VALUES (?,?,?)
+                ON CONFLICT DO NOTHING
+                |]
           $ chunksOf 10000
           [ (fragId, title, parentId)
           | (path, (fragId, title)) <- HM.toList fragments
@@ -227,12 +225,21 @@ toPostgres openConn pagesFile = do
               ]
         insertChunks
             conns
-            [sql| INSERT INTO paragraphs_accum ( id, content )
+            [sql| INSERT INTO paragraphs_accum ( paragraph_id, content )
                   SELECT x.column1, x.column2
                   FROM (VALUES (?,?)) AS x
                   ON CONFLICT DO NOTHING
                 |]
             (map (foldMap pageParaRows) $ chunksOf 100 pages)
+
+        putStrLn "Consolidating paragraphs..."
+        mapM_ (execute_ (head conns))
+            [ [sql| INSERT INTO paragraphs ( id, content )
+                    SELECT DISTINCT ON(paragraph_id) paragraph_id, content
+                    FROM paragraphs_accum
+                  |]
+            , [sql| DROP TABLE paragraphs_accum |]
+            ]
 
     exportParagraphFragments conns lookupFragmentId = do
         putStrLn "exporting paragraph fragment relations..."
