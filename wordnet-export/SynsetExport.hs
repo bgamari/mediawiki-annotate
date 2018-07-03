@@ -56,7 +56,7 @@ main = do
 
 createTables :: [Query]
 createTables =
-    [ [sql| CREATE UNLOGGED TABLE IF NOT EXISTS synsets
+    [ [sql| CREATE TABLE IF NOT EXISTS synsets
                ( id serial PRIMARY KEY
                , dict_offset integer NOT NULL
                , pos char NOT NULL
@@ -64,7 +64,7 @@ createTables =
                )
       |]
 
-    , [sql| CREATE UNLOGGED TABLE IF NOT EXISTS synset_mentions
+    , [sql| CREATE TABLE IF NOT EXISTS synset_mentions
                ( synset_id integer REFERENCES synsets (id)
                , paragraph_id text REFERENCES paragraphs (id)
                )
@@ -77,6 +77,10 @@ toPostgres openConn dictPath ukbDict ukbKb pages = do
     mapM_ (execute_ conn) createTables
     mapM_ (exportSynsets openConn . (dictPath </>)) [ "data.verb", "data.noun", "data.adv", "data.adj" ]
     exportMentions ukbDict ukbKb openConn pages
+    mapM_ (execute_ conn)
+        [ [sql| CREATE INDEX ON synset_mentions (synset_id) |]
+        , [sql| CREATE INDEX ON synset_mentions (paragraph_id) |]
+        ]
 
 exportSynsets :: IO Connection -> FilePath -> IO ()
 exportSynsets openConn dbFile = do
