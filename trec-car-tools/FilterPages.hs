@@ -37,6 +37,8 @@ helpDescr =
         "",
         cmd "name-in-set [\"P1\", \"P2\", \"P3\"]"  "matches pages whose page names are in the given set {P1,P2,P3}",
         cmd "name-set-from-file FILE"          "like name-in-set but loads NAMEs from FILE",
+        cmd "pageid-in-set [\"P1\", \"P2\", \"P3\"]"  "matches pages whose page ids are in the given set {P1,P2,P3}",
+        cmd "pageid-set-from-file FILE"        "like pageid-in-set but loads NAMEs from FILE",
         cmd "category-contains-from-file FILE" "like category-contain but loads SUBSTRs from FILE",
         "",
         cmd "true"                             "always true",
@@ -67,6 +69,7 @@ opts =
     siteId = SiteId . T.pack <$> str
 
 data PredFromFile = NameSetFromFile FilePath
+                  | PageIdSetFromFile FilePath
                   | HasCategoryContainingFromFile FilePath
                   deriving (Show)
 
@@ -86,7 +89,9 @@ runPredFromFile :: Pred PredFromFile -> IO (Pred Void)
 runPredFromFile = runPred go
   where
     go (NameSetFromFile path) =
-        NameInSet . HS.fromList . map (PageName . T.pack) . lines <$> readFile path
+        NameInSet . HS.fromList . map (packPageName) . lines <$> readFile path
+    go (PageIdSetFromFile path) =
+        PageIdInSet . HS.fromList . map ( packPageId ) . lines <$> readFile path
     go (HasCategoryContainingFromFile path) =
         Any . map (HasCategoryContaining . T.pack) . filter (not . null) . lines <$> readFile path
 
