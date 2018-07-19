@@ -252,6 +252,24 @@ executable trec-car-derive-toplevel
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
 
+
+executable trec-car-remove-duplicate-pages
+  main-is:             RemoveDuplicatePages.hs
+  ghc-options:         -Wall
+  build-depends:       base,
+                       bytestring,
+                       containers,
+                       trifecta >= 1.5,
+                       parsers >= 0.12,
+                       ansi-wl-pprint,
+                       text,
+                       optparse-applicative >= 0.12,
+                       binary-serialise-cbor,
+                       trec-car-tools
+  default-language:    Haskell2010
+
+
+
 test-suite tests
   main-is:             Test.hs
   type:                exitcode-stdio-1.0
