@@ -75,11 +75,15 @@ data PredFromFile = NameSetFromFile FilePath
 
 predFromFile :: Tri.Parser PredFromFile
 predFromFile =
-    nameSet <|> hasCategoryContaining
+    nameSet <|> pageIdSet <|> hasCategoryContaining
   where
     nameSet = do
         void $ Tri.textSymbol "name-set-from-file"
         NameSetFromFile <$> Tri.stringLiteral
+
+    pageIdSet = do
+        void $ Tri.textSymbol "pageid-set-from-file"
+        PageIdSetFromFile <$> Tri.stringLiteral
 
     hasCategoryContaining = do
         void $ Tri.textSymbol "category-contains-from-file"
