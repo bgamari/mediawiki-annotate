@@ -80,6 +80,7 @@ toPostgres openConn dictPath ukbDict ukbKb pages = do
     mapM_ (execute_ conn)
         [ [sql| CREATE INDEX ON synset_mentions (synset_id) |]
         , [sql| CREATE INDEX ON synset_mentions (paragraph_id) |]
+        , [sql| ANALYZE |]
         ]
 
 exportSynsets :: IO Connection -> FilePath -> IO ()
