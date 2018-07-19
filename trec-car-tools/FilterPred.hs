@@ -27,6 +27,7 @@ defaultSalt = -2578643520546668380  -- 0xdc36d1615b7400a4
 data Pred a = NameContains T.Text
             | NameHasPrefix T.Text
             | NameInSet (HS.HashSet PageName)
+            | PageIdInSet (HS.HashSet PageId)
             | HasCategoryContaining T.Text
             | PageHashMod Int Int Int -- ^ for training/test split
             | IsRedirect
@@ -44,6 +45,7 @@ runPred :: Applicative m => (a -> m (Pred b)) -> Pred a -> m (Pred b)
 runPred _ (NameContains x)     = pure $ NameContains x
 runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
 runPred _ (NameInSet x)        = pure $ NameInSet x
+runPred _ (PageIdInSet x)        = pure $ PageIdInSet x
 runPred _ (HasCategoryContaining x)  = pure $ HasCategoryContaining x
 runPred _ (PageHashMod s x y)  = pure $ PageHashMod s x y
 runPred _ IsRedirect           = pure IsRedirect
@@ -106,6 +108,10 @@ parsePred inj = term
         void $ textSymbol "name-in-set"
         NameInSet . HS.fromList . map PageName <$> listOf string'
 
+    pageIdInSet = do
+        void $ textSymbol "pageid-in-set"
+        PageIdInSet . HS.fromList . map (packPageId . T.unpack) <$> listOf string'
+
     hasCategoryContaining = do
         void $ textSymbol "category-contains"
         HasCategoryContaining . T.toCaseFold <$> string'
@@ -139,6 +145,7 @@ interpret pageNameTranslate pred page =
       NameContains t                -> t `T.isInfixOf` (T.toCaseFold $ getPageName $ pageNameTranslate $ pageName page)
       NameHasPrefix prefix          -> prefix `T.isPrefixOf` (getPageName $ pageNameTranslate $ pageName page)
       NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
+      PageIdInSet pageIds           -> (pageId page) `HS.member` pageIds
       HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName . pageNameTranslate) $ fromMaybe [] $ getMetadata _CategoryNames (pageMetadata page)
       PageHashMod salt n k          -> let h = hashWithSalt salt $ pageNameTranslate $ pageName page
                                        in h `mod` n == k
