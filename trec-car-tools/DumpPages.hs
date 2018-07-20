@@ -4,6 +4,7 @@ import Control.Monad
 import Data.List (intersperse)
 import Data.Maybe
 import Data.Monoid
+import Data.List
 
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
@@ -144,28 +145,30 @@ opts = subparser
 
 
 readFilteredPages :: S.Set PageName    -- ^ set of page names to read
+                  -> S.Set PageId    -- ^ set of page names to read
                   -> FilePath          -- ^ pages or outlines file
                   -> IO [Page]
-readFilteredPages pageNames inputFile
-  | S.null pageNames  =
+readFilteredPages pageNames pageIds inputFile
+  | S.null pageNames && S.null pageIds  =
      readPagesOrOutlinesAsPages inputFile
   | otherwise = do
      siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
      anns <- CAR.openAnnotations inputFile
-     let pageIds = map (pageNameToId siteId) $ S.toList pageNames
-     return $ mapMaybe (`CAR.lookupPage` anns) pageIds
+     let pageIds' = pageIds <> (S.map (pageNameToId siteId) $ pageNames)
+     return $ mapMaybe (`CAR.lookupPage` anns) ( S.toList  pageIds')
 
 pagesFromFile :: Parser (IO [Page])
 pagesFromFile =
     f <$> argument str (help "input file" <> metavar "FILE")
-      <*> fmap S.fromList (many (option  (PageName . T.pack <$> str) (short 'p' <> long "page" <> metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+      <*> fmap S.fromList (many (option  (packPageName  <$> str) (short 'p' <> long "page" <> metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
+      <*> fmap S.fromList (many (option  (packPageId  <$> str) (short 'P' <> long "pageid" <> metavar "PAGE ID " <> help "Page id to dump or nothing to dump all")))
       <*> (many (option (flip pageNameToId <$> (packPageName <$> str)) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
-      <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> help "dump only pages with links to this target page id (and the page itself)")))
+      <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> short 'T'  <> help "dump only pages with links to this target page id (and the page itself)")))
   where
-    f :: FilePath -> S.Set PageName -> [SiteId -> PageId] -> HS.HashSet PageId -> IO [Page]
-    f inputFile pageNames targetPageIds1 targetPageIds2 = do
+    f :: FilePath -> S.Set PageName -> S.Set PageId -> [SiteId -> PageId] -> HS.HashSet PageId -> IO [Page]
+    f inputFile pageNames pageIds targetPageIds1 targetPageIds2 = do
         siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
-        pages <- readFilteredPages pageNames inputFile
+        pages <- readFilteredPages pageNames pageIds inputFile
         return $ filter (searchTargets (targetPageIds siteId)) pages
       where targetPageIds siteId =
                 HS.fromList (map ($ siteId) targetPageIds1)
