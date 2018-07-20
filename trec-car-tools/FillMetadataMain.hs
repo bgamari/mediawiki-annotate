@@ -48,7 +48,7 @@ main = do
       case stage of
           StageResolveRedirect                 -> stageResolveRedirect inputPath
           StageResolveDisambiguationAndInlinks -> stageResolveDisambiguationAndInlinks inputPath
-          StageCategoryTags                    -> stageResolveDisambiguationAndInlinks inputPath
+          StageCategoryTags                    -> stageResolveCategoryTags inputPath
     writeCarFile outputPath prov pages'
 
 
