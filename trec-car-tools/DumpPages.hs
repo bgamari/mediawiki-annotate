@@ -164,20 +164,29 @@ pagesFromFile =
       <*> fmap S.fromList (many (option  (packPageId  <$> str) (short 'P' <> long "pageid" <> metavar "PAGE ID " <> help "Page id to dump or nothing to dump all")))
       <*> (many (option (flip pageNameToId <$> (packPageName <$> str)) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
       <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> short 'T'  <> help "dump only pages with links to this target page id (and the page itself)")))
+      <*> ( HS.fromList <$> many (option (packPageName <$> str)  (long "redirect" <> short 'r' <> help "dump only pages with redirects from this page name")))
   where
-    f :: FilePath -> S.Set PageName -> S.Set PageId -> [SiteId -> PageId] -> HS.HashSet PageId -> IO [Page]
-    f inputFile pageNames pageIds targetPageIds1 targetPageIds2 = do
+    f :: FilePath -> S.Set PageName -> S.Set PageId -> [SiteId -> PageId] -> HS.HashSet PageId -> HS.HashSet PageName -> IO [Page]
+    f inputFile pageNames pageIds targetPageIds1 targetPageIds2 redirectPageNames = do
         siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
         pages <- readFilteredPages pageNames pageIds inputFile
-        return $ filter (searchTargets (targetPageIds siteId)) pages
+        return $ filter (redirectTargets redirectPageNames)
+               $ filter (searchTargets (targetPageIds siteId)) pages
       where targetPageIds siteId =
                 HS.fromList (map ($ siteId) targetPageIds1)
                 `HS.union` targetPageIds2
             searchTargets targets page =
                 if | HS.null targets -> True
-                    | (pageId page) `HS.member` targets -> True
-                    | otherwise     -> let pageTargets = HS.fromList (pageLinkTargetIds page)
+                   | (pageId page) `HS.member` targets -> True
+                   | otherwise     -> let pageTargets = HS.fromList (pageLinkTargetIds page)
                                       in any (  `HS.member` pageTargets) targets
+            redirectTargets :: HS.HashSet PageName -> Page -> Bool
+            redirectTargets redirects page =
+                if | HS.null redirects -> True
+                   | Just pageRedirects <- getMetadata _RedirectNames (pageMetadata page)
+                        -> let pageRedirectSet = HS.fromList pageRedirects
+                           in any (  `HS.member` pageRedirectSet) redirects
+                   | otherwise -> False
 
 sectionHeadings :: PageSkeleton -> [SectionHeading]
 sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children
