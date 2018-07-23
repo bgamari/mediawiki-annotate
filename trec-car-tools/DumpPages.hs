@@ -27,6 +27,8 @@ import CAR.ToolVersion
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "titles"        dumpTitles
+    <> cmd "page-ids"      dumpPageIds
+    <> cmd "meta"          dumpMeta
     <> cmd "pages"         dumpPages
     <> cmd "entityids"     dumpEntityIds
     <> cmd "paragraphs"    dumpParagraphs
@@ -51,6 +53,14 @@ opts = subparser
             pages <- getPages
             mapM_ (T.putStrLn . getPageName . pageName) pages
 
+    dumpPageIds =
+        f <$> pagesFromFile
+      where
+        f getPages = do
+            pages <- getPages
+            mapM_ (putStrLn . unpackPageId . pageId) pages
+
+
     dumpSections =
         f <$> pagesFromFile
           <*> flag False True (long "raw" <> help "only section paths - no pagenames")
@@ -74,6 +84,15 @@ opts = subparser
         f getPages linkStyle = do
             pages <- getPages
             let printPage = putStrLn . prettyPage linkStyle
+            mapM_ printPage pages
+
+    dumpMeta =
+        f <$> pagesFromFile
+      where
+        f :: IO [Page] -> IO ()
+        f getPages = do
+            pages <- getPages
+            let printPage = putStrLn . prettyMeta
             mapM_ printPage pages
 
     paragraphIdsInPages =

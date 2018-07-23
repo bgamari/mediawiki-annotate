@@ -1,6 +1,7 @@
 module CAR.Types.AST.Pretty
     ( -- * Printing
       prettyPage
+    , prettyMeta
     , prettySkeleton
     , prettyParagraph
       -- ** Link styles
@@ -23,6 +24,16 @@ prettyPage linkStyle (Page (PageName name) pageId pageType metaData skeleton) =
               , ""
               ]
             ++ map (prettySkeleton linkStyle) skeleton
+
+prettyMeta ::  Page -> String
+prettyMeta (Page (PageName name) pageId pageType metaData _) =
+    unlines $ [ T.unpack name
+              , replicate (T.length name) '='
+              , ""
+              , "   " ++ show pageId  ++ " ("++show pageType ++") "
+              , "   " ++ show metaData
+              , ""
+              ]
 
 prettySkeleton :: LinkStyle -> PageSkeleton -> String
 prettySkeleton renderLink = go 1
