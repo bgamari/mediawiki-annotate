@@ -188,8 +188,12 @@ transformCategoriesAndForbiddenSection page =
 
 metaFilterPage ::  Page  ->  Page
 metaFilterPage page =
-    let metadata = clearMetadata _CategoryNames
+    let metadata = clearMetadata _RedirectNames
+              $ clearMetadata _CategoryNames
               $ clearMetadata _CategoryIds
+              $ clearMetadata _DisambiguationNames
+              $ clearMetadata _DisambiguationIds
+              $ clearMetadata _InlinkIds
               $ pageMetadata page
     in page { pageMetadata = metadata }
 
