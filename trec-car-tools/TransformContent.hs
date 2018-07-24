@@ -35,6 +35,7 @@ data ConfOpts = ConfOpts { forbiddenHeadings :: HS.HashSet T.Text
                          , includeLongHeadings :: Bool
                          , deleteSections :: Bool
                          , includeShortPage :: Bool
+                         , dropWikiMeta :: Bool
                          }
 
 opts :: Parser (FilePath, FilePath, Page -> Maybe Page)
@@ -55,6 +56,7 @@ opts =
                                              includeLongHeadings <-switch (long "longHeading" <> help "include headings if they are longer than 100 characters")
                                              deleteSections <- switch (long "deleteSections" <> help "delete Sections")
                                              includeShortPage <- switch (long "shortpage" <> help "keep pages that contain less than three sections after filtering")
+                                             dropWikiMeta <- switch (long "dropWikiMeta" <> help "drop wikipedia specific meta data")
                                              return ConfOpts {..}
                                          )
     transformConf :: ConfOpts -> Page -> Maybe Page
@@ -69,6 +71,7 @@ opts =
                    , deactivate includeCategories     $ recurseFilterPage (not . isCategoriesPara)
                    , deactivate (not deleteSections) $ recurseFilterPage (not . isSection)
                    , deactivate includeLead           $ topLevelFilterPage (not . isPara)
+                   , deactivate (not dropWikiMeta) $ metaFilterPage
                    ]
             deactivate :: Bool -> a -> Maybe a
             deactivate False x = Just x
@@ -182,6 +185,15 @@ transformCategoriesAndForbiddenSection page =
     $ recurseFilterPage (not . isImage)
     $ recurseFilterPage (not . isCategoriesPara)
     page
+
+metaFilterPage ::  Page  ->  Page
+metaFilterPage page =
+    let metadata = clearMetadata _CategoryNames
+              $ clearMetadata _CategoryIds
+              $ pageMetadata page
+    in page { pageMetadata = metadata }
+
+
 
 ---
 

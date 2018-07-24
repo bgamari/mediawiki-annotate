@@ -64,8 +64,9 @@ opts = subparser
     dumpSections =
         f <$> pagesFromFile
           <*> flag False True (long "raw" <> help "only section paths - no pagenames")
+          <*> flag False True (long "internal" <> help "also internal sections")
       where
-        f getPages raw = do
+        f getPages raw internal = do
             pages <- getPages
             let sectionpathlist p = fmap escapeSectionPath
                                   $ pageSectionPaths p
