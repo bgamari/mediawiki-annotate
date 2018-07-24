@@ -203,7 +203,7 @@ metaFilterPage page =
 
 main :: IO ()
 main = do
-    (inputFile, outputFile, transformMode) <- execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
+    (inputFile, outputFile, transformMode) <- execParser' 2 (helper <*> opts) (progDescDoc $ Just helpDescr)
     (prov, pages) <- readPagesFileWithProvenance inputFile
     writeCarFile outputFile prov $ mapMaybe transformMode pages
 
