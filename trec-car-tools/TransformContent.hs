@@ -194,6 +194,7 @@ metaFilterPage page =
               $ clearMetadata _DisambiguationNames
               $ clearMetadata _DisambiguationIds
               $ clearMetadata _InlinkIds
+              $ clearMetadata _InlinkAnchors
               $ pageMetadata page
     in page { pageMetadata = metadata }
 
