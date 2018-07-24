@@ -120,16 +120,16 @@ exportPages outPath prov pagesToExport = do
 
 
 exportAllWithPrefix :: FilePath -> Exporter
-exportAllWithPrefix outpath = do
-    exportPages (outpath <.> "articles")
-    exportOutlines (outpath <.> "outlines")
-    exportParagraphs ( outpath <.> "paragraphs")
-    exportParagraphAnnotations id (outpath <.> "hierarchical.qrels")
-    exportParagraphAnnotations cutSectionPathArticle  (outpath <.> "article.qrels")
-    exportParagraphAnnotations cutSectionPathTopLevel (outpath <.> "toplevel.qrels")
-    exportEntityAnnotations id  (outpath <.> "hierarchical.entity.qrels")
-    exportEntityAnnotations cutSectionPathArticle (outpath <.> "article.entity.qrels")
-    exportEntityAnnotations cutSectionPathTopLevel  (outpath <.> "toplevel.entity.qrels") 
+exportAllWithPrefix outpath prov pages= do
+    exportPages (outpath <.> "articles") prov pages
+    exportOutlines (outpath <.> "outlines") prov pages
+    exportParagraphs ( outpath <.> "paragraphs") prov pages
+    exportParagraphAnnotations id (outpath <.> "hierarchical.qrels") prov pages
+    exportParagraphAnnotations cutSectionPathArticle  (outpath <.> "article.qrels") prov pages
+    exportParagraphAnnotations cutSectionPathTopLevel (outpath <.> "toplevel.qrels") prov pages
+    exportEntityAnnotations id  (outpath <.> "hierarchical.entity.qrels") prov pages
+    exportEntityAnnotations cutSectionPathArticle (outpath <.> "article.entity.qrels") prov pages
+    exportEntityAnnotations cutSectionPathTopLevel  (outpath <.> "toplevel.entity.qrels") prov pages
 
 
 main :: IO ()
