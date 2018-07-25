@@ -271,6 +271,24 @@ executable trec-car-remove-duplicate-pages
   default-language:    Haskell2010
 
 
+executable trec-car-merge-duplicate-sections
+  main-is:             MergeDuplicateSections.hs
+  ghc-options:         -Wall
+  build-depends:       base,
+                       bytestring,
+                       containers,
+                       trifecta >= 1.5,
+                       parsers >= 0.12,
+                       ansi-wl-pprint,
+                       text,
+                       optparse-applicative >= 0.12,
+                       binary-serialise-cbor,
+                       unordered-containers,
+                       hashable,
+                       trec-car-tools
+  default-language:    Haskell2010
+
+
 
 test-suite tests
   main-is:             Test.hs
