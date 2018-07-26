@@ -8,6 +8,7 @@ import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+import Data.List
 import System.FilePath
 
 import Options.Applicative
@@ -42,22 +43,28 @@ options =
         , exportParagraphs
           <$> option str (long "paragraphs" <> metavar "OUTPUT" <> help "Export paragraphs")
 
-        , exportParagraphAnnotations id
+        , exportParagraphAnnotations id id
           <$> option str (long "para-hier-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
-        , exportParagraphAnnotations cutSectionPathArticle
+        , exportParagraphAnnotations id resolveSubsumption
+          <$> option str (long "para-tree-qrel" <> metavar "OUTPUT" <> help "Export tree qrel for paragraphs")
+
+        , exportParagraphAnnotations cutSectionPathArticle id
           <$> option str (long "para-article-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
-        , exportParagraphAnnotations cutSectionPathTopLevel
+        , exportParagraphAnnotations cutSectionPathTopLevel id
           <$> option str (long "para-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for paragraphs")
 
-        , exportEntityAnnotations id
+        , exportEntityAnnotations id id
           <$> option str (long "entity-hier-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
 
-        , exportEntityAnnotations cutSectionPathArticle
+        , exportEntityAnnotations id resolveEntitySubsumption
+          <$> option str (long "entity-tree-qrel" <> metavar "OUTPUT" <> help "Export tree qrel for entities")
+
+        , exportEntityAnnotations cutSectionPathArticle id
           <$> option str (long "entity-article-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
 
-        , exportEntityAnnotations cutSectionPathTopLevel
+        , exportEntityAnnotations cutSectionPathTopLevel id
           <$> option str (long "entity-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
           
         , exportAllWithPrefix
@@ -81,16 +88,34 @@ exportParagraphs outPath prov pagesToExport = do
     writeCarFile paragraphsFile prov $ sortIt $ concatMap toParagraphs pagesToExport
     putStrLn "done"
 
-exportParagraphAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Exporter
-exportParagraphAnnotations cutSectionPath outPath _prov pagesToExport = do
+exportParagraphAnnotations :: (SectionPath -> SectionPath) -> ([Annotation IsRelevant] -> [Annotation IsRelevant]) -> FilePath -> Exporter
+exportParagraphAnnotations cutSectionPath transform outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (Annotation sectionPath paragId rel) =
           Annotation (cutSectionPath sectionPath) paragId rel
     writeParagraphQRel outPath
+          $ transform
           $ S.toList
           $ S.map cutAnnotation
           $ foldMap Exports.toAnnotations pagesToExport
     putStrLn "done"
+
+
+resolveSubsumption :: [Annotation IsRelevant] -> [Annotation IsRelevant]
+resolveSubsumption annotations =
+        [ (Annotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) paraid rel)
+        | (Annotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) paraid rel) <- annotations
+        , headingPrefix <- heads headings
+        ]
+  where heads xs = map reverse $ tails $ reverse xs
+
+resolveEntitySubsumption ::  [EntityAnnotation IsRelevant] -> [EntityAnnotation IsRelevant]
+resolveEntitySubsumption annotations =
+        [ (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) paraid rel)
+        | (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) paraid rel) <- annotations
+        , headingPrefix <- heads headings
+        ]
+  where heads xs = map reverse $ tails $ reverse xs
 
 cutSectionPathArticle, cutSectionPathTopLevel :: SectionPath -> SectionPath
 cutSectionPathArticle (SectionPath pgId _headinglist)  =
@@ -98,12 +123,13 @@ cutSectionPathArticle (SectionPath pgId _headinglist)  =
 cutSectionPathTopLevel  (SectionPath pgId headinglist) =
     SectionPath pgId (take 1 headinglist)
 
-exportEntityAnnotations :: (SectionPath -> SectionPath) -> FilePath -> Exporter
-exportEntityAnnotations cutSectionPath outPath _prov pagesToExport = do
+exportEntityAnnotations :: (SectionPath -> SectionPath) -> ([EntityAnnotation IsRelevant] -> [EntityAnnotation IsRelevant]) -> FilePath -> Exporter
+exportEntityAnnotations cutSectionPath transform outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
     let cutAnnotation (EntityAnnotation sectionPath entityId rel) =
           EntityAnnotation (cutSectionPath sectionPath) entityId rel
     writeEntityQRel outPath
+          $ transform
           $ S.toList
           $ S.map cutAnnotation
           $ foldMap Exports.toEntityAnnotations pagesToExport
@@ -121,20 +147,22 @@ exportPages outPath prov pagesToExport = do
 
 exportAllWithPrefix :: FilePath -> Exporter
 exportAllWithPrefix outpath prov pages= do
-    exportPages (outpath <.> "articles") prov pages
-    exportOutlines (outpath <.> "outlines") prov pages
-    exportParagraphs ( outpath <.> "paragraphs") prov pages
-    exportParagraphAnnotations id (outpath <.> "hierarchical.qrels") prov pages
-    exportParagraphAnnotations cutSectionPathArticle  (outpath <.> "article.qrels") prov pages
-    exportParagraphAnnotations cutSectionPathTopLevel (outpath <.> "toplevel.qrels") prov pages
-    exportEntityAnnotations id  (outpath <.> "hierarchical.entity.qrels") prov pages
-    exportEntityAnnotations cutSectionPathArticle (outpath <.> "article.entity.qrels") prov pages
-    exportEntityAnnotations cutSectionPathTopLevel  (outpath <.> "toplevel.entity.qrels") prov pages
+    exportPages (outpath <> "-articles.cbor") prov pages
+    exportOutlines (outpath <> "-outlines.cbor") prov pages
+    exportParagraphs ( outpath <> "-paragraphs.cbor") prov pages
+    exportParagraphAnnotations id id (outpath <.> "hierarchical.qrels") prov pages
+    exportParagraphAnnotations id resolveSubsumption (outpath <.> "tree.qrels") prov pages
+    exportParagraphAnnotations cutSectionPathArticle id  (outpath <.> "article.qrels") prov pages
+    exportParagraphAnnotations cutSectionPathTopLevel id (outpath <.> "toplevel.qrels") prov pages
+    exportEntityAnnotations id id  (outpath <.> "hierarchical.entity.qrels") prov pages
+    exportEntityAnnotations id resolveEntitySubsumption (outpath <.> "tree.entity.qrels") prov pages
+    exportEntityAnnotations cutSectionPathArticle id (outpath <.> "article.entity.qrels") prov pages
+    exportEntityAnnotations cutSectionPathTopLevel id (outpath <.> "toplevel.entity.qrels") prov pages
 
 
 main :: IO ()
 main = do
-    (path, names, exporters) <- execParser' 1 (helper <*> options) mempty
+    (path, names, exporters) <- execParser' 2 (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
     let siteId = wikiSite prov
