@@ -95,5 +95,5 @@ modes = subparser
 
 main :: IO ()
 main = do
-    mode <- execParser' 1 (helper <*> modes)  fullDesc
+    mode <- execParser' 2 (helper <*> modes)  fullDesc
     mode
