@@ -9,6 +9,8 @@ module EdgeDocCorpus
   ( EdgeDoc(..)
   , pageToEdgeDocs
   , pagesToEdgeDocs
+  , paragraphToEdgeDocs
+  , paragraphsToEdgeDocs
   ) where
 
 import Data.Monoid hiding (All, Any)
@@ -21,6 +23,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
 import Data.Hashable
+
+import qualified Data.SmallUtf8 as Utf8
 
 import CAR.Types
 import CAR.Utils
@@ -46,6 +50,9 @@ instance Eq EdgeDoc where
 instance Hashable EdgeDoc where
     hashWithSalt salt x =
         hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
+
+anonymousPageId = PageId $ Utf8.unsafeFromShortByteString "enwiki:anonymous"
+
 
 pageToEdgeDocs :: Page -> [EdgeDoc]
 pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
@@ -82,10 +89,36 @@ pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
       <> "\n"
       <> paraToText para
 
+paragraphToEdgeDocs :: Paragraph -> [EdgeDoc]
+paragraphToEdgeDocs para =
+    [convertPara para]
+  where
+    go ::  PageSkeleton -> [EdgeDoc]
+    go  (Para paragraph) =
+      [convertPara paragraph ]
+
+    convertPara :: Paragraph -> EdgeDoc
+    convertPara para =
+      let
+        edgeDocParagraphId    = paraId para
+        edgeDocArticleId      = anonymousPageId
+        edgeDocNeighbors      = HS.fromList
+                              $ fmap linkTargetId (paraLinks para)
+        edgeDocContent        = paragraphContent para
+      in EdgeDoc {..}
+
+    paragraphContent :: Paragraph ->  T.Text
+    paragraphContent para  =
+         TL.toStrict $ paraToText para
+
 edgeDocHasLinks :: EdgeDoc -> Bool
 edgeDocHasLinks = not . HS.null . edgeDocNeighbors
 
 pagesToEdgeDocs :: [Page] -> [EdgeDoc]
 pagesToEdgeDocs =
     foldMap (filter edgeDocHasLinks . pageToEdgeDocs)
+
+paragraphsToEdgeDocs :: [Paragraph] -> [EdgeDoc]
+paragraphsToEdgeDocs =
+    foldMap (filter edgeDocHasLinks . paragraphToEdgeDocs)
 

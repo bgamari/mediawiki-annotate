@@ -25,28 +25,50 @@ queryHelpDesc :: PP.Doc
 queryHelpDesc = "Create EdgeDoc corpus and toc"
 
 
+buildEdgeDocToc :: FilePath -> IO ()
+buildEdgeDocToc cborPath =
+    void $ Toc.createIndex edgeDocParagraphId cborPath
 
 
-exportEdgeDocs :: [Page] -> FilePath -> IO ()
-exportEdgeDocs pagesToExport outPath = do
+exportEdgeDocsFromPages :: [Page] -> FilePath -> IO ()
+exportEdgeDocsFromPages pagesToExport outPath = do
     putStr "Writing edgedocs..."
     let edgeDocFile = outPath
 --     writeCarFile edgeDocFile $ map pageToEdgeDocs pagesToExport
     writeCborList outPath (Just (0::Int)) $ foldMap pageToEdgeDocs pagesToExport
     putStrLn "done"
 
-buildEdgeDocToc :: FilePath -> IO ()
-buildEdgeDocToc cborPath =
-    void $ Toc.createIndex edgeDocParagraphId cborPath
 
 
-convertMode =
+convertPageMode =
     go <$> argument str (metavar "CBOR" <> help "pages cbor file")
        <*> option str (long "output" <> short 'o' <> help "output index path")
   where
     go inputPath outputPath = do
         pages <- readPagesFile inputPath
-        exportEdgeDocs pages outputPath
+        exportEdgeDocsFromPages pages outputPath
+
+
+exportEdgeDocsFromParagraphs:: [Paragraph] -> FilePath -> IO ()
+exportEdgeDocsFromParagraphs paragraphsToExport outPath = do
+    putStr "Writing edgedocs..."
+    let edgeDocFile = outPath
+--     writeCarFile edgeDocFile $ map pageToEdgeDocs pagesToExport
+    writeCborList outPath (Just (0::Int)) $ foldMap paragraphToEdgeDocs paragraphsToExport
+    putStrLn "done"
+
+
+convertParagraphMode =
+    go <$> argument str (metavar "CBOR" <> help "paragraph cbor file")
+       <*> option str (long "output" <> short 'o' <> help "output index path")
+  where
+    go inputPath outputPath = do
+        paragraphs <- readParagraphsFile inputPath
+        exportEdgeDocsFromParagraphs paragraphs outputPath
+
+
+
+
 
 buildTocMode =
     go <$> argument str (metavar "CBOR" <> help "EdgeDoc cbor file")
@@ -66,7 +88,8 @@ lookupMode =
         putStrLn $ show edgeDoc
 
 modes = subparser
-    $ command "convert"  (info (helper <*> convertMode) (progDesc "Convert pages to edgedocs" <> fullDesc))
+    $ command "convert-page"  (info (helper <*> convertPageMode) (progDesc "Convert pages to edgedocs" <> fullDesc))
+   <> command "convert-paragraph"  (info (helper <*> convertParagraphMode) (progDesc "Convert pararaphs to edgedocs" <> fullDesc))
    <> command "toc" (info (helper <*> buildTocMode) (progDesc "build toc filed for edgedocs" <> fullDesc))
    <> command "lookup" (info (helper <*> lookupMode) (progDesc "get edgedoc by paragraphId" <> fullDesc))
 
