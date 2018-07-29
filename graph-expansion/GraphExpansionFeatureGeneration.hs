@@ -52,10 +52,11 @@ import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
+import CAR.Utils
 
 
 import EdgeDocCorpus
-import GraphExpansionExperiments hiding (Bm25, Ql)
+-- import GraphExpansionExperiments hiding (Bm25, Ql)
 import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
@@ -202,30 +203,6 @@ opts =
         <|> option (ModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
 
 
-computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
-                        -> AnnotationsFile
-                        -> CarRun.QueryId  ->  [Term]
-                        -> [(RetrievalFun, [(ParagraphId, Double)])]
-
-computeRankingsForQuery
-      retrieveDocs
-      annsFile queryId query =
-      let
-
-        retrievalResults :: [(RetrievalFun, [(ParagraphId, Double)])]
-        retrievalResults = [ (irname, retrievalResult)
-                           | (irname, retrievalModel) <- retrievalModels
-                           , let retrievalResult =
-                                   fmap (\(ed, ld) -> (edgeDocParagraphId ed, ln ld)) $
-                                   retrieveDocs retrievalModel query
-                           ]
-
-    in retrievalResults
-
-
-logMsg :: CarRun.QueryId -> RetrievalFun -> String -> IO ()
-logMsg queryId method t = T.putStr $ (CarRun.unQueryId queryId)<>"\t"<>T.pack (show method)<>"\t"<>T.pack t<>"\n"
-
 
 bm25MethodName :: CarRun.MethodName
 bm25MethodName = CarRun.MethodName "BM25"
@@ -234,6 +211,50 @@ qlMethodName = CarRun.MethodName "QL"
 
 type TrainData =  M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
 type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
+
+
+-- --------------------------------- Query Doc ------------------------------------------------------
+
+
+data QueryDoc = QueryDoc { queryDocQueryId      :: !CarRun.QueryId
+                         , queryDocQueryText    :: !T.Text
+                         }
+           deriving (Show, Generic)
+instance FromJSON QueryDoc
+instance ToJSON QueryDoc
+
+data QueryDocList = QueryDocList { queryDocListContent :: [QueryDoc]}
+           deriving Generic
+instance FromJSON QueryDocList
+instance ToJSON QueryDocList
+
+data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
+
+pagesToQueryDocs :: QueryDerivation
+                 -> [Page]
+                 -> [QueryDoc]
+pagesToQueryDocs deriv pages =
+    queryDocs
+  where
+    queryDocs = case deriv of
+      QueryFromPageTitle ->
+          [ QueryDoc { queryDocQueryId      = CarRun.pageIdToQueryId $  pageId page
+                     , queryDocQueryText    = getPageName $ pageName page
+                     }
+          | page <- pages
+          ]
+      QueryFromSectionPaths ->
+          [ QueryDoc { queryDocQueryId      = CarRun.sectionPathToQueryId sectionPath
+                     , queryDocQueryText    = T.unwords
+                                            $ getPageName (pageName page) : getPageName (pageName page) -- twice factor
+                                              : map getSectionHeading headings
+                     }
+          | page <- pages
+          , (sectionPath, headings, _) <- pageSections page
+          ]
+
+
+-- ---------------------------------------------------------------------------------------
 
 
 main :: IO ()
@@ -247,7 +268,6 @@ main = do
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
     let entityRunFiles  = [ (g, r) | (g, Entity, r) <- gridRunFiles]
@@ -268,7 +288,7 @@ main = do
     queries' <-
         case querySrc of
           QueriesFromCbor queryFile queryDeriv _seedDeriv -> do
-              pagesToQueryDocs siteId queryDeriv <$> readPagesOrOutlinesAsPages queryFile
+              pagesToQueryDocs queryDeriv <$> readPagesOrOutlinesAsPages queryFile
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
@@ -664,7 +684,7 @@ data Run = GridRun' GridRun | Aggr
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
-data RunFeature = ScoreF | RecipRankF | LinearRankF | BucketRankF | CountF
+data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
@@ -842,8 +862,8 @@ defaultRankFeatures runF =
     case runF of
       ScoreF -> -1000.0
       RecipRankF -> 0.0
-      LinearRankF -> 0.0
-      BucketRankF -> 0.0
+--       LinearRankF -> 0.0
+--       BucketRankF -> 0.0
       CountF -> 0.0
 
 defaultEntRankFeatures :: Run -> [(EntityFeature, Double)]
@@ -863,8 +883,8 @@ rankFeatures runF entry =
     case runF of
       ScoreF -> score entry
       RecipRankF -> recipRank entry
-      LinearRankF -> linearRank 100  entry
-      BucketRankF -> bucketRank entry
+--       LinearRankF -> linearRank 100  entry
+--       BucketRankF -> bucketRank entry
       CountF -> count entry
   where
     score :: RankingEntry d -> Double
