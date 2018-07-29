@@ -649,7 +649,7 @@ data QueryModel = All | Title
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data RetrievalModel = Bm25 | Ql
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
-data ExpansionModel = NoneX | Rm | EcmX | EcmRm
+data ExpansionModel = NoneX | Rm | EcmX | EcmRm | EcmPsg
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
@@ -660,8 +660,10 @@ entityRunsF = [ GridRun qm rm em it
              , rm <- [minBound..maxBound]
              , (it, em) <- [ (EcmIdx, EcmX), (EcmIdx, EcmRm)
                            , (ParagraphIdx, EcmX), (ParagraphIdx, EcmRm)
-                           , (PageIdx, NoneX), (PageIdx, Rm)]
+                           -- , (PageIdx, NoneX), (PageIdx, Rm)]
+                           ]
                            ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
+                           ++ [(PageIdx, em) | em <- [minBound..maxBound]]
              ]
 
 
@@ -669,8 +671,8 @@ edgeRunsF :: [GridRun]
 edgeRunsF = [ GridRun qm rm em it
              | qm <- [minBound..maxBound]
              , rm <- [minBound..maxBound]
-             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm)
-                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm)
+             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg)
+                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg)
                            ]
              ]
 
