@@ -38,6 +38,7 @@ import Data.Foldable as Foldable
 import Data.Function
 import Data.Bifunctor
 import Data.Hashable
+import Data.Semigroup hiding (option)
 
 
 import CAR.Types hiding (Entity)
