@@ -254,6 +254,9 @@ type EdgeFeatureVec = FeatureVec EdgeFeature Double
 type EntityFeatureVec = FeatureVec EntityFeature Double
 type CombinedFeatureVec = FeatureVec CombinedFeature Double
 
+
+
+
 makeEntFeatVector :: [(EntityFeature, Double)] -> F.FeatureVec EntityFeature Double
 makeEntFeatVector xs =
     F.modify entFSpace defaults xs
@@ -343,6 +346,13 @@ rankEdgeFeatures run entry =
     [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
     | runF <- allRunFeatures
     ]
+
+
+-- ---------------------------------------------------------
+-- ---------------------------------------------------------
+
+type TrainData =  M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
+type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
 
 
 -- ---------------------------------------------------------

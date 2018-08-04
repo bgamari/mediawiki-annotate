@@ -188,8 +188,6 @@ bm25MethodName = CarRun.MethodName "BM25"
 qlMethodName :: CarRun.MethodName
 qlMethodName = CarRun.MethodName "QL"
 
-type TrainData =  M.Map CAR.RunFile.QueryId [(QRel.DocumentName, Features, IsRelevant)]
-type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
 
 
 -- --------------------------------- Query Doc ------------------------------------------------------
@@ -426,21 +424,21 @@ main = do
               featureNames :: _
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames combinedFSpace'
 
-              franking :: TrainData
-              franking = augmentWithQrels qrel docFeatures Relevant
+              evalData :: TrainData
+              evalData = augmentWithQrels qrel docFeatures Relevant
 
               -- Option a) drop in an svmligh style features annsFile
               -- Option b) stick into learning to rank
               discardUntrainable :: TrainData -> TrainData
-              discardUntrainable franking =
-                  M.filter hasPosAndNeg  franking
+              discardUntrainable evalData =
+                  M.filter hasPosAndNeg  evalData
                 where hasPosAndNeg list =
                         let hasPos = any (\(_,_,r) -> r == Relevant) list
                             hasNeg = any (\(_,_,r) -> r /= Relevant) list
                         in hasPos && hasNeg
 
               trainData :: TrainData
-              trainData = discardUntrainable franking
+              trainData = discardUntrainable evalData
               metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ trainData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
@@ -481,7 +479,7 @@ main = do
           let outputDiagnostics :: (String, Model, Double) -> IO ()
               outputDiagnostics (modelDesc,model, trainScore) = do
                       storeModelData outputFilePrefix modelFile model trainScore modelDesc
-                      storeRankingData outputFilePrefix franking metric model modelDesc
+                      storeRankingData outputFilePrefix evalData metric model modelDesc
 
               modelDiag :: [(String, Model, Double)]
               ((model, trainScore), modelDiag) = trainProcedure "train" trainData
@@ -493,7 +491,7 @@ main = do
                       where foldLen = ((M.size trainData) `div` 5 ) +1
 
 --         trainProcedure trainData = learnToRank trainData featureNames metric gen0
-              (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData franking
+              (predictRanking, modelDiag') = kFoldCross trainProcedure folds trainData evalData
               testScore = metric predictRanking
 
           -- evaluate all work here!
@@ -501,7 +499,7 @@ main = do
 
                 -- eval and write train ranking (on all data)
           storeModelData outputFilePrefix modelFile model trainScore "train"
-          storeRankingData outputFilePrefix franking metric model "train"
+          storeRankingData outputFilePrefix evalData metric model "train"
 
           putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
           -- write test ranking that results from k-fold cv
@@ -582,9 +580,9 @@ storeRankingData ::  FilePath
                -> Model
                -> [Char]
                -> IO ()
-storeRankingData outputFilePrefix franking metric model modelDesc = do
+storeRankingData outputFilePrefix evalData metric model modelDesc = do
 
-  let rerankedFranking = rerankRankings' model franking
+  let rerankedFranking = rerankRankings' model evalData
   putStrLn $ "Model "++modelDesc++" test metric "++ show (metric rerankedFranking) ++ "MAP."
   CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
@@ -795,6 +793,8 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
                  return [ edgeFeat | edgeFeat <- HM.elems xs ]
        ]
 
+
+
 entityScoreVec :: MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec
 entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
       [ (EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
@@ -807,6 +807,7 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
   where
    numIncidentEdgeDocs = realToFrac $ length incidentEdgeDocs
    degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors incidentEdgeDocs
+
 
 edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
              -> FeatureVec EdgeFeature Double

@@ -24,6 +24,10 @@ type QueryId = RunFile.QueryId
 
 type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 
+
+-- Compound type for storing results of transposing multiple rankings over doc,
+-- into a doc -> [ranking], i.e., the "all".
+-- It also exposes the collapsed version by unsupervised rank aggregation (score(doc) = sum_rankings 1/rank(doc))
 data MultiRankingEntry doc key =  MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
                                                     , multiRankingEntryAll       :: [(key, RankingEntry doc)]
                                                     }
