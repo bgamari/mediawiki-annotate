@@ -21,21 +21,6 @@ type Score = Double
 type Rank = Int
 type QueryId = RunFile.QueryId
 
--- data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
---                                       , carDocument    :: doc
---                                       , carRank        :: !Int
---                                       , carScore       :: !Run.Score
---                                       , carMethodName  :: !MethodName
---                                       }
---                        deriving  (Show)
-
--- data RankingEntry = RankingEntry { queryId       :: !QueryId
---                                  , documentName  :: !DocumentName
---                                  , documentRank  :: !Rank
---                                  , documentScore :: !Score
---                                  , methodName    :: !MethodName
---                                  }
---                   deriving (Show)
 
 type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 

@@ -20,7 +20,8 @@ library
   exposed-modules:     EdgeDocCorpus,
                        GraphExpansion,
                        MultiTrecRunFile,
-                       GraphExpansionExperiments
+                       GraphExpansionExperiments,
+                       GridFeatures
   build-depends:       base >=4.9 && <4.12,
                        async,
                        bytestring,
