@@ -58,7 +58,7 @@ import GridFeatures
 
 import EdgeDocCorpus
 -- import GraphExpansionExperiments hiding (Bm25, Ql)
-import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
+-- import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
@@ -70,15 +70,6 @@ import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
-import PageRank
-import DenseMapping
-import Graph
-
-import qualified Data.GraphViz as Dot
-import qualified Data.GraphViz.Printing as Dot
-import qualified Data.GraphViz.Attributes.Complete as Dot
-import qualified Data.GraphViz.Commands.IO as Dot
-import Control.Monad
 
 
 import Debug.Trace
@@ -107,8 +98,6 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
 
 
 
--- | PageRank teleportation \(\alpha\)
-type TeleportationProb = Double
 
 opts :: Parser ( FilePath
                , FilePath
@@ -116,15 +105,9 @@ opts :: Parser ( FilePath
                , [CarRun.QueryId]
                , NumResults
                , [(GridRun, EntityOrEdge, FilePath)]
---                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , FilePath
                , ModelSource
---                , PosifyEdgeWeights
---                , TeleportationProb
                , [ExperimentSettings]
---                , PageRankExperimentSettings
---                , PageRankConvergence
---                , GraphWalkModel
                )
 opts =
     (,,,,,,,,)
@@ -134,15 +117,9 @@ opts =
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
     <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
     <*> some gridRunParser
---     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
---     <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
---     <*> option auto (long "teleport" <> help "teleport probability (for page rank)" <> value 0.1)
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
---     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
---     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
---     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     where
 
       querySource :: Parser QuerySource
@@ -171,12 +148,6 @@ opts =
             option (TrainModel <$> str) (long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
 --         <|> option (ModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
 
-
-
--- bm25MethodName :: CarRun.MethodName
--- bm25MethodName = CarRun.MethodName "BM25"
--- qlMethodName :: CarRun.MethodName
--- qlMethodName = CarRun.MethodName "QL"
 
 
 -- --------------------------------- Query Doc ------------------------------------------------------
@@ -309,11 +280,18 @@ main = do
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
           trainMe trainData evalData entFSpace metric outputFilePrefix modelFile
 
-trainMe :: TrainData -> TrainData -> _ -> _ -> FilePath -> FilePath -> IO ()
+trainMe :: TrainData
+        -> TrainData
+        -> FeatureSpace EntityFeature
+        -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+        -> FilePath
+        -> FilePath
+        -> IO ()
 trainMe trainData evalData entFSpace metric outputFilePrefix modelFile = do
           -- train me!
           gen0 <- newStdGen  -- needed by learning to rank
           let
+
               featureNames :: _
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames entFSpace
 
@@ -458,12 +436,9 @@ makeFeatures collapsedEntityRun =
         docFeatures''' = M.fromList
                     [ ((query, T.pack $ unpackPageId pid), features)
                     | (query, entityRun) <- M.toList collapsedEntityRun
---                     , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
                     , entityRankEntry <- entityRun
                     , let pid = multiRankingEntryGetDocumentName entityRankEntry
                     , let features =  makeEntFeatVector (entityScoreVecFromMultiRankings entityRankEntry)
---                     , --let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
---                     , --((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
                     ]
 
 
