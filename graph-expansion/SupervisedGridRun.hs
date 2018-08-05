@@ -295,19 +295,19 @@ trainMe trainData evalData entFSpace metric outputFilePrefix modelFile = do
               featureNames :: _
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames entFSpace
 
+              rngSeeds :: [StdGen]
+              rngSeeds = unfoldr (Just . System.Random.split) gen0
+
               trainProcedure:: String -> TrainData -> ReturnWithModelDiagnostics (Model, Double)
               trainProcedure modelDesc trainData =
-                  let trainWithDifferentGens :: StdGen -> Int -> (StdGen, ReturnWithModelDiagnostics (Model, Double))
-                      trainWithDifferentGens gen i =
-                                let (genA, genB) = System.Random.split gen
-                                in (genA, restartModel i genB)
-                        where restartModel i gen =
-                                let (model, trainScore) = learnToRank trainData featureNames metric gen
-                                in ((model, trainScore), [((modelDesc ++ "-restart-"++show i), model, trainScore)])
+                  let restartModel :: Int -> StdGen -> ReturnWithModelDiagnostics (Model, Double)
+                      restartModel i gen =
+                        let (model, trainScore) = learnToRank trainData featureNames metric gen
+                        in ((model, trainScore), [((modelDesc ++ "-restart-"++show i), model, trainScore)])
 
 
                       other:: [ReturnWithModelDiagnostics (Model, Double)]
-                      (_, other) = mapAccumL trainWithDifferentGens gen0 [0..4]
+                      other = zipWith restartModel [0..4] rngSeeds
                       modelsWithTrainScore:: [(Model, Double)]
                       (modelsWithTrainScore, modelDiag) = unzip other
                       (model, trainScore) = maximumBy (compare `on` snd) modelsWithTrainScore
