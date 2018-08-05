@@ -53,6 +53,8 @@ library
                        snowball,
                        time,
                        dlist,
+                       random,
+                       split,
                        graph-algorithms,
                        simplir-word-embedding,
                        trec-car-tools
