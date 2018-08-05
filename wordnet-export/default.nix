@@ -5,7 +5,7 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "ukb-hs";
-        rev = "a9b0235dca2362a1f723476fed62db8a77210190";
+        rev = "fc789861c0e0340a6d91efa5871fee29d4909788";
         sha256 = null;
       };
     in import src { inherit haskellPackages; };
@@ -14,7 +14,7 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "wordnet-parse";
-        rev = "754d855f51735a30f38da5ce4fd5f2ac62a8d180";
+        rev = "96f90c1e2d9924f3c65fc454bb9237ca38b83dd0";
         sha256 = null;
       };
     in haskellPackages.callCabal2nix "wordnet-parse" src {};

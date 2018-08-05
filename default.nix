@@ -1,8 +1,15 @@
-{ nixpkgs ? (import <nixpkgs> {}) }:
+{ nixpkgs ? (import simplir/nixpkgs.nix {}) }:
 
 let
   inherit (nixpkgs.haskell.lib) dontCheck doJailbreak;
   inherit (nixpkgs.stdenv) lib;
+
+  all-cabal-hashes =
+    let rev = "a4f65a465ce4b727a44cabc8073a5b09f058335f";
+    in {
+      url    = "https://github.com/commercialhaskell/all-cabal-hashes/archive/${rev}.tar.gz";
+      sha256 = "16rnyxqmr93ahml0fjfa6hmjpmx8sbpfdr52krd3sd6ic9n5p5ix";
+    };
 
   cabalFilter = path: type:
     let pathBaseName = baseNameOf path;
@@ -36,7 +43,7 @@ let
       };
     in trecCarPackages // { inherit trecCarPackages; };
 
-  haskellPackages = nixpkgs.haskell.packages.ghc822.override {
+  haskellPackages = nixpkgs.haskell.packages.ghc843.override {
     overrides = lib.composeExtensions simplirNix.haskellOverrides haskellOverrides;
   };
 in {

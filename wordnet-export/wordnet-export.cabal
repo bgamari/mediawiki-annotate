@@ -15,7 +15,7 @@ executable wordnet-export
   main-is:             SynsetExport.hs
   ghc-options:         -threaded -with-rtsopts=-A64M -rtsopts
   other-extensions:    BangPatterns, OverloadedStrings, QuasiQuotes, StandaloneDeriving, RecordWildCards, ParallelListComp, GeneralizedNewtypeDeriving
-  build-depends:       base >=4.10 && <4.11,
+  build-depends:       base >=4.10 && <4.13,
                        deepseq >=1.4 && <1.5,
                        hashable >=1.2 && <1.3,
                        unordered-containers >=0.2 && <0.3,
