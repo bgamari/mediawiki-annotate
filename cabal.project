@@ -10,7 +10,6 @@ packages:
     db-export/
     graph-expansion/
     graph-algorithms/
-    simplir/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
     car-baselines/
