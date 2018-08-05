@@ -378,25 +378,10 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
           -- train me!
           let
 
-              featureNames :: _
+              featureNames :: [FeatureName]
               featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames featureSpace
 
-              rngSeeds :: [StdGen]
-              rngSeeds = unfoldr (Just . System.Random.split) gen0
-
-              trainProcedure :: TrainData -> [(Model, Double)]
-              trainProcedure trainData =
-
-                  let trainData' = discardUntrainable trainData
-
-                      restartModel ::  StdGen -> (Model, Double)
-                      restartModel gen =
-                        learnToRank trainData' featureNames metric gen
-                      modelsWithTrainScore :: [(Model,Double)]
-                      modelsWithTrainScore = fmap restartModel rngSeeds
-                     in modelsWithTrainScore
-
-              (model, trainScore) = bestModel $ trainProcedure trainData
+              (model, trainScore) = bestModel $ trainWithRestarts gen0 metric featureNames trainData
 
             -- todo  exportGraphs model
 
@@ -404,10 +389,29 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
               folds = mkSequentialFolds 5 (M.keys trainData)
 
               foldRestartResults :: Folds (M.Map  Q [(DocId, Features, Rel)], [(Model, Double)])
-              foldRestartResults = kFolds trainProcedure trainData folds
+              foldRestartResults = kFolds (trainWithRestarts gen0 metric featureNames) trainData folds
 
           dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
+          dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
 
+trainWithRestarts :: StdGen
+                -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+                -> [FeatureName]
+                -> TrainData
+                -> [(Model, Double)]
+trainWithRestarts gen0 metric featureNames trainData =
+  let trainData' = discardUntrainable trainData
+
+      rngSeeds :: [StdGen]
+      rngSeeds = unfoldr (Just . System.Random.split) gen0
+
+      restartModel ::  StdGen -> (Model, Double)
+      restartModel gen =
+        learnToRank trainData' featureNames metric gen0
+
+      modelsWithTrainScore :: [(Model,Double)]
+      modelsWithTrainScore = fmap restartModel rngSeeds
+     in modelsWithTrainScore
 
 
 discardUntrainable :: TrainData -> TrainData
@@ -465,15 +469,25 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
                         , let modelDesc = "fold-"<> show foldNo <> "-best"
                         ]
 
-              dumpKfoldTest = storeRankingData outputFilePrefix testRanking metric modelDesc
+              dumpKfoldTestRanking = storeRankingData outputFilePrefix testRanking metric modelDesc
                                 where modelDesc = "test"
 
 
-          mapConcurrently_ id $ dumpAll ++ dumpBest ++ [dumpKfoldTest]
+          mapConcurrently_ id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
 
---           storeModelData outputFilePrefix modelFile model trainScore "train"
---           storeRankingData outputFilePrefix evalData metric model "train"
 
+
+dumpFullModelsAndRankings :: M.Map Q [(DocId, Features, Rel)]
+                            -> (Model, Double)
+                            -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+                            -> FilePath
+                            -> FilePath
+                            -> IO()
+dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile = do
+    let modelDesc = "train"
+        trainRanking = rerankRankings' model trainData
+    storeRankingData outputFilePrefix trainRanking metric modelDesc
+    storeModelData outputFilePrefix modelFile model trainScore modelDesc
 
 --
 -- outputTrainedModelsAndRanking :: TrainData
@@ -565,7 +579,7 @@ kFolds :: forall q docId rel r.
        -> Folds [q]
        -> Folds (M.Map q [(docId, Features, rel)], r)
           -- ^ the training result and set of test data for the fold
-kFolds trainProcedure allData foldQueries =
+kFolds trainWithRestarts allData foldQueries =
     fmap trainSingleFold foldQueries
   where
     trainSingleFold :: [q] -> (M.Map q [(docId, Features, rel)], r)
@@ -575,7 +589,7 @@ kFolds trainProcedure allData foldQueries =
 
           trainData :: M.Map q [(docId, Features, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allData
-      in (testData, trainProcedure trainData)
+      in (testData, trainWithRestarts trainData)
 
 
 
