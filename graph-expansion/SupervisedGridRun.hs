@@ -247,26 +247,14 @@ main = do
           let docFeatures = fmap featureVecToFeatures
                           $ makeFeatures collapsedEntityRun
 
+              allData :: TrainData
+              allData = augmentWithQrels qrel docFeatures Relevant
 
-              evalData :: TrainData
-              evalData = augmentWithQrels qrel docFeatures Relevant
-
-              -- Option b) stick into learning to rank
-              discardUntrainable :: TrainData -> TrainData
-              discardUntrainable evalData =
-                  M.filter hasPosAndNeg  evalData
-                where hasPosAndNeg list =
-                        let hasPos = any (\(_,_,r) -> r == Relevant) list
-                            hasNeg = any (\(_,_,r) -> r /= Relevant) list
-                        in hasPos && hasNeg
-
-              trainData :: TrainData
-              trainData = discardUntrainable evalData
               metric = avgMetricQrel qrel
-              totalElems = getSum . foldMap ( Sum . length ) $ trainData
-              totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ trainData
+              totalElems = getSum . foldMap ( Sum . length ) $ allData
+              totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
-          putStrLn $ "Training model with (trainData) "++ show (M.size trainData) ++
+          putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
@@ -277,10 +265,9 @@ main = do
                 | (k,list) <- M.toList trainData
                 , elem <- list]
 
-          putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData trainData)
+          putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData allData)
           gen0 <- newStdGen  -- needed by learning to rank
-
-          trainMe gen0 trainData evalData entFSpace metric outputFilePrefix modelFile
+          trainMe gen0 allData entFSpace metric outputFilePrefix modelFile
 
 --
 -- expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
