@@ -7,68 +7,53 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 
 import Control.Concurrent.Async
 import Control.DeepSeq
-import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 import System.IO
 import Data.Aeson
-import Numeric.Log
 import System.Random
 import GHC.Generics
-import Codec.Serialise
 
 import qualified Data.Map.Strict as M
-import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import qualified Data.Vector.Indexed as VI
 import qualified Data.Vector.Unboxed as VU
 import qualified Text.PrettyPrint.Leijen.Text as PP
 import Data.List
-import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
-import Data.Function
-import Data.Bifunctor
 import Data.Hashable
-
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
 import GridFeatures
 
-
 import EdgeDocCorpus
--- import GraphExpansionExperiments hiding (Bm25, Ql)
-import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
+import GraphExpansion
 import qualified SimplIR.SimpleIndex as Index
-import SimplIR.LearningToRank hiding (zNormalize, Weight)
+import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 import SimplIR.FeatureSpace.Normalise
 
 
-import qualified CAR.RunFile as CAR.RunFile
+import qualified CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
@@ -77,7 +62,6 @@ import DenseMapping
 import Graph
 
 import qualified Data.GraphViz as Dot
-import qualified Data.GraphViz.Printing as Dot
 import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import Control.Monad
