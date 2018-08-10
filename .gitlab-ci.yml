@@ -4,6 +4,27 @@ variables:
 before_script:
   - git submodule update --init --recursive
 
+  - |
+    nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/db557aab7b690f5e0e3348459f2e4dc8fd0d9298
+
+    mkdir -p $HOME/.config/nix
+    cat > $HOME/.config/nix/nix.conf <<EOF
+    substituters = https://cache.nixos.org https://trec-car-tools.cachix.org
+    trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= trec-car-tools.cachix.org-1:zlHkXRIQit3P6UdWD/tC7rHI4OmorVE/e2d9HcE80dQ=
+    EOF
+
+    mkdir -p $HOME/.config/cachix
+    cat > $HOME/.config/cachix/config.dhall <<EOF
+    { authToken = $CACHIX_AUTH_TOKEN
+    , binaryCaches =
+        [ { name = "trec-car-tools"
+          , secretKey = $CACHIX_SECRET_KEY
+          }
+        ] : List { name : Text, secretKey : Text }
+    }
+    EOF
+
+
 validate:
   script:
-    - nix build
+    - nix-build | cachix push trec-car-tools
