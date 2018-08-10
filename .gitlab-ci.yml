@@ -1,0 +1,9 @@
+variables:
+  THREADS: 9
+
+before_script:
+  - git submodule update --init --recursive
+
+validate:
+  script:
+    - nix build
