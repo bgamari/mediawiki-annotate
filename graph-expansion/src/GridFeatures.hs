@@ -391,14 +391,17 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
             -- todo  exportGraphs model
 
                                 -- todo load external folds
-              folds = force $ mkSequentialFolds 5 (M.keys trainData)
+              !folds = force $ mkSequentialFolds 5 (M.keys trainData)
           putStrLn "made folds"
 
           let foldRestartResults :: Folds (M.Map  Q [(DocId, Features, Rel)], [(Model, Double)])
               foldRestartResults = kFolds (trainWithRestarts gen0 metric featureNames) trainData folds
 
           dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
+          putStrLn "dumped kFold models and rankings"
+
           dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
+          putStrLn "dumped full models and rankings"
 
 trainWithRestarts :: StdGen
                 -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
