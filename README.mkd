@@ -7,6 +7,16 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 ## Installation
 
+### With Nix
+
+Simply type `nix build -f . binaries`. This will produce a `./result` directory containing all tools in the package.
+
+To speed up the build you can also use the [Cachix](https://cachix.org/) [cache](https://trec-car-tools.cachix.org/),
+```bash
+$ cachix use trec-car-tools
+```
+
+### Manually
 You'll need `ghc >=8.0.1` and `cabal-install >=0.24`.
 
 Additionally, you will need to install a few native dependencies (citing
