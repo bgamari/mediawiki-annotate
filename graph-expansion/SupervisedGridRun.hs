@@ -15,60 +15,33 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
-import Control.Concurrent.Async
-import Data.Ord
-import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 import System.IO
 import Data.Aeson
-import Numeric.Log
 import System.Random
 import GHC.Generics
-import Codec.Serialise
 
 import qualified Data.Map.Strict as M
-import qualified Data.Map.Lazy as ML
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Vector.Indexed as VI
-import qualified Data.Vector.Unboxed as VU
-import qualified Text.PrettyPrint.Leijen.Text as PP
 import Data.List
-import Data.List.Split
-import Data.Maybe
-import Data.Foldable as Foldable
-import Data.Function
-import Data.Bifunctor
-import Data.Hashable
-
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
-import CAR.TocFile as Toc
 import CAR.Utils
 import GridFeatures
 
-
-import EdgeDocCorpus
--- import GraphExpansionExperiments hiding (Bm25, Ql)
--- import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
 import qualified SimplIR.SimpleIndex as Index
-import SimplIR.LearningToRank
+import SimplIR.LearningToRank (IsRelevant(..))
 import SimplIR.LearningToRankWrapper
-import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
-
+import SimplIR.FeatureSpace.Normalise
 
 import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
-import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 
 
@@ -244,10 +217,9 @@ main = do
     case modelSource of
 
       TrainModel modelFile -> do
-          let docFeatures = fmap featureVecToFeatures
-                          $ makeFeatures collapsedEntityRun
+          let docFeatures = makeFeatures collapsedEntityRun
 
-              allData :: TrainData
+              allData :: TrainData EntityFeature
               allData = augmentWithQrels qrel docFeatures Relevant
 
               metric = avgMetricQrel qrel
@@ -258,7 +230,7 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: TrainData
+          let displayTrainData :: TrainData f
                                -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
@@ -302,9 +274,8 @@ makeFeatures collapsedEntityRun =
 --         docFeatures'' = fmap crit docFeatures'''
 --                         where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
 
-        docFeatures' = fmap (Features . F.toVector) docFeatures'''
-        normalizer = zNormalizer $ M.elems docFeatures'
-        docFeatures = fmap (normFeatures normalizer) docFeatures'
+        normalizer = zNormalizer $ M.elems docFeatures'''
+        docFeatures = fmap (normFeatures normalizer) docFeatures'''
 
-    in fmap featuresToFeatureVec docFeatures
+    in docFeatures
 

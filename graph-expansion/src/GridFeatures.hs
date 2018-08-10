@@ -24,54 +24,34 @@ module GridFeatures where
 
 import Options.Applicative
 import Data.Aeson
-import Numeric.Log
 import GHC.Generics
 import Codec.Serialise
 
 import qualified Data.Map.Strict as M
-import qualified Data.Map.Lazy as ML
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Vector.Indexed as VI
-import qualified Data.Vector.Unboxed as VU
 import Data.List
 import Data.List.Split
-import Data.Maybe
 import Data.Foldable as Foldable
 import Data.Function
 import Data.Bifunctor
 import Data.Hashable
-import Data.Semigroup hiding (option)
 import System.Random
-import Control.Concurrent.Async
 import Control.Concurrent.Map
 import Control.DeepSeq
 
 import CAR.Types hiding (Entity)
-import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
-import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
-import CAR.Utils
 
-
-import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 
-
 import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
-
-
-
 
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
@@ -365,28 +345,23 @@ rankEdgeFeatures run entry =
 type Q = CAR.RunFile.QueryId
 type DocId = QRel.DocumentName
 type Rel = IsRelevant
-type TrainData =  M.Map Q [(DocId, Features, Rel)]
-type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
-type FoldRestartResults = Folds (M.Map Q [(DocId, Features, Rel)], [(Model, Double)])
-type BestFoldResults  = Folds (M.Map Q [(DocId, Features, Rel)], (Model, Double))
+type TrainData f =  M.Map Q [(DocId, FeatureVec f Double, Rel)]
+-- type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
+type FoldRestartResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
+type BestFoldResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
 
 
-trainMe :: Show f
+trainMe :: forall f. (Ord f, Show f)
         => StdGen
-        -> TrainData
+        -> TrainData f
         -> FeatureSpace f
         -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
         -> FilePath
         -> FilePath
         -> IO ()
-trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
+trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           -- train me!
-          let
-
-              featureNames :: [FeatureName]
-              featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames featureSpace
-
-              (model, trainScore) = bestModel $ trainWithRestarts gen0 metric featureNames trainData
+          let (model, trainScore) = bestModel $ trainWithRestarts gen0 metric fspace trainData
 
             -- todo  exportGraphs model
 
@@ -394,8 +369,8 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
               !folds = force $ mkSequentialFolds 5 (M.keys trainData)
           putStrLn "made folds"
 
-          let foldRestartResults :: Folds (M.Map  Q [(DocId, Features, Rel)], [(Model, Double)])
-              foldRestartResults = kFolds (trainWithRestarts gen0 metric featureNames) trainData folds
+          let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
+              foldRestartResults = kFolds (trainWithRestarts gen0 metric fspace) trainData folds
 
           dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
           putStrLn "dumped kFold models and rankings"
@@ -403,27 +378,29 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
           dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
           putStrLn "dumped full models and rankings"
 
-trainWithRestarts :: StdGen
-                -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
-                -> [FeatureName]
-                -> TrainData
-                -> [(Model, Double)]
-trainWithRestarts gen0 metric featureNames trainData =
+trainWithRestarts
+    :: forall f. ()
+    => StdGen
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> FeatureSpace f
+    -> TrainData f
+    -> [(Model f, Double)]
+trainWithRestarts gen0 metric fspace trainData =
   let trainData' = discardUntrainable trainData
 
       rngSeeds :: [StdGen]
       rngSeeds = unfoldr (Just . System.Random.split) gen0
 
-      restartModel ::  StdGen -> (Model, Double)
+      restartModel :: StdGen -> (Model f, Double)
       restartModel gen =
-        learnToRank trainData' featureNames metric gen0
+        learnToRank trainData' fspace metric gen0
 
-      modelsWithTrainScore :: [(Model,Double)]
+      modelsWithTrainScore :: [(Model f,Double)]
       modelsWithTrainScore = fmap restartModel rngSeeds
      in modelsWithTrainScore
 
 
-discardUntrainable :: TrainData -> TrainData
+discardUntrainable :: TrainData f -> TrainData f
 discardUntrainable evalData =
     M.filter hasPosAndNeg  evalData
   where
@@ -433,26 +410,30 @@ discardUntrainable evalData =
         in hasPos && hasNeg
 
 
-bestPerFold :: FoldRestartResults -> BestFoldResults
+bestPerFold :: FoldRestartResults f -> BestFoldResults f
 bestPerFold = fmap (second bestModel)
 
-bestModel ::  [(Model, Double)] -> (Model, Double)
+bestModel ::  [(Model f, Double)] -> (Model f, Double)
 bestModel = maximumBy (compare `on` snd)
 
 
-bestRankingPerFold :: BestFoldResults -> Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
+bestRankingPerFold :: forall f . ()
+                   => BestFoldResults f
+                   -> Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
 bestRankingPerFold bestPerFold' =
     fmap (\(testData, (model, trainScore))  ->  rerankRankings' model testData) bestPerFold'
 
 
 
-dumpKFoldModelsAndRankings  :: FoldRestartResults
-                            -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
-                            -> FilePath
-                            -> FilePath
-                            -> IO()
+dumpKFoldModelsAndRankings
+    :: forall f. (Ord f, Show f)
+    => FoldRestartResults f
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> FilePath
+    -> FilePath
+    -> IO()
 dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile = do
-          let bestPerFold' :: Folds (M.Map Q [(DocId, Features, Rel)], (Model, Double))
+          let bestPerFold' :: Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
               bestPerFold' = bestPerFold foldRestartResults
 
               bestRankingPerFold' :: Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
@@ -488,43 +469,21 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
 
 
 
-dumpFullModelsAndRankings :: M.Map Q [(DocId, Features, Rel)]
-                            -> (Model, Double)
-                            -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
-                            -> FilePath
-                            -> FilePath
-                            -> IO()
+dumpFullModelsAndRankings
+    :: forall f. (Ord f, Show f)
+    => M.Map Q [(DocId, FeatureVec f Double, Rel)]
+    -> (Model f, Double)
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> FilePath
+    -> FilePath
+    -> IO()
 dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile = do
     let modelDesc = "train"
         trainRanking = rerankRankings' model trainData
     storeRankingData outputFilePrefix trainRanking metric modelDesc
     storeModelData outputFilePrefix modelFile model trainScore modelDesc
 
---
--- outputTrainedModelsAndRanking :: TrainData
---         -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
---         -> FilePath
---         -> FilePath
---         -> IO ()
--- outputTrainedModelsAndRanking evalData metric outputFilePrefix modelFile =
---
---           let outputDiagnostics :: (String, Model, Double) -> IO ()
---               outputDiagnostics (modelDesc,model, trainScore) = do
---                       storeModelData outputFilePrefix modelFile model trainScore modelDesc
---                       storeRankingData outputFilePrefix evalData metric model modelDesc
---
---           -- evaluate all work here!
---           mapConcurrently_ outputDiagnostics $ modelDiag ++ modelDiag'
---
---                 -- eval and write train ranking (on all data)
---           storeModelData outputFilePrefix modelFile model trainScore "train"
---           storeRankingData outputFilePrefix evalData metric model "train"
---
---           putStrLn $ "K-fold cross validation score " ++ (show testScore)++"."
---           -- write test ranking that results from k-fold cv
---           CAR.RunFile.writeEntityRun (outputFilePrefix++"-test.run")
---               $ l2rRankingToRankEntries (CAR.RunFile.MethodName "l2r test")
---               $ predictRanking
+
 
 
 l2rRankingToRankEntries :: CAR.RunFile.MethodName
@@ -544,9 +503,10 @@ l2rRankingToRankEntries methodName rankings =
 
 
 -- Train model on all data
-storeModelData :: FilePath
+storeModelData :: (Show f, Ord f)
+               => FilePath
                -> FilePath
-               -> Model
+               -> Model f
                -> Double
                -> [Char]
                -> IO ()
@@ -583,26 +543,25 @@ mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
 -- r might be: [(Model, Double)]
 
 
-kFolds :: forall q docId rel r.
+kFolds :: forall q docId rel r f.
        Eq q
-       => (M.Map q [(docId, Features, rel)] -> r)
-       -> M.Map q [(docId, Features, rel)]
+       => (M.Map q [(docId, FeatureVec f Double, rel)] -> r)
+       -> M.Map q [(docId, FeatureVec f Double, rel)]
           -- ^ training data
        -> Folds [q]
-       -> Folds (M.Map q [(docId, Features, rel)], r)
+       -> Folds (M.Map q [(docId, FeatureVec f Double, rel)], r)
           -- ^ the training result and set of test data for the fold
 kFolds trainWithRestarts allData foldQueries =
     fmap trainSingleFold foldQueries
   where
-    trainSingleFold :: [q] -> (M.Map q [(docId, Features, rel)], r)
+    trainSingleFold :: [q] -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
     trainSingleFold testQueries =
-      let testData :: M.Map q [(docId, Features, rel)]
+      let testData :: M.Map q [(docId, FeatureVec f Double, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allData
 
-          trainData :: M.Map q [(docId, Features, rel)]
+          trainData :: M.Map q [(docId, FeatureVec f Double, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allData
       in (testData, trainWithRestarts trainData)
-
 
 
 
@@ -617,23 +576,3 @@ entityScoreVecFromMultiRankings entityRankEntry =
          | (g, entry) <- multiRankingEntryAll entityRankEntry
          ]
 
--- ---------------------------------------------------------
---       Low level feature wrangling
--- ---------------------------------------------------------
-
-
-
--- | Quite unsafe
-featureVecToFeatures :: FeatureVec a Double -> Features
-featureVecToFeatures = Features . F.getFeatureVec
-
--- | Quite unsafe
-featuresToFeatureVec :: Features -> FeatureVec a Double
-featuresToFeatureVec = F.unsafeFeatureVecFromVector . getFeatures
-
-
-fconcat :: Features -> Features -> Features
-fconcat (Features xs) (Features ys) = Features  (xs VU.++ ys)
-
-fsum :: Features -> Features -> Features
-fsum (Features xs) (Features ys) = Features $ VU.zipWith (+) xs ys
