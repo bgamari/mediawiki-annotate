@@ -293,10 +293,15 @@ main = do
     putStrLn $ "# query count: " ++ show (length queries)
 
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
+    putStrLn $ "Loaded edgDocsLookup."
 
 
     entityRuns <-  mapM (mapM CAR.RunFile.readEntityRun) entityRunFiles  -- mapM mapM -- first map over list, then map of the snd of a tuple
+    putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
+
     edgeRuns <-  mapM (mapM CAR.RunFile.readParagraphRun) edgedocRunFiles
+
+    putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
         collapsedEntityRun = collapseRuns entityRuns
@@ -418,7 +423,8 @@ main = do
           let docFeatures = fmap featureVecToFeatures
                           $ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
 
-              allData :: TrainData
+          putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
+          let allData :: TrainData
               allData = augmentWithQrels qrel docFeatures Relevant
 
               metric = avgMetricQrel qrel
