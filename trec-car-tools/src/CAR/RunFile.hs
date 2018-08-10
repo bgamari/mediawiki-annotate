@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
 
 module CAR.RunFile
     ( -- * Types
@@ -36,6 +37,7 @@ module CAR.RunFile
     ) where
 
 import Control.Exception
+import Control.DeepSeq
 import Data.Ord
 import Data.Maybe
 import Data.Monoid
@@ -48,8 +50,11 @@ import qualified SimplIR.Format.TrecRunFile as Run
 import qualified Data.SmallUtf8 as Utf8
 import CAR.Types
 
+
 newtype QueryId = QueryId { unQueryId :: T.Text }
                 deriving (Eq, Ord, Show, FromJSON, ToJSON, Hashable)
+                deriving newtype NFData
+
 
 newtype MethodName = MethodName { unMethodName :: T.Text }
                    deriving (Eq, Ord, Show, FromJSON, ToJSON)

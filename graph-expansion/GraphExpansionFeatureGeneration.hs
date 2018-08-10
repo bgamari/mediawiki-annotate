@@ -16,6 +16,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 
 import Control.Concurrent.Async
+import Control.DeepSeq
 import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
@@ -355,7 +356,7 @@ main = do
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
 
-                  -- TODO: very unsafe
+                  -- TODO: very unsafe            F
 --                   params' = F.unsafeFeatureVecFromVector $ getFeatures
 --                             $ Features $ F.getFeatureVec params
                   params' = params
@@ -435,7 +436,7 @@ main = do
                 | (k,list) <- M.toList trainData
                 , elem <- list]
 
-          putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData allData)
+          putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
           gen0 <- newStdGen  -- needed by learning to rank
           trainMe gen0 allData entFSpace metric outputFilePrefix modelFile
 

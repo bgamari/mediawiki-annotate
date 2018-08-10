@@ -16,6 +16,9 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
+
 
 module GridFeatures where
 
@@ -44,6 +47,8 @@ import Data.Hashable
 import Data.Semigroup hiding (option)
 import System.Random
 import Control.Concurrent.Async
+import Control.Concurrent.Map
+import Control.DeepSeq
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
@@ -386,9 +391,10 @@ trainMe gen0  trainData featureSpace metric outputFilePrefix modelFile = do
             -- todo  exportGraphs model
 
                                 -- todo load external folds
-              folds = mkSequentialFolds 5 (M.keys trainData)
+              folds = force $ mkSequentialFolds 5 (M.keys trainData)
+          putStrLn "made folds"
 
-              foldRestartResults :: Folds (M.Map  Q [(DocId, Features, Rel)], [(Model, Double)])
+          let foldRestartResults :: Folds (M.Map  Q [(DocId, Features, Rel)], [(Model, Double)])
               foldRestartResults = kFolds (trainWithRestarts gen0 metric featureNames) trainData folds
 
           dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
@@ -454,13 +460,15 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
 
               testScore = metric testRanking
 
-              dumpAll = [ do storeRankingData outputFilePrefix ranking metric modelDesc
-                             storeModelData outputFilePrefix modelFile model trainScore modelDesc
-                        | (foldNo, (testData, restartModels))  <- zip [0..] $ toList foldRestartResults
-                        , (restartNo, (model, trainScore)) <- zip [0..] restartModels
-                        , let ranking = rerankRankings' model testData
-                        , let modelDesc = "fold-"<> show foldNo <> "-restart-"<> show restartNo
-                        ]
+--               dumpAll = [ do storeRankingData outputFilePrefix ranking metric modelDesc
+--                              storeModelData outputFilePrefix modelFile model trainScore modelDesc
+--                         | (foldNo, (testData, restartModels))  <- zip [0..] $ toList foldRestartResults
+--                         , (restartNo, (model, trainScore)) <- zip [0..] restartModels
+--                         , let ranking = rerankRankings' model testData
+--                         , let modelDesc = "fold-"<> show foldNo <> "-restart-"<> show restartNo
+--                         ]
+
+              dumpAll = []
 
               dumpBest = [ do storeRankingData outputFilePrefix ranking metric modelDesc
                               storeModelData outputFilePrefix modelFile model trainScore modelDesc
@@ -473,7 +481,7 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
                                 where modelDesc = "test"
 
 
-          mapConcurrently_ id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
+          mapConcurrentlyL_ 5 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
 
 
 
@@ -562,6 +570,7 @@ storeRankingData outputFilePrefix ranking metric modelDesc = do
 
 newtype Folds a = Folds { getFolds :: [a] }
                 deriving (Foldable, Functor)
+                deriving newtype NFData
 
 mkSequentialFolds :: Int -> [a] -> Folds [a]
 mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
