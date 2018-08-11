@@ -349,7 +349,8 @@ type DocId = QRel.DocumentName
 type Rel = IsRelevant
 type TrainData f =  M.Map Q [(DocId, FeatureVec f Double, Rel)]
 -- type ReturnWithModelDiagnostics a = (a, [(String, Model, Double)])
-type FoldRestartResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
+type FoldRestartResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)],
+                                   [(Model f, Double)])
 type BestFoldResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
 
 
@@ -366,11 +367,7 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           let nRestarts = 5
               nFolds = 5
 
-              (model, trainScore) =
-                  bestModel $ take nRestarts $ trainWithRestarts gen0 metric fspace trainData
-
-            -- todo  exportGraphs model
-
+          -- folded CV
                                 -- todo load external folds
               !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
           putStrLn "made folds"
@@ -378,11 +375,20 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
               foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
 
-          dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
-          putStrLn "dumped kFold models and rankings"
+              strat :: Strategy _
+              strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
+          foldRestartResults' <- withStrategyIO strat foldRestartResults
 
-          dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
-          putStrLn "dumped full models and rankings"
+          let actions1 = dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
+
+          -- full train
+          let fullRestarts = withStrategy (parTraversable rdeepseq)
+                             $ take nRestarts $ trainWithRestarts gen0 metric fspace trainData
+              (model, trainScore) =  bestModel $  fullRestarts
+              actions2 = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
+
+          mapConcurrentlyL_ 24 id $ actions1 ++ actions2
+          putStrLn "dumped all models and rankings"
 
 trainWithRestarts
     :: forall f. ()
@@ -437,12 +443,8 @@ dumpKFoldModelsAndRankings
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> FilePath
     -> FilePath
-    -> IO ()
-dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile = do
-    let strat :: Strategy _
-        strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
-    foldRestartResults <- withStrategyIO strat foldRestartResults'
-
+    -> [IO ()]
+dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile =
     let bestPerFold' :: Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
         bestPerFold' = bestPerFold foldRestartResults
 
@@ -475,7 +477,7 @@ dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
         dumpKfoldTestRanking = storeRankingData outputFilePrefix testRanking metric modelDesc
           where modelDesc = "test"
 
-    mapConcurrentlyL_ 24 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
+    in dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
 
 
 
@@ -486,12 +488,13 @@ dumpFullModelsAndRankings
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> FilePath
     -> FilePath
-    -> IO()
-dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile = do
+    -> [IO()]
+dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile =
     let modelDesc = "train"
         trainRanking = rerankRankings' model trainData
-    storeRankingData outputFilePrefix trainRanking metric modelDesc
-    storeModelData outputFilePrefix modelFile model trainScore modelDesc
+    in [ storeRankingData outputFilePrefix trainRanking metric modelDesc
+       , storeModelData outputFilePrefix modelFile model trainScore modelDesc
+       ]
 
 
 
