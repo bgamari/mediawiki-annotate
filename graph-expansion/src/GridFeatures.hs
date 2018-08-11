@@ -183,7 +183,7 @@ filterExpSettingsEdge ::  FeatureSpace EdgeFeature
 filterExpSettingsEdge fromFeatSpace toFeatSpace pred features =
     F.fromList toFeatSpace
     $ [ pair
-      | pair@(fname, _) <- F.toList fromFeatSpace features
+      | pair@(fname, _) <- F.toList features
       , pred fname
       ]
 
@@ -209,7 +209,7 @@ filterExpSettings ::  FeatureSpace CombinedFeature
 filterExpSettings fromFeatSpace toFeatSpace pred features =
     F.fromList toFeatSpace
     $ [ pair
-      | pair@(fname, _) <- F.toList fromFeatSpace features
+      | pair@(fname, _) <- F.toList features
       , pred fname
       ]
 noEntity :: CombinedFeature -> Bool
@@ -251,7 +251,7 @@ type CombinedFeatureVec = FeatureVec CombinedFeature Double
 
 makeEntFeatVector :: [(EntityFeature, Double)] -> F.FeatureVec EntityFeature Double
 makeEntFeatVector xs =
-    F.modify entFSpace defaults xs
+    F.modify defaults xs
  where defaults = F.fromList entFSpace ([ (EntIncidentEdgeDocsRecip, 0.0)
                                        , (EntDegreeRecip, 0.0)
                                        , (EntDegree, 0.0)
@@ -264,7 +264,7 @@ makeEntFeatVector xs =
 
 makeEdgeFeatVector :: [(EdgeFeature, Double)] -> F.FeatureVec EdgeFeature Double
 makeEdgeFeatVector xs =
-    F.modify edgeFSpace defaults xs
+    F.modify defaults xs
  where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
                                          , (EdgeDocKL, 0.0)
                                          ]
@@ -391,7 +391,7 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           putStrLn "dumped all models and rankings"
 
 trainWithRestarts
-    :: forall f. ()
+    :: forall f. (Show f)
     => StdGen
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> FeatureSpace f

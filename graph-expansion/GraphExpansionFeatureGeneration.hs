@@ -355,7 +355,7 @@ main = do
                   normalizer = zNormalizer $ Foldable.toList graph
 
                   params' :: WeightVec EdgeFeature
-                  params' = WeightVec $ F.projectFeatureVec combinedFSpace edgeFSpace
+                  params' = WeightVec $ F.projectFeatureVec edgeFSpace'
                             (either (const Nothing) Just)
                             (getWeightVec params)
 
@@ -412,8 +412,7 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: TrainData f
-                               -> [String]
+          let displayTrainData :: Show f => TrainData f -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
                 | (k,list) <- M.toList trainData
@@ -630,7 +629,7 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
         -- stack node vector on top of projected edge feature vector
         -- no need to use nodeEdgeFeatureGraph
     in HM.fromList
-       [ ((query, u), concatFeatureVec uFeats (F.aggregateWith (+) edgeFeats))
+       [ ((query, u), concatFeatureVec combinedFSpace uFeats (F.aggregateWith (+) edgeFeats))
        | entityRankEntry <- entityRun
        , let u = multiRankingEntryGetDocumentName entityRankEntry
 

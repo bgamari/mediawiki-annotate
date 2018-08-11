@@ -37,7 +37,6 @@ import GridFeatures
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank (IsRelevant(..))
 import SimplIR.LearningToRankWrapper
-import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 import SimplIR.FeatureSpace.Normalise
 
 import qualified CAR.RunFile as CAR.RunFile
@@ -230,8 +229,7 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: TrainData f
-                               -> [String]
+          let displayTrainData :: Show f => TrainData f -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
                 | (k,list) <- M.toList trainData
