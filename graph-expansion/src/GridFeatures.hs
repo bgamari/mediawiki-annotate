@@ -392,8 +392,7 @@ trainWithRestarts gen0 metric fspace trainData =
       rngSeeds = unfoldr (Just . System.Random.split) gen0
 
       restartModel :: StdGen -> (Model f, Double)
-      restartModel gen =
-        learnToRank trainData' fspace metric gen
+      restartModel = learnToRank trainData' fspace metric
 
       modelsWithTrainScore :: [(Model f,Double)]
       modelsWithTrainScore = fmap restartModel rngSeeds
