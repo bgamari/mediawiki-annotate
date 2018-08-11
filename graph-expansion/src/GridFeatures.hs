@@ -541,8 +541,11 @@ newtype Folds a = Folds { getFolds :: [a] }
 
 mkSequentialFolds :: Int -> [a] -> Folds [a]
 mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
-       where foldLen = (length xs `div` k) + 1
-
+  where
+    foldLen
+      | len >= 2 * k = (len `div` k) + 1  -- usual case: prevents overpopulation of last fold, e.g. [1,2] [3,4] [5,6] [7]
+      | otherwise = len `div` k  -- to prevent last folds to be empty, accept overpopulation of last fold, e.g. [1] [2] [3] [4] [5,6,7]
+    len = length xs
 
 -- r might be: [(Model, Double)]
 
