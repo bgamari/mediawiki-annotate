@@ -224,7 +224,7 @@ pagesToQueryDocs deriv pages =
 m >!< key =
     case key `M.lookup` m  of
         Just v -> v
-        Nothing -> error $ ">!<: Can't lookup key "<> show key <> " in map. Example keys " <> (show $ take 10 $ M.keys m)<> "..."
+        Nothing -> error $ ">!<: Can't lookup key "<> show key <> " in map. Map size: "<> show (length m) <>" Example keys " <> (show $ take 10 $ M.keys m)<> "..."
 
 main :: IO ()
 main = do
