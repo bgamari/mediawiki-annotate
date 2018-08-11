@@ -7,67 +7,53 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 
 import Control.Concurrent.Async
 import Control.DeepSeq
-import Data.Ord
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 import System.IO
 import Data.Aeson
-import Numeric.Log
 import System.Random
 import GHC.Generics
-import Codec.Serialise
 
 import qualified Data.Map.Strict as M
-import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import qualified Data.Vector.Indexed as VI
 import qualified Data.Vector.Unboxed as VU
 import qualified Text.PrettyPrint.Leijen.Text as PP
 import Data.List
-import Data.List.Split
 import Data.Maybe
 import Data.Foldable as Foldable
-import Data.Function
-import Data.Bifunctor
 import Data.Hashable
-
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
 import GridFeatures
 
-
 import EdgeDocCorpus
--- import GraphExpansionExperiments hiding (Bm25, Ql)
-import GraphExpansion hiding (RetrievalFun, Bm25, Ql)
+import GraphExpansion
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
+import SimplIR.FeatureSpace.Normalise
 
 
-import qualified CAR.RunFile as CAR.RunFile
+import qualified CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
@@ -76,7 +62,6 @@ import DenseMapping
 import Graph
 
 import qualified Data.GraphViz as Dot
-import qualified Data.GraphViz.Printing as Dot
 import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import Control.Monad
@@ -315,12 +300,11 @@ main = do
     -- save predicted node ranking as run-file
     case modelSource of
       ModelFromFile modelFile -> do
-          Just model <-  trace "loading model" $ Data.Aeson.decode @Model <$> BSL.readFile modelFile
+          Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
           let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
               docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
-              degreeCentrality = fmap (modelWeights `F.dotFeatureVecs`) docFeatures
-                where modelWeights = modelToFeatureVec combinedFSpace' model
+              degreeCentrality = fmap (modelWeights' model `score`) docFeatures
               queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
               ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
               ranking = fmap (Ranking.fromList . map swap) queryToScoredList
@@ -336,13 +320,8 @@ main = do
                               $  filter (expSettingToCritEdge experimentSettings)
                               $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
 
-          let params :: EdgeFeatureVec
-              params = tr $ F.fromList edgeFSpace' -- TODO: Use modelToFeatureVec
-                  [ (k'', v)
-                  | (k, v) <- M.toList $ modelWeights model
-                  , let k' = read $ T.unpack $ getFeatureName k :: Either EntityFeature EdgeFeature
-                  , Right k'' <- pure k'
-                  ]
+          let params :: WeightVec CombinedFeature
+              params = modelWeights' model
 
           let graphWalkRanking :: QueryId -> IO (Ranking.Ranking Double PageId)
               graphWalkRanking query
@@ -361,33 +340,26 @@ main = do
                       edgeRun = collapsedEdgedocRun M.! query
                       entityRun = collapsedEntityRun M.! query
 
-                  -- TODO: very unsafe            F
---                   params' = F.unsafeFeatureVecFromVector $ getFeatures
---                             $ Features $ F.getFeatureVec params
-                  params' = params
-
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
                          $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
 
-                  normalizer :: Normalization
-                  normalizer = zNormalizer $ map (Features . F.getFeatureVec) $ Foldable.toList graph
+                  normalizer :: Normalisation _ Double
+                  normalizer = zNormalizer $ Foldable.toList graph
 
+                  params' :: WeightVec EdgeFeature
+                  params' = WeightVec $ F.projectFeatureVec combinedFSpace edgeFSpace
+                            (either (const Nothing) Just)
+                            (getWeightVec params)
 
                   graph' :: Graph PageId Double
                   graph' = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
                   -- for debugging...
---                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params' feats))) graph
+--                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params feats))) graph
                     where
                       normFeats :: EdgeFeatureVec -> EdgeFeatureVec
-                      normFeats fv =
-                          let v :: VU.Vector Double
-                              v = F.getFeatureVec fv
-                              normedF = normFeatures normalizer (Features v)
-                              normedV :: VU.Vector Double
-                              normedV =  getFeatures normedF
-                          in F.unsafeFeatureVecFromVector normedV
+                      normFeats fv = normFeatures normalizer fv
 
                   eigv :: Eigenvector PageId Double
                   eigv =
@@ -420,11 +392,10 @@ main = do
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
       TrainModel modelFile -> do
-          let docFeatures = fmap featureVecToFeatures
-                          $ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-          let allData :: TrainData
+          let allData :: TrainData CombinedFeature
               allData = augmentWithQrels qrel docFeatures Relevant
 
               metric = avgMetricQrel qrel
@@ -435,7 +406,7 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: TrainData
+          let displayTrainData :: TrainData f
                                -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
@@ -444,7 +415,7 @@ main = do
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
           gen0 <- newStdGen  -- needed by learning to rank
-          trainMe gen0 allData entFSpace metric outputFilePrefix modelFile
+          trainMe gen0 allData combinedFSpace' metric outputFilePrefix modelFile
 
 
 
@@ -471,11 +442,10 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
         docFeatures'' = fmap crit docFeatures'''
                         where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
 
-        docFeatures' = fmap (Features . F.toVector) docFeatures''
-        normalizer = zNormalizer $ M.elems docFeatures'
-        docFeatures = fmap (normFeatures normalizer) docFeatures'
+        normalizer = zNormalizer $ M.elems docFeatures''
+        docFeatures = fmap (normFeatures normalizer) docFeatures''
 
-    in fmap featuresToFeatureVec docFeatures
+    in docFeatures
 
 
 logistic :: Double -> Double
@@ -752,8 +722,8 @@ readEdgeDocsToc edgeDocsFileWithToc = do
 
 
 dropUnjudged :: Ord q
-             => M.Map q [(QRel.DocumentName, Features, Maybe IsRelevant)]
-             -> M.Map q [(QRel.DocumentName, Features, IsRelevant)]
+             => M.Map q [(QRel.DocumentName, FeatureVec f Double, Maybe IsRelevant)]
+             -> M.Map q [(QRel.DocumentName, FeatureVec f Double, IsRelevant)]
 dropUnjudged featureMap =
     M.filter (not . null)   -- drop entries with empty lists
     $ M.map (mapMaybe dropUnjudged') featureMap
@@ -768,8 +738,8 @@ dropUnjudged featureMap =
 -- | Compute a dot product between a feature and weight vector, ensuring
 -- positivity.
 posifyDot :: PageRankExperimentSettings -> PosifyEdgeWeights
-          -> Normalization
-          -> EdgeFeatureVec   -- ^ parameter vector
+          -> Normalisation EdgeFeature Double
+          -> WeightVec EdgeFeature  -- ^ parameter vector
           -> [EdgeFeatureVec] -- ^ all features
           -> EdgeFeatureVec
           -> Double
@@ -777,15 +747,15 @@ posifyDot expSettings posifyOpt normalizer params' allFeatures =
     \feats ->
     let computedWeight =
           case posifyOpt of
-              Exponentiate ->  exp (F.dotFeatureVecs params' feats)
-              Logistic ->  logistic (F.dotFeatureVecs params' feats)
+              Exponentiate ->  exp (params' `score` feats)
+              Logistic ->  logistic (params' `score` feats)
               CutNegative ->
-                  case F.dotFeatureVecs params' feats of
+                  case params' `score` feats of
                     x | x > 0.0 -> x
                     _ -> 0.0
 
-              ExpDenormWeight ->  exp (F.dotFeatureVecs denormWeights' feats)
-              Linear  -> (F.dotFeatureVecs params' feats) - minimumVal
+              ExpDenormWeight ->  exp (denormWeights' `score` feats)
+              Linear  -> (params' `score` feats) - minimumVal
     in case expSettings of
           PageRankNormal -> computedWeight
           PageRankJustStructure -> 1.0
@@ -793,53 +763,39 @@ posifyDot expSettings posifyOpt normalizer params' allFeatures =
           PageRankWeightOffset01 -> computedWeight + 0.1
 
   where
-    !minimumVal = minimum $ fmap (\feats -> F.dotFeatureVecs params' feats) allFeatures
+    !minimumVal = minimum $ fmap (\feats -> params' `score` feats) allFeatures
 
-    denormWeights' :: EdgeFeatureVec
+    denormWeights' :: WeightVec EdgeFeature
     denormWeights' =
-        let v :: VU.Vector Double
-            v = F.getFeatureVec params'
-            normedF = denormWeights normalizer (Features v)
-            normedV :: VU.Vector Double
-            normedV =  getFeatures normedF
-        in F.unsafeFeatureVecFromVector normedV
-
-
-modelToFeatureVec :: (Show a, Read a, Ord a)
-                  => FeatureSpace a -> Model -> FeatureVec a Double
-modelToFeatureVec fspace model =
-    F.fromList fspace
-    [ (k', v)
-    | (k, v) <- M.toList $ modelWeights model
-    , let k' = read $ T.unpack $ getFeatureName k
-    ]
+        WeightVec $ denormWeights normalizer (getWeightVec params')
 
 interleavedPageRankTraining
     :: ()
     => (EdgeFeatureVec -> EdgeFeatureVec -> Double) -- ^ edge feature dot product
     -> Graph PageId (FeatureVec EdgeFeature Double) -- ^ graph for single query FIXME
-    -> FeatureSpace EdgeFeatureVec
+    -> FeatureSpace EdgeFeature
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
-    -> TrainData
+    -> TrainData EdgeFeature
     -> StdGen
-    -> [(Eigenvector PageId Double, Weight)]
+    -> [(Eigenvector PageId Double, WeightVec EdgeFeature)]
 interleavedPageRankTraining dotProduct graph fspace metric trainData =
     go initialPR initialL2R
   where
     go :: VI.Vector VU.Vector (DenseId PageId) Double
-       -> Weight -> StdGen
-       -> [(Eigenvector PageId Double, Weight)]
+       -> WeightVec EdgeFeature -> StdGen
+       -> [(Eigenvector PageId Double, WeightVec EdgeFeature)]
     go x0 y0 gen0 =
-        let graph' = fmap (dotProduct (featuresToFeatureVec y0)) graph
+        let graph' = fmap (y0 `score`) graph
             x = head $ drop 3 $ persPageRankWithSeedsAndInitial mapping x0 alpha mempty graph'
-            (_score, y) = head $ drop 3 $ coordAscent gen metric y0 trainData
+            (_score, y) = head $ drop 3 $ coordAscent gen metric fspace y0 trainData
             (gen, gen1) = System.Random.split gen0
         in (x,y) : go (eigenvectorValues x) y gen1
 
     alpha = 0.1
     mapping  = mkDenseMapping (nodeSet graph)
     initialPR = VI.replicate (denseRange mapping) (1 / realToFrac (DenseMapping.size mapping))
-    initialL2R = Features $ VU.replicate (featureDimension fspace) 1
+    initialL2R :: WeightVec EdgeFeature
+    initialL2R = WeightVec $ F.repeat fspace 1
 
     featureNames :: [FeatureName]
     featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames fspace
