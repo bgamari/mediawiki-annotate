@@ -1,8 +1,16 @@
 variables:
   THREADS: 9
 
+cache:
+  paths:
+    - ./cache.nar
+
 before_script:
   - |
+    if [ -e ./cache.nar ]; then
+        nix-store --import < ./cache.nar
+    fi
+
     nix-env -iA git -f '<nixpkgs>'
     nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/db557aab7b690f5e0e3348459f2e4dc8fd0d9298
 
@@ -29,3 +37,4 @@ before_script:
 validate:
   script:
     - nix-build | cachix push trec-car-tools
+    - nix-store --export $(nix-store -qR ./result) > ./cache.nar
