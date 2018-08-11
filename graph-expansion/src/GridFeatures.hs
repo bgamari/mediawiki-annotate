@@ -425,7 +425,7 @@ bestRankingPerFold :: forall f . ()
                    => BestFoldResults f
                    -> Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
 bestRankingPerFold bestPerFold' =
-    fmap (\(testData, (model, trainScore))  ->  rerankRankings' model testData) bestPerFold'
+    fmap (\(testData, (model, _trainScore))  ->  rerankRankings' model testData) bestPerFold'
 
 
 
@@ -529,7 +529,7 @@ storeRankingData ::  FilePath
 storeRankingData outputFilePrefix ranking metric modelDesc = do
 
 --   let rerankedFranking = rerankRankings' model evalData
-  putStrLn $ "Model "++modelDesc++" test metric "++ show (metric ranking) ++ "MAP."
+  putStrLn $ "Model "++modelDesc++" test metric "++ show (metric ranking) ++ " MAP."
   CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
        $ ranking
