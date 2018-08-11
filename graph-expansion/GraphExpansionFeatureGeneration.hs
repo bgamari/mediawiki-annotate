@@ -21,6 +21,7 @@ import System.IO
 import Data.Aeson
 import System.Random
 import GHC.Generics
+import GHC.Stack
 
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
@@ -219,6 +220,11 @@ pagesToQueryDocs deriv pages =
 
 -- ---------------------------------------------------------------------------------------
 
+(>!<) :: (Show k, Ord k, HasCallStack) => M.Map k v -> k -> v
+m >!< key =
+    case key `M.lookup` m  of
+        Just v -> v
+        Nothing -> error $ ">!<: Can't lookup key "<> show key <> "in map. Example keys " <> (show $ take 5 $ M.keys m)<> "..."
 
 main :: IO ()
 main = do
@@ -337,8 +343,8 @@ main = do
 
                   candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
-                      edgeRun = collapsedEdgedocRun M.! query
-                      entityRun = collapsedEntityRun M.! query
+                      edgeRun = collapsedEdgedocRun >!< query
+                      entityRun = collapsedEntityRun >!< query
 
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
