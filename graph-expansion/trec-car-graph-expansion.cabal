@@ -47,6 +47,7 @@ library
                        pipes-safe,
                        pipes,
                        foldl,
+                       parallel,
                        serialise,
                        filepath,
                        log-domain,

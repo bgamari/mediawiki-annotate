@@ -16,6 +16,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DerivingStrategies #-}
 
@@ -37,6 +38,7 @@ import Data.Function
 import Data.Bifunctor
 import Data.Hashable
 import System.Random
+import Control.Parallel.Strategies
 import Control.Concurrent.Map
 import Control.DeepSeq
 
@@ -436,7 +438,11 @@ dumpKFoldModelsAndRankings
     -> FilePath
     -> FilePath
     -> IO ()
-dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile = do
+dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile = do
+    let strat :: Strategy _
+        strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
+    foldRestartResults <- withStrategyIO strat foldRestartResults'
+
     let bestPerFold' :: Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
         bestPerFold' = bestPerFold foldRestartResults
 
@@ -469,8 +475,7 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
         dumpKfoldTestRanking = storeRankingData outputFilePrefix testRanking metric modelDesc
           where modelDesc = "test"
 
-
-    mapConcurrentlyL_ 5 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
+    mapConcurrentlyL_ 24 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
 
 
 
@@ -537,8 +542,8 @@ storeRankingData outputFilePrefix ranking metric modelDesc = do
 
 
 newtype Folds a = Folds { getFolds :: [a] }
-                deriving (Foldable, Functor)
-                deriving newtype NFData
+                deriving (Foldable, Functor, Traversable)
+                deriving newtype (NFData)
 
 mkSequentialFolds :: Int -> [a] -> Folds [a]
 mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
