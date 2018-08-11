@@ -393,7 +393,7 @@ trainWithRestarts gen0 metric fspace trainData =
 
       restartModel :: StdGen -> (Model f, Double)
       restartModel gen =
-        learnToRank trainData' fspace metric gen0
+        learnToRank trainData' fspace metric gen
 
       modelsWithTrainScore :: [(Model f,Double)]
       modelsWithTrainScore = fmap restartModel rngSeeds
