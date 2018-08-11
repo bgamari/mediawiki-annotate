@@ -425,7 +425,7 @@ bestRankingPerFold :: forall f . ()
                    => BestFoldResults f
                    -> Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
 bestRankingPerFold bestPerFold' =
-    fmap (\(testData, (model, _trainScore))  ->  rerankRankings' model testData) bestPerFold'
+    fmap (\(testData, ~(model, _trainScore))  ->  rerankRankings' model testData) bestPerFold'
 
 
 
@@ -435,41 +435,42 @@ dumpKFoldModelsAndRankings
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> FilePath
     -> FilePath
-    -> IO()
+    -> IO ()
 dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile = do
-          let bestPerFold' :: Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
-              bestPerFold' = bestPerFold foldRestartResults
+    let bestPerFold' :: Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Model f, Double))
+        bestPerFold' = bestPerFold foldRestartResults
 
-              bestRankingPerFold' :: Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
-              bestRankingPerFold' = bestRankingPerFold bestPerFold'
+        bestRankingPerFold' :: Folds (M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel)))
+        bestRankingPerFold' = bestRankingPerFold bestPerFold'
 
-              testRanking ::   M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel))
-              testRanking = fold bestRankingPerFold'
+        testRanking ::   M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel))
+        testRanking = fold bestRankingPerFold'
 
-              testScore = metric testRanking
+        testScore = metric testRanking
 
---               dumpAll = [ do storeRankingData outputFilePrefix ranking metric modelDesc
---                              storeModelData outputFilePrefix modelFile model trainScore modelDesc
---                         | (foldNo, (testData, restartModels))  <- zip [0..] $ toList foldRestartResults
---                         , (restartNo, (model, trainScore)) <- zip [0..] restartModels
---                         , let ranking = rerankRankings' model testData
---                         , let modelDesc = "fold-"<> show foldNo <> "-restart-"<> show restartNo
---                         ]
+--         dumpAll = [ do storeRankingData outputFilePrefix ranking metric modelDesc
+--                        storeModelData outputFilePrefix modelFile model trainScore modelDesc
+--                   | (foldNo, ~(testData, restartModels))  <- zip [0..] $ toList foldRestartResults
+--                   , (restartNo, ~(model, trainScore)) <- zip [0..] restartModels
+--                   , let ranking = rerankRankings' model testData
+--                   , let modelDesc = "fold-"<> show foldNo <> "-restart-"<> show restartNo
+--                   ]
 
-              dumpAll = []
+        dumpAll = []
 
-              dumpBest = [ do storeRankingData outputFilePrefix ranking metric modelDesc
-                              storeModelData outputFilePrefix modelFile model trainScore modelDesc
-                        | (foldNo, (testData,  (model, trainScore)))  <- zip [0..] $ toList bestPerFold'
-                        , let ranking = rerankRankings' model testData
-                        , let modelDesc = "fold-"<> show foldNo <> "-best"
-                        ]
+        dumpBest =
+            [ do storeRankingData outputFilePrefix ranking metric modelDesc
+                 storeModelData outputFilePrefix modelFile model trainScore modelDesc
+            | (foldNo, (testData,  ~(model, trainScore)))  <- zip [0..] $ toList bestPerFold'
+            , let ranking = rerankRankings' model testData
+            , let modelDesc = "fold-"<> show foldNo <> "-best"
+            ]
 
-              dumpKfoldTestRanking = storeRankingData outputFilePrefix testRanking metric modelDesc
-                                where modelDesc = "test"
+        dumpKfoldTestRanking = storeRankingData outputFilePrefix testRanking metric modelDesc
+          where modelDesc = "test"
 
 
-          mapConcurrentlyL_ 5 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
+    mapConcurrentlyL_ 5 id $ dumpAll ++ dumpBest ++ [dumpKfoldTestRanking]
 
 
 
