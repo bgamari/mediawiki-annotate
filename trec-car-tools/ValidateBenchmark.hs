@@ -2,27 +2,14 @@
 {-# LANGUAGE TypeApplications #-}
 
 import Control.Monad
-import Data.List (intersperse)
 import Data.Maybe
-import Data.Monoid
-import Data.List
 
-import qualified Data.Set as S
-import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
-import qualified Data.Text.Lazy.IO as TL
-import qualified Data.Text.Lazy.Builder as TB
-import qualified Data.Text.Lazy.Builder.Int as TB
 import Options.Applicative hiding (action)
-import qualified Codec.Serialise as CBOR
-import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.TocFile as TocFile
-import qualified CAR.AnnotationsFile as CAR
 import CAR.Types
-import CAR.Utils
 import CAR.ToolVersion
 import qualified SimplIR.Format.QRel as QRel
 import SimplIR.Format.QRel
