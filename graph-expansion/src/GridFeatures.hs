@@ -370,14 +370,14 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
             -- todo  exportGraphs model
 
                                 -- todo load external folds
---               !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
---           putStrLn "made folds"
---
---           let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
---               foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
---
-          --dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
-          --putStrLn "dumped kFold models and rankings"
+              !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
+          putStrLn "made folds"
+
+          let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
+              foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
+
+          dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
+          putStrLn "dumped kFold models and rankings"
 
           dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
           putStrLn "dumped full models and rankings"
