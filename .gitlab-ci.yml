@@ -36,5 +36,5 @@ before_script:
 
 validate:
   script:
-    - nix-build | cachix push trec-car-tools
+    - nix-build . -A env | cachix push trec-car-tools
     - nix-store --export $(nix-store -qR ./result) > ./cache.nar
