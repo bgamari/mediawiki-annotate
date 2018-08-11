@@ -361,16 +361,20 @@ trainMe :: forall f. (Ord f, Show f)
         -> IO ()
 trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           -- train me!
-          let (model, trainScore) = bestModel $ trainWithRestarts gen0 metric fspace trainData
+          let nRestarts = 5
+              nFolds = 5
+
+              (model, trainScore) =
+                  bestModel $ take nRestarts $ trainWithRestarts gen0 metric fspace trainData
 
             -- todo  exportGraphs model
 
                                 -- todo load external folds
---               !folds = force $ mkSequentialFolds 5 (M.keys trainData)
+--               !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
 --           putStrLn "made folds"
 --
 --           let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
---               foldRestartResults = kFolds (trainWithRestarts gen0 metric fspace) trainData folds
+--               foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
 --
           --dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile
           --putStrLn "dumped kFold models and rankings"
@@ -385,6 +389,7 @@ trainWithRestarts
     -> FeatureSpace f
     -> TrainData f
     -> [(Model f, Double)]
+       -- ^ an infinite list of restarts
 trainWithRestarts gen0 metric fspace trainData =
   let trainData' = discardUntrainable trainData
 
@@ -550,7 +555,7 @@ kFolds :: forall q docId rel r f.
        -> Folds [q]
        -> Folds (M.Map q [(docId, FeatureVec f Double, rel)], r)
           -- ^ the training result and set of test data for the fold
-kFolds trainWithRestarts allData foldQueries =
+kFolds train allData foldQueries =
     fmap trainSingleFold foldQueries
   where
     trainSingleFold :: [q] -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
@@ -560,7 +565,7 @@ kFolds trainWithRestarts allData foldQueries =
 
           trainData :: M.Map q [(docId, FeatureVec f Double, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allData
-      in (testData, trainWithRestarts trainData)
+      in (testData, train trainData)
 
 
 
