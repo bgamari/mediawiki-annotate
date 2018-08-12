@@ -82,7 +82,7 @@ gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
 -- the feature space
 -- -------------------------------------------
 
-data QueryModel = All | Title | SubTree | LeadHeading | Interior | SectionPath
+data QueryModel = All | Title | SubTree | LeafHeading | Interior | SectionPath
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data RetrievalModel = Bm25 | Ql
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
