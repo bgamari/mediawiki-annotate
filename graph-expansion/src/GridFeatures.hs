@@ -208,7 +208,7 @@ onlyLessFeaturesEdge _  = False
 
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
-
+onlyPageEdge _ = False
 
 filterExpSettings ::  FeatureSpace CombinedFeature
                   ->  FeatureSpace CombinedFeature
