@@ -88,7 +88,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -333,8 +333,8 @@ main = do
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
                  | otherwise = do
-                   print $ (take 3 $ toEntries eigv)
-                   exportGraphViz (filterGraphTopEdges $ dropDisconnected graph') (dotFileName query)
+                   putStrLn $ (show query) <> " -> " <> show (take 2 $ toEntries eigv)
+                   -- exportGraphViz (filterGraphTopEdges $ dropDisconnected graph') (dotFileName query)
                    return $ Ranking.fromList $ map swap $ toEntries eigv
 --                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
                 where
@@ -477,6 +477,7 @@ convertEdge exp = case exp of
                 JustAggr -> onlyAggrEdge
                 JustScore -> onlyScoreEdge
                 JustRecip -> onlyRREdge
+                LessFeatures -> onlyLessFeaturesEdge
 
 
 expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
@@ -492,6 +493,7 @@ expSettingToCrit exps fname =
                     JustAggr -> onlyAggr
                     JustScore -> onlyScore
                     JustRecip -> onlyRR
+                    LessFeatures -> onlyLessFeatures
 
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates

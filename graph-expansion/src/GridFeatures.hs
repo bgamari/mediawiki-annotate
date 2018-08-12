@@ -200,6 +200,13 @@ onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
 onlyRREdge _  = False
 
 
+onlyLessFeaturesEdge :: EdgeFeature -> Bool
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _) = True
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _) = True
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
+onlyLessFeaturesEdge _  = False
+
+
 
 filterExpSettings ::  FeatureSpace CombinedFeature
                   ->  FeatureSpace CombinedFeature
@@ -235,6 +242,17 @@ onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
 onlyRR (Right (EdgeRetrievalFeature _ RecipRankF)) = True
 onlyRR _  = False
 
+
+onlyLessFeatures :: CombinedFeature -> Bool
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX EntityIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX PageIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
+onlyLessFeatures _  = False
+
+
+-- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
 
 
 
