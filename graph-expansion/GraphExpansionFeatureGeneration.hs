@@ -88,7 +88,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures | ExpPage
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -478,6 +478,7 @@ convertEdge exp = case exp of
                 JustScore -> onlyScoreEdge
                 JustRecip -> onlyRREdge
                 LessFeatures -> onlyLessFeaturesEdge
+                ExpPage -> onlyPageEdge
 
 
 expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
@@ -494,6 +495,7 @@ expSettingToCrit exps fname =
                     JustScore -> onlyScore
                     JustRecip -> onlyRR
                     LessFeatures -> onlyLessFeatures
+                    ExpPage -> onlyPage
 
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates
