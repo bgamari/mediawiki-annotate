@@ -14,6 +14,9 @@
 
 import Control.Concurrent.Async
 import Control.DeepSeq
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Control.Lens (each)
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
@@ -52,7 +55,7 @@ import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 import SimplIR.FeatureSpace.Normalise
-
+import SimplIR.Intern
 
 import qualified CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
@@ -264,7 +267,7 @@ main = do
               return queries
 
     let dotFileName :: QueryId -> FilePath
-        dotFileName queryId = (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot")
+        dotFileName queryId = outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot"
 
         filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
         filterGraphTopEdges graph =  graph -- filterEdges (\_ _ weight -> weight > 5.0) graph
@@ -286,17 +289,27 @@ main = do
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
     putStrLn $ "Loaded edgDocsLookup."
 
-
-    entityRuns <-  mapM (mapM CAR.RunFile.readEntityRun) entityRunFiles  -- mapM mapM -- first map over list, then map of the snd of a tuple
+    entityRuns <- fmap M.toList $ runInternM $ runInternM
+        $ mapM (\path ->
+                     lift . internAll (each . CAR.RunFile.document)
+                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
+                 =<< liftIO (CAR.RunFile.readEntityRun path))
+               (M.fromList entityRunFiles)
         :: IO [(GridRun, [RankingEntry PageId])]
+
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
 
-    edgeRuns <-  mapM (mapM CAR.RunFile.readParagraphRun) edgedocRunFiles
+    edgeRuns <- fmap M.toList $ runInternM $ runInternM
+        $ mapM (\path ->
+                      lift . internAll (each . CAR.RunFile.document)
+                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
+                  =<< liftIO (CAR.RunFile.readParagraphRun path))
+               (M.fromList edgedocRunFiles)
 
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
-        collapsedEntityRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $  entityRuns
+        collapsedEntityRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $ entityRuns
         collapsedEdgedocRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $ edgeRuns
 
         tr x = traceShow x x

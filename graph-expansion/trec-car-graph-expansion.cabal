@@ -389,6 +389,7 @@ executable graph-expansion-feature-generation
                        containers,
                        stm,
                        random,
+                       lens,
                        deepseq,
                        simplir-galago,
                        optparse-applicative >= 0.12,

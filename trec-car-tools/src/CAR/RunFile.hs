@@ -1,6 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module CAR.RunFile
     ( -- * Types
@@ -11,10 +16,17 @@ module CAR.RunFile
 
       -- ** Entity/paragraph rankings
     , RankingEntry
+    , traverseText
     , PassageEntity(..)
     , carEntity, carPassage
     , readEntityParagraphRun
     , writeEntityParagraphRun
+      -- *** Lenses
+    , queryId
+    , document
+    , rank
+    , score
+    , methodName
 
       -- ** Paragraph ranking
     , ParagraphRankingEntry
@@ -38,6 +50,7 @@ module CAR.RunFile
 
 import Control.Exception
 import Control.DeepSeq
+import Control.Lens hiding (MethodName)
 import Data.Ord
 import Data.Maybe
 import Data.Monoid
@@ -67,10 +80,20 @@ data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
                                       }
                        deriving  (Show)
 
+$(makeLensesWith abbreviatedFields ''RankingEntry')
+$(makeWrapped ''QueryId)
+$(makeWrapped ''MethodName)
+
+traverseText :: Monad m
+             => Optical (->) (->) m doc doc T.Text T.Text
+             -> Optical (->) (->) m (RankingEntry' doc) (RankingEntry' doc) T.Text T.Text
+traverseText traverseDoc f x =
+    (document . traverseDoc) f x >>= (queryId . _Wrapped) f >>= (methodName . _Wrapped) f
+
 -- | Paragraph/entity ranking entry
 type RankingEntry = RankingEntry' PassageEntity
 
-data PassageEntity = EntityOnly PageId
+data PassageEntity = EntityOnly !PageId
                    | EntityAndPassage !PageId !ParagraphId
                    deriving (Show)
 
