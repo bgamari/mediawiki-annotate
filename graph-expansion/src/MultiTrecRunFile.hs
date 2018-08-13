@@ -5,6 +5,7 @@
 
 module MultiTrecRunFile where
 
+import Control.Parallel.Strategies
 import qualified Data.DList as DList
 import Data.Foldable
 import Data.Ord
@@ -14,7 +15,6 @@ import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
 import qualified CAR.RunFile as RunFile
-import CAR.Types
 
 
 type Score = Double
@@ -28,9 +28,9 @@ type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 -- Compound type for storing results of transposing multiple rankings over doc,
 -- into a doc -> [ranking], i.e., the "all".
 -- It also exposes the collapsed version by unsupervised rank aggregation (score(doc) = sum_rankings 1/rank(doc))
-data MultiRankingEntry doc key =  MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
-                                                    , multiRankingEntryAll       :: [(key, RankingEntry doc)]
-                                                    }
+data MultiRankingEntry doc key = MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
+                                                   , multiRankingEntryAll       :: [(key, RankingEntry doc)]
+                                                   }
 
 multiRankingEntryGetDocumentName :: MultiRankingEntry doc key -> doc
 multiRankingEntryGetDocumentName mre =  RunFile.carDocument $ multiRankingEntryCollapsed mre
@@ -46,46 +46,56 @@ collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key)
              -> M.Map QueryId [MultiRankingEntry doc key]
 collapseRuns runs =
     let listOfRunMaps :: M.Map QueryId [(key, RankingEntry doc)]
-        listOfRunMaps = fmap toList . RunFile.groupByQuery' $ [(key, elem) | (key, run) <- runs, elem <- run]
+        listOfRunMaps = fmap toList $ RunFile.groupByQuery' [ (key, elem)
+                                                            | (key, run) <- runs
+                                                            , elem <- run
+                                                            ]
 
-     in M.fromList $ [ (query, collapseRankings rankings)
-                     | (query, rankings) <- M.toList listOfRunMaps  -- fetch rankings for query
-                     ]
+     in M.fromList
+        $ withStrategy (parBuffer 100 rseq)
+        [ (query, collapseRankings rankings)
+        | (query, rankings) <- M.toList listOfRunMaps  -- fetch rankings for query
+        ]
 
 
 -- rankings: rank entries for the same query, across different run files
-collapseRankings ::  forall doc key . (Eq doc, Hashable doc) => [(key, RankingEntry doc)] -> [MultiRankingEntry doc key]
+collapseRankings :: forall doc key. (Eq doc, Hashable doc)
+                 => [(key, RankingEntry doc)]
+                 -> [MultiRankingEntry doc key]
 collapseRankings rankingEntries =
     -- docid -> [ entries ]
     -- groupBy (docId) rankingEntries
     let groupByDoc :: [DList.DList (key, RankingEntry doc)]
-        groupByDoc = map snd $ HM.toList -- equivalent for HM.values
-                  $ HM.fromListWith (<>)
-                  $ [ ((RunFile.carDocument entry), DList.singleton (key, entry) ) |  (key, entry) <- rankingEntries ]
+        groupByDoc = HM.elems -- equivalent for HM.values
+                   $ HM.fromListWith (<>)
+                   $ [ ((RunFile.carDocument entry), DList.singleton (key, entry))
+                     | (key, entry) <- rankingEntries
+                     ]
 
         -- with score but not sorted
-        scoredMultiRankings :: [ ( Score,  [(key, RankingEntry doc)] ) ]
-        scoredMultiRankings = [ ( aggregatedScore rankingsPerDoc', rankingsPerDoc')
+        scoredMultiRankings :: [ (Score,  [(key, RankingEntry doc)]) ]
+        scoredMultiRankings = [ (aggregatedScore rankingsPerDoc', rankingsPerDoc')
                               | rankingsPerDoc <- groupByDoc
-                              , let rankingsPerDoc' = toList rankingsPerDoc
+                              , let !rankingsPerDoc' = toList rankingsPerDoc
                               ]
 
 
         -- sorted and with ranks
-    in zipWith buildData [1 .. ]
+    in zipWith buildData [1 ..]
        $ sortOn (Down . fst) scoredMultiRankings
 
   where buildData :: Rank -> (Score, [(key, RankingEntry doc)]) -> MultiRankingEntry doc key
-        buildData r (s, rankings) =  MultiRankingEntry {
-                                    multiRankingEntryCollapsed =
-                                        RunFile.RankingEntry { RunFile.carQueryId = qId
-                                                             , RunFile.carDocument = docName
-                                                             , RunFile.carRank = r
-                                                             , RunFile.carScore = s
-                                                             , RunFile.carMethodName = RunFile.MethodName "collapsed"
-                                                             }
-                                    , multiRankingEntryAll = rankings
-                                    }
+        buildData r (s, rankings) =
+            MultiRankingEntry
+            { multiRankingEntryCollapsed =
+                  RunFile.RankingEntry { RunFile.carQueryId = qId
+                                       , RunFile.carDocument = docName
+                                       , RunFile.carRank = r
+                                       , RunFile.carScore = s
+                                       , RunFile.carMethodName = RunFile.MethodName "collapsed"
+                                       }
+            , multiRankingEntryAll = rankings
+            }
           where
             qId = RunFile.carQueryId $ snd $ head rankings
             docName = RunFile.carDocument $ snd $ head rankings
