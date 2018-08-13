@@ -403,7 +403,7 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
               foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
 
-              strat :: Strategy _
+              strat :: Strategy (Folds (a, [(Model f, Double)]))
               strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
           foldRestartResults' <- withStrategyIO strat foldRestartResults
 
