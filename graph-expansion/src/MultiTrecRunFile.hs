@@ -52,7 +52,7 @@ collapseRuns runs =
                                                             ]
 
      in M.fromList
-        $ withStrategy (parBuffer 100 rseq)
+        $ withStrategy (parBuffer 100 (evalTuple2 r0 rseq))
         [ (query, collapseRankings rankings)
         | (query, rankings) <- M.toList listOfRunMaps  -- fetch rankings for query
         ]
