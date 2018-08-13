@@ -288,6 +288,7 @@ main = do
 
 
     entityRuns <-  mapM (mapM CAR.RunFile.readEntityRun) entityRunFiles  -- mapM mapM -- first map over list, then map of the snd of a tuple
+        :: IO [(GridRun, [RankingEntry PageId])]
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
 
     edgeRuns <-  mapM (mapM CAR.RunFile.readParagraphRun) edgedocRunFiles
@@ -295,8 +296,8 @@ main = do
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
-        collapsedEntityRun = collapseRuns entityRuns
-        collapsedEdgedocRun = collapseRuns edgeRuns
+        collapsedEntityRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $  entityRuns
+        collapsedEdgedocRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $ edgeRuns
 
         tr x = traceShow x x
 
