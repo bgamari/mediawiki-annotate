@@ -798,38 +798,6 @@ posifyDot expSettings posifyOpt normalizer params' allFeatures =
     denormWeights' =
         WeightVec $ denormWeights normalizer (getWeightVec params')
 
-interleavedPageRankTraining
-    :: ()
-    => (EdgeFeatureVec -> EdgeFeatureVec -> Double) -- ^ edge feature dot product
-    -> Graph PageId (FeatureVec EdgeFeature Double) -- ^ graph for single query FIXME
-    -> FeatureSpace EdgeFeature
-    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
-    -> TrainData EdgeFeature
-    -> StdGen
-    -> [(Eigenvector PageId Double, WeightVec EdgeFeature)]
-interleavedPageRankTraining dotProduct graph fspace metric trainData =
-    go initialPR initialL2R
-  where
-    go :: VI.Vector VU.Vector (DenseId PageId) Double
-       -> WeightVec EdgeFeature -> StdGen
-       -> [(Eigenvector PageId Double, WeightVec EdgeFeature)]
-    go x0 y0 gen0 =
-        let graph' = fmap (y0 `score`) graph
-            x = head $ drop 3 $ persPageRankWithSeedsAndInitial mapping x0 alpha mempty graph'
-            (_score, y) = head $ drop 3 $ coordAscent gen metric fspace y0 trainData
-            (gen, gen1) = System.Random.split gen0
-        in (x,y) : go (eigenvectorValues x) y gen1
-
-    alpha = 0.1
-    mapping  = mkDenseMapping (nodeSet graph)
-    initialPR = VI.replicate (denseRange mapping) (1 / realToFrac (DenseMapping.size mapping))
-    initialL2R :: WeightVec EdgeFeature
-    initialL2R = WeightVec $ F.repeat fspace 1
-
-    featureNames :: [FeatureName]
-    featureNames = fmap (FeatureName . T.pack . show) $ F.featureNames fspace
-
-
 -- ---------------------------------------------
 -- Graphviz export
 -- ---------------------------------------------
