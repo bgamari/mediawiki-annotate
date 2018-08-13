@@ -315,8 +315,10 @@ main = do
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
-        collapsedEntityRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $ entityRuns
-        collapsedEdgedocRun = collapseRuns $ map (fmap $ filter (\entry -> (CAR.RunFile.carRank entry) <= numResults)) $ edgeRuns
+        collapsedEntityRun =
+            collapseRuns
+            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
+        collapsedEdgedocRun = collapseRuns $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
 
         tr x = traceShow x x
 
