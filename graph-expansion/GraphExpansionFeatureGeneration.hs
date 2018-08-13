@@ -38,6 +38,9 @@ import Data.List
 import Data.Maybe
 import Data.Foldable as Foldable
 import Data.Hashable
+import Control.Concurrent
+import Control.Concurrent.Map
+import Data.List.Split
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
@@ -287,24 +290,27 @@ main = do
     putStrLn $ "# query count: " ++ show (length queries)
 
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
-    putStrLn $ "Loaded edgDocsLookup."
+    putStrLn $ "Loaded edgeDocsLookup."
 
-    entityRuns <- fmap M.toList $ runInternM $ runInternM
-        $ mapM (\path ->
+    ncaps <- getNumCapabilities
+
+    entityRuns <- fmap concat $ mapConcurrentlyL ncaps
+        (runInternM . runInternM . mapM (mapM (\path ->
                      lift . internAll (each . CAR.RunFile.document)
                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (CAR.RunFile.readEntityRun path))
-               (M.fromList entityRunFiles)
+                 =<< liftIO (CAR.RunFile.readEntityRun path))))
+        (chunksOf 2 entityRunFiles)
         :: IO [(GridRun, [RankingEntry PageId])]
 
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
 
-    edgeRuns <- fmap M.toList $ runInternM $ runInternM
-        $ mapM (\path ->
-                      lift . internAll (each . CAR.RunFile.document)
-                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                  =<< liftIO (CAR.RunFile.readParagraphRun path))
-               (M.fromList edgedocRunFiles)
+    edgeRuns <- fmap concat $ mapConcurrentlyL ncaps
+        (runInternM . runInternM . mapM (mapM (\path ->
+                     lift . internAll (each . CAR.RunFile.document)
+                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
+                 =<< liftIO (CAR.RunFile.readParagraphRun path))))
+        (chunksOf 2 edgedocRunFiles)
+        :: IO [(GridRun, [RankingEntry ParagraphId])]
 
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
