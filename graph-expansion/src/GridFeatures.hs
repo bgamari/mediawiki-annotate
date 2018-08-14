@@ -195,6 +195,10 @@ onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphId
 onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
 onlyLessFeaturesEdge _  = False
 
+onlyNoneFeaturesEdge :: EdgeFeature -> Bool
+onlyNoneFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _) = True
+onlyNoneFeaturesEdge _  = False
+
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
@@ -242,6 +246,11 @@ onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX Parag
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
 onlyLessFeatures _  = False
+
+onlyNoneFeatures :: CombinedFeature -> Bool
+onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
+onlyNoneFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
+onlyNoneFeatures _  = False
 
 
 onlyPage :: CombinedFeature -> Bool
