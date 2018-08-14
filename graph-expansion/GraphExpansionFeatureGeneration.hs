@@ -438,7 +438,7 @@ main = do
           let allData :: TrainData CombinedFeature
               allData = augmentWithQrels qrel docFeatures Relevant
 
-              metric = avgMetricQrel qrel
+              !metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
@@ -462,7 +462,7 @@ main = do
           let allData :: TrainData CombinedFeature
               allData = augmentWithQrels qrel docFeatures Relevant
 
-              metric = avgMetricQrel qrel
+              !metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
