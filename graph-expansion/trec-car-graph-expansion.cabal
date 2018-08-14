@@ -448,6 +448,7 @@ executable graph-expansion-supervised-grid-run
                        simplir,
                        simplir-disk-index,
                        pipes,
+                       parallel,
                        serialise,
                        pipes-safe,
                        pipes,

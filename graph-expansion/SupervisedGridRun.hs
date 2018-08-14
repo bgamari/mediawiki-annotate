@@ -15,6 +15,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
+import Control.Parallel.Strategies
+
 import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 import System.IO
@@ -260,6 +262,7 @@ makeFeatures collapsedEntityRun =
     let
         docFeatures''' :: M.Map (QueryId, QRel.DocumentName) EntityFeatureVec
         docFeatures''' = M.fromList
+                    $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
                     [ ((query, T.pack $ unpackPageId pid), features)
                     | (query, entityRun) <- M.toList collapsedEntityRun
                     , entityRankEntry <- entityRun
@@ -273,7 +276,8 @@ makeFeatures collapsedEntityRun =
 --                         where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
 
         normalizer = zNormalizer $ M.elems docFeatures'''
-        docFeatures = fmap (normFeatures normalizer) docFeatures'''
+        docFeatures = withStrategy (parTraversable rwhnf)
+                    $fmap (normFeatures normalizer) docFeatures'''
 
     in docFeatures
 
