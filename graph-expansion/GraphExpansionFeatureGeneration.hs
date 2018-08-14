@@ -13,9 +13,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 import Control.Concurrent.Async
-import Control.DeepSeq
+import Control.DeepSeq hiding (rwhnf)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Parallel.Strategies
 import Control.Lens (each)
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
@@ -289,11 +290,12 @@ main = do
                   return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
     putStrLn $ "# query count: " ++ show (length queries)
 
+    putStrLn "Loading edgeDocsLookup."
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
-    putStrLn $ "Loaded edgeDocsLookup."
 
     ncaps <- getNumCapabilities
 
+    putStrLn "Loading EntityRuns..."
     entityRuns <- fmap concat $ mapConcurrentlyL ncaps
         (runInternM . runInternM . mapM (mapM (\path ->
                      lift . internAll (each . CAR.RunFile.document)
@@ -304,6 +306,7 @@ main = do
 
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
 
+    putStrLn "Loading EdgeRuns..."
     edgeRuns <- fmap concat $ mapConcurrentlyL ncaps
         (runInternM . runInternM . mapM (mapM (\path ->
                      lift . internAll (each . CAR.RunFile.document)
@@ -314,13 +317,17 @@ main = do
 
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
 
+    putStrLn "Computing collapsed runs..."
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
-        collapsedEntityRun =
+        !collapsedEntityRun =
             collapseRuns
             $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
-        collapsedEdgedocRun = collapseRuns $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
+        !collapsedEdgedocRun =
+            collapseRuns
+            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
 
         tr x = traceShow x x
+    putStrLn "Computed collapsed runs."
 
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
@@ -459,6 +466,7 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
     let
         docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
         docFeatures''' = M.fromList
+                    $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
                     [ ((qid, T.pack $ unpackPageId pid), features)
                     | (query, edgeRun) <- M.toList collapsedEdgedocRun
                     , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
@@ -466,11 +474,13 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
                     , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
                     ]
 
-        docFeatures'' = fmap crit docFeatures'''
+        docFeatures'' = withStrategy (parTraversable rwhnf)
+                        $ fmap crit docFeatures'''
                         where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
 
         normalizer = zNormalizer $ M.elems docFeatures''
-        docFeatures = fmap (normFeatures normalizer) docFeatures''
+        docFeatures = withStrategy (parTraversable rwhnf)
+                      $ fmap (normFeatures normalizer) docFeatures''
 
     in docFeatures
 

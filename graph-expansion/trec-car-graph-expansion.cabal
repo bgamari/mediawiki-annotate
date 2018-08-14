@@ -403,6 +403,7 @@ executable graph-expansion-feature-generation
                        simplir,
                        simplir-disk-index,
                        pipes,
+                       parallel,
                        serialise,
                        pipes-safe,
                        pipes,
