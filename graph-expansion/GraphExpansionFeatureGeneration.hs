@@ -278,10 +278,6 @@ main = do
         filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
         filterGraphTopEdges graph =  graph -- filterEdges (\_ _ weight -> weight > 5.0) graph
 
-    let combinedFSpace' = mkFeatureSpace
-                          $ filter (expSettingToCrit experimentSettings)
-                          $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
-
     let fixQRel (QRel.Entry qid docId rel) = QRel.Entry (CAR.RunFile.QueryId qid) docId rel
     qrel <- map fixQRel <$> QRel.readQRel @IsRelevant qrelFile
 
@@ -330,17 +326,21 @@ main = do
 
         tr x = traceShow x x
     putStrLn "Computed collapsed runs."
+    putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
+    putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
     -- save predicted node ranking as run-file
     case modelSource of
+      {-
       GraphWalkModelFromFile modelFile -> do
-          Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
+          putStrLn "loading model"
+          Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
           let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-              docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+              docFeatures = makeStackedFeatures' edgeDocsLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
               degreeCentrality = fmap (modelWeights' model `score`) docFeatures
               queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
               ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
@@ -378,7 +378,7 @@ main = do
                       entityRun = collapsedEntityRun >!< query
 
                   graph :: Graph PageId EdgeFeatureVec
-                  graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace' (expSettingToCritEdge experimentSettings))
+                  graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace')
                          $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
 
@@ -427,11 +427,12 @@ main = do
                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
                                     $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
+      -}
 
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
-          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+          let docFeatures = makeStackedFeatures' edgeDocsLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
           let allData :: TrainData CombinedFeature
@@ -451,7 +452,11 @@ main = do
 
 
       TrainModel modelFile -> do
-          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+          let combinedFSpace' = mkFeatureSpace
+                                $ filter (expSettingToCrit experimentSettings)
+                                $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
+
+          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace'
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
           let allData :: TrainData CombinedFeature
@@ -461,6 +466,7 @@ main = do
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
+          putStrLn $ "Feature dimension: "++show (featureDimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
           putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
@@ -480,33 +486,46 @@ main = do
 qrelDocNameToPageId :: QRel.DocumentName -> PageId
 qrelDocNameToPageId docname = packPageId $ T.unpack docname
 
-makeStackedFeatures :: EdgeDocsLookup
-                    ->  M.Map QueryId [MultiRankingEntry PageId GridRun]
-                    ->  M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                    ->  FeatureSpace CombinedFeature
-                    -> [ExperimentSettings]
-                    ->  M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings =
-    let
-        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-        docFeatures''' = M.fromList
-                    $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
-                    [ ((qid, T.pack $ unpackPageId pid), features)
-                    | (query, edgeRun) <- M.toList collapsedEdgedocRun
-                    , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-                    , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
-                    , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
-                    ]
+makeCombinedFeatureVec :: _
+makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
+    M.fromList
+    $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
+      [ ((qid, T.pack $ unpackPageId pid), features)
+      | (query, edgeRun) <- M.toList collapsedEdgedocRun
+      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
+      , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+      , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
+      ]
 
-        docFeatures'' = withStrategy (parTraversable rwhnf)
-                        $ fmap crit docFeatures'''
-                        where crit = filterExpSettings combinedFSpace combinedFSpace' (expSettingToCrit experimentSettings)
+makeStackedFeatures :: EdgeDocsLookup
+                    -> M.Map QueryId [MultiRankingEntry PageId GridRun]
+                    -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+                    -> FeatureSpace CombinedFeature
+                    -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
+    let docFeatures'' = withStrategy (parTraversable rwhnf)
+                        $ fmap crit
+                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
+                        where crit = filterExpSettings combinedFSpace combinedFSpace'
 
         normalizer = zNormalizer $ M.elems docFeatures''
-        docFeatures = withStrategy (parTraversable rwhnf)
-                      $ fmap (normFeatures normalizer) docFeatures''
+    in withStrategy (parTraversable rwhnf)
+       $ fmap (normFeatures normalizer) docFeatures''
 
-    in docFeatures
+makeStackedFeatures' :: EdgeDocsLookup
+                     -> FeatureSpace CombinedFeature
+                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
+                     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+                     -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+makeStackedFeatures' edgeDocsLookup fspace collapsedEntityRun collapsedEdgedocRun =
+    let docFeatures'' = withStrategy (parTraversable rwhnf)
+                        $ fmap crit
+                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
+                        where crit = filterExpSettings combinedFSpace fspace
+
+        normalizer = zNormalizer $ M.elems docFeatures''
+    in withStrategy (parTraversable rwhnf)
+       $ fmap (normFeatures normalizer) docFeatures''
 
 
 logistic :: Double -> Double

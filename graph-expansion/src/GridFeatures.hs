@@ -29,6 +29,7 @@ import GHC.Generics
 import Codec.Serialise
 
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import Data.List
@@ -175,18 +176,6 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 -- -------------------------------------------
 
 
-filterExpSettingsEdge ::  FeatureSpace EdgeFeature
-                  ->  FeatureSpace EdgeFeature
-                  -> (EdgeFeature -> Bool)
-                  ->  (FeatureVec EdgeFeature Double)
-                  ->  (FeatureVec EdgeFeature Double)
-filterExpSettingsEdge fromFeatSpace toFeatSpace pred features =
-    F.fromList toFeatSpace
-    $ [ pair
-      | pair@(fname, _) <- F.toList features
-      , pred fname
-      ]
-
 onlyAggrEdge :: EdgeFeature -> Bool
 onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
 onlyAggrEdge _  = False
@@ -210,17 +199,18 @@ onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
 
-filterExpSettings ::  FeatureSpace CombinedFeature
-                  ->  FeatureSpace CombinedFeature
-                  -> (CombinedFeature -> Bool)
-                  ->  (FeatureVec CombinedFeature Double)
-                  ->  (FeatureVec CombinedFeature Double)
-filterExpSettings fromFeatSpace toFeatSpace pred features =
+filterExpSettings :: (Show f, Ord f)
+                  => FeatureSpace f
+                  -> FeatureSpace f
+                  -> FeatureVec f Double
+                  -> FeatureVec f Double
+filterExpSettings fromFeatSpace toFeatSpace features =
     F.fromList toFeatSpace
     $ [ pair
       | pair@(fname, _) <- F.toList features
-      , pred fname
+      , fname `S.member` F.featureNameSet toFeatSpace
       ]
+
 noEntity :: CombinedFeature -> Bool
 noEntity (Left _) = False
 noEntity _  = True
