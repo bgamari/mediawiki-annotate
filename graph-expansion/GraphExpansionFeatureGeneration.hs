@@ -92,6 +92,7 @@ data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
 data ModelSource = ModelFromFile FilePath -- filename to read model from
+                 | GraphWalkModelFromFile FilePath -- filename to read model from for graph walks
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
@@ -174,6 +175,7 @@ opts =
       modelSource =
             option (TrainModel <$> str) (long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
         <|> option (ModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
+        <|> option (GraphWalkModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model for graph walking from Model-FILE")
 
 
 
@@ -334,7 +336,7 @@ main = do
     -- use pagerank on this graph to predict an alternative node ranking
     -- save predicted node ranking as run-file
     case modelSource of
-      ModelFromFile modelFile -> do
+      GraphWalkModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
           let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
@@ -425,6 +427,28 @@ main = do
                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
                                     $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
+
+      ModelFromFile modelFile -> do
+          Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
+
+          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
+
+          putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
+          let allData :: TrainData CombinedFeature
+              allData = augmentWithQrels qrel docFeatures Relevant
+
+              metric = avgMetricQrel qrel
+              totalElems = getSum . foldMap ( Sum . length ) $ allData
+              totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
+
+          putStrLn $ "Test model with (trainData) "++ show (M.size allData) ++
+                    " queries and "++ show totalElems ++" items total of which "++
+                    show totalPos ++" are positive."
+
+          let trainRanking = rerankRankings' model allData
+          storeRankingData outputFilePrefix trainRanking metric "learn2walk-degreecentrality"
+
+
 
       TrainModel modelFile -> do
           let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' experimentSettings
