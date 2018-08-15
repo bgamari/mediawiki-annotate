@@ -334,7 +334,7 @@ main = do
     -- use pagerank on this graph to predict an alternative node ranking
     -- save predicted node ranking as run-file
     case modelSource of
-      {-
+
       GraphWalkModelFromFile modelFile -> do
           putStrLn "loading model"
           Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
@@ -352,19 +352,21 @@ main = do
               nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
               nodeDistr = fmap nodeRankingToDistribution rankingPageId
 
-          let edgeFSpace' = mkFeatureSpace
-                              $ tr
-                              $  filter (expSettingToCritEdge experimentSettings)
-                              $ F.featureNames edgeFSpace  -- Todo this is completely unsafe
+          let edgeFSpace' = F.mkFeatureSpace [ f'
+                                             | f <- F.featureNames $ modelFeatures model
+                                             , Right f' <- pure f
+                                             ]
 
-          let params :: WeightVec CombinedFeature
-              params = modelWeights' model
+              params' :: WeightVec EdgeFeature
+              params' = WeightVec $ F.projectFeatureVec edgeFSpace'
+                        (either (const Nothing) Just)
+                        (getWeightVec $ modelWeights' model)
 
           let graphWalkRanking :: QueryId -> IO (Ranking.Ranking Double PageId)
               graphWalkRanking query
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
                  | otherwise = do
-                   putStrLn $ (show query) <> " -> " <> show (take 2 $ toEntries eigv)
+                   putStrLn $ show query <> " -> " <> show (take 2 $ toEntries eigv)
                    -- exportGraphViz (filterGraphTopEdges $ dropDisconnected graph') (dotFileName query)
                    return $ Ranking.fromList $ map swap $ toEntries eigv
 --                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
@@ -378,17 +380,13 @@ main = do
                       entityRun = collapsedEntityRun >!< query
 
                   graph :: Graph PageId EdgeFeatureVec
-                  graph =  fmap (filterExpSettingsEdge edgeFSpace edgeFSpace')
+                  graph =  fmap (filterExpSettings edgeFSpace')
                          $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
 
 
                   normalizer :: Normalisation _ Double
                   normalizer = zNormalizer $ Foldable.toList graph
 
-                  params' :: WeightVec EdgeFeature
-                  params' = WeightVec $ F.projectFeatureVec edgeFSpace'
-                            (either (const Nothing) Just)
-                            (getWeightVec params)
 
                   graph' :: Graph PageId Double
                   graph' = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
@@ -427,7 +425,7 @@ main = do
                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
                                     $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
-      -}
+
 
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
@@ -506,7 +504,7 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
                         $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings combinedFSpace combinedFSpace'
+                        where crit = filterExpSettings combinedFSpace'
 
         normalizer = zNormalizer $ M.elems docFeatures''
     in withStrategy (parTraversable rwhnf)
@@ -521,7 +519,7 @@ makeStackedFeatures' edgeDocsLookup fspace collapsedEntityRun collapsedEdgedocRu
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
                         $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings combinedFSpace fspace
+                        where crit = filterExpSettings fspace
 
         normalizer = zNormalizer $ M.elems docFeatures''
     in withStrategy (parTraversable rwhnf)

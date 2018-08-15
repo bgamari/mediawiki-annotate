@@ -273,7 +273,7 @@ makeFeatures collapsedEntityRun =
 
      -- todo filter with expCrits
 --         docFeatures'' = fmap crit docFeatures'''
---                         where crit = filterExpSettings combinedFSpace combinedFSpace'
+--                         where crit = filterExpSettings combinedFSpace'
 
         normalizer = zNormalizer $ M.elems docFeatures'''
         docFeatures = withStrategy (parTraversable rwhnf)

@@ -204,11 +204,10 @@ onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
 
 filterExpSettings :: (Show f, Ord f)
-                  => FeatureSpace f
-                  -> FeatureSpace f
+                  => FeatureSpace f       -- ^ space to project into
+                  -> FeatureVec f Double  -- ^ vector to project
                   -> FeatureVec f Double
-                  -> FeatureVec f Double
-filterExpSettings fromFeatSpace toFeatSpace features =
+filterExpSettings toFeatSpace features =
     F.fromList toFeatSpace
     $ [ pair
       | pair@(fname, _) <- F.toList features
