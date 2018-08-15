@@ -491,16 +491,22 @@ main = do
 qrelDocNameToPageId :: QRel.DocumentName -> PageId
 qrelDocNameToPageId docname = packPageId $ T.unpack docname
 
-makeCombinedFeatureVec :: _
+makeCombinedFeatureVec :: EdgeDocsLookup
+                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
+                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
+                       -> M.Map (QueryId, T.Text) CombinedFeatureVec
 makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
-    M.fromList
-    $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
-      [ ((qid, T.pack $ unpackPageId pid), features)
+    M.unions
+    $ withStrategy (parBuffer 200 rwhnf)
+      [ M.fromList
+        [ ((qid, T.pack $ unpackPageId pid), features)
+        | ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
+        ]
       | (query, edgeRun) <- M.toList collapsedEdgedocRun
       , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
       , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
-      , ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
       ]
+
 
 makeStackedFeatures :: EdgeDocsLookup
                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
