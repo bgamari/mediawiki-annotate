@@ -424,11 +424,13 @@ main = do
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
                                     ]
 
-                      fileId qid = T.unpack $ T.replace "/" "--" qid
+--                       fileId qid = T.unpack $ T.replace "/" "--" qid
 
-                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ fileId (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
-                                    $ rankEntries
-          mapConcurrently_(runRanking . queryDocQueryId) queries
+--                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ fileId (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
+--                                     $
+                  return $ rankEntries
+          rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
+          CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-pagerank-test.run") rankEntries
 
 
       ModelFromFile modelFile -> do
