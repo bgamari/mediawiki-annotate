@@ -403,7 +403,7 @@ main = do
                        in case pageRankConvergence of
                             L2Convergence -> snd
                                            $ head
-                                           $ dropWhile (\(x,y) -> relChange x y > 1e-4)
+                                           $ dropWhile (\(x,y) -> relChange x y > 1e-3)
                                            $ pageRankIters
                             Iteration10   -> snd $ (!! 10)  pageRankIters
                             Iteration2    -> snd $ (!! 2)  pageRankIters
@@ -416,13 +416,17 @@ main = do
 
 
 
+
+
               runRanking query = do
                   ranking <- graphWalkRanking query
                   let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
                                     ]
 
-                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
+                      fileId qid = T.unpack $ T.replace "/" "--" qid
+
+                  CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ fileId (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
                                     $ rankEntries
           mapConcurrently_(runRanking . queryDocQueryId) queries
 
