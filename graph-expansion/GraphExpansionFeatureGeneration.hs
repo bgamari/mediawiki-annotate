@@ -452,7 +452,7 @@ main = do
 
           let trainRanking = withStrategy (parTraversable rwhnf)
                            $ rerankRankings' model allData
-          storeRankingData outputFilePrefix trainRanking metric "learn2walk-degreecentrality"
+          storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
 
 
 

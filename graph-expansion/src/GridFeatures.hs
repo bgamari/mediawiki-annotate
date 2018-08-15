@@ -569,6 +569,20 @@ storeRankingData outputFilePrefix ranking metric modelDesc = do
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
        $ ranking
 
+-- todo avoid duplicateion with storeRankingData
+storeRankingDataNoMetric ::  FilePath
+--                -> TrainData
+               -> _
+               -> String
+               -> IO ()
+storeRankingDataNoMetric outputFilePrefix ranking modelDesc = do
+
+--   let rerankedFranking = rerankRankings' model evalData
+  putStrLn $ "Model "++modelDesc++" .. no metric.."
+  CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
+       $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
+       $ ranking
+
 
 newtype Folds a = Folds { getFolds :: [a] }
                 deriving (Foldable, Functor, Traversable)
