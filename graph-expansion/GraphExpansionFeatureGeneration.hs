@@ -463,9 +463,21 @@ main = do
 
           let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace'
 
+          let augmentNoQrels     :: forall docId queryId f.
+                                    (Ord queryId, Ord docId)
+                                 => M.Map (queryId, docId) (FeatureVec f Double)
+                                 -> M.Map queryId [(docId, FeatureVec f Double, IsRelevant)]
+              augmentNoQrels docFeatures =
+                    let franking :: M.Map queryId [(docId, FeatureVec f Double, IsRelevant)]
+                        franking = M.fromListWith (++)
+                                   [ (qid, [(doc, features, Relevant)])
+                                   | ((qid, doc), features) <- M.assocs docFeatures
+                                   ]
+                    in franking
+
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
           let allData :: TrainData CombinedFeature
-              allData = augmentWithQrels qrel docFeatures Relevant
+              allData = augmentNoQrels docFeatures
 
               !metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ allData
