@@ -450,7 +450,8 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let trainRanking = rerankRankings' model allData
+          let trainRanking = withStrategy (parTraversable rwhnf)
+                           $ rerankRankings' model allData
           storeRankingData outputFilePrefix trainRanking metric "learn2walk-degreecentrality"
 
 
