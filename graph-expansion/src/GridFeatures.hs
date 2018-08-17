@@ -57,6 +57,13 @@ import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 
 
+minibatchParser :: Parser MiniBatchParams
+minibatchParser = MiniBatchParams
+    <$> option auto (long "mini-batch-steps" <> metavar "STEPS" <> help "iterations per mini-batch")
+    <*> option auto (long "mini-batch-size" <> metavar "SIZE" <> help "number of mini-batch training queries")
+    <*> option auto (long "mini-batch-eval" <> metavar "EVAL" <> help "number of mini-batches before next training evaluation")
+
+
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
 gridRunParser :: Parser (GridRun, EntityOrEdge, FilePath)
 gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
@@ -381,14 +388,15 @@ type BestFoldResults f = Folds (M.Map Q [(DocId, FeatureVec f Double, Rel)], (Mo
 
 
 trainMe :: forall f. (Ord f, Show f)
-        => StdGen
+        => MiniBatchParams
+        -> StdGen
         -> TrainData f
         -> FeatureSpace f
         -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
         -> FilePath
         -> FilePath
         -> IO ()
-trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
+trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile = do
           -- train me!
           let nRestarts = 5
               nFolds = 5
@@ -399,7 +407,7 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
           putStrLn "made folds"
 
           let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
-              foldRestartResults = kFolds (take nRestarts . trainWithRestarts gen0 metric fspace) trainData folds
+              foldRestartResults = kFolds (take nRestarts . trainWithRestarts miniBatchParams gen0 metric fspace) trainData folds
 
               strat :: Strategy (Folds (a, [(Model f, Double)]))
               strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
@@ -409,7 +417,7 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
 
           -- full train
           let fullRestarts = withStrategy (parTraversable rdeepseq)
-                             $ take nRestarts $ trainWithRestarts gen0 metric fspace trainData
+                             $ take nRestarts $ trainWithRestarts miniBatchParams gen0 metric fspace trainData
               (model, trainScore) =  bestModel $  fullRestarts
               actions2 = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
 
@@ -418,20 +426,21 @@ trainMe gen0 trainData fspace metric outputFilePrefix modelFile = do
 
 trainWithRestarts
     :: forall f. (Show f)
-    => StdGen
+    => MiniBatchParams
+    -> StdGen
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
     -> FeatureSpace f
     -> TrainData f
     -> [(Model f, Double)]
        -- ^ an infinite list of restarts
-trainWithRestarts gen0 metric fspace trainData =
+trainWithRestarts miniBatchParams gen0 metric fspace trainData =
   let trainData' = discardUntrainable trainData
 
       rngSeeds :: [StdGen]
       rngSeeds = unfoldr (Just . System.Random.split) gen0
 
       restartModel :: StdGen -> (Model f, Double)
-      restartModel = learnToRank trainData' fspace metric
+      restartModel = learnToRank miniBatchParams trainData' fspace metric
 
       modelsWithTrainScore :: [(Model f,Double)]
       modelsWithTrainScore = fmap restartModel rngSeeds

@@ -130,9 +130,10 @@ opts :: Parser ( FilePath
                , PageRankExperimentSettings
                , PageRankConvergence
                , GraphWalkModel
+               , Maybe MiniBatchParams
                )
 opts =
-    (,,,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -148,6 +149,7 @@ opts =
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
+    <*> optional minibatchParser
     where
 
       querySource :: Parser QuerySource
@@ -244,7 +246,8 @@ main = do
       , edgeDocsCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
-      , pageRankExperimentSettings, pageRankConvergence, graphWalkModel  ) <- execParser' 1 (helper <*> opts) mempty
+      , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
+      , miniBatchParamsMaybe  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
@@ -260,6 +263,9 @@ main = do
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
+    putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
+
+    let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
     gen0 <- newStdGen  -- needed by learning to rank
 
@@ -496,7 +502,7 @@ main = do
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
           gen0 <- newStdGen  -- needed by learning to rank
-          trainMe gen0 allData combinedFSpace' metric outputFilePrefix modelFile
+          trainMe miniBatchParams gen0 allData combinedFSpace' metric outputFilePrefix modelFile
 
 
 

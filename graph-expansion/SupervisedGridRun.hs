@@ -28,6 +28,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import Data.List
+import Data.Maybe
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
@@ -37,7 +38,7 @@ import CAR.Utils
 import GridFeatures
 
 import qualified SimplIR.SimpleIndex as Index
-import SimplIR.LearningToRank (IsRelevant(..))
+import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import SimplIR.FeatureSpace.Normalise
 
@@ -82,9 +83,10 @@ opts :: Parser ( FilePath
                , FilePath
                , ModelSource
                , [ExperimentSettings]
+               , Maybe MiniBatchParams
                )
 opts =
-    (,,,,,,,,)
+    (,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -94,6 +96,7 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
+    <*> optional minibatchParser
     where
 
       querySource :: Parser QuerySource
@@ -177,10 +180,12 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , qrelFile, modelSource
       , experimentSettings
-      ) <- execParser' 1 (helper <*> opts) mempty
+      , miniBatchParamsMaybe) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
+    putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
 
+    let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
     let entityRunFiles  = [ (g, r) | (g, Entity, r) <- gridRunFiles]
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
@@ -239,7 +244,7 @@ main = do
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData allData)
           gen0 <- newStdGen  -- needed by learning to rank
-          trainMe gen0 allData entFSpace metric outputFilePrefix modelFile
+          trainMe miniBatchParams gen0 allData entFSpace metric outputFilePrefix modelFile
 
 --
 -- expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
