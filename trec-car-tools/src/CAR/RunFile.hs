@@ -15,7 +15,7 @@ module CAR.RunFile
     , Run.Score
 
       -- ** Entity/paragraph rankings
-    , RankingEntry
+    , PassageEntityRankingEntry
     , traverseText
     , PassageEntity(..)
     , carEntity, carPassage
@@ -90,20 +90,18 @@ traverseText :: Monad m
 traverseText traverseDoc f x =
     (document . traverseDoc) f x >>= (queryId . _Wrapped) f >>= (methodName . _Wrapped) f
 
--- | Paragraph/entity ranking entry
-type RankingEntry = RankingEntry' PassageEntity
 
 data PassageEntity = EntityOnly !PageId
                    | EntityAndPassage !PageId !ParagraphId
                    deriving (Show)
 
-carEntity :: RankingEntry -> PageId
+carEntity :: PassageEntityRankingEntry -> PageId
 carEntity r =
     case carDocument r of
       EntityOnly pid         -> pid
       EntityAndPassage pid _ -> pid
 
-carPassage :: RankingEntry -> Maybe ParagraphId
+carPassage :: PassageEntityRankingEntry -> Maybe ParagraphId
 carPassage r =
     case carDocument r of
       EntityOnly _pid         -> Nothing
@@ -111,6 +109,8 @@ carPassage r =
 
 type ParagraphRankingEntry = RankingEntry' ParagraphId
 type EntityRankingEntry = RankingEntry' PageId
+-- | Paragraph/entity ranking entry
+type PassageEntityRankingEntry = RankingEntry' PassageEntity
 
 toCarRankingEntry :: (Run.DocumentName -> doc) -> Run.RankingEntry -> RankingEntry' doc
 toCarRankingEntry parseDocument r =
@@ -175,12 +175,12 @@ data ReadRunError = ReadRunError FilePath ParseError
                   deriving (Show)
 instance Exception ReadRunError
 
-readEntityParagraphRun :: FilePath -> IO [RankingEntry]
+readEntityParagraphRun :: FilePath -> IO [PassageEntityRankingEntry]
 readEntityParagraphRun path =
     handle (throwIO . ReadRunError path)
     (map (toCarRankingEntry parsePassageEntity) <$> Run.readRunFile path)
 
-writeEntityParagraphRun :: FilePath -> [RankingEntry] -> IO ()
+writeEntityParagraphRun :: FilePath -> [PassageEntityRankingEntry] -> IO ()
 writeEntityParagraphRun path =
     Run.writeRunFile path . map (fromCarRankingEntry constructPassageEntity)
 
