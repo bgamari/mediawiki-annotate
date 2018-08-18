@@ -19,16 +19,22 @@ import qualified CAR.TocFile as TocFile
 import CAR.Utils
 import CAR.KnowledgeBase as Kb
 
+data EntityPassageWithFlag = OnlyWithPassage | BothPassage
+data EntityPassageWithoutFlag = OnlyWithoutPassage | BothPassage'
+data EntityPassageOverwriteFlag = OverwritePassage | KeepPassage
 
-opts :: Parser (FilePath,  FilePath, TocFile.IndexedCborPath PageId Page)
-opts = (,,)
+
+opts :: Parser (FilePath,  FilePath, TocFile.IndexedCborPath PageId Page, EntityPassageWithFlag, EntityPassageWithoutFlag,EntityPassageOverwriteFlag)
+opts = (,,,,,)
     <$> option str (short 'o' <> long "output" <> help "Output TREC ranking file")
     <*> option str (short 'r' <> long "ranking" <> help "Entity TREC ranking file")
     <*> option (TocFile.IndexedCborPath <$> str) (short 'b' <> long "kb" <> help "cbor file with knowledge base")
-
+    <*> flag OnlyWithPassage BothPassage (long "only-with-passage" <> help "Only include entities with defined passages")
+    <*> flag OnlyWithoutPassage BothPassage' (long "only-without-passage" <> help "Only include entities without defined passages (and fill with leads)")
+    <*> flag OverwritePassage KeepPassage (long "overwrite-passage" <> help "Overwrite defined passages with leads)")
 main :: IO ()
 main = do
-    (outputFile, runFile, kbFile) <- execParser $ info (helper <*> opts) mempty
+    (outputFile, runFile, kbFile, onlyWithPassage, onlyWithoutPassage, overwritePassage) <- execParser $ info (helper <*> opts) mempty
     queries <- Run.groupByQuery <$> Run.readEntityRun runFile
     kb <- TocFile.open kbFile
 
@@ -43,31 +49,66 @@ main = do
                   let leadSkeleton = listToMaybe $ pageParas page
                   in case leadSkeleton of
                     Just(Paragraph pid _ ) -> Just pid
-                    _ -> Nothing
+                    _ ->  Nothing
 
     entityRun <- Run.readEntityParagraphRun runFile
               :: IO [Run.PassageEntityRankingEntry]
 
+--     let entityPassageRun ::  [Run.PassageEntityRankingEntry]
+--         entityPassageRun = mapMaybe augmentLeadParagraph entityRun
+--           where augmentLeadParagraph :: Run.PassageEntityRankingEntry -> Maybe Run.PassageEntityRankingEntry
+--                 augmentLeadParagraph r
+--                   | Run.EntityOnly e <- Run.carDocument r
+--                   , Just para <- lookupLeadPara e
+--                   = Just $ r { Run.carDocument = Run.EntityAndPassage e para }
+--
+--                   | Run.EntityAndPassage e p <- Run.carDocument r
+--                   = Just $ r { Run.carDocument = Run.EntityAndPassage e p }
+--
+--                   | otherwise
+--                   = trace ("unknown lead paragraph for entity.  "<>show r) $ Nothing
+
     let entityPassageRun ::  [Run.PassageEntityRankingEntry]
-        entityPassageRun = mapMaybe augmentLeadParagraph entityRun
-          where augmentLeadParagraph :: Run.PassageEntityRankingEntry -> Maybe Run.PassageEntityRankingEntry
+        entityPassageRun =
+                mapMaybe (\r -> merge r $ rewrite $ filterFlags $ augmentLeadParagraph r) entityRun
+
+          where augmentLeadParagraph :: Run.PassageEntityRankingEntry -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
                 augmentLeadParagraph r
-                  | Run.EntityOnly e <- Run.carDocument r
-                  , Just para <- lookupLeadPara e
-                  = Just $ r { Run.carDocument = Run.EntityAndPassage e para }
+                  | pa@(Run.EntityOnly e) <- Run.carDocument r
+                  = Just $ (pa , e, lookupLeadPara' e, Nothing)
 
-                  | Run.EntityAndPassage e p <- Run.carDocument r
-                  = Just $ r { Run.carDocument = Run.EntityAndPassage e p }
+                  | pa@(Run.EntityAndPassage e p) <- Run.carDocument r
+                  = Just $ (pa, e, lookupLeadPara' e, Just p)
 
-                  | otherwise
-                  = trace ("unknown lead paragraph for entity.  "<>show r) $ Nothing
+                    where lookupLeadPara' entityId =
+                            let paramaybe = lookupLeadPara entityId
+                            in case paramaybe of
+                                Nothing -> trace ("unknown lead paragraph for entity.  "<>show r) $ Nothing
+                                otherwise -> paramaybe
+
+                filterFlags :: Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId) -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
+                filterFlags Nothing = Nothing
+                filterFlags (Just t@(Run.EntityOnly _, _, _, _)) =
+                    case onlyWithPassage of
+                      OnlyWithPassage -> Nothing
+                      _ -> Just t
+                filterFlags (Just t@(Run.EntityAndPassage _ _, _, _, _)) =
+                    case onlyWithoutPassage of
+                      OnlyWithoutPassage -> Nothing
+                      _ ->  Just t
+
+                rewrite :: Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId) -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
+                rewrite Nothing = Nothing
+                rewrite (Just t@(pa@(Run.EntityAndPassage _ _), e, loadedPara, origPara)) =
+                    case overwritePassage of
+                      OverwritePassage -> Just (pa, e, loadedPara, loadedPara)
+                      _ -> Just (pa, e, loadedPara, origPara)
+                rewrite (Just t) = Just t
+
+                merge ::  Run.PassageEntityRankingEntry -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId) -> Maybe Run.PassageEntityRankingEntry
+                merge r (Just (_ , e, _, Just para)) =   Just $ r { Run.carDocument = Run.EntityAndPassage e para }
+                merge r (Just (_ , e, Just para, _)) =   Just $ r { Run.carDocument = Run.EntityAndPassage e para }
+                merge _ _ = Nothing
 
     Run.writeEntityParagraphRun outputFile entityPassageRun
-
-readDedupTable :: FilePath -> IO (HM.HashMap PageId PageId)
-readDedupTable fname =
-    HM.fromList . fmap (toPair . words) . lines <$> readFile fname
-  where
-    toPair [fromPid, toPid] = (packPageId fromPid, packPageId toPid)
-
 
