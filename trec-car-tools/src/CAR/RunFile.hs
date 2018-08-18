@@ -131,11 +131,12 @@ parsePassageEntity docName =
     case (passage, entity) of
       (Just p,  Just e)  -> EntityAndPassage e p
       (Nothing, Just e)  -> EntityOnly e
-      (Just _,  Nothing) -> throw $ ParseError "Passage but no entity" docName
+--       (Just _,  Nothing) -> throw $ ParseError "Passage but no entity" docName
       (Nothing, Nothing) -> throw $ ParseError "Neither a passage nor an entity" docName
   where
     (psg,ent)
       | T.null a  = throw $ ParseError "Invalid document name" docName
+      | T.null b  = ("", a)
       | otherwise = (a, T.drop 1 b)
       where (a,b) = T.breakOn "/" docName
 
