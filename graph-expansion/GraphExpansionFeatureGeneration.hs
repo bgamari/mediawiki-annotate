@@ -569,23 +569,23 @@ changeKey f map_ =
     M.fromList $ fmap (\(key,val) -> (f key, val)) $ M.toList map_
 
 
-
-expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeature -> Bool)
-expSettingToCritEdge exps fname =
-    all (`convertEdge` fname) exps
-
-convertEdge :: ExperimentSettings -> (EdgeFeature -> Bool)
-convertEdge exp = case exp of
-                AllExp -> const True
-                NoEdgeFeats -> const False
-                NoEntityFeats -> const True
-                AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
-                JustAggr -> onlyAggrEdge
-                JustScore -> onlyScoreEdge
-                JustRecip -> onlyRREdge
-                LessFeatures -> onlyLessFeaturesEdge
-                JustNone -> onlyNoneFeaturesEdge
-                ExpPage -> onlyPageEdge
+--
+-- expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeature -> Bool)
+-- expSettingToCritEdge exps fname =
+--     all (`convertEdge` fname) exps
+--
+-- convertEdge :: ExperimentSettings -> (EdgeFeature -> Bool)
+-- convertEdge exp = case exp of
+--                 AllExp -> const True
+--                 NoEdgeFeats -> const False
+--                 NoEntityFeats -> const True
+--                 AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
+--                 JustAggr -> onlyAggrEdge
+--                 JustScore -> onlyScoreEdge
+--                 JustRecip -> onlyRREdge
+--                 LessFeatures -> onlyLessFeaturesEdge
+--                 JustNone -> onlyNoneFeaturesEdge
+--                 ExpPage -> onlyPageEdge
 
 
 expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
