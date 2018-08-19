@@ -59,6 +59,7 @@ library
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
                        text,
+                       regex-compat,
                        simplir,
                        optparse-applicative,
                        mediawiki-parser >= 0.1

@@ -57,11 +57,13 @@ import Data.Monoid
 import Data.Aeson
 import Data.Hashable
 import qualified Data.Text as T
+import qualified Text.Regex as TR
 import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
 import qualified SimplIR.Format.TrecRunFile as Run
 import qualified Data.SmallUtf8 as Utf8
 import CAR.Types
+import Debug.Trace
 
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
@@ -137,8 +139,18 @@ parsePassageEntity docName =
     (psg,ent)
       | T.null a  = throw $ ParseError "Invalid document name" docName
       | T.null b  = ("", a)
-      | otherwise = (a, T.drop 1 b)
-      where (a,b) = T.breakOn "/" docName
+      | otherwise = (a,  b)
+      -- where (a,b) = T.breakOn "/" docName -- (a, T.drop 1 b)
+      where (a,b) = case TR.matchRegex (TR.mkRegex "[0-9a-f]40/") (T.unpack docName) of
+                        Nothing -> ("", docName)
+                        Just [ paraSlash ] ->
+                                        let para = case T.unsnoc $ T.pack paraSlash of
+                                                    Just (para, _) -> para
+                                                    Nothing -> trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
+                                            entity = T.pack $ drop (length paraSlash) (T.unpack docName)
+                                        in (para, entity)
+                        _ -> trace ("parsePassageEntity: Multiple para matches "<> (show docName)) $ ("", "")
+
 
     passage
       | T.null psg = Nothing
