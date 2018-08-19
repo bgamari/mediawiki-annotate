@@ -29,9 +29,9 @@ opts = (,,,,,)
     <$> option str (short 'o' <> long "output" <> help "Output TREC ranking file")
     <*> option str (short 'r' <> long "ranking" <> help "Entity TREC ranking file")
     <*> option (TocFile.IndexedCborPath <$> str) (short 'b' <> long "kb" <> help "cbor file with knowledge base")
-    <*> flag OnlyWithPassage BothPassage (long "only-with-passage" <> help "Only include entities with defined passages")
-    <*> flag OnlyWithoutPassage BothPassage' (long "only-without-passage" <> help "Only include entities without defined passages (and fill with leads)")
-    <*> flag OverwritePassage KeepPassage (long "overwrite-passage" <> help "Overwrite defined passages with leads)")
+    <*> flag BothPassage OnlyWithPassage (long "only-with-passage" <> help "Only include entities with defined passages")
+    <*> flag BothPassage' OnlyWithoutPassage (long "only-without-passage" <> help "Only include entities without defined passages (and fill with leads)")
+    <*> flag KeepPassage OverwritePassage (long "overwrite-passage" <> help "Overwrite defined passages with leads)")
 main :: IO ()
 main = do
     (outputFile, runFile, kbFile, onlyWithPassage, onlyWithoutPassage, overwritePassage) <- execParser $ info (helper <*> opts) mempty
@@ -71,6 +71,7 @@ main = do
     let entityPassageRun ::  [Run.PassageEntityRankingEntry]
         entityPassageRun =
                 mapMaybe (\r -> merge r $ rewrite $ filterFlags $ augmentLeadParagraph r) entityRun
+--                 mapMaybe (\r -> merge r $ rewrite $ filterFlags $ augmentLeadParagraph r) entityRun
 
           where augmentLeadParagraph :: Run.PassageEntityRankingEntry -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
                 augmentLeadParagraph r
@@ -86,7 +87,7 @@ main = do
                                 Nothing -> trace ("unknown lead paragraph for entity.  "<>show r) $ Nothing
                                 otherwise -> paramaybe
 
-                filterFlags :: Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId) -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
+                filterFlags :: Maybe-augmentLeadParagraph -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
                 filterFlags Nothing = Nothing
                 filterFlags (Just t@(Run.EntityOnly _, _, _, _)) =
                     case onlyWithPassage of
