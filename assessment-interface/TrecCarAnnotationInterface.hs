@@ -102,6 +102,7 @@ readTrecRanking trecRunItemToEntryItem path = do
           , DList.singleton
             $ RankingEntry { entryItem = item
                            , entryScore = TrecRun.documentScore entry
+                           , entryMethodNames = [TrecRun.methodName entry]
                            }
           )
         | entry <- contents
@@ -109,17 +110,20 @@ readTrecRanking trecRunItemToEntryItem path = do
         ]
 
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
-                             => (RankingEntry item -> nubKey) -> Int
+                             => (RankingEntry item -> nubKey)
+                             -> (RankingEntry item -> RankingEntry item -> RankingEntry item)
+                             -> Int
                              -> [HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]]
                              -> HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item]
-trecResultUnionOfRankedItems getNubKey optsTopK rankings =
+trecResultUnionOfRankedItems getNubKey mergeNubbedElems optsTopK rankings =
     fmap nubIt
     $ foldl' (HM.unionWith (++)) mempty
     $ fmap (fmap $ take topKPerFile)
       rankings
   where
     topKPerFile = ceiling ((realToFrac optsTopK) / (realToFrac $ length rankings))
-    nubIt = HM.elems . HM.fromList . fmap (\rankElem -> (getNubKey rankElem, rankElem))
+    nubIt = HM.elems . HM.fromListWith mergeNubbedElems . fmap (\rankElem -> (getNubKey rankElem, rankElem))
+--     nubIt = HM.elems . HM.fromList . fmap (\rankElem -> (getNubKey rankElem, rankElem))
 
 shuffleRankings :: Traversable t
                 => t [TrecCarRenderHtml.RankingEntry item]
@@ -185,7 +189,10 @@ main = do
 
             getNubKeyPara ::  RankingEntry Paragraph-> ParagraphId
             getNubKeyPara = paraId . entryItem
-        in trecResultUnionOfRankedItems getNubKeyPara optsTopK
+            mergeNubbedPara :: RankingEntry Paragraph -> RankingEntry Paragraph -> RankingEntry Paragraph
+            mergeNubbedPara entry1 entry2 =
+                entry1 {entryMethodNames = entryMethodNames entry1 ++ entryMethodNames entry2 }
+        in trecResultUnionOfRankedItems getNubKeyPara mergeNubbedPara optsTopK
            <$> mapM (readTrecRanking trecRunItemToEntryItemPara) trecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
@@ -222,8 +229,11 @@ main = do
             getNubKeyEntity rankingEntry =
                 let (entity, paragraph) = entryItem  rankingEntry
                 in (entityPageId entity, paraId paragraph)
+            mergeNubbedEntity :: EntityParagraphRankingEntry -> EntityParagraphRankingEntry -> EntityParagraphRankingEntry
+            mergeNubbedEntity entry1 entry2 =
+                entry1 {entryMethodNames = entryMethodNames entry1 ++ entryMethodNames entry2 }
 
-        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK
+        in trecResultUnionOfRankedItems getNubKeyEntity mergeNubbedEntity optsTopK
            <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 

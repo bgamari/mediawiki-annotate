@@ -21,6 +21,7 @@ import qualified SimplIR.Format.QRel as TrecQrel
 
 data RankingEntry item = RankingEntry { entryItem  :: item
                                       , entryScore :: TrecRun.Score
+                                      , entryMethodNames :: [T.Text]
                                       }
                        | QrelEntry { entryItem  :: item
                                    , entryLabel :: IsRelevant}
