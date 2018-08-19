@@ -88,7 +88,7 @@ trecQrelItems trecRunItemToEntryItemMaybe qrelfile  = do
     return qrelMap
 
 
-readTrecRanking :: (TrecRun.DocumentName -> Maybe item)
+readTrecRanking :: Show item => (TrecRun.DocumentName -> Maybe item)
                 -> FilePath
                 -> IO (HM.Lazy.HashMap TrecRun.QueryId [TrecCarRenderHtml.RankingEntry item])
 readTrecRanking trecRunItemToEntryItem path = do
@@ -105,7 +105,7 @@ readTrecRanking trecRunItemToEntryItem path = do
                            }
           )
         | entry <- contents
-        , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry
+        , Just item <- pure $ (\x -> traceShow (x, entry) x) $ trecRunItemToEntryItem $ TrecRun.documentName entry
         ]
 
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
@@ -219,8 +219,7 @@ main = do
                 let (entity, paragraph) = entryItem  rankingEntry
                 in (entityPageId entity, paraId paragraph)
 
-            tr x = traceShow x x
-        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK . tr
+        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK
            <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
