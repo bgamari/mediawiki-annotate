@@ -18,7 +18,7 @@ data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              }
 
 urlEncodeText :: String -> String
-urlEncodeText = escapeURIString isAllowedInURI
+urlEncodeText = escapeURIString isUnescapedInURIComponent
 
 
 fileNameLookupFactory :: (SectionPath -> Bool) -> (SectionPath -> Bool) -> FileNameLookup
