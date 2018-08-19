@@ -304,8 +304,8 @@ executable trec-car-validate-benchmark
                        simplir
   default-language:    Haskell2010
 
-executable test-entity-passage
-  main-is:             TestEntityPassage.hs
+executable test-entity-passage-parsing
+  main-is:             TestEntityPassageParsing.hs
   ghc-options:         -Wall
   build-depends:       base,
                        bytestring,
