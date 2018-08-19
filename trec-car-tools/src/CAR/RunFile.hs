@@ -161,11 +161,11 @@ parsePassageEntity docName =
 parseEntityPassageString :: T.Text -> (T.Text, T.Text)
 parseEntityPassageString docName = (T.pack a, b)
       where (a,b) =  case TR.matchRegex (TR.mkRegex "^([0-9a-f]+/)") (T.unpack docName) of
-                        Nothing -> trace "nothing" $ ("", docName)
-                        Just [] -> trace ("no matches in " <> (show docName)) $ ("", docName)
+                        Nothing -> ("", docName)
+                        Just [] -> ("", docName)
                         Just [ paraSlash ] ->
                                         let para = case T.unsnoc $ T.pack paraSlash of
-                                                    Just (para, _) -> trace ("justpara " <> show para) $ para
+                                                    Just (para, _) -> para
                                                     Nothing -> T.pack $ trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
                                             entity = T.pack $ drop (length paraSlash) (T.unpack docName)
                                         in (T.unpack para, entity)
