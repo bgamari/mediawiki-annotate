@@ -212,7 +212,7 @@ main = do
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
                 in case (loadEntityMaybe eid,loadParagraphMaybe pid) of
                    (Just e, Just p) -> Just (e, p)
-                   (Nothing, Just p) -> trace ("trecRunItemToEntryItemEntity can't load entity "<> show eid) $ Nothing
+--                    (Nothing, Just p) -> trace ("trecRunItemToEntryItemEntity can't load entity "<> show eid) $ Nothing
                    _ -> Nothing
 --                 in do entity <- loadEntityMaybe eid
 --                       para <- loadParagraphMaybe pid
