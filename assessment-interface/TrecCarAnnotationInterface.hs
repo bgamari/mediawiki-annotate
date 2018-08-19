@@ -105,7 +105,7 @@ readTrecRanking trecRunItemToEntryItem path = do
                            }
           )
         | entry <- contents
-        , Just item <- pure $ (\x -> traceShow (x, entry) x) $ trecRunItemToEntryItem $ TrecRun.documentName entry
+        , Just item <- pure $ trecRunItemToEntryItem $ TrecRun.documentName entry -- $ (\x -> traceShow (x, entry) x)
         ]
 
 trecResultUnionOfRankedItems :: forall item nubKey. (Eq nubKey, Hashable nubKey)
@@ -210,9 +210,13 @@ main = do
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
                 let CarRun.EntityAndPassage eid pid = CarRun.parsePassageEntity docName -- loadEntity . packPageId . T.unpack
-                in do entity <- loadEntityMaybe eid
-                      para <- loadParagraphMaybe pid
-                      return (entity, para)
+                in case (loadEntityMaybe eid,loadParagraphMaybe pid) of
+                   (Just e, Just p) -> Just (e, p)
+                   (Nothing, Just p) -> trace ("trecRunItemToEntryItemEntity can't load entity "<> show eid) $ Nothing
+                   _ -> Nothing
+--                 in do entity <- loadEntityMaybe eid
+--                       para <- loadParagraphMaybe pid
+--                       return (entity, para)
 
             getNubKeyEntity :: EntityParagraphRankingEntry -> (PageId, ParagraphId)
             getNubKeyEntity rankingEntry =
