@@ -5,6 +5,8 @@ module FileNameLookup where
 import Data.List
 import System.FilePath
 import CAR.Types
+import Network.URI
+
 
 data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              , outlineURL :: Stub -> FilePath
@@ -15,12 +17,16 @@ data FileNameLookup = FileNameLookup { outlinePathname :: Stub -> FilePath
                              , maybeEntityViewUrl :: SectionPath -> Maybe FilePath
                              }
 
+urlEncodeText :: String -> String
+urlEncodeText = escapeURIString isAllowedInURI
+
+
 fileNameLookupFactory :: (SectionPath -> Bool) -> (SectionPath -> Bool) -> FileNameLookup
 fileNameLookupFactory existResultsForSectionpath  existEntityResultsForSectionpath = FileNameLookup {..}
   where
     outlinePathname :: Stub -> FilePath
     outlinePathname (Stub {stubPageId=pageId}) =
-       unpackPageId pageId </> "index" <.> "html"
+       urlEncodeText (unpackPageId pageId) </> "index" <.> "html"
 
     outlineURL :: Stub -> FilePath
     outlineURL stub =
@@ -39,7 +45,7 @@ fileNameLookupFactory existResultsForSectionpath  existEntityResultsForSectionpa
 
     viewPathname ::  String -> SectionPath -> FilePath
     viewPathname suffix sectionPath@(SectionPath page headings) =
-        unpackPageId page </> sectionfilename <.> suffix <.> "html"
+        urlEncodeText (unpackPageId page) </> urlEncodeText sectionfilename <.> urlEncodeText suffix <.> "html"
         -- do not percent encode filename, we leave this to the browser
       where
         sectionfilename =
