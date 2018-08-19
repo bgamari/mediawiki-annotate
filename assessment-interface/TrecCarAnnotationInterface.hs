@@ -94,7 +94,7 @@ readTrecRanking :: (TrecRun.DocumentName -> Maybe item)
 readTrecRanking trecRunItemToEntryItem path = do
     fmap sortIt . toMap <$> TrecRun.readRunFile path
   where
-    sortIt = sortBy (comparing entryScore)
+    sortIt = sortBy (flip $ comparing entryScore)      -- todo use Ranking
     toMap contents =
         fmap DList.toList $
         HM.fromListWith (<>)
