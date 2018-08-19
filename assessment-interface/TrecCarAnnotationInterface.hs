@@ -206,7 +206,6 @@ main = do
 
 
     -- ========= view renderer Entity ==============
-
     trecResultMapEntity <-
         let trecRunItemToEntryItemEntity :: TrecRun.DocumentName -> Maybe (Entity, Paragraph)
             trecRunItemToEntryItemEntity docName =
@@ -220,7 +219,8 @@ main = do
                 let (entity, paragraph) = entryItem  rankingEntry
                 in (entityPageId entity, paraId paragraph)
 
-        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK
+            tr x = traceShow x x
+        in trecResultUnionOfRankedItems getNubKeyEntity optsTopK . tr
            <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
