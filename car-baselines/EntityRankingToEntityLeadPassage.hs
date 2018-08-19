@@ -71,7 +71,6 @@ main = do
     let entityPassageRun ::  [Run.PassageEntityRankingEntry]
         entityPassageRun =
                 mapMaybe (\r -> merge r $ rewrite $ filterFlags $ augmentLeadParagraph r) entityRun
---                 mapMaybe (\r -> merge r $ rewrite $ filterFlags $ augmentLeadParagraph r) entityRun
 
           where augmentLeadParagraph :: Run.PassageEntityRankingEntry -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
                 augmentLeadParagraph r
@@ -87,7 +86,7 @@ main = do
                                 Nothing -> trace ("unknown lead paragraph for entity.  "<>show r) $ Nothing
                                 otherwise -> paramaybe
 
-                filterFlags :: Maybe-augmentLeadParagraph -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
+                filterFlags :: Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId) -> Maybe (Run.PassageEntity, PageId, Maybe ParagraphId, Maybe ParagraphId)
                 filterFlags Nothing = Nothing
                 filterFlags (Just t@(Run.EntityOnly _, _, _, _)) =
                     case onlyWithPassage of
