@@ -136,28 +136,41 @@ parsePassageEntity docName =
 --       (Just _,  Nothing) -> throw $ ParseError "Passage but no entity" docName
       (Nothing, Nothing) -> throw $ ParseError "Neither a passage nor an entity" docName
   where
-    (psg,ent)
-      | T.null a  = throw $ ParseError "Invalid document name" docName
-      | T.null b  = ("", a)
-      | otherwise = (a,  b)
-      -- where (a,b) = T.breakOn "/" docName -- (a, T.drop 1 b)
-      where (a,b) = case TR.matchRegex (TR.mkRegex "[0-9a-f]40/") (T.unpack docName) of
-                        Nothing -> ("", docName)
-                        Just [ paraSlash ] ->
-                                        let para = case T.unsnoc $ T.pack paraSlash of
-                                                    Just (para, _) -> para
-                                                    Nothing -> trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
-                                            entity = T.pack $ drop (length paraSlash) (T.unpack docName)
-                                        in (para, entity)
-                        _ -> trace ("parsePassageEntity: Multiple para matches "<> (show docName)) $ ("", "")
-
-
+    (psg,ent) = parseEntityPassageString docName
     passage
       | T.null psg = Nothing
       | otherwise  = Just $ packParagraphId $ T.unpack psg
     entity
       | T.null ent = Nothing
       | otherwise  = Just $ packPageId $ T.unpack ent
+
+--       | T.null a  = ("", b) -- throw $ ParseError "Invalid document name" docName
+--       | T.null b  = ("", a)
+--       | otherwise = (a,  b)
+--       where (a, b) =
+      -- where (a,b) = T.breakOn "/" docName -- (a, T.drop 1 b)
+--       where (a,b) = case TR.matchRegex (TR.mkRegex "[0-9a-f]40/") (T.unpack docName) of
+--                         Nothing -> ("", docName)
+--                         Just [ paraSlash ] ->
+--                                         let para = case T.unsnoc $ T.pack paraSlash of
+--                                                     Just (para, _) -> para
+--                                                     Nothing -> trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
+--                                             entity = T.pack $ drop (length paraSlash) (T.unpack docName)
+--                                         in (para, entity)
+--                         _ -> trace ("parsePassageEntity: Multiple para matches "<> (show docName)) $ ("", "")
+parseEntityPassageString :: T.Text -> (T.Text, T.Text)
+parseEntityPassageString docName = (T.pack a, b)
+      where (a,b) =  case TR.matchRegex (TR.mkRegex "^([0-9a-f]+/)") (T.unpack docName) of
+                        Nothing -> trace "nothing" $ ("", docName)
+                        Just [] -> trace ("no matches in " <> (show docName)) $ ("", docName)
+                        Just [ paraSlash ] ->
+                                        let para = case T.unsnoc $ T.pack paraSlash of
+                                                    Just (para, _) -> trace ("justpara " <> show para) $ para
+                                                    Nothing -> T.pack $ trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
+                                            entity = T.pack $ drop (length paraSlash) (T.unpack docName)
+                                        in (T.unpack para, entity)
+                        xx -> trace ("parsePassageEntity: Multiple para matches "<> (show docName) <> " : "++ (show xx)) $ ("", T.pack "")
+
 
 fromCarRankingEntry :: (doc -> Run.DocumentName) -> RankingEntry' doc -> Run.RankingEntry
 fromCarRankingEntry construct r =
