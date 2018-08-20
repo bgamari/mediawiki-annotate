@@ -322,22 +322,61 @@ main = do
 
 
     BSL.writeFile "interface.json" $ Aeson.encode
-        $ AnnotationInterface { entityResults = fmap (map $ second paraId . entryItem) trecResultMapEntity
-                              , entityQRels   = fmap (map $ second paraId . entryItem) trecQrelsMapEntity
-                              , passageResults = fmap (map $ paraId . entryItem) trecResultMap
-                              , passageQRels   = fmap (map $ paraId . entryItem) trecQrelsMap
+        $ AnnotationInterface { entityResults = fmap (map $ convertE) trecResultMapEntity
+                              , entityQRels   = fmap (map $ convertE') trecQrelsMapEntity
+                              , passageResults = fmap (map $ convertP) trecResultMap
+                              , passageQRels   = fmap (map $ convertP') trecQrelsMap
                               }
+          where convertE :: RankingEntry (Entity, Paragraph) -> AnnotationRecordEntityPara
+                convertE entry =
+                   AnnotationRecordEntityPara { annotationEntity = fst $ entryItem entry
+                                              , annnotationSupportParaId = paraId $ snd $ entryItem entry
+                                              , annotationEntityMethodNames = entryMethodNames entry
+                                              }
+                convertE' :: RankingEntry (Entity, Paragraph) -> AnnotationRecordEntityPara
+                convertE' entry =
+                   AnnotationRecordEntityPara { annotationEntity = fst $ entryItem entry
+                                              , annnotationSupportParaId = paraId $ snd $ entryItem entry
+                                              , annotationEntityMethodNames = ["qrels"]
+                                              }
 
+                convertP :: RankingEntry Paragraph -> AnnotationRecordParagraph
+                convertP entry =
+                   AnnotationRecordParagraph { annotationParaId = paraId $ entryItem entry
+                                        , annotationParaMethodNames = entryMethodNames entry
+                                        }
+                convertP' :: RankingEntry Paragraph -> AnnotationRecordParagraph
+                convertP' entry =
+                   AnnotationRecordParagraph { annotationParaId = paraId $ entryItem entry
+                                        , annotationParaMethodNames = ["qrels"]
+                                        }
 
+--     BSL.writeFile "interface.json" $ Aeson.encode
+--         $ AnnotationInterface { entityResults = fmap (map $ second paraId . entryItem) trecResultMapEntity
+--                               , entityQRels   = fmap (map $ second paraId . entryItem) trecQrelsMapEntity
+--                               , passageResults = fmap (map $ paraId . entryItem) trecResultMap
+--                               , passageQRels   = fmap (map $ paraId . entryItem) trecQrelsMap
+--                               }
+
+data AnnotationRecordEntityPara =
+    AnnotationRecordEntityPara { annotationEntity :: Entity, annnotationSupportParaId :: ParagraphId, annotationEntityMethodNames :: [T.Text]}
+    deriving (Generic)
+data AnnotationRecordParagraph =
+    AnnotationRecordParagraph { annotationParaId :: ParagraphId, annotationParaMethodNames :: [T.Text]}
+    deriving (Generic)
 data AnnotationInterface =
-    AnnotationInterface { entityResults  :: HM.Lazy.HashMap TrecRun.QueryId [(Entity, ParagraphId)]
-                        , entityQRels    :: HM.Lazy.HashMap TrecRun.QueryId [(Entity, ParagraphId)]
-                        , passageResults :: HM.Lazy.HashMap TrecRun.QueryId [ParagraphId]
-                        , passageQRels   :: HM.Lazy.HashMap TrecRun.QueryId [ParagraphId]
+    AnnotationInterface { entityResults  :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordEntityPara]
+                        , entityQRels    :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordEntityPara]
+                        , passageResults :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordParagraph]
+                        , passageQRels   :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordParagraph]
                         }
     deriving (Generic)
 instance Aeson.FromJSON AnnotationInterface
 instance Aeson.ToJSON AnnotationInterface
+instance Aeson.FromJSON AnnotationRecordEntityPara
+instance Aeson.ToJSON AnnotationRecordEntityPara
+instance Aeson.FromJSON AnnotationRecordParagraph
+instance Aeson.ToJSON AnnotationRecordParagraph
 
     -- ======== get sectionpaths out of a stub ===============
 
