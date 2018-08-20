@@ -326,30 +326,46 @@ main = do
                               , entityQRels   = fmap (map $ convertE') trecQrelsMapEntity
                               , passageResults = fmap (map $ convertP) trecResultMap
                               , passageQRels   = fmap (map $ convertP') trecQrelsMap
+                              , runEntityStats = fmap convert trecResultMapEntity
+                              , runPassageStats = fmap convert trecResultMap
                               }
           where convertE :: RankingEntry (Entity, Paragraph) -> AnnotationRecordEntityPara
                 convertE entry =
-                   AnnotationRecordEntityPara { annotationEntity = fst $ entryItem entry
+                   AnnotationRecordEntityPara { annotationEntityId = entityPageId $ fst $ entryItem entry
+                                              , annotationEntityName = entityPageName $ fst $ entryItem entry
                                               , annnotationSupportParaId = paraId $ snd $ entryItem entry
                                               , annotationEntityMethodNames = entryMethodNames entry
                                               }
                 convertE' :: RankingEntry (Entity, Paragraph) -> AnnotationRecordEntityPara
                 convertE' entry =
-                   AnnotationRecordEntityPara { annotationEntity = fst $ entryItem entry
+                   AnnotationRecordEntityPara { annotationEntityId = entityPageId $ fst $ entryItem entry
+                                              , annotationEntityName = entityPageName $ fst $ entryItem entry
                                               , annnotationSupportParaId = paraId $ snd $ entryItem entry
                                               , annotationEntityMethodNames = ["qrels"]
                                               }
 
                 convertP :: RankingEntry Paragraph -> AnnotationRecordParagraph
                 convertP entry =
+
                    AnnotationRecordParagraph { annotationParaId = paraId $ entryItem entry
-                                        , annotationParaMethodNames = entryMethodNames entry
-                                        }
+                                             , annotationParaMethodNames = entryMethodNames entry
+                                             }
                 convertP' :: RankingEntry Paragraph -> AnnotationRecordParagraph
                 convertP' entry =
                    AnnotationRecordParagraph { annotationParaId = paraId $ entryItem entry
                                         , annotationParaMethodNames = ["qrels"]
                                         }
+
+                convert :: [RankingEntry x] -> [AnnotationRunStats]
+                convert entries =
+                     fmap conv
+                     $ HM.toList
+                     $ HM.fromListWith (+)
+                     $ [ (method, 1) | entry <- entries, method <- entryMethodNames entry]
+                       where conv (method, count) =
+                                AnnotationRunStats { annotationStatsMethodName = method
+                                                   , annotationStatsCount = count
+                                                   }
 
 --     BSL.writeFile "interface.json" $ Aeson.encode
 --         $ AnnotationInterface { entityResults = fmap (map $ second paraId . entryItem) trecResultMapEntity
@@ -359,16 +375,26 @@ main = do
 --                               }
 
 data AnnotationRecordEntityPara =
-    AnnotationRecordEntityPara { annotationEntity :: Entity, annnotationSupportParaId :: ParagraphId, annotationEntityMethodNames :: [T.Text]}
+    AnnotationRecordEntityPara { annotationEntityId :: PageId
+                               , annotationEntityName :: PageName
+                               , annnotationSupportParaId :: ParagraphId
+                               , annotationEntityMethodNames :: [T.Text]
+                               }
     deriving (Generic)
 data AnnotationRecordParagraph =
-    AnnotationRecordParagraph { annotationParaId :: ParagraphId, annotationParaMethodNames :: [T.Text]}
+    AnnotationRecordParagraph { annotationParaId :: ParagraphId
+                              , annotationParaMethodNames :: [T.Text]}
+    deriving (Generic)
+data AnnotationRunStats =
+    AnnotationRunStats { annotationStatsMethodName :: T.Text, annotationStatsCount :: Int}
     deriving (Generic)
 data AnnotationInterface =
     AnnotationInterface { entityResults  :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordEntityPara]
                         , entityQRels    :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordEntityPara]
                         , passageResults :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordParagraph]
                         , passageQRels   :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRecordParagraph]
+                        , runEntityStats :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRunStats]
+                        , runPassageStats :: HM.Lazy.HashMap TrecRun.QueryId [AnnotationRunStats]
                         }
     deriving (Generic)
 instance Aeson.FromJSON AnnotationInterface
@@ -377,6 +403,8 @@ instance Aeson.FromJSON AnnotationRecordEntityPara
 instance Aeson.ToJSON AnnotationRecordEntityPara
 instance Aeson.FromJSON AnnotationRecordParagraph
 instance Aeson.ToJSON AnnotationRecordParagraph
+instance Aeson.FromJSON AnnotationRunStats
+instance Aeson.ToJSON AnnotationRunStats
 
     -- ======== get sectionpaths out of a stub ===============
 
