@@ -14,8 +14,10 @@ module CAR.CarExports
     , IsRelevant(..)
     , Annotation(..)
     , EntityAnnotation(..)
+    , EntityPassageAnnotation(..)
     , toAnnotations
     , toEntityAnnotations
+    , toEntityPassageAnnotations
     ) where
 
 import Data.Maybe
@@ -92,6 +94,30 @@ toEntityAnnotations (Page { pageId, pageSkeleton = skeleton }) =
                       $ paraLinks paragraph
         in S.fromList
             $  [EntityAnnotation sectionPath entityId Relevant
+               | entityId <- entityIds
+               ]
+      where
+        sectionPath = SectionPath pageId (DList.toList parentIds)
+        badEntityId entityId = null $ unpackPageId entityId
+    go _parentIds (Image{})   = mempty
+    go _parentIds (List{})    = mempty
+    go _parentIds (Infobox{}) = mempty
+
+toEntityPassageAnnotations :: Page ->  S.Set (EntityPassageAnnotation IsRelevant)
+toEntityPassageAnnotations (Page { pageId, pageSkeleton = skeleton }) =
+    -- recurse into sections, recursively collect section path, emit one entity annotation per link
+    foldMap (go mempty) skeleton
+  where
+    go :: DList.DList HeadingId -> PageSkeleton -> S.Set (EntityPassageAnnotation IsRelevant)
+    go parentIds (Section _ sectionId children) =
+        let parentIds' = parentIds `DList.snoc` sectionId
+        in foldMap (go parentIds') children
+    go parentIds (Para paragraph@(Paragraph paraId _)) =
+        let entityIds = filter (not . badEntityId)
+                      $ fmap linkTargetId
+                      $ paraLinks paragraph
+        in S.fromList
+            $  [EntityPassageAnnotation sectionPath entityId paraId Relevant
                | entityId <- entityIds
                ]
       where

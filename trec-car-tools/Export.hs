@@ -66,7 +66,11 @@ options =
 
         , exportEntityAnnotations cutSectionPathTopLevel id
           <$> option str (long "entity-toplevel-qrel" <> metavar "OUTPUT" <> help "Export hierarchical qrel for entities")
-          
+
+        , exportEntityPassageAnnotations id resolveEntityPassageSubsumption
+          <$> option str (long "entity-psg-tree-qrel" <> metavar "OUTPUT" <> help "Export tree qrel for entities with support passages")
+
+
         , exportAllWithPrefix
           <$> option str (short 'o' <> long "output-prefix" <> metavar "PREFIX" <> help "Export all under prefix (backwards compatibility)")
         ]
@@ -111,8 +115,16 @@ resolveSubsumption annotations =
 
 resolveEntitySubsumption ::  [EntityAnnotation IsRelevant] -> [EntityAnnotation IsRelevant]
 resolveEntitySubsumption annotations =
-        [ (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) paraid rel)
-        | (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) paraid rel) <- annotations
+        [ (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) id rel)
+        | (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) id rel) <- annotations
+        , headingPrefix <- heads headings
+        ]
+  where heads xs = map reverse $ tails $ reverse xs
+
+resolveEntityPassageSubsumption ::  [EntityPassageAnnotation IsRelevant] -> [EntityPassageAnnotation IsRelevant]
+resolveEntityPassageSubsumption annotations =
+        [ (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) id id' rel)
+        | (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) id id' rel) <- annotations
         , headingPrefix <- heads headings
         ]
   where heads xs = map reverse $ tails $ reverse xs
@@ -133,6 +145,18 @@ exportEntityAnnotations cutSectionPath transform outPath _prov pagesToExport = d
           $ S.toList
           $ S.map cutAnnotation
           $ foldMap Exports.toEntityAnnotations pagesToExport
+    putStrLn "done"
+
+exportEntityPassageAnnotations :: (SectionPath -> SectionPath) -> ([EntityPassageAnnotation IsRelevant] -> [EntityPassageAnnotation IsRelevant]) -> FilePath -> Exporter
+exportEntityPassageAnnotations cutSectionPath transform outPath _prov pagesToExport = do
+    putStr "Writing section relevance annotations..."
+    let cutAnnotation (EntityPassageAnnotation sectionPath entityId paraId rel) =
+          EntityPassageAnnotation (cutSectionPath sectionPath) entityId paraId rel
+    writeEntityPassageQRel outPath
+          $ transform
+          $ S.toList
+          $ S.map cutAnnotation
+          $ foldMap Exports.toEntityPassageAnnotations pagesToExport
     putStrLn "done"
 
 
@@ -158,7 +182,7 @@ exportAllWithPrefix outpath prov pages= do
     exportEntityAnnotations id resolveEntitySubsumption (outpath <.> "tree.entity.qrels") prov pages
     exportEntityAnnotations cutSectionPathArticle id (outpath <.> "article.entity.qrels") prov pages
     exportEntityAnnotations cutSectionPathTopLevel id (outpath <.> "toplevel.entity.qrels") prov pages
-
+    exportEntityPassageAnnotations id resolveEntityPassageSubsumption (outpath <.> "tree.entitypsg.qrels") prov pages
 
 main :: IO ()
 main = do

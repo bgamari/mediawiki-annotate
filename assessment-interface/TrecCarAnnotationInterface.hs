@@ -61,6 +61,7 @@ data Opts = Opts { outlinesFile :: FilePath
                  , optsInterface :: Maybe FilePath
                  , optsTrueQrelFiles :: [FilePath]
                  , optsQrelFile :: FilePath
+                 , optsEntityQrelFile :: FilePath
                  , optsTrecPsgRunGlobs :: [FilePath]
                  , optsTrecEntityRunGlobs :: [FilePath]
                  }
@@ -143,11 +144,12 @@ opts =
     <*> option str (short 'd' <> long "destdir" <> help "destination directory for generated HTML" <> metavar "DIR")
     <*> switch (short 's' <> long "shuffle results")
     <*> optional (option auto (short 'k' <> long "top" <> help "max k assessments per ranking" <> metavar "INT" ))
-    <*> optional (option auto (short 'K' <> long "topPerRun" <> help "top k to take from each ranking" <> metavar "INT" ))
+    <*> optional (option auto (short 'K' <> long "top-per-run" <> help "top k to take from each ranking" <> metavar "INT" ))
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
     <*> optional (option str (short 'i' <> long "interface" <> help "regenerate old interface"))
     <*> many (option str (short 'Q' <> long "show-qrel" <> help "qrel file to show annotations from"))
     <*> option str (short 'q' <> long "qrels" <> help "trec compatible qrels file" <> metavar "QRELS")
+    <*> option str (long "entity-qrels" <> help "trec compatible entity qrels file" <> metavar "QRELS")
     <*> many (option str (short 'p' <> long "psg-runs" <> help "trec compatible passage run file(s)" <> metavar "Trec-psg-run-FILE(s)"))
     <*> many (option str (short 'e' <> long "entity-runs" <> help "trec compatible entity run file(s)" <> metavar "Trec-entity-run-FILE(s)"))
 
@@ -203,9 +205,22 @@ main = do
                 entry1 {entryMethodNames = entryMethodNames entry1 ++ entryMethodNames entry2 }
         in trecResultUnionOfRankedItems getNubKeyPara mergeNubbedPara topKPara
            <$> mapM (readTrecRanking trecRunItemToEntryItemPara) trecPsgRunFiles
+
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
         in trecQrelItems trecRunItemToEntryItemMaybePara optsQrelFile
+
+    trecQrelsMapEntity <-
+        let trecRunItemToEntryItemMaybeEntity :: TrecRun.DocumentName -> Maybe (Entity,Paragraph)
+            trecRunItemToEntryItemMaybeEntity docName =
+                case CarRun.parsePassageEntity docName of
+                    CarRun.EntityOnly _ -> trace ("trecQrelsMapEntity: only entity in Qrels") $ Nothing
+                    CarRun.EntityAndPassage entityId passageId ->
+                        trace ("trecQrelsMapEntity: found entity "<> show entityId <> " passage "<> show passageId)
+                        $ case Just (loadEntityMaybe entityId, loadParagraphMaybe passageId) of
+                               Just (Just a, Just b) -> Just (a, b)
+                               _ -> Nothing
+        in trecQrelItems trecRunItemToEntryItemMaybeEntity optsEntityQrelFile
 
     -- print trecResultMap
 
@@ -246,8 +261,6 @@ main = do
            <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
-    let trecQrelsMapEntity = mempty
---     putStrLn $ "trecResultMapEntity = " <> show trecResultMapEntity
 
     let lookupResultEntity :: SectionPath -> Maybe [TrecCarRenderHtml.EntityParagraphRankingEntry]
         lookupResultEntity sectionPath =

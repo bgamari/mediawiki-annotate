@@ -6,7 +6,9 @@ module CAR.QRelFile
   , GradedRelevance(..)
   , Annotation (..)
   , EntityAnnotation (..)
+  , EntityPassageAnnotation (..)
   , readEntityQRel, writeEntityQRel
+  , readEntityPassageQRel, writeEntityPassageQRel
   , readParagraphQRel, writeParagraphQRel
   )  where
 
@@ -15,7 +17,7 @@ import qualified Data.Text as T
 
 import CAR.Types
 import SimplIR.Format.QRel -- hiding (IsRelevant(..))
-
+import CAR.RunFile (parseEntityPassageString, writeEntityPassageString)
 -- Ground truth
 -- data Relevance = Relevant | NonRelevant
 --                deriving (Show, Eq, Ord)
@@ -35,6 +37,9 @@ data Annotation rel = Annotation SectionPath ParagraphId rel
 data EntityAnnotation rel = EntityAnnotation SectionPath PageId rel
                 deriving (Show, Eq, Ord)
 
+data EntityPassageAnnotation rel = EntityPassageAnnotation SectionPath PageId ParagraphId rel
+                deriving (Show, Eq, Ord)
+
 readEntityQRel :: RelevanceScale rel => FilePath -> IO [EntityAnnotation rel]
 readEntityQRel path = map to <$> readQRel path
   where
@@ -48,6 +53,21 @@ writeEntityQRel path = writeQRel path . map to
   where
     to (EntityAnnotation qid doc rel) =
         Entry (T.pack $ escapeSectionPath qid) (T.pack $ unpackPageId doc) rel
+
+readEntityPassageQRel :: RelevanceScale rel => FilePath -> IO [EntityPassageAnnotation rel]
+readEntityPassageQRel path = map to <$> readQRel path
+  where
+    to (Entry qid docName rel)
+      | Just spath <- parseSectionPath qid =
+        EntityPassageAnnotation spath (packPageId $ T.unpack ent) (packParagraphId $ T.unpack psg) rel
+      | otherwise = error $ "readEntityQRel: Couldn't parse section path: " <> show qid
+        where (ent, psg) = parseEntityPassageString docName
+
+writeEntityPassageQRel :: RelevanceScale rel => FilePath -> [EntityPassageAnnotation rel] -> IO ()
+writeEntityPassageQRel path = writeQRel path . map to
+  where
+    to (EntityPassageAnnotation qid ent psg rel) =
+        Entry (T.pack $ escapeSectionPath qid) (writeEntityPassageString (T.pack $ unpackParagraphId psg, T.pack $ unpackPageId ent)) rel
 
 readParagraphQRel :: RelevanceScale rel => FilePath -> IO [Annotation rel]
 readParagraphQRel path = map to <$> readQRel path

@@ -21,6 +21,8 @@ module CAR.RunFile
     , carEntity, carPassage
     , readEntityParagraphRun
     , writeEntityParagraphRun
+    , parseEntityPassageString
+    , writeEntityPassageString
       -- *** Lenses
     , queryId
     , document
@@ -144,20 +146,6 @@ parsePassageEntity docName =
       | T.null ent = Nothing
       | otherwise  = Just $ packPageId $ T.unpack ent
 
---       | T.null a  = ("", b) -- throw $ ParseError "Invalid document name" docName
---       | T.null b  = ("", a)
---       | otherwise = (a,  b)
---       where (a, b) =
-      -- where (a,b) = T.breakOn "/" docName -- (a, T.drop 1 b)
---       where (a,b) = case TR.matchRegex (TR.mkRegex "[0-9a-f]40/") (T.unpack docName) of
---                         Nothing -> ("", docName)
---                         Just [ paraSlash ] ->
---                                         let para = case T.unsnoc $ T.pack paraSlash of
---                                                     Just (para, _) -> para
---                                                     Nothing -> trace ("parsePassageEntity: Issues with dropping slash of paraSlash " <> (show paraSlash)) $ ""
---                                             entity = T.pack $ drop (length paraSlash) (T.unpack docName)
---                                         in (para, entity)
---                         _ -> trace ("parsePassageEntity: Multiple para matches "<> (show docName)) $ ("", "")
 parseEntityPassageString :: T.Text -> (T.Text, T.Text)
 parseEntityPassageString docName = (T.pack a, b)
       where (a,b) =  case TR.matchRegex (TR.mkRegex "^([0-9a-f]+/)") (T.unpack docName) of
@@ -170,6 +158,10 @@ parseEntityPassageString docName = (T.pack a, b)
                                             entity = T.pack $ drop (length paraSlash) (T.unpack docName)
                                         in (T.unpack para, entity)
                         xx -> trace ("parsePassageEntity: Multiple para matches "<> (show docName) <> " : "++ (show xx)) $ ("", T.pack "")
+
+writeEntityPassageString :: (T.Text, T.Text) -> T.Text
+writeEntityPassageString ("", ent) = ent
+writeEntityPassageString (psg, ent) = psg <> "/" <> ent
 
 
 fromCarRankingEntry :: (doc -> Run.DocumentName) -> RankingEntry' doc -> Run.RankingEntry
