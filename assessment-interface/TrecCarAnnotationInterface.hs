@@ -55,7 +55,8 @@ data Opts = Opts { outlinesFile :: FilePath
                  , entityFile :: FilePath
                  , optsDest :: FilePath
                  , optsShuffle :: Bool
-                 , optsTopK :: Int
+                 , optsTopK :: Maybe Int
+                 , optsTopKPerRun :: Maybe Int
                  , optsOutlineId :: Maybe String
                  , optsInterface :: Maybe FilePath
                  , optsTrueQrelFiles :: [FilePath]
@@ -141,7 +142,8 @@ opts =
     <*> argument str (help "entity collection file" <> metavar "ArticleCbor")
     <*> option str (short 'd' <> long "destdir" <> help "destination directory for generated HTML" <> metavar "DIR")
     <*> switch (short 's' <> long "shuffle results")
-    <*> option auto (short 'k' <> long "top" <> help "top k to take from each ranking" <> metavar "INT" <> value 10)
+    <*> optional (option auto (short 'k' <> long "top" <> help "max k assessments per ranking" <> metavar "INT" ))
+    <*> optional (option auto (short 'K' <> long "topPerRun" <> help "top k to take from each ranking" <> metavar "INT" ))
     <*> optional (option str (short 'O' <> long "outlineid" <> help "id of outline for which HTML should be generated" <> metavar "STR"))
     <*> optional (option str (short 'i' <> long "interface" <> help "regenerate old interface"))
     <*> many (option str (short 'Q' <> long "show-qrel" <> help "qrel file to show annotations from"))
@@ -156,6 +158,13 @@ main = do
     Opts{..} <- execParser $ info (helper <*> opts) mempty
     trecPsgRunFiles <- concat <$> mapM glob optsTrecPsgRunGlobs
     trecEntityRunFiles <- concat <$> mapM glob optsTrecEntityRunGlobs
+    let topKPara :: Int
+        topKEntity :: Int
+        (topKPara, topKEntity) = case (optsTopK, optsTopKPerRun) of
+                                    (Just k, _) -> (k, k)
+                                    (Nothing, Just k) -> ( k * (length $ trecPsgRunFiles)
+                                                         , k * (length $ trecEntityRunFiles))
+                                    _ -> (10, 10)
 
     -- ======== basic loading ===========
     interface <- flip traverse optsInterface $ \fname -> do
@@ -192,7 +201,7 @@ main = do
             mergeNubbedPara :: RankingEntry Paragraph -> RankingEntry Paragraph -> RankingEntry Paragraph
             mergeNubbedPara entry1 entry2 =
                 entry1 {entryMethodNames = entryMethodNames entry1 ++ entryMethodNames entry2 }
-        in trecResultUnionOfRankedItems getNubKeyPara mergeNubbedPara optsTopK
+        in trecResultUnionOfRankedItems getNubKeyPara mergeNubbedPara topKPara
            <$> mapM (readTrecRanking trecRunItemToEntryItemPara) trecPsgRunFiles
     trecQrelsMap <-
         let trecRunItemToEntryItemMaybePara = loadParagraphMaybe . packParagraphId . T.unpack
@@ -233,7 +242,7 @@ main = do
             mergeNubbedEntity entry1 entry2 =
                 entry1 {entryMethodNames = entryMethodNames entry1 ++ entryMethodNames entry2 }
 
-        in trecResultUnionOfRankedItems getNubKeyEntity mergeNubbedEntity optsTopK
+        in trecResultUnionOfRankedItems getNubKeyEntity mergeNubbedEntity topKEntity
            <$> mapM (readTrecRanking trecRunItemToEntryItemEntity) trecEntityRunFiles
       :: IO (HM.Lazy.HashMap TrecRun.QueryId [RankingEntry (Entity, Paragraph)])
 
