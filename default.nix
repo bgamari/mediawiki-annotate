@@ -38,6 +38,7 @@ let
         wordnet-export       = nixpkgs.callPackage (import ./wordnet-export) { haskellPackages = self; };
         multilang-car        = self.callCabal2nix "multilang-car" (localDir ./multilang-car) {};
         tqa-import           = self.callCabal2nix "tqa-import" ./tqa-import {};
+        trec-news            = self.callCabal2nix "trec-news" ./trec-news {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
       };

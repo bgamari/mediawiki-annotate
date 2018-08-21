@@ -19,6 +19,7 @@ packages:
     vendor/*
     benchquality/
     tqa-import/
+    trec-news/
     epfl-section-recommendation/
 
 package mediawiki-parser
