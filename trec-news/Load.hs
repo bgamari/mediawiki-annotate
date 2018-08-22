@@ -23,9 +23,6 @@ opts =
 main :: IO ()
 main = do
     (queryFile, runFile, outFile) <- execParser $ info (helper <*> opts) mempty
-    let queryFile =  "/home/ben/trec-car/data/wapo/newsir18-entity-ranking-topics.xml"
-        runFile = ""
-        outFile = ""
 
     topics <- TREC.parseMany TREC.newsQuery <$> TLIO.readFile queryFile
     let knownEntities = M.fromList [ (TREC.entityLink entity, TREC.entityId entity)
