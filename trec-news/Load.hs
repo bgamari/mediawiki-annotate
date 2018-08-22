@@ -25,15 +25,25 @@ main = do
     (queryFile, runFile, outFile) <- execParser $ info (helper <*> opts) mempty
 
     topics <- TREC.parseMany TREC.newsQuery <$> TLIO.readFile queryFile
-    let knownEntities = M.fromList [ (TREC.entityLink entity, TREC.entityId entity)
-                                   | topic <- topics
-                                   , entity <- TREC.topicEntities topic
-                                   ]
+    let knownEntities :: M.Map Run.QueryId (M.Map Run.DocumentName T.Text)
+        knownEntities =
+            M.unionsWith (<>)
+            [ M.singleton (T.pack $ show $ TREC.topicNumber topic)
+              $ M.fromList
+              [ (TREC.entityLink entity, TREC.entityId entity)
+              | entity <- TREC.topicEntities topic
+              ]
+            | topic <- topics
+            ]
 
     rankings <- partitionRankings <$> Run.readRunFile runFile
     let rankings' :: M.Map (Run.QueryId, Run.MethodName) (Ranking Run.Score T.Text)
-        rankings' = fmap (Ranking.mapMaybe isKnownDoc) rankings
-        isKnownDoc = (`M.lookup` knownEntities)
+        rankings' = M.mapWithKey (\(qid,_) ->
+                                    let Just knownQueryEntities = qid `M.lookup` knownEntities
+                                        isKnownDoc :: Run.DocumentName -> Maybe T.Text
+                                        isKnownDoc = (`M.lookup` knownQueryEntities)
+                                    in Ranking.mapMaybe isKnownDoc) rankings
+
     Run.writeRunFile outFile $ combineRankings rankings'
 
 partitionRankings :: [Run.RankingEntry]
