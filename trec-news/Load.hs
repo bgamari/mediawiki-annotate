@@ -5,6 +5,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Text.Lazy.IO as TLIO
 import qualified Data.Text as T
+import Data.Foldable
 
 import Options.Applicative as Opts
 
@@ -38,11 +39,16 @@ main = do
 
     rankings <- partitionRankings <$> Run.readRunFile runFile
     let rankings' :: M.Map (Run.QueryId, Run.MethodName) (Ranking Run.Score T.Text)
-        rankings' = M.mapWithKey (\(qid,_) ->
+        rankings' = M.mapWithKey (\(qid,_) ranking ->
                                     let Just knownQueryEntities = qid `M.lookup` knownEntities
                                         isKnownDoc :: Run.DocumentName -> Maybe T.Text
                                         isKnownDoc = (`M.lookup` knownQueryEntities)
-                                    in Ranking.mapMaybe isKnownDoc) rankings
+                                        ranking' = Ranking.mapMaybe isKnownDoc ranking
+                                        notMentioned = M.keysSet knownQueryEntities `S.difference` S.fromList (toList ranking)
+                                    in Ranking.fromList $ Ranking.toSortedList ranking'
+                                         <> [(0, ent) | ent <- S.toList notMentioned]
+                                 )
+                    rankings
 
     Run.writeRunFile outFile $ combineRankings rankings'
 
