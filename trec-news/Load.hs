@@ -44,7 +44,7 @@ main = do
                                         isKnownDoc :: Run.DocumentName -> Maybe T.Text
                                         isKnownDoc = (`M.lookup` knownQueryEntities)
                                         ranking' = Ranking.mapMaybe isKnownDoc ranking
-                                        notMentioned = M.keysSet knownQueryEntities `S.difference` S.fromList (toList ranking)
+                                        notMentioned = S.fromList (M.elems knownQueryEntities) `S.difference` S.fromList (toList ranking)
                                     in Ranking.fromList $ Ranking.toSortedList ranking'
                                          <> [(0, ent) | ent <- S.toList notMentioned]
                                  )
