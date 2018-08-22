@@ -35,14 +35,14 @@ main = do
     let (errors', queries') = partitionEithers
             [ case HM.lookup (topicUrl topic) articleMap of
                 Just article ->
-                    let metadata = mentionMetadata $ map entityId (topicEntities topic)
-                    in Right $ (queryToPage article) { pageMetadata = metadata }
-                Nothing -> Left (topicNumber topic, topicUrl topic)
+                    Right $ queryToPage topic article
+                Nothing ->
+                    Left (topicNumber topic, topicUrl topic)
             | topic <- topics
             ]
 
     print errors'
-    writeCarFile "queries.cbor" invalidProvenance queries'
+    writeCarFile "queries-section.cbor" invalidProvenance queries'
 
 readArticles :: FilePath -> IO [Either String Article]
 readArticles articlePath = do
@@ -52,24 +52,37 @@ readArticles articlePath = do
     print $ length xs
     return xs
 
-mentionMetadata :: [T.Text] -> PageMetadata
-mentionMetadata entities =
-     setMetadata _InlinkIds (map (packPageId . T.unpack) entities) emptyPageMetadata
+mentionMetadata :: Topic -> PageMetadata
+mentionMetadata topic =
+     setMetadata
+       _InlinkIds
+       (map (packPageId . T.unpack . entityLink) (topicEntities topic))
+       emptyPageMetadata
 
-queryToPage :: Article -> CAR.Page
-queryToPage a =
-    CAR.Page { pageName = packPageName $ T.unpack $ getArticleId $ articleId a
-             , pageId = packPageId $ T.unpack $ articleUrl a
-             , pageType = ArticlePage
-             , pageMetadata = emptyPageMetadata
+queryToPage :: Topic -> Article -> CAR.Page
+queryToPage topic a =
+    CAR.Page { pageName     = mkTitle $ mapMaybe toTitle (articleContents a)
+             , pageId       = packPageId $ show $ topicNumber topic
+             , pageType     = ArticlePage
+             , pageMetadata = mentionMetadata topic
              , pageSkeleton = mapMaybe toSkel (articleContents a)
              }
 
   where
+    toTitle (Wapo.Title x) = Just $ packPageName $ T.unpack x
+    toTitle _ = Nothing
+
     toSkel (Wapo.Title x) = Just $ mkPara x
     toSkel (Wapo.SanitizedParagraph x) = Just $ mkPara x
-    toSkel (Wapo.SanitizedSubheading x) = Just $ mkPara x
+    toSkel (Wapo.SanitizedSubheading x) = Just $ mkSection x -- mkPara x
     toSkel _ = Nothing
 
+    mkTitle (x:_) = x
+    mkTitle [] = packPageName "-"
+
     mkPara x = CAR.Para $ CAR.Paragraph paraId [CAR.ParaText x]
+
+    mkSection :: T.Text -> CAR.PageSkeleton
+    mkSection x = CAR.Section (CAR.SectionHeading x) (sectionHeadingToId (CAR.SectionHeading x) ) [] 
+
     paraId = packParagraphId "deadbeef"
