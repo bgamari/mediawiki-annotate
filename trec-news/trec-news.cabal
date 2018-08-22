@@ -25,3 +25,19 @@ executable trec-news
                        trec-car-tools,
                        simplir-trec
   default-language:    Haskell2010
+
+executable trec-news-load
+  main-is:             Load.hs
+  other-modules:       WapoCorpus
+  other-extensions:    OverloadedStrings
+  build-depends:       base >=4.11 && <4.12,
+                       deepseq >= 1.4,
+                       text >=1.2 && <1.3,
+                       aeson >=1.3 && <1.5,
+                       dlist,
+                       containers,
+                       optparse-applicative >= 0.14,
+                       trec-car-tools,
+                       simplir,
+                       simplir-trec
+  default-language:    Haskell2010
