@@ -54,12 +54,12 @@ entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMayb
 
         H.div ! HA.class_ "overview-wide" ! HA.class_ "overview-entities" $ do
             H.h1 "Entities with Passages"
-            --H.ol $ mapM_ renderHtml sprRanking  -- todo urgent sort by entity
+
 
 
             case sprTruthsMaybe of
                 Just sprTruths -> do
-                    let mixed = traceShow sprTruths $ nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
+                    let mixed = traceShow (sprQueryId, sprTruths) $ nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
                                $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
                 Nothing -> do
