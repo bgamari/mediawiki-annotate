@@ -59,7 +59,7 @@ entityPassageRankingToHtml spr@SectionPathWithName {..} sprRanking sprTruthsMayb
 
             case sprTruthsMaybe of
                 Just sprTruths -> do
-                    let mixed = nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
+                    let mixed = traceShow sprTruths $ nubBy ((==) `on` (toId . entryItem)) $ sortBy (compare `on` (toId . entryItem))
                                $ (sprRanking ++ sprTruths)
                     H.ol $ mapM_ renderHtml mixed
                 Nothing -> do
