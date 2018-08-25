@@ -9,5 +9,6 @@ in stdenv.mkDerivation {
   buildInputs = [
     haskell.compiler.ghc843 binutils-unwrapped
     zlib icu icu.out expat lzma trec-eval kyotocabinet
+    postgresql
   ];
 }

@@ -41,6 +41,7 @@ import TrainAndStore
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
+import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace.Normalise
 
 import qualified CAR.RunFile as CAR.RunFile
@@ -191,6 +192,8 @@ main = do
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
 
+    F.SomeFeatureSpace (entFSpace :: F.FeatureSpace EntityFeature allEntFeats) <- pure entSomeFSpace
+    F.SomeFeatureSpace (edgeFSpace :: F.FeatureSpace EdgeFeature allEdgeFeats) <- pure edgeSomeFSpace
 
     queries' <-
         case querySrc of
@@ -224,9 +227,9 @@ main = do
     case modelSource of
       ModelFromFile _file -> error $ "SupervisedGridRun Does not support  loading models from file"
       TrainModel modelFile -> do
-          let docFeatures = makeFeatures collapsedEntityRun
+          let docFeatures = makeFeatures entFSpace collapsedEntityRun
 
-              allData :: TrainData EntityFeature
+              allData :: TrainData EntityFeature allEntFeats
               allData = augmentWithQrels qrel docFeatures Relevant
 
               metric = avgMetricQrel qrel
@@ -237,7 +240,7 @@ main = do
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: Show f => TrainData f -> [String]
+          let displayTrainData :: Show f => TrainData f s -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elem
                 | (k,list) <- M.toList trainData
@@ -263,17 +266,20 @@ main = do
 --                     JustRecip -> onlyRR
 
 
-makeFeatures :: M.Map QueryId [MultiRankingEntry PageId GridRun] -> M.Map (QueryId, QRel.DocumentName) EntityFeatureVec
-makeFeatures collapsedEntityRun =
+makeFeatures :: forall allEntFeats. ()
+             => F.FeatureSpace EntityFeature allEntFeats
+             -> M.Map QueryId [MultiRankingEntry PageId GridRun]
+             -> M.Map (QueryId, QRel.DocumentName) (EntityFeatureVec allEntFeats)
+makeFeatures entFSpace collapsedEntityRun =
     let
-        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) EntityFeatureVec
+        docFeatures''' :: M.Map (QueryId, QRel.DocumentName) (EntityFeatureVec allEntFeats)
         docFeatures''' = M.fromList
                     $ withStrategy (parBuffer 200 $ evalTuple2 r0 rwhnf)
                     [ ((query, T.pack $ unpackPageId pid), features)
                     | (query, entityRun) <- M.toList collapsedEntityRun
                     , entityRankEntry <- entityRun
                     , let pid = multiRankingEntryGetDocumentName entityRankEntry
-                    , let features =  makeEntFeatVector (entityScoreVecFromMultiRankings entityRankEntry)
+                    , let features =  makeEntFeatVector entFSpace (entityScoreVecFromMultiRankings entityRankEntry)
                     ]
 
 

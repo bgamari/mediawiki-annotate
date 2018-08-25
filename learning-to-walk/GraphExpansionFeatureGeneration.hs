@@ -28,11 +28,13 @@ import System.Random
 import GHC.Generics
 import GHC.Stack
 
+import qualified Data.Set as S
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
+import qualified Data.Vector.Indexed as VI
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Generic as VG
 import qualified Text.PrettyPrint.Leijen.Text as PP
@@ -50,7 +52,9 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
+import GridFeatures
 
+import EdgeDocCorpus
 import GraphExpansion
 import DenseMapping
 import PageRank
@@ -58,7 +62,8 @@ import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
---import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
+import SimplIR.FeatureSpace (FeatureSpace, FeatureVec)
+import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace.Normalise
 import SimplIR.Intern
 
@@ -194,6 +199,12 @@ opts =
 
 
 
+bm25MethodName :: CarRun.MethodName
+bm25MethodName = CarRun.MethodName "BM25"
+qlMethodName :: CarRun.MethodName
+qlMethodName = CarRun.MethodName "QL"
+
+
 
 -- --------------------------------- Query Doc ------------------------------------------------------
 
@@ -257,6 +268,10 @@ main = do
       , miniBatchParamsMaybe  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
+
+    F.SomeFeatureSpace (entFSpace :: F.FeatureSpace EntityFeature allEntFeats) <- pure entSomeFSpace
+    F.SomeFeatureSpace (edgeFSpace :: F.FeatureSpace EdgeFeature allEdgeFeats) <- pure edgeSomeFSpace
+    F.SomeFeatureSpace (combinedFSpace :: F.FeatureSpace CombinedFeature allCombinedFeats) <- pure combinedSomeFSpace
 
     let entityRunFiles  = [ (g, r) | (g, Entity, r) <- gridRunFiles]
         edgedocRunFiles = [ (g, r) | (g, Edge, r) <- gridRunFiles]
@@ -375,8 +390,9 @@ main = do
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
     -- save predicted node ranking as run-file
+    case modelSource of
 
-    let   graphWalkRanking :: QueryId -> WeightVec EdgeFeature -> _ -> M.Map QueryId (HM.HashMap PageId Double) ->  [Eigenvector PageId Double]
+    let   graphWalkRanking :: QueryId -> WeightVec EdgeFeature s -> _ -> M.Map QueryId (HM.HashMap PageId Double) ->  [Eigenvector PageId Double]
           graphWalkRanking query params' edgeFSpace' nodeDistr
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
                  | otherwise =
@@ -395,12 +411,12 @@ main = do
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query
 
-                  graph :: Graph PageId EdgeFeatureVec
+                  graph :: Graph PageId (EdgeFeatureVec edgeFeatSubset)
                   graph =  fmap (filterExpSettings edgeFSpace')
                          $ generateEdgeFeatureGraph query candidates
 
 
-                  normalizer :: Normalisation _ Double
+                  normalizer :: Normalisation _ s Double
                   normalizer = zNormalizer $ Foldable.toList graph
 
 
@@ -409,7 +425,7 @@ main = do
                   -- for debugging...
                 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params feats))) graph
                     where
-                      normFeats :: EdgeFeatureVec -> EdgeFeatureVec
+                      normFeats :: EdgeFeatureVec s -> EdgeFeatureVec s
                       normFeats fv = normFeatures normalizer fv
                   walkIters :: [Eigenvector PageId Double]
                   walkIters = case graphWalkModel of
@@ -661,11 +677,9 @@ main = do
 
           let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
               nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator pagesLookup model collapsedEntityRun collapsedEdgedocRun
-
-          let edgeFSpace' = F.mkFeatureSpace [ f'
-                                             | f <- F.featureNames $ modelFeaturesFromModel
-                                             , Right f' <- pure f
-                                             ]
+          
+          F.SomeFeatureSpace (edgeFSpace' :: F.FeatureSpace EdgeFeature edgeFeatsSubset) <-
+              pure $ F.mkFeatureSpace $ S.fromList [ f | Right f <- F.featureNames $ modelFeatures model ]
 
               params' :: WeightVec EdgeFeature
               params' = WeightVec $ F.projectFeatureVec edgeFSpace'
@@ -694,12 +708,12 @@ main = do
       ModelFromFile modelFile -> do
           Just model <-  trace "loading model" $ Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
-          let augmentNoQrels     :: forall docId queryId f.
+          let augmentNoQrels     :: forall docId queryId f s.
                                     (Ord queryId, Ord docId)
-                                 => M.Map (queryId, docId) (F.FeatureVec f Double)
-                                 -> M.Map queryId [(docId, F.FeatureVec f Double, IsRelevant)]
+                                 => M.Map (queryId, docId) (FeatureVec f s Double)
+                                 -> M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
               augmentNoQrels docFeatures =
-                    let franking :: M.Map queryId [(docId, F.FeatureVec f Double, IsRelevant)]
+                    let franking :: M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
                         franking = M.fromListWith (++)
                                    [ (qid, [(doc, features, Relevant)])
                                    | ((qid, doc), features) <- M.assocs docFeatures
@@ -710,7 +724,7 @@ main = do
           let docFeatures = makeStackedFeatures' candidateGraphGenerator pagesLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-          let allData :: TrainData CombinedFeature
+          let allData :: TrainData CombinedFeature _
               allData = augmentWithQrels qrel docFeatures Relevant
 
 --               !metric = avgMetricQrel qrel
@@ -736,19 +750,19 @@ main = do
 
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-          let allData :: TrainData CombinedFeature
+          let allData :: TrainData CombinedFeature _
               allData = augmentWithQrels qrel docFeatures Relevant
 
               !metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
-          putStrLn $ "Feature dimension: "++show (F.featureDimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
+          putStrLn $ "Feature dimension: "++show (F.dimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
           putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
 
-          let displayTrainData :: Show f => TrainData f -> [String]
+          let displayTrainData :: Show f => TrainData f s -> [String]
               displayTrainData trainData =
                 [ show k ++ " -> "++ show elm
                 | (k,list) <- M.toList trainData
@@ -861,8 +875,8 @@ filterFeaturesByExperimentSetting settings fname =
 
 
 dropUnjudged :: Ord q
-             => M.Map q [(QRel.DocumentName, F.FeatureVec f Double, Maybe IsRelevant)]
-             -> M.Map q [(QRel.DocumentName, F.FeatureVec f Double, IsRelevant)]
+             => M.Map q [(QRel.DocumentName, FeatureVec f s Double, Maybe IsRelevant)]
+             -> M.Map q [(QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
 dropUnjudged featureMap =
     M.filter (not . null)   -- drop entries with empty lists
     $ M.map (mapMaybe dropUnjudged') featureMap
@@ -884,11 +898,12 @@ logistic t =
 
 -- | Compute a dot product between a feature and weight vector, ensuring
 -- positivity.
-posifyDot :: PageRankExperimentSettings -> PosifyEdgeWeights
-          -> Normalisation EdgeFeature Double
-          -> WeightVec EdgeFeature  -- ^ parameter vector
-          -> [EdgeFeatureVec] -- ^ all features
-          -> EdgeFeatureVec
+posifyDot :: forall s.
+             PageRankExperimentSettings -> PosifyEdgeWeights
+          -> Normalisation EdgeFeature s Double
+          -> WeightVec EdgeFeature s  -- ^ parameter vector
+          -> [EdgeFeatureVec s] -- ^ all features
+          -> EdgeFeatureVec s
           -> Double
 posifyDot expSettings posifyOpt normalizer params' allFeatures =
     \feats ->
@@ -912,7 +927,7 @@ posifyDot expSettings posifyOpt normalizer params' allFeatures =
   where
     !minimumVal = minimum $ fmap (\feats -> params' `score` feats) allFeatures
 
-    denormWeights' :: WeightVec EdgeFeature
+    denormWeights' :: WeightVec EdgeFeature s
     denormWeights' =
         WeightVec $ denormWeights normalizer (getWeightVec params')
 

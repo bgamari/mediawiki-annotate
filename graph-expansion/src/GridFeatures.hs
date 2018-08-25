@@ -23,6 +23,8 @@
 
 module GridFeatures where
 
+import qualified Data.Map as M
+import Data.Maybe
 import Control.DeepSeq
 import Options.Applicative
 import Data.Aeson
@@ -36,7 +38,7 @@ import CAR.Types hiding (Entity)
 
 import SimplIR.LearningToRank
 import qualified SimplIR.FeatureSpace as F
-import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
+import SimplIR.FeatureSpace (FeatureSpace, FeatureVec, featureNames, mkFeatureSpace)
 
 import qualified CAR.RunFile as CAR.RunFile
 import MultiTrecRunFile
@@ -152,25 +154,25 @@ data EntityOrEdge = Entity | Edge
 
 type CombinedFeature = Either EntityFeature EdgeFeature
 
-allEntityFeatures :: [EntityFeature]
-allEntityFeatures =
+allEntityFeatures :: S.Set EntityFeature
+allEntityFeatures = S.fromList $
     (EntRetrievalFeature <$> allEntityRunsF <*> allRunFeatures)
     <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
 
 
-allEdgeFeatures :: [EdgeFeature]
-allEdgeFeatures =
+allEdgeFeatures :: S.Set EdgeFeature
+allEdgeFeatures = S.fromList $
     (EdgeRetrievalFeature <$> allSources <*> allEdgeRunsF <*> allRunFeatures)
     <> ([EdgeDocKL, EdgeCount] <*>  allSources)
 
-entFSpace :: FeatureSpace EntityFeature
-entFSpace = mkFeatureSpace allEntityFeatures
+entSomeFSpace :: F.SomeFeatureSpace EntityFeature
+entSomeFSpace = F.mkFeatureSpace allEntityFeatures
 
-edgeFSpace :: FeatureSpace EdgeFeature
-edgeFSpace = mkFeatureSpace allEdgeFeatures
+edgeSomeFSpace :: F.SomeFeatureSpace EdgeFeature
+edgeSomeFSpace = F.mkFeatureSpace allEdgeFeatures
 
-combinedFSpace :: FeatureSpace CombinedFeature
-combinedFSpace = concatSpace entFSpace edgeFSpace
+combinedSomeFSpace :: F.SomeFeatureSpace CombinedFeature
+combinedSomeFSpace = F.mkFeatureSpace $ S.map Left allEntityFeatures <> S.map Right allEdgeFeatures
 
 
 
@@ -212,9 +214,9 @@ onlyPageEdge (EdgeRetrievalFeature  _ (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
 
 filterExpSettings :: (Show f, Ord f)
-                  => FeatureSpace f       -- ^ space to project into
-                  -> FeatureVec f Double  -- ^ vector to project
-                  -> FeatureVec f Double
+                  => FeatureSpace f s        -- ^ space to project into
+                  -> FeatureVec f s' Double  -- ^ vector to project
+                  -> FeatureVec f s Double
 filterExpSettings toFeatSpace features =
     F.fromList toFeatSpace
     $ [ pair
@@ -331,66 +333,50 @@ nothingElseButAggr _ = False
 -- make feature vectors with defaults and stuff
 -- -------------------------------------------
 
-type EdgeFeatureVec = FeatureVec EdgeFeature Double
-type EntityFeatureVec = FeatureVec EntityFeature Double
-type CombinedFeatureVec = FeatureVec CombinedFeature Double
+type EdgeFeatureVec s     = FeatureVec EdgeFeature s Double
+type EntityFeatureVec s   = FeatureVec EntityFeature s Double
+type CombinedFeatureVec s = FeatureVec CombinedFeature s Double
 
 
 
 
-makeDefaultEntFeatVector :: F.FeatureVec EntityFeature Double
-makeDefaultEntFeatVector = makeEntFeatVector []
+makeEntFeatVector :: FeatureSpace EntityFeature s
+                  -> [(EntityFeature, Double)]
+                  -> F.FeatureVec EntityFeature s Double
+makeEntFeatVector fspace xs =
+    let xs' = M.fromList xs
+    in F.generate fspace $ \f -> fromMaybe (defaultEntityFeatures f) $ M.lookup f xs'
 
-makeEntFeatVector :: [(EntityFeature, Double)] -> F.FeatureVec EntityFeature Double
-makeEntFeatVector xs =
-    F.modify defaults xs
- where defaults = F.fromList entFSpace ([ (EntIncidentEdgeDocsRecip, 0.0)
-                                       , (EntDegreeRecip, 0.0)
-                                       , (EntDegree, 0.0)
-                                       ]
-                                       ++ [ feat
-                                          | entityRun <- allEntityRunsF
-                                          , feat <- defaultEntRankFeatures entityRun
-                                          ]
-                                       )
+defaultEntityFeatures :: EntityFeature -> Double
+defaultEntityFeatures f =
+    case f of
+      EntIncidentEdgeDocsRecip -> 0.0
+      EntDegreeRecip -> 0.0
+      EntDegree -> 0.0
+      EntRetrievalFeature _ runF -> defaultRankFeatures runF
 
-makeDefaultEdgeFeatVector :: F.FeatureVec EdgeFeature Double
-makeDefaultEdgeFeatVector = makeEdgeFeatVector []
+makeEdgeFeatVector :: FeatureSpace EdgeFeature s
+                   -> [(EdgeFeature, Double)]
+                   -> F.FeatureVec EdgeFeature s Double
+makeEdgeFeatVector fspace xs =
+    let xs' = M.fromList xs
+    in F.generate fspace $ \f -> fromMaybe (defaultEdgeFeatures f) $ M.lookup f xs'
 
-makeEdgeFeatVector :: [(EdgeFeature, Double)] -> F.FeatureVec EdgeFeature Double
-makeEdgeFeatVector xs =
-    F.modify defaults xs
- where defaults = F.fromList edgeFSpace
-                $ foldMap (\source ->
-                          [ (EdgeCount source, 0.0)
-                          , (EdgeDocKL source, 0.0)
-                          ]
-                          ++ [ feat
-                             | edgeRun <- allEdgeRunsF
-                             , feat <- defaultEdgeRankFeatures source edgeRun
-                             ]
-                          ) allSources
+defaultEdgeFeatures :: EdgeFeature -> Double
+defaultEdgeFeatures f =
+    case f of
+      EdgeCount _ -> 0
+      EdgeDocKL _ -> 0
+      EdgeRetrievalFeature _ _ runF -> defaultRankFeatures runF
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
     case runF of
-      ScoreF -> 0.0 -- -1000.0
+      ScoreF -> -1000.0
       RecipRankF -> 0.0
 --       LinearRankF -> 0.0
 --       BucketRankF -> 0.0
       CountF -> 0.0
-
-defaultEntRankFeatures :: Run -> [(EntityFeature, Double)]
-defaultEntRankFeatures run =
-    [ (EntRetrievalFeature run runF, defaultRankFeatures runF)
-    | runF <- allRunFeatures
-    ]
-
-defaultEdgeRankFeatures :: FromSource -> Run -> [(EdgeFeature, Double)]
-defaultEdgeRankFeatures source run =
-    [ (EdgeRetrievalFeature source run runF, defaultRankFeatures runF)
-    | runF <- allRunFeatures
-    ]
 
 rankFeatures :: RunFeature -> RankingEntry d -> Double
 rankFeatures runF entry =
