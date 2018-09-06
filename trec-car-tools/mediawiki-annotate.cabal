@@ -225,6 +225,20 @@ executable trec-car-trec-run-filter
   default-language:    Haskell2010
 
 
+executable trec-car-trec-run-modify
+  main-is:             TrecRunModify.hs
+  ghc-options:         -Wall -threaded -rtsopts
+  build-depends:       base,
+                       deepseq,
+                       trec-car-tools,
+                       optparse-applicative,
+                       simplir,
+                       text,
+                       hashable,
+                       serialise
+  default-language:    Haskell2010
+
+
 executable trec-car-fill-metadata
   main-is:             FillMetadataMain.hs
   ghc-options:         -Wall -threaded -rtsopts
