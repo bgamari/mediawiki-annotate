@@ -61,7 +61,7 @@ opts = subparser
                 $ fmap (\page -> (pageName page, pageId page))
                 $ AnnsFile.pages unprocessedPages
 
-
+        putStrLn $ "Loaded pages file"
         rankings <- readStringRun inputRunFile :: IO [StringRankingEntry]
         let filteredRankings = map (entityFixIdFromRankEntry pageNameTranslate) rankings
         writeEntityRun outputRunFile filteredRankings
