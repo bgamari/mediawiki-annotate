@@ -69,6 +69,7 @@ opts = subparser
             entityFixIdFromRankEntry pageNameTranslate r =
                 let entityPageName :: PageName
                     entityPageName = packPageName $ T.unpack
+                                   $ T.replace "enwiki:" ""
                                    $ T.replace "%20" " "
                                    $ carDocument r -- pretends to be ID but is not
                     defaultEntityId :: PageId
@@ -78,7 +79,7 @@ opts = subparser
                              fromMaybe defaultEntityId
                              $ HM.lookup entityPageName pageNameTranslate
 
-                in trace (show entityPageName <> "\t" <> show entityId) $ r {carDocument = entityId}
+                in trace ( show (defaultEntityId == entityId) <> "\t" <> show entityPageName <> "\t" <> show entityId) $ r {carDocument = entityId}
 
 
 
