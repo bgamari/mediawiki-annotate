@@ -232,8 +232,9 @@ executable trec-car-trec-run-modify
                        deepseq,
                        trec-car-tools,
                        optparse-applicative,
-                       simplir,
                        text,
+                       unordered-containers,
+                       simplir,
                        hashable,
                        serialise
   default-language:    Haskell2010
