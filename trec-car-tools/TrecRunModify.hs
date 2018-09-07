@@ -25,6 +25,7 @@ import CAR.RunFile as RF
 import SimplIR.Format.TrecRunFile as TrecRunFile
 import CAR.AnnotationsFile as AnnsFile
 
+import Debug.Trace
 
 
 opts :: Parser (IO ())
@@ -61,7 +62,6 @@ opts = subparser
                 $ fmap (\page -> (pageName page, pageId page))
                 $ AnnsFile.pages unprocessedPages
 
-        putStrLn $ "Loaded pages file"
         rankings <- readStringRun inputRunFile :: IO [StringRankingEntry]
         let filteredRankings = map (entityFixIdFromRankEntry pageNameTranslate) rankings
         writeEntityRun outputRunFile filteredRankings
@@ -77,7 +77,8 @@ opts = subparser
                     entityId =
                              fromMaybe defaultEntityId
                              $ HM.lookup entityPageName pageNameTranslate
-                in r {carDocument = entityId}
+
+                in trace (show entityPageName <> "\t" <> show entityId) $ r {carDocument = entityId}
 
 
 
