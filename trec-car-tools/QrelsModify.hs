@@ -52,11 +52,24 @@ opts = subparser
    -- <> cmd "entity-fix-id" entityFixId'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
+    articleSwitch = switch (long "drop-article-level" <> help "Remove article-level ground truth")
+    sectionSwitch = switch (long "drop-section-level" <> help "Remove section-level ground truth")
+
     pagesFile = argument str (help "Pages file" <> metavar "CBOR")
     indexedParagraphCorpus = option (TocFile.IndexedCborPath <$> str) (long "paragraph-corpus" <> help "Paragraph corpus available to participants")
-    inputFile = argument str (help "Input qrels file" <> metavar "QRELSFILE")
-    secondGroundTruth = option str (short 'q' <> long "ground-truth" <> help "Ground truth as qrels file" <> metavar "QRELSFILE")
+    inputFile = loadQrels <$> argument str (help "Input qrels file" <> metavar "QRELSFILE")
+                          <*> articleSwitch <*> sectionSwitch
+    secondGroundTruth = loadQrels <$> option str (short 'q' <> long "ground-truth" <> help "Ground truth as qrels file" <> metavar "QRELSFILE")
+                                  <*> articleSwitch <*> sectionSwitch
     outputFile = option str (long "output" <> short 'o' <> help "Output qrels file" <> metavar "QRELSFILE")
+
+    loadQrels qrelsFile articleSwitch sectionSwitch = do
+        content <- readParagraphQRel qrelsFile :: IO [QF.Annotation T.Text]
+        let content' = filter dropAnnotations content
+        return content'
+      where dropAnnotations (Annotation (SectionPath _page []) _ _) = not articleSwitch
+            dropAnnotations (Annotation (SectionPath _page _) _ _) = not sectionSwitch
+
     deriveAutomaticCmd =
         deriveManual <$> secondGroundTruth <*> outputFile <*> indexedParagraphCorpus
     deriveManualCmd =
@@ -70,26 +83,27 @@ opts = subparser
 
 
 
-    deriveManual :: FilePath -> FilePath -> TocFile.IndexedCborPath ParagraphId Paragraph -> IO ()
-    deriveManual inputQrelsFile outputQrelsFile indexedParagraphCorpus = do
+    deriveManual :: IO [Annotation T.Text] -> FilePath -> TocFile.IndexedCborPath ParagraphId Paragraph -> IO ()
+    deriveManual annotations' outputQrelsFile indexedParagraphCorpus = do
+        annotations <- annotations'
         indexedParas <- TocFile.open indexedParagraphCorpus
-        annotations <- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
+--         annotations <- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
         let filteredAnnotations = filter (dropX indexedParas) annotations
         writeParagraphQRel outputQrelsFile filteredAnnotations
       where dropX :: IndexedCbor ParagraphId Paragraph -> QF.Annotation T.Text -> Bool
             dropX indexedParas (Annotation qid doc rel) =
                  isJust (TocFile.lookup doc indexedParas)
 
-    noop :: FilePath -> FilePath -> IO ()
-    noop inputQrelsFile outputQrelsFile  = do
-        annotations <- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
+    noop ::  IO [Annotation T.Text]  -> FilePath -> IO ()
+    noop annotations' outputQrelsFile  = do
+        annotations <- annotations' -- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
         writeParagraphQRel outputQrelsFile annotations
 
 
-    deriveAgreementManualAuto :: FilePath -> FilePath -> FilePath -> IO ()
-    deriveAgreementManualAuto inputQrelsFile outputQrelsFile inputGroundTruthQrels = do
-        annotations <- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
-        groundTruthAnnotations <- readParagraphQRel inputGroundTruthQrels :: IO [QF.Annotation T.Text]
+    deriveAgreementManualAuto ::  IO [Annotation T.Text]  -> FilePath ->  IO [Annotation T.Text]  -> IO ()
+    deriveAgreementManualAuto annotations' outputQrelsFile inputGroundTruthQrels' = do
+        annotations <- annotations' -- readParagraphQRel inputQrelsFile :: IO [QF.Annotation T.Text]
+        groundTruthAnnotations <- inputGroundTruthQrels' -- readParagraphQRel inputGroundTruthQrels :: IO [QF.Annotation T.Text]
 
         let groundTruthHashed :: HM.HashMap SectionPath (HS.HashSet ParagraphId)
             groundTruthHashed = HM.fromListWith (<>)
