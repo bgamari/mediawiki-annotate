@@ -239,6 +239,20 @@ executable trec-car-trec-run-modify
                        serialise
   default-language:    Haskell2010
 
+executable trec-car-qrels-modify
+  main-is:             QrelsModify.hs
+  ghc-options:         -Wall -threaded -rtsopts
+  build-depends:       base,
+                       deepseq,
+                       trec-car-tools,
+                       optparse-applicative,
+                       text,
+                       unordered-containers,
+                       simplir,
+                       hashable,
+                       serialise
+  default-language:    Haskell2010
+
 
 executable trec-car-fill-metadata
   main-is:             FillMetadataMain.hs
