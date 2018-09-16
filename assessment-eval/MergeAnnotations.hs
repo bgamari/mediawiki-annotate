@@ -4,15 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BangPatterns #-}
 
-import Data.Maybe
 import Data.Semigroup hiding (option)
-import Data.Hashable
-import Data.List
-import Data.Function
 import qualified Data.HashMap.Strict as HM
-import qualified Data.Text as T
 import Options.Applicative
-import System.FilePath
 import Data.Time.Clock
 
 
@@ -47,8 +41,8 @@ main = do
 
     nestedAssessments <- mapM readAssessmentTuples files
     let assessmentsMerged = HM.fromListWith mergeBucket $ mconcat nestedAssessments
-    let result =  [QRel.Entry queryId  documentId relevance
-                  |((QueryId queryId, DocumentId documentId), ((annotator, date), relevance)) <- HM.toList assessmentsMerged ]
+    let result =  [ QRel.Entry queryId  documentId relevance
+                  | ((QueryId queryId, DocumentId documentId), ((annotator, date), relevance)) <- HM.toList assessmentsMerged ]
 
     QRel.writeQRel outputFile result
 
