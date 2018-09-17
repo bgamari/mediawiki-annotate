@@ -56,7 +56,7 @@ relType =
 opts :: Parser ([FilePath], RelType, TableRenderer)
 opts =
     (,,)
-    <$> some (argument str (metavar "QREL" <> help "A qrel file with judgements from a single assessor"))
+    <$> some (argument str (metavar "QREL" <> help "Each a qrel file with judgements from a single assessor"))
     <*> relType
     <*> tableRenderer
 
