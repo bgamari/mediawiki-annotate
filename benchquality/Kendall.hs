@@ -44,7 +44,7 @@ import Data.Bifunctor
 import Data.Hashable
 
 import System.FilePath
-
+import System.FilePath.Glob
 
 import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
@@ -70,7 +70,9 @@ main :: IO ()
 main = do
     hSetBuffering stdout LineBuffering
 
-    (eval1, eval2, metric) <- execParser' 1 (helper <*> opts) mempty
+    (eval1Globs, eval2Globs, metric) <- execParser' 1 (helper <*> opts) mempty
+    eval1 <- concat <$> mapM glob eval1Globs
+    eval2 <- concat <$> mapM glob eval2Globs
     eval1Runs <-  mapM TrecEvalFile.readEvalFile eval1
     eval2Runs <-  mapM TrecEvalFile.readEvalFile eval2
 
