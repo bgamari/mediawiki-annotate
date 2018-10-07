@@ -29,10 +29,6 @@ type MethodName = T.Text
 
 data EvalEntry = EvalEntry { evalRunName   :: !FilePath
                            , evalRunId     :: !MethodName
-                           , evalMap       :: !Score
-                           , evalRprec     :: !Score
-                           , evalMrr       :: !Score
-                           , evalNdcg      :: !Score
                            , evals         :: !(HM.HashMap T.Text Score)
                            }
                   deriving (Show)
@@ -75,15 +71,11 @@ readEvalFile metrics fname = do
                  $  [ (metric, evalScore)
                     | EvalLine{..} <- evalLines
                     , queryField == "all"
-                    , metric `elem` (metrics ++ ["map", "Rprec", "recip_rank", "ndcg_cut_20", "runid"])
+                    , metric `elem` (metrics ++ ["runid"])
                     ]
         fetchedEvals = HM.fromList $ fmap (\m -> (m, fetch m evalMap)) metrics
     return EvalEntry { evalRunName = fname
                       , evalRunId = fetchStr "runid" evalMap
-                      , evalMap = fetch "map" evalMap
-                      , evalRprec = fetch "Rprec" evalMap
-                      , evalMrr = fetch "recip_rank" evalMap
-                      , evalNdcg = fetch "ndcg_cut_20" evalMap
                       , evals = fetchedEvals
                       }
 

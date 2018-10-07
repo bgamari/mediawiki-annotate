@@ -76,12 +76,12 @@ main = do
     eval1Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval1
     eval2Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval2
 
-    putStrLn "--------"
-    putStrLn "eval1Runs"
-    sortedListDebug evalMap evalRunId eval1Runs
-    putStrLn "--------"
-    putStrLn "eval2Runs"
-    sortedListDebug evalMap evalRunId eval2Runs
+--     putStrLn "--------"
+--     putStrLn "eval1Runs"
+--     sortedListDebug evalMap evalRunId eval1Runs
+--     putStrLn "--------"
+--     putStrLn "eval2Runs"
+--     sortedListDebug evalMap evalRunId eval2Runs
 
 
     let experiment evalMetric = do
@@ -108,20 +108,8 @@ main = do
           putStrLn $ "Universe Size = " ++ show (HS.size universe1)
           putStrLn $ "Kendalls Tau = " ++ show kendallsTau
 
-    putStrLn $ "\n==========="
-    putStrLn $ "MAP"
-    experiment evalMap
-    putStrLn $ "\n==========="
-    putStrLn $ "RPrec"
-    experiment evalRprec
-    putStrLn $ "\n==========="
-    putStrLn $ "MRR"
-    experiment evalMrr
-    putStrLn $ "\n==========="
-    putStrLn $ "NDCG@20"
-    experiment evalNdcg
-
     forM_ metrics (\metric -> do
+        putStrLn $ "\n==========="
         T.putStrLn $ metric
         let fromJust' = fromMaybe (error $ "Metric "<>T.unpack metric<>" not defined")
         experiment (\ee -> fromJust' $ metric `HM.lookup` (evals ee))
@@ -141,21 +129,21 @@ sortedList scoreFun idFun eval1Runs =
 
         in eval1Sorted
 
-
-sortedListDebug :: forall ee identifier . (Show identifier) =>  (ee -> Double) -> (ee -> identifier)  -> [ee] ->IO ()
-sortedListDebug scoreFun idFun eval1Runs = do
-        let sortedAll =
-                       Ranking.toSortedList
-                       $ Ranking.fromList
-                       $ [ (score, idFun ee)
-                         | ee <- eval1Runs
-                         , let score = scoreFun ee
-                         ]
-
-            eval1Sorted :: [identifier]
-            eval1Sorted = fmap snd sortedAll
-
-        print sortedAll
+--
+-- sortedListDebug :: forall ee identifier . (Show identifier) =>  (ee -> Double) -> (ee -> identifier)  -> [ee] ->IO ()
+-- sortedListDebug scoreFun idFun eval1Runs = do
+--         let sortedAll =
+--                        Ranking.toSortedList
+--                        $ Ranking.fromList
+--                        $ [ (score, idFun ee)
+--                          | ee <- eval1Runs
+--                          , let score = scoreFun ee
+--                          ]
+--
+--             eval1Sorted :: [identifier]
+--             eval1Sorted = fmap snd sortedAll
+--
+--         print sortedAll
 
 sortedPairs :: (Eq identifier, Hashable identifier) => [identifier] -> HS.HashSet (identifier, identifier)
 sortedPairs evalSorted = HS.fromList [ (upper,lower)
