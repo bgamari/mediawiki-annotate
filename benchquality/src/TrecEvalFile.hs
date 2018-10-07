@@ -32,7 +32,8 @@ data EvalEntry = EvalEntry { evalRunName   :: !FilePath
                            , evalMap       :: !Score
                            , evalRprec     :: !Score
                            , evalMrr       :: !Score
-                           , evalNdcg       :: !Score
+                           , evalNdcg      :: !Score
+                           , evals         :: !(HM.HashMap T.Text Score)
                            }
                   deriving (Show)
 data EvalLine = EvalLine { metric   :: !T.Text
@@ -65,8 +66,8 @@ parseLine = do
     void (some newline) <|> eof
     return $ EvalLine {..}
 
-readEvalFile :: FilePath -> IO EvalEntry
-readEvalFile fname  = do
+readEvalFile :: [T.Text ]-> FilePath ->  IO EvalEntry
+readEvalFile metrics fname = do
     mbEvalLines <- parseFromFile parseEvalLine fname
     evalLines <- maybe (fail "Failed to parse run file") pure mbEvalLines
     let evalMap :: HM.HashMap T.Text (Either Score MethodName)
@@ -74,14 +75,16 @@ readEvalFile fname  = do
                  $  [ (metric, evalScore)
                     | EvalLine{..} <- evalLines
                     , queryField == "all"
-                    , metric `elem` ["map", "Rprec", "recip_rank", "ndcg_cut_20", "runid"]
+                    , metric `elem` (metrics ++ ["map", "Rprec", "recip_rank", "ndcg_cut_20", "runid"])
                     ]
+        fetchedEvals = HM.fromList $ fmap (\m -> (m, fetch m evalMap)) metrics
     return EvalEntry { evalRunName = fname
                       , evalRunId = fetchStr "runid" evalMap
                       , evalMap = fetch "map" evalMap
                       , evalRprec = fetch "Rprec" evalMap
                       , evalMrr = fetch "recip_rank" evalMap
                       , evalNdcg = fetch "ndcg_cut_20" evalMap
+                      , evals = fetchedEvals
                       }
 
   where fetch :: T.Text -> (HM.HashMap T.Text (Either Score MethodName)) -> Score

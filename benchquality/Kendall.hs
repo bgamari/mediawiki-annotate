@@ -57,24 +57,24 @@ import TrecEvalFile
 
 opts :: Parser ( [FilePath]
                , [FilePath]
-               , T.Text
+               , [T.Text]
                )
 opts =
     (,,)
     <$> many (option str (long "eval1" <> metavar "Eval-FILE"))
     <*> many (option str (long "eval2" <> metavar "Eval-FILE"))
-    <*> option str (short 'm' <> long "metric" <> metavar "METRIC" <> help "eval metric to use, one of map recip_rank Rprec")
+    <*> many (option str (short 'm' <> long "metric" <> metavar "METRIC" <> help "eval metric to use, one of map recip_rank Rprec"))
 
 
 main :: IO ()
 main = do
     hSetBuffering stdout LineBuffering
 
-    (eval1Globs, eval2Globs, metric) <- execParser' 1 (helper <*> opts) mempty
+    (eval1Globs, eval2Globs, metrics) <- execParser' 1 (helper <*> opts) mempty
     eval1 <- concat <$> mapM glob eval1Globs
     eval2 <- concat <$> mapM glob eval2Globs
-    eval1Runs <-  mapM TrecEvalFile.readEvalFile eval1
-    eval2Runs <-  mapM TrecEvalFile.readEvalFile eval2
+    eval1Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval1
+    eval2Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval2
 
     putStrLn "--------"
     putStrLn "eval1Runs"
@@ -121,6 +121,11 @@ main = do
     putStrLn $ "NDCG@20"
     experiment evalNdcg
 
+    forM_ metrics (\metric -> do
+        T.putStrLn $ metric
+        let fromJust' = fromMaybe (error $ "Metric "<>T.unpack metric<>" not defined")
+        experiment (\ee -> fromJust' $ metric `HM.lookup` (evals ee))
+      )
 
 
 sortedList :: forall ee identifier . (ee -> Double) -> (ee -> identifier)  -> [ee] -> [identifier]
