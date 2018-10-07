@@ -84,7 +84,8 @@ main = do
 --     sortedListDebug evalMap evalRunId eval2Runs
 
 
-    let experiment evalMetric = do
+    let experiment :: (EvalEntry -> Double) -> IO()
+        experiment evalMetric = do
           let eval1Set = sortedList evalMetric evalRunId eval1Runs
               eval2Set = sortedList evalMetric evalRunId eval2Runs
 
@@ -117,14 +118,14 @@ main = do
 
 
 sortedList :: forall ee identifier . (ee -> Double) -> (ee -> identifier)  -> [ee] -> [identifier]
-sortedList scoreFun idFun eval1Runs =
+sortedList scoreFun idFun evalRuns =
         let eval1Sorted :: [identifier]
             eval1Sorted = fmap snd
                    $ Ranking.toSortedList
                    $ Ranking.fromList
                    $ [ (score, idFun ee)
-                     | ee <- eval1Runs
-                     , let score = scoreFun ee
+                     | ee <- evalRuns
+                     , let !score = scoreFun ee
                      ]
 
         in eval1Sorted
