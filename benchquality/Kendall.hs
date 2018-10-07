@@ -60,15 +60,15 @@ main = do
 
     let experiment :: (EvalEntry -> Double) -> IO()
         experiment evalMetric = do
-          let eval1Set = sortedList evalMetric evalRunId eval1Runs
-              eval2Set = sortedList evalMetric evalRunId eval2Runs
+          let systemRanking1 = sortedList evalMetric evalRunId eval1Runs
+              systemRanking2 = sortedList evalMetric evalRunId eval2Runs
 
-              universe1 = HS.fromList eval1Set
-              universe2 = HS.fromList eval2Set
+              universe1 = HS.fromList systemRanking1
+              universe2 = HS.fromList systemRanking2
 
           when (universe1 /= universe2) $ fail ( "Sets are not identical: " ++ "("++ show universe1 ++ "  /   "++ show universe2 ++ ")")
 
-          let concordantSet = HS.size $ (sortedPairs eval1Set) `HS.intersection` (sortedPairs eval2Set)
+          let concordantSet = HS.size $ (sortedPairs systemRanking1) `HS.intersection` (sortedPairs systemRanking2)
               allSet = n * ( n -1 ) `div` 2
                 where n = HS.size universe1
               discordantSet = allSet - concordantSet
@@ -80,6 +80,17 @@ main = do
           putStrLn $ "Discordant = " ++ show (discordantSet)
           putStrLn $ "Universe Size = " ++ show (HS.size universe1)
           putStrLn $ "Kendalls Tau = " ++ show kendallsTau
+
+
+          let rankDiffsSq = [ (r1-r2)^2
+                            | (r1, s1)<- zip [1.. ] systemRanking1
+                            , (r2, s2)<- zip [1.. ] systemRanking2
+                            , s1 == s2
+                            ]
+              n = realToFrac $ length systemRanking2
+              spearmansRank = 1.0 - 6.0 * realToFrac (sum rankDiffsSq) / (n * (n^2 -1.0))
+
+          putStrLn $ "Spearman's Rank Correlation = " ++ show spearmansRank
 
     forM_ metrics (\metric -> do
         putStrLn $ "\n==========="
