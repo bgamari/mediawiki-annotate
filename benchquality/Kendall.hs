@@ -15,39 +15,20 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
-import Control.Concurrent.Async
 import Control.Monad
-import Data.Ord
-import Data.Tuple
-import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 import System.IO
-import Data.Aeson
-import Numeric.Log
-import GHC.Generics
-import Codec.Serialise
 
-import qualified Data.Map.Strict as M
-import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-import qualified Data.Vector.Indexed as VI
-import qualified Data.Vector.Unboxed as VU
 import Data.List
 import Data.Maybe
-import Data.Foldable as Foldable
-import Data.Function
-import Data.Bifunctor
 import Data.Hashable
 
-import System.FilePath
 import System.FilePath.Glob
 
-import qualified CAR.RunFile as CAR.RunFile
-import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import CAR.ToolVersion
 import TrecEvalFile
@@ -76,13 +57,6 @@ main = do
     eval1Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval1
     eval2Runs <-  mapM (TrecEvalFile.readEvalFile metrics) eval2
 
---     putStrLn "--------"
---     putStrLn "eval1Runs"
---     sortedListDebug evalMap evalRunId eval1Runs
---     putStrLn "--------"
---     putStrLn "eval2Runs"
---     sortedListDebug evalMap evalRunId eval2Runs
-
 
     let experiment :: (EvalEntry -> Double) -> IO()
         experiment evalMetric = do
@@ -99,10 +73,8 @@ main = do
                 where n = HS.size universe1
               discordantSet = allSet - concordantSet
 
+              kendallsTau :: Double
               kendallsTau = realToFrac (concordantSet - discordantSet) / realToFrac (concordantSet + discordantSet)
-
-
-      --     , let method = takeFileName evalRunName
 
           putStrLn $ "Concordant = " ++ show (concordantSet)
           putStrLn $ "Discordant = " ++ show (discordantSet)
