@@ -40,6 +40,10 @@ module CAR.RunFile
     , readEntityRun
     , writeEntityRun
 
+     -- ** Lowlevel ranking
+     , toCarRankingEntry
+     , Run.readRunFile
+
       -- * Grouping and sorting runs
     , groupByQuery, groupByQuery'
 

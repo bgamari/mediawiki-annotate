@@ -87,6 +87,7 @@ executable kendall
                        snowball,
                        trifecta,
                        time,
+                       Glob,
                        simplir-word-embedding,
                        trec-car-graph-expansion,
                        graph-algorithms,

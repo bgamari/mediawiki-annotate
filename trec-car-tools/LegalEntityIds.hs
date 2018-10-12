@@ -24,7 +24,7 @@ main = do
     (unprocessedPagesFile, outputFile) <- execParser $ info (helper <*> options) mempty
     unprocessedPages <- openAnnotations unprocessedPagesFile
 
-    let legalPageIds = pages unprocessedPages
+    let legalPages = AnnsFile.pages unprocessedPages
 
         formatPageIdToName :: Page -> TB.Builder
         formatPageIdToName page =
@@ -36,4 +36,4 @@ main = do
          $ mconcat
          $ intersperse "\n"
          $ fmap formatPageIdToName
-         legalPageIds
+         legalPages

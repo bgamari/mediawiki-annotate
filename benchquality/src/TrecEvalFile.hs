@@ -29,10 +29,7 @@ type MethodName = T.Text
 
 data EvalEntry = EvalEntry { evalRunName   :: !FilePath
                            , evalRunId     :: !MethodName
-                           , evalMap       :: !Score
-                           , evalRprec     :: !Score
-                           , evalMrr       :: !Score
-                           , evalNdcg       :: !Score
+                           , evals         :: !(HM.HashMap T.Text Score)
                            }
                   deriving (Show)
 data EvalLine = EvalLine { metric   :: !T.Text
@@ -47,6 +44,7 @@ parseEvalLine = runUnlined (catMaybes <$> many (fmap Just parseLine <|> whitespa
 
 -- one entry looks like this:
 -- lucene-luceneindex-ecm-pages.cbor-unprocessedAllButBenchmark.v201.cbor.lucene-ecm--entity-section--all-ql-ecm--Text-benchmarkY1train.v201.cbor.outlines.run
+--   runid                   all     myFunkyMethodname
 --   map                     all     0.0247
 --   Rprec                   all     0.0337
 --   recip_rank              all     0.0904
@@ -65,8 +63,8 @@ parseLine = do
     void (some newline) <|> eof
     return $ EvalLine {..}
 
-readEvalFile :: FilePath -> IO EvalEntry
-readEvalFile fname  = do
+readEvalFile :: [T.Text ]-> FilePath ->  IO EvalEntry
+readEvalFile metrics fname = do
     mbEvalLines <- parseFromFile parseEvalLine fname
     evalLines <- maybe (fail "Failed to parse run file") pure mbEvalLines
     let evalMap :: HM.HashMap T.Text (Either Score MethodName)
@@ -74,24 +72,15 @@ readEvalFile fname  = do
                  $  [ (metric, evalScore)
                     | EvalLine{..} <- evalLines
                     , queryField == "all"
-                    , metric `elem` ["map", "Rprec", "recip_rank", "ndcg_cut_20", "runid"]
+                    , metric `elem` (metrics ++ ["runid"])
                     ]
+
+        fetchedEvals = HM.fromList [ (m, score)
+                                   | m <- metrics
+                                   , Just (Left score) <- pure $ m `HM.lookup` evalMap
+                                   ]
+        Just (Right runId) = HM.lookup "runid" evalMap
     return EvalEntry { evalRunName = fname
-                      , evalRunId = fetchStr "runid" evalMap
-                      , evalMap = fetch "map" evalMap
-                      , evalRprec = fetch "Rprec" evalMap
-                      , evalMrr = fetch "recip_rank" evalMap
-                      , evalNdcg = fetch "ndcg_cut_20" evalMap
-                      }
-
-  where fetch :: T.Text -> (HM.HashMap T.Text (Either Score MethodName)) -> Score
-        fetch metricName evalMap =
-            fromMaybe 0.0
-            $ fmap (\(Left z) -> z)
-            $ metricName `HM.lookup` evalMap
-        fetchStr :: T.Text -> (HM.HashMap T.Text (Either Score MethodName)) -> T.Text
-        fetchStr entryName evalMap =
-            fromMaybe ""
-            $ fmap (\(Right z) -> z)
-            $ entryName `HM.lookup` evalMap
-
+                     , evalRunId = runId
+                     , evals = fetchedEvals
+                     }

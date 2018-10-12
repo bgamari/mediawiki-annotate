@@ -33,6 +33,7 @@ opts = subparser
     <> cmd "entityids"     dumpEntityIds
     <> cmd "paragraphs"    dumpParagraphs
     <> cmd "paragraphids"  dumpParagraphIds
+    <> cmd "filter-paragraphids"  filterParagraphIds
     <> cmd "paragraphids-pages"  paragraphIdsInPages
     <> cmd "sections"      dumpSections
     <> cmd "hist-headings" histogramHeadings
@@ -145,6 +146,20 @@ opts = subparser
         f inputFile  = do
                 paragraphs <- readParagraphsFile inputFile
                 mapM_ printParagraphId paragraphs
+
+          where printParagraphId (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
+
+    filterParagraphIds =
+        f <$> argument str (help "input paragraph file" <> metavar "FILE")
+          <*> option (TocFile.IndexedCborPath <$> str) (long "para2" <> help "dump only paragraph ids that are also in this file")
+          <*> switch (short 'n' <> long "negate" <> help "invert matching logic")
+      where
+        f :: FilePath -> TocFile.IndexedCborPath ParagraphId Paragraph -> Bool -> IO ()
+        f inputFile para2File negate = do
+                paragraphs <- readParagraphsFile inputFile
+                para2 <- TocFile.open para2File
+                let paragraphs' = filter (\ (Paragraph pid _) ->  negate /= isJust (TocFile.lookup pid para2) ) paragraphs
+                mapM_ printParagraphId paragraphs'
 
           where printParagraphId (Paragraph paraId' _) = putStrLn $ unpackParagraphId paraId'
 
