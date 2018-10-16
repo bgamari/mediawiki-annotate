@@ -7,6 +7,8 @@
 module TrecEvalFile
   ( EvalEntry(..)
   , readEvalFile
+  , QueryEvalEntry(..)
+  , readQueryEvalFile
   ) where
 
 import Data.Semigroup
@@ -26,15 +28,23 @@ import Text.Trifecta
 
 type Score = Double
 type MethodName = T.Text
+type QueryField = T.Text
+type Metric = T.Text
+
 
 data EvalEntry = EvalEntry { evalRunName   :: !FilePath
                            , evalRunId     :: !MethodName
                            , evals         :: !(HM.HashMap T.Text Score)
                            }
                   deriving (Show)
+data QueryEvalEntry = QueryEvalEntry { qevalRunName   :: !FilePath
+                                     , qqueryField    :: !QueryField
+                                     , qevalScore     :: !Score
+                                     }
+                  deriving (Show)
 data EvalLine = EvalLine { metric   :: !T.Text
-                         , queryField       :: !T.Text
-                         , evalScore     :: !(Either Score MethodName)
+                         , queryField      :: !QueryField
+                         , evalScore       :: !(Either Score MethodName)
                          }
                   deriving (Show)
 
@@ -63,11 +73,11 @@ parseLine = do
     void (some newline) <|> eof
     return $ EvalLine {..}
 
-readEvalFile :: [T.Text ]-> FilePath ->  IO EvalEntry
+readEvalFile :: [Metric ]-> FilePath ->  IO EvalEntry
 readEvalFile metrics fname = do
     mbEvalLines <- parseFromFile parseEvalLine fname
     evalLines <- maybe (fail "Failed to parse run file") pure mbEvalLines
-    let evalMap :: HM.HashMap T.Text (Either Score MethodName)
+    let evalMap :: HM.HashMap Metric (Either Score MethodName)
         evalMap  =  HM.fromList
                  $  [ (metric, evalScore)
                     | EvalLine{..} <- evalLines
@@ -84,3 +94,15 @@ readEvalFile metrics fname = do
                      , evalRunId = runId
                      , evals = fetchedEvals
                      }
+
+readQueryEvalFile ::  Metric -> FilePath -> IO [QueryEvalEntry]
+readQueryEvalFile targetMetric fname = do
+    mbEvalLines <- parseFromFile parseEvalLine fname
+    evalLines <- maybe (fail "Failed to parse run file") pure mbEvalLines
+
+    return      [ (QueryEvalEntry fname queryField evalScore')
+                | EvalLine{..} <- evalLines
+                , queryField /= "all"
+                , metric == targetMetric
+                , Left evalScore' <- pure evalScore
+                ]
