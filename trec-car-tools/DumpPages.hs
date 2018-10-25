@@ -81,8 +81,9 @@ opts = subparser
 
     dumpOutlines =
         f <$> pagesFromFile
+          <*> flag False True (long "page-id" <> help "also print page id")
       where
-        f getPages = do
+        f getPages withPageId = do
             pages <- getPages
 
             let indentHeadings p = [ (length headinglist, last headinglist)
@@ -91,13 +92,15 @@ opts = subparser
                                    ]  -- [(SectionPath, [SectionHeading], [PageSkeleton])]
 
                 pageNameStr p = (T.unpack $ getPageName $ pageName p)
+                pageIdStr p = (unpackPageId $ pageId p)
 
                 formatIndentHeadings :: (Int, SectionHeading) -> String
                 formatIndentHeadings (level, headingtext) = (replicate level '\t') <> T.unpack (getSectionHeading headingtext)
 
 
                 prettyPage p = unlines $
-                    [ pageNameStr p ]
+                    if withPageId then [pageIdStr p] else []
+                    ++ [ pageNameStr p ]
                     ++ fmap formatIndentHeadings (indentHeadings p)
                     ++ [""]
 
