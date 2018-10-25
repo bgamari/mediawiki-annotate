@@ -99,7 +99,7 @@ opts = subparser
 
 
                 prettyPage p = unlines $
-                    if withPageId then [pageIdStr p] else []
+                    ( if withPageId then [pageIdStr p] else [] )
                     ++ [ pageNameStr p ]
                     ++ fmap formatIndentHeadings (indentHeadings p)
                     ++ [""]
