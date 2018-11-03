@@ -95,6 +95,46 @@ executable kendall
                        benchquality
   default-language:    Haskell2010
 
+executable chronbachsalpha
+  main-is:             ChronbachsAlpha.hs
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       graphviz,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       trifecta,
+                       time,
+                       Glob,
+                       simplir-word-embedding,
+                       trec-car-graph-expansion,
+                       graph-algorithms,
+                       trec-car-tools,
+                       benchquality
+  default-language:    Haskell2010
+
 executable qrelsInterset
   main-is:             QrelsIntersect.hs
   ghc-options:         -Wall -threaded -rtsopts -eventlog

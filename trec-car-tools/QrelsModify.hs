@@ -109,7 +109,7 @@ opts = subparser
             groundTruthHashed = HM.fromListWith (<>)
                               $ [ (qid, HS.singleton doc)
                                 | (Annotation qid doc rel) <- groundTruthAnnotations
-                                , rel /= "0"
+                                , read (T.unpack rel) > 0
                                 ]
             isInGroundTruth qid paraId =
                 maybe False (paraId `HS.member`) (qid `HM.lookup` groundTruthHashed)

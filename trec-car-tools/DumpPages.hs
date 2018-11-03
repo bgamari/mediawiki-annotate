@@ -35,7 +35,8 @@ opts = subparser
     <> cmd "paragraphids"  dumpParagraphIds
     <> cmd "filter-paragraphids"  filterParagraphIds
     <> cmd "paragraphids-pages"  paragraphIdsInPages
-    <> cmd "sections"      dumpSections
+    <> cmd "section-ids"      dumpSectionIds
+    <> cmd "outlines"      dumpOutlines
     <> cmd "hist-headings" histogramHeadings
     <> cmd "dump-header"   dumpHeader
   where
@@ -62,7 +63,7 @@ opts = subparser
             mapM_ (putStrLn . unpackPageId . pageId) pages
 
 
-    dumpSections =
+    dumpSectionIds =
         f <$> pagesFromFile
           <*> flag False True (long "raw" <> help "only section paths - no pagenames")
           <*> flag False True (long "internal" <> help "also internal sections")
@@ -77,6 +78,34 @@ opts = subparser
                 mapM_  (\p -> putStrLn $ unlines $ sectionpathlist p) pages
             else
                 mapM_ (\p -> putStrLn $ unlines $ pageNameStr p : sectionpathlist p) pages
+
+    dumpOutlines =
+        f <$> pagesFromFile
+          <*> flag False True (long "page-id" <> help "also print page id")
+      where
+        f getPages withPageId = do
+            pages <- getPages
+
+            let indentHeadings p = [ (length headinglist, last headinglist)
+                                   |  (_, headinglist, _) <- pageSections p
+                                   , headinglist /= []
+                                   ]  -- [(SectionPath, [SectionHeading], [PageSkeleton])]
+
+                pageNameStr p = (T.unpack $ getPageName $ pageName p)
+                pageIdStr p = (unpackPageId $ pageId p)
+
+                formatIndentHeadings :: (Int, SectionHeading) -> String
+                formatIndentHeadings (level, headingtext) = (replicate level '\t') <> T.unpack (getSectionHeading headingtext)
+
+
+                prettyPage p = unlines $
+                    ( if withPageId then [pageIdStr p] else [] )
+                    ++ [ pageNameStr p ]
+                    ++ fmap formatIndentHeadings (indentHeadings p)
+                    ++ [""]
+
+            putStrLn $ unlines $ map prettyPage pages
+
 
     dumpPages =
         f <$> pagesFromFile
