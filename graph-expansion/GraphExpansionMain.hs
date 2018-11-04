@@ -57,6 +57,7 @@ import SimplIR.WordEmbedding.Parse
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import SimplIR.TopK (collectTopK)
+import Control.Concurrent.Map
 import ZScore
 
 type NumResults = Int
@@ -559,7 +560,4 @@ main = do
     mapM_ (\h -> takeMVar h >>= hClose) handles
 
 forConcurrentlyN_ :: Foldable f => Int -> f a -> (a -> IO ()) -> IO ()
-forConcurrentlyN_ n xs f = do
-    sem <- atomically $ newTSem n
-    let run x = bracket (atomically $ waitTSem sem) (const $ atomically $ signalTSem sem) (const $ f x)
-    forConcurrently_ xs run
+forConcurrentlyN_ n = flip $ mapConcurrentlyL_ n

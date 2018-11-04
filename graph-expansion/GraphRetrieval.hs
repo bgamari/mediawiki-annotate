@@ -7,9 +7,6 @@
 
 import Control.Monad (when)
 import Control.Concurrent
-import Control.Concurrent.Async
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TSem
 import Control.Exception
 import Data.List (sortBy)
 import Data.Tuple
@@ -41,6 +38,7 @@ import GraphExpansion
 import GraphExpansionExperiments
 import qualified SimplIR.SimpleIndex as Index
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
+import Control.Concurrent.Map
 
 type EntityIndex = Index.OnDiskIndex Term PageId Int
 
@@ -208,12 +206,8 @@ main = do
 
     mapM_ (\h -> takeMVar h >>= hClose) handles
 
-forConcurrentlyN_ :: Foldable f => Int -> f a -> (a -> IO ()) -> IO ()
-forConcurrentlyN_ n xs f = do
-    sem <- atomically $ newTSem n
-    let run x = bracket (atomically $ waitTSem sem) (const $ atomically $ signalTSem sem) (const $ f x)
-    forConcurrently_ xs run
-
+forConcurrentlyN_ :: Traversable f => Int -> f a -> (a -> IO ()) -> IO ()
+forConcurrentlyN_ n = flip $ mapConcurrentlyL_ n
 
 retrieveEntities :: EntityIndex -> IO ([Term] -> [(Log Double, PageId)])
 retrieveEntities entityIndexFile = do

@@ -8,9 +8,6 @@
 {-# LANGUAGE TypeApplications #-}
 
 import Control.Concurrent
-import Control.Concurrent.Async
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TSem
 import Control.Exception
 import Data.Tuple
 import Data.Semigroup hiding (All, Any, option)
@@ -37,6 +34,7 @@ import WriteRanking
 import GraphExpansionExperiments
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.TopK (collectTopK)
+import Control.Concurrent.Map
 
 type NumResults = Int
 
@@ -210,8 +208,5 @@ main = do
 
 -- | Given a foldable container of a's, and function that turns an a into an action, run all actions throw away result.
 -- Run N actions concurrentl at a time.
-forConcurrentlyN_ :: Foldable f => Int -> f a -> (a -> IO ()) -> IO ()
-forConcurrentlyN_ n xs f = do
-    sem <- atomically $ newTSem n
-    let run x = bracket (atomically $ waitTSem sem) (const $ atomically $ signalTSem sem) (const $ f x)
-    forConcurrently_ xs run
+forConcurrentlyN_ :: Traversable f => Int -> f a -> (a -> IO ()) -> IO ()
+forConcurrentlyN_ n = flip $ mapConcurrentlyL_ n
