@@ -1,5 +1,6 @@
 allow-newer:
-    base, template-haskell, pipes
+    base, template-haskell, 
+    pipes-safe   -- for pipes-text
 
 packages:
     trec-car-tools/
