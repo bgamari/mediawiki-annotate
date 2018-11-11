@@ -122,7 +122,7 @@ stderr xs = stddev xs / sqrt (realToFrac $ length xs)
 
 main :: IO ()
 main = do
-    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, runType) <- execParser $ info (helper <*> opts) mempty
+    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
     --print =<< readEval "UNH/UNH-benchmarkY1test.bm25.automatic.psg.eval.gz"
     let assessmentMethodsSet = S.fromList assessmentMethods
@@ -132,6 +132,8 @@ main = do
                                     | eval <- evals
                                     , (runName, runType, assess, _query, metric, score) <- eval
                                     , assess `S.member` assessmentMethodsSet
+                                    , metric `S.member` metricsSet
+                                    , runType ==  requestedRunType
                                     ]
     let stats = fmap (\xs -> (mean xs, stderr xs)) grouped
         runNames =
