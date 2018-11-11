@@ -311,7 +311,7 @@ parMapIOUnordered :: (Semigroup b, Monoid b)
                   -> [a]
                   -> IO b
 parMapIOUnordered n f xs = do
-    ahead <- atomically $ newTSem n
+    ahead <- atomically $ newTSem $ fromIntegral n
     accum <- newTVarIO mempty
     forM_ xs $ \x -> do
         atomically $ waitTSem ahead
