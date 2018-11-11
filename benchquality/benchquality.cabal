@@ -176,3 +176,43 @@ executable qrelsInterset
                        simplir-word-embedding,
                        trec-car-tools
   default-language:    Haskell2010
+
+executable appendix-table
+  main-is:             AppendixTable.hs
+  ghc-options:         -Wall -threaded -rtsopts -eventlog
+  build-depends:       base,
+                       async,
+                       bytestring,
+                       unordered-containers,
+                       text,
+                       vector,
+                       indexed-vector,
+                       containers,
+                       stm,
+                       deepseq,
+                       simplir-galago,
+                       optparse-applicative >= 0.12,
+                       hashable,
+                       transformers,
+                       aeson,
+                       simplir,
+                       simplir-disk-index,
+                       pipes,
+                       serialise,
+                       pipes-safe,
+                       pipes,
+                       foldl,
+                       serialise,
+                       filepath,
+                       log-domain,
+                       snowball,
+                       trifecta,
+                       time,
+                       Glob,
+                       trec-car-tools,
+                       pandoc-types >= 1.17,
+                       tabular >= 0.2,
+                       split,
+                       zlib,
+                       benchquality
+  default-language:    Haskell2010
