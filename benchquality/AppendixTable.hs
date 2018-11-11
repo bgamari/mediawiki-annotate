@@ -48,15 +48,21 @@ newtype Query = Query BS.ByteString
 type Metric = String
 type AssessmentMethod = String
 
+parseRunName name =
+    case name of
+      "Entity" -> Entity
+      "Passage" -> Passage
+      s -> error ("unknown runName "<> show s)
 
-opts :: Parser ([FilePath], [Metric], Metric, [AssessmentMethod], AssessmentMethod)
+opts :: Parser ([FilePath], [Metric], Metric, [AssessmentMethod], AssessmentMethod, RunType)
 opts =
-    (,,,,)
+    (,,,,,)
     <$> some (argument str (metavar "evalfiles" <> help "A glob pattern for evalfiles"))
     <*> some (option str (short 'm' <> long "metric" <> help "evaluation metric to include, (e.g. Rprec, map, ndcg_cut_5)"))
     <*> option str (short 'M' <> long "sort-metric" <> help "evaluation metric to sort results by")
     <*> some (option str (short 'a' <> long "assessment" <> help "assessment method to include (e.g. manual, automatic, lenient)"))
     <*> option str (short 'A' <> long "sort-assessment" <> help "assessment method to sort results by")
+    <*> option (parseRunName <$> str) (short 'r' <> long "run-type" <> help "Passage or Entity")
 
 -- Expect file names to be of this format:
 --  $methodname.$assess.$runType.eval*
@@ -82,6 +88,7 @@ readEval metrics assessmentMethods path  =
             runType = case parts !! 2 of
                         "psg" -> Passage
                         "entity" -> Entity
+                        s     -> error $ "unknown runType "++ show s
             assess = parts !! 1
 --             assess = case parts !! 1 of
 --                        "automatic" -> Automatic
@@ -115,7 +122,7 @@ stderr xs = stddev xs / sqrt (realToFrac $ length xs)
 
 main :: IO ()
 main = do
-    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod) <- execParser $ info (helper <*> opts) mempty
+    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, runType) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
     --print =<< readEval "UNH/UNH-benchmarkY1test.bm25.automatic.psg.eval.gz"
     let assessmentMethodsSet = S.fromList assessmentMethods
@@ -123,7 +130,7 @@ main = do
     evals <- mapM (readEval metricsSet assessmentMethodsSet) evalFiles
     let grouped = M.unionsWith (++) [ M.singleton (runName, assess, metric) [score]
                                     | eval <- evals
-                                    , (runName, Passage, assess, _query, metric, score) <- eval
+                                    , (runName, runType, assess, _query, metric, score) <- eval
                                     , assess `S.member` assessmentMethodsSet
                                     ]
     let stats = fmap (\xs -> (mean xs, stderr xs)) grouped
