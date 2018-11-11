@@ -214,5 +214,6 @@ executable appendix-table
                        tabular >= 0.2,
                        split,
                        zlib,
+                       pandoc >= 2.4,
                        benchquality
   default-language:    Haskell2010

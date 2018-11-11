@@ -16,6 +16,7 @@ import Data.List.Split
 import System.Environment
 import System.FilePath
 import Codec.Compression.GZip
+import qualified Data.Text as T
 
 import Text.Tabular
 --import Text.Tabular.AsciiArt
@@ -23,6 +24,9 @@ import Text.Tabular
 --import Text.Tabular.Latex
 
 import qualified Text.Pandoc.Definition as Pandoc
+import qualified Text.Pandoc.Class
+import qualified Text.Pandoc.Options
+import qualified Text.Pandoc.Writers.HTML
 import Data.Aeson
 
 data RunType = Entity | Passage
@@ -35,6 +39,11 @@ data Metric = MAP | RPrec | RecipRank | NDCG
             deriving (Eq, Ord, Enum, Bounded, Show)
 newtype Query = Query BS.ByteString
               deriving (Show)
+
+
+-- Expect file names to be of this format:
+--  $methodname.$assess.$runType.eval*
+-- example: mpii-nn6_pos.automatic.psg.eval.gz
 
 readEval :: FilePath -> IO [(RunName, RunType, AssessmentMethod, Query, Metric, Double)]
 readEval path =
@@ -111,9 +120,11 @@ main = do
     let showCell Nothing = "—"
         showCell (Just (m,s)) = showFFloat (Just 3) m . showString " ± " . showFFloat (Just 3) s $ ""
     --putStrLn $ render (escapeLatex . getRunName) show showCell table
-    BSL.putStrLn $ encode $ Pandoc.Pandoc mempty
-        [toPandoc (textCell . getRunName) (textCell . show) (textCell . showCell) table]
-    return ()
+    let pandocPage =  Pandoc.Pandoc mempty
+            [toPandoc (textCell . getRunName) (textCell . show) (textCell . showCell) table]
+    htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
+    putStrLn $ T.unpack htmlText
+    --return ()
 
 textCell :: String -> Pandoc.TableCell
 textCell t = [Pandoc.Plain [Pandoc.Str t]]
