@@ -16,7 +16,9 @@ import Data.List.Split
 import System.Environment
 import System.FilePath
 import Codec.Compression.GZip
+import System.FilePath.Glob
 import qualified Data.Text as T
+import Options.Applicative
 
 import Text.Tabular
 --import Text.Tabular.AsciiArt
@@ -29,24 +31,39 @@ import qualified Text.Pandoc.Options
 import qualified Text.Pandoc.Writers.HTML
 import Data.Aeson
 
+
+
 data RunType = Entity | Passage
              deriving (Eq, Ord, Show)
-data AssessmentMethod = Automatic | Lenient | Manual
-                      deriving (Eq, Ord, Enum, Bounded, Show)
+-- data AssessmentMethod = Automatic | Lenient | Manual
+--                       deriving (Eq, Ord, Enum, Bounded, Show)
 newtype RunName = RunName { getRunName :: String }
                 deriving (Eq, Ord, Show)
-data Metric = MAP | RPrec | RecipRank | NDCG
-            deriving (Eq, Ord, Enum, Bounded, Show)
+--data Metric = MAP | RPrec | RecipRank | NDCG
+--            deriving (Eq, Ord, Enum, Bounded, Show)
 newtype Query = Query BS.ByteString
               deriving (Show)
 
+
+type Metric = String
+type AssessmentMethod = String
+
+
+opts :: Parser ([FilePath], [Metric], Metric, [AssessmentMethod], AssessmentMethod)
+opts =
+    (,,,,)
+    <$> some (argument str (metavar "evalfiles" <> help "A glob pattern for evalfiles"))
+    <*> some (option str (short 'm' <> long "metric" <> help "evaluation metric to include, (e.g. Rprec, map, ndcg_cut_5)"))
+    <*> option str (short 'M' <> long "sort-metric" <> help "evaluation metric to sort results by")
+    <*> some (option str (short 'a' <> long "assessment" <> help "assessment method to include (e.g. manual, automatic, lenient)"))
+    <*> option str (short 'A' <> long "sort-assessment" <> help "assessment method to sort results by")
 
 -- Expect file names to be of this format:
 --  $methodname.$assess.$runType.eval*
 -- example: mpii-nn6_pos.automatic.psg.eval.gz
 
-readEval :: FilePath -> IO [(RunName, RunType, AssessmentMethod, Query, Metric, Double)]
-readEval path =
+readEval ::  S.Set Metric-> S.Set AssessmentMethod -> FilePath -> IO [(RunName, RunType, AssessmentMethod, Query, Metric, Double)]
+readEval metrics assessmentMethods path  =
     if ".gz" `isSuffixOf` path then
         parse . decompress <$> BSL.readFile path
     else
@@ -65,20 +82,26 @@ readEval path =
             runType = case parts !! 2 of
                         "psg" -> Passage
                         "entity" -> Entity
-            assess = case parts !! 1 of
-                       "automatic" -> Automatic
-                       "lenient" -> Lenient
-                       "manual" -> Manual
-                       s        -> error $ "unknown assessment type "++show s
+            assess = parts !! 1
+--             assess = case parts !! 1 of
+--                        "automatic" -> Automatic
+--                        "lenient" -> Lenient
+--                        "manual" -> Manual
+--                        s        -> error $ "unknown assessment type "++show s
         in mapMaybe (parseLine . BSL.split '\t') $ BSL.lines x
 
     parseMetric name =
-        case name of
-          "map"        -> Just MAP
-          "Rprec"      -> Just RPrec
-          "recip_rank" -> Just RecipRank
-          "ndcg"       -> Just NDCG
-          _            -> Nothing
+        if name `S.member` metrics then
+            Just name
+        else
+            Nothing
+--     parseMetric name =
+--         case name of
+--           "map"        -> Just MAP
+--           "Rprec"      -> Just RPrec
+--           "recip_rank" -> Just RecipRank
+--           "ndcg"       -> Just NDCG
+--           _            -> Nothing
 
 mean :: RealFrac a => [a] -> a
 mean xs = sum xs / realToFrac (length xs)
@@ -92,20 +115,24 @@ stderr xs = stddev xs / sqrt (realToFrac $ length xs)
 
 main :: IO ()
 main = do
-    evalFiles <- getArgs
+    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod) <- execParser $ info (helper <*> opts) mempty
+    evalFiles <- concat <$> mapM glob evalGlobs
     --print =<< readEval "UNH/UNH-benchmarkY1test.bm25.automatic.psg.eval.gz"
-    evals <- mapM readEval evalFiles
+    let assessmentMethodsSet = S.fromList assessmentMethods
+        metricsSet = S.fromList metrics
+    evals <- mapM (readEval metricsSet assessmentMethodsSet) evalFiles
     let grouped = M.unionsWith (++) [ M.singleton (runName, assess, metric) [score]
                                     | eval <- evals
                                     , (runName, Passage, assess, _query, metric, score) <- eval
+                                    , assess `S.member` assessmentMethodsSet
                                     ]
     let stats = fmap (\xs -> (mean xs, stderr xs)) grouped
         runNames =
-            sortBy (flip $ comparing $ \runName -> stats M.! (runName, Manual, RPrec))
+            sortBy (flip $ comparing $ \runName -> stats M.! (runName, sortAssessmentMethod, sortMetric))
             $ S.toList $ S.fromList [ runName | (runName, _, _) <- M.keys grouped ]
 
     let simpleHeader = Group SingleLine . map Header
-        cols = (,) <$> [RPrec,MAP,RecipRank,NDCG] <*> [Manual,Automatic,Lenient]
+        cols = (,) <$> metrics <*> assessmentMethods
         cells = [ [ s
                   | (metric,assess) <- cols
                   , let s = M.lookup (runName,assess,metric) stats
