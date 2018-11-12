@@ -39,6 +39,9 @@ data RunType = Entity | Passage
 --                       deriving (Eq, Ord, Enum, Bounded, Show)
 newtype RunName = RunName { getRunName :: String }
                 deriving (Eq, Ord, Show)
+
+newtype ColHeader = ColHeader { getHeader :: String }
+                deriving (Eq, Ord, Show)
 --data Metric = MAP | RPrec | RecipRank | NDCG
 --            deriving (Eq, Ord, Enum, Bounded, Show)
 newtype Query = Query BS.ByteString
@@ -149,7 +152,7 @@ main = do
                   ]
                 | runName <- runNames
                 ]
-    let table :: Table RunName String (Maybe (Double, Double))
+    let table :: Table RunName ColHeader (Maybe (Double, Double))
         table = Table (Group SingleLine (map Header runNames))
                       (Group SingleLine (map Header (fmap prettyCols cols)))
                       cells
@@ -163,8 +166,8 @@ main = do
     writeFile output $ T.unpack htmlText
     return ()
 
-prettyCols :: (Metric, AssessmentMethod) -> String
-prettyCols (metric, assessment) = metric <> "/" <> assessment
+prettyCols :: (Metric, AssessmentMethod) -> ColHeader
+prettyCols (metric, assessment) = ColHeader $ metric <> "/" <> assessment
 
 
 textCell :: String -> Pandoc.TableCell
