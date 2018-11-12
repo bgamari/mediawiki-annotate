@@ -173,7 +173,7 @@ toPandoc rowHeader colHeader cell (Table rows cols cells) =
   where
     nCols = length (headerContents cols) + 1
     aligns = replicate nCols Pandoc.AlignLeft
-    widths = replicate nCols 1
+    widths = replicate nCols 0
     colHeaders = [] : map colHeader (headerContents cols)
     tableCells = [ rowHeader row : map cell rowCells
                  | (row, rowCells) <- zip (headerContents rows) cells
