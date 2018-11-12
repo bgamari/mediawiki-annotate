@@ -146,13 +146,14 @@ main = do
 
     let simpleHeader = Group SingleLine . map Header
         --cols = (,) <$> metrics <*> assessmentMethods
-        cols = [(m,a) |  m <- metrics, a <- assessmentMethods]
+        cols = [(m,a) |  a <- assessmentMethods, m <- metrics]
         cells = [ [ s
                   | (metric,assess) <- cols
                   , let s = M.lookup (runName,assess,metric) stats
                   ]
                 | runName <- runNames
                 ]
+    putStrLn $ show cols
     let table :: Table RunName ColHeader (Maybe (Double, Double))
         table = Table (Group SingleLine (map Header runNames))
                       (Group SingleLine (map Header (fmap prettyCols cols)))
