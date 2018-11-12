@@ -145,7 +145,8 @@ main = do
             $ S.toList $ S.fromList [ runName | (runName, _, _) <- M.keys grouped ]
 
     let simpleHeader = Group SingleLine . map Header
-        cols = (,) <$> metrics <*> assessmentMethods
+        --cols = (,) <$> metrics <*> assessmentMethods
+        cols = [(m,a) |  m <- metrics, a <- assessmentMethods]
         cells = [ [ s
                   | (metric,assess) <- cols
                   , let s = M.lookup (runName,assess,metric) stats
