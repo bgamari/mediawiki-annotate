@@ -149,7 +149,7 @@ main = do
             [toPandoc (textCell . getRunName) (textCell . getHeader) (textCell . showCell) table]
 
         pandocPage =  Pandoc.Pandoc mempty (
-                        [pandocHeader (show title <> " " <> show requestedRunType <> " Task")]
+                        [pandocHeader (title <> " " <> show requestedRunType <> " Task")]
                         ++ (createPandocTable table))
 
 
