@@ -161,7 +161,7 @@ main = do
         showCell (Just (m,s)) = showFFloat (Just 3) m . showString " ± " . showFFloat (Just 3) s $ ""
     --putStrLn $ render (escapeLatex . getRunName) show showCell table
     let pandocPage =  Pandoc.Pandoc mempty
-            [toPandoc (textCell . getRunName) (textCell . show) (textCell . showCell) table]
+            [toPandoc (textCell . getRunName) (textCell . getHeader) (textCell . showCell) table]
     htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
     writeFile output $ T.unpack htmlText
     return ()
