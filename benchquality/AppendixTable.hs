@@ -149,9 +149,9 @@ main = do
                   ]
                 | runName <- runNames
                 ]
-    let table :: Table RunName (Metric, AssessmentMethod) (Maybe (Double, Double))
+    let table :: Table RunName String (Maybe (Double, Double))
         table = Table (Group SingleLine (map Header runNames))
-                      (Group SingleLine (map Header cols))
+                      (Group SingleLine (map Header (fmap prettyCols cols)))
                       cells
 
     let showCell Nothing = "—"
@@ -162,6 +162,10 @@ main = do
     htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
     writeFile output $ T.unpack htmlText
     return ()
+
+prettyCols :: (Metric, AssessmentMethod) -> String
+prettyCols (metric, assessment) = show metric <> "/" <> show assessment
+
 
 textCell :: String -> Pandoc.TableCell
 textCell t = [Pandoc.Plain [Pandoc.Str t]]
