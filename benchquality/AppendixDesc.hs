@@ -63,10 +63,11 @@ main = do
     (evalGlobs, output, title) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
     blocks <-  concat <$> mapM readConfirm evalFiles
-    let pandocPage =  Pandoc.Pandoc mempty ( [pandocHeader (title <> " Run Description")]  ++ blocks   )
+    let pandocPage =  Pandoc.Pandoc Pandoc.nullMeta ( [pandocHeader (title <> " Run Description")]  ++ blocks   )
 
 
-    htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
+    let htmlOpts = Text.Pandoc.Options.def {Text.Pandoc.Options.writerPreferAscii = True}
+    htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String htmlOpts pandocPage
     writeFile output $ T.unpack htmlText
     return ()
 

@@ -153,7 +153,8 @@ main = do
                         ++ (createPandocTable table))
 
 
-    htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
+    let htmlOpts = Text.Pandoc.Options.def {Text.Pandoc.Options.writerPreferAscii = True}
+    htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String htmlOpts pandocPage
     writeFile output $ T.unpack htmlText
     return ()
 
