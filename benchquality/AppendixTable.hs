@@ -54,10 +54,11 @@ parseRunName name =
       "Passage" -> Passage
       s -> error ("unknown runName "<> show s)
 
-opts :: Parser ([FilePath], [Metric], Metric, [AssessmentMethod], AssessmentMethod, RunType)
+opts :: Parser ([FilePath], FilePath, [Metric], Metric, [AssessmentMethod], AssessmentMethod, RunType)
 opts =
-    (,,,,,)
+    (,,,,,,)
     <$> some (argument str (metavar "evalfiles" <> help "A glob pattern for evalfiles"))
+    <*> option str (short 'o' <> long "out" <> help "output file")
     <*> some (option str (short 'm' <> long "metric" <> help "evaluation metric to include, (e.g. Rprec, map, ndcg_cut_5)"))
     <*> option str (short 'M' <> long "sort-metric" <> help "evaluation metric to sort results by")
     <*> some (option str (short 'a' <> long "assessment" <> help "assessment method to include (e.g. manual, automatic, lenient)"))
@@ -122,7 +123,7 @@ stderr xs = stddev xs / sqrt (realToFrac $ length xs)
 
 main :: IO ()
 main = do
-    (evalGlobs, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType) <- execParser $ info (helper <*> opts) mempty
+    (evalGlobs, output, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
     --print =<< readEval "UNH/UNH-benchmarkY1test.bm25.automatic.psg.eval.gz"
     let assessmentMethodsSet = S.fromList assessmentMethods
@@ -159,8 +160,8 @@ main = do
     let pandocPage =  Pandoc.Pandoc mempty
             [toPandoc (textCell . getRunName) (textCell . show) (textCell . showCell) table]
     htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
-    putStrLn $ T.unpack htmlText
-    --return ()
+    writeFile output $ T.unpack htmlText
+    return ()
 
 textCell :: String -> Pandoc.TableCell
 textCell t = [Pandoc.Plain [Pandoc.Str t]]
