@@ -51,9 +51,9 @@ parseRunName name =
       "Passage" -> Passage
       s -> error ("unknown runName "<> show s)
 
-opts :: Parser ([FilePath], FilePath, [Metric], Metric, [AssessmentMethod], AssessmentMethod, RunType)
+opts :: Parser ([FilePath], FilePath, [Metric], Metric, [AssessmentMethod], AssessmentMethod, RunType, String)
 opts =
-    (,,,,,,)
+    (,,,,,,,)
     <$> some (argument str (metavar "evalfiles" <> help "A glob pattern for evalfiles"))
     <*> option str (short 'o' <> long "out" <> help "output file")
     <*> some (option str (short 'm' <> long "metric" <> help "evaluation metric to include, (e.g. Rprec, map, ndcg_cut_5)"))
@@ -61,6 +61,7 @@ opts =
     <*> some (option str (short 'a' <> long "assessment" <> help "assessment method to include (e.g. manual, automatic, lenient)"))
     <*> option str (short 'A' <> long "sort-assessment" <> help "assessment method to sort results by")
     <*> option (parseRunName <$> str) (short 'r' <> long "run-type" <> help "Passage or Entity")
+    <*> option str (short 't' <> long "title" <> help "page title. will be appended with \"Entity/Passage task\"")
 
 -- Expect file names to be of this format:
 --  $methodname.$assess.$runType.eval*
@@ -109,22 +110,22 @@ stderr xs = stddev xs / sqrt (realToFrac $ length xs)
 
 main :: IO ()
 main = do
-    (evalGlobs, output, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType) <- execParser $ info (helper <*> opts) mempty
+    (evalGlobs, output, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType, title) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
     let assessmentMethodsSet = S.fromList assessmentMethods
         metricsSet = S.fromList metrics
     evals <- mapM (readEval metricsSet assessmentMethodsSet) evalFiles
-    let grouped = M.unionsWith (++) [ M.singleton (runName, assess, metric) [score]
+    let groupedData = M.unionsWith (++) [ M.singleton (runName, assess, metric) [score]
                                     | eval <- evals
                                     , (runName, runType, assess, _query, metric, score) <- eval
                                     , assess `S.member` assessmentMethodsSet
                                     , metric `S.member` metricsSet
                                     , runType ==  requestedRunType
                                     ]
-    let stats = fmap (\xs -> (mean xs, stderr xs)) grouped
+    let stats = fmap (\xs -> (mean xs, stderr xs)) groupedData
         runNames =
             sortBy (flip $ comparing $ \runName -> stats M.! (runName, sortAssessmentMethod, sortMetric))
-            $ S.toList $ S.fromList [ runName | (runName, _, _) <- M.keys grouped ]
+            $ S.toList $ S.fromList [ runName | (runName, _, _) <- M.keys groupedData ]
 
     let simpleHeader = Group SingleLine . map Header
         cols = [(m,a) |  a <- assessmentMethods, m <- metrics]
@@ -139,11 +140,19 @@ main = do
                       (Group SingleLine (map Header (fmap prettyCols cols)))
                       cells
 
+
+
     let showCell Nothing = "—"
         showCell (Just (m,s)) = showFFloat (Just 3) m . showString " ± " . showFFloat (Just 3) s $ ""
-    --putStrLn $ render (escapeLatex . getRunName) show showCell table
-    let pandocPage =  Pandoc.Pandoc mempty
+
+        createPandocTable table =
             [toPandoc (textCell . getRunName) (textCell . getHeader) (textCell . showCell) table]
+
+        pandocPage =  Pandoc.Pandoc mempty (
+                        [pandocHeader (show title <> " " <> show requestedRunType <> " Task")]
+                        ++ (createPandocTable table))
+
+
     htmlText <- Text.Pandoc.Class.runIOorExplode $ Text.Pandoc.Writers.HTML.writeHtml5String Text.Pandoc.Options.def pandocPage
     writeFile output $ T.unpack htmlText
     return ()
@@ -151,6 +160,8 @@ main = do
 prettyCols :: (Metric, AssessmentMethod) -> ColHeader
 prettyCols (metric, assessment) = ColHeader $ metric <> "/" <> assessment
 
+pandocHeader :: String -> Pandoc.Block
+pandocHeader text = Pandoc.Header 1 mempty [Pandoc.Str text ]
 
 textCell :: String -> Pandoc.TableCell
 textCell t = [Pandoc.Plain [Pandoc.Str t]]
