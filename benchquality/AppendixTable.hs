@@ -164,7 +164,7 @@ main = do
     return ()
 
 prettyCols :: (Metric, AssessmentMethod) -> String
-prettyCols (metric, assessment) = show metric <> "/" <> show assessment
+prettyCols (metric, assessment) = metric <> "/" <> assessment
 
 
 textCell :: String -> Pandoc.TableCell
