@@ -162,10 +162,10 @@ prettyCols :: (Metric, AssessmentMethod) -> ColHeader
 prettyCols (metric, assessment) = ColHeader $ metric <> "/" <> assessment
 
 pandocHeader :: String -> Pandoc.Block
-pandocHeader text = Pandoc.Header 1 mempty [Pandoc.Str text ]
+pandocHeader text = Pandoc.Header 1 mempty [Pandoc.Str text, Pandoc.Space ]
 
 textCell :: String -> Pandoc.TableCell
-textCell t = [Pandoc.Plain [Pandoc.Str t]]
+textCell t = [Pandoc.Plain [Pandoc.Str t, Pandoc.Space]]
 
 toPandoc :: (rh -> Pandoc.TableCell) -> (ch -> Pandoc.TableCell) -> (a -> Pandoc.TableCell) -> Table rh ch a -> Pandoc.Block
 toPandoc rowHeader colHeader cell (Table rows cols cells) =
@@ -173,7 +173,7 @@ toPandoc rowHeader colHeader cell (Table rows cols cells) =
   where
     nCols = length (headerContents cols) + 1
     aligns = replicate nCols Pandoc.AlignLeft
-    widths = replicate nCols 0
+    widths = replicate nCols 1
     colHeaders = [] : map colHeader (headerContents cols)
     tableCells = [ rowHeader row : map cell rowCells
                  | (row, rowCells) <- zip (headerContents rows) cells
