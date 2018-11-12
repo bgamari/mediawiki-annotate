@@ -21,9 +21,7 @@ import qualified Data.Text as T
 import Options.Applicative
 
 import Text.Tabular
---import Text.Tabular.AsciiArt
---import Text.Tabular.Html
---import Text.Tabular.Latex
+
 
 import qualified Text.Pandoc.Definition as Pandoc
 import qualified Text.Pandoc.Class
@@ -35,15 +33,11 @@ import Data.Aeson
 
 data RunType = Entity | Passage
              deriving (Eq, Ord, Show)
--- data AssessmentMethod = Automatic | Lenient | Manual
---                       deriving (Eq, Ord, Enum, Bounded, Show)
 newtype RunName = RunName { getRunName :: String }
                 deriving (Eq, Ord, Show)
 
 newtype ColHeader = ColHeader { getHeader :: String }
                 deriving (Eq, Ord, Show)
---data Metric = MAP | RPrec | RecipRank | NDCG
---            deriving (Eq, Ord, Enum, Bounded, Show)
 newtype Query = Query BS.ByteString
               deriving (Show)
 
@@ -94,11 +88,7 @@ readEval metrics assessmentMethods path  =
                         "entity" -> Entity
                         s     -> error $ "unknown runType "++ show s
             assess = parts !! 1
---             assess = case parts !! 1 of
---                        "automatic" -> Automatic
---                        "lenient" -> Lenient
---                        "manual" -> Manual
---                        s        -> error $ "unknown assessment type "++show s
+
         in mapMaybe (parseLine . BSL.split '\t') $ BSL.lines x
 
     parseMetric name =
@@ -106,13 +96,6 @@ readEval metrics assessmentMethods path  =
             Just name
         else
             Nothing
---     parseMetric name =
---         case name of
---           "map"        -> Just MAP
---           "Rprec"      -> Just RPrec
---           "recip_rank" -> Just RecipRank
---           "ndcg"       -> Just NDCG
---           _            -> Nothing
 
 mean :: RealFrac a => [a] -> a
 mean xs = sum xs / realToFrac (length xs)
@@ -128,7 +111,6 @@ main :: IO ()
 main = do
     (evalGlobs, output, metrics, sortMetric, assessmentMethods, sortAssessmentMethod, requestedRunType) <- execParser $ info (helper <*> opts) mempty
     evalFiles <- concat <$> mapM glob evalGlobs
-    --print =<< readEval "UNH/UNH-benchmarkY1test.bm25.automatic.psg.eval.gz"
     let assessmentMethodsSet = S.fromList assessmentMethods
         metricsSet = S.fromList metrics
     evals <- mapM (readEval metricsSet assessmentMethodsSet) evalFiles
@@ -145,7 +127,6 @@ main = do
             $ S.toList $ S.fromList [ runName | (runName, _, _) <- M.keys grouped ]
 
     let simpleHeader = Group SingleLine . map Header
-        --cols = (,) <$> metrics <*> assessmentMethods
         cols = [(m,a) |  a <- assessmentMethods, m <- metrics]
         cells = [ [ s
                   | (metric,assess) <- cols
@@ -153,7 +134,6 @@ main = do
                   ]
                 | runName <- runNames
                 ]
-    putStrLn $ show cols
     let table :: Table RunName ColHeader (Maybe (Double, Double))
         table = Table (Group SingleLine (map Header runNames))
                       (Group SingleLine (map Header (fmap prettyCols cols)))
