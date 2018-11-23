@@ -17,7 +17,7 @@ executable car-retrieval
   other-extensions:    ScopedTypeVariables, BangPatterns
   build-depends:       base >=4.9 && <4.12,
                        filepath,
-                       containers >=0.5 && <0.6,
+                       containers >=0.5 && <0.7,
                        unordered-containers >= 0.2,
                        dlist >= 0.7,
                        log-domain,
@@ -43,7 +43,7 @@ executable trec-car-entity-search
   other-extensions:    ScopedTypeVariables, BangPatterns
   build-depends:       base,
                        filepath,
-                       containers >=0.5 && <0.6,
+                       containers,
                        unordered-containers >= 0.2,
                        dlist >= 0.7,
                        log-domain,
@@ -89,7 +89,7 @@ executable car-galago-query
   other-extensions:    ScopedTypeVariables, BangPatterns
   build-depends:       base,
                        filepath,
-                       containers >=0.5 && <0.6,
+                       containers,
                        unordered-containers >= 0.2,
                        dlist >= 0.7,
                        log-domain,
