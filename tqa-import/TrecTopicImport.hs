@@ -56,13 +56,13 @@ splitQueries line =
 
 
 
-queriesToPage :: Query -> Page
+queriesToPage :: Query -> Stub
 queriesToPage Query{..} =
-    Page { pageName = pageName
-         , pageId = packPageId $ T.unpack queryId
-         , pageType = ArticlePage
-         , pageMetadata = emptyPageMetadata
-         , pageSkeleton = mempty
+    Stub { stubName = pageName
+         , stubPageId = packPageId $ T.unpack queryId
+         , stubType = ArticlePage
+         , stubMetadata = emptyPageMetadata
+         , stubSkeleton = mempty
          }
   where
     pageName = packPageName $ T.unpack queryText
