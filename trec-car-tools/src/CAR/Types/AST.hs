@@ -11,7 +11,8 @@ module CAR.Types.AST
       PageName(..), packPageName, unpackPageName
     , SiteId(..)
     , Link(..)
-    , PageId(..), packPageId, unpackPageId, pageNameToId
+    , PageId(..), packPageId, unpackPageId
+    , pageNameToId
     , SectionHeading(..)
     , HeadingId(..), unpackHeadingId, packHeadingId, sectionHeadingToId
     , ParagraphId(..), unpackParagraphId, packParagraphId
@@ -41,7 +42,8 @@ module CAR.Types.AST
       -- * Outline documents
     , Stub(..)
       -- * Entity
-    , Entity(..), pageIdToName
+    , Entity(..)
+    , pageIdToName
     ) where
 
 import Data.Foldable
@@ -101,6 +103,7 @@ instance CBOR.Serialise PageId where
     encode (PageId p) = CBOR.encode (Utf8.toByteString p)
     decode = PageId . Utf8.unsafeFromByteString <$> CBOR.decode
 
+{-# Deprecated pageNameToId "Use nameToId index" #-}
 pageNameToId :: SiteId -> PageName -> PageId
 pageNameToId (SiteId s) (PageName n) =
     PageId

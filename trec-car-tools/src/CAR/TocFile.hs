@@ -56,9 +56,9 @@ newtype IndexedCborPath i a = IndexedCborPath FilePath
 
 buildIndex :: (Hashable i, Eq i, CBOR.Serialise a)
            => (a -> i) -> FilePath -> IO (HM.HashMap i Offset)
-buildIndex toIndex path = do
+buildIndex toIndex cborPath = do
     -- Ignore header
-    bs <- BSL.readFile path
+    bs <- BSL.readFile cborPath
     let decodeHeader = do
             _ <- CBOR.decode @CBOR.Term
             _ <- CBOR.decodeListLenIndef
@@ -94,7 +94,7 @@ open (IndexedCborPath fname) = do
         error $ "Deserialisation error while deserialising TOC "++show tocName++": "++show err
     tocName = fname <.> "toc"
 
--- | Build a TOC in-memory
+-- | Build a TOC in-memory (does not read from file)
 openInMem :: (Hashable i, Eq i, CBOR.Serialise a, NFData i)
           => (a -> i) -> FilePath -> IO (IndexedCbor i a)
 openInMem toIndex fname = do

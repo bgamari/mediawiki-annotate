@@ -36,6 +36,8 @@ library
                        trifecta,
                        aeson,
                        yaml,
+                       network-uri,
+                       bytestring,
                        optparse-applicative >= 0.13,
                        transformers >=0.5 && <0.6,
                        time >=1.6 && <1.10,
@@ -52,6 +54,7 @@ library
                        postgresql-simple >=0.5 && <0.6,
                        unordered-containers >=0.2 && <0.3,
                        trec-car-tools,
+                       simplir,
                        mediawiki-parser
   default-language:    Haskell2010
 

@@ -20,6 +20,7 @@ import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.TocFile as TocFile
 import qualified CAR.AnnotationsFile as CAR
+import qualified CAR.NameToIdMap as CARN
 import CAR.Types
 import CAR.Utils
 import CAR.ToolVersion
@@ -216,9 +217,10 @@ readFilteredPages pageNames pageIds inputFile
   | S.null pageNames && S.null pageIds  =
      readPagesOrOutlinesAsPages inputFile
   | otherwise = do
-     siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
      anns <- CAR.openAnnotations inputFile
-     let pageIds' = pageIds <> (S.map (pageNameToId siteId) $ pageNames)
+     nameMap <- CARN.openNameToIdMap inputFile
+     let pageNameToIdSet = CARN.pageNameToIdSet nameMap
+     let pageIds' = pageIds <>  foldMap pageNameToIdSet pageNames
      return $ mapMaybe (`CAR.lookupPage` anns) ( S.toList  pageIds')
 
 pagesFromFile :: Parser (IO [Page])
@@ -226,18 +228,17 @@ pagesFromFile =
     f <$> argument str (help "input file" <> metavar "FILE")
       <*> fmap S.fromList (many (option  (packPageName  <$> str) (short 'p' <> long "page" <> metavar "PAGE NAME" <> help "Page name to dump or nothing to dump all")))
       <*> fmap S.fromList (many (option  (packPageId  <$> str) (short 'P' <> long "pageid" <> metavar "PAGE ID " <> help "Page id to dump or nothing to dump all")))
-      <*> (many (option (flip pageNameToId <$> (packPageName <$> str)) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
+      <*> (many (option (packPageName <$> str) (long "target" <> short 't' <> help "dump only pages with links to this target page name (and the page itself)")))
       <*> ( HS.fromList <$> many (option (packPageId <$> str) (long "targetids" <> short 'T'  <> help "dump only pages with links to this target page id (and the page itself)")))
       <*> ( HS.fromList <$> many (option (packPageName <$> str)  (long "redirect" <> short 'r' <> help "dump only pages with redirects from this page name")))
   where
-    f :: FilePath -> S.Set PageName -> S.Set PageId -> [SiteId -> PageId] -> HS.HashSet PageId -> HS.HashSet PageName -> IO [Page]
-    f inputFile pageNames pageIds targetPageIds1 targetPageIds2 redirectPageNames = do
-        siteId <- wikiSite . fst <$> readPagesOrOutlinesAsPagesWithProvenance inputFile
-        pages <- readFilteredPages pageNames pageIds inputFile
-        return $ filter (redirectTargets redirectPageNames)
-               $ filter (searchTargets (targetPageIds siteId)) pages
-      where targetPageIds siteId =
-                HS.fromList (map ($ siteId) targetPageIds1)
+    f :: FilePath -> S.Set PageName -> S.Set PageId -> [PageName] -> HS.HashSet PageId -> HS.HashSet PageName -> IO [Page]
+    f inputFile pageNames pageIds targetPageNames1 targetPageIds2 redirectPageNames = do
+        nameMap <- CARN.openNameToIdMap inputFile
+        let targetPageIds1 = S.toList $ CARN.pageNamesToIdSet nameMap targetPageNames1
+
+            targetPageIds =
+                HS.fromList targetPageIds1
                 `HS.union` targetPageIds2
             searchTargets targets page =
                 if | HS.null targets -> True
@@ -251,6 +252,10 @@ pagesFromFile =
                         -> let pageRedirectSet = HS.fromList pageRedirects
                            in any (  `HS.member` pageRedirectSet) redirects
                    | otherwise -> False
+
+        pages <- readFilteredPages pageNames pageIds inputFile
+        return $ filter (redirectTargets redirectPageNames)
+               $ filter (searchTargets targetPageIds) pages
 
 sectionHeadings :: PageSkeleton -> [SectionHeading]
 sectionHeadings (Section h _ children) = h : foldMap sectionHeadings children

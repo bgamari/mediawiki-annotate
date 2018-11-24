@@ -30,6 +30,7 @@ library
                        CAR.Retrieve
                        CAR.KnowledgeBase
                        CAR.FillMetadata
+                       CAR.NameToIdMap
                        WikiData
   default-language:    Haskell2010
   ghc-options:         -Wall

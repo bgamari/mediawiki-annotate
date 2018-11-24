@@ -16,12 +16,17 @@ import qualified Data.Text.Encoding as TE
 
 import Data.MediaWiki.XmlDump (WikiDoc(..))
 import Data.MediaWiki.Markup as Markup
-import CAR.Types
+import CAR.Types hiding (pageNameToId)
 import CAR.Utils hiding (pageRedirect)
 
 import CAR.Import.Entities
 import CAR.Import.Templates
 import CAR.Import.Utils
+import Network.URI
+import Data.Char (ord, chr)
+import qualified Data.ByteString.Short as SBS
+
+import qualified Data.SmallUtf8 as Utf8
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
@@ -36,6 +41,16 @@ defaultConfig =
            , isInfoboxTemplate = (== "infobox settlement")
            , resolveTemplate = defaultTemplateHandler
            }
+
+pageNameToId :: SiteId -> PageName -> PageId
+pageNameToId (SiteId s) (PageName n) =
+    PageId
+    $ Utf8.unsafeFromShortByteString
+    $ urlEncodeText
+    $ T.unpack s ++ ":" ++ T.unpack n
+  where urlEncodeText :: String -> SBS.ShortByteString
+        urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
+
 
 toPage :: Config -> SiteId -> WikiDoc -> Either String Page
 toPage config@Config{..} site WikiDoc{..} =

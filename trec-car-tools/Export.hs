@@ -18,16 +18,17 @@ import CAR.ToolVersion
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 import CAR.QRelFile
+import qualified CAR.NameToIdMap as CARN
 
 
-options :: Parser (FilePath, [SiteId -> PageId], [Exporter])
+options :: Parser (FilePath, [PageName], [PageId], [Exporter])
 options =
-    (,,)
+    (,,,)
         <$> argument str (help "annotations file" <> metavar "FILE")
-        <*> many (option (flip pageNameToId . PageName . T.pack <$> str)
+        <*> many (option (packPageName <$> str)
                          (short 'p' <> long "page"
-                          <> metavar "PAGE NAME" <> help "Export only this page")
-              <|> option (const . packPageId <$> str)
+                          <> metavar "PAGE NAME" <> help "Export only this page"))
+        <*> many (option (packPageId <$> str)
                          (short 'P' <> long "page-id"
                           <> metavar "PAGE ID" <> help "Export only this page"))
         <*> some exporter
@@ -186,15 +187,15 @@ exportAllWithPrefix outpath prov pages= do
 
 main :: IO ()
 main = do
-    (path, names, exporters) <- execParser' 2 (helper <*> options) mempty
+    (path, names, pageIds1, exporters) <- execParser' 2 (helper <*> options) mempty
     anns <- openAnnotations path
     (prov, _) <- readPagesFileWithProvenance path
-    let siteId = wikiSite prov
+    nameMap <- CARN.openNameToIdMap path
+    let pageIds2 = S.toList $ CARN.pageNamesToIdSet nameMap names
 
     forM_ exporters $ \exporter ->
         let pagesToExport
               | null names = pages anns
-              | otherwise  = mapMaybe (`lookupPage` anns)
-                           $ map ($ siteId) names
+              | otherwise  = mapMaybe (`lookupPage` anns)  $ nub (pageIds1 ++ pageIds2)
             {-# INLINE pagesToExport #-}
         in exporter prov pagesToExport
