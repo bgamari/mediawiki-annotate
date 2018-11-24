@@ -19,6 +19,7 @@ module CAR.TocFile
 import Control.Exception (Exception, throw)
 import Data.Foldable hiding (toList)
 import Control.DeepSeq
+import GHC.Stack
 import qualified Codec.CBOR.Read as CBOR.Read
 import qualified Codec.CBOR.Decoding as CBOR (decodeListLenIndef)
 import qualified Codec.CBOR.Term as CBOR
@@ -36,7 +37,7 @@ import CAR.Types.CborList
 
 type Offset = Int
 
-readValuesWithOffsets :: forall a. CBOR.Serialise a
+readValuesWithOffsets :: forall a. (CBOR.Serialise a, HasCallStack)
                       => BSL.ByteString -> [(Offset, a)]
 readValuesWithOffsets = go 0
   where

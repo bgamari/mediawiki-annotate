@@ -35,6 +35,7 @@ buildNameToIdMap cborPath = do
           ]
 
 
+
 createNameToIdMap :: FilePath -> IO ()
 createNameToIdMap cborPath = do
     index <- buildNameToIdMap cborPath

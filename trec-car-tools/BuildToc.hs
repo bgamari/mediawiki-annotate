@@ -15,11 +15,14 @@ import CAR.NameToIdMap as NameIdx
 mode :: Parser (IO ())
 mode = subparser
     $  command "pages" (info (helper <*> indexPages) fullDesc)
+    <> command "stubs" (info (helper <*> indexStubs) fullDesc)
     <> command "paragraphs" (info (helper <*> indexParagraphs) fullDesc)
     <> command "page-names" (info (helper <*> indexPageNames) fullDesc)
   where
     indexPages =
         void . Toc.createIndex pageId <$> argument str (help "articles cbor file" <> metavar "FILE")
+    indexStubs =
+        void . Toc.createIndex stubPageId <$> argument str (help "outlines cbor file" <> metavar "FILE")
     indexParagraphs =
         void . Toc.createIndex paraId <$> argument str (help "paragraphs cbor file" <> metavar "FILE")
     indexPageNames =
