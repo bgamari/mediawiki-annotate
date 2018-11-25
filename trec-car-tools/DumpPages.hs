@@ -217,11 +217,13 @@ readFilteredPages pageNames pageIds inputFile
   | S.null pageNames && S.null pageIds  =
      readPagesOrOutlinesAsPages inputFile
   | otherwise = do
-     anns <- CAR.openAnnotations inputFile
+     anns <- TocFile.open $ TocFile.IndexedCborPath inputFile
+--      anns <- CAR.openAnnotations inputFile
+
      nameMap <- CARN.openNameToIdMap inputFile
      let pageNameToIdSet = CARN.pageNameToIdSet nameMap
      let pageIds' = pageIds <>  foldMap pageNameToIdSet pageNames
-     return $ mapMaybe (`CAR.lookupPage` anns) ( S.toList  pageIds')
+     return $ mapMaybe (`TocFile.lookup` anns) ( S.toList  pageIds')
 
 pagesFromFile :: Parser (IO [Page])
 pagesFromFile =
