@@ -24,6 +24,7 @@ import qualified CAR.NameToIdMap as CARN
 import CAR.Types
 import CAR.Utils
 import CAR.ToolVersion
+import CAR.Types.Files
 
 opts :: Parser (IO ())
 opts = subparser
@@ -223,7 +224,7 @@ readFilteredPages pageNames pageIds inputFile
      nameMap <- CARN.openNameToIdMap inputFile
      let pageNameToIdSet = CARN.pageNameToIdSet nameMap
      let pageIds' = pageIds <>  foldMap pageNameToIdSet pageNames
-     return $ mapMaybe (`TocFile.lookup` anns) ( S.toList  pageIds')
+     return $ mapMaybe (\x -> fmap (stubToPage) $ x `TocFile.lookup` anns) ( S.toList  pageIds')
 
 pagesFromFile :: Parser (IO [Page])
 pagesFromFile =

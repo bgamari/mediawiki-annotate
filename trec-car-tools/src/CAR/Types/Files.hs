@@ -30,6 +30,7 @@ module CAR.Types.Files
       -- * Header type
     , FileType(..)
     , Header(..)
+    , stubToPage
     ) where
 
 import Data.Proxy
@@ -170,7 +171,9 @@ readPagesOrOutlinesAsPagesWithProvenance path = do
     case result of
         Left pages -> return (prov, pages)
         Right stubs -> return (prov, fmap stubToPage stubs)
-  where stubToPage Stub{..} =
+
+stubToPage :: Stub -> Page
+stubToPage Stub{..} =
           Page { pageName = stubName
                , pageId = stubPageId
                , pageType = stubType
