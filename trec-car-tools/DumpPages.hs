@@ -212,19 +212,14 @@ opts = subparser
 
 readFilteredPages :: S.Set PageName    -- ^ set of page names to read
                   -> S.Set PageId    -- ^ set of page names to read
-                  -> FilePath          -- ^ pages or outlines file
-                  -> IO [Page]
-readFilteredPages pageNames pageIds inputFile
-  | S.null pageNames && S.null pageIds  =
-     readPagesOrOutlinesAsPages inputFile
-  | otherwise = do
-     anns <- CAR.openEitherAnnotations inputFile
---      anns <- CAR.openAnnotations inputFile
-
-     nameMap <- CARN.openNameToIdMap inputFile
-     let pageNameToIdSet = CARN.pageNameToIdSet nameMap
-     let pageIds' = pageIds <>  foldMap pageNameToIdSet pageNames
-     return $ mapMaybe ( `CAR.lookupEither` anns) ( S.toList  pageIds')
+                  -> CAR.PageBundle          -- ^ pages or outlines file
+                  -> [Page]
+readFilteredPages pageNames pageIds pageBundle =
+   if S.null pageNames && S.null pageIds  then
+     CAR.bundleAllPages pageBundle
+   else
+     let pageIds' = pageIds <>  (CAR.bundleLookupAllPageNames pageBundle) pageNames
+     in mapMaybe (CAR.bundleLookupPage pageBundle) ( S.toList  pageIds')
 
 pagesFromFile :: Parser (IO [Page])
 pagesFromFile =
@@ -237,8 +232,8 @@ pagesFromFile =
   where
     f :: FilePath -> S.Set PageName -> S.Set PageId -> [PageName] -> HS.HashSet PageId -> HS.HashSet PageName -> IO [Page]
     f inputFile pageNames pageIds targetPageNames1 targetPageIds2 redirectPageNames = do
-        nameMap <- CARN.openNameToIdMap inputFile
-        let targetPageIds1 = S.toList $ CARN.pageNamesToIdSet nameMap targetPageNames1
+        pageBundle <- CAR.openPageBundle inputFile
+        let targetPageIds1 = S.toList $ CAR.bundleLookupAllPageNames pageBundle targetPageNames1
 
             targetPageIds =
                 HS.fromList targetPageIds1
@@ -256,7 +251,7 @@ pagesFromFile =
                            in any (  `HS.member` pageRedirectSet) redirects
                    | otherwise -> False
 
-        pages <- readFilteredPages pageNames pageIds inputFile
+            pages = readFilteredPages pageNames pageIds pageBundle
         return $ filter (redirectTargets redirectPageNames)
                $ filter (searchTargets targetPageIds) pages
 

@@ -9,7 +9,7 @@ import qualified Data.Text.Lazy.IO as TL
 import Options.Applicative
 
 import CAR.Types
-import CAR.AnnotationsFile as AnnsFile
+import CAR.AnnotationsFile as CAR
 
 -- TODO: This should get moved to trec-car-dump
 
@@ -22,9 +22,10 @@ options =
 main :: IO ()
 main = do
     (unprocessedPagesFile, outputFile) <- execParser $ info (helper <*> options) mempty
-    unprocessedPages <- openAnnotations unprocessedPagesFile
+--     unprocessedPages <- openAnnotations unprocessedPagesFile
+    pageBundle <- CAR.openPageBundle unprocessedPagesFile
 
-    let legalPages = AnnsFile.pages unprocessedPages
+    let legalPages = CAR.bundleAllPages pageBundle --CAR.pages unprocessedPages
 
         formatPageIdToName :: Page -> TB.Builder
         formatPageIdToName page =

@@ -23,7 +23,7 @@ import CAR.RunFile
 import CAR.RunFile as RF
 
 import SimplIR.Format.TrecRunFile as TrecRunFile
-import CAR.AnnotationsFile as AnnsFile
+import CAR.AnnotationsFile as CAR
 
 import Debug.Trace
 
@@ -56,11 +56,12 @@ opts = subparser
 
     entityFixId :: FilePath -> FilePath -> FilePath -> IO ()
     entityFixId pagesFile inputRunFile outputRunFile = do
-        unprocessedPages <- openAnnotations pagesFile
+        pageBundle <- CAR.openPageBundle pagesFile
+--         unprocessedPages <- openAnnotations pagesFile
         let pageNameTranslate :: HM.HashMap PageName PageId
             pageNameTranslate = HM.fromList
-                $ fmap (\page -> (pageName page, pageId page))
-                $ AnnsFile.pages unprocessedPages
+                $ (\page -> (pageName page, pageId page))
+               <$> CAR.bundleAllPages pageBundle
 
         rankings <- readStringRun inputRunFile :: IO [StringRankingEntry]
         let filteredRankings = map (entityFixIdFromRankEntry pageNameTranslate) rankings

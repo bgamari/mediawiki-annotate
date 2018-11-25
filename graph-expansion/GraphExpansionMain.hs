@@ -43,7 +43,7 @@ import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import CAR.Types
 import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
+import CAR.AnnotationsFile as CAR
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 
@@ -156,11 +156,11 @@ opts =
 
 
 nodesToWordVector :: forall n. (KnownNat n)
-                 => AnnotationsFile
+                 => PageBundle
                  -> WordEmbedding n
                  -> HS.HashSet PageId
                  -> HM.HashMap PageId (Attributes (EmbeddingDim n))
-nodesToWordVector annsFile wordEmbedding nodes =
+nodesToWordVector pageBundle wordEmbedding nodes =
     zScoreStandardize
     $ HM.mapWithKey (\pid _ -> toWordVec pid)
     $ HS.toMap nodes
@@ -168,16 +168,16 @@ nodesToWordVector annsFile wordEmbedding nodes =
     toWordVec pid =
         wordVecToAttributes
         $ maybe (pageNameEmbeddingAttributes wordEmbedding pid) (pageTextEmbeddingAttributes wordEmbedding)
-        $ AnnsFile.lookupPage pid annsFile
+        $ CAR.bundleLookupPage pageBundle pid
 
 computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
-                        -> AnnotationsFile
+                        -> PageBundle
                         -> CarRun.QueryId -> PageId ->  [Term] -> HS.HashSet PageId -> Int
                         -> [(Method, [(PageId, Maybe ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
-      annsFile queryId queryPageId query seeds radius =
+      pageBundle queryId queryPageId query seeds radius =
       let
 
         edgeFilters :: [(EdgeFilteringNames, [EdgeDoc] -> [EdgeDoc])]
@@ -313,13 +313,13 @@ computeSimpleGraphs universeGraph queryPageIds =
 
 computeFullgraphRankingsForQuery
     :: forall n. (KnownNat n)
-    => AnnotationsFile
+    => PageBundle
     -> WordEmbedding n
     -> [((GraphNames, EdgeFilteringNames, WeightingNames), Graph PageId Double)]
     -> HS.HashSet PageId
     -> [(Method, [(PageId, Double)])]
 
-computeFullgraphRankingsForQuery annsFile wordEmbedding simpleWeightedGraphs = \seeds ->
+computeFullgraphRankingsForQuery pageBundle wordEmbedding simpleWeightedGraphs = \seeds ->
     let graphRankings :: [(GraphRankingNames, Graph PageId Double -> [(PageId, Double)])]
         graphRankings = [(PageRank, \graph -> rankByPageRank graph 0.15 20)
                         ,(PersPageRank, \graph -> rankByPersonalizedPageRank graph 0.15 seeds 20)
@@ -337,7 +337,7 @@ computeFullgraphRankingsForQuery annsFile wordEmbedding simpleWeightedGraphs = \
             ]
     in computeRankings'
   where
-    nodeAttributes = nodesToWordVector annsFile wordEmbedding (foldMap (nodeSet . snd) simpleWeightedGraphs)
+    nodeAttributes = nodesToWordVector pageBundle wordEmbedding (foldMap (nodeSet . snd) simpleWeightedGraphs)
 
 
 
@@ -431,7 +431,7 @@ main = do
       rankingType, graphset, queryRestriction, dotFilenameMaybe, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
-    annsFile <- AnnsFile.openAnnotations articlesFile
+    pageBundle <- CAR.openPageBundle articlesFile
     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -536,7 +536,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
-                    rankings = computeRankingsForQuery retrieveDocs annsFile queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
+                    rankings = computeRankingsForQuery retrieveDocs pageBundle queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
 
                 case dotFilenameMaybe of
                     Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename

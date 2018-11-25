@@ -1,8 +1,21 @@
-module CAR.AnnotationsFile where
+module CAR.AnnotationsFile (
+      PageBundle(..)
+    , bundleAllPages, bundleLookupAllPageNames
+    , openPageBundle
+    -- | to be deprecated
+    , AnnotationsFile
+    , openAnnotations
+--     , lookupPage, pageIds, pages
+--     , AnnotationsFileStub, openStubAnnotations, lookupStub, lookupStubAsPage
+--     , EitherAnnotationsFile, openEitherAnnotations, lookupEither, toPageListEither
+    ) where
 
 import CAR.Types
 import qualified CAR.TocFile as Toc
 import CAR.Types.Files
+import CAR.NameToIdMap
+import qualified Data.Set as S
+import Data.Maybe (fromMaybe)
 
 data AnnotationsFile = AnnotationsFile (Toc.IndexedCbor PageId Page)
 
@@ -48,5 +61,46 @@ lookupEither name ann =
     case ann of
         PagesAnnotations ann' -> lookupPage name ann'
         StubsAnnotations ann' -> lookupStubAsPage name ann'
+
+toPageListEither :: EitherAnnotationsFile -> [Page]
+toPageListEither ann =
+    case ann of
+        PagesAnnotations (AnnotationsFile toc) -> Toc.toList toc
+        StubsAnnotations (AnnotationsFileStub toc) -> stubToPage <$> Toc.toList toc
+
+
+
+------
+
+data PageBundle = PageBundle { bundleProvenance :: Provenance
+                             , bundleLookupPage :: PageId -> Maybe Page
+                             , bundleLookupPageName :: PageName -> Maybe (S.Set PageId)
+                             , bundleToc :: EitherAnnotationsFile
+                             , bundleNameLookup ::  NameToIdMap
+                             , bundleCborPath :: FilePath
+                             }
+
+
+openPageBundle :: FilePath -> IO PageBundle
+openPageBundle cborPath = do
+    toc <- openEitherAnnotations cborPath
+    nameLookup <- openNameToIdMap cborPath
+    (prov, _) <- readPagesOrOutlinesAsPagesWithProvenance cborPath
+    return PageBundle {
+                 bundleCborPath = cborPath
+               , bundleProvenance = prov
+               , bundleToc = toc
+               , bundleNameLookup = nameLookup
+               , bundleLookupPage = (`lookupEither` toc)
+               , bundleLookupPageName = (nameLookup `pageNameToIdMaybeSet`)
+               }
+{-# NOINLINE openPageBundle #-}
+
+bundleAllPages :: PageBundle -> [Page]
+bundleAllPages bundle = toPageListEither (bundleToc bundle)
+
+bundleLookupAllPageNames :: Foldable f => PageBundle -> f PageName -> S.Set PageId
+bundleLookupAllPageNames bundle =
+    foldMap (fromMaybe S.empty . bundleLookupPageName bundle)
 
 

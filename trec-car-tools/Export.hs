@@ -188,14 +188,17 @@ exportAllWithPrefix outpath prov pages= do
 main :: IO ()
 main = do
     (path, names, pageIds1, exporters) <- execParser' 2 (helper <*> options) mempty
-    anns <- openAnnotations path
-    (prov, _) <- readPagesFileWithProvenance path
-    nameMap <- CARN.openNameToIdMap path
-    let pageIds2 = S.toList $ CARN.pageNamesToIdSet nameMap names
+--     anns <- openAnnotations path
+--     (prov, _) <- readPagesFileWithProvenance path
+--     nameMap <- CARN.openNameToIdMap path
+    pageBundle <- openPageBundle path
+
+
+    let pageIds2 = S.toList $ bundleLookupAllPageNames pageBundle names
 
     forM_ exporters $ \exporter ->
         let pagesToExport
-              | null names = pages anns
-              | otherwise  = mapMaybe (`lookupPage` anns)  $ nub (pageIds1 ++ pageIds2)
+              | null names = bundleAllPages pageBundle
+              | otherwise  = mapMaybe (bundleLookupPage pageBundle)  $ nub (pageIds1 ++ pageIds2)
             {-# INLINE pagesToExport #-}
-        in exporter prov pagesToExport
+        in exporter (bundleProvenance pageBundle) pagesToExport

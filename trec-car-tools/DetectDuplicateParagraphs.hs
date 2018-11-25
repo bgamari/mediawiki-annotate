@@ -7,11 +7,11 @@ import qualified Data.HashMap.Strict as M
 
 main :: IO ()
 main = do
-    anns <- openAnnotations "../data/enwiki-20161220/transformed-omit-pages.cbor"
+    pageBundle <- openPageBundle "../data/enwiki-20161220/transformed-omit-pages.cbor"
     let m :: M.HashMap ParagraphId (Paragraph, Int, [PageId] )
         m = M.fromListWith (\(text,count1, pages1)  (_,  count2,pages2) -> (text, count1 + count2, pages1 ++ pages2))
             [ (paraId para, (para, 1::Int, [pageId page]))
-            | page <- pages anns
+            | page <- bundleAllPages pageBundle
             , para <- toParagraphs page
             ]
             -- $ map (\p -> (paraId p ,(p, 1::Int)))

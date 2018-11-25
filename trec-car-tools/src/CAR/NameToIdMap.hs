@@ -8,6 +8,7 @@ module CAR.NameToIdMap
     , pageNameToIdSet
     , pageNameToAnId
     , pageNamesToIdSet
+    , NameToIdMap
     ) where
 
 import qualified Data.Map as M
