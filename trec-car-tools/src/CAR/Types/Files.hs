@@ -31,6 +31,7 @@ module CAR.Types.Files
     , FileType(..)
     , Header(..)
     , stubToPage
+    , readCarPagesOrOutlineWithProvenance
     ) where
 
 import Data.Proxy
