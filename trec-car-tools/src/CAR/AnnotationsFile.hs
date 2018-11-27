@@ -2,14 +2,10 @@ module CAR.AnnotationsFile (
       PageBundle(..)
     , bundleAllPages, bundleLookupAllPageNames
     , openPageBundle
-    -- | to be deprecated
-    , AnnotationsFile
-    , openAnnotations
     ) where
 
 import CAR.Types
 import qualified CAR.TocFile as Toc
-import CAR.Types.Files
 import CAR.NameToIdMap
 import qualified Data.Set as S
 import Data.Maybe (fromMaybe)
@@ -45,7 +41,7 @@ lookupStubAsPage name ann =  stubToPage <$> lookupStub name ann
 
 openEitherAnnotations :: FilePath -> IO EitherAnnotationsFile
 openEitherAnnotations cborPath = do
-    (prov, cborContents) <- readCarPagesOrOutlineWithProvenance cborPath
+    (_, cborContents) <- readCarPagesOrOutlineWithProvenance cborPath
     case cborContents  of
         Left _ ->  PagesAnnotations <$> openAnnotations cborPath
         Right _ -> StubsAnnotations <$> openStubAnnotations cborPath

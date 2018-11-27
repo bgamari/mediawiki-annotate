@@ -3,8 +3,6 @@
 import Control.Monad
 import Data.List (intersperse)
 import Data.Maybe
-import Data.Monoid
-import Data.List
 
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
