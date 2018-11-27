@@ -14,7 +14,6 @@ import qualified Data.HashMap.Strict as HM
 
 import CAR.Types
 import CAR.ToolVersion
-import CAR.RunFile
 import CAR.RunFile as RF
 
 import CAR.AnnotationsFile as CAR

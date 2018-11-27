@@ -2,6 +2,7 @@ module CAR.AnnotationsFile (
       PageBundle(..)
     , bundleAllPages, bundleLookupAllPageNames
     , openPageBundle
+    , takeOneFromSet
     ) where
 
 import CAR.Types
@@ -97,3 +98,12 @@ bundleLookupAllPageNames bundle =
     foldMap (fromMaybe S.empty . bundleLookupPageName bundle)
 
 
+
+takeOneFromSet :: Maybe (S.Set a) -> Maybe a
+takeOneFromSet Nothing = Nothing
+takeOneFromSet (Just s) | S.null s = Nothing
+takeOneFromSet (Just s) | not (S.null s) = Just $ head $ S.toList s
+
+
+-- maybeEmptySet :: Maybe (S.Set a) -> S.Set
+-- maybeEmptySet = fromMaybe S.empty

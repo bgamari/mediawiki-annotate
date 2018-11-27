@@ -4,7 +4,6 @@
 {-# LANGUAGE ApplicativeDo #-}
 
 import Data.Monoid hiding (All, Any)
-import Options.Applicative
 import qualified Data.HashSet as HS
 import qualified Data.Set as S
 import qualified Data.Text as T
@@ -17,7 +16,7 @@ import Control.Monad (void)
 import Options.Applicative
 import qualified Data.Binary.Serialise.CBOR as CBOR
 
-import CAR.ToolVersion
+
 import CAR.ToolVersion
 import CAR.Types
 

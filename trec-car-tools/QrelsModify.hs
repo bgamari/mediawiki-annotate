@@ -13,12 +13,9 @@ import Data.Maybe
 import Data.Hashable
 import Codec.Serialise as CBOR
 import qualified Data.Text as T
-import qualified Data.HashMap.Strict as HM
-
 
 import CAR.Types
 import CAR.ToolVersion
-import CAR.QRelFile
 import CAR.QRelFile as QF
 import CAR.TocFile as TocFile
 
