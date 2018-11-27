@@ -432,7 +432,7 @@ main = do
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
     pageBundle <- CAR.openPageBundle articlesFile
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
+--     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
@@ -459,8 +459,9 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
-              map populateSeeds . pagesToQueryDocs siteId queryDeriv
-                  <$> readPagesOrOutlinesAsPages queryFile
+              pageBundle <- openPageBundle queryFile
+              return $ map populateSeeds $ pagesToQueryDocs pageBundle queryDeriv
+
 
           QueriesFromJson queryFile -> do
               QueryDocList queriesWithSeedEntities <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile

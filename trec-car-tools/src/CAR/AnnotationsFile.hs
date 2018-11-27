@@ -5,9 +5,6 @@ module CAR.AnnotationsFile (
     -- | to be deprecated
     , AnnotationsFile
     , openAnnotations
---     , lookupPage, pageIds, pages
---     , AnnotationsFileStub, openStubAnnotations, lookupStub, lookupStubAsPage
---     , EitherAnnotationsFile, openEitherAnnotations, lookupEither, toPageListEither
     ) where
 
 import CAR.Types

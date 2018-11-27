@@ -24,7 +24,6 @@ import qualified Data.Text.Lazy.IO as TL
 
 import CAR.Types
 import CAR.ToolVersion
-import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.Utils (nubWithKey)
@@ -36,6 +35,7 @@ import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import SimplIR.TopK (collectTopK)
 import Control.Concurrent.Map
+import CAR.AnnotationsFile as CAR
 
 type NumResults = Int
 
@@ -98,13 +98,13 @@ retrievalModels' =
     ]
 
 computeRankingsForQuery :: (Index.RetrievalModel Term ParagraphId Int -> RetrievalFunction ParagraphId)
-                        -> AnnotationsFile
+                        -> PageBundle
                         -> CarRun.QueryId  ->  [Term]
                         -> [(RetrievalFun, [(ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
-      annsFile queryId query =
+      _articleBundle queryId query =
       let
 
         retrievalResults :: [(RetrievalFun, [(ParagraphId, Double)])]
@@ -133,15 +133,15 @@ main = do
       queryRestriction, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
-    annsFile <- AnnsFile.openAnnotations articlesFile
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
+    articlesBundle <- CAR.openPageBundle articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Paragraph index: "++ show simplirIndexFilepath
 
     queries' <-
         case querySrc of
           QueriesFromCbor queryFile queryDeriv _seedDeriv -> do
-              pagesToQueryDocs siteId queryDeriv <$> readPagesOrOutlinesAsPages queryFile
+              queryBundle <- CAR.openPageBundle queryFile
+              return $ pagesToQueryDocs queryBundle queryDeriv
 
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
@@ -205,7 +205,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(RetrievalFun, [(ParagraphId,  Double)])]
-                    rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query)
+                    rankings = computeRankingsForQuery retrieveDocs articlesBundle queryId (queryDocRawTerms query)
 
 
                 mapM_ (\(method, ranking) -> runIrMethod queryId query method ranking) rankings

@@ -5,24 +5,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
-import Data.Monoid
 import Options.Applicative
 import Control.Monad
-import Control.DeepSeq
 import Data.Maybe
-import Data.Hashable
-import Codec.Serialise as CBOR
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HM
 
 
 import CAR.Types
-import CAR.TocFile as Toc
 import CAR.ToolVersion
 import CAR.RunFile
 import CAR.RunFile as RF
 
-import SimplIR.Format.TrecRunFile as TrecRunFile
 import CAR.AnnotationsFile as CAR
 
 import Debug.Trace
@@ -57,7 +51,6 @@ opts = subparser
     entityFixId :: FilePath -> FilePath -> FilePath -> IO ()
     entityFixId pagesFile inputRunFile outputRunFile = do
         pageBundle <- CAR.openPageBundle pagesFile
---         unprocessedPages <- openAnnotations pagesFile
         let pageNameTranslate :: HM.HashMap PageName PageId
             pageNameTranslate = HM.fromList
                 $ (\page -> (pageName page, pageId page))

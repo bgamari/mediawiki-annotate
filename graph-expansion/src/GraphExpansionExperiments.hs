@@ -19,6 +19,7 @@ import Data.Bifunctor
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
+import qualified Data.Set as S
 import qualified Data.Text as T
 import Data.Aeson
 import Numeric.Log (Log)
@@ -35,6 +36,9 @@ import qualified SimplIR.SimpleIndex.Models.QueryLikelihood as QL
 import qualified SimplIR.SimpleIndex.Models.BM25 as BM25
 import EdgeDocCorpus
 import Graph
+import qualified CAR.AnnotationsFile as CAR
+
+
 
 mapKeys :: (Hashable k1, Eq k1, Hashable k2, Eq k2) => (k1 -> k2) -> HM.HashMap k1 v -> HM.HashMap k2 v
 mapKeys f = HM.fromList . map (first f) . HM.toList
@@ -56,14 +60,13 @@ instance ToJSON QueryDocList
 
 data QueryDerivation = QueryFromPageTitle | QueryFromSectionPaths
 
-pagesToQueryDocs :: SiteId
+pagesToQueryDocs :: CAR.PageBundle
                  -> QueryDerivation
-                 -> [Page]
                  -> [QueryDoc]
-pagesToQueryDocs siteId deriv pages =
+pagesToQueryDocs pageBundle deriv =
     queryDocs
   where
-    leadEntities = HS.fromList . fmap (pageNameToId siteId) . KB.kbDocOutLinks
+    leadEntities kbDoc = HS.fromList $ S.toList $ CAR.bundleLookupAllPageNames pageBundle $ KB.kbDocOutLinks kbDoc
     queryDocs = case deriv of
       QueryFromPageTitle ->
           [ QueryDoc { queryDocQueryId      = CarRun.pageIdToQueryId $ KB.kbDocPageId kbDoc
@@ -71,7 +74,7 @@ pagesToQueryDocs siteId deriv pages =
                      , queryDocQueryText    = getPageName $ pageName page
                      , queryDocLeadEntities = leadEntities kbDoc
                      }
-          | page <- pages
+          | page <-  pages
           , let kbDoc = KB.pageToKbDoc page
           ]
       QueryFromSectionPaths ->
@@ -86,6 +89,7 @@ pagesToQueryDocs siteId deriv pages =
           , let kbDoc = KB.pageToKbDoc page
           , (sectionPath, headings, _) <- pageSections page
           ]
+    pages = CAR.bundleAllPages pageBundle
 
 queryDocRawTerms :: QueryDoc -> [Term]
 queryDocRawTerms = textToTokens' . queryDocQueryText

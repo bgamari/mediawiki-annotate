@@ -28,6 +28,7 @@ import CAR.AnnotationsFile as AnnsFile
 import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.Utils (nubWithKey)
+import qualified CAR.AnnotationsFile as CAR
 
 import EdgeDocCorpus
 import WriteRanking
@@ -92,13 +93,12 @@ opts =
 
 
 computeRankingsForQuery :: (Index.RetrievalModel Term EdgeDoc Int -> RetrievalFunction EdgeDoc)
-                        -> AnnotationsFile
                         -> CarRun.QueryId  ->  [Term]
                         -> [(RetrievalFun, [(ParagraphId, Double)])]
 
 computeRankingsForQuery
       retrieveDocs
-      annsFile queryId query =
+      queryId query =
       let
 
         retrievalResults :: [(RetrievalFun, [(ParagraphId, Double)])]
@@ -126,8 +126,7 @@ main = do
       queryRestriction, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
-    annsFile <- AnnsFile.openAnnotations articlesFile
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
+    pageBundle <- CAR.openPageBundle articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
     putStrLn $ "# Edgedoc index: "++ show simplirIndexFilepath
 
@@ -135,8 +134,8 @@ main = do
     queries' <-
         case querySrc of
           QueriesFromCbor queryFile queryDeriv _seedDeriv -> do
-              pagesToQueryDocs siteId queryDeriv <$> readPagesOrOutlinesAsPages queryFile
-
+              pageBundle <- openPageBundle queryFile
+              return $ pagesToQueryDocs pageBundle queryDeriv
           QueriesFromJson queryFile -> do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
@@ -199,7 +198,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(RetrievalFun, [(ParagraphId,  Double)])]
-                    rankings = computeRankingsForQuery retrieveDocs annsFile queryId (queryDocRawTerms query)
+                    rankings = computeRankingsForQuery retrieveDocs queryId (queryDocRawTerms query)
 
                 mapM_ (\(method, ranking) -> runIrMethod queryId query method ranking) rankings
 

@@ -6,7 +6,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 
-import Data.Semigroup hiding (All, Any, option)
 import Options.Applicative
 
 import qualified Data.HashMap.Strict as HM
@@ -14,6 +13,7 @@ import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
+import CAR.AnnotationsFile as CAR
 import CAR.Types
 
 import SimplIR.Format.QRel
@@ -33,22 +33,23 @@ main = do
     (outputFile, qrelfile, queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
-    siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
+--     siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
+    pageBundle <- CAR.openPageBundle queryFile
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =
              queryDocPageId queryDoc `HS.insert` queryDocLeadEntities queryDoc
 
-        pagesToForbiddenEntities :: [Page] -> [(PageId, HS.HashSet PageId)]
-        pagesToForbiddenEntities pages = [ (queryDocPageId queryDoc, toSeeds queryDoc)
-                                         | queryDoc <- pagesToQueryDocs siteId QueryFromPageTitle pages
+        pagesToForbiddenEntities :: [(PageId, HS.HashSet PageId)]
+        pagesToForbiddenEntities  = [ (queryDocPageId queryDoc, toSeeds queryDoc)
+                                         | queryDoc <- pagesToQueryDocs pageBundle QueryFromPageTitle
                                          ]
 
 
-    query2ForbiddenEntities <- HM.fromList . pagesToForbiddenEntities
-                            <$> readPagesFile queryFile
-        :: IO (HM.HashMap PageId (HS.HashSet PageId))
+        query2ForbiddenEntities :: (HM.HashMap PageId (HS.HashSet PageId))
+        query2ForbiddenEntities = HM.fromList $ pagesToForbiddenEntities
 
-    let notEntryWithSeed :: Entry QueryId DocumentName IsRelevant -> Bool
+
+        notEntryWithSeed :: Entry QueryId DocumentName IsRelevant -> Bool
         notEntryWithSeed Entry {queryId = queryId, documentName = entityId } =
             case (packPageId $ T.unpack queryId) `HM.lookup` query2ForbiddenEntities of
               Just seeds -> not $ (packPageId $ T.unpack entityId) `HS.member` seeds

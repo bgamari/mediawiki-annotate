@@ -20,11 +20,9 @@ import qualified Data.ByteString.Lazy as BSL
 
 import qualified CAR.TocFile as TocFile
 import qualified CAR.AnnotationsFile as CAR
-import qualified CAR.NameToIdMap as CARN
 import CAR.Types
 import CAR.Utils
 import CAR.ToolVersion
-import CAR.Types.Files
 
 opts :: Parser (IO ())
 opts = subparser
