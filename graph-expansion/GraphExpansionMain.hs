@@ -431,7 +431,7 @@ main = do
       rankingType, graphset, queryRestriction, dotFilenameMaybe, numResults) <-
         execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
-    pageBundle <- CAR.openPageBundle articlesFile
+    articlesBundle <- CAR.openPageBundle articlesFile
 --     siteId <- wikiSite . fst <$> readPagesFileWithProvenance articlesFile
     putStrLn $ "# Running methods: " ++ show runMethods
     putStrLn $ "# Query restriction: " ++ show queryRestriction
@@ -459,8 +459,8 @@ main = do
         case querySrc of
           QueriesFromCbor queryFile queryDeriv seedDerivation -> do
               populateSeeds <- seedMethod seedDerivation
-              pageBundle <- openPageBundle queryFile
-              return $ map populateSeeds $ pagesToQueryDocs pageBundle queryDeriv
+              queryBundle <- openPageBundle queryFile
+              return $ map populateSeeds $ pagesToQueryDocs queryBundle queryDeriv
 
 
           QueriesFromJson queryFile -> do
@@ -537,7 +537,7 @@ main = do
 
                 T.putStr $ T.pack $ "# Processing query "++ show query++": seeds=" ++ show seedEntities ++ "\n"
                 let rankings :: [(Method, [(PageId, Maybe ParagraphId,  Double)])]
-                    rankings = computeRankingsForQuery retrieveDocs pageBundle queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
+                    rankings = computeRankingsForQuery retrieveDocs articlesBundle queryId queryPage (queryDocRawTerms query) seedEntities expansionHops
 
                 case dotFilenameMaybe of
                     Just dotFilename -> computeGraphForQuery retrieveDocs (queryDocRawTerms query) seedEntities  dotFilename
