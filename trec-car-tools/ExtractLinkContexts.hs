@@ -2,8 +2,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-import Data.Monoid hiding (All, Any)
-
 import Options.Applicative
 import qualified Data.DList as DList
 import qualified Data.HashMap.Strict as HM
@@ -120,21 +118,10 @@ toGalagoDoc linkDoc =
 
 -- Todo pagenames with '#' , and also normalize first letter.
 
---         linkDocParagraphId    = paraId $ paragraph
---         linkDocArticleId      = pageId
---         linkDocSourceEntity   = pageName
---         linkDocSourceEntity   = pageNameToId pageName
---         linkDocSectionPath    = sectionpath
---         linkDocCategories     = pageCategories (Page pageName pageId pageSkeleta)
---         linkDocParagraph      = paraToText paragraph
---         linkDocOutlinks       = pageSkeletonLinks paragraph
---         linkDocOutlinkIds     = fmap (\(ParaLink pagename anchor) -> pageNameToId pagename) $ linkDocOutlinks
-
 
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
---     (prov, pages) <- readPagesFileWithProvenance inputFile
     pageBundle <- CAR.openPageBundle inputFile
     BSL.writeFile outputFile
         $ Galago.toWarc
@@ -147,7 +134,6 @@ main = do
         HM.elems $ HM.fromList $ fmap (\linkDoc -> (key linkDoc, linkDoc)) $ linkDocs
       where
         key linkDoc = linkDocParagraphId $ linkDoc
---         key linkDoc = (linkDocParagraphId $ linkDoc, linkDocArticleId $ linkDoc)   -- if you nub across multiple articles
     dropLinkDocsNoLinks :: [LinkDoc] -> [LinkDoc]
     dropLinkDocsNoLinks =
         filter (\linkDoc -> not ( null (linkDocOutlinks $ linkDoc)))
