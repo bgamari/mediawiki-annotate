@@ -33,7 +33,6 @@ main = do
     (outputFile, qrelfile, queryFile) <-
         execParser $ info (helper <*> opts) mempty
 
---     siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
     pageBundle <- CAR.openPageBundle queryFile
     let toSeeds :: QueryDoc -> HS.HashSet PageId
         toSeeds queryDoc =

@@ -7,15 +7,18 @@ import Data.Monoid hiding (All, Any)
 import Options.Applicative
 import qualified Data.DList as DList
 import qualified Data.HashMap.Strict as HM
+import qualified Data.Set as S
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Lazy as BSL
+import Data.Maybe
 
 import CAR.Utils
 import CAR.Types
 import SimplIR.Galago as Galago
+import CAR.AnnotationsFile as CAR
 
 opts :: Parser (FilePath, FilePath)
 opts =
@@ -23,9 +26,6 @@ opts =
     <$> argument str (help "input file" <> metavar "ANNOTATIONS FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
 
--- data Entity = Entity { entityId :: PageId
---                      , entityCanonicalName :: PageName
---                      }
 
 
 data SectionPath' = SectionPath' { sectionPath'PageName :: PageName
@@ -45,14 +45,10 @@ data LinkDoc = LinkDoc { linkDocParagraphId    :: ParagraphId
                        , linkDocOutlinks       ::  [Link]
                        }
 
--- pageNameToEntity :: PageName -> Entity
--- pageNameToEntity pageName =
---     Entity {entityId = pageNameToId pageName, entityCanonicalName = pageName }
-
 -- todo handle links to Disambiguation pages and redirects
 
-transformContent :: SiteId -> Page -> [LinkDoc]
-transformContent siteId page@(Page {pageName, pageId, pageSkeleton = pageSkeleta}) =
+transformContent :: PageBundle -> Page -> [LinkDoc]
+transformContent pageBundle page@(Page {pageName, pageId, pageSkeleton = pageSkeleta}) =
     foldMap (go mempty) pageSkeleta
   where
     go :: DList.DList SectionHeading -> PageSkeleton -> [LinkDoc]
@@ -64,6 +60,10 @@ transformContent siteId page@(Page {pageName, pageId, pageSkeleton = pageSkeleta
       in [convertPara paragraph sectionPath]
     go parentHeadings (Image {}) =
       mempty
+    go parentHeadings (Infobox {}) =
+      mempty
+    go parentHeadings (List {}) =
+      mempty
 
     convertPara :: Paragraph -> SectionPath' -> LinkDoc
     convertPara paragraph sectionPath =
@@ -71,13 +71,17 @@ transformContent siteId page@(Page {pageName, pageId, pageSkeleton = pageSkeleta
         linkDocParagraphId    = paraId $ paragraph
         linkDocArticleId      = pageId
         linkDocSourceEntity   = pageName
-        linkDocSourceEntityId = pageNameToId siteId pageName
+        linkDocSourceEntityId = getOne $ fromMaybe (error $ "Can't find pageName " ++ (show pageName)) $ CAR.bundleLookupPageName pageBundle pageName
         linkDocSectionPath    = sectionPath
         -- FIXME
         --linkDocCategories     = pageCategories $ pageMetadata page
         linkDocParagraph      = paragraph
         linkDocOutlinks       = paraLinks $ paragraph
+        linkDocCategories     = []
       in LinkDoc {..}
+
+    getOne :: S.Set a -> a
+    getOne s = head $ S.toList s
 
 
 toGalagoDoc :: LinkDoc -> Galago.Document
@@ -130,12 +134,13 @@ toGalagoDoc linkDoc =
 main :: IO ()
 main = do
     (inputFile, outputFile) <- execParser $ info (helper <*> opts) mempty
-    (prov, pages) <- readPagesFileWithProvenance inputFile
+--     (prov, pages) <- readPagesFileWithProvenance inputFile
+    pageBundle <- CAR.openPageBundle inputFile
     BSL.writeFile outputFile
         $ Galago.toWarc
         $ map toGalagoDoc
-        $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent (wikiSite prov))
-        $ pages
+        $ foldMap (nubLinkDocs . dropLinkDocsNoLinks . transformContent (pageBundle))
+        $ CAR.bundleAllPages pageBundle
   where
     nubLinkDocs :: [LinkDoc] -> [LinkDoc]
     nubLinkDocs linkDocs =

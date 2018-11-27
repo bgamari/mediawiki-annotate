@@ -14,7 +14,6 @@ main = do
     (queryFile) <-
         execParser $ info (helper <*> opts) mempty
     pageBundle <- CAR.openPageBundle queryFile
---     siteId <- wikiSite . fst <$> readPagesFileWithProvenance queryFile
     let queriesToSeedEntities = pagesToQueryDocs pageBundle QueryFromPageTitle
     putStrLn $ unlines $ foldMap toSeedLines $ queriesToSeedEntities
   where
