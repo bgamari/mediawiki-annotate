@@ -15,6 +15,7 @@ import qualified Data.HashMap.Strict as HM
 import CAR.Types
 import CAR.ToolVersion
 import CAR.RunFile as RF
+import qualified SimplIR.Format.TrecRunFile as Run
 
 import CAR.AnnotationsFile as CAR
 
@@ -25,6 +26,7 @@ opts :: Parser (IO ())
 opts = subparser
     $  cmd "entity-drop-paragraphs"   entityDropParagraphs'
     <> cmd "entity-fix-id" entityFixId'
+    <> cmd "drop-duplicates" dropDuplicates'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     pagesFile = argument str (help "Pages file" <> metavar "CBOR")
@@ -35,6 +37,8 @@ opts = subparser
 
     entityFixId' =
         entityFixId <$> pagesFile <*> inputFile <*> outputFile
+    dropDuplicates' =
+        dropDuplicates <$> inputFile <*> outputFile
 
 
 
@@ -74,6 +78,18 @@ opts = subparser
 
                 in trace ( show (defaultEntityId == entityId) <> "\t" <> show entityPageName <> "\t" <> show entityId) $ r {carDocument = entityId}
 
+    dropDuplicates :: FilePath -> FilePath -> IO ()
+    dropDuplicates inputRunFile outputRunFile = do
+        rankings <- readStringRun inputRunFile :: IO [StringRankingEntry]
+        let filteredRankings :: [StringRankingEntry]
+            filteredRankings = HM.elems $ HM.fromListWith chooseHigher [ ((carQueryId entry, carDocument entry), entry) |  entry <- rankings]
+        Run.writeRunFile  outputRunFile $ fmap (RF.fromCarRankingEntry id) filteredRankings
+      where chooseHigher :: StringRankingEntry -> StringRankingEntry -> StringRankingEntry
+            chooseHigher entry1 entry2 =
+               if carScore entry1 >= carScore entry2 then
+                    entry1
+               else
+                    entry2
 
 
 type StringRankingEntry = RankingEntry' T.Text

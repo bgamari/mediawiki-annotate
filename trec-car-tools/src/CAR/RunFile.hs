@@ -29,6 +29,7 @@ module CAR.RunFile
     , rank
     , score
     , methodName
+    , fromCarRankingEntry
 
       -- ** Paragraph ranking
     , ParagraphRankingEntry
