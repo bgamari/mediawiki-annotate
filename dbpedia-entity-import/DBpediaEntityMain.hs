@@ -7,6 +7,7 @@ import Data.Monoid hiding (All, Any)
 import Control.Monad
 
 import qualified Data.HashSet as HS
+import qualified Data.HashMap.Strict as HM
 import qualified Data.Set as S
 import qualified Data.Text as T
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
@@ -50,7 +51,7 @@ main = do
                    | (QF.Entry query doc rel) <- inQrels
                    , doc' <- transformEntity articlesBundle doc
                    ]
-    QF.writeQRel outputFile outQrels
+    QF.writeQRel outputFile $ filterDuplicateQrels outQrels
 
   where transformEntity :: PageBundle -> T.Text -> [PageId]
         transformEntity articlesBundle dbPediaEntityId =
@@ -70,6 +71,19 @@ main = do
              in S.toList $ fromMaybe S.empty trecCarPageIds
         unwrapPageId = T.pack . CAR.unpackPageId
 
+        filterDuplicateQrels :: Ord rel => [Entry QueryId  DocumentName rel] ->  [Entry QueryId  DocumentName rel]
+        filterDuplicateQrels qrelEntries =
+            HM.elems
+            $ HM.fromListWith chooseHigher
+            [ ((QF.queryId entry, QF.documentName entry), entry) |  entry <- qrelEntries]
+
+      --where --chooseHigher :: (QF.Entry query doc rel -> (QF.Entry query doc rel) -> (QF.Entry query doc rel)
+
+        chooseHigher entry1 entry2 =
+           if QF.relevance entry1 >= QF.relevance entry2 then
+                entry1
+           else
+                entry2
 
 
 parseEntity :: T.Text -> Maybe T.Text
