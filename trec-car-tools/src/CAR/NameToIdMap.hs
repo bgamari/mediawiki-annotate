@@ -8,6 +8,8 @@ module CAR.NameToIdMap
     , pageNameToIdSet
     , pageNameToAnId
     , pageNamesToIdSet
+    , openRedirectToIdMap
+    , createRedirectToIdMap
     , NameToIdMap
     ) where
 
@@ -25,34 +27,50 @@ newtype NameToIdMap = NameToIdMap (M.Map PageName (S.Set PageId))
                     deriving (CBOR.Serialise)
 
 
-buildNameToIdMap :: FilePath -> IO NameToIdMap
-buildNameToIdMap cborPath = do
+buildInfoToIdMap :: (Page -> [PageName]) -> FilePath -> IO (NameToIdMap)
+buildInfoToIdMap pageToInfo cborPath = do
     (_, pages) <- readPagesOrOutlinesAsPagesWithProvenance cborPath
     return
         $ NameToIdMap
         $ M.fromListWith (<>)
-        $ [ (pageName page, S.singleton (pageId page))
+        $ [ (name, S.singleton (pageId page))
           | page <- pages
+          , name <- pageToInfo page
           ]
 
 
 
-createNameToIdMap :: FilePath -> IO ()
-createNameToIdMap cborPath = do
-    index <- buildNameToIdMap cborPath
+createInfoToIdMap :: (Page -> [PageName]) -> String -> FilePath -> IO ()
+createInfoToIdMap transform extension cborPath = do
+    index <- buildInfoToIdMap transform cborPath
     BSL.writeFile indexPath $ CBOR.serialise index
-  where indexPath = cborPath <.> "name"
+  where indexPath = cborPath <.> extension
 
 
-openNameToIdMap :: FilePath -> IO NameToIdMap
-openNameToIdMap cborPath = do
+openInfoToIdMap :: String -> FilePath -> IO NameToIdMap
+openInfoToIdMap extension cborPath = do
     index <- either onError snd . CBOR.Read.deserialiseFromBytes CBOR.decode
            <$> BSL.readFile indexPath
     return index
   where
-    indexPath = cborPath <.> "name"
+    indexPath = cborPath <.> extension
     onError err =
         error $ "Deserialisation error while deserialising TOC "++show indexPath++": "++show err
+
+
+openNameToIdMap = openInfoToIdMap "name"
+openRedirectToIdMap = openInfoToIdMap "redirect"
+
+
+createNameToIdMap :: FilePath -> IO ()
+createNameToIdMap = createInfoToIdMap  (\p -> [pageName p]) "name"
+
+createRedirectToIdMap :: FilePath -> IO ()
+createRedirectToIdMap = createInfoToIdMap  page2redirect  "redirect"
+  where
+    page2redirect :: Page -> [PageName]
+    page2redirect page = (pageName page) : (fromMaybe [] $ getMetadata _RedirectNames (pageMetadata page))
+
 
 
 pageNameToIdMaybeSet :: NameToIdMap -> PageName -> Maybe (S.Set PageId)

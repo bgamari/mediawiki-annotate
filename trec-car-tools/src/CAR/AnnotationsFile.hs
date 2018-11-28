@@ -69,8 +69,10 @@ toPageListEither ann =
 data PageBundle = PageBundle { bundleProvenance :: Provenance
                              , bundleLookupPage :: PageId -> Maybe Page
                              , bundleLookupPageName :: PageName -> Maybe (S.Set PageId)
+                             , bundleLookupRedirect :: PageName -> Maybe (S.Set PageId)
                              , bundleToc :: EitherAnnotationsFile
                              , bundleNameLookup ::  NameToIdMap
+                             , bundleRedirectLookup ::  NameToIdMap
                              , bundleCborPath :: FilePath
                              }
 
@@ -79,14 +81,17 @@ openPageBundle :: FilePath -> IO PageBundle
 openPageBundle cborPath = do
     toc <- openEitherAnnotations cborPath
     nameLookup <- openNameToIdMap cborPath
+    redirectLookup <- openRedirectToIdMap cborPath
     (prov, _) <- readPagesOrOutlinesAsPagesWithProvenance cborPath
     return PageBundle {
                  bundleCborPath = cborPath
                , bundleProvenance = prov
                , bundleToc = toc
                , bundleNameLookup = nameLookup
+               , bundleRedirectLookup = nameLookup
                , bundleLookupPage = (`lookupEither` toc)
                , bundleLookupPageName = (nameLookup `pageNameToIdMaybeSet`)
+               , bundleLookupRedirect= (redirectLookup `pageNameToIdMaybeSet`)
                }
 {-# NOINLINE openPageBundle #-}
 
@@ -96,6 +101,10 @@ bundleAllPages bundle = toPageListEither (bundleToc bundle)
 bundleLookupAllPageNames :: Foldable f => PageBundle -> f PageName -> S.Set PageId
 bundleLookupAllPageNames bundle =
     foldMap (fromMaybe S.empty . bundleLookupPageName bundle)
+
+bundleLookupAllRedirects :: Foldable f => PageBundle -> f PageName -> S.Set PageId
+bundleLookupAllRedirects bundle =
+    foldMap (fromMaybe S.empty . bundleLookupRedirect bundle)
 
 
 
