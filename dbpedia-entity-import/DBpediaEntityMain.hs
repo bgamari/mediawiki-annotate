@@ -62,7 +62,7 @@ main = do
                         Just cleanName -> CAR.packPageName $ T.unpack cleanName
                  trecCarPageIds :: Maybe (S.Set PageId)
                  trecCarPageIds =
-                     case CAR.bundleLookupPageName articlesBundle cleanDbpediaEntityName of
+                     case CAR.bundleLookupRedirect articlesBundle cleanDbpediaEntityName of
                         Nothing -> Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ")
                                    Nothing
                         Just pageIdSet -> Just pageIdSet
