@@ -81,7 +81,7 @@ opts = subparser
         inQrels <- QF.readQRel inQrelsFile
                  :: IO [QF.Entry T.Text T.Text QF.GradedRelevance]
         articlesBundle <- CAR.openPageBundle articlesFile
-        let transFormEntity' = transformEntity  defaultCantParseHandler defaultCantFindHandler articlesBundle
+        let transFormEntity' = transformEntity defaultCantParseHandler defaultCantFindHandler articlesBundle
 
             outQrels = [ (QF.Entry query (unwrapPageId doc') rel)
                        | (QF.Entry query doc rel) <- inQrels
