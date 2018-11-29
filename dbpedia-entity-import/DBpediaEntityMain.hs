@@ -22,7 +22,8 @@ import qualified Data.Binary.Serialise.CBOR as CBOR
 import CAR.Types.AST as CAR
 import CAR.ToolVersion
 import CAR.Types
-import SimplIR.Format.QRel as QF
+import qualified SimplIR.Format.QRel as QF
+import qualified SimplIR.Format.TrecRunFile as RF
 import CAR.AnnotationsFile as CAR
 import qualified Debug.Trace as Debug
 
@@ -35,6 +36,7 @@ helpDescr =
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "transform-qrels"   transformQrels'
+    <>  cmd "transform-runs"   transformRuns'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     pagesFile = option str (short 'A' <> long "articles" <> help "articles file" <> metavar "ANNOTATIONS FILE")
@@ -43,8 +45,26 @@ opts = subparser
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     transformQrels' =
         transformQrels <$> inputQrelsFile <*> pagesFile <*> outputFile
+    transformRuns' =
+        transformRuns <$> inputRunsFile <*> pagesFile <*> outputFile
 
 
+    transformEntity :: PageBundle -> T.Text -> [PageId]
+    transformEntity articlesBundle dbPediaEntityId =
+--    dbPediaEntityId example: <dbpedia:Cellophane_noodles> ->  Cellophane_noodles
+         let cleanDbpediaEntityName :: PageName
+             cleanDbpediaEntityName =
+                 case parseEntity dbPediaEntityId of
+                    Nothing -> error $ "Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\""
+                    Just cleanName -> CAR.packPageName $ T.unpack cleanName
+             trecCarPageIds :: Maybe (S.Set PageId)
+             trecCarPageIds =
+                 case CAR.bundleLookupRedirect articlesBundle cleanDbpediaEntityName of
+                    Nothing -> Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ")
+                               Nothing
+                    Just pageIdSet -> Just pageIdSet
+
+         in S.toList $ fromMaybe S.empty trecCarPageIds
 
     transformQrels :: FilePath -> FilePath -> FilePath -> IO()
     transformQrels inQrelsFile articlesFile outputFile = do
@@ -59,25 +79,10 @@ opts = subparser
                        ]
         QF.writeQRel outputFile $ filterDuplicateQrels outQrels
       where
-        transformEntity :: PageBundle -> T.Text -> [PageId]
-        transformEntity articlesBundle dbPediaEntityId =
---    dbPediaEntityId example: <dbpedia:Cellophane_noodles> ->  Cellophane_noodles
-             let cleanDbpediaEntityName :: PageName
-                 cleanDbpediaEntityName =
-                     case parseEntity dbPediaEntityId of
-                        Nothing -> error $ "Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\""
-                        Just cleanName -> CAR.packPageName $ T.unpack cleanName
-                 trecCarPageIds :: Maybe (S.Set PageId)
-                 trecCarPageIds =
-                     case CAR.bundleLookupRedirect articlesBundle cleanDbpediaEntityName of
-                        Nothing -> Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ")
-                                   Nothing
-                        Just pageIdSet -> Just pageIdSet
 
-             in S.toList $ fromMaybe S.empty trecCarPageIds
         unwrapPageId = T.pack . CAR.unpackPageId
 
-        filterDuplicateQrels :: Ord rel => [Entry QueryId  DocumentName rel] ->  [Entry QueryId  DocumentName rel]
+        filterDuplicateQrels :: Ord rel => [QF.Entry QF.QueryId  QF.DocumentName rel] ->  [QF.Entry QF.QueryId  QF.DocumentName rel]
         filterDuplicateQrels qrelEntries =
             HM.elems
             $ HM.fromListWith chooseHigher
@@ -87,6 +92,35 @@ opts = subparser
 
         chooseHigher entry1 entry2 =
            if QF.relevance entry1 >= QF.relevance entry2 then
+                entry1
+           else
+                entry2
+
+
+    transformRuns :: FilePath -> FilePath -> FilePath -> IO()
+    transformRuns inRunsFile articlesFile outputFile = do
+
+        inRun <- RF.readRunFile inRunsFile
+                 :: IO [RF.RankingEntry]
+        articlesBundle <- CAR.openPageBundle articlesFile
+
+        let outRun =  [ entry {RF.documentName = unwrapPageId doc'}
+                       | entry <- inRun
+                       , let doc = RF.documentName entry
+                       , doc' <- transformEntity articlesBundle doc
+                       ]
+        RF.writeRunFile outputFile $ filterDuplicateEntries outRun
+      where
+        unwrapPageId = T.pack . CAR.unpackPageId
+
+        filterDuplicateEntries :: [RF.RankingEntry] ->  [RF.RankingEntry]
+        filterDuplicateEntries runEntries =
+            HM.elems
+            $ HM.fromListWith chooseHigher
+            [ ((RF.queryId entry, RF.documentName entry), entry) |  entry <- runEntries]
+
+        chooseHigher entry1 entry2 =
+           if RF.documentScore entry1 >= RF.documentScore entry2 then
                 entry1
            else
                 entry2
