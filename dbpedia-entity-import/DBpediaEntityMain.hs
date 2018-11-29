@@ -49,22 +49,31 @@ opts = subparser
         transformRuns <$> inputRunsFile <*> pagesFile <*> outputFile
 
 
-    transformEntity :: PageBundle -> T.Text -> [PageId]
-    transformEntity articlesBundle dbPediaEntityId =
+    transformEntity :: (T.Text -> PageName) -> (PageName -> Maybe (S.Set PageId)) -> PageBundle -> T.Text -> [PageId]
+    transformEntity cantParseHandler cantFindHandler articlesBundle dbPediaEntityId =
 --    dbPediaEntityId example: <dbpedia:Cellophane_noodles> ->  Cellophane_noodles
          let cleanDbpediaEntityName :: PageName
              cleanDbpediaEntityName =
                  case parseEntity dbPediaEntityId of
-                    Nothing -> error $ "Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\""
+                    Nothing -> cantParseHandler dbPediaEntityId
                     Just cleanName -> CAR.packPageName $ T.unpack cleanName
              trecCarPageIds :: Maybe (S.Set PageId)
              trecCarPageIds =
                  case CAR.bundleLookupRedirect articlesBundle cleanDbpediaEntityName of
-                    Nothing -> Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ")
-                               Nothing
+                    Nothing -> cantFindHandler cleanDbpediaEntityName
                     Just pageIdSet -> Just pageIdSet
 
          in S.toList $ fromMaybe S.empty trecCarPageIds
+
+    defaultCantParseHandler dbPediaEntityId = error ("Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\"")  Nothing
+    defaultCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ") $ Nothing
+
+    silentCantParseHandler dbPediaEntityId = error ("Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\"" ) (Just (packPageName (T.unpack dbPediaEntityId)))
+    silentCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ") $ Just (dummyPageIdSet cleanDbpediaEntityName)
+
+    dummyPageIdSet :: PageName -> S.Set PageId
+    dummyPageIdSet name =
+         S.singleton $ packPageId ("undefined: " ++ unpackPageName name)
 
     transformQrels :: FilePath -> FilePath -> FilePath -> IO()
     transformQrels inQrelsFile articlesFile outputFile = do
@@ -72,10 +81,11 @@ opts = subparser
         inQrels <- QF.readQRel inQrelsFile
                  :: IO [QF.Entry T.Text T.Text QF.GradedRelevance]
         articlesBundle <- CAR.openPageBundle articlesFile
+        let transFormEntity' = transformEntity  defaultCantParseHandler defaultCantFindHandler articlesBundle
 
-        let outQrels = [ (QF.Entry query (unwrapPageId doc') rel)
+            outQrels = [ (QF.Entry query (unwrapPageId doc') rel)
                        | (QF.Entry query doc rel) <- inQrels
-                       , doc' <- transformEntity articlesBundle doc
+                       , doc' <- transFormEntity' doc
                        ]
         QF.writeQRel outputFile $ filterDuplicateQrels outQrels
       where
@@ -104,10 +114,12 @@ opts = subparser
                  :: IO [RF.RankingEntry]
         articlesBundle <- CAR.openPageBundle articlesFile
 
-        let outRun =  [ entry {RF.documentName = unwrapPageId doc'}
+        let transFormEntity' = transformEntity  silentCantParseHandler silentCantFindHandler articlesBundle
+
+            outRun =  [ entry {RF.documentName = unwrapPageId doc'}
                        | entry <- inRun
                        , let doc = RF.documentName entry
-                       , doc' <- transformEntity articlesBundle doc
+                       , doc' <- transFormEntity' doc
                        ]
         RF.writeRunFile outputFile $ filterDuplicateEntries outRun
       where
