@@ -66,10 +66,10 @@ opts = subparser
          in S.toList $ fromMaybe S.empty trecCarPageIds
 
     defaultCantParseHandler dbPediaEntityId = error ("Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\"")  Nothing
-    defaultCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ") $ Nothing
+    defaultCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR. Skipping ") $ Nothing
 
-    silentCantParseHandler dbPediaEntityId = error ("Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\"" ) (Just (packPageName (T.unpack dbPediaEntityId)))
-    silentCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ") $ Just (dummyPageIdSet cleanDbpediaEntityName)
+    silentCantParseHandler dbPediaEntityId = Debug.trace ("Warning: Can't parse DBpedia entity id \"" ++ (show dbPediaEntityId) ++ "\"" ) ((packPageName (T.unpack dbPediaEntityId)))
+    silentCantFindHandler cleanDbpediaEntityName =  Debug.trace ("Warning: Can't find entity \"" ++show cleanDbpediaEntityName++" \" in TREC CAR ") $ Just (dummyPageIdSet cleanDbpediaEntityName)
 
     dummyPageIdSet :: PageName -> S.Set PageId
     dummyPageIdSet name =
