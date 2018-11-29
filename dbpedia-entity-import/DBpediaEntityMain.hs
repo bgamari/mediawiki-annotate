@@ -73,7 +73,7 @@ opts = subparser
 
     dummyPageIdSet :: PageName -> S.Set PageId
     dummyPageIdSet name =
-         S.singleton $ packPageId ("undefined: " ++ unpackPageName name)
+         S.singleton $ packPageId ("undefined:" ++ unpackPageName name)
 
     transformQrels :: FilePath -> FilePath -> FilePath -> IO()
     transformQrels inQrelsFile articlesFile outputFile = do
