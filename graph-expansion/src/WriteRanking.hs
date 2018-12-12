@@ -2,7 +2,6 @@
 
 module WriteRanking where
 
-import Data.Semigroup
 import Data.Ord (comparing)
 import Data.List (sortBy, intersperse)
 

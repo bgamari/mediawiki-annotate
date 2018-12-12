@@ -11,6 +11,7 @@ packages:
     mediawiki-import/
     db-export/
     graph-expansion/
+    learning-to-walk/
     graph-algorithms/
     simplir/*/*.cabal
     simplir/vendor/*/*.cabal
