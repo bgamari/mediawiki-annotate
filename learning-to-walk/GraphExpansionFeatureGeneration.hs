@@ -32,8 +32,6 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Data.Vector.Indexed as VI
-import qualified Data.Vector.Unboxed as VU
 import qualified Text.PrettyPrint.Leijen.Text as PP
 import Data.List
 import Data.Maybe
@@ -57,7 +55,7 @@ import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
-import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
+--import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 import SimplIR.FeatureSpace.Normalise
 import SimplIR.Intern
 
@@ -66,7 +64,7 @@ import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 import PageRank
-import DenseMapping
+--import DenseMapping
 import Graph
 
 import qualified Data.GraphViz as Dot
@@ -96,7 +94,8 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures | ExpPage | JustNone
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures | JustNone
+                        | ExpPage | ExpSection
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -444,10 +443,10 @@ main = do
 
           let augmentNoQrels     :: forall docId queryId f.
                                     (Ord queryId, Ord docId)
-                                 => M.Map (queryId, docId) (FeatureVec f Double)
-                                 -> M.Map queryId [(docId, FeatureVec f Double, IsRelevant)]
+                                 => M.Map (queryId, docId) (F.FeatureVec f Double)
+                                 -> M.Map queryId [(docId, F.FeatureVec f Double, IsRelevant)]
               augmentNoQrels docFeatures =
-                    let franking :: M.Map queryId [(docId, FeatureVec f Double, IsRelevant)]
+                    let franking :: M.Map queryId [(docId, F.FeatureVec f Double, IsRelevant)]
                         franking = M.fromListWith (++)
                                    [ (qid, [(doc, features, Relevant)])
                                    | ((qid, doc), features) <- M.assocs docFeatures
@@ -476,7 +475,7 @@ main = do
 
 
       TrainModel modelFile -> do
-          let combinedFSpace' = mkFeatureSpace
+          let combinedFSpace' = F.mkFeatureSpace
                                 $ filter (expSettingToCrit experimentSettings)
                                 $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
 
@@ -491,7 +490,7 @@ main = do
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
-          putStrLn $ "Feature dimension: "++show (featureDimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
+          putStrLn $ "Feature dimension: "++show (F.featureDimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
           putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                     " queries and "++ show totalElems ++" items total of which "++
                     show totalPos ++" are positive."
@@ -531,7 +530,7 @@ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
 makeStackedFeatures :: EdgeDocsLookup
                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
                     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                    -> FeatureSpace CombinedFeature
+                    -> F.FeatureSpace CombinedFeature
                     -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
 makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
@@ -544,7 +543,7 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
        $ fmap (normFeatures normalizer) docFeatures''
 
 makeStackedFeatures' :: EdgeDocsLookup
-                     -> FeatureSpace CombinedFeature
+                     -> F.FeatureSpace CombinedFeature
                      -> M.Map QueryId [MultiRankingEntry PageId GridRun]
                      -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
                      -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
@@ -604,6 +603,7 @@ expSettingToCrit exps fname =
                     LessFeatures -> onlyLessFeatures
                     JustNone -> onlyNoneFeatures
                     ExpPage -> onlyPage
+                    ExpSection -> onlySection
 
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates
@@ -741,7 +741,7 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
         -- stack node vector on top of projected edge feature vector
         -- no need to use nodeEdgeFeatureGraph
     in HM.fromList
-       [ ((query, u), concatFeatureVec combinedFSpace uFeats (F.aggregateWith (+) edgeFeats))
+       [ ((query, u), F.concatFeatureVec combinedFSpace uFeats (F.aggregateWith (+) edgeFeats))
        | entityRankEntry <- entityRun
        , let u = multiRankingEntryGetDocumentName entityRankEntry
 
@@ -768,7 +768,7 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
 
 
 edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
-             -> FeatureVec EdgeFeature Double
+             -> F.FeatureVec EdgeFeature Double
 edgeScoreVec edgedocsRankEntry = makeEdgeFeatVector $
                                     [ (EdgeCount, 1.0)
                                     -- TODO
@@ -839,8 +839,8 @@ readEdgeDocsToc edgeDocsFileWithToc = do
 
 
 dropUnjudged :: Ord q
-             => M.Map q [(QRel.DocumentName, FeatureVec f Double, Maybe IsRelevant)]
-             -> M.Map q [(QRel.DocumentName, FeatureVec f Double, IsRelevant)]
+             => M.Map q [(QRel.DocumentName, F.FeatureVec f Double, Maybe IsRelevant)]
+             -> M.Map q [(QRel.DocumentName, F.FeatureVec f Double, IsRelevant)]
 dropUnjudged featureMap =
     M.filter (not . null)   -- drop entries with empty lists
     $ M.map (mapMaybe dropUnjudged') featureMap

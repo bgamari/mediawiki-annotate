@@ -266,6 +266,17 @@ onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = Tru
 onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage _  = False
 
+onlySection :: CombinedFeature -> Bool
+onlySection (Left (EntRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = True
+onlySection (Left (EntRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
+onlySection (Left (EntRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
+onlySection (Left (EntRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlySection _  = False
+
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
 
