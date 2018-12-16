@@ -180,12 +180,6 @@ opts =
 
 
 
-bm25MethodName :: CarRun.MethodName
-bm25MethodName = CarRun.MethodName "BM25"
-qlMethodName :: CarRun.MethodName
-qlMethodName = CarRun.MethodName "QL"
-
-
 
 -- --------------------------------- Query Doc ------------------------------------------------------
 
@@ -424,9 +418,9 @@ main = do
 
 
               runRanking query = do
-                  ranking <- graphWalkRanking query
+                  graphRanking <- graphWalkRanking query
                   let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
-                                    | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList ranking)
+                                    | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList graphRanking)
                                     ]
 
 --                       fileId qid = T.unpack $ T.replace "/" "--" qid

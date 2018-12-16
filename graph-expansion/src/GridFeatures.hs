@@ -417,8 +417,14 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
               !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
           putStrLn "made folds"
 
-          let foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
-              foldRestartResults = kFolds (take nRestarts . trainWithRestarts miniBatchParams gen0 metric fspace) trainData folds
+          let trainFun :: FoldIdx -> _
+              trainFun foldIdx =
+                  take nRestarts . trainWithRestarts miniBatchParams gen0 metric info fspace
+                where
+                  info = show foldIdx
+
+              foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
+              foldRestartResults = kFolds trainFun trainData folds
 
               strat :: Strategy (Folds (a, [(Model f, Double)]))
               strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
@@ -428,7 +434,7 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
 
           -- full train
           let fullRestarts = withStrategy (parTraversable rdeepseq)
-                             $ take nRestarts $ trainWithRestarts miniBatchParams gen0 metric fspace trainData
+                             $ take nRestarts $ trainWithRestarts miniBatchParams gen0 metric "full" fspace trainData
               (model, trainScore) =  bestModel $  fullRestarts
               actions2 = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
 
@@ -440,21 +446,24 @@ trainWithRestarts
     => MiniBatchParams
     -> StdGen
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> String
     -> FeatureSpace f
     -> TrainData f
     -> [(Model f, Double)]
        -- ^ an infinite list of restarts
-trainWithRestarts miniBatchParams gen0 metric fspace trainData =
+trainWithRestarts miniBatchParams gen0 metric info fspace trainData =
   let trainData' = discardUntrainable trainData
 
       rngSeeds :: [StdGen]
       rngSeeds = unfoldr (Just . System.Random.split) gen0
 
-      restartModel :: StdGen -> (Model f, Double)
-      restartModel = learnToRank miniBatchParams trainData' fspace metric
-
+      restartModel :: Int -> StdGen -> (Model f, Double)
+      restartModel restart =
+          learnToRank miniBatchParams (defaultConvergence info' 1e-2 100 2) trainData' fspace metric
+        where
+          info' = info <> " " <> show restart
       modelsWithTrainScore :: [(Model f,Double)]
-      modelsWithTrainScore = fmap restartModel rngSeeds
+      modelsWithTrainScore = zipWith restartModel [0..] rngSeeds
      in modelsWithTrainScore
 
 
@@ -608,6 +617,11 @@ newtype Folds a = Folds { getFolds :: [a] }
                 deriving (Foldable, Functor, Traversable)
                 deriving newtype (NFData)
 
+newtype FoldIdx = FoldIdx Int
+                deriving (Eq, Ord, Show, Enum)
+numberFolds :: Folds a -> Folds (FoldIdx, a)
+numberFolds (Folds xs) = Folds $ zip [FoldIdx 0..] xs
+
 mkSequentialFolds :: Int -> [a] -> Folds [a]
 mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
   where
@@ -621,23 +635,23 @@ mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
 
 kFolds :: forall q docId rel r f.
        Eq q
-       => (M.Map q [(docId, FeatureVec f Double, rel)] -> r)
+       => (FoldIdx -> M.Map q [(docId, FeatureVec f Double, rel)] -> r)
        -> M.Map q [(docId, FeatureVec f Double, rel)]
           -- ^ training data
        -> Folds [q]
        -> Folds (M.Map q [(docId, FeatureVec f Double, rel)], r)
           -- ^ the training result and set of test data for the fold
 kFolds train allData foldQueries =
-    fmap trainSingleFold foldQueries
+    fmap trainSingleFold (numberFolds foldQueries)
   where
-    trainSingleFold :: [q] -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
-    trainSingleFold testQueries =
+    trainSingleFold :: (FoldIdx, [q]) -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
+    trainSingleFold (foldIdx, testQueries) =
       let testData :: M.Map q [(docId, FeatureVec f Double, rel)]
           testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allData
 
           trainData :: M.Map q [(docId, FeatureVec f Double, rel)]
           trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allData
-      in (testData, train trainData)
+      in (testData, train foldIdx trainData)
 
 
 
