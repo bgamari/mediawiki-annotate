@@ -128,7 +128,9 @@ data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Read, Ord, Eq, Generic, Serialise)
+allEntityRunsF :: [Run]
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
+allEdgeRunsF :: [Run]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
@@ -206,6 +208,7 @@ onlyNoneFeaturesEdge :: EdgeFeature -> Bool
 onlyNoneFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _) = True
 onlyNoneFeaturesEdge _  = False
 
+onlyPageEdge :: EdgeFeature -> Bool
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
@@ -342,14 +345,14 @@ defaultEdgeRankFeatures run =
 rankFeatures :: RunFeature -> RankingEntry d -> Double
 rankFeatures runF entry =
     case runF of
-      ScoreF -> score entry
+      ScoreF -> rankScore entry
       RecipRankF -> recipRank entry
 --       LinearRankF -> linearRank 100  entry
 --       BucketRankF -> bucketRank entry
       CountF -> count entry
   where
-    score :: RankingEntry d -> Double
-    score entry  = CAR.RunFile.carScore entry
+    rankScore :: RankingEntry d -> Double
+    rankScore entry  = CAR.RunFile.carScore entry
 
     recipRank :: RankingEntry d  -> Double
     recipRank entry = 1.0/ (1.0 + realToFrac rank)
@@ -419,9 +422,9 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
 
           let trainFun :: FoldIdx -> _
               trainFun foldIdx =
-                  take nRestarts . trainWithRestarts miniBatchParams gen0 metric info fspace
+                  take nRestarts . trainWithRestarts miniBatchParams gen0 metric infoStr fspace
                 where
-                  info = show foldIdx
+                  infoStr = show foldIdx
 
               foldRestartResults :: Folds (M.Map  Q [(DocId, FeatureVec f Double, Rel)], [(Model f, Double)])
               foldRestartResults = kFolds trainFun trainData folds
@@ -561,11 +564,11 @@ l2rRankingToRankEntries methodName rankings =
   [ CAR.RunFile.RankingEntry { carQueryId = query
                              , carDocument = packPageId $ T.unpack doc
                              , carRank = rank
-                             , carScore = score
+                             , carScore = rankScore
                              , carMethodName = methodName
                              }
   | (query, ranking) <- M.toList rankings
-  , ((score, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
+  , ((rankScore, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
   ]
 
 
@@ -586,7 +589,7 @@ storeModelData outputFilePrefix modelFile model trainScore modelDesc = do
 
 storeRankingData ::  FilePath
 --                -> TrainData
-               -> _
+               -> M.Map  CAR.RunFile.QueryId (Ranking Double (QRel.DocumentName, IsRelevant))
                -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
                -> String
                -> IO ()

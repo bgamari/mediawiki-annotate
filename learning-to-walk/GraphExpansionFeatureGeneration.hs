@@ -49,7 +49,6 @@ import CAR.TocFile as Toc
 import CAR.Utils
 import GridFeatures
 
-import EdgeDocCorpus
 import GraphExpansion
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
@@ -72,6 +71,9 @@ import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import Control.Monad
 
+import EdgeDocCorpus
+import CandidateGraph
+import NodeAndEgdeFeatures
 
 import Debug.Trace
 
@@ -114,9 +116,6 @@ data GraphWalkModel = PageRankWalk | BiasedPersPageRankWalk
 -- | PageRank teleportation \(\alpha\)
 type TeleportationProb = Double
 
-
-selectCandidateGraph :: _
-selectCandidateGraph = selectStrictCandidateGraph
 
 opts :: Parser ( FilePath
                , FilePath
@@ -264,7 +263,6 @@ main = do
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
-    gen0 <- newStdGen  -- needed by learning to rank
 
     queries' <-
         case querySrc of
@@ -302,7 +300,7 @@ main = do
                      lift . internAll (each . CAR.RunFile.document)
                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
                  =<< liftIO (CAR.RunFile.readEntityRun path))))
-        (chunksOf 2 entityRunFiles)
+        (chunksOf 2 entityRunFiles)                                              -- todo why chunks of 2?!?
         :: IO [(GridRun, [RankingEntry PageId])]
 
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
@@ -313,7 +311,7 @@ main = do
                      lift . internAll (each . CAR.RunFile.document)
                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
                  =<< liftIO (CAR.RunFile.readParagraphRun path))))
-        (chunksOf 2 edgedocRunFiles)
+        (chunksOf 2 edgedocRunFiles)                                             -- todo why chunks of 2?!?
         :: IO [(GridRun, [RankingEntry ParagraphId])]
 
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
@@ -374,8 +372,8 @@ main = do
                    return $ Ranking.fromList $ map swap $ toEntries eigv
 --                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
                 where
-                  count pred = getSum . foldMap f
-                    where f x = if pred x then Sum 1 else Sum 0
+                  count predicate = getSum . foldMap f
+                    where f x = if predicate x then Sum 1 else Sum 0
 
                   candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
@@ -458,7 +456,7 @@ main = do
           let allData :: TrainData CombinedFeature
               allData = augmentWithQrels qrel docFeatures Relevant
 
-              !metric = avgMetricQrel qrel
+--               !metric = avgMetricQrel qrel
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
@@ -474,7 +472,7 @@ main = do
 
       TrainModel modelFile -> do
           let combinedFSpace' = F.mkFeatureSpace
-                                $ filter (expSettingToCrit experimentSettings)
+                                $ filter (filterFeaturesByExperimentSetting experimentSettings)
                                 $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
 
           let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace'
@@ -495,9 +493,9 @@ main = do
 
           let displayTrainData :: Show f => TrainData f -> [String]
               displayTrainData trainData =
-                [ show k ++ " -> "++ show elem
+                [ show k ++ " -> "++ show elm
                 | (k,list) <- M.toList trainData
-                , elem <- list]
+                , elm <- list]
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
           gen0 <- newStdGen  -- needed by learning to rank
@@ -508,89 +506,13 @@ main = do
 qrelDocNameToPageId :: QRel.DocumentName -> PageId
 qrelDocNameToPageId docname = packPageId $ T.unpack docname
 
-makeCombinedFeatureVec :: EdgeDocsLookup
-                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
-                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
-                       -> M.Map (QueryId, T.Text) CombinedFeatureVec
-makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
-    M.unions
-    $ withStrategy (parBuffer 200 rwhnf)
-      [ M.fromList
-        [ ((qid, T.pack $ unpackPageId pid), features)
-        | ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query candidates
-        ]
-      | (query, edgeRun) <- M.toList collapsedEdgedocRun
-      , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-      , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
-      ]
 
-
-makeStackedFeatures :: EdgeDocsLookup
-                    -> M.Map QueryId [MultiRankingEntry PageId GridRun]
-                    -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                    -> F.FeatureSpace CombinedFeature
-                    -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
-    let docFeatures'' = withStrategy (parTraversable rwhnf)
-                        $ fmap crit
-                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings combinedFSpace'
-
-        normalizer = zNormalizer $ M.elems docFeatures''
-    in withStrategy (parTraversable rwhnf)
-       $ fmap (normFeatures normalizer) docFeatures''
-
-makeStackedFeatures' :: EdgeDocsLookup
-                     -> F.FeatureSpace CombinedFeature
-                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
-                     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                     -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures' edgeDocsLookup fspace collapsedEntityRun collapsedEdgedocRun =
-    let docFeatures'' = withStrategy (parTraversable rwhnf)
-                        $ fmap crit
-                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings fspace
-
-        normalizer = zNormalizer $ M.elems docFeatures''
-    in withStrategy (parTraversable rwhnf)
-       $ fmap (normFeatures normalizer) docFeatures''
-
-
-logistic :: Double -> Double
-logistic t =
-    1.0 / (1.0 + exp (-1 * t))
-
-
-changeKey :: Ord k' => (k-> k') -> M.Map k v -> M.Map k' v
-changeKey f map_ =
-    M.fromList $ fmap (\(key,val) -> (f key, val)) $ M.toList map_
-
-
---
--- expSettingToCritEdge :: [ExperimentSettings] ->  (EdgeFeature -> Bool)
--- expSettingToCritEdge exps fname =
---     all (`convertEdge` fname) exps
---
--- convertEdge :: ExperimentSettings -> (EdgeFeature -> Bool)
--- convertEdge exp = case exp of
---                 AllExp -> const True
---                 NoEdgeFeats -> const False
---                 NoEntityFeats -> const True
---                 AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
---                 JustAggr -> onlyAggrEdge
---                 JustScore -> onlyScoreEdge
---                 JustRecip -> onlyRREdge
---                 LessFeatures -> onlyLessFeaturesEdge
---                 JustNone -> onlyNoneFeaturesEdge
---                 ExpPage -> onlyPageEdge
-
-
-expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
-expSettingToCrit exps fname =
-    all (`convert` fname) exps
+filterFeaturesByExperimentSetting :: [ExperimentSettings] ->  (CombinedFeature -> Bool)
+filterFeaturesByExperimentSetting settings fname =
+    all (`convert` fname) settings
   where
     convert :: ExperimentSettings -> (CombinedFeature -> Bool)
-    convert exp = case exp of
+    convert setting = case setting of
                     AllExp -> const True
                     NoEdgeFeats -> noEdge
                     NoEntityFeats -> noEntity
@@ -603,313 +525,14 @@ expSettingToCrit exps fname =
                     ExpPage -> onlyPage
                     ExpSection -> onlySection
 
-generateEdgeFeatureGraph:: QueryId
-                        -> Candidates
---                         -> [MultiRankingEntry ParagraphId GridRun]
---                         -> [MultiRankingEntry PageId GridRun]
-                        -> Graph PageId EdgeFeatureVec
-generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
-                                               , candidateEdgeRuns = edgeRun
-                                               , candidateEntityRuns = _entityRun} = -- edgeDocsLookup query edgeRun entityRun =
-    let
-        edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
-        edgeDoc paraId = case edgeDocsLookup [paraId] of
-                           [] -> error $ "No edgedoc for paraId "++show paraId
-                           (a:_) -> a
-
-        edgeFeat :: ParagraphId -> _
-        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry
-
-        divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
-        edgeCardinality ed = HS.size $ edgeDocNeighbors ed
-
-        aggrFeatVecs :: EdgeFeatureVec -> EdgeFeatureVec -> EdgeFeatureVec
-        aggrFeatVecs features1 features2 =
-            F.aggregateWith (+) [features1, features2]
-
-        oneHyperEdge :: (ParagraphId, MultiRankingEntry ParagraphId GridRun)
-                     -> [((PageId, PageId), EdgeFeatureVec)]
-        oneHyperEdge (paraId, edgeEntry) =
-              [ ((u, v) , dividedFeatVec)
-              | u <- HS.toList $ edgeDocNeighbors (edgeDoc paraId)
-              , v <- HS.toList $ edgeDocNeighbors (edgeDoc paraId) -- include self links (v==u)!
-              , let featVec = edgeFeat paraId edgeEntry
-              , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality (edgeDoc paraId))
-              ]
-
-        allHyperEdges :: HM.HashMap (PageId, PageId) EdgeFeatureVec
-        allHyperEdges = HM.fromListWith aggrFeatVecs
-                      $ foldMap oneHyperEdge
-                      $ [ (multiRankingEntryGetDocumentName edgeEntry, edgeEntry)
-                        | edgeEntry <- edgeRun
-                        ]
-
-
-        edgeFeatureGraph :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
-        edgeFeatureGraph = HM.fromListWith (<>)
-                         $ fmap (\((u,v),f) -> (u, HM.singleton v f))
-                         $ HM.toList allHyperEdges
-
-    in Graph edgeFeatureGraph
-
-
-generateNodeFeatures :: QueryId -> [MultiRankingEntry PageId GridRun] -> [EdgeDoc] -> HM.HashMap PageId EntityFeatureVec
-generateNodeFeatures query entityRun allEdgeDocs =
-   let
-        universalGraph :: HM.HashMap PageId [EdgeDoc]
-        universalGraph = edgeDocsToUniverseGraph allEdgeDocs
-
-   in HM.fromList [ (entity, (entityScoreVec entityRankEntry edgeDocs))
-                  | entityRankEntry <- entityRun
-                  , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
-                  , Just edgeDocs <- pure $ entity `HM.lookup` universalGraph
-                  ]
-
-
-data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
-                             , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
-                             , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
-                             }
-
-
-selectGenerousCandidateGraph
-    :: EdgeDocsLookup
-    -> QueryId
-    -> [MultiRankingEntry ParagraphId GridRun]
-    -> [MultiRankingEntry PageId GridRun]
-    -> Candidates
-selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
-    Candidates { candidateEdgeDocs = edgeDocs''
-               , candidateEdgeRuns = edgeRun''
-               , candidateEntityRuns = entityRun''
-               }
-  where
-    restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
-    restrict keys m =
-        let m2 = HM.fromList [(k, ()) | k <- keys]
-        in m `HM.intersection` m2
-
-    uniqBy :: (Eq b, Hashable b) => (a->b) -> [a] -> [a]
-    uniqBy keyF elems =
-        HM.elems $ HM.fromList [ (keyF e, e) | e <- elems]
-
-    -- goal: select the subset of entityRunEntries, edgesRunEntries, and edgeDocs that
-    -- fulfill these criteria:
-    --
-    -- edgeDocs has entry in edgeRuns
-    -- entities have entityRun entries
-    -- But not:  entities have indicent edgeDocs
-    --
-    -- but otherwise edgeFeatures are only considered,
-    -- if a) they belong to one indicent endgeDoc
-    -- and b) they have an edgeRun entry
-
-    paraIdToEdgeRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-    pageIdToEntityRun = [(multiRankingEntryGetDocumentName run, run)  | run <- entityRun]
-
-    edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
-
-
-    (edgeRun', edgeDocs')  = unzip
-                                      $ [ (edgeEntry, edgeDoc)
-                                        |edgeDoc <- edgeDocs
-                                        , let paraId = edgeDocParagraphId edgeDoc
-                                        , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
-                                        ]
-
-
---     (entityRunFake', edgeRun', edgeDocs')  = unzip3
---                                       $ [ (entityEntry, edgeEntry, edgeDoc)
---                                         | edgeDoc <- edgeDocs
---                                         , pageId <- HS.toList (edgeDocNeighbors edgeDoc)
---                                         , let paraId = edgeDocParagraphId edgeDoc
---                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
---                                         , let entityEntry = fakeMultiPageEntry queryId pageId
---                                         ]
-
-    entityRun'  =                    [ entityEntry
-                                        | (pageId, entityEntry) <- pageIdToEntityRun
-                                        ]
-
-    entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
-    edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
-    edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
-
-    fakeMultiPageEntry query page =
-           MultiRankingEntry { multiRankingEntryCollapsed = fakePageEntry query page
-                             , multiRankingEntryAll       = []
-                                                              }
-    fakePageEntry query page =     CAR.RunFile.RankingEntry { carQueryId     = query
-                                         , carDocument    = page
-                                         , carRank        = 1000
-                                         , carScore       = 0.0
-                                         , carMethodName  = CAR.RunFile.MethodName $ "fake"
-                                         }
-
-
-selectStrictCandidateGraph
-    :: EdgeDocsLookup
-    -> QueryId
-    -> [MultiRankingEntry ParagraphId GridRun]
-    -> [MultiRankingEntry PageId GridRun]
-    -> Candidates
-selectStrictCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
-    Candidates { candidateEdgeDocs = edgeDocs''
-               , candidateEdgeRuns = edgeRun''
-               , candidateEntityRuns = entityRun''
-               }
-  where
-    restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
-    restrict keys m =
-        let m2 = HM.fromList [(k, ()) | k <- keys]
-        in m `HM.intersection` m2
-
-    uniqBy :: (Eq b, Hashable b) => (a->b) -> [a] -> [a]
-    uniqBy keyF elems =
-        HM.elems $ HM.fromList [ (keyF e, e) | e <- elems]
-
-    -- goal: select the subset of entityRunEntries, edgesRunEntries, and edgeDocs that
-    -- fulfill these criteria:
-    --
-    -- edgeDocs has entry in edgeRuns
-    -- entities have entityRun entries
-    -- entities have indicent edgeDocs
-    --
-    -- but otherwise edgeFeatures are only considered,
-    -- if a) they belong to one indicent endgeDoc
-    -- and b) they have an edgeRun entry
-
-    paraIdToEdgeRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
-    pageIdToEntityRun = [(multiRankingEntryGetDocumentName run, run)  | run <- entityRun]
-
-    edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
-
-
-    (entityRun', edgeRun', edgeDocs')  = unzip3
-                                      $ [ (entityEntry, edgeEntry, edgeDoc)
-                                        | (pageId, entityEntry) <- pageIdToEntityRun
-                                        , edgeDoc <- edgeDocs
-                                        , pageId `HS.member` (edgeDocNeighbors edgeDoc)
-                                        , let paraId = edgeDocParagraphId edgeDoc
-                                        , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
-                                        ]
-
-    entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
-    edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
-    edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
-
-combineEntityEdgeFeatures
-    :: QueryId
-    -> Candidates
-    -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
-combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs, candidateEdgeRuns = edgeRun, candidateEntityRuns = entityRun} =
-    let
---         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
-        edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
-        edgeFeatureGraph = generateEdgeFeatureGraph query cands -- edgeDocsLookup query edgeRun entityRun
-        Graph edgeFeatureGraph' = edgeFeatureGraph
-
-        nodeFeatures :: HM.HashMap PageId EntityFeatureVec
-        nodeFeatures = generateNodeFeatures query entityRun allEdgeDocs
-
-        -- stack node vector on top of projected edge feature vector
-        -- no need to use nodeEdgeFeatureGraph
-    in HM.fromList
-       [ ((query, u), F.concatFeatureVec combinedFSpace uFeats (F.aggregateWith (+) edgeFeats))
-       | entityRankEntry <- entityRun
-       , let u = multiRankingEntryGetDocumentName entityRankEntry
-
-       , let Just uFeats =  u `HM.lookup` nodeFeatures
-       , let Just edgeFeats = do
-                 xs <- u `HM.lookup` edgeFeatureGraph'
-                 return [ edgeFeat | edgeFeat <- HM.elems xs ]
-       ]
 
 
 
-entityScoreVec :: MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec
-entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
-      [ (EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
-  --  , (EntDegreeRecip, recip degree)
-      , (EntDegree, degree)
-      ]
-      ++ entityScoreVecFromMultiRankings entityRankEntry
-     )
+-- ----------------
 
-  where
-   numIncidentEdgeDocs = realToFrac $ length incidentEdgeDocs
-   degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors incidentEdgeDocs
+-- ========================
 
 
-edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
-             -> F.FeatureVec EdgeFeature Double
-edgeScoreVec edgedocsRankEntry = makeEdgeFeatVector $
-                                    [ (EdgeCount, 1.0)
-                                    -- TODO
-                                    --, ( EdgeDocKL
-                                    --  , let Just edgeDocs = multiRankingEntryGetDocumentName edgedocsRankEntry `HM.lookup` edgeDocsByPara
-                                    --    in edgeDocKullbackLeibler connectedEdgeDocs edgeDocs
-                                    --  )
-                                    ]
-                                    ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgedocsRankEntry)
-                                    ++ concat [ rankEdgeFeatures (GridRun' g) entry
-                                       | (g, entry) <- multiRankingEntryAll edgedocsRankEntry
-                                       ]
-{-
-  where
-
-        connectedEdgeDocs :: ParagraphId -> [EdgeDoc]
-        connectedEdgeDocs = undefined
-
-        edgeDocKullbackLeibler :: [EdgeDoc] -> EdgeDoc -> Double
-        edgeDocKullbackLeibler otherEdgeDocsOfConnectedEntities edgeDoc =
-
-          let (backTermCounts, backTotal) =
-                termCountsAndTotal
-                $ fmap edgeDocContent
-                $ HS.toList $ HS.fromList
-                $ otherEdgeDocsOfConnectedEntities
-
-              (termCounts, total) =
-                termCountsAndTotal [(edgeDocContent edgeDoc)]
-          in kullbackLeibler (termCounts, total) (backTermCounts, backTotal)
-
-
-        kullbackLeibler :: (TermCounts, Int) -> (TermCounts, Int) -> Double
-        kullbackLeibler (termCounts, total) (backTermCounts, backTotal) =
-                            Foldable.sum $ [ pi * (log pi - log qi)
-                                            | (term,count) <- HM.toList (getTermCounts termCounts)
-                                            , let pi = (realToFrac count) / (realToFrac total)
-                                            , let bcount = fromJust $ term `HM.lookup` (getTermCounts backTermCounts)
-                                            , let qi = (realToFrac bcount) / (realToFrac backTotal)
-                                            ]
-
-        termCountsAndTotal :: [T.Text] -> (Retrieve.TermCounts, Int)
-        termCountsAndTotal texts =
-                              let termCounts =
-                                    foldMap (textToTokens) texts
-                                  total = Foldable.sum $ HM.elems $ getTermCounts $ termCounts
-                              in (termCounts, total)
--}
-
-textToTokens :: T.Text -> Retrieve.TermCounts
-textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
-
-
-
-
-type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
-
-wrapEdgeDocsTocs :: HM.HashMap ParagraphId EdgeDoc
-                 -> EdgeDocsLookup
-wrapEdgeDocsTocs paraId2EdgeDoc =
-    \paragraphIds -> catMaybes $ fmap (`HM.lookup` paraId2EdgeDoc) paragraphIds
-
-
-readEdgeDocsToc :: Toc.IndexedCborPath ParagraphId EdgeDoc -> IO EdgeDocsLookup
-readEdgeDocsToc edgeDocsFileWithToc = do
-    toc <- Toc.open edgeDocsFileWithToc
-    return $ \paragraphIds -> mapMaybe ( `Toc.lookup` toc) paragraphIds
 
 
 dropUnjudged :: Ord q
@@ -925,6 +548,14 @@ dropUnjudged featureMap =
 -- -----------------------------------
 -- iterative optimization
 -- -----------------------------------
+
+
+
+
+logistic :: Double -> Double
+logistic t =
+    1.0 / (1.0 + exp (-1 * t))
+
 
 -- | Compute a dot product between a feature and weight vector, ensuring
 -- positivity.

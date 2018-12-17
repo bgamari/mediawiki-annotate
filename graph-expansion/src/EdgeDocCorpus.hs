@@ -11,6 +11,11 @@ module EdgeDocCorpus
   , pagesToEdgeDocs
   , paragraphToEdgeDocs
   , paragraphsToEdgeDocs
+
+  -- ^ usage
+  , EdgeDocsLookup
+  , wrapEdgeDocsTocs
+  , readEdgeDocsToc
   ) where
 
 import Data.Monoid hiding (All, Any)
@@ -22,7 +27,11 @@ import Codec.Serialise
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.HashSet as HS
+import qualified Data.HashMap.Strict as HM
 import Data.Hashable
+import Data.Maybe
+import CAR.TocFile as Toc
+
 
 import qualified Data.SmallUtf8 as Utf8
 
@@ -51,8 +60,30 @@ instance Hashable EdgeDoc where
     hashWithSalt salt x =
         hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
 
+anonymousPageId :: PageId
 anonymousPageId = PageId $ Utf8.unsafeFromShortByteString "enwiki:anonymous"
 
+
+
+
+-- ---- open and use ------
+
+type EdgeDocsLookup =  ([ParagraphId] -> [EdgeDoc])
+
+wrapEdgeDocsTocs :: HM.HashMap ParagraphId EdgeDoc
+                 -> EdgeDocsLookup
+wrapEdgeDocsTocs paraId2EdgeDoc =
+    \paragraphIds -> catMaybes $ fmap (`HM.lookup` paraId2EdgeDoc) paragraphIds
+
+
+readEdgeDocsToc :: Toc.IndexedCborPath ParagraphId EdgeDoc -> IO EdgeDocsLookup
+readEdgeDocsToc edgeDocsFileWithToc = do
+    toc <- Toc.open edgeDocsFileWithToc
+    return $ \paragraphIds -> mapMaybe ( `Toc.lookup` toc) paragraphIds
+
+
+
+-- -------  build ------------------
 
 pageToEdgeDocs :: Page -> [EdgeDoc]
 pageToEdgeDocs (Page pageName pageId _ _ pageSkeleta) =
