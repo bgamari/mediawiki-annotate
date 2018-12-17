@@ -191,7 +191,7 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
 
   where
    numIncidentEdgeDocs = realToFrac $ length incidentEdgeDocs
-   degree =  realToFrac $ HS.size $ foldl1' HS.union $ fmap edgeDocNeighbors incidentEdgeDocs
+   degree =  realToFrac $ HS.size $ HS.unions $ fmap edgeDocNeighbors incidentEdgeDocs
 
 
 
