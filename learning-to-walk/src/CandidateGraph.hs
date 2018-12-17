@@ -39,6 +39,11 @@ data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
                              }
 
+type CandidateGraphGenerator =
+     QueryId
+    -> [MultiRankingEntry ParagraphId GridRun]
+    -> [MultiRankingEntry PageId GridRun]
+    -> Candidates
 
 selectCandidateGraph :: _
 selectCandidateGraph = selectStrictCandidateGraph
@@ -46,10 +51,7 @@ selectCandidateGraph = selectStrictCandidateGraph
 
 selectGenerousCandidateGraph
     :: EdgeDocsLookup
-    -> QueryId
-    -> [MultiRankingEntry ParagraphId GridRun]
-    -> [MultiRankingEntry PageId GridRun]
-    -> Candidates
+    -> CandidateGraphGenerator
 selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
@@ -121,10 +123,7 @@ selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
 
 selectStrictCandidateGraph
     :: EdgeDocsLookup
-    -> QueryId
-    -> [MultiRankingEntry ParagraphId GridRun]
-    -> [MultiRankingEntry PageId GridRun]
-    -> Candidates
+    -> CandidateGraphGenerator
 selectStrictCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''

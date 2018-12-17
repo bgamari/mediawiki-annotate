@@ -73,7 +73,7 @@ import Control.Monad
 
 import EdgeDocCorpus
 import CandidateGraph
-import NodeAndEgdeFeatures
+import NodeAndEdgeFeatures
 
 import Debug.Trace
 
@@ -330,6 +330,7 @@ main = do
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
+    let candidateGraphGenerator = selectStrictCandidateGraph edgeDocsLookup
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
@@ -341,7 +342,7 @@ main = do
           Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
 
           let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-              docFeatures = makeStackedFeatures' edgeDocsLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
+              docFeatures = makeStackedFeatures' candidateGraphGenerator (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
               degreeCentrality = fmap (modelWeights' model `score`) docFeatures
               queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
               ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
@@ -375,7 +376,7 @@ main = do
                   count predicate = getSum . foldMap f
                     where f x = if predicate x then Sum 1 else Sum 0
 
-                  candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                  candidates = candidateGraphGenerator query edgeRun entityRun -- selectCandidateGraph edgeDocsLookup query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query
@@ -450,7 +451,7 @@ main = do
                     in franking
 
 
-          let docFeatures = makeStackedFeatures' edgeDocsLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
+          let docFeatures = makeStackedFeatures' candidateGraphGenerator (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
           let allData :: TrainData CombinedFeature
@@ -475,7 +476,7 @@ main = do
                                 $ filter (filterFeaturesByExperimentSetting experimentSettings)
                                 $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
 
-          let docFeatures = makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace'
+          let docFeatures = makeStackedFeatures candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun combinedFSpace'
 
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)

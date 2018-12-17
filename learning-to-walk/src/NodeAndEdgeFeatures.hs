@@ -107,11 +107,11 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
 
 
 -- | merge node and edge features (used for both training, prediction, and walking)
-makeCombinedFeatureVec :: EdgeDocsLookup
+makeCombinedFeatureVec :: CandidateGraphGenerator
                        -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
                        -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
                        -> M.Map (QueryId, T.Text) CombinedFeatureVec
-makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
+makeCombinedFeatureVec candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun =
     M.unions
     $ withStrategy (parBuffer 200 rwhnf)
       [ M.fromList
@@ -120,20 +120,20 @@ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun =
         ]
       | (query, edgeRun) <- M.toList collapsedEdgedocRun
       , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-      , let candidates = selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+      , let candidates = candidateGraphGenerator query edgeRun entityRun
       ]
 
 
 -- | used for training
-makeStackedFeatures :: EdgeDocsLookup
+makeStackedFeatures :: CandidateGraphGenerator
                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
                     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
                     -> F.FeatureSpace CombinedFeature
                     -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
+makeStackedFeatures candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
+                        $ makeCombinedFeatureVec candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun
                         where crit = filterExpSettings combinedFSpace'
 
         normalizer = zNormalizer $ M.elems docFeatures''
@@ -141,15 +141,15 @@ makeStackedFeatures edgeDocsLookup collapsedEntityRun collapsedEdgedocRun combin
        $ fmap (normFeatures normalizer) docFeatures''
 
 -- | used for prediction and graph walk
-makeStackedFeatures' :: EdgeDocsLookup
+makeStackedFeatures' :: CandidateGraphGenerator
                      -> F.FeatureSpace CombinedFeature
                      -> M.Map QueryId [MultiRankingEntry PageId GridRun]
                      -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
                      -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures' edgeDocsLookup fspace collapsedEntityRun collapsedEdgedocRun =
+makeStackedFeatures' candidateGraphGenerator fspace collapsedEntityRun collapsedEdgedocRun =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec edgeDocsLookup collapsedEntityRun collapsedEdgedocRun
+                        $ makeCombinedFeatureVec candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun
                         where crit = filterExpSettings fspace
 
         normalizer = zNormalizer $ M.elems docFeatures''
