@@ -116,7 +116,7 @@ type TeleportationProb = Double
 
 
 selectCandidateGraph :: _
-selectCandidateGraph = selectGenerousCandidateGraph
+selectCandidateGraph = selectStrictCandidateGraph
 
 opts :: Parser ( FilePath
                , FilePath
