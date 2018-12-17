@@ -45,14 +45,12 @@ type CandidateGraphGenerator =
     -> [MultiRankingEntry PageId GridRun]
     -> Candidates
 
-selectCandidateGraph :: _
-selectCandidateGraph = selectStrictCandidateGraph
 
 
 selectGenerousCandidateGraph
     :: EdgeDocsLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
+selectGenerousCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''
@@ -101,24 +99,26 @@ selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
 --                                         , let entityEntry = fakeMultiPageEntry queryId pageId
 --                                         ]
 
-    entityRun'  =                    [ entityEntry
-                                        | (pageId, entityEntry) <- pageIdToEntityRun
-                                        ]
+  -- todo add entities adjacent to edgedocs
 
+    entityRun'  =                  entityRun
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
 
-    fakeMultiPageEntry query page =
-           MultiRankingEntry { multiRankingEntryCollapsed = fakePageEntry query page
-                             , multiRankingEntryAll       = []
-                                                              }
-    fakePageEntry query page =     CAR.RunFile.RankingEntry { carQueryId     = query
-                                         , carDocument    = page
-                                         , carRank        = 1000
-                                         , carScore       = 0.0
-                                         , carMethodName  = CAR.RunFile.MethodName $ "fake"
-                                         }
+    fakeMultiPageEntry query doc =
+        buildMultiTrecEntry  100 (0.0, [])
+
+--     fakeMultiPageEntry query page =
+--            MultiRankingEntry { multiRankingEntryCollapsed = fakePageEntry query page
+--                              , multiRankingEntryAll       = []
+--                                                               }
+--     fakePageEntry query page =     CAR.RunFile.RankingEntry { carQueryId     = query
+--                                          , carDocument    = page
+--                                          , carRank        = 1000
+--                                          , carScore       = 0.0
+--                                          , carMethodName  = CAR.RunFile.MethodName $ "fake"
+--                                          }
 
 
 selectStrictCandidateGraph

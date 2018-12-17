@@ -175,7 +175,8 @@ generateNodeFeatures query entityRun allEdgeDocs =
    in HM.fromList [ (entity, (entityScoreVec entityRankEntry edgeDocs))
                   | entityRankEntry <- entityRun
                   , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
-                  , Just edgeDocs <- pure $ entity `HM.lookup` universalGraph
+--                   , Just edgeDocs <- pure $ entity `HM.lookup` universalGraph
+                  , let edgeDocs = fromMaybe [] $ entity `HM.lookup` universalGraph
                   ]
 
 

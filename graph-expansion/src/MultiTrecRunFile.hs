@@ -81,21 +81,21 @@ collapseRankings rankingEntries =
 
 
         -- sorted and with ranks
-    in zipWith buildData [1 ..]
+    in zipWith buildMultiTrecEntry [1 ..]
        $ sortOn (Down . fst) scoredMultiRankings
 
-  where buildData :: Rank -> (Score, [(key, RankingEntry doc)]) -> MultiRankingEntry doc key
-        buildData r (s, rankings) =
+buildMultiTrecEntry :: Rank -> (Score, [(key, RankingEntry doc)]) -> MultiRankingEntry doc key
+buildMultiTrecEntry r (s, rankings) =
             MultiRankingEntry
-            { multiRankingEntryCollapsed =
-                  RunFile.RankingEntry { RunFile.carQueryId = qId
-                                       , RunFile.carDocument = docName
-                                       , RunFile.carRank = r
-                                       , RunFile.carScore = s
-                                       , RunFile.carMethodName = RunFile.MethodName "collapsed"
-                                       }
-            , multiRankingEntryAll = rankings
-            }
+                { multiRankingEntryCollapsed =
+                      RunFile.RankingEntry { RunFile.carQueryId = qId
+                                           , RunFile.carDocument = docName
+                                           , RunFile.carRank = r
+                                           , RunFile.carScore = s
+                                           , RunFile.carMethodName = RunFile.MethodName "collapsed"
+                                           }
+                , multiRankingEntryAll = rankings
+                }
           where
             qId = RunFile.carQueryId $ snd $ head rankings
             docName = RunFile.carDocument $ snd $ head rankings

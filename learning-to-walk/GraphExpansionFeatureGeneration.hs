@@ -330,7 +330,7 @@ main = do
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
-    let candidateGraphGenerator = selectStrictCandidateGraph edgeDocsLookup
+    let candidateGraphGenerator = selectGenerousCandidateGraph edgeDocsLookup
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
