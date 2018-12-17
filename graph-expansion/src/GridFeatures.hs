@@ -461,7 +461,7 @@ trainWithRestarts miniBatchParams gen0 metric info fspace trainData =
       restartModel restart =
           learnToRank miniBatchParams (defaultConvergence info' 1e-2 100 2) trainData' fspace metric
         where
-          info' = info <> " " <> show restart
+          info' = info <> " restart " <> show restart
       modelsWithTrainScore :: [(Model f,Double)]
       modelsWithTrainScore = zipWith restartModel [0..] rngSeeds
      in modelsWithTrainScore
