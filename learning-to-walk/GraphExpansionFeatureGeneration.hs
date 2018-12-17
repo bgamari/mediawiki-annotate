@@ -710,28 +710,28 @@ selectGenerousCandidateGraph edgeDocsLookup queryId edgeRun entityRun =
     edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
 
 
---     (edgeRun', edgeDocs')  = unzip
---                                       $ [ (edgeEntry, edgeDoc)
---                                         |edgeDoc <- edgeDocs
---                                         , let paraId = edgeDocParagraphId edgeDoc
---                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
---                                         ]
-
-
-    (entityRunFake', edgeRun', edgeDocs')  = unzip3
-                                      $ [ (entityEntry, edgeEntry, edgeDoc)
-                                        | edgeDoc <- edgeDocs
-                                        , pageId <- HS.toList (edgeDocNeighbors edgeDoc)
+    (edgeRun', edgeDocs')  = unzip
+                                      $ [ (edgeEntry, edgeDoc)
+                                        |edgeDoc <- edgeDocs
                                         , let paraId = edgeDocParagraphId edgeDoc
                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
-                                        , let entityEntry = fakeMultiPageEntry queryId pageId
                                         ]
+
+
+--     (entityRunFake', edgeRun', edgeDocs')  = unzip3
+--                                       $ [ (entityEntry, edgeEntry, edgeDoc)
+--                                         | edgeDoc <- edgeDocs
+--                                         , pageId <- HS.toList (edgeDocNeighbors edgeDoc)
+--                                         , let paraId = edgeDocParagraphId edgeDoc
+--                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
+--                                         , let entityEntry = fakeMultiPageEntry queryId pageId
+--                                         ]
 
     entityRun'  =                    [ entityEntry
                                         | (pageId, entityEntry) <- pageIdToEntityRun
                                         ]
 
-    entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun' <> entityRunFake')
+    entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
 
