@@ -97,10 +97,11 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
        | entityRankEntry <- entityRun
        , let u = multiRankingEntryGetDocumentName entityRankEntry
 
-       , let Just uFeats =  u `HM.lookup` nodeFeatures
-       , let Just edgeFeats = do
-                 xs <- u `HM.lookup` edgeFeatureGraph'
-                 return [ edgeFeat | edgeFeat <- HM.elems xs ]
+       , let uFeats = fromMaybe makeDefaultEntFeatVector $  u `HM.lookup` nodeFeatures
+       , let edgeFeats =
+                 case u `HM.lookup` edgeFeatureGraph' of
+                    Just xs ->  HM.elems xs
+                    Nothing ->  [makeDefaultEdgeFeatVector]
        ]
 
 

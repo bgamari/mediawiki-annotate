@@ -296,6 +296,9 @@ type CombinedFeatureVec = FeatureVec CombinedFeature Double
 
 
 
+makeDefaultEntFeatVector :: F.FeatureVec EntityFeature Double
+makeDefaultEntFeatVector = makeEntFeatVector []
+
 makeEntFeatVector :: [(EntityFeature, Double)] -> F.FeatureVec EntityFeature Double
 makeEntFeatVector xs =
     F.modify defaults xs
@@ -308,6 +311,9 @@ makeEntFeatVector xs =
                                           , feat <- defaultEntRankFeatures entityRun
                                           ]
                                        )
+
+makeDefaultEdgeFeatVector :: F.FeatureVec EdgeFeature Double
+makeDefaultEdgeFeatVector = makeEdgeFeatVector []
 
 makeEdgeFeatVector :: [(EdgeFeature, Double)] -> F.FeatureVec EdgeFeature Double
 makeEdgeFeatVector xs =
