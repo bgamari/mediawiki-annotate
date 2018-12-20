@@ -94,7 +94,7 @@ data QueryModel = All | Title | SubTree | LeafHeading | Interior | SectionPath
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data RetrievalModel = Bm25 | Ql
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
-data ExpansionModel = NoneX | Rm | EcmX | EcmRm | EcmPsg
+data ExpansionModel = NoneX | Rm | Rm1 | EcmX | EcmRm | EcmPsg | EcmPsg1
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
@@ -116,8 +116,8 @@ edgeRunsF :: [GridRun]
 edgeRunsF = [ GridRun qm rm em it
              | qm <- [minBound..maxBound]
              , rm <- [minBound..maxBound]
-             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg)
-                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg)
+             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg), (EcmIdx, Rm1), (EcmIdx, EcmPsg1)
+                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg), (ParagraphIdx, Rm1), (ParagraphIdx, EcmPsg1)
                            ]
              ]
 
@@ -201,7 +201,10 @@ onlyRREdge _  = False
 onlyLessFeaturesEdge :: EdgeFeature -> Bool
 onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _) = True
 onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _) = True
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _) = True
 onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _) = True
+onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _) = True
 onlyLessFeaturesEdge _  = False
 
 onlyNoneFeaturesEdge :: EdgeFeature -> Bool
@@ -251,9 +254,20 @@ onlyRR _  = False
 onlyLessFeatures :: CombinedFeature -> Bool
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm EntityIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm1 EntityIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm1 PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg EntityIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 EntityIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 PageIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
 onlyLessFeatures _  = False
 
 onlyNoneFeatures :: CombinedFeature -> Bool
