@@ -40,6 +40,7 @@ import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, feature
 import qualified CAR.RunFile as CAR.RunFile
 import MultiTrecRunFile
 
+import qualified Debug.Trace as Debug
 
 minibatchParser :: Parser MiniBatchParams
 minibatchParser = MiniBatchParams
@@ -261,6 +262,7 @@ onlySimpleRmFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalMo
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
 onlySimpleRmFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
+onlySimpleRmFeatures other = Debug.trace (show other) False
 
 
 onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
