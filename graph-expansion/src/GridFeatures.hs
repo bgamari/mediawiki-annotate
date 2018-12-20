@@ -262,7 +262,9 @@ onlySimpleRmFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalMo
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
 onlySimpleRmFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
-onlySimpleRmFeatures other = Debug.trace (show other) False
+onlySimpleRmFeatures (Left (EntRetrievalFeature Aggr runf)) = True
+onlySimpleRmFeatures (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlySimpleRmFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not specify this feature: " <> show other <> " Returning True.")    True
 
 
 onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
@@ -283,6 +285,15 @@ onlyPage (Left (EntRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
 onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage _  = False
+
+onlyTitleAndSectionPath :: CombinedFeature -> Bool
+onlyTitleAndSectionPath  (Left (EntRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
+onlyTitleAndSectionPath  (Left (EntRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
+onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlyTitleAndSectionPath (Left (EntRetrievalFeature Aggr runf)) = True
+onlyTitleAndSectionPath (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlyTitleAndSectionPath  _  = False
 
 onlySection :: CombinedFeature -> Bool
 onlySection (Left (EntRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = True
