@@ -97,7 +97,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath
                         | ExpPage | ExpSection
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
@@ -520,6 +520,7 @@ filterFeaturesByExperimentSetting settings fname =
                     NoEntityFeats -> noEntity
                     AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
                     JustAggr -> onlyAggr
+                    NoAggr -> not . onlyAggr
                     JustScore -> onlyScore
                     JustRecip -> onlyRR
                     LessFeatures -> onlyLessFeatures

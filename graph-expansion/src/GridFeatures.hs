@@ -228,12 +228,12 @@ onlyAggr _  = False
 onlyScore :: CombinedFeature -> Bool
 onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
 onlyScore (Right (EdgeRetrievalFeature _ ScoreF)) = True
-onlyScore _  = False
+onlyScore x = nothingElseButAggr x
 
 onlyRR :: CombinedFeature -> Bool
 onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
 onlyRR (Right (EdgeRetrievalFeature _ RecipRankF)) = True
-onlyRR _  = False
+onlyRR x = nothingElseButAggr x
 
 
 onlyLessFeatures :: CombinedFeature -> Bool
@@ -253,7 +253,7 @@ onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 Paragra
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
-onlyLessFeatures _  = False
+onlyLessFeatures x = nothingElseButAggr x
 
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
@@ -276,7 +276,7 @@ onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
 onlyNoneFeatures :: CombinedFeature -> Bool
 onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
 onlyNoneFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
-onlyNoneFeatures _  = False
+onlyNoneFeatures x  = nothingElseButAggr x
 
 
 onlyPage :: CombinedFeature -> Bool
@@ -284,7 +284,7 @@ onlyPage (Left (EntRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
 onlyPage (Left (EntRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
 onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
-onlyPage _  = False
+onlyPage x = nothingElseButAggr x
 
 onlyTitleAndSectionPath :: CombinedFeature -> Bool
 onlyTitleAndSectionPath  (Left (EntRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
@@ -293,7 +293,7 @@ onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _
 onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
 onlyTitleAndSectionPath (Left (EntRetrievalFeature Aggr runf)) = True
 onlyTitleAndSectionPath (Right (EdgeRetrievalFeature Aggr runf)) = True
-onlyTitleAndSectionPath  _  = False
+onlyTitleAndSectionPath x = nothingElseButAggr x
 
 onlySection :: CombinedFeature -> Bool
 onlySection (Left (EntRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = True
@@ -304,9 +304,13 @@ onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) 
 onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
 onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
 onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
-onlySection _  = False
+onlySection x = nothingElseButAggr x
 
 
+nothingElseButAggr :: CombinedFeature -> Bool
+nothingElseButAggr (Left (EntRetrievalFeature Aggr _)) = True
+nothingElseButAggr (Right (EdgeRetrievalFeature Aggr _)) = True
+nothingElseButAggr _ = False
 
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
