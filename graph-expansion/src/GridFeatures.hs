@@ -122,7 +122,7 @@ data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
-allRunFeatures = [ScoreF] --[minBound..maxBound]
+allRunFeatures = [ScoreF, RecipRankF] --[minBound..maxBound]
 
 data EntityFeature where
     EntRetrievalFeature :: Run -> RunFeature -> EntityFeature
