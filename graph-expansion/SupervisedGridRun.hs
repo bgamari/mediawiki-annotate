@@ -36,6 +36,7 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.Utils
 import GridFeatures
+import TrainAndStore
 
 import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
@@ -221,7 +222,7 @@ main = do
         tr x = traceShow x x
 
     case modelSource of
-
+      ModelFromFile _file -> error $ "SupervisedGridRun Does not support  loading models from file"
       TrainModel modelFile -> do
           let docFeatures = makeFeatures collapsedEntityRun
 

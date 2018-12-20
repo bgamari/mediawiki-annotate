@@ -47,7 +47,6 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
-import GridFeatures
 
 import GraphExpansion
 import qualified SimplIR.SimpleIndex as Index
@@ -71,9 +70,11 @@ import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
 import Control.Monad
 
+import GridFeatures
 import EdgeDocCorpus
 import CandidateGraph
 import NodeAndEdgeFeatures
+import TrainAndStore
 
 import Debug.Trace
 

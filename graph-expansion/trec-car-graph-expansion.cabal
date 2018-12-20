@@ -22,7 +22,8 @@ library
                        MultiTrecRunFile,
                        GraphExpansionExperiments,
                        GridFeatures,
-                       WriteRanking
+                       WriteRanking,
+                       TrainAndStore
   build-depends:       base >=4.9 && <4.12,
                        async,
                        bytestring,

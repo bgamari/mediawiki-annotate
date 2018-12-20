@@ -14,63 +14,25 @@ module NodeAndEdgeFeatures
 
 
 import Control.Concurrent.Async
-import Control.DeepSeq hiding (rwhnf)
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Control.Parallel.Strategies
-import Control.Lens (each)
-import Data.Tuple
-import Data.Semigroup hiding (All, Any, option)
-import Options.Applicative
-import System.IO
-import Data.Aeson
-import System.Random
-import GHC.Generics
-import GHC.Stack
 
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
-import qualified Text.PrettyPrint.Leijen.Text as PP
-import Data.List
 import Data.Maybe
-import Data.Foldable as Foldable
-import Data.Hashable
-import Control.Concurrent
-import Control.Concurrent.Map
-import Data.List.Split
 
 import CAR.Types hiding (Entity)
-import CAR.ToolVersion
-import CAR.Retrieve as Retrieve
-import qualified CAR.RunFile as CarRun
-import CAR.TocFile as Toc
-import CAR.Utils
 import GridFeatures
 
 import GraphExpansion
-import qualified SimplIR.SimpleIndex as Index
-import SimplIR.LearningToRank
-import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
---import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 import SimplIR.FeatureSpace.Normalise
-import SimplIR.Intern
 
 import qualified CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
-import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
-import PageRank
---import DenseMapping
 import Graph
-
-import qualified Data.GraphViz as Dot
-import qualified Data.GraphViz.Attributes.Complete as Dot
-import qualified Data.GraphViz.Commands.IO as Dot
-import Control.Monad
 
 import EdgeDocCorpus
 import CandidateGraph
