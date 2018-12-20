@@ -68,7 +68,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | TrainModel FilePath -- filename to write resulting file to
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip -- | LessFeatures | ExpPage | JustNone
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | JustScore | JustRecip | JustSimpleRm-- | LessFeatures | ExpPage | JustNone
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 

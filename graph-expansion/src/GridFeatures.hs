@@ -38,8 +38,6 @@ import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (featureDimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace, concatSpace, concatFeatureVec)
 
 import qualified CAR.RunFile as CAR.RunFile
-import qualified SimplIR.Format.QRel as QRel
-import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
 
 
@@ -170,32 +168,32 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 -- filtering of feature spaces
 -- -------------------------------------------
 
-
-onlyAggrEdge :: EdgeFeature -> Bool
-onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
-onlyAggrEdge _  = False
-
-onlyScoreEdge :: EdgeFeature -> Bool
-onlyScoreEdge (EdgeRetrievalFeature _ ScoreF) = True
-onlyScoreEdge _  = False
-
-onlyRREdge :: EdgeFeature -> Bool
-onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
-onlyRREdge _  = False
-
-
-onlyLessFeaturesEdge :: EdgeFeature -> Bool
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _) = True
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _) = True
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _) = True
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _) = True
-onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _) = True
-onlyLessFeaturesEdge _  = False
-
-onlyNoneFeaturesEdge :: EdgeFeature -> Bool
-onlyNoneFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _) = True
-onlyNoneFeaturesEdge _  = False
+--
+-- onlyAggrEdge :: EdgeFeature -> Bool
+-- onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
+-- onlyAggrEdge _  = False
+--
+-- onlyScoreEdge :: EdgeFeature -> Bool
+-- onlyScoreEdge (EdgeRetrievalFeature _ ScoreF) = True
+-- onlyScoreEdge _  = False
+--
+-- onlyRREdge :: EdgeFeature -> Bool
+-- onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
+-- onlyRREdge _  = False
+--
+--
+-- onlyLessFeaturesEdge :: EdgeFeature -> Bool
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _) = True
+-- onlyLessFeaturesEdge _  = False
+--
+-- onlyNoneFeaturesEdge :: EdgeFeature -> Bool
+-- onlyNoneFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _) = True
+-- onlyNoneFeaturesEdge _  = False
 
 onlyPageEdge :: EdgeFeature -> Bool
 onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
@@ -256,6 +254,21 @@ onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg Para
 onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
 onlyLessFeatures _  = False
 
+
+-- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
+onlySimpleRmFeatures :: CombinedFeature -> Bool
+onlySimpleRmFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
+    onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
+onlySimpleRmFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
+    onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
+
+
+onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
+onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
+     (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx])
+     &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
+     &&  (retrievalModel == Bm25)
+
 onlyNoneFeatures :: CombinedFeature -> Bool
 onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
 onlyNoneFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
@@ -279,6 +292,8 @@ onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) 
 onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
 onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
 onlySection _  = False
+
+
 
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
