@@ -75,6 +75,10 @@ pageRank
     -> Graph n a          -- ^ the graph
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 pageRank alpha = persPageRankWithSeeds alpha 0 HS.empty
+{-# SPECIALISE pageRank
+                   :: (Eq n, Hashable n, Show n)
+                   => Double
+                   -> Graph n Double -> [Eigenvector n Double] #-}
 
 -- | Personalized PageRank.
 --
@@ -108,6 +112,10 @@ persPageRankWithSeeds alpha beta seeds graph =
     !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
     seeds' = w <$ HS.toMap seeds
       where w = beta / realToFrac (HS.size seeds)
+{-# SPECIALISE persPageRankWithSeeds
+                   :: (Eq n, Hashable n, Show n)
+                   => Double -> Double -> HS.HashSet n
+                   -> Graph n Double -> [Eigenvector n Double] #-}
 
 -- | Like 'persPageRankWithSeeds' but allowing the weight of each seed to be
 -- given independently. Note that \( \alpha + \sum_i \beta_i \) must sum to less
@@ -124,6 +132,12 @@ persPageRankWithNonUniformSeeds alpha seeds graph =
     !mapping  = mkDenseMapping (nodeSet graph)
     !numNodes = rangeSize (denseRange mapping)
     !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+{-# SPECIALISE persPageRankWithNonUniformSeeds
+    :: forall n. (VG.Vector VU.Vector Double, Eq n, Hashable n, Show n, HasCallStack)
+    => Double
+    -> HM.HashMap n Double
+    -> Graph n Double
+    -> [Eigenvector n Double] #-}
 
 -- | Like 'persPagerankWithSeeds' but allowing the user to specify a
 -- 'DenseMapping' and an initial principle eigenvector.
@@ -217,10 +231,12 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
       | otherwise = xs
     !nodeRng  = denseRange mapping
     !numNodes = rangeSize nodeRng
-
-{-# SPECIALISE persPageRankWithSeeds
+{-# SPECIALISE persPageRankWithSeedsAndInitial
                    :: (Eq n, Hashable n, Show n)
-                   => Double -> Double -> HS.HashSet n
+                   => DenseMapping n
+                   -> VI.Vector VU.Vector (DenseId n) Double
+                   -> Double
+                   -> HM.HashMap n Double
                    -> Graph n Double -> [Eigenvector n Double] #-}
 
 test :: Graph Char Double
