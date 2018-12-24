@@ -1,5 +1,6 @@
 variables:
   THREADS: 9
+  GIT_SUBMODULE_STRATEGY: recursive
 
 cache:
   paths:
@@ -30,9 +31,6 @@ before_script:
         ] : List { name : Text, secretKey : Text }
     }
     EOF
-
-  - git submodule update --init --recursive
-
 
 validate:
   image: nixos/nix

@@ -41,7 +41,12 @@ let
         trec-news            = self.callCabal2nix "trec-news" ./trec-news {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
-        graphviz = self.callCabal2nix "graphviz" ./vendor/graphviz { graphviz = nixpkgs.graphviz; };
+        graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {
+          owner = "bgamari";
+          repo = "graphviz";
+          rev = "804db2d4805d210c8e160e9654e1e95bd898c077";
+          sha256 = "0iq1slrla554b4g29bfx61ak2p3nxfw09nrdbhln0f43hmcpw8d7";
+        }) { inherit (nixpkgs) graphviz; };
         hpc-coveralls = self.callCabal2nix "hpc-coveralls" (nixpkgs.fetchFromGitHub {
           owner = "bgamari";
           repo = "hpc-coveralls";
