@@ -11,10 +11,12 @@ module DenseMapping
       -- * Mapping to index space
     , DenseMapping
     , denseRange
+    , toDenseMap
     , assocs
     , elems
     , size
     , toDense
+    , toDenseMaybe
     , fromDense
     , mkDenseMapping
     ) where
@@ -62,11 +64,17 @@ $(derivingUnbox "DenseId"
 fromDense :: DenseMapping a -> DenseId a -> a
 fromDense m = (fromDenseArr m VI.!)
 
+toDenseMaybe :: (HasCallStack, Eq a, Hashable a, Show a)
+             => DenseMapping a -> a -> Maybe (DenseId a)
+toDenseMaybe m x =
+    HM.lookup x (toDenseMap m)
+{-# INLINE toDenseMaybe #-}
+
 toDense :: (HasCallStack, Eq a, Hashable a, Show a)
         => DenseMapping a -> a -> DenseId a
 toDense m x =
     fromMaybe (error $ "DenseMapping.toDense: "++show x)
-    $ HM.lookup x (toDenseMap m)
+    $ toDenseMaybe m x
 {-# INLINE toDense #-}
 
 mkDenseMapping

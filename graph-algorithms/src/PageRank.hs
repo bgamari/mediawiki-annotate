@@ -156,6 +156,15 @@ persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
 
 persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
   | numNodes == 0 = error "persPageRank: no nodes"
+
+  | uncovered <- HS.toMap (nodeSet graph) `HM.difference` toDenseMap mapping
+  , not $ HM.null uncovered
+  = error $ "persPageRank: graph nodes not covered by dense mapping: "<>show (HM.keys uncovered)
+
+  | uncovered <- seeds `HM.difference` toDenseMap mapping
+  , not $ HM.null uncovered
+  = error $ "persPageRank: seed nodes not covered by dense mapping: "<>show (HM.keys uncovered)
+
   | otherwise =
     let -- normalized flow of nodes flowing into each node
         inbound :: VI.Vector V.Vector (DenseId n) (HM.HashMap (DenseId n) a)
