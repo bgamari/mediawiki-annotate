@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module NodeAndEdgeFeatures
     ( makeStackedFeatures
@@ -21,6 +22,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Data.Maybe
+import qualified Data.List.NonEmpty as NE
 
 import CAR.Types hiding (Entity)
 import GridFeatures
@@ -62,7 +64,10 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
        , let uFeats = fromMaybe makeDefaultEntFeatVector $  u `HM.lookup` nodeFeatures
        , let edgeFeats =
                  case u `HM.lookup` edgeFeatureGraph' of
-                    Just xs ->  HM.elems xs
+                    Just mxs
+                      | Just xs <- NE.nonEmpty $ HM.elems mxs -- check that values of mxs is non-empty
+                                         -> xs
+                      | otherwise        -> [makeDefaultEdgeFeatVector]
                     Nothing ->  [makeDefaultEdgeFeatVector]
        ]
 
