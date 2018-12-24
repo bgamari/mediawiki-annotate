@@ -35,7 +35,7 @@ library
   default-language:    Haskell2010
   ghc-options:         -Wall
   hs-source-dirs:      src
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base,
                        aeson >= 1.0,
                        binary,
                        cborg,
