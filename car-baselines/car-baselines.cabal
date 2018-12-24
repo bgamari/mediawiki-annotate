@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 executable car-retrieval
   main-is:             CarBaselines.hs
   other-extensions:    ScopedTypeVariables, BangPatterns
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base,
                        filepath,
                        containers >=0.5 && <0.7,
                        unordered-containers >= 0.2,

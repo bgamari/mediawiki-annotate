@@ -24,7 +24,7 @@ library
                        GridFeatures,
                        WriteRanking,
                        TrainAndStore
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,

@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 executable multilang-car
   main-is:             LangExtract.hs
   other-extensions:    OverloadedStrings, GeneralizedNewtypeDeriving, TypeApplications, DeriveGeneric
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base,
                        aeson >=1.1 && <1.5,
                        hashable >=1.2 && <1.3,
                        bytestring >=0.10 && <0.11,
