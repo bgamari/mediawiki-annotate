@@ -302,8 +302,9 @@ mkSequentialFolds k xs = Folds $ chunksOf foldLen xs
 -- r might be: [(Model, Double)]
 
 
+-- todo think about turning Fold[q] into Fold (S.Set q)
 kFolds :: forall q docId rel r f.
-       Eq q
+       (Eq q, Ord q)
        => (FoldIdx -> M.Map q [(docId, FeatureVec f Double, rel)] -> r)
        -> M.Map q [(docId, FeatureVec f Double, rel)]
           -- ^ training data
@@ -316,10 +317,11 @@ kFolds train allData foldQueries =
     trainSingleFold :: (FoldIdx, [q]) -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
     trainSingleFold (foldIdx, testQueries) =
       let testData :: M.Map q [(docId, FeatureVec f Double, rel)]
-          testData =  M.filterWithKey (\query _ -> query `elem` testQueries) allData
+          testQueries' = S.fromList testQueries
+          testData =  M.filterWithKey (\query _ -> query `S.member` testQueries') allData
 
           trainData :: M.Map q [(docId, FeatureVec f Double, rel)]
-          trainData =  M.filterWithKey (\query _ -> query `notElem` testQueries) allData
+          trainData =  M.filterWithKey (\query _ -> query `S.notMember` testQueries') allData
       in (testData, train foldIdx trainData)
 
 

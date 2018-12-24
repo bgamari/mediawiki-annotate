@@ -141,7 +141,7 @@ opts =
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
     <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
-    <*> option auto (short 'k' <> long "num-results" <> help "number of results per query")
+    <*> option auto (short 'k' <> long "num-results" <> help "use number of results of input rankings (per query)")
     <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
@@ -253,8 +253,9 @@ main = do
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
     putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles))
+    putStrLn $ "# numResults: "++ ( show (numResults))
 
-    putStrLn $ " Experimentation settins: "++ (show experimentSettings)
+    putStrLn $ " Experimentation settings: "++ (show experimentSettings)
     putStrLn $ " model comes from : "++ (show modelSource)
     putStrLn $ " teleport (only for page rank) : "++ (show teleportation)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)

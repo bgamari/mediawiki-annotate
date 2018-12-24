@@ -89,16 +89,6 @@ selectGenerousCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
                                         ]
 
-
---     (entityRunFake', edgeRun', edgeDocs')  = unzip3
---                                       $ [ (entityEntry, edgeEntry, edgeDoc)
---                                         | edgeDoc <- edgeDocs
---                                         , pageId <- HS.toList (edgeDocNeighbors edgeDoc)
---                                         , let paraId = edgeDocParagraphId edgeDoc
---                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
---                                         , let entityEntry = fakeMultiPageEntry queryId pageId
---                                         ]
-
   -- todo add entities adjacent to edgedocs
 
     entityRun'  =                  entityRun

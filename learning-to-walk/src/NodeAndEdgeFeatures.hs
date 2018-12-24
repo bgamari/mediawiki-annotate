@@ -166,7 +166,7 @@ generateEdgeFeatureGraph:: QueryId
                         -> Graph PageId EdgeFeatureVec
 generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                                                , candidateEdgeRuns = edgeRun
-                                               , candidateEntityRuns = _entityRun} = -- edgeDocsLookup query edgeRun entityRun =
+                                               , candidateEntityRuns = entityRun} = -- edgeDocsLookup query edgeRun entityRun =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeDoc paraId = case edgeDocsLookup [paraId] of
@@ -208,7 +208,16 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                          $ fmap (\((u,v),f) -> (u, HM.singleton v f))
                          $ HM.toList allHyperEdges
 
-    in Graph edgeFeatureGraph
+        allNodes :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
+        allNodes = HM.fromList
+                   $ [ (entityId, HM.empty)
+                   | run <- entityRun
+                   , let entityId = CAR.RunFile.carDocument $ multiRankingEntryCollapsed run
+                   ]
+
+        edgeFeatureGraphWithSingleNodes = HM.unionWith (<>) edgeFeatureGraph allNodes
+
+    in Graph edgeFeatureGraphWithSingleNodes
 
 
 
