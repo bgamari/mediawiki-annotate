@@ -12,7 +12,7 @@ module EdgeDocCorpus
   , paragraphToEdgeDocs
   , paragraphsToEdgeDocs
 
-  -- ^ usage
+  -- * usage
   , EdgeDocsLookup
   , wrapEdgeDocsTocs
   , readEdgeDocsToc
