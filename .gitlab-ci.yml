@@ -35,5 +35,5 @@ before_script:
 validate:
   image: nixos/nix
   script:
-    - nix-build . -A env | cachix push trec-car-tools
+    - nix-build . -A env --cores 1 -j $THREADS | cachix push trec-car-tools
     - nix-store --export $(nix-store -qR ./result) > ./cache.nar
