@@ -191,7 +191,7 @@ opts =
 data QueryDoc = QueryDoc { queryDocQueryId      :: !CarRun.QueryId
                          , queryDocQueryText    :: !T.Text
                          }
-           deriving (Show, Generic)
+           deriving (Show, Generic, Eq)
 instance FromJSON QueryDoc
 instance ToJSON QueryDoc
 
@@ -288,7 +288,9 @@ main = do
         if null queryRestriction
           then return queries'
           else do putStrLn $ "# using only queries "<>show queryRestriction
-                  return $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
+                  return
+                    $ nub
+                    $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
     putStrLn $ "# query count: " ++ show (length queries)
 
     putStrLn "Loading edgeDocsLookup."
@@ -424,7 +426,7 @@ main = do
 
               runRanking query = do
                   graphRanking <- graphWalkRanking query
-                  let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName "PageRank")
+                  let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName (T.pack (show graphWalkModel)))
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList graphRanking)
                                     ]
 
@@ -434,7 +436,7 @@ main = do
 --                                     $
                   return $ rankEntries
           rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
-          CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-pagerank-test.run") rankEntries
+          CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
 
 
       ModelFromFile modelFile -> do
