@@ -362,7 +362,7 @@ makeEdgeFeatVector xs =
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
     case runF of
-      ScoreF -> -1000.0
+      ScoreF -> 0.0 -- -1000.0
       RecipRankF -> 0.0
 --       LinearRankF -> 0.0
 --       BucketRankF -> 0.0

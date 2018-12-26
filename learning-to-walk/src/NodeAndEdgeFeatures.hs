@@ -165,7 +165,7 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
 
 -- ------------------- make edge features ---------------
 
--- | used for graph walk
+-- | used for train,test, and graph walk
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates
                         -> Graph PageId EdgeFeatureVec
@@ -181,7 +181,7 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
         edgeFeat :: ParagraphId
                  -> MultiRankingEntry ParagraphId GridRun
                  -> F.FeatureVec EdgeFeature Double
-        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry
+        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry (edgeDoc paraId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
         edgeCardinality ed = HS.size $ edgeDocNeighbors ed
@@ -228,8 +228,10 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
 
 
 edgeScoreVec :: MultiRankingEntry ParagraphId GridRun
+             -> EdgeDoc
              -> F.FeatureVec EdgeFeature Double
-edgeScoreVec edgedocsRankEntry = makeEdgeFeatVector $
+edgeScoreVec edgedocsRankEntry edgeDoc
+                                 = makeEdgeFeatVector $
                                     [ (EdgeCount, 1.0)
                                     -- TODO
                                     --, ( EdgeDocKL
