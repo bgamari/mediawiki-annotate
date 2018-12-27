@@ -344,22 +344,29 @@ main = do
       GraphWalkModelFromFile modelFile -> do
           putStrLn "loading model"
           Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
+          let modelFeaturesFromModel = modelFeatures model
 
-          let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-              docFeatures = makeStackedFeatures' candidateGraphGenerator (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
-              degreeCentrality = fmap (modelWeights' model `score`) docFeatures
-              queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
-              ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
-              ranking = fmap (Ranking.fromList . map swap) queryToScoredList
+          let nodeDistrPriorForGraphwalk candidateGraphGenerator modelFeaturesFromModel collapsedEntityRun collapsedEdgedocRun =
 
-              rankingPageId :: M.Map QueryId (Ranking.Ranking Double PageId)
-              rankingPageId = fmap (fmap qrelDocNameToPageId) ranking
+                  let docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
+                      docFeatures = makeStackedFeatures' candidateGraphGenerator modelFeaturesFromModel collapsedEntityRun collapsedEdgedocRun
+                      degreeCentrality = fmap (modelWeights' model `score`) docFeatures
+                      queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
+                      ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
+                      ranking = fmap (Ranking.fromList . map swap) queryToScoredList
 
-              nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
-              nodeDistr = fmap nodeRankingToDistribution rankingPageId
+                      rankingPageId :: M.Map QueryId (Ranking.Ranking Double PageId)
+                      rankingPageId = fmap (fmap qrelDocNameToPageId) ranking
+
+                      nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
+                      nodeDistr = fmap nodeRankingToDistribution rankingPageId
+                  in nodeDistr
+
+          let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
+              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator modelFeaturesFromModel collapsedEntityRun collapsedEdgedocRun
 
           let edgeFSpace' = F.mkFeatureSpace [ f'
-                                             | f <- F.featureNames $ modelFeatures model
+                                             | f <- F.featureNames $ modelFeaturesFromModel
                                              , Right f' <- pure f
                                              ]
 
@@ -368,8 +375,8 @@ main = do
                         (either (const Nothing) Just)
                         (getWeightVec $ modelWeights' model)
 
-          let graphWalkRanking :: QueryId -> IO (Ranking.Ranking Double PageId)
-              graphWalkRanking query
+          let graphWalkRanking :: QueryId -> WeightVec EdgeFeature -> IO (Ranking.Ranking Double PageId)
+              graphWalkRanking query params'
                  | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
                  | otherwise = do
                    putStrLn $ show query <> " -> " <> show (take 2 $ toEntries eigv)
@@ -425,7 +432,7 @@ main = do
 
 
               runRanking query = do
-                  graphRanking <- graphWalkRanking query
+                  graphRanking <- graphWalkRanking query params'
                   let rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName (T.pack (show graphWalkModel)))
                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList graphRanking)
                                     ]
