@@ -7,3 +7,5 @@ bin
 .ghci
 TAGS
 cabal.project.local
+*.iml
+.idea

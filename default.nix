@@ -16,6 +16,7 @@ let
     in !(lib.hasPrefix "dist-newstyle" pathBaseName) &&
        !(lib.hasPrefix ".git" pathBaseName) &&
        !(lib.hasPrefix ".ghc.environment" pathBaseName) &&
+       !(lib.hasPrefix ".iml" pathBaseName) &&
        !(lib.hasPrefix "dist" pathBaseName);
 
   localDir = builtins.filterSource cabalFilter;
