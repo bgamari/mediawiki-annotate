@@ -23,7 +23,8 @@ library
                        GraphExpansionExperiments,
                        GridFeatures,
                        WriteRanking,
-                       TrainAndStore
+                       TrainAndStore,
+                       TrainUtils
   build-depends:       base,
                        async,
                        bytestring,
