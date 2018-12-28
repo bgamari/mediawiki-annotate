@@ -1,7 +1,7 @@
 allow-newer:
-    base, template-haskell, 
     -- for pipes-text
     pipes-safe
+    profunctors
 
 packages:
     trec-car-tools/
