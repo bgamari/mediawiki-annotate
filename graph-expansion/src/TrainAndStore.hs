@@ -324,50 +324,50 @@ mkRestartSeeds = Restarts . unfoldr (Just . System.Random.split)
 
 -- TODO think about turning Fold[q] into Fold (S.Set q)
 kFolds
-    :: forall q docId rel r f. (Eq q, Ord q)
-    => (FoldIdx -> M.Map q [(docId, FeatureVec f Double, rel)] -> r)
+    :: forall q d r. (Eq q, Ord q)
+    => (FoldIdx -> M.Map q d -> r)
        -- ^ a training function, producing a trained result from a
        -- set of training data. 'FoldIdx' provided for diagnostics.
-    -> M.Map q [(docId, FeatureVec f Double, rel)]
+    -> M.Map q d
        -- ^ training data
     -> Folds [q]
        -- ^ partitioning of queries into folds
-    -> Folds (M.Map q [(docId, FeatureVec f Double, rel)], r)
+    -> Folds (M.Map q d, r)
        -- ^ the training result and set of test data for the fold
 kFolds train allData foldQueries =
     fmap trainSingleFold (numberFolds foldQueries)
   where
-    trainSingleFold :: (FoldIdx, [q]) -> (M.Map q [(docId, FeatureVec f Double, rel)], r)
+    trainSingleFold :: (FoldIdx, [q]) -> (M.Map q d, r)
     trainSingleFold (foldIdx, testQueries) =
-      let testData :: M.Map q [(docId, FeatureVec f Double, rel)]
+      let testData :: M.Map q d
           testQueries' = S.fromList testQueries
           testData =  M.filterWithKey (\query _ -> query `S.member` testQueries') allData
 
-          trainData :: M.Map q [(docId, FeatureVec f Double, rel)]
+          trainData :: M.Map q d
           trainData =  M.filterWithKey (\query _ -> query `S.notMember` testQueries') allData
       in (testData, train foldIdx trainData)
 
 
 
 kFoldsAndRestarts
-    ::  forall q docId rel r f. (Eq q, Ord q)
+    ::  forall q d r. (Eq q, Ord q)
     => (FoldIdx -> RestartIdx
-        -> StdGen -> M.Map q [(docId, FeatureVec f Double, rel)] -> r)
+        -> StdGen -> M.Map q d -> r)
         -- ^ a training function, producing a trained result from a
         -- set of training data. 'FoldIdx' and 'RestartIdx' provided for
         -- diagnostics.
-    -> M.Map q [(docId, FeatureVec f Double, rel)]
+    -> M.Map q d
         -- ^ training data
     -> Folds [q]
         -- ^ partitioning of queries into folds
     -> StdGen
         -- ^ random generator
-    -> Folds (M.Map q [(docId, FeatureVec f Double, rel)], Restarts r)
+    -> Folds (M.Map q d, Restarts r)
         -- ^ the training result and set of test data for the fold
 kFoldsAndRestarts train allData foldQueries gen0 =
     kFolds train' allData foldQueries
   where
-    train' :: FoldIdx -> M.Map q [(docId, FeatureVec f Double, rel)] -> Restarts r
+    train' :: FoldIdx -> M.Map q d -> Restarts r
     train' foldIdx trainData =
         fmap (\(restartIdx, gen) -> train foldIdx restartIdx gen trainData)
              (numberRestarts gens)
