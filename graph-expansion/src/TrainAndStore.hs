@@ -55,7 +55,7 @@ import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
-import TrainUtils
+import SimplIR.TrainUtils
 
 
 type Q = CAR.RunFile.QueryId
