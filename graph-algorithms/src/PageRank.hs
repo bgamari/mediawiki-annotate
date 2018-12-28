@@ -62,6 +62,15 @@ relChange (Eigenvector _ a) (Eigenvector _ b) =
     delta = VI.sum $ VI.map square $ VI.zipWith (-) a b
     square x = x*x
 
+uniformInitial :: (Hashable n, Eq n, VG.Vector VU.Vector a, Fractional a)
+               => DenseMapping n -> Eigenvector n a
+uniformInitial mapping =
+    Eigenvector mapping $ VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+  where
+    !numNodes = rangeSize (denseRange mapping)
+{-# SPECIALISE uniformInitial
+                 :: (Hashable n, Eq n) => DenseMapping n -> Eigenvector n Double #-}
+
 -- | Plain PageRank with uniform teleportation.
 --
 -- Solving for the principle eigenvector of the transport operator,
@@ -107,9 +116,8 @@ persPageRankWithSeeds
 persPageRankWithSeeds alpha beta seeds graph =
     persPageRankWithSeedsAndInitial mapping initial alpha seeds' graph
   where
-    !mapping  = mkDenseMapping (nodeSet graph)
-    !numNodes = rangeSize (denseRange mapping)
-    !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+    !mapping = mkDenseMapping (nodeSet graph)
+    !initial = uniformInitial mapping
     seeds' = w <$ HS.toMap seeds
       where w = beta / realToFrac (HS.size seeds)
 {-# SPECIALISE persPageRankWithSeeds
@@ -130,10 +138,9 @@ persPageRankWithNonUniformSeeds alpha seeds graph =
     persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
   where
     !mapping  = mkDenseMapping (nodeSet graph)
-    !numNodes = rangeSize (denseRange mapping)
-    !initial = VI.replicate (denseRange mapping) (1 / realToFrac numNodes)
+    !initial = uniformInitial mapping
 {-# SPECIALISE persPageRankWithNonUniformSeeds
-    :: forall n. (VG.Vector VU.Vector Double, Eq n, Hashable n, Show n, HasCallStack)
+    :: (Eq n, Hashable n, Show n, HasCallStack)
     => Double
     -> HM.HashMap n Double
     -> Graph n Double
@@ -144,7 +151,7 @@ persPageRankWithNonUniformSeeds alpha seeds graph =
 persPageRankWithSeedsAndInitial
     :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
     => DenseMapping n
-    -> VI.Vector VU.Vector (DenseId n) a
+    -> Eigenvector n a
     -> a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
     -> HM.HashMap n a     -- ^ teleportation probability \(\beta\) for each seed
     -> Graph n a          -- ^ the graph
@@ -216,8 +223,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
             | (n, w) <- HM.toList seeds
             ]
 
-    in map (Eigenvector mapping . checkNaN)
-       $ initial : iterate nextiter initial
+    in initial : map (Eigenvector mapping . checkNaN) (iterate nextiter (eigenvectorValues initial))
   where
     checkNaN xs
       | VU.any isNaN $ VI.vector xs = error $ unlines $
@@ -234,7 +240,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
 {-# SPECIALISE persPageRankWithSeedsAndInitial
                    :: (Eq n, Hashable n, Show n)
                    => DenseMapping n
-                   -> VI.Vector VU.Vector (DenseId n) Double
+                   -> Eigenvector n Double
                    -> Double
                    -> HM.HashMap n Double
                    -> Graph n Double -> [Eigenvector n Double] #-}
