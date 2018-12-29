@@ -9,6 +9,7 @@ module PageRank
    , relChange
    , toHashMap
    , toEntries
+   , uniformInitial
      -- * PageRank
    , pageRank
      -- * Personalized PageRank
