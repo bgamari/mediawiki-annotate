@@ -517,7 +517,7 @@ main = do
               rerank query w = (augmentWithQrels query) $ fst $ (trainingWalkGraphs >!< query) w
 
           gen0 <- newStdGen
-          let someKindOfTrainingData =  M.fromList [(q,q) | (q, _) <- M.toList trainingWalkGraphs]
+          let someKindOfTrainingData =  M.fromList [(q,q) | (q, _) <- M.toList totalRels] -- totalRels does not include queries for which there is no training data
           let newParams = naiveCoordAscent (meanAvgPrec (totalRels >!<) Relevant) rerank gen0 initParams' someKindOfTrainingData
           putStrLn $ "new model params " <> show newParams
           let model = Model $ snd $ last newParams
