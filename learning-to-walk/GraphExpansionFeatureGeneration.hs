@@ -414,58 +414,61 @@ main = do
                                          seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
 
 
-    let   produceWalkingGraph :: QueryId
+
+    let   makeFeatureGraphs :: F.FeatureSpace EdgeFeature ->  M.Map QueryId (Graph PageId EdgeFeatureVec)
+          makeFeatureGraphs edgeFSpace' =
+              M.fromList [ (qid, f edgeFSpace' qid)
+                         | q <- queries
+                         , let qid = queryDocQueryId q
+                         ]
+            where
+              f :: F.FeatureSpace EdgeFeature -> QueryId -> Graph PageId EdgeFeatureVec
+              f edgeFSpace' query =
+                  fmap (filterExpSettings edgeFSpace')
+                  $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+                where
+                  !candidates = candidateGraphGenerator query edgeRun entityRun -- selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                    where
+                      edgeRun = collapsedEdgedocRun >!< query
+                      entityRun = collapsedEntityRun >!< query
+
+
+          produceWalkingGraph :: M.Map QueryId (Graph PageId EdgeFeatureVec)
+                              -> Eigenvector PageId Double
+                              -> QueryId
                               -> F.FeatureSpace EdgeFeature
                               -> M.Map QueryId (HM.HashMap PageId Double)
                               -> WeightVec EdgeFeature
                               -> (Ranking Double PageId, Eigenvector PageId Double)
-          produceWalkingGraph query edgeFSpace' nodeDistr =
+          produceWalkingGraph featureGraphs initialEigv query edgeFSpace' nodeDistr =
               \params ->
                 let graph = walkingGraph params
-                in nextRerankIter params (firstInitial graph)
+                in nextRerankIter params initialEigv
               where
-                count predicate = getSum . foldMap f
-                  where f x = if predicate x then Sum 1 else Sum 0
-
-                candidates = candidateGraphGenerator query edgeRun entityRun -- selectCandidateGraph edgeDocsLookup query edgeRun entityRun
-                  where
-                    edgeRun = collapsedEdgedocRun >!< query
-                    entityRun = collapsedEntityRun >!< query
-
-                featureGraph :: Graph PageId EdgeFeatureVec
-                featureGraph =  fmap (filterExpSettings edgeFSpace')
-                        $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+                !featureGraph = featureGraphs  >!< query
 
                 normalizer :: Normalisation _ Double
-                normalizer = zNormalizer $ Foldable.toList featureGraph
+                !normalizer = zNormalizer $ Foldable.toList featureGraph
 
                 walkingGraph :: WeightVec EdgeFeature -> Graph PageId Double
                 walkingGraph params' =
                     let graph = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
                         graph' = dropLowEdges graph
-                        minEdgeWeight g = Foldable.minimum g
+--                         minEdgeWeight g = Foldable.minimum g
 --                         !x = Debug.trace ("produceWalkingGraph: " <> show query <> "   minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
                     in graph'
-
-
 
                 dropLowEdges :: Graph PageId Double -> Graph PageId Double
                 dropLowEdges graph = filterEdges significantEdgeWeight graph
                                         where significantEdgeWeight :: PageId ->  PageId -> Double -> Bool
                                               significantEdgeWeight _ _ e = e > 1e-8
 
-
-
-                firstInitial :: Graph PageId Double -> Eigenvector PageId Double
-                firstInitial graph' = PageRank.uniformInitial mapping
-                  where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
-
                 walkIters :: Eigenvector PageId Double
                           -> Graph PageId Double
                           -> [Eigenvector PageId Double]
                 walkIters initial graph' =
                     case graphWalkModel of
-                      PageRankWalk -> pageRank teleportation graph' -- todo finish
+                      PageRankWalk -> pageRankWithInitial teleportation graph' initial
                       BiasedPersPageRankWalk -> -- persPageRankWithNonUniformSeeds (teleportation/2) seedNodeDistr graph'
                           biasedPersPageRankWithInitial alpha seedNodeDistr graph' initial
                   where
@@ -477,7 +480,7 @@ main = do
                                -> (Ranking Double PageId, Eigenvector PageId Double)
                 nextRerankIter params initial  =
                       let graph = walkingGraph params
-                          nexteigen = (!!2) $ walkIters initial $ graph
+                          nexteigen = (!!1) $ walkIters initial $ graph
                           ranking = eigenvectorToRanking nexteigen
 --                           debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
                       in (ranking, nexteigen)
@@ -498,13 +501,14 @@ main = do
           Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
           let modelFeaturesFromModel = modelFeatures model
 
-
-          let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
-              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
           let edgeFSpace' = F.mkFeatureSpace [ f'
                                              | f <- F.featureNames $ modelFeaturesFromModel
                                              , Right f' <- pure f
                                              ]
+              featureGraphs =  makeFeatureGraphs edgeFSpace'
+
+              nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
+              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
 
               augmentWithQrels :: QueryId -> Ranking Double PageId -> Ranking Double (PageId, IsRelevant)
               augmentWithQrels query ranking = Ranking.fromSortedList
@@ -520,68 +524,51 @@ main = do
                                                       , QRel.isPositive r
                                                       ]
 
-              trainingWalkGraphs :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
-              trainingWalkGraphs =
-                  M.fromList $ fmap (\q -> (q, produceWalkingGraph q edgeFSpace' nodeDistr)) $ fmap queryDocQueryId queries
+              metric :: ScoringMetric IsRelevant QueryId _
+              metric = meanAvgPrec (totalRels >!<) Relevant
 
-              initParams' :: WeightVec EdgeFeature
+              someKindOfTrainingData =  M.fromList $ take 20 $[(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
+
+          gen0 <- newStdGen
+
+          let initParams' :: WeightVec EdgeFeature
               initParams' = WeightVec $ F.projectFeatureVec edgeFSpace'
                              (either (const Nothing) Just)
                              (getWeightVec $ modelWeights' model)
 
-              rerank :: QueryId -> WeightVec EdgeFeature -> Ranking Double (PageId, IsRelevant)
-              rerank query w =
-                  (augmentWithQrels query) $ fst $ (trainingWalkGraphs >!< query) w
+              initialEigenv :: Graph PageId a -> Eigenvector PageId Double
+              initialEigenv graph' = PageRank.uniformInitial mapping
+                where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
 
-          gen0 <- newStdGen
-          let someKindOfTrainingData =  M.fromList [(q,q) | q <- intersect (M.keys totalRels) (M.keys trainingWalkGraphs) ] -- totalRels does not include queries for which there is no training data
-          let newParams = naiveCoordAscent (meanAvgPrec (totalRels >!<) Relevant) rerank gen0 initParams' someKindOfTrainingData
+              iterate :: WeightVec EdgeFeature -> M.Map QueryId (Eigenvector PageId Double)
+                      -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), Double)]
+              iterate params eigvs =
+                  let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
+                      nextPageRankIter = M.fromList
+                               [ (qid, produceWalkingGraph featureGraphs eigv0 qid edgeFSpace' nodeDistr)
+                               | q <- queries
+                               , let qid = queryDocQueryId q
+                                     eigv0 = eigvs >!< qid
+                               ]
+
+                      rerank :: QueryId -> WeightVec EdgeFeature -> Ranking Double (PageId, IsRelevant)
+                      rerank query w =
+                          let (ranking, _pageRank) = (nextPageRankIter >!< query) w
+                          in augmentWithQrels query ranking
+
+                      (score, params') : _ = naiveCoordAscent metric rerank gen0 params someKindOfTrainingData
+
+                      eigvs' = fmap snd $ fmap ($ params') nextPageRankIter
+
+                  in (params', eigvs',  score) : iterate params' eigvs'
+
+              iters = iterate initParams' (fmap initialEigenv featureGraphs)
+              (newParams, _, _):_ = drop 2 iters
+
           putStrLn $ "new model params " <> show newParams
-          let model = Model $ snd $ last newParams
+          let model = Model newParams
           storeModelData outputFilePrefix updatedModelFile model 0.0 "modelDesc"
---
---
---               runRanking query = do
---                   let graphRanking :: _
---                       graphRanking = eigenvectorToRanking
---                                    $ head $ drop 1
---                                    $ graphWalkRanking query initParams' edgeFSpace' nodeDistr
---                       rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName (T.pack (show graphWalkModel)))
---                                     | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList graphRanking)
---                                     ]
---
--- --                       fileId qid = T.unpack $ T.replace "/" "--" qid
---
--- --                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ fileId (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
--- --                                     $
---                   return $ rankEntries
 
-
-
--- -- | Re-rank a set of documents given a weight vector.
--- rerank :: WeightVec f -> [(a, FeatureVec f Double)] -> Ranking Score a
--- rerank weight fRanking =
---     Ranking.fromList
---     [ (weight `score` feats, doc)
---     | (doc, feats) <- fRanking
---     ]
-
---           let score :: WeightVec f -> FeatureVec f Double -> Score
---               score (WeightVec w) f = w `FS.dotFeatureVecs` f
---
---               rerankWalk :: WeightVec f -> [(a, FeatureVec f Double)] -> Ranking Score a
---
-
-
-
---           rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
---           CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
-
---           let pageRankRerank params' fRanking = graphWalkRanking query params' edgeFSpace' M.empty
---
---
---           gen0 <- newStdGen  -- needed by learning to rank
---           trainMe (pageRankRerank query params') --  miniBatchParams gen0 allData combinedFSpace' metric outputFilePrefix modelFile
 
 
       GraphWalkModelFromFile modelFile -> do
@@ -700,6 +687,17 @@ biasedPersPageRankWithInitial
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 biasedPersPageRankWithInitial alpha seeds graph initial =
     persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
+  where
+    !mapping  = mkDenseMapping (nodeSet graph)
+
+pageRankWithInitial
+    :: forall n a. (RealFloat a, VU.Unbox a, VG.Vector VU.Vector a, Eq n, Hashable n, Show n, Show a, HasCallStack)
+    => a                  -- ^ teleportation probability \(\alpha\) to be uniformly distributed
+    -> Graph n a          -- ^ the graph
+    -> Eigenvector n a  -- ^ initial page rank vector
+    -> [Eigenvector n a]  -- ^ principle eigenvector iterates
+pageRankWithInitial alpha graph initial =
+    persPageRankWithSeedsAndInitial mapping initial alpha HM.empty graph
   where
     !mapping  = mkDenseMapping (nodeSet graph)
 
