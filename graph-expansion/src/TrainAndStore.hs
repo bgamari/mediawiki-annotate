@@ -256,14 +256,11 @@ storeModelData outputFilePrefix modelFile model trainScore modelDesc = do
   putStrLn $ "Written model "++modelDesc++ " to file "++ (show modelFile') ++ " ."
 
 storeRankingData ::  FilePath
---                -> TrainData
                -> M.Map  CAR.RunFile.QueryId (Ranking Double (QRel.DocumentName, IsRelevant))
                -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
                -> String
                -> IO ()
 storeRankingData outputFilePrefix ranking metric modelDesc = do
-
---   let rerankedFranking = rerankRankings' model evalData
   putStrLn $ "Model "++modelDesc++" test metric "++ show (metric ranking) ++ " MAP."
   CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
@@ -271,13 +268,10 @@ storeRankingData outputFilePrefix ranking metric modelDesc = do
 
 -- todo avoid duplicateion with storeRankingData
 storeRankingDataNoMetric ::  FilePath
---                -> TrainData
                -> M.Map CAR.RunFile.QueryId (Ranking Double (QRel.DocumentName, Rel))
                -> String
                -> IO ()
 storeRankingDataNoMetric outputFilePrefix ranking modelDesc = do
-
---   let rerankedFranking = rerankRankings' model evalData
   putStrLn $ "Model "++modelDesc++" .. no metric.."
   CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
        $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
