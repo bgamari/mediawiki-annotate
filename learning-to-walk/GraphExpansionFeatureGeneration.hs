@@ -422,10 +422,7 @@ main = do
           produceWalkingGraph query edgeFSpace' nodeDistr =
               \params ->
                 let graph = walkingGraph params
-                    graph' = dropLowEdges graph
-                    minEdgeWeight g = Foldable.minimum g
-                    !x = Debug.trace ("produceWalkingGraph: " <> show query<> "minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
-                in nextRerankIter params (firstInitial graph')
+                in nextRerankIter params (firstInitial graph)
               where
                 count predicate = getSum . foldMap f
                   where f x = if predicate x then Sum 1 else Sum 0
@@ -444,7 +441,12 @@ main = do
 
                 walkingGraph :: WeightVec EdgeFeature -> Graph PageId Double
                 walkingGraph params' =
-                    fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
+                    let graph = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
+                        graph' = dropLowEdges graph
+                        minEdgeWeight g = Foldable.minimum g
+                        !x = Debug.trace ("produceWalkingGraph: " <> show query <> "   minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
+                    in graph'
+
 
 
                 dropLowEdges :: Graph PageId Double -> Graph PageId Double
