@@ -477,8 +477,8 @@ main = do
                       let graph = walkingGraph params
                           nexteigen = (!!2) $ walkIters initial $ graph
                           ranking = eigenvectorToRanking nexteigen
-                          debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
-                      in Debug.trace debugRanking $ (ranking, nexteigen)
+--                           debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
+                      in (ranking, nexteigen)
 
 
                 -- for debugging...
