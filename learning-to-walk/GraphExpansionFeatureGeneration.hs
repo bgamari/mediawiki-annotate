@@ -545,7 +545,7 @@ main = do
               iterate :: StdGen
                       -> WeightVec EdgeFeature
                       -> M.Map QueryId (Eigenvector PageId Double)
-                      -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), Double)]
+                      -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), M.Map QueryId (Ranking Double (PageId, IsRelevant)))]
               iterate gen0 params eigvs =
                   let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
                       nextPageRankIter = M.fromList
@@ -562,11 +562,6 @@ main = do
 
 
                       (gen1, gen2) = System.Random.split gen0
---                       (score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
---
---  --                     miniBatched batchSteps batchSize optimise gen00 w00 fRankings
---   --                    optimise ::  (gen -> model -> M.Map qid d -> [model])
---
                       optimise :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId QueryId -> [WeightVec EdgeFeature]
                       optimise gen model someKindOfTrainingData' =
                             let scoreParams = naiveCoordAscent metric rerank gen params someKindOfTrainingData'
@@ -574,7 +569,6 @@ main = do
                       params' :: WeightVec EdgeFeature
                       params' = (!!2) $ miniBatched 1 20 optimise gen0 params someKindOfTrainingData
 
--- -------------------
                       iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
                       iterResult = fmap ($ params') nextPageRankIter
 
@@ -582,17 +576,58 @@ main = do
                       eigvs' = fmap snd iterResult
                       rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
                       rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
-                      score :: Double
-                      score = metric rankings'
 
-                  in (params', eigvs',  score) : iterate gen2 params' eigvs'
+                  in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
 
               iters = iterate gen0 initParams' (fmap initialEigenv featureGraphs)
-              (newParams, _, _):_ = drop 2 iters
+              (newParams, eigenvs, trainRanking):_ = drop 2 iters
+              trainScore :: Double
+              trainScore = metric trainRanking
 
           putStrLn $ "new model params " <> show newParams
           let model = Model newParams
-          storeModelData outputFilePrefix updatedModelFile model 0.0 "modelDesc"
+              formatQuery pageId = CAR.RunFile.QueryId $ T.pack $ unpackPageId pageId
+
+              storeRankingData' ::  FilePath
+                       -> M.Map  CAR.RunFile.QueryId (Ranking Double (PageId, IsRelevant))
+                       -> Double
+                       -> String
+                       -> IO ()
+              storeRankingData' outputFilePrefix ranking metricScore modelDesc = do
+                  putStrLn $ "Model "++modelDesc++" test metric "++ show (metricScore) ++ " MAP."
+                  CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
+                       $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
+                       $ ranking
+                where l2rRankingToRankEntries methodName rankings =
+                          [ CAR.RunFile.RankingEntry { carQueryId = query
+                                                     , carDocument = doc
+                                                     , carRank = rank
+                                                     , carScore = rankScore
+                                                     , carMethodName = methodName
+                                                     }
+                          | (query, ranking) <- M.toList rankings
+                          , ((rankScore, (doc, rel)), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
+                          ]
+
+
+          storeModelData outputFilePrefix updatedModelFile model trainScore "trainwalk"
+          storeRankingData' outputFilePrefix trainRanking trainScore "trainwalk"
+
+--
+-- dumpFullModelsAndRankings
+--     :: forall f. (Ord f, Show f)
+--     => M.Map Q [(DocId, FeatureVec f Double, Rel)]
+--     -> (Model f, Double)
+--     -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+--     -> FilePath
+--     -> FilePath
+--     -> [IO()]
+-- dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile =
+--     let modelDesc = "train"
+--         trainRanking = rerankRankings' model trainData
+--     in [ storeRankingData outputFilePrefix trainRanking metric modelDesc
+--        , storeModelData outputFilePrefix modelFile model trainScore modelDesc
+--        ]
 
 
 
