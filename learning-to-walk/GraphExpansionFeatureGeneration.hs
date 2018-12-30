@@ -525,7 +525,7 @@ main = do
                                                       ]
 
               metric :: ScoringMetric IsRelevant QueryId _
-              metric = meanAvgPrec (totalRels >!<) Relevant
+              metric = meanAvgPrec (\q -> fromMaybe 0 $ q `M.lookup` totalRels)  Relevant
 
 
 
@@ -576,6 +576,8 @@ main = do
                       eigvs' = fmap snd iterResult
                       rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
                       rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
+                      score' = metric rankings'
+                      !x = Debug.trace ("trainwalk score " <> (show score')) $ 0
 
                   in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
 
