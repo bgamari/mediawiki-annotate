@@ -444,7 +444,7 @@ main = do
                     let graph = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
                         graph' = dropLowEdges graph
                         minEdgeWeight g = Foldable.minimum g
-                        !x = Debug.trace ("produceWalkingGraph: " <> show query <> "   minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
+--                         !x = Debug.trace ("produceWalkingGraph: " <> show query <> "   minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
                     in graph'
 
 
