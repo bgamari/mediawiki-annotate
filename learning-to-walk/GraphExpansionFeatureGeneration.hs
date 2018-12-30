@@ -424,7 +424,7 @@ main = do
                 let graph = walkingGraph params
                     graph' = dropLowEdges graph
                     minEdgeWeight g = Foldable.minimum g
-                    x = Debug.trace ("produceWalkingGraph: " <> show query<> "minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
+                    !x = Debug.trace ("produceWalkingGraph: " <> show query<> "minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
                 in nextRerankIter params (firstInitial graph')
               where
                 count predicate = getSum . foldMap f
