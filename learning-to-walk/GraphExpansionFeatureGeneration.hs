@@ -527,7 +527,9 @@ main = do
               metric :: ScoringMetric IsRelevant QueryId _
               metric = meanAvgPrec (totalRels >!<) Relevant
 
-              someKindOfTrainingData =  M.fromList $ take 20 $[(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
+
+
+              someKindOfTrainingData =  M.fromList $[(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
 
           gen0 <- newStdGen
 
@@ -540,7 +542,9 @@ main = do
               initialEigenv graph' = PageRank.uniformInitial mapping
                 where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
 
-              iterate :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId (Eigenvector PageId Double)
+              iterate :: StdGen
+                      -> WeightVec EdgeFeature
+                      -> M.Map QueryId (Eigenvector PageId Double)
                       -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), Double)]
               iterate gen0 params eigvs =
                   let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
@@ -558,18 +562,28 @@ main = do
 
 
                       (gen1, gen2) = System.Random.split gen0
-                      (score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
+--                       (score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
 --
 --  --                     miniBatched batchSteps batchSize optimise gen00 w00 fRankings
 --   --                    optimise ::  (gen -> model -> M.Map qid d -> [model])
 --
---                       optimise gen model someKindOfTrainingData' =
---                             let scoreParams = naiveCoordAscent metric rerank gen params someKindOfTrainingData'
---                             in fmap snd scoreParams
---                       params' = miniBatched 1 100 optimise gen0 params someKindOfTrainingData
+                      optimise :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId QueryId -> [WeightVec EdgeFeature]
+                      optimise gen model someKindOfTrainingData' =
+                            let scoreParams = naiveCoordAscent metric rerank gen params someKindOfTrainingData'
+                            in fmap snd scoreParams
+                      params' :: WeightVec EdgeFeature
+                      params' = (!!2) $ miniBatched 1 20 optimise gen0 params someKindOfTrainingData
 
---
-                      eigvs' = fmap snd $ fmap ($ params') nextPageRankIter
+-- -------------------
+                      iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
+                      iterResult = fmap ($ params') nextPageRankIter
+
+                      eigvs' :: M.Map QueryId (Eigenvector PageId Double)
+                      eigvs' = fmap snd iterResult
+                      rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
+                      rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
+                      score :: Double
+                      score = metric rankings'
 
                   in (params', eigvs',  score) : iterate gen2 params' eigvs'
 
