@@ -35,13 +35,19 @@ instance (Hashable n, Eq n, Semigroup e) => Monoid (Graph n e) where
     mappend = (<>)
 
 graphFromEdges :: (Semigroup e, Eq n, Hashable n ) => [(n,n,e)] -> Graph n e
-graphFromEdges edges =
+graphFromEdges edges = graphFromEdgesAndSingletons edges []
+
+graphFromEdgesAndSingletons :: (Semigroup e, Eq n, Hashable n) =>  [(n,n,e)] -> [n]  -> Graph n e
+graphFromEdgesAndSingletons edges singles =
     Graph
     $ HM.fromListWith (HM.unionWith (<>))
     $ concat
     [ [(n2, mempty), (n1, HM.singleton n2 e1)]
     | (n1,n2,e1) <- edges
     ]
+    ++ [ (n, mempty) | n <- singles ]
+
+
 
 graphFromNeighbors ::(Eq n, Hashable n) =>  [(n, [(n,e)])] -> Graph n e
 graphFromNeighbors neighbors =
@@ -56,6 +62,25 @@ graphFromNeighbors neighbors =
 nullGraph :: Graph n e -> Bool
 nullGraph = HM.null . getGraph
 
+
+toEdgesAndSingletons :: Graph n e -> ( [(n,n,e)], [n] )
+toEdgesAndSingletons graph =
+    let edges = [ (n1, n2, e)
+                | (n1, m) <- HM.toList $ getGraph graph
+                , (n2, e) <- HM.toList m
+                ]
+        singles = [ n1
+                  | (n1, m) <- HM.toList $ getGraph graph
+                  , HM.null m
+                  ]
+    in (edges, singles)
+
+toNeighbors :: Graph n e ->  [(n, [(n,e)])]
+toNeighbors graph =
+    [ (n1, neighs)
+    | (n1, m) <- HM.toList $ getGraph graph
+    , let neighs = HM.toList m
+    ]
 
 graphUnions :: (Eq n, Hashable n, Semigroup e) => [Graph n e] -> Graph n e
 graphUnions graphs =
