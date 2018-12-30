@@ -69,7 +69,6 @@ getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e
 getNeighbors (Graph ns) n = fromMaybe mempty $ HM.lookup n ns
 
--- TODO: This also drops nodes!
 filterEdges :: (n -> n -> e -> Bool)
             -> Graph.Graph n e -> Graph.Graph n e
 filterEdges pred (Graph.Graph graph) =
