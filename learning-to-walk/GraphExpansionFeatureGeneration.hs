@@ -81,7 +81,7 @@ import CandidateGraph
 import NodeAndEdgeFeatures
 import TrainAndStore
 
-import Debug.Trace
+import Debug.Trace  as Debug
 
 type NumResults = Int
 
@@ -423,6 +423,8 @@ main = do
               \params ->
                 let graph = walkingGraph params
                     graph' = dropLowEdges graph
+                    minEdgeWeight g = Foldable.minimum g
+                    x = Debug.trace ("produceWalkingGraph: " <> show query<> "minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
                 in nextRerankIter params (firstInitial graph')
               where
                 count predicate = getSum . foldMap f
@@ -472,8 +474,11 @@ main = do
                 nextRerankIter :: WeightVec EdgeFeature -> Eigenvector PageId Double
                                -> (Ranking Double PageId, Eigenvector PageId Double)
                 nextRerankIter params initial  =
-                      let nexteigen = (!!2) $ walkIters initial $ walkingGraph params
-                      in (eigenvectorToRanking nexteigen, nexteigen)
+                      let graph = walkingGraph params
+                          nexteigen = (!!2) $ walkIters initial $ graph
+                          ranking = eigenvectorToRanking nexteigen
+                          debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
+                      in Debug.trace debugRanking $ (ranking, nexteigen)
 
 
                 -- for debugging...
