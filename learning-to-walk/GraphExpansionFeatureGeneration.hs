@@ -422,8 +422,8 @@ main = do
           produceWalkingGraph query edgeFSpace' nodeDistr =
               \params ->
                 let graph = walkingGraph params
---                     graph' = dropLowEdges graph
-                in nextRerankIter params (firstInitial graph)
+                    graph' = dropLowEdges graph
+                in nextRerankIter params (firstInitial graph')
               where
                 count predicate = getSum . foldMap f
                   where f x = if predicate x then Sum 1 else Sum 0
@@ -445,8 +445,11 @@ main = do
                     fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
 
 
---                 dropLowEdges :: Graph PageId Double -> Graph PageId Double
---                 dropLowEdges graph =
+                dropLowEdges :: Graph PageId Double -> Graph PageId Double
+                dropLowEdges graph = filterEdges significantEdgeWeight graph
+                                        where significantEdgeWeight :: PageId ->  PageId -> Double -> Bool
+                                              significantEdgeWeight _ _ e = e > 1e-8
+
 
 
                 firstInitial :: Graph PageId Double -> Eigenvector PageId Double
