@@ -3,12 +3,17 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Graph
-    ( Graph(..)
+    ( Graph
+    , getGraph
+
     , nullGraph
     , nodeSet
     , getNeighbors
     , filterEdges
     , dropDisconnected
+
+    -- * construct graphs
+    , graphFromEdges, graphFromNeighbors, graphUnions
     ) where
 
 import Control.DeepSeq
@@ -29,11 +34,36 @@ instance (Hashable n, Eq n, Semigroup e) => Monoid (Graph n e) where
     mempty = Graph mempty
     mappend = (<>)
 
+graphFromEdges :: (Semigroup e, Eq n, Hashable n ) => [(n,n,e)] -> Graph n e
+graphFromEdges edges =
+    Graph
+    $ HM.fromListWith (HM.unionWith (<>))
+    $ concat
+    [ [(n2, mempty), (n1, HM.singleton n2 e1)]
+    | (n1,n2,e1) <- edges
+    ]
+
+graphFromNeighbors ::(Eq n, Hashable n) =>  [(n, [(n,e)])] -> Graph n e
+graphFromNeighbors neighbors =
+    Graph
+    $ HM.fromListWith (<>)
+    $ fmap (fmap HM.fromList) neighbors
+   <> [ (n, mempty)                    -- include entries for "to"-nodes
+      | (_, ns) <- neighbors
+      , (n, _) <- ns
+      ]
+
 nullGraph :: Graph n e -> Bool
 nullGraph = HM.null . getGraph
 
+
+graphUnions :: (Eq n, Hashable n, Semigroup e) => [Graph n e] -> Graph n e
+graphUnions graphs =
+    Graph $ HM.fromListWith (HM.unionWith (<>)) $ foldMap (HM.toList . getGraph) graphs
+
+
 nodeSet :: (Hashable n, Eq n) => Graph n e -> HS.HashSet n
-nodeSet (Graph g) = HS.fromMap (() <$ g) <> foldMap (HS.fromMap . (() <$)) g
+nodeSet = HS.fromMap . fmap (const ()) . getGraph
 
 getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e

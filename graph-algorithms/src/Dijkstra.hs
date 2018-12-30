@@ -312,7 +312,7 @@ interleaveSorted = go . foldl' (flip addCandidate) mempty
 -- Testing
 
 test :: Graph Char (Sum Int)
-test = Graph $ fmap HM.fromList $ HM.fromList
+test = graphFromNeighbors
     [ a .= [ b .= 1, c .= 2, d .= 10, e .= 1, f .= 1 ]
     , b .= [ a .= 1, c .= 1 ]
     , c .= [ a .= 2, b .= 1, d .= 1, e .= 1 ]

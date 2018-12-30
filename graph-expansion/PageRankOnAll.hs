@@ -28,6 +28,7 @@ import Data.Vector.Unboxed.Deriving
 import PageRank
 import EdgeDocCorpus
 import Graph
+import GraphExpansionExperiments
 import DenseMapping
 import Dijkstra
 import GraphExpansion
@@ -76,9 +77,9 @@ readEdgeDocs inPath = do
 
 readEdgeDocGraph :: (Num a, NFData a) => FilePath -> IO (Graph PageId a)
 readEdgeDocGraph inPath = singleThreaded $ do
-    binGraph <- edgeDocsToBinaryGraph <$> readEdgeDocs inPath
-    putStrLn $ "Read graph of "++show (HM.size binGraph)++" nodes"
-    return $! inCompact $ Graph $ HM.map (\xs -> 1 <$ HS.toMap xs) binGraph
+    binGraph <- edgeDocsToGraph <$> readEdgeDocs inPath
+    putStrLn $ "Read graph of "++show (HS.size (nodeSet binGraph))++" nodes"
+    return $! inCompact $ fmap (const 1) binGraph
 
 type PageRankScores = [(PageId, Float)]
 

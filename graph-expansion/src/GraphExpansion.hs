@@ -11,11 +11,6 @@ module GraphExpansion (
   , UniverseGraph
   , edgeDocsToUniverseGraph
   , subsetOfUniverseGraph
-  -- * BinarySymmetric Graph
-  , BinarySymmetricGraph
-  , edgeDocsToBinaryGraph
-  , universeToBinaryGraph
-  , nHopGraphExpansion
   -- * Shortest Paths
   , rankByShortestPaths
   -- * RankBy...
@@ -113,48 +108,6 @@ subsetOfUniverseGraph universe nodeset =
     pruneEdges :: EdgeDoc -> EdgeDoc
     pruneEdges edoc = edoc { edgeDocNeighbors = edgeDocNeighbors edoc `HS.intersection` nodeset }
 
-
-
--- ------------------------------------------------
---  BinarySymmetric graph expansion
--- ------------------------------------------------
-
-type BinarySymmetricGraph = HM.HashMap PageId (HS.HashSet PageId)
-
-edgeDocsToBinaryGraph :: [EdgeDoc] -> BinarySymmetricGraph
-edgeDocsToBinaryGraph edgeDocs =
-    HM.fromListWith (<>)
-    [ (a, HS.singleton b)
-    | edgeDoc <- edgeDocs
-    , a <- HS.toList $ edgeDocNeighbors edgeDoc
-    , b <- HS.toList $ edgeDocNeighbors edgeDoc
-    , a /= b
-    ]
-
-universeToBinaryGraph :: UniverseGraph -> BinarySymmetricGraph
-universeToBinaryGraph universeGraph =
-    HM.map (foldMap edgeDocNeighbors) universeGraph
-
-
-expandNodes :: BinarySymmetricGraph -> HS.HashSet PageId -> HS.HashSet PageId
-expandNodes binarySymmetricGraph seeds =
-  seeds <> foldMap (fromMaybe mempty . (`HM.lookup` binarySymmetricGraph)) seeds
-
-expandNodesK :: BinarySymmetricGraph -> HS.HashSet PageId -> Int -> HS.HashSet PageId
-expandNodesK binarySymmetricGraph seeds k =
-  iterate (expandNodes binarySymmetricGraph) seeds !! k
-
-
-nHopGraphExpansion :: HS.HashSet PageId -> Int -> BinarySymmetricGraph
-                ->  [(PageId, Double)]
-nHopGraphExpansion seeds radius binarySymmetricGraph  =
-    let nodes :: HS.HashSet PageId
-        nodes = expandNodesK binarySymmetricGraph seeds radius
-   in [ (pageId, 1.0) | pageId <- HS.toList nodes]
-
-
-
--- ------------------------------------------------
 
 
 -- ------------------------------------------------

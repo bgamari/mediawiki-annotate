@@ -422,6 +422,7 @@ main = do
           produceWalkingGraph query edgeFSpace' nodeDistr =
               \params ->
                 let graph = walkingGraph params
+--                     graph' = dropLowEdges graph
                 in nextRerankIter params (firstInitial graph)
               where
                 count predicate = getSum . foldMap f
@@ -443,6 +444,11 @@ main = do
                 walkingGraph params' =
                     fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
 
+
+--                 dropLowEdges :: Graph PageId Double -> Graph PageId Double
+--                 dropLowEdges graph =
+
+
                 firstInitial :: Graph PageId Double -> Eigenvector PageId Double
                 firstInitial graph' = PageRank.uniformInitial mapping
                   where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
@@ -463,7 +469,7 @@ main = do
                 nextRerankIter :: WeightVec EdgeFeature -> Eigenvector PageId Double
                                -> (Ranking Double PageId, Eigenvector PageId Double)
                 nextRerankIter params initial  =
-                      let nexteigen = head $ walkIters initial $ walkingGraph params
+                      let nexteigen = (!!2) $ walkIters initial $ walkingGraph params
                       in (eigenvectorToRanking nexteigen, nexteigen)
 
 
@@ -514,7 +520,8 @@ main = do
                              (getWeightVec $ modelWeights' model)
 
               rerank :: QueryId -> WeightVec EdgeFeature -> Ranking Double (PageId, IsRelevant)
-              rerank query w = (augmentWithQrels query) $ fst $ (trainingWalkGraphs >!< query) w
+              rerank query w =
+                  (augmentWithQrels query) $ fst $ (trainingWalkGraphs >!< query) w
 
           gen0 <- newStdGen
           let someKindOfTrainingData =  M.fromList [(q,q) | q <- intersect (M.keys totalRels) (M.keys trainingWalkGraphs) ] -- totalRels does not include queries for which there is no training data

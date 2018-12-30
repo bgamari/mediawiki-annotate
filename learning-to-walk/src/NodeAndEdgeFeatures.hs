@@ -49,7 +49,6 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
 --         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
         edgeFeatureGraph = generateEdgeFeatureGraph query cands -- edgeDocsLookup query edgeRun entityRun
-        Graph edgeFeatureGraph' = edgeFeatureGraph
 
         nodeFeatures :: HM.HashMap PageId EntityFeatureVec
         nodeFeatures = generateNodeFeatures query entityRun allEdgeDocs
@@ -63,12 +62,9 @@ combineEntityEdgeFeatures query cands@Candidates{candidateEdgeDocs = allEdgeDocs
 
        , let uFeats = fromMaybe makeDefaultEntFeatVector $  u `HM.lookup` nodeFeatures
        , let edgeFeats =
-                 case u `HM.lookup` edgeFeatureGraph' of
-                    Just mxs
-                      | Just xs <- NE.nonEmpty $ HM.elems mxs -- check that values of mxs is non-empty
-                                         -> xs
-                      | otherwise        -> [makeDefaultEdgeFeatVector]
-                    Nothing ->  [makeDefaultEdgeFeatVector]
+                 fromMaybe [makeDefaultEdgeFeatVector]
+                 $ NE.nonEmpty $ HM.elems  -- gives Nothing in case of empty
+                 $ getNeighbors edgeFeatureGraph u
        ]
 
 
@@ -165,6 +161,8 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
 
 -- ------------------- make edge features ---------------
 
+
+
 -- | used for train,test, and graph walk
 generateEdgeFeatureGraph:: QueryId
                         -> Candidates
@@ -208,21 +206,31 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                         ]
 
 
-        edgeFeatureGraph :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
-        edgeFeatureGraph = HM.fromListWith (<>)
-                         $ fmap (\((u,v),f) -> (u, HM.singleton v f))
-                         $ HM.toList allHyperEdges
+        edgeFeaturesGraph :: Graph PageId EdgeFeatureVec
+        edgeFeaturesGraph = graphFromEdges [ (n1, n2, e) | ((n1, n2), e) <- HM.toList allHyperEdges ]
 
-        allNodes :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
-        allNodes = HM.fromList
-                   $ [ (entityId, HM.empty)
+        allNodesGraph = graphFromNeighbors
+                 $ [ (entityId, [])
                    | run <- entityRun
                    , let entityId = CAR.RunFile.carDocument $ multiRankingEntryCollapsed run
                    ]
 
-        edgeFeatureGraphWithSingleNodes = HM.unionWith (<>) edgeFeatureGraph allNodes
+--         edgeFeatureGraph :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
+--         edgeFeatureGraph = HM.fromListWith (<>)
+--                          $ fmap (\((u,v),f) -> (u, HM.singleton v f))
+--                          $ HM.toList allHyperEdges
 
-    in Graph edgeFeatureGraphWithSingleNodes
+--         allNodes :: HM.HashMap PageId (HM.HashMap PageId EdgeFeatureVec)
+--         allNodes = HM.fromList
+--                    $ [ (entityId, HM.empty)
+--                    | run <- entityRun
+--                    , let entityId = CAR.RunFile.carDocument $ multiRankingEntryCollapsed run
+--                    ]
+
+        edgeFeatureGraphWithSingleNodes = graphUnions [edgeFeaturesGraph, allNodesGraph]
+        -- HM.unionWith (<>) edgeFeatureGraph allNodes
+
+    in edgeFeatureGraphWithSingleNodes
 
 
 

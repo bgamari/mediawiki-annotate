@@ -164,7 +164,7 @@ persPageRankWithSeedsAndInitial _ _ alpha seeds _
                                , "seeds = " <> show seeds
                                ]
 
-persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
+persPageRankWithSeedsAndInitial _ _ _ _ graph
   | not $ null badEdges
   = error $ unlines $
     [ "persPageRank: negative edge weights"
@@ -175,8 +175,8 @@ persPageRankWithSeedsAndInitial _ _ _ _ (Graph nodeMap)
                    , (v, weight) <- HM.toList outEdges
                    , not $ weight >= 0
                    ]
-
-persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap)
+        nodeMap = getGraph graph
+persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
   | numNodes == 0 = error "persPageRank: no nodes"
 
   | uncovered <- HS.toMap (nodeSet graph) `HM.difference` toDenseMap mapping
@@ -223,6 +223,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
             [ (toDense mapping n, w)
             | (n, w) <- HM.toList seeds
             ]
+        nodeMap = getGraph graph
 
     in initial : map (Eigenvector mapping . checkNaN) (iterate nextiter (eigenvectorValues initial))
   where
@@ -247,7 +248,7 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph@(Graph nodeMap
                    -> Graph n Double -> [Eigenvector n Double] #-}
 
 test :: Graph Char Double
-test = Graph $ fmap HM.fromList $ HM.fromList
+test = graphFromNeighbors
     [ d0 .= [ d2 .= 1],
       d1 .= [ d1 .= 1, d2 .= 1],
       d2 .= [ d0 .= 1, d2 .= 1, d3 .= 1],
@@ -262,7 +263,7 @@ test = Graph $ fmap HM.fromList $ HM.fromList
     a .= b = (a, b)
 
 testW :: Graph Char Double
-testW = Graph $ fmap HM.fromList $ HM.fromList
+testW = graphFromNeighbors
     [ d0 .= [ d2 .= 0.0001],
       d1 .= [ d1 .= 1, d2 .= 100],
       d2 .= [ d0 .= 1, d2 .= 1, d3 .= 1],

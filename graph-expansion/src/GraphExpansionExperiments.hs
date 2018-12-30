@@ -13,6 +13,7 @@ import Data.Monoid
 import Data.List (intercalate)
 import GHC.Generics
 import Data.Tuple
+import Data.Coerce
 
 import qualified Control.Foldl as Foldl
 import Data.Bifunctor
@@ -101,10 +102,10 @@ data GraphStats = GraphStats { nNodes, nEdges :: !Int }
 
 -- ----------------------------------------------------------------------
 
-data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: EdgeDoc
-                                           , withScoreCount     :: Int
-                                           , withScoreScore     :: Log Double
-                                           , withScoreRank      :: Int
+data EdgeDocWithScores = EdgeDocWithScores { withScoreEdgeDoc   :: !EdgeDoc
+                                           , withScoreCount     :: !Int
+                                           , withScoreScore     :: !(Log Double)
+                                           , withScoreRank      :: !Int
                                            }
            deriving (Show, Generic)
 instance NFData EdgeDocWithScores
@@ -180,16 +181,26 @@ filterGraphByTop5NodeEdges retrieveDocs query edgeDocs =
     -}
 
 
+edgeDocsToGraph :: [EdgeDoc] ->  Graph PageId [EdgeDoc]
+edgeDocsToGraph edgeDocs =
+  graphFromEdges
+    $ [ (n1, n2, [edgeDoc])
+      | edgeDoc <- edgeDocs
+      , n1 <- HS.toList $ edgeDocNeighbors edgeDoc
+      , n2 <- HS.toList $ edgeDocNeighbors edgeDoc
+      , n1 /= n2
+      ]
+
 noFilterTwice :: [EdgeDoc] ->  Graph PageId [EdgeDoc]
-noFilterTwice edgeDocs =
-  let perSourceEdges :: HM.HashMap PageId [EdgeDoc]
-      perSourceEdges = HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs
-      perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs' ) $ perSourceEdges
-  in Graph perTargetEdges
-  where groupByIncidentEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
-        groupByIncidentEntity edgeDoc =
-                  [ (entity, [edgeDoc])
-                  | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
+noFilterTwice = edgeDocsToGraph
+--   let perSourceEdges :: HM.HashMap PageId [EdgeDoc]
+--       perSourceEdges = HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs
+--       perTargetEdges = fmap (\edgeDocs' -> HM.fromListWith (++) $ foldMap groupByIncidentEntity edgeDocs' ) $ perSourceEdges
+--   in Graph perTargetEdges
+--   where groupByIncidentEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
+--         groupByIncidentEntity edgeDoc =
+--                   [ (entity, [edgeDoc])
+--                   | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 
@@ -226,14 +237,15 @@ onlySymmetricEdges edgeDocs =
 randomFilter :: Int -> [EdgeDoc] -> Graph PageId [EdgeDoc]
 randomFilter topN edgeDocs =
   let edgeDocs' = take topN $ HS.toList $ HS.fromList edgeDocs -- rely on HashSet randomizing the list
-      perSourceEdges :: HM.HashMap PageId [EdgeDoc]
-      perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
-      perTargetEdges = fmap (HM.fromListWith (++) . foldMap groupByEntity) $ perSourceEdges
-  in Graph perTargetEdges
-  where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
-        groupByEntity edgeDoc =
-                  [ (entity, [edgeDoc])
-                  | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
+  in edgeDocsToGraph edgeDocs'
+--       perSourceEdges :: HM.HashMap PageId [EdgeDoc]
+--       perSourceEdges = HM.fromListWith (++) $ foldMap groupByEntity edgeDocs'
+--       perTargetEdges = fmap (HM.fromListWith (++) . foldMap groupByEntity) $ perSourceEdges
+--   in Graph perTargetEdges
+--   where groupByEntity :: EdgeDoc -> [(PageId, [EdgeDoc])]
+--         groupByEntity edgeDoc =
+--                   [ (entity, [edgeDoc])
+--                   | entity <- HS.toList $ edgeDocNeighbors $ edgeDoc]
 
 
 accumulateEdgeWeights :: forall w. Num w
@@ -242,16 +254,29 @@ accumulateEdgeWeights :: forall w. Num w
                       -> HS.HashSet PageId
                       -> Graph PageId w
 accumulateEdgeWeights sourceToEdgeDocsWithScores by seeds=
-     Graph $ (HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores) <> fmap (const mempty) (HS.toMap seeds)
-  where countEdgeDocs :: PageId -> [EdgeDocWithScores] -> HM.HashMap PageId w
-        countEdgeDocs sourceNode edgeDocsWithScores =
-            HM.fromListWith (+)
-              [ (targetNode, by edgeDocsWithScore)
-              | edgeDocsWithScore <- edgeDocsWithScores
-              , targetNode <- HS.toList $ edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
-              , targetNode /= sourceNode  -- we only compute the destinations, this will be added to the source's outedges
-              ]
+    coerce
+    $ graphFromEdges [ (sourceNode, targetNode, Sum weight)
+                     | (sourceNode, edges) <- HM.toList sourceToEdgeDocsWithScores
+                     , edge <- edges
+                     , let weight = by edge
+                     , targetNode <- HS.toList $ edgeDocNeighbors $ withScoreEdgeDoc $ edge
+                     , targetNode /= sourceNode
+                     ]
 
+
+--
+--
+--
+--      Graph $ (HM.mapWithKey countEdgeDocs sourceToEdgeDocsWithScores) <> fmap (const mempty) (HS.toMap seeds)
+--   where countEdgeDocs :: PageId -> [EdgeDocWithScores] -> HM.HashMap PageId w
+--         countEdgeDocs sourceNode edgeDocsWithScores =
+--             HM.fromListWith (+)
+--               [ (targetNode, by edgeDocsWithScore)
+--               | edgeDocsWithScore <- edgeDocsWithScores
+--               , targetNode <- HS.toList $ edgeDocNeighbors $ withScoreEdgeDoc $ edgeDocsWithScore
+--               , targetNode /= sourceNode  -- we only compute the destinations, this will be added to the source's outedges
+--               ]
+--
 
 
 -- Marginalized over second argument in edges, e.g. Map source (Map target weight_{st}) -> Map source weight_{s*}
