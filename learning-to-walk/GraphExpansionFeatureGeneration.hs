@@ -540,9 +540,9 @@ main = do
               initialEigenv graph' = PageRank.uniformInitial mapping
                 where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
 
-              iterate :: WeightVec EdgeFeature -> M.Map QueryId (Eigenvector PageId Double)
+              iterate :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId (Eigenvector PageId Double)
                       -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), Double)]
-              iterate params eigvs =
+              iterate gen0 params eigvs =
                   let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
                       nextPageRankIter = M.fromList
                                [ (qid, produceWalkingGraph featureGraphs eigv0 qid edgeFSpace' nodeDistr)
@@ -556,13 +556,24 @@ main = do
                           let (ranking, _pageRank) = (nextPageRankIter >!< query) w
                           in augmentWithQrels query ranking
 
-                      (score, params') : _ = naiveCoordAscent metric rerank gen0 params someKindOfTrainingData
 
+                      (gen1, gen2) = System.Random.split gen0
+                      (score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
+--
+--  --                     miniBatched batchSteps batchSize optimise gen00 w00 fRankings
+--   --                    optimise ::  (gen -> model -> M.Map qid d -> [model])
+--
+--                       optimise gen model someKindOfTrainingData' =
+--                             let scoreParams = naiveCoordAscent metric rerank gen params someKindOfTrainingData'
+--                             in fmap snd scoreParams
+--                       params' = miniBatched 1 100 optimise gen0 params someKindOfTrainingData
+
+--
                       eigvs' = fmap snd $ fmap ($ params') nextPageRankIter
 
-                  in (params', eigvs',  score) : iterate params' eigvs'
+                  in (params', eigvs',  score) : iterate gen2 params' eigvs'
 
-              iters = iterate initParams' (fmap initialEigenv featureGraphs)
+              iters = iterate gen0 initParams' (fmap initialEigenv featureGraphs)
               (newParams, _, _):_ = drop 2 iters
 
           putStrLn $ "new model params " <> show newParams
