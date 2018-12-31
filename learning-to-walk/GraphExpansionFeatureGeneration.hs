@@ -527,7 +527,13 @@ main = do
               metric :: ScoringMetric IsRelevant QueryId _
               metric = meanAvgPrec (\q -> fromMaybe 0 $ q `M.lookup` totalRels)  Relevant
 
-              !someKindOfTrainingData = M.fromList [(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
+
+--
+--       Remove take 20!
+--
+
+
+              !someKindOfTrainingData = M.fromList $ take 20 $ [(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
 
           gen0 <- newStdGen
 
@@ -560,12 +566,16 @@ main = do
 
 
                       (gen1, gen2) = System.Random.split gen0
-                      optimise :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId QueryId -> [WeightVec EdgeFeature]
-                      optimise gen model someKindOfTrainingData' =
-                            let scoreParams = naiveCoordAscent metric rerank gen model someKindOfTrainingData'
-                            in fmap snd scoreParams
-                      params' :: WeightVec EdgeFeature
-                      params' = (!!2) $ miniBatched 1 20 optimise gen1 params someKindOfTrainingData
+--                       optimise :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId QueryId -> [WeightVec EdgeFeature]
+--                       optimise gen model someKindOfTrainingData' =
+--                             let scoreParams = naiveCoordAscent metric rerank gen model someKindOfTrainingData'
+--                             in fmap snd scoreParams
+--                       params' :: WeightVec EdgeFeature
+--                       params' = (!!2) $ miniBatched 1 20 optimise gen1 params someKindOfTrainingData
+
+
+                      (_score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
+
 
                       iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
                       iterResult = fmap ($ params') nextPageRankIter
