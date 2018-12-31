@@ -564,10 +564,10 @@ main = do
                       (gen1, gen2) = System.Random.split gen0
                       optimise :: StdGen -> WeightVec EdgeFeature -> M.Map QueryId QueryId -> [WeightVec EdgeFeature]
                       optimise gen model someKindOfTrainingData' =
-                            let scoreParams = naiveCoordAscent metric rerank gen params someKindOfTrainingData'
+                            let scoreParams = naiveCoordAscent metric rerank gen model someKindOfTrainingData'
                             in fmap snd scoreParams
                       params' :: WeightVec EdgeFeature
-                      params' = (!!2) $ miniBatched 1 20 optimise gen0 params someKindOfTrainingData
+                      params' = (!!2) $ miniBatched 1 20 optimise gen1 params someKindOfTrainingData
 
                       iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
                       iterResult = fmap ($ params') nextPageRankIter
@@ -577,7 +577,9 @@ main = do
                       rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
                       rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
                       score' = metric rankings'
-                      !x = Debug.trace ("trainwalk score " <> (show score')) $ 0
+                      printTopRanking rs =
+                         unlines $ take 2 $ M.elems $ fmap ( show . take 1 . Ranking.toSortedList) rs
+                      !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries "<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
 
                   in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
 
