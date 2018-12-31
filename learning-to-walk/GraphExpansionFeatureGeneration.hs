@@ -442,8 +442,8 @@ main = do
                               -> (Ranking Double PageId, Eigenvector PageId Double)
           produceWalkingGraph featureGraphs initialEigv query edgeFSpace' nodeDistr =
               \params ->
-                let graph = walkingGraph params
-                in nextRerankIter params initialEigv
+                --let graph = walkingGraph params
+                nextRerankIter params initialEigv
               where
                 !featureGraph = featureGraphs  >!< query
 
@@ -480,7 +480,7 @@ main = do
                                -> (Ranking Double PageId, Eigenvector PageId Double)
                 nextRerankIter params initial  =
                       let graph = walkingGraph params
-                          nexteigen = (!!1) $ walkIters initial $ graph
+                          nexteigen = (!!3) $ walkIters initial $ graph
                           ranking = eigenvectorToRanking nexteigen
 --                           debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
                       in (ranking, nexteigen)
@@ -536,6 +536,10 @@ main = do
               !someKindOfTrainingData = M.fromList $ take 20 $ [(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
 
           gen0 <- newStdGen
+
+
+          let trShow y x = Debug.trace (show y <> " " <> show x) x
+
 
           let initParams' :: WeightVec EdgeFeature
               initParams' = WeightVec $ F.projectFeatureVec edgeFSpace'
