@@ -499,25 +499,25 @@ main = do
 
           putStrLn "loading model"
           Just model <-  Data.Aeson.decode @(Model CombinedFeature) <$> BSL.readFile modelFile
-          let modelFeaturesFromModel = modelFeatures model
+          let !modelFeaturesFromModel = modelFeatures model
+          putStrLn "loaded model."
 
           let edgeFSpace' = F.mkFeatureSpace [ f'
-                                             | f <- F.featureNames $ modelFeaturesFromModel
+                                             | f <- F.featureNames modelFeaturesFromModel
                                              , Right f' <- pure f
                                              ]
-              featureGraphs =  makeFeatureGraphs edgeFSpace'
+              !featureGraphs =  makeFeatureGraphs edgeFSpace'
 
               nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
-              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
+              !nodeDistr =
+                  nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
 
               augmentWithQrels :: QueryId -> Ranking Double PageId -> Ranking Double (PageId, IsRelevant)
-              augmentWithQrels query ranking = Ranking.fromSortedList
-                                       $ [ (score, (page, rel))
-                                         | (score, page) <- Ranking.toSortedList ranking
-                                         , let rel = lookupQrel NotRelevant query page
-                                         ]
+              augmentWithQrels query =
+                  fmap (\page -> (page, lookupQrel NotRelevant query page))
 
-              totalRels = fmap countRel qrelMap
+              totalRels :: M.Map QueryId Int
+              !totalRels = fmap countRel qrelMap
                             where countRel :: M.Map x IsRelevant -> Int
                                   countRel m = length [ r
                                                       | (_, r) <- M.toList m
@@ -527,9 +527,7 @@ main = do
               metric :: ScoringMetric IsRelevant QueryId _
               metric = meanAvgPrec (\q -> fromMaybe 0 $ q `M.lookup` totalRels)  Relevant
 
-
-
-              someKindOfTrainingData =  M.fromList $[(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
+              !someKindOfTrainingData = M.fromList [(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
 
           gen0 <- newStdGen
 
@@ -548,7 +546,7 @@ main = do
                       -> [(WeightVec EdgeFeature, M.Map QueryId (Eigenvector PageId Double), M.Map QueryId (Ranking Double (PageId, IsRelevant)))]
               iterate gen0 params eigvs =
                   let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature -> (Ranking Double PageId, Eigenvector PageId Double))
-                      nextPageRankIter = M.fromList
+                      !nextPageRankIter = M.fromList
                                [ (qid, produceWalkingGraph featureGraphs eigv0 qid edgeFSpace' nodeDistr)
                                | q <- queries
                                , let qid = queryDocQueryId q
@@ -578,7 +576,7 @@ main = do
                       rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
                       score' = metric rankings'
                       printTopRanking rs =
-                         unlines $ take 2 $ M.elems $ fmap ( show . take 1 . Ranking.toSortedList) rs
+                          unlines $ take 2 $ M.elems $ fmap (show . take 1 . Ranking.toSortedList) rs
                       !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries "<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
 
                   in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
