@@ -575,7 +575,7 @@ main = do
                             let scoreParams = naiveCoordAscent metric rerank gen model someKindOfTrainingData'
                             in fmap snd scoreParams
                       params' :: WeightVec EdgeFeature
-                      params' = (!!3) $ miniBatched 1 20 optimise gen1 params someKindOfTrainingData
+                      params' = (!!3) $ miniBatched 1 100 optimise gen1 params someKindOfTrainingData
 --
 --
 --                       (_score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData
