@@ -538,7 +538,7 @@ main = do
           gen0 <- newStdGen
 
 
-          let trShow y x = Debug.trace (show y <> " " <> show x) x
+--           let trShow y x = Debug.trace (show y <> " " <> show x) x
 
 
           let initParams' :: WeightVec EdgeFeature
@@ -590,8 +590,8 @@ main = do
                       rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
                       score' = metric rankings'
                       printTopRanking rs =
-                          unlines $ take 2 $ M.elems $ fmap (show . take 1 . Ranking.toSortedList) rs
-                      !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries "<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
+                          unlines $ take 3 $ M.elems $ fmap (show . take 2 . Ranking.toSortedList) rs
+                      !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries \n"<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
 
                   in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
 
@@ -762,6 +762,7 @@ biasedPersPageRankWithInitial
     -> Eigenvector n a  -- ^ initial page rank vector
     -> [Eigenvector n a]  -- ^ principle eigenvector iterates
 biasedPersPageRankWithInitial alpha seeds graph initial =
+--      Debug.trace ("biasedPersPageRankWithInitial with initial "<> show initial) $
     persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
   where
     !mapping  = mkDenseMapping (nodeSet graph)
