@@ -238,31 +238,31 @@ edgesFromPages :: PagesLookup
                -> [((PageId, PageId), EdgeFeatureVec)]
 edgesFromPages pagesLookup entityRuns =
     let
-        page :: PageId -> Page
-        page pageId = case pagesLookup [pageId] of
-                           [] -> error $ "No page for pageId "++show pageId
-                           (a:_) -> a
+--         page :: PageId -> Page
+--         page pageId = case pagesLookup [pageId] of
+--                            [] -> error $ "No page for pageId "++show pageId
+--                            (a:_) -> a
 
 
-        pageNeighbors = pageLinkTargetIds
+--         pageNeighbors = pageLinkTargetIds
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> F.FeatureVec EdgeFeature Double
-        edgeFeat pageId entityEntry = edgePageScoreVec entityEntry (page pageId)
+        edgeFeat pageId entityEntry = edgePageScoreVec entityEntry -- (page pageId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
-        edgeCardinality p = length $ pageNeighbors p
+        edgeCardinality  = 3 -- length $ pageNeighbors p
 
 
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec)]
         oneHyperEdge (pageId, entityEntry) =
               [ ((u, v) , dividedFeatVec)
-              | let p = page pageId
-              , u <- pageNeighbors p
-              , v <- pageNeighbors p -- include self links (v==u)!
+              | -- let p = page pageId
+               let u = pageId
+              , let v = pageId -- include self links (v==u)!
               , let featVec = edgeFeat pageId entityEntry
-              , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality p)
+              , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality)
               ]
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName entityEntry, entityEntry)
@@ -271,13 +271,53 @@ edgesFromPages pagesLookup entityRuns =
 
 
 
+--
+--     -- TODO:  use featurenames for Page
+-- edgesFromPages :: PagesLookup
+--                -> [MultiRankingEntry PageId GridRun]
+--                -> [((PageId, PageId), EdgeFeatureVec)]
+-- edgesFromPages pagesLookup entityRuns =
+--     let
+--         page :: PageId -> Page
+--         page pageId = case pagesLookup [pageId] of
+--                            [] -> error $ "No page for pageId "++show pageId
+--                            (a:_) -> a
+--
+--
+--         pageNeighbors = pageLinkTargetIds
+--         edgeFeat :: PageId
+--                  -> MultiRankingEntry PageId GridRun
+--                  -> F.FeatureVec EdgeFeature Double
+--         edgeFeat pageId entityEntry = edgePageScoreVec entityEntry (page pageId)
+--
+--         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
+--         edgeCardinality p = length $ pageNeighbors p
+--
+--
+--         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
+--                      -> [((PageId, PageId), EdgeFeatureVec)]
+--         oneHyperEdge (pageId, entityEntry) =
+--               [ ((u, v) , dividedFeatVec)
+--               | let p = page pageId
+--               , u <- pageNeighbors p
+--               , v <- pageNeighbors p -- include self links (v==u)!
+--               , let featVec = edgeFeat pageId entityEntry
+--               , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality p)
+--               ]
+--
+--     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName entityEntry, entityEntry)
+--                | entityEntry <- entityRuns
+--                ]
+--
+--
+--
 
                           -- TODO use different features for page edge features
 
 edgePageScoreVec :: MultiRankingEntry p GridRun
-             -> Page
+             -- -> Page
              -> F.FeatureVec EdgeFeature Double
-edgePageScoreVec pageRankEntry page
+edgePageScoreVec pageRankEntry --_page
                                  = makeEdgeFeatVector $
                                     [ (EdgeCount, 1.0)
                                     ]
