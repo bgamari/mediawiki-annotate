@@ -104,6 +104,8 @@ edgeRunsF = [ GridRun qm rm em it
              , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg), (EcmIdx, Rm1), (EcmIdx, EcmPsg1)
                            , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg), (ParagraphIdx, Rm1), (ParagraphIdx, EcmPsg1)
                            ]
+                           ++ [(EntityIdx, em) | em <- [NoneX, Rm]] -- for edges derived from pages
+                           ++ [(PageIdx, em) | em <- [NoneX, Rm]]  -- for edges derived from pages
              ]
 
 
