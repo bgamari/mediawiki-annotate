@@ -369,7 +369,7 @@ main = do
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
-    let candidateGraphGenerator = selectGenerousCandidateGraph edgeDocsLookup
+    let candidateGraphGenerator = selectGenerousCandidateGraph edgeDocsLookup pagesLookup
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
@@ -396,7 +396,7 @@ main = do
 
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettings edgeFSpace')
-                         $ generateEdgeFeatureGraph query pagesLookup candidates
+                         $ generateEdgeFeatureGraph query candidates
 
 
                   normalizer :: Normalisation _ Double
@@ -429,9 +429,9 @@ main = do
               f :: F.FeatureSpace EdgeFeature -> QueryId -> Graph PageId EdgeFeatureVec
               f edgeFSpace' query =
                   fmap (filterExpSettings edgeFSpace')
-                  $ generateEdgeFeatureGraph query pagesLookup candidates
+                  $ generateEdgeFeatureGraph query candidates
                 where
-                  !candidates = candidateGraphGenerator query edgeRun entityRun
+                  !candidates = Debug.trace "created candidate graph." $ candidateGraphGenerator query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query

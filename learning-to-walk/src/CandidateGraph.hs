@@ -24,6 +24,7 @@ import qualified CAR.RunFile as CarRun
 import GridFeatures
 
 import EdgeDocCorpus
+import LookupWrapper
 
 import qualified CAR.RunFile
 import MultiTrecRunFile
@@ -37,6 +38,7 @@ import Debug.Trace
 data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
                              , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
+                             , candidatePages :: [Page]
                              }
 
 type CandidateGraphGenerator =
@@ -49,11 +51,13 @@ type CandidateGraphGenerator =
 
 selectGenerousCandidateGraph
     :: EdgeDocsLookup
+    -> PagesLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
+selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''
+               , candidatePages = entityPages
                }
   where
     restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
@@ -95,6 +99,12 @@ selectGenerousCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
+    entityPages :: [Page]
+    entityPages = pagesLookup $  HS.toList $ (HS.fromList entitiesFromRuns) `HS.union` entitiesFromEdgeDocs
+        where entitiesFromRuns :: [PageId]
+              entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
+              entitiesFromEdgeDocs :: HS.HashSet PageId
+              entitiesFromEdgeDocs = mconcat (fmap edgeDocNeighbors edgeDocs'')
 
     fakeMultiPageEntry query doc =
         buildMultiTrecEntry  100 (0.0, [])
@@ -113,11 +123,13 @@ selectGenerousCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
 
 selectStrictCandidateGraph
     :: EdgeDocsLookup
+    -> PagesLookup
     -> CandidateGraphGenerator
-selectStrictCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
+selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''
+               , candidatePages = entityPages
                }
   where
     restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
@@ -158,4 +170,10 @@ selectStrictCandidateGraph edgeDocsLookup _queryId edgeRun entityRun =
     entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
+    entityPages :: [Page]
+    entityPages = pagesLookup $  HS.toList $ (HS.fromList entitiesFromRuns) `HS.union` entitiesFromEdgeDocs
+        where entitiesFromRuns :: [PageId]
+              entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
+              entitiesFromEdgeDocs :: HS.HashSet PageId
+              entitiesFromEdgeDocs = mconcat (fmap edgeDocNeighbors edgeDocs'')
 
