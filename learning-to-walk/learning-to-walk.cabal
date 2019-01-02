@@ -18,7 +18,8 @@ library
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:     CandidateGraph,
-                       NodeAndEdgeFeatures
+                       NodeAndEdgeFeatures,
+                       LookupWrapper
   build-depends:       base >=4.9 && <4.12,
                        async,
                        bytestring,

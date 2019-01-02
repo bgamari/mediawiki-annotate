@@ -77,6 +77,7 @@ import Control.Monad
 
 import GridFeatures
 import EdgeDocCorpus
+import LookupWrapper
 import CandidateGraph
 import NodeAndEdgeFeatures
 import TrainAndStore
@@ -131,6 +132,7 @@ opts :: Parser ( FilePath
                , NumResults
                , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
+               , Toc.IndexedCborPath PageId Page
                , FilePath
                , ModelSource
                , PosifyEdgeWeights
@@ -142,7 +144,7 @@ opts :: Parser ( FilePath
                , Maybe MiniBatchParams
                )
 opts =
-    (,,,,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -150,6 +152,7 @@ opts =
     <*> option auto (short 'k' <> long "num-results" <> help "use number of results of input rankings (per query)")
     <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
+    <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-cbor" <> metavar "Page-CBOR" <> help "Page cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
@@ -247,7 +250,7 @@ main = do
 
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
-      , edgeDocsCborFile
+      , edgeDocsCborFile, pagesCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
@@ -326,6 +329,7 @@ main = do
 
     putStrLn "Loading edgeDocsLookup."
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
+    pagesLookup <- readPagesToc pagesCborFile
 
     ncaps <- getNumCapabilities
 
@@ -385,14 +389,14 @@ main = do
                   count predicate = getSum . foldMap f
                     where f x = if predicate x then Sum 1 else Sum 0
 
-                  candidates = candidateGraphGenerator query edgeRun entityRun -- selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                  candidates = candidateGraphGenerator query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query
 
                   graph :: Graph PageId EdgeFeatureVec
                   graph =  fmap (filterExpSettings edgeFSpace')
-                         $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+                         $ generateEdgeFeatureGraph query pagesLookup candidates
 
 
                   normalizer :: Normalisation _ Double
@@ -425,9 +429,9 @@ main = do
               f :: F.FeatureSpace EdgeFeature -> QueryId -> Graph PageId EdgeFeatureVec
               f edgeFSpace' query =
                   fmap (filterExpSettings edgeFSpace')
-                  $ generateEdgeFeatureGraph query candidates -- edgeDocsLookup query edgeRun entityRun
+                  $ generateEdgeFeatureGraph query pagesLookup candidates
                 where
-                  !candidates = candidateGraphGenerator query edgeRun entityRun -- selectCandidateGraph edgeDocsLookup query edgeRun entityRun
+                  !candidates = candidateGraphGenerator query edgeRun entityRun
                     where
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query
@@ -468,8 +472,9 @@ main = do
                           -> [Eigenvector PageId Double]
                 walkIters initial graph' =
                     case graphWalkModel of
-                      PageRankWalk -> pageRankWithInitial teleportation graph' initial
-                      BiasedPersPageRankWalk -> -- persPageRankWithNonUniformSeeds (teleportation/2) seedNodeDistr graph'
+                      PageRankWalk ->
+                            pageRankWithInitial teleportation graph' initial
+                      BiasedPersPageRankWalk ->
                           biasedPersPageRankWithInitial alpha seedNodeDistr graph' initial
                   where
                     betaTotal = teleportation/2
@@ -510,7 +515,7 @@ main = do
 
               nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
               !nodeDistr =
-                  nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
+                  nodeDistrPriorForGraphwalk candidateGraphGenerator pagesLookup model collapsedEntityRun collapsedEdgedocRun
 
               augmentWithQrels :: QueryId -> Ranking Double PageId -> Ranking Double (PageId, IsRelevant)
               augmentWithQrels query =
@@ -654,7 +659,7 @@ main = do
 
 
           let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
-              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun
+              nodeDistr = nodeDistrPriorForGraphwalk candidateGraphGenerator pagesLookup model collapsedEntityRun collapsedEdgedocRun
 
           let edgeFSpace' = F.mkFeatureSpace [ f'
                                              | f <- F.featureNames $ modelFeaturesFromModel
@@ -701,7 +706,7 @@ main = do
                     in franking
 
 
-          let docFeatures = makeStackedFeatures' candidateGraphGenerator (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
+          let docFeatures = makeStackedFeatures' candidateGraphGenerator pagesLookup (modelFeatures model) collapsedEntityRun collapsedEdgedocRun
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
           let allData :: TrainData CombinedFeature
@@ -726,7 +731,7 @@ main = do
                                 $ filter (filterFeaturesByExperimentSetting experimentSettings)
                                 $ F.featureNames combinedFSpace  -- Todo this is completely unsafe
 
-          let docFeatures = makeStackedFeatures candidateGraphGenerator collapsedEntityRun collapsedEdgedocRun combinedFSpace'
+          let docFeatures = makeStackedFeatures candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace'
 
 
           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
@@ -794,15 +799,16 @@ eigenvectorToRanking :: Eigenvector doc Double -> Ranking Double doc
 eigenvectorToRanking = Ranking.fromList . map swap . toEntries
 
 nodeDistrPriorForGraphwalk :: CandidateGraphGenerator
+                           -> PagesLookup
                            -> Model CombinedFeature
                            -> M.Map QueryId [MultiRankingEntry PageId GridRun]
                            -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
                            -> M.Map QueryId (HM.HashMap PageId Double)
-nodeDistrPriorForGraphwalk candidateGraphGenerator model collapsedEntityRun collapsedEdgedocRun =
+nodeDistrPriorForGraphwalk candidateGraphGenerator pagesLookup model collapsedEntityRun collapsedEdgedocRun =
 
   let modelFeaturesFromModel = modelFeatures model
       docFeatures :: M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-      docFeatures = makeStackedFeatures' candidateGraphGenerator modelFeaturesFromModel collapsedEntityRun collapsedEdgedocRun
+      docFeatures = makeStackedFeatures' candidateGraphGenerator pagesLookup modelFeaturesFromModel collapsedEntityRun collapsedEdgedocRun
       degreeCentrality = fmap (modelWeights' model `score`) docFeatures
       queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
       ranking :: M.Map QueryId (Ranking.Ranking Double QRel.DocumentName)
@@ -951,3 +957,4 @@ nodeRankingToDistribution ranking =
                       ]
         totals = Foldable.sum proportions
     in fmap (/ totals) proportions
+
