@@ -119,10 +119,12 @@ allEntityRunsF :: [Run]
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
 allEdgeRunsF :: [Run]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
+allSources :: [FromSource]
+allSources = [FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink]
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
-data FromSource = FromParas | FromPages
+data FromSource = FromParas | FromPagesOwnerLink | FromPagesLinkOwner | FromPagesLinkLink
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
@@ -154,8 +156,8 @@ allEntityFeatures =
 
 allEdgeFeatures :: [EdgeFeature]
 allEdgeFeatures =
-    (EdgeRetrievalFeature <$> [FromParas, FromPages] <*> allEdgeRunsF <*> allRunFeatures)
-    <> ([EdgeDocKL, EdgeCount] <*>  [FromParas, FromPages])
+    (EdgeRetrievalFeature <$> allSources <*> allEdgeRunsF <*> allRunFeatures)
+    <> ([EdgeDocKL, EdgeCount] <*>  allSources)
 
 entFSpace :: FeatureSpace EntityFeature
 entFSpace = mkFeatureSpace allEntityFeatures
@@ -363,7 +365,7 @@ makeEdgeFeatVector xs =
                              | edgeRun <- allEdgeRunsF
                              , feat <- defaultEdgeRankFeatures source edgeRun
                              ]
-                          ) [FromPages, FromParas]
+                          ) allSources
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =

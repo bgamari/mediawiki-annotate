@@ -238,8 +238,10 @@ edgesFromParas edgeDocsLookup edgeRuns =
                | edgeEntry <- edgeRuns
                ]
 
+data Role = RoleOwner | RoleLink
+         deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
-    -- TODO:  use featurenames for Page
+
 edgesFromPages :: PagesLookup
                -> [MultiRankingEntry PageId GridRun]
                -> [((PageId, PageId), EdgeFeatureVec)]
@@ -250,12 +252,13 @@ edgesFromPages pagesLookup entityRuns =
                            [] -> error $ "No page for pageId "++show pageId
                            (a:_) -> a
 
-
-        pageNeighbors p = [pageId p] ++ pageLinkTargetIds p
+        pageNeighbors :: Page -> [(PageId, Role)]
+        pageNeighbors p = ([(pageId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ pageLinkTargetIds p)
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
+                 -> FromSource
                  -> F.FeatureVec EdgeFeature Double
-        edgeFeat pageId entityEntry = edgePageScoreVec FromPages entityEntry (page pageId)
+        edgeFeat pageId entityEntry source = edgePageScoreVec source entityEntry (page pageId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
         edgeCardinality p = length $ pageNeighbors p
@@ -266,11 +269,17 @@ edgesFromPages pagesLookup entityRuns =
         oneHyperEdge (pageId, entityEntry) =
               [ ((u, v) , dividedFeatVec)
               | let p = page pageId
-              , u <- pageNeighbors p
-              , v <- pageNeighbors p -- include self links (v==u)!
-              , let featVec = edgeFeat pageId entityEntry
+              , (u, uRole) <- pageNeighbors p
+              , (v, vRole) <- pageNeighbors p -- include self links (v==u)!
+              , let featVec = edgeFeat pageId entityEntry (getSource uRole vRole)
               , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality p)
               ]
+          where getSource :: Role -> Role -> FromSource
+                getSource RoleOwner RoleLink = FromPagesOwnerLink
+                getSource RoleLink RoleOwner = FromPagesLinkOwner
+                getSource RoleLink RoleLink = FromPagesLinkLink
+                getSource u v = error $ "edgesFromPages: Don't know source for roles "<>show u <> ", "<> show v
+
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName entityEntry, entityEntry)
                | entityEntry <- entityRuns
