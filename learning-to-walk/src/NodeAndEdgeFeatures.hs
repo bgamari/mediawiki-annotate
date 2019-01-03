@@ -251,7 +251,7 @@ edgesFromPages pagesLookup entityRuns =
                            (a:_) -> a
 
 
-        pageNeighbors = pageLinkTargetIds
+        pageNeighbors p = [pageId p] ++ pageLinkTargetIds p
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> F.FeatureVec EdgeFeature Double

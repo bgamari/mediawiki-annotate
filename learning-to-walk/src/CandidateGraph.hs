@@ -100,7 +100,7 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
     entityPages :: [Page]
-    entityPages = pagesLookup $  HS.toList $ (HS.fromList entitiesFromRuns) `HS.union` entitiesFromEdgeDocs
+    entityPages = pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
         where entitiesFromRuns :: [PageId]
               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
               entitiesFromEdgeDocs :: HS.HashSet PageId
