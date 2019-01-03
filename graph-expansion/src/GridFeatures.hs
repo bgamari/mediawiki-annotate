@@ -122,6 +122,8 @@ allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
+data FromSource = FromParas | FromPages
+         deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
 allRunFeatures = [ScoreF, RecipRankF] --[minBound..maxBound]
@@ -134,9 +136,9 @@ data EntityFeature where
     deriving (Show, Read, Ord, Eq)
 
 data EdgeFeature where
-    EdgeRetrievalFeature :: Run -> RunFeature -> EdgeFeature
-    EdgeDocKL  :: EdgeFeature
-    EdgeCount  :: EdgeFeature
+    EdgeRetrievalFeature :: FromSource -> Run -> RunFeature -> EdgeFeature
+    EdgeDocKL  :: FromSource -> EdgeFeature
+    EdgeCount  :: FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq)
 
 data EntityOrEdge = Entity | Edge
@@ -152,8 +154,8 @@ allEntityFeatures =
 
 allEdgeFeatures :: [EdgeFeature]
 allEdgeFeatures =
-    (EdgeRetrievalFeature <$> allEdgeRunsF <*> allRunFeatures)
-    <> [EdgeDocKL, EdgeCount]
+    (EdgeRetrievalFeature <$> [FromParas, FromPages] <*> allEdgeRunsF <*> allRunFeatures)
+    <> ([EdgeDocKL, EdgeCount] <*>  [FromParas, FromPages])
 
 entFSpace :: FeatureSpace EntityFeature
 entFSpace = mkFeatureSpace allEntityFeatures
@@ -199,8 +201,8 @@ combinedFSpace = concatSpace entFSpace edgeFSpace
 -- onlyNoneFeaturesEdge _  = False
 
 onlyPageEdge :: EdgeFeature -> Bool
-onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _) = True
-onlyPageEdge (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _) = True
+onlyPageEdge (EdgeRetrievalFeature  _ (GridRun' (GridRun Title _ _ _)) _) = True
+onlyPageEdge (EdgeRetrievalFeature  _ (GridRun' (GridRun All _ _ _)) _) = True
 onlyPageEdge _ = False
 
 filterExpSettings :: (Show f, Ord f)
@@ -224,17 +226,17 @@ noEdge _  = True
 
 onlyAggr :: CombinedFeature -> Bool
 onlyAggr (Left (EntRetrievalFeature Aggr runf)) = True
-onlyAggr (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlyAggr (Right (EdgeRetrievalFeature _ Aggr runf)) = True
 onlyAggr _  = False
 
 onlyScore :: CombinedFeature -> Bool
 onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
-onlyScore (Right (EdgeRetrievalFeature _ ScoreF)) = True
+onlyScore (Right (EdgeRetrievalFeature _ _ ScoreF)) = True
 onlyScore x = nothingElseButAggr x
 
 onlyRR :: CombinedFeature -> Bool
 onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
-onlyRR (Right (EdgeRetrievalFeature _ RecipRankF)) = True
+onlyRR (Right (EdgeRetrievalFeature _ _ RecipRankF)) = True
 onlyRR x = nothingElseButAggr x
 
 
@@ -249,12 +251,12 @@ onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg Entity
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg PageIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 PageIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _)) = True
-onlyLessFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _)) = True
+onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
 onlyLessFeatures x = nothingElseButAggr x
 
 
@@ -262,10 +264,10 @@ onlyLessFeatures x = nothingElseButAggr x
 onlySimpleRmFeatures :: CombinedFeature -> Bool
 onlySimpleRmFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
-onlySimpleRmFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
+onlySimpleRmFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
 onlySimpleRmFeatures (Left (EntRetrievalFeature Aggr runf)) = True
-onlySimpleRmFeatures (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlySimpleRmFeatures (Right (EdgeRetrievalFeature _ Aggr runf)) = True
 onlySimpleRmFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not specify this feature: " <> show other <> " Returning True.")    True
 
 
@@ -277,24 +279,24 @@ onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
 
 onlyNoneFeatures :: CombinedFeature -> Bool
 onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
-onlyNoneFeatures (Right (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
+onlyNoneFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ NoneX _)) _)) = True
 onlyNoneFeatures x  = nothingElseButAggr x
 
 
 onlyPage :: CombinedFeature -> Bool
 onlyPage (Left (EntRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
 onlyPage (Left (EntRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
-onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
-onlyPage (Right (EdgeRetrievalFeature (GridRun' (GridRun All _ _ _)) _)) = True
+onlyPage (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title _ _ _)) _)) = True
+onlyPage (Right (EdgeRetrievalFeature _ (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage x = nothingElseButAggr x
 
 onlyTitleAndSectionPath :: CombinedFeature -> Bool
 onlyTitleAndSectionPath  (Left (EntRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
 onlyTitleAndSectionPath  (Left (EntRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
-onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun Title _ _ _)) _)) = True
-onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title _ _ _)) _)) = True
+onlyTitleAndSectionPath  (Right (EdgeRetrievalFeature _ (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
 onlyTitleAndSectionPath (Left (EntRetrievalFeature Aggr runf)) = True
-onlyTitleAndSectionPath (Right (EdgeRetrievalFeature Aggr runf)) = True
+onlyTitleAndSectionPath (Right (EdgeRetrievalFeature _ Aggr runf)) = True
 onlyTitleAndSectionPath x = nothingElseButAggr x
 
 onlySection :: CombinedFeature -> Bool
@@ -302,16 +304,16 @@ onlySection (Left (EntRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = 
 onlySection (Left (EntRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
 onlySection (Left (EntRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
 onlySection (Left (EntRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
-onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun SubTree _ _ _)) _)) = True
-onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
-onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun Interior _ _ _)) _)) = True
-onlySection (Right (EdgeRetrievalFeature (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun SubTree _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun LeafHeading _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Interior _ _ _)) _)) = True
+onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
 onlySection x = nothingElseButAggr x
 
 
 nothingElseButAggr :: CombinedFeature -> Bool
 nothingElseButAggr (Left (EntRetrievalFeature Aggr _)) = True
-nothingElseButAggr (Right (EdgeRetrievalFeature Aggr _)) = True
+nothingElseButAggr (Right (EdgeRetrievalFeature _ Aggr _)) = True
 nothingElseButAggr _ = False
 
 
@@ -352,14 +354,16 @@ makeDefaultEdgeFeatVector = makeEdgeFeatVector []
 makeEdgeFeatVector :: [(EdgeFeature, Double)] -> F.FeatureVec EdgeFeature Double
 makeEdgeFeatVector xs =
     F.modify defaults xs
- where defaults = F.fromList edgeFSpace ([ (EdgeCount, 0.0)
-                                         , (EdgeDocKL, 0.0)
-                                         ]
-                                        ++ [ feat
-                                           | edgeRun <- allEdgeRunsF
-                                           , feat <- defaultEdgeRankFeatures edgeRun
-                                           ]
-                                        )
+ where defaults = F.fromList edgeFSpace
+                $ foldMap (\source ->
+                          [ (EdgeCount source, 0.0)
+                          , (EdgeDocKL source, 0.0)
+                          ]
+                          ++ [ feat
+                             | edgeRun <- allEdgeRunsF
+                             , feat <- defaultEdgeRankFeatures source edgeRun
+                             ]
+                          ) [FromPages, FromParas]
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
@@ -376,9 +380,9 @@ defaultEntRankFeatures run =
     | runF <- allRunFeatures
     ]
 
-defaultEdgeRankFeatures :: Run -> [(EdgeFeature, Double)]
-defaultEdgeRankFeatures run =
-    [ (EdgeRetrievalFeature run runF, defaultRankFeatures runF)
+defaultEdgeRankFeatures :: FromSource -> Run -> [(EdgeFeature, Double)]
+defaultEdgeRankFeatures source run =
+    [ (EdgeRetrievalFeature source run runF, defaultRankFeatures runF)
     | runF <- allRunFeatures
     ]
 
@@ -420,9 +424,9 @@ rankEntFeatures run entry =
     | runF <- allRunFeatures
     ]
 
-rankEdgeFeatures :: Run -> RankingEntry d -> [(EdgeFeature, Double)]
-rankEdgeFeatures run entry =
-    [ (EdgeRetrievalFeature run runF, rankFeatures runF entry)
+rankEdgeFeatures :: FromSource -> Run -> RankingEntry d -> [(EdgeFeature, Double)]
+rankEdgeFeatures source run entry =
+    [ (EdgeRetrievalFeature source run runF, rankFeatures runF entry)
     | runF <- allRunFeatures
     ]
 

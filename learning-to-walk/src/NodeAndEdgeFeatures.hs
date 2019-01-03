@@ -23,6 +23,7 @@ import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Data.Maybe
 import qualified Data.List.NonEmpty as NE
+import Data.Bifunctor
 
 import CAR.Types hiding (Entity)
 import CAR.Utils
@@ -217,7 +218,7 @@ edgesFromParas edgeDocsLookup edgeRuns =
         edgeFeat :: ParagraphId
                  -> MultiRankingEntry ParagraphId GridRun
                  -> F.FeatureVec EdgeFeature Double
-        edgeFeat paraId edgeEntry = edgeScoreVec edgeEntry (edgeDoc paraId)
+        edgeFeat paraId edgeEntry = edgeScoreVec FromParas edgeEntry (edgeDoc paraId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
         edgeCardinality ed = HS.size $ edgeDocNeighbors ed
@@ -254,7 +255,7 @@ edgesFromPages pagesLookup entityRuns =
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> F.FeatureVec EdgeFeature Double
-        edgeFeat pageId entityEntry = edgePageScoreVec entityEntry (page pageId)
+        edgeFeat pageId entityEntry = edgePageScoreVec FromPages entityEntry (page pageId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
         edgeCardinality p = length $ pageNeighbors p
@@ -280,33 +281,36 @@ edgesFromPages pagesLookup entityRuns =
 
                           -- TODO use different features for page edge features
 
-edgePageScoreVec :: MultiRankingEntry p GridRun
+edgePageScoreVec :: FromSource
+             -> MultiRankingEntry p GridRun
              -> Page
              -> F.FeatureVec EdgeFeature Double
-edgePageScoreVec pageRankEntry _page
-                                 = makeEdgeFeatVector $
-                                    [ (EdgeCount, 1.0)
-                                    ]
-                                    ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed pageRankEntry)
-                                    ++ concat [ rankEdgeFeatures (GridRun' g) entry
-                                       | (g, entry) <- multiRankingEntryAll pageRankEntry
-                                      ]
+edgePageScoreVec source pageRankEntry _page =
+    makeEdgeFeatVector
+        $ ([ (EdgeCount source , 1.0)
+           ]
+          ++ rankEdgeFeatures source Aggr (multiRankingEntryCollapsed pageRankEntry)
+          ++ concat [ rankEdgeFeatures source (GridRun' g) entry
+                    | (g, entry) <- multiRankingEntryAll pageRankEntry
+                    ]
+         )
 
 
-edgeScoreVec :: MultiRankingEntry p GridRun
+edgeScoreVec :: FromSource
+             -> MultiRankingEntry p GridRun
              -> EdgeDoc
              -> F.FeatureVec EdgeFeature Double
-edgeScoreVec edgedocsRankEntry edgeDoc
+edgeScoreVec source edgedocsRankEntry edgeDoc
                                  = makeEdgeFeatVector $
-                                    [ (EdgeCount, 1.0)
+                                    [ (EdgeCount source, 1.0)
                                     -- TODO
                                     --, ( EdgeDocKL
                                     --  , let Just edgeDocs = multiRankingEntryGetDocumentName edgedocsRankEntry `HM.lookup` edgeDocsByPara
                                     --    in edgeDocKullbackLeibler connectedEdgeDocs edgeDocs
                                     --  )
                                     ]
-                                    ++ rankEdgeFeatures Aggr (multiRankingEntryCollapsed edgedocsRankEntry)
-                                    ++ concat [ rankEdgeFeatures (GridRun' g) entry
+                                    ++ rankEdgeFeatures source Aggr (multiRankingEntryCollapsed edgedocsRankEntry)
+                                    ++ concat [ rankEdgeFeatures source (GridRun' g) entry
                                        | (g, entry) <- multiRankingEntryAll edgedocsRankEntry
                                       ]
 {-
