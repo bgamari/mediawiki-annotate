@@ -278,6 +278,7 @@ edgesFromPages pagesLookup entityRuns =
                 getSource RoleOwner RoleLink = FromPagesOwnerLink
                 getSource RoleLink RoleOwner = FromPagesLinkOwner
                 getSource RoleLink RoleLink = FromPagesLinkLink
+                getSource RoleOwner RoleOwner = FromPagesSelf
                 getSource u v = error $ "edgesFromPages: Don't know source for roles "<>show u <> ", "<> show v
 
 

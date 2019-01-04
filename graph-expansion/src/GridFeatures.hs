@@ -120,11 +120,11 @@ allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
 allEdgeRunsF :: [Run]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 allSources :: [FromSource]
-allSources = [FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink]
+allSources = [FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
-data FromSource = FromParas | FromPagesOwnerLink | FromPagesLinkOwner | FromPagesLinkLink
+data FromSource = FromParas | FromPagesOwnerLink | FromPagesLinkOwner | FromPagesLinkLink  | FromPagesSelf
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
