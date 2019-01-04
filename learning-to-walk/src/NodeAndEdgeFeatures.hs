@@ -183,7 +183,7 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                                                             } =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
-        pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageId page, page) | page <- candidatePages]
+        pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageDocId page, page) | page <- candidatePages]
 
         aggrFeatVecs :: EdgeFeatureVec -> EdgeFeatureVec -> EdgeFeatureVec
         aggrFeatVecs features1 features2 =
@@ -247,13 +247,13 @@ edgesFromPages :: PagesLookup
                -> [((PageId, PageId), EdgeFeatureVec)]
 edgesFromPages pagesLookup entityRuns =
     let
-        page :: PageId -> Page
+        page :: PageId -> PageDoc
         page pageId = case pagesLookup [pageId] of
                            [] -> error $ "No page for pageId "++show pageId
                            (a:_) -> a
 
-        pageNeighbors :: Page -> [(PageId, Role)]
-        pageNeighbors p = ([(pageId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ pageLinkTargetIds p)
+        pageNeighbors :: PageDoc -> [(PageId, Role)]
+        pageNeighbors p = ([(pageDocArticleId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors p)
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> FromSource
@@ -292,7 +292,7 @@ edgesFromPages pagesLookup entityRuns =
 
 edgePageScoreVec :: FromSource
              -> MultiRankingEntry p GridRun
-             -> Page
+             -> PageDoc
              -> F.FeatureVec EdgeFeature Double
 edgePageScoreVec source pageRankEntry _page =
     makeEdgeFeatVector

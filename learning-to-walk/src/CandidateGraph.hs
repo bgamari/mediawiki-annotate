@@ -38,7 +38,7 @@ import Debug.Trace
 data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
                              , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
-                             , candidatePages :: [Page]
+                             , candidatePages :: [PageDoc]
                              }
 
 type CandidateGraphGenerator =
@@ -99,7 +99,7 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
-    entityPages :: [Page]
+    entityPages :: [PageDoc]
     entityPages = pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
         where entitiesFromRuns :: [PageId]
               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
@@ -170,7 +170,7 @@ selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun
     entityRun'' = uniqBy multiRankingEntryGetDocumentName entityRun'
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
-    entityPages :: [Page]
+    entityPages :: [PageDoc]
     entityPages = pagesLookup $  HS.toList $ (HS.fromList entitiesFromRuns) `HS.union` entitiesFromEdgeDocs
         where entitiesFromRuns :: [PageId]
               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
