@@ -6,6 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module CAR.RunFile
     ( -- * Types
@@ -58,6 +59,7 @@ module CAR.RunFile
 import Control.Exception
 import Control.DeepSeq
 import Control.Lens hiding (MethodName)
+import GHC.Generics
 import Data.Ord
 import Data.Maybe
 import Data.Monoid
@@ -75,11 +77,12 @@ import Debug.Trace
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
                 deriving (Eq, Ord, Show, FromJSON, ToJSON, Hashable)
-                deriving newtype NFData
+                deriving newtype (NFData)
 
 
 newtype MethodName = MethodName { unMethodName :: T.Text }
                    deriving (Eq, Ord, Show, FromJSON, ToJSON)
+                   deriving newtype (NFData)
 
 data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
                                       , carDocument    :: doc
@@ -87,7 +90,9 @@ data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
                                       , carScore       :: !Run.Score
                                       , carMethodName  :: !MethodName
                                       }
-                       deriving  (Show)
+                       deriving  (Show, Generic)
+instance NFData doc => NFData (RankingEntry' doc)
+
 
 $(makeLensesWith abbreviatedFields ''RankingEntry')
 $(makeWrapped ''QueryId)

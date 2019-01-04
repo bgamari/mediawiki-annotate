@@ -2,10 +2,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module MultiTrecRunFile where
 
 import Control.Parallel.Strategies
+import Control.DeepSeq
+import GHC.Generics
 import qualified Data.DList as DList
 import Data.Foldable
 import Data.Ord
@@ -31,6 +34,8 @@ type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 data MultiRankingEntry doc key = MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
                                                    , multiRankingEntryAll       :: [(key, RankingEntry doc)]
                                                    }
+                               deriving (Generic)
+instance (NFData doc, NFData key) => NFData (MultiRankingEntry doc key)
 
 multiRankingEntryGetDocumentName :: MultiRankingEntry doc key -> doc
 multiRankingEntryGetDocumentName mre =  RunFile.carDocument $ multiRankingEntryCollapsed mre

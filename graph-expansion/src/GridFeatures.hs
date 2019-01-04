@@ -23,6 +23,7 @@
 
 module GridFeatures where
 
+import Control.DeepSeq
 import Options.Applicative
 import Data.Aeson
 import GHC.Generics
@@ -110,8 +111,11 @@ edgeRunsF = [ GridRun qm rm em it
 
 
 
-data GridRun = GridRun QueryModel RetrievalModel ExpansionModel IndexType
+data GridRun = GridRun !QueryModel !RetrievalModel !ExpansionModel !IndexType
          deriving (Show, Read, Ord, Eq, Generic, Serialise, Hashable)
+
+instance NFData GridRun where
+    rnf x = x `seq` ()
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Read, Ord, Eq, Generic, Serialise)
@@ -131,16 +135,16 @@ allRunFeatures :: [RunFeature]
 allRunFeatures = [ScoreF, RecipRankF] --[minBound..maxBound]
 
 data EntityFeature where
-    EntRetrievalFeature :: Run -> RunFeature -> EntityFeature
+    EntRetrievalFeature :: !Run -> !RunFeature -> EntityFeature
     EntIncidentEdgeDocsRecip :: EntityFeature
     EntDegreeRecip :: EntityFeature
     EntDegree  :: EntityFeature
     deriving (Show, Read, Ord, Eq)
 
 data EdgeFeature where
-    EdgeRetrievalFeature :: FromSource -> Run -> RunFeature -> EdgeFeature
-    EdgeDocKL  :: FromSource -> EdgeFeature
-    EdgeCount  :: FromSource -> EdgeFeature
+    EdgeRetrievalFeature :: !FromSource -> !Run -> !RunFeature -> EdgeFeature
+    EdgeDocKL  :: !FromSource -> EdgeFeature
+    EdgeCount  :: !FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq)
 
 data EntityOrEdge = Entity | Edge

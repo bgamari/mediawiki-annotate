@@ -14,6 +14,8 @@
 
 module CandidateGraph where
 
+import GHC.Generics
+import Control.DeepSeq
 import Control.Concurrent.Async
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -40,6 +42,9 @@ data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
                              , candidatePages :: [PageDoc]
                              }
+                deriving (Generic)
+
+instance NFData Candidates
 
 type CandidateGraphGenerator =
      QueryId
@@ -54,12 +59,16 @@ selectGenerousCandidateGraph
     -> PagesLookup
     -> CandidateGraphGenerator
 selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun =
-    Candidates { candidateEdgeDocs = edgeDocs''
-               , candidateEdgeRuns = edgeRun''
-               , candidateEntityRuns = entityRun''
-               , candidatePages = entityPages
-               }
+    candidates
   where
+    !candidates =
+        force $
+        Candidates { candidateEdgeDocs = edgeDocs''
+                   , candidateEdgeRuns = edgeRun''
+                   , candidateEntityRuns = entityRun''
+                   , candidatePages = entityPages
+                   }
+
     restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
     restrict keys m =
         let m2 = HM.fromList [(k, ()) | k <- keys]
@@ -100,7 +109,7 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
     entityPages :: [PageDoc]
-    entityPages = pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
+    entityPages = force $ pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
         where entitiesFromRuns :: [PageId]
               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
               entitiesFromEdgeDocs :: HS.HashSet PageId

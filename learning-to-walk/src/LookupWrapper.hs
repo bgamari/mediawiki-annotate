@@ -81,11 +81,11 @@ instance Hashable PageDoc where
 -- -------  build ------------------
 
 pageToPageDocs :: Page -> [PageDoc]
-pageToPageDocs page@(Page pageName pageId _ _ pageSkeleta) =
+pageToPageDocs page =
     [convertPage page]
   where
     convertPage :: Page -> PageDoc
-    convertPage page =
+    convertPage page@(Page pageName pageId _ _ _)  =
       let
         pageDocId             = pageId
         pageDocArticleId      = pageId
