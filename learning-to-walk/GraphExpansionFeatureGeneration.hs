@@ -132,7 +132,7 @@ opts :: Parser ( FilePath
                , NumResults
                , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
-               , Toc.IndexedCborPath PageId Page
+               , Toc.IndexedCborPath PageId PageDoc
                , FilePath
                , ModelSource
                , PosifyEdgeWeights
@@ -152,7 +152,7 @@ opts =
     <*> option auto (short 'k' <> long "num-results" <> help "use number of results of input rankings (per query)")
     <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
-    <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-cbor" <> metavar "Page-CBOR" <> help "Page cbor file"))
+    <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
@@ -250,7 +250,7 @@ main = do
 
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
-      , edgeDocsCborFile, pagesCborFile
+      , edgeDocsCborFile, pagesDocCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpt,  teleportation, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
@@ -329,7 +329,8 @@ main = do
 
     putStrLn "Loading edgeDocsLookup."
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
-    pagesLookup <- readPagesToc pagesCborFile
+    pagesLookup <- readAbstractDocToc pagesDocCborFile
+                   :: IO (AbstractLookup PageId)
 
     ncaps <- getNumCapabilities
 

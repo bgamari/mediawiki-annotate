@@ -66,10 +66,6 @@ convertParagraphMode =
         paragraphs <- readParagraphsFile inputPath
         exportEdgeDocsFromParagraphs paragraphs outputPath
 
-
-
-
-
 buildTocMode =
     go <$> argument str (metavar "CBOR" <> help "EdgeDoc cbor file")
   where

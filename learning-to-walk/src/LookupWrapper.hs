@@ -31,15 +31,25 @@ import qualified Data.SmallUtf8 as Utf8
 -- Fetch pages from cbor
 -- ---------------------------------------------
 
-type PagesLookup =  ([PageId] -> [PageDoc])
+type AbstractLookup id =  ([id] -> [AbstractDoc id])
 
-readPagesToc :: Toc.IndexedCborPath PageId Page -> IO PagesLookup
+type PagesLookup = AbstractLookup PageId
+
+
+readPagesToc :: Toc.IndexedCborPath PageId Page -> IO ([PageId] -> [Page])
 readPagesToc pagesFileWithToc = do
     toc <- Toc.open pagesFileWithToc
-    return $ \pageIds -> pagesToPageDocs $ mapMaybe ( `Toc.lookup` toc) pageIds
+    return $ \pageIds -> mapMaybe ( `Toc.lookup` toc) pageIds
 
-wrapPagesTocs :: HM.HashMap PageId PageDoc
-                 -> PagesLookup
+readAbstractDocToc :: (Hashable id, Eq id, Serialise id, NFData id)
+                   => Toc.IndexedCborPath id (AbstractDoc id) -> IO (AbstractLookup id)
+readAbstractDocToc pagesFileWithToc = do
+    toc <- Toc.open pagesFileWithToc
+    return $ \pageIds ->  mapMaybe ( `Toc.lookup` toc) pageIds
+
+wrapPagesTocs :: (Hashable id, Eq id)
+                 => HM.HashMap id (AbstractDoc id)
+                 -> AbstractLookup id
 wrapPagesTocs pageId2Page =
     \pageIds -> catMaybes $ fmap (`HM.lookup` pageId2Page) pageIds
 
@@ -49,29 +59,31 @@ wrapPagesTocs pageId2Page =
 
 -- -----------------------------
 
-data PageDoc = PageDoc { pageDocId              :: !PageId
-                       , pageDocArticleId       :: !PageId
-                       , pageDocNeighbors       :: !(HS.HashSet PageId)
-                       , pageDocContent         :: !T.Text
-                       }
-           deriving (Show, Generic)
+data AbstractDoc pageDocId = AbstractDoc { pageDocId              :: !pageDocId
+                                         , pageDocArticleId       :: !PageId
+                                         , pageDocNeighbors       :: !(HS.HashSet PageId)
+                                         , pageDocContent         :: !T.Text
+                                         }
+                       deriving (Show, Generic)
+
+type PageDoc = AbstractDoc PageId
 
 
 pageDocOnlyNeighbors :: PageDoc -> HS.HashSet PageId
 pageDocOnlyNeighbors pageDoc = HS.filter (/= pageDocArticleId pageDoc) $ pageDocNeighbors pageDoc
 
-instance Ord PageDoc where
+instance Ord id => Ord (AbstractDoc id) where
     compare = comparing $ \x -> (pageDocId x, pageDocArticleId x)
 
-instance Serialise PageDoc
-instance NFData PageDoc
+instance Serialise id => Serialise (AbstractDoc id)
+instance NFData id => NFData (AbstractDoc id)
 
-instance Eq PageDoc where
+instance Eq id => Eq (AbstractDoc id) where
     x == y =
            pageDocId x == pageDocId y
         && pageDocArticleId x == pageDocArticleId y
 
-instance Hashable PageDoc where
+instance Hashable id => Hashable (AbstractDoc id) where
     hashWithSalt salt x =
         hashWithSalt salt (pageDocId x, pageDocArticleId x)
 
@@ -92,10 +104,10 @@ pageToPageDocs page =
         pageDocNeighbors      = HS.fromList
                               $ [pageId] ++ pageLinkTargetIds page
         pageDocContent        = ""
-      in PageDoc {..}
+      in AbstractDoc {..}
 
 
-pageDocHasLinks :: PageDoc -> Bool
+pageDocHasLinks :: AbstractDoc id -> Bool
 pageDocHasLinks p =  (>1) $ length $ pageDocNeighbors p
 
 pagesToPageDocs :: [Page] -> [PageDoc]
