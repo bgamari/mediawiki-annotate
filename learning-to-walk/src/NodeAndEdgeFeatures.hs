@@ -13,6 +13,7 @@ module NodeAndEdgeFeatures
     )  where
 
 
+import Debug.Trace
 
 import Control.Concurrent.Async
 import Control.Parallel.Strategies
@@ -191,6 +192,7 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
 
         edgeFeaturesFromPara = edgesFromParas edgeDocsLookup edgeRun
         edgeFeaturesFromPage = edgesFromPages pagesLookup entityRun
+
         allHyperEdges :: HM.HashMap (PageId, PageId) EdgeFeatureVec
         allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
 
@@ -205,7 +207,11 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
 
         edgeFeatureGraphWithSingleNodes = graphUnions [edgeFeaturesGraph, allNodesGraph]
 
-    in edgeFeatureGraphWithSingleNodes
+    in traceShow (query,
+                   Graph.numNodes edgeFeaturesGraph,
+                   Graph.numNodes edgeFeatureGraphWithSingleNodes,
+                   F.featureVecDimension $ head $ HM.elems allHyperEdges)
+      edgeFeatureGraphWithSingleNodes
 
 edgesFromParas :: EdgeDocsLookup
                -> [MultiRankingEntry ParagraphId GridRun]

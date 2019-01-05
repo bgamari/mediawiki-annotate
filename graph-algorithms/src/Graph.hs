@@ -8,6 +8,7 @@ module Graph
 
     , nullGraph
     , nodeSet
+    , numNodes
     , getNeighbors
     , filterEdges
     , dropDisconnected
@@ -89,6 +90,9 @@ graphUnions graphs =
 
 nodeSet :: (Hashable n, Eq n) => Graph n e -> HS.HashSet n
 nodeSet = HS.fromMap . fmap (const ()) . getGraph
+
+numNodes :: Graph n e -> Int
+numNodes = HM.size . getGraph
 
 getNeighbors :: (Eq n, Hashable n)
              => Graph n e -> n -> HM.HashMap n e
