@@ -254,6 +254,7 @@ edgesFromPages pagesLookup entityRuns =
 
         pageNeighbors :: PageDoc -> [(PageId, Role)]
         pageNeighbors p = ([(pageDocArticleId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors p)
+
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> FromSource
@@ -261,18 +262,19 @@ edgesFromPages pagesLookup entityRuns =
         edgeFeat pageId entityEntry source = edgePageScoreVec source entityEntry (page pageId)
 
         divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
-        edgeCardinality p = length $ pageNeighbors p
 
 
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec)]
         oneHyperEdge (pageId, entityEntry) =
               [ ((u, v) , dividedFeatVec)
-              | let p = page pageId
-              , (u, uRole) <- pageNeighbors p
-              , (v, vRole) <- pageNeighbors p -- include self links (v==u)!
-              , let featVec = edgeFeat pageId entityEntry (getSource uRole vRole)
-              , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality p)
+              | let !p = page pageId
+                    neighbors = pageNeighbors p
+                    !cardinality = HS.size (pageDocOnlyNeighbors p) + 1
+              , (u, uRole) <- neighbors
+              , (v, vRole) <- neighbors -- include self links (v==u)!
+              , let !featVec = edgeFeat pageId entityEntry (getSource uRole vRole)
+              , let !dividedFeatVec = divideEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromPagesOwnerLink
