@@ -14,7 +14,7 @@ module Graph
     , dropDisconnected
 
     -- * construct graphs
-    , graphFromEdges, graphFromNeighbors, graphUnions
+    , graphFromEdges, graphFromEdgesAndSingletons, graphFromNeighbors, graphUnions
     ) where
 
 import Control.DeepSeq

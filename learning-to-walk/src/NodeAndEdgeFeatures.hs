@@ -196,19 +196,20 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
         allHyperEdges :: HM.HashMap (PageId, PageId) EdgeFeatureVec
         allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
 
-        edgeFeaturesGraph :: Graph PageId EdgeFeatureVec
-        edgeFeaturesGraph = graphFromEdges [ (n1, n2, e) | ((n1, n2), e) <- HM.toList allHyperEdges ]
+        edgeFeaturesGraph :: [(PageId, PageId, EdgeFeatureVec)]
+        edgeFeaturesGraph = [ (n1, n2, e) | ((n1, n2), e) <- HM.toList allHyperEdges ]
 
-        allNodesGraph = graphFromNeighbors
-                 $ [ (entityId, [])
-                   | run <- entityRun
-                   , let entityId = CAR.RunFile.carDocument $ multiRankingEntryCollapsed run
-                   ]
+        singletonNodes :: [PageId]
+        singletonNodes =
+            [ entityId
+            | run <- entityRun
+            , let entityId = CAR.RunFile.carDocument $ multiRankingEntryCollapsed run
+            ]
 
-        edgeFeatureGraphWithSingleNodes = graphUnions [edgeFeaturesGraph, allNodesGraph]
+        edgeFeatureGraphWithSingleNodes =
+            Graph.graphFromEdgesAndSingletons edgeFeaturesGraph singletonNodes
 
     in traceShow (query,
-                   Graph.numNodes edgeFeaturesGraph,
                    Graph.numNodes edgeFeatureGraphWithSingleNodes,
                    F.featureVecDimension $ head $ HM.elems allHyperEdges)
       edgeFeatureGraphWithSingleNodes
