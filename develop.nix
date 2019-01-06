@@ -7,7 +7,8 @@ let
 in stdenv.mkDerivation {
   name = "mediawiki-annotate-develop";
   buildInputs = [
-    haskell.compiler.ghc843 binutils-unwrapped
+    curl binutils-unwrapped leveldb
     zlib icu icu.out expat lzma trec-eval kyotocabinet
+    postgresql
   ];
 }

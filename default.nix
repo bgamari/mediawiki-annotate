@@ -40,6 +40,10 @@ let
         multilang-car        = self.callCabal2nix "multilang-car" (localDir ./multilang-car) {};
         tqa-import           = self.callCabal2nix "tqa-import" ./tqa-import {};
         trec-news            = self.callCabal2nix "trec-news" ./trec-news {};
+        epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" ./epfl-section-recommendation {};
+        dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" ./dbpedia-entity-import {};
+        learning-to-walk     = self.callCabal2nix "learning-to-walk" ./learning-to-walk {};
+
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {

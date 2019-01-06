@@ -20,7 +20,7 @@ library
   exposed-modules:     CandidateGraph,
                        NodeAndEdgeFeatures,
                        LookupWrapper
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base,
                        async,
                        bytestring,
                        unordered-containers,
