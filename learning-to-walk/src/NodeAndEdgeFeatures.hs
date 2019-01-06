@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE BangPatterns #-}
@@ -53,12 +54,18 @@ data FeatureSpaces entity edge = FeatureSpaces { edgeFSpace :: F.FeatureSpace Ed
                                                , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entity, edge])
                                                }
 
-mkFeatureSpaces :: S.Set CombinedFeature -> (FeatureSpaces entity edge -> a) -> a
-mkFeatureSpaces xs f = runIdentity $ do
-    F.SomeFeatureSpace edgeFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either (const Nothing) Just) $ S.toList xs
-    F.SomeFeatureSpace entityFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either Just (const Nothing)) $ S.toList xs
+mkFeatureSpaces :: F.FeatureSpace CombinedFeature s
+                -> (F.FeatureMappingInto CombinedFeature s CombinedFeature (F.Stack '[entity, edge])
+                     -> FeatureSpaces entity edge
+                     -> r)
+                -> r
+mkFeatureSpaces fspace f = runIdentity $ do
+    F.SomeFeatureSpace edgeFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either (const Nothing) Just) $ F.featureNames fspace
+    F.SomeFeatureSpace entityFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either Just (const Nothing)) $ F.featureNames fspace
     let combinedFSpace = F.eitherSpaces entityFSpace edgeFSpace
-    pure $ f $ FeatureSpaces{..}
+    -- This is an identity
+    modelToCombinedFeatureVec <- pure $ fromMaybe (error "mkFeatureSpaces: impossible") $ F.mapFeaturesInto fspace combinedFSpace Just
+    pure $ f modelToCombinedFeatureVec FeatureSpaces{..}
 
 -- | merge entity and edge features
 combineEntityEdgeFeatures

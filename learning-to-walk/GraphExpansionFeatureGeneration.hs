@@ -523,18 +523,14 @@ main = do
           Just (SomeModel model) <-  Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
           putStrLn "loaded model."
 
-          mkFeatureSpaces (F.featureNameSet $ modelFeatures model) $ \(fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
+          mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
 
-          -- This is an identity
-          Just (F.FeatureMappingInto modelToCombinedFeatureVec) <-
-              pure $ F.mapFeaturesInto (modelFeatures model) allCombinedFSpace Just
           let featureGraphs :: M.Map QueryId (Graph PageId (EdgeFeatureVec edgeFSpace))
               !featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
 
-              Just toCombined' = F.equivSpace (modelFeatures model) (combinedFSpace fspaces)
               nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
               !nodeDistr =
-                  nodeDistrPriorForGraphwalk fspaces candidateGraphGenerator pagesLookup (coerce toCombined' $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun
+                  nodeDistrPriorForGraphwalk fspaces candidateGraphGenerator pagesLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun
 
               augmentWithQrels :: QueryId -> Ranking Double PageId -> Ranking Double (PageId, IsRelevant)
               augmentWithQrels query =
@@ -672,11 +668,7 @@ main = do
       GraphWalkModelFromFile modelFile -> do
           putStrLn "loading model"
           Just (SomeModel model) <-  Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
-          mkFeatureSpaces (F.featureNameSet $ modelFeatures model) $ \(fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
-
-          -- This is an identity
-          Just (F.FeatureMappingInto modelToCombinedFeatureVec) <-
-              pure $ F.mapFeaturesInto (modelFeatures model) allCombinedFSpace Just
+          mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
 
           let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
               nodeDistr = nodeDistrPriorForGraphwalk fspaces candidateGraphGenerator pagesLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun
@@ -708,11 +700,8 @@ main = do
 
       ModelFromFile modelFile -> do
           Just (SomeModel model) <-  trace "loading model" $ Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
-          mkFeatureSpaces (F.featureNameSet $ modelFeatures model) $ \(fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
+          mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityFSpace edgeFSpace) -> do
 
-          -- This is an identity
-          Just (F.FeatureMappingInto modelToCombinedFeatureVec) <-
-              pure $ F.mapFeaturesInto (modelFeatures model) allCombinedFSpace Just
           let model' = coerce modelToCombinedFeatureVec model
 
 
@@ -749,9 +738,10 @@ main = do
 
 
       TrainModel modelFile ->
-          let features = S.filter (filterFeaturesByExperimentSetting experimentSettings)
-                         $ F.featureNameSet allCombinedFSpace
-          in mkFeatureSpaces features $ \fspaces -> do
+          let F.SomeFeatureSpace features = F.mkFeatureSpace
+                                            $ S.filter (filterFeaturesByExperimentSetting experimentSettings)
+                                            $ F.featureNameSet allCombinedFSpace
+          in mkFeatureSpaces features $ \_ fspaces -> do
 
           let docFeatures = makeStackedFeatures fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
 
