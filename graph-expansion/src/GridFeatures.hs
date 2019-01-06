@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -171,9 +172,6 @@ entSomeFSpace = F.mkFeatureSpace allEntityFeatures
 edgeSomeFSpace :: F.SomeFeatureSpace EdgeFeature
 edgeSomeFSpace = F.mkFeatureSpace allEdgeFeatures
 
-combinedSomeFSpace :: F.SomeFeatureSpace CombinedFeature
-combinedSomeFSpace = F.mkFeatureSpace $ S.map Left allEntityFeatures <> S.map Right allEdgeFeatures
-
 
 
 
@@ -335,10 +333,10 @@ nothingElseButAggr _ = False
 
 type EdgeFeatureVec s     = FeatureVec EdgeFeature s Double
 type EntityFeatureVec s   = FeatureVec EntityFeature s Double
-type CombinedFeatureVec s = FeatureVec CombinedFeature s Double
+type CombinedFeatureVec entFspace edgeFspace = FeatureVec CombinedFeature (F.Stack '[entFspace, edgeFspace]) Double
 
-
-
+makeDefaultEntFeatVector :: F.FeatureSpace EntityFeature s -> F.FeatureVec EntityFeature s Double
+makeDefaultEntFeatVector fspace = makeEntFeatVector fspace []
 
 makeEntFeatVector :: FeatureSpace EntityFeature s
                   -> [(EntityFeature, Double)]
@@ -354,6 +352,9 @@ defaultEntityFeatures f =
       EntDegreeRecip -> 0.0
       EntDegree -> 0.0
       EntRetrievalFeature _ runF -> defaultRankFeatures runF
+
+makeDefaultEdgeFeatVector :: F.FeatureSpace EdgeFeature s -> F.FeatureVec EdgeFeature s Double
+makeDefaultEdgeFeatVector fspace = makeEdgeFeatVector fspace []
 
 makeEdgeFeatVector :: FeatureSpace EdgeFeature s
                    -> [(EdgeFeature, Double)]

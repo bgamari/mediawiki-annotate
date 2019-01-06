@@ -1,3 +1,6 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -10,14 +13,17 @@ module NodeAndEdgeFeatures
     ( makeStackedFeatures
     , makeStackedFeatures'
     , generateEdgeFeatureGraph
+    , mkFeatureSpaces
+    , FeatureSpaces(..)
     )  where
 
 
 import Debug.Trace
 
-import Control.Concurrent.Async
 import Control.Parallel.Strategies
 
+import Data.Functor.Identity
+import qualified Data.Set as S
 import qualified Data.Map.Strict as M
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
@@ -27,7 +33,6 @@ import qualified Data.List.NonEmpty as NE
 import Data.Bifunctor
 
 import CAR.Types hiding (Entity)
-import CAR.Utils
 import GridFeatures
 
 import GraphExpansion
@@ -43,34 +48,56 @@ import EdgeDocCorpus
 import LookupWrapper
 import CandidateGraph
 
+data FeatureSpaces entity edge = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edge
+                                               , entityFSpace :: F.FeatureSpace EntityFeature entity
+                                               , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entity, edge])
+                                               }
+
+mkFeatureSpaces :: S.Set CombinedFeature -> (FeatureSpaces entity edge -> a) -> a
+mkFeatureSpaces xs f = runIdentity $ do
+    F.SomeFeatureSpace edgeFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either (const Nothing) Just) $ S.toList xs
+    F.SomeFeatureSpace entityFSpace <- pure $ F.mkFeatureSpace $ S.fromList $ mapMaybe (either Just (const Nothing)) $ S.toList xs
+    let combinedFSpace = F.eitherSpaces entityFSpace edgeFSpace
+    pure $ f $ FeatureSpaces{..}
+
 -- | merge entity and edge features
 combineEntityEdgeFeatures
-    :: QueryId
+    :: forall entityFSpace edgeFSpace.
+       FeatureSpaces entityFSpace edgeFSpace
+    -> QueryId
     -> PagesLookup
     -> Candidates
-    -> HM.HashMap (QueryId, PageId) CombinedFeatureVec
-combineEntityEdgeFeatures query pagesLookup cands@Candidates{ candidateEdgeDocs = allEdgeDocs
-                                                            , candidateEdgeRuns = edgeRun
-                                                            , candidateEntityRuns = entityRun
-                                                            , candidatePages = candidatePages
-                                                            } =
+    -> HM.HashMap (QueryId, PageId) (CombinedFeatureVec entityFSpace edgeFSpace)
+combineEntityEdgeFeatures (FeatureSpaces {..})
+                          query pagesLookup
+                          cands@Candidates{ candidateEdgeDocs = allEdgeDocs
+                                          , candidateEdgeRuns = edgeRun
+                                          , candidateEntityRuns = entityRun
+                                          , candidatePages = candidatePages
+                                          } =
     let
-        edgeFeatureGraph :: Graph PageId (EdgeFeatureVec)
-        edgeFeatureGraph = generateEdgeFeatureGraph query cands
+        edgeFeatureGraph :: Graph PageId (EdgeFeatureVec edgeFSpace)
+        edgeFeatureGraph = generateEdgeFeatureGraph edgeFSpace query cands
 
-        nodeFeatures :: HM.HashMap PageId EntityFeatureVec
-        nodeFeatures = generateNodeFeatures query entityRun allEdgeDocs
+        nodeFeatures :: HM.HashMap PageId (EntityFeatureVec entityFSpace)
+        nodeFeatures = generateNodeFeatures entityFSpace query entityRun allEdgeDocs
+
+        stackFeatures :: EntityFeatureVec entityFSpace
+                      -> EdgeFeatureVec edgeFSpace
+                      -> CombinedFeatureVec entityFSpace edgeFSpace
+        stackFeatures uFeats eFeats =
+            F.fromList combinedFSpace $ map (first Left) (F.toList uFeats) ++ map (first Right) (F.toList eFeats)
 
         -- stack node vector on top of projected edge feature vector
         -- no need to use nodeEdgeFeatureGraph
     in HM.fromList
-       [ ((query, u), F.concatFeatureVec combinedFSpace uFeats (F.aggregateWith (+) edgeFeats))
+       [ ((query, u), stackFeatures uFeats (F.aggregateWith (+) edgeFeats))
        | entityRankEntry <- entityRun
        , let u = multiRankingEntryGetDocumentName entityRankEntry
 
-       , let uFeats = fromMaybe makeDefaultEntFeatVector $  u `HM.lookup` nodeFeatures
+       , let uFeats = fromMaybe (makeDefaultEntFeatVector entityFSpace) $  u `HM.lookup` nodeFeatures
        , let edgeFeats =
-                 fromMaybe [makeDefaultEdgeFeatVector]
+                 fromMaybe [makeDefaultEdgeFeatVector edgeFSpace]
                  $ NE.nonEmpty $ HM.elems  -- gives Nothing in case of empty
                  $ getNeighbors edgeFeatureGraph u
        ]
@@ -79,17 +106,19 @@ combineEntityEdgeFeatures query pagesLookup cands@Candidates{ candidateEdgeDocs 
 
 
 -- | merge node and edge features (used for both training, prediction, and walking)
-makeCombinedFeatureVec :: CandidateGraphGenerator
-                       -> PagesLookup
-                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
-                       -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
-                       -> M.Map (QueryId, T.Text) CombinedFeatureVec
-makeCombinedFeatureVec candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
+makeCombinedFeatureVec
+    :: FeatureSpaces entityFSpace edgeFSpace
+    -> CandidateGraphGenerator
+    -> PagesLookup
+    -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
+    -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map (QueryId, T.Text) (CombinedFeatureVec entityFSpace edgeFSpace)
+makeCombinedFeatureVec fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
     M.unions
     $ withStrategy (parBuffer 200 rwhnf)
       [ M.fromList
         [ ((qid, T.pack $ unpackPageId pid), features)
-        | ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures query pagesLookup candidates
+        | ((qid, pid), features) <- HM.toList $ combineEntityEdgeFeatures fspaces query pagesLookup candidates
         ]
       | (query, edgeRun) <- M.toList collapsedEdgedocRun
       , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
@@ -98,34 +127,36 @@ makeCombinedFeatureVec candidateGraphGenerator pagesLookup collapsedEntityRun co
 
 
 -- | used for training
-makeStackedFeatures :: CandidateGraphGenerator
-                    -> PagesLookup
-                    -> M.Map QueryId [MultiRankingEntry PageId GridRun]
-                    -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                    -> F.FeatureSpace CombinedFeature
-                    -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun combinedFSpace' =
+makeStackedFeatures
+    :: FeatureSpaces entityFSpace edgeFSpace
+    -> CandidateGraphGenerator
+    -> PagesLookup
+    -> M.Map QueryId [MultiRankingEntry PageId GridRun]
+    -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityFSpace edgeFSpace)
+makeStackedFeatures fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings combinedFSpace'
+                        $ makeCombinedFeatureVec fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
+                        where crit = filterExpSettings (combinedFSpace fspaces)
 
         normalizer = zNormalizer $ M.elems docFeatures''
     in withStrategy (parTraversable rwhnf)
        $ fmap (normFeatures normalizer) docFeatures''
 
 -- | used for prediction and graph walk
-makeStackedFeatures' :: CandidateGraphGenerator
-                     -> PagesLookup
-                     -> F.FeatureSpace CombinedFeature
-                     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
-                     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
-                     -> M.Map (QueryId, QRel.DocumentName) CombinedFeatureVec
-makeStackedFeatures' candidateGraphGenerator pagesLookup fspace collapsedEntityRun collapsedEdgedocRun =
+makeStackedFeatures'
+    :: FeatureSpaces entityFSpace edgeFSpace
+    -> CandidateGraphGenerator
+    -> PagesLookup
+    -> M.Map QueryId [MultiRankingEntry PageId GridRun]
+    -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityFSpace edgeFSpace)
+makeStackedFeatures' fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
-                        where crit = filterExpSettings fspace
+                        $ makeCombinedFeatureVec fspaces candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
+                        where crit = filterExpSettings (combinedFSpace fspaces)
 
         normalizer = zNormalizer $ M.elems docFeatures''
     in withStrategy (parTraversable rwhnf)
@@ -141,21 +172,23 @@ changeKey f map_ =
 -- ------------ Make Node features --------------------
 
 -- | generate node features
-generateNodeFeatures :: QueryId -> [MultiRankingEntry PageId GridRun] -> [EdgeDoc] -> HM.HashMap PageId EntityFeatureVec
-generateNodeFeatures query entityRun allEdgeDocs =
+generateNodeFeatures :: F.FeatureSpace EntityFeature entityFSpace
+                     -> QueryId -> [MultiRankingEntry PageId GridRun] -> [EdgeDoc]
+                     -> HM.HashMap PageId (EntityFeatureVec entityFSpace)
+generateNodeFeatures entityFSpace query entityRun allEdgeDocs =
    let
         universalGraph :: HM.HashMap PageId [EdgeDoc]
         universalGraph = edgeDocsToUniverseGraph allEdgeDocs
 
-   in HM.fromList [ (entity, (entityScoreVec entityRankEntry edgeDocs))
+   in HM.fromList [ (entity, (entityScoreVec entityFSpace entityRankEntry edgeDocs))
                   | entityRankEntry <- entityRun
                   , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
                   , let edgeDocs = fromMaybe [] $ entity `HM.lookup` universalGraph
                   ]
 
 
-entityScoreVec :: MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec
-entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
+entityScoreVec :: F.FeatureSpace EntityFeature entityFSpace -> MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec entityFSpace
+entityScoreVec entityFSpace entityRankEntry incidentEdgeDocs = makeEntFeatVector entityFSpace (
       [ (EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
   --  , (EntDegreeRecip, recip degree)
       , (EntDegree, degree)
@@ -174,29 +207,33 @@ entityScoreVec entityRankEntry incidentEdgeDocs = makeEntFeatVector  (
 
 
 -- | used for train,test, and graph walk
-generateEdgeFeatureGraph:: QueryId
-                        -> Candidates
-                        -> Graph PageId EdgeFeatureVec
-generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
-                                                            , candidateEdgeRuns = edgeRun
-                                                            , candidateEntityRuns = entityRun
-                                                            , candidatePages = candidatePages
-                                                            } =
+generateEdgeFeatureGraph :: forall edgeFSpace.
+                            F.FeatureSpace EdgeFeature edgeFSpace
+                         -> QueryId
+                         -> Candidates
+                         -> Graph PageId (EdgeFeatureVec edgeFSpace)
+generateEdgeFeatureGraph edgeFSpace
+                         query
+                         cands@Candidates{ candidateEdgeDocs = allEdgeDocs
+                                         , candidateEdgeRuns = edgeRun
+                                         , candidateEntityRuns = entityRun
+                                         , candidatePages = candidatePages
+                                         } =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
         pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageDocId page, page) | page <- candidatePages]
 
-        aggrFeatVecs :: EdgeFeatureVec -> EdgeFeatureVec -> EdgeFeatureVec
+        aggrFeatVecs :: EdgeFeatureVec edgeFSpace -> EdgeFeatureVec edgeFSpace -> EdgeFeatureVec edgeFSpace
         aggrFeatVecs features1 features2 =
             F.aggregateWith (+) [features1, features2]
 
-        edgeFeaturesFromPara = edgesFromParas edgeDocsLookup edgeRun
-        edgeFeaturesFromPage = edgesFromPages pagesLookup entityRun
+        edgeFeaturesFromPara = edgesFromParas edgeFSpace edgeDocsLookup edgeRun
+        edgeFeaturesFromPage = edgesFromPages edgeFSpace pagesLookup entityRun
 
-        allHyperEdges :: HM.HashMap (PageId, PageId) EdgeFeatureVec
+        allHyperEdges :: HM.HashMap (PageId, PageId) (EdgeFeatureVec edgeFSpace)
         allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
 
-        edgeFeaturesGraph :: Graph PageId EdgeFeatureVec
+        edgeFeaturesGraph :: Graph PageId (EdgeFeatureVec edgeFSpace)
         edgeFeaturesGraph = graphFromEdges [ (n1, n2, e) | ((n1, n2), e) <- HM.toList allHyperEdges ]
 
         allNodesGraph = graphFromNeighbors
@@ -210,28 +247,30 @@ generateEdgeFeatureGraph query cands@Candidates{ candidateEdgeDocs = allEdgeDocs
     in traceShow (query,
                    Graph.numNodes edgeFeaturesGraph,
                    Graph.numNodes edgeFeatureGraphWithSingleNodes,
-                   F.featureVecDimension $ head $ HM.elems allHyperEdges)
+                   F.dimension $ F.featureSpace $ head $ HM.elems allHyperEdges)
       edgeFeatureGraphWithSingleNodes
 
-edgesFromParas :: EdgeDocsLookup
+edgesFromParas :: forall edgeFSpace.
+                  F.FeatureSpace EdgeFeature edgeFSpace
+               -> EdgeDocsLookup
                -> [MultiRankingEntry ParagraphId GridRun]
-               -> [((PageId, PageId), EdgeFeatureVec)]
-edgesFromParas edgeDocsLookup edgeRuns =
+               -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
+edgesFromParas edgeFSpace edgeDocsLookup edgeRuns =
     let
         edgeDoc paraId = case edgeDocsLookup [paraId] of
                            [] -> error $ "No edgedoc for paraId "++show paraId
                            (a:_) -> a
         edgeFeat :: ParagraphId
                  -> MultiRankingEntry ParagraphId GridRun
-                 -> F.FeatureVec EdgeFeature Double
-        edgeFeat paraId edgeEntry = edgeScoreVec FromParas edgeEntry (edgeDoc paraId)
+                 -> F.FeatureVec EdgeFeature edgeFSpace Double
+        edgeFeat paraId edgeEntry = edgeScoreVec edgeFSpace FromParas edgeEntry (edgeDoc paraId)
 
-        divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
+        divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
         edgeCardinality ed = HS.size $ edgeDocNeighbors ed
 
 
         oneHyperEdge :: (ParagraphId, MultiRankingEntry ParagraphId GridRun)
-                     -> [((PageId, PageId), EdgeFeatureVec)]
+                     -> [((PageId, PageId), EdgeFeatureVec edgeFSpace )]
         oneHyperEdge (paraId, edgeEntry) =
               [ ((u, v) , dividedFeatVec)
               | u <- HS.toList $ edgeDocNeighbors (edgeDoc paraId)
@@ -248,10 +287,12 @@ data Role = RoleOwner | RoleLink
          deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 
-edgesFromPages :: PagesLookup
+edgesFromPages :: forall edgeFSpace.
+                  F.FeatureSpace EdgeFeature edgeFSpace
+               -> PagesLookup
                -> [MultiRankingEntry PageId GridRun]
-               -> [((PageId, PageId), EdgeFeatureVec)]
-edgesFromPages pagesLookup entityRuns =
+               -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
+edgesFromPages edgeFSpace pagesLookup entityRuns =
     let
         page :: PageId -> PageDoc
         page pageId = case pagesLookup [pageId] of
@@ -264,14 +305,14 @@ edgesFromPages pagesLookup entityRuns =
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> FromSource
-                 -> F.FeatureVec EdgeFeature Double
-        edgeFeat pageId entityEntry source = edgePageScoreVec source entityEntry (page pageId)
+                 -> F.FeatureVec EdgeFeature edgeFSpace Double
+        edgeFeat pageId entityEntry source = edgePageScoreVec edgeFSpace source entityEntry (page pageId)
 
-        divideEdgeFeats feats cardinality = F.scaleFeatureVec (1 / (realToFrac cardinality)) feats
+        divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
 
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
-                     -> [((PageId, PageId), EdgeFeatureVec)]
+                     -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
         oneHyperEdge (pageId, entityEntry) =
               [ ((u, v) , dividedFeatVec)
               | let !p = page pageId
@@ -299,12 +340,13 @@ edgesFromPages pagesLookup entityRuns =
 
                           -- TODO use different features for page edge features
 
-edgePageScoreVec :: FromSource
-             -> MultiRankingEntry p GridRun
-             -> PageDoc
-             -> F.FeatureVec EdgeFeature Double
-edgePageScoreVec source pageRankEntry _page =
-    makeEdgeFeatVector
+edgePageScoreVec :: F.FeatureSpace EdgeFeature edgeFSpace
+                 -> FromSource
+                 -> MultiRankingEntry p GridRun
+                 -> PageDoc
+                 -> F.FeatureVec EdgeFeature edgeFSpace Double
+edgePageScoreVec fspace source pageRankEntry _page =
+    makeEdgeFeatVector fspace
         $ ([ (EdgeCount source , 1.0)
            ]
           ++ rankEdgeFeatures source Aggr (multiRankingEntryCollapsed pageRankEntry)
@@ -314,12 +356,13 @@ edgePageScoreVec source pageRankEntry _page =
          )
 
 
-edgeScoreVec :: FromSource
+edgeScoreVec :: F.FeatureSpace EdgeFeature edgeFSpace
+             -> FromSource
              -> MultiRankingEntry p GridRun
              -> EdgeDoc
-             -> F.FeatureVec EdgeFeature Double
-edgeScoreVec source edgedocsRankEntry edgeDoc
-                                 = makeEdgeFeatVector $
+             -> F.FeatureVec EdgeFeature edgeFSpace Double
+edgeScoreVec fspace source edgedocsRankEntry edgeDoc
+                                 = makeEdgeFeatVector fspace $
                                     [ (EdgeCount source, 1.0)
                                     -- TODO
                                     --, ( EdgeDocKL
