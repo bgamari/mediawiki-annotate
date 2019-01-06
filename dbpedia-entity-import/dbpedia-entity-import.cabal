@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 executable dbpedia-entity-import
   main-is:             DBpediaEntityMain.hs
   other-extensions:    DeriveAnyClass, DerivingStrategies
-  build-depends:       base >=4.10 && <4.12,
+  build-depends:       base,
                        containers,
                        trifecta >= 1.5,
                        parsers >= 0.12,
