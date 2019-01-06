@@ -49,14 +49,14 @@ import EdgeDocCorpus
 import LookupWrapper
 import CandidateGraph
 
-data FeatureSpaces entity edge = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edge
-                                               , entityFSpace :: F.FeatureSpace EntityFeature entity
-                                               , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entity, edge])
-                                               }
+data FeatureSpaces entityPh edgePh = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edgePh
+                                                   , entityFSpace :: F.FeatureSpace EntityFeature entityPh
+                                                   , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entityPh, edgePh])
+                                                   }
 
 mkFeatureSpaces :: F.FeatureSpace CombinedFeature s
-                -> (F.FeatureMappingInto CombinedFeature s CombinedFeature (F.Stack '[entity, edge])
-                     -> FeatureSpaces entity edge
+                -> (F.FeatureMappingInto CombinedFeature s CombinedFeature (F.Stack '[entityPh, edgePh])
+                     -> FeatureSpaces entityPh edgePh
                      -> r)
                 -> r
 mkFeatureSpaces fspace f = runIdentity $ do

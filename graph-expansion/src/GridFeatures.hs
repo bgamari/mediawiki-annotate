@@ -166,6 +166,7 @@ allEdgeFeatures = S.fromList $
     (EdgeRetrievalFeature <$> allSources <*> allEdgeRunsF <*> allRunFeatures)
     <> ([EdgeDocKL, EdgeCount] <*>  allSources)
 
+-- todo can we get rid of this?
 entSomeFSpace :: F.SomeFeatureSpace EntityFeature
 entSomeFSpace = F.mkFeatureSpace allEntityFeatures
 
@@ -343,7 +344,7 @@ makeEntFeatVector :: FeatureSpace EntityFeature s
                   -> F.FeatureVec EntityFeature s Double
 makeEntFeatVector fspace xs =
     let xs' = M.fromList xs
-    in F.generate fspace $ \f -> fromMaybe (defaultEntityFeatures f) $ M.lookup f xs'
+    in F.generate fspace $ (\f -> fromMaybe (defaultEntityFeatures f) $ M.lookup f xs')
 
 defaultEntityFeatures :: EntityFeature -> Double
 defaultEntityFeatures f =
