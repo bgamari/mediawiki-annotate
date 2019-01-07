@@ -320,6 +320,7 @@ onlySection x = nothingElseButAggr x
 
 
 noEdgesFromParas :: CombinedFeature -> Bool
+noEdgesFromParas (Left _) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromParas (_) _)) = False
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
@@ -330,6 +331,7 @@ noEdgesFromParas x = nothingElseButAggr x
 -- FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
 
 noEdgesFromPages :: CombinedFeature -> Bool
+noEdgesFromPages (Left _) = True
 noEdgesFromPages (Right (EdgeRetrievalFeature FromParas (_) _)) = True
 noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = False
 noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = False
@@ -338,6 +340,7 @@ noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = False
 noEdgesFromPages x = nothingElseButAggr x
 
 noEdgesFromPageLinkLink :: CombinedFeature -> Bool
+noEdgesFromPageLinkLink (Left _) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromParas (_) _)) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
