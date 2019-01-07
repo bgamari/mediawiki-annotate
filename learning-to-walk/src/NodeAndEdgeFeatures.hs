@@ -238,7 +238,10 @@ generateEdgeFeatureGraph edgeFSpace
         edgeFeaturesFromPage = edgesFromPages edgeFSpace pagesLookup entityRun
 
         allHyperEdges :: HM.HashMap (PageId, PageId) (EdgeFeatureVec edgeFSpace)
-        allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
+
+        -- todo fidget about hoping to bring back my performance
+        allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara
+--         allHyperEdges = HM.fromListWith aggrFeatVecs $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
 
         edgeFeaturesGraph :: [(PageId, PageId, EdgeFeatureVec edgeFSpace)]
         edgeFeaturesGraph = [ (n1, n2, e) | ((n1, n2), e) <- HM.toList allHyperEdges ]
