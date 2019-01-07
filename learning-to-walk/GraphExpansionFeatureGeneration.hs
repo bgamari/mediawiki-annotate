@@ -106,7 +106,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | GraphWalkTrainModel FilePath -- filename to read model from
   deriving (Show)
 
-data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath
+data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
@@ -860,6 +860,9 @@ filterFeaturesByExperimentSetting settings fname =
                     ExpSection -> onlySection
                     JustSimpleRm -> onlySimpleRmFeatures
                     JustTitleAndSectionPath -> onlyTitleAndSectionPath
+                    NoEdgesFromParas -> noEdgesFromParas
+                    NoEdgesFromPages -> noEdgesFromPages
+                    NoEdgesFromPageLinkLink -> noEdgesFromPageLinkLink
 
 
 

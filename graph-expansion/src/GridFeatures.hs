@@ -318,6 +318,35 @@ onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun GridFeatures.Secti
 onlySection x = nothingElseButAggr x
 
 
+
+noEdgesFromParas :: CombinedFeature -> Bool
+noEdgesFromParas (Right (EdgeRetrievalFeature FromParas (_) _)) = False
+noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
+noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
+noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = True
+noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = True
+noEdgesFromParas x = nothingElseButAggr x
+
+-- FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
+
+noEdgesFromPages :: CombinedFeature -> Bool
+noEdgesFromPages (Right (EdgeRetrievalFeature FromParas (_) _)) = True
+noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = False
+noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = False
+noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = False
+noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = False
+noEdgesFromPages x = nothingElseButAggr x
+
+noEdgesFromPageLinkLink :: CombinedFeature -> Bool
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromParas (_) _)) = True
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = False
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = True
+noEdgesFromPageLinkLink x = nothingElseButAggr x
+
+
+
 nothingElseButAggr :: CombinedFeature -> Bool
 nothingElseButAggr (Left (EntRetrievalFeature Aggr _)) = True
 nothingElseButAggr (Right (EdgeRetrievalFeature _ Aggr _)) = True
