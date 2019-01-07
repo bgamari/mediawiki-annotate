@@ -253,7 +253,7 @@ generateEdgeFeatureGraph edgeFSpace
         edgeFeatureGraphWithSingleNodes =
             Graph.graphFromEdgesAndSingletons edgeFeaturesGraph singletonNodes
 
-    in traceShow (query,
+    in traceShow ("generateEdgeFeatureGraph", query,
                    Graph.numNodes edgeFeatureGraphWithSingleNodes,
                    F.dimension $ F.featureSpace $ head $ HM.elems allHyperEdges)
       edgeFeatureGraphWithSingleNodes
