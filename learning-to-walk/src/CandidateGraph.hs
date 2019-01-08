@@ -109,7 +109,7 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
 
     entityRun'  =  [ entry
                    | (docName, entry) <- pageIdToEntityRun
-                   ,  "enwiki:Category:" `T.isPrefixOf` (T.pack $ unpackPageId docName)
+                   ,  not $ "enwiki:Category:" `T.isPrefixOf` (T.pack $ unpackPageId docName)
                    ]
 
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
