@@ -108,6 +108,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection
+                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -377,7 +378,14 @@ main = do
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
-    let candidateGraphGenerator = selectGenerousCandidateGraph edgeDocsLookup pagesLookup
+    let candidateGraphGenerator :: CandidateGraphGenerator
+        candidateGraphGenerator = if CandidateStrict `elem` experimentSettings  then
+                                     selectStrictCandidateGraph edgeDocsLookup pagesLookup
+                                  else -- (CandidateStrict or none)
+                                      selectGenerousCandidateGraph edgeDocsLookup pagesLookup
+
+
+
     -- predict mode
     -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
     -- use pagerank on this graph to predict an alternative node ranking
@@ -864,6 +872,10 @@ filterFeaturesByExperimentSetting settings fname =
                     NoEdgesFromPages -> noEdgesFromPages
                     NoEdgesFromPageLinkLink -> noEdgesFromPageLinkLink
 
+                    CandidateNoEdgeDocs -> const True
+                    CandidateNoPageDocs -> const True
+                    CandidateStrict -> const True
+                    CandidateGenerous -> const True
 
 
 
