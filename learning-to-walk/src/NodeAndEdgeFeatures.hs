@@ -49,6 +49,7 @@ import Graph
 import EdgeDocCorpus
 import LookupWrapper
 import CandidateGraph
+import Debug.Trace as Debug
 
 data FeatureSpaces entityPh edgePh = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edgePh
                                                    , entityFSpace :: F.FeatureSpace EntityFeature entityPh
@@ -306,10 +307,10 @@ edgesFromPages :: forall edgeFSpace.
                -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
 edgesFromPages edgeFSpace pagesLookup entityRuns =
     let
-        page :: PageId -> PageDoc
+        page :: PageId -> Maybe PageDoc
         page pageId = case pagesLookup [pageId] of
-                           [] -> error $ "No page for pageId "++show pageId
-                           (a:_) -> a
+                           [] -> Debug.trace ("No page for pageId "++show pageId) $ Nothing
+                           (a:_) -> Just a
 
         pageNeighbors :: PageDoc -> [(PageId, Role)]
         pageNeighbors p = ([(pageDocArticleId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors p)
@@ -317,8 +318,9 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
         edgeFeat :: PageId
                  -> MultiRankingEntry PageId GridRun
                  -> FromSource
+                 -> PageDoc
                  -> F.FeatureVec EdgeFeature edgeFSpace Double
-        edgeFeat pageId entityEntry source = edgePageScoreVec edgeFSpace source entityEntry (page pageId)
+        edgeFeat pageId entityEntry source pg = edgePageScoreVec edgeFSpace source entityEntry pg
 
         divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
@@ -327,12 +329,12 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
                      -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
         oneHyperEdge (pageId, entityEntry) =
               [ ((u, v) , dividedFeatVec)
-              | let !p = page pageId
-                    neighbors = pageNeighbors p
+              | Just p <- pure $ page pageId
+              , let neighbors = pageNeighbors p
                     !cardinality = HS.size (pageDocOnlyNeighbors p) + 1
               , (u, uRole) <- neighbors
               , (v, vRole) <- neighbors -- include self links (v==u)!
-              , let !featVec = edgeFeat pageId entityEntry (getSource uRole vRole)
+              , let !featVec = edgeFeat pageId entityEntry (getSource uRole vRole) p
               , let !dividedFeatVec = divideEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource

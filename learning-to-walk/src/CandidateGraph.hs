@@ -20,8 +20,10 @@ import Control.Concurrent.Async
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Hashable
+import Data.Text as T
 
 import CAR.Types hiding (Entity)
+import CAR.Utils
 import qualified CAR.RunFile as CarRun
 import GridFeatures
 
@@ -30,6 +32,7 @@ import LookupWrapper
 
 import qualified CAR.RunFile
 import MultiTrecRunFile
+
 
 
 import Debug.Trace
@@ -104,7 +107,11 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
 
   -- todo add entities adjacent to edgedocs
 
-    entityRun'  =                  entityRun
+    entityRun'  =  [ entry
+                   | (docName, entry) <- pageIdToEntityRun
+                   ,  "enwiki:Category:" `T.isPrefixOf` (T.pack $ unpackPageId docName)
+                   ]
+
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
