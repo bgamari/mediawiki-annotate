@@ -448,8 +448,9 @@ main = do
             where
               f :: QueryId -> Graph PageId (EdgeFeatureVec edgeFSpace)
               f query =
-                  fmap (filterExpSettings edgeFSpace')                -- Todo this needs to change, we first want to filter the feature space
-                  $ generateEdgeFeatureGraph allEdgeFSpace featureGraphSettings query pagesLookup candidates
+                  -- fmap (filterExpSettings edgeFSpace')                -- Done: Todo this needs to change, we first want to filter the feature space
+                  -- $
+                  generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup candidates
                 where
                   !candidates = Debug.trace "created candidate graph." $ candidateGraphGenerator query edgeRun entityRun
                     where
