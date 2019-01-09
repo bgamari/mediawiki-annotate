@@ -88,7 +88,7 @@ combineEntityEdgeFeatures (FeatureSpaces {..})
                                           } =
     let
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec edgeFSpace)
-        edgeFeatureGraph = generateEdgeFeatureGraph edgeFSpace featureGraphSettings query cands
+        edgeFeatureGraph = generateEdgeFeatureGraph edgeFSpace featureGraphSettings query pagesLookup cands
 
         nodeFeatures :: HM.HashMap PageId (EntityFeatureVec entityFSpace)
         nodeFeatures = generateNodeFeatures entityFSpace query entityRun allEdgeDocs
@@ -225,11 +225,13 @@ generateEdgeFeatureGraph :: forall edgeFSpace.
                             F.FeatureSpace EdgeFeature edgeFSpace
                          -> FeatureGraphSettings
                          -> QueryId
+                         -> PagesLookup
                          -> Candidates
                          -> Graph PageId (EdgeFeatureVec edgeFSpace)
 generateEdgeFeatureGraph edgeFSpace
                          (includeEdgesFromParas, includeEdgesFromPages)
                          query
+                         pagesLookup
                          cands@Candidates{ candidateEdgeDocs = allEdgeDocs
                                          , candidateEdgeRuns = edgeRun
                                          , candidateEntityRuns = entityRun
@@ -237,7 +239,7 @@ generateEdgeFeatureGraph edgeFSpace
                                          } =
     let
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
-        pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageDocId page, page) | page <- candidatePages]
+--         pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageDocId page, page) | page <- candidatePages]
 
         edgeFeaturesFromPara = if includeEdgesFromParas then edgesFromParas edgeFSpace edgeDocsLookup edgeRun else []
         edgeFeaturesFromPage = if includeEdgesFromPages then edgesFromPages edgeFSpace pagesLookup entityRun else []
@@ -347,6 +349,8 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName entityEntry, entityEntry)
                | entityEntry <- entityRuns
+               , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 10)  (multiRankingEntryAll entityEntry))
+                || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed entityEntry )<= 10)      -- todo make 10 configurable
                ]
 
 

@@ -69,7 +69,7 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
         Candidates { candidateEdgeDocs = edgeDocs''
                    , candidateEdgeRuns = edgeRun''
                    , candidateEntityRuns = entityRun''
-                   , candidatePages = entityPages
+                   , candidatePages = [] --entityPages
                    }
 
     restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b
@@ -115,15 +115,15 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
-    entityPages :: [PageDoc]
-    entityPages = force $ pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
-        where entitiesFromRuns :: [PageId]
-              entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
-              entitiesFromEdgeDocs :: HS.HashSet PageId
-              entitiesFromEdgeDocs = mconcat (fmap edgeDocNeighbors edgeDocs'')
+--     entityPages :: [PageDoc]
+--     entityPages = force $ pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
+--         where entitiesFromRuns :: [PageId]
+--               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
+--               entitiesFromEdgeDocs :: HS.HashSet PageId
+--               entitiesFromEdgeDocs = mconcat (fmap edgeDocNeighbors edgeDocs'')
 
     fakeMultiPageEntry query doc =
-        buildMultiTrecEntry  100 (0.0, [])
+        buildMultiTrecEntry  1000 (0.0, [])
 
 --     fakeMultiPageEntry query page =
 --            MultiRankingEntry { multiRankingEntryCollapsed = fakePageEntry query page

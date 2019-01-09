@@ -416,7 +416,7 @@ main = do
                       entityRun = collapsedEntityRun >!< query
 
                   graph :: Graph PageId (EdgeFeatureVec edgeFeatSubset)
-                  graph = generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query candidates
+                  graph = generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup candidates
 
 
                   normalizer :: Normalisation EdgeFeature edgeFeatSubset Double
@@ -449,7 +449,7 @@ main = do
               f :: QueryId -> Graph PageId (EdgeFeatureVec edgeFSpace)
               f query =
                   fmap (filterExpSettings edgeFSpace')                -- Todo this needs to change, we first want to filter the feature space
-                  $ generateEdgeFeatureGraph allEdgeFSpace featureGraphSettings query candidates
+                  $ generateEdgeFeatureGraph allEdgeFSpace featureGraphSettings query pagesLookup candidates
                 where
                   !candidates = Debug.trace "created candidate graph." $ candidateGraphGenerator query edgeRun entityRun
                     where
