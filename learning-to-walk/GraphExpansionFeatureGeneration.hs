@@ -424,7 +424,7 @@ main = do
 
 
                   graph' :: Graph PageId Double
-                  graph' = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
+                  graph' = dropLowEdges $ fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
                   -- for debugging...
                 --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params feats))) graph
                     where
@@ -483,10 +483,6 @@ main = do
 --                         !x = Debug.trace ("produceWalkingGraph: " <> show query <> "   minweight graph = "<>show (minEdgeWeight graph) <> " minweight graph' = "<> show (minEdgeWeight graph') ) $ 4
                     in graph'
 
-                dropLowEdges :: Graph PageId Double -> Graph PageId Double
-                dropLowEdges graph = filterEdges significantEdgeWeight graph
-                                        where significantEdgeWeight :: PageId ->  PageId -> Double -> Bool
-                                              significantEdgeWeight _ _ e = e > 1e-8
 
                 walkIters :: Eigenvector PageId Double
                           -> Graph PageId Double
@@ -844,6 +840,13 @@ nodeDistrPriorForGraphwalk
       nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
       nodeDistr = fmap nodeRankingToDistribution rankingPageId
   in nodeDistr
+
+
+dropLowEdges :: Graph PageId Double -> Graph PageId Double
+dropLowEdges graph = filterEdges significantEdgeWeight graph
+                        where significantEdgeWeight :: PageId ->  PageId -> Double -> Bool
+                              significantEdgeWeight _ _ e = e > 1e-8
+
 
 -- --------------------------------------
 
