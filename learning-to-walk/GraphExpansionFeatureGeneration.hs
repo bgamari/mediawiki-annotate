@@ -31,6 +31,7 @@ import GHC.Stack
 
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
+import qualified Data.Map.Lazy as ML
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.ByteString.Lazy as BSL
@@ -398,9 +399,10 @@ main = do
 
         pageRankHyperParams = PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
 
-    let   makeFeatureGraphs :: forall edgeFSpace. F.FeatureSpace EdgeFeature edgeFSpace ->  M.Map QueryId (Graph PageId (EdgeFeatureVec edgeFSpace))
+    let   makeFeatureGraphs :: forall edgeFSpace. F.FeatureSpace EdgeFeature edgeFSpace ->  ML.Map QueryId (Graph PageId (EdgeFeatureVec edgeFSpace))
           makeFeatureGraphs edgeFSpace' =
-              M.fromList [ (qid, f qid)
+              M.fromList -- $ withStrategy (parTraversable $ evalTuple2 r0 rseq)
+                         $[ (qid, f qid)
                          | q <- queries
                          , let qid = queryDocQueryId q
                          ]
@@ -430,7 +432,7 @@ main = do
 
           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
 
-              let featureGraphs :: M.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
+              let featureGraphs :: ML.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
                   !featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
 
                   nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- xyes, only positive entries, expected to sum to 1.0
@@ -565,8 +567,8 @@ main = do
                   params' :: WeightVec EdgeFeature edgePh
                   params' = coerce (toEdgeVecSubset . modelToCombinedFeatureVec) $ modelWeights' model
 
-                  featureGraphs :: M.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
-                  !featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
+                  featureGraphs :: ML.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
+                  featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
 
 
                   Just (F.FeatureMappingInto toEdgeVecSubset) =
@@ -804,8 +806,9 @@ makeNextPageRankIter ::  FeatureSpace EdgeFeature edgePh
                      -> M.Map QueryId (HM.HashMap PageId Double)
                      -> M.Map CAR.RunFile.QueryId (Eigenvector PageId Double)
                      -> M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
-makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps queries featureGraphs nodeDistr eigvs = M.fromList
-       [ (qid, \w -> produceWalkingGraph edgeFSpace prh pageRankSteps featureGraph eigv0 qid nodeDistr w)
+makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps queries featureGraphs nodeDistr eigvs =
+    M.fromList
+    $  [ (qid, \w -> produceWalkingGraph edgeFSpace prh pageRankSteps featureGraph eigv0 qid nodeDistr w)
        | q <- queries
        , let qid = queryDocQueryId q
              eigv0 = eigvs >!< qid  -- lookup the current pagerank vector for this query's graph
