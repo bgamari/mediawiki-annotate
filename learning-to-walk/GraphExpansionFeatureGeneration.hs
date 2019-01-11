@@ -139,7 +139,7 @@ opts :: Parser ( FilePath
                , FilePath
                , ModelSource
                , PosifyEdgeWeights
-               , TeleportationProb
+               , [TeleportationProb]
                , [ExperimentSettings]
                , PageRankExperimentSettings
                , PageRankConvergence
@@ -159,7 +159,7 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
-    <*> option auto (long "teleport" <> help "teleport probability (for page rank)" <> value 0.1)
+    <*> option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" <> value [0.1])
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
@@ -241,7 +241,7 @@ pagesToQueryDocs deriv pages =
 data PageRankHyperParams = PageRankHyperParams { pageRankExperimentSettings :: PageRankExperimentSettings
                                                , posifyEdgeWeights :: PosifyEdgeWeights
                                                , graphWalkModel :: GraphWalkModel
-                                               , teleportation :: Double
+                                               , teleportation :: TeleportationProb
                                                }
 -- ---------------------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile, pagesDocCborFile
       , qrelFile, modelSource
-      , posifyEdgeWeightsOpt,  teleportation, experimentSettings
+      , posifyEdgeWeightsOpt,  teleportations, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
       , miniBatchParamsMaybe  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
@@ -279,17 +279,19 @@ main = do
 
     putStrLn $ " Experimentation settings: "++ (show experimentSettings)
     putStrLn $ " model comes from : "++ (show modelSource)
-    putStrLn $ " teleport (only for page rank) : "++ (show teleportation)
+    putStrLn $ " teleport (only for page rank) : "++ (show teleportations)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
-    let featureGraphSettings :: FeatureGraphSettings
+
+        featureGraphSettings :: FeatureGraphSettings
         featureGraphSettings = ( not $ (CandidateNoEdgeDocs `elem` experimentSettings)
                                , not $ (CandidateNoPageDocs `elem` experimentSettings)
                                )
+        teleportation = head teleportations
 
     queries' <-
         case querySrc of
@@ -578,52 +580,57 @@ main = do
 
                   pageRankSteps = 3    -- todo use proper convergence criterion
 
-                  nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
-                  nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
-                                                          (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                          pageRankSteps queries featureGraphs nodeDistr initialEigenVmap
+
+              forM_ teleportations $ \teleportation -> do
+                  let
+                      nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
+                      nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
+                                                              (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
+                                                              -- !!!!
+                                                              pageRankSteps queries featureGraphs nodeDistr initialEigenVmap
 
 
-                  iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
-                  iterResult = fmap ($ params') nextPageRankIter
+                      iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
+                      iterResult = withStrategy (parTraversable $ evalTraversable rseq)
+                                 $ fmap ($ params') nextPageRankIter
 
---                   eigvs' :: M.Map QueryId (Eigenvector PageId Double)
---                   eigvs' = fmap snd iterResult
---                   rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
---                   rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
-                  predictedRankings :: M.Map QueryId (Ranking Double PageId)
-                  predictedRankings = fmap fst iterResult
+    --                   eigvs' :: M.Map QueryId (Eigenvector PageId Double)
+    --                   eigvs' = fmap snd iterResult
+    --                   rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
+    --                   rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
+                      predictedRankings :: M.Map QueryId (Ranking Double PageId)
+                      predictedRankings = fmap fst iterResult
 
---                   score' = metric rankings'
---                   printTopRanking rs =
---                       unlines $ take 3 $ M.elems $ fmap (show . take 2 . Ranking.toSortedList) rs
---                   !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries \n"<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
+    --                   score' = metric rankings'
+    --                   printTopRanking rs =
+    --                       unlines $ take 3 $ M.elems $ fmap (show . take 2 . Ranking.toSortedList) rs
+    --                   !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries \n"<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
 
---               rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
---                   rankings =
---               CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
+    --               rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
+    --                   rankings =
+    --               CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
 
-                  storeRankingData' ::  FilePath
-                           -> M.Map  CAR.RunFile.QueryId (Ranking Double PageId)
-                           -> String
-                           -> IO ()
-                  storeRankingData' outputFilePrefix ranking modelDesc = do
-                      CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
-                           $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
-                           $ ranking
-                    where l2rRankingToRankEntries methodName rankings =
-                              [ CAR.RunFile.RankingEntry { carQueryId = query
-                                                         , carDocument = doc
-                                                         , carRank = rank
-                                                         , carScore = rankScore
-                                                         , carMethodName = methodName
-                                                         }
-                              | (query, ranking) <- M.toList rankings
-                              , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
-                              ]
+                      storeRankingData' ::  FilePath
+                               -> M.Map  CAR.RunFile.QueryId (Ranking Double PageId)
+                               -> String
+                               -> IO ()
+                      storeRankingData' outputFilePrefix ranking modelDesc = do
+                          CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
+                               $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
+                               $ ranking
+                        where l2rRankingToRankEntries methodName rankings =
+                                  [ CAR.RunFile.RankingEntry { carQueryId = query
+                                                             , carDocument = doc
+                                                             , carRank = rank
+                                                             , carScore = rankScore
+                                                             , carMethodName = methodName
+                                                             }
+                                  | (query, ranking) <- M.toList rankings
+                                  , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
+                                  ]
 
 
-              storeRankingData' outputFilePrefix predictedRankings "walk"
+                  storeRankingData' outputFilePrefix predictedRankings ("walk-tele-" <> show teleportation)
 
 
 
