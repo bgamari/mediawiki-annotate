@@ -159,7 +159,7 @@ opts =
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
-    <*> option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" <> value [0.1])
+    <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
@@ -291,7 +291,9 @@ main = do
         featureGraphSettings = ( not $ (CandidateNoEdgeDocs `elem` experimentSettings)
                                , not $ (CandidateNoPageDocs `elem` experimentSettings)
                                )
-        teleportation = head teleportations
+        teleportation = case teleportations of
+                          (x:_) -> x
+                          []    -> 0.1
 
     queries' <-
         case querySrc of
