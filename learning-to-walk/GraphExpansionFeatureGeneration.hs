@@ -582,7 +582,7 @@ main = do
 
 
 
-                  pageRankSteps = 3    -- todo use proper convergence criterion
+                  pageRankSteps = 1    -- todo use proper convergence criterion
 
 
               forM_ teleportations $ \teleportation -> do
