@@ -425,7 +425,7 @@ main = do
           let updatedModelFile = modelFile <> "walk.json"
               (MiniBatchParams batchSteps batchSize evalSteps) = miniBatchParams
               evalSteps' = evalSteps +2
-              pageRankSteps = evalSteps'
+--               pageRankSteps = evalSteps'
           putStrLn "loading model"
           Just (SomeModel model) <-  Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
           putStrLn "loaded model."
@@ -481,14 +481,14 @@ main = do
 
                           -- todo: we call it repeatedly with the same eigvs, (oncefor the iteration and once for the computing the ranking. Is this intentional?
                           -- nextPageRankIter holds a map from query  to a function that computes one step of pagerank given a parameter :: WeightVec
-                      let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
+                      let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> M.Map QueryId (Eigenvector PageId Double) -> (Ranking Double PageId, Eigenvector PageId Double))
                           nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                                   (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                                  pageRankConvergence queries featureGraphs nodeDistr eigvs
+                                                                  pageRankConvergence queries featureGraphs nodeDistr
 
                           rerank :: QueryId -> WeightVec EdgeFeature edgePh -> Ranking Double (PageId, IsRelevant)
                           rerank query w =
-                              let (ranking, _pageRank) = (nextPageRankIter >!< query) w     -- one step of pagerank for this query, then take ranking
+                              let (ranking, _pageRank) = (nextPageRankIter >!< query) w eigvs     -- one step of pagerank for this query, then take ranking
                               in augmentWithQrels query ranking                             -- we do not save the pagerank result at this point.
 
 
@@ -504,7 +504,7 @@ main = do
     --                       (_score, params') : _ = naiveCoordAscent metric rerank gen1 params someKindOfTrainingData  -- without minibatching
 
                           iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
-                          iterResult = fmap ($ params') nextPageRankIter
+                          iterResult = fmap (\f -> f params' eigvs) nextPageRankIter
 
                           eigvs' :: M.Map QueryId (Eigenvector PageId Double)
                           eigvs' = fmap snd iterResult
@@ -578,6 +578,8 @@ main = do
                   initialEigenv :: Graph PageId a -> Eigenvector PageId Double
                   initialEigenv graph' = PageRank.uniformInitial mapping
                     where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
+
+                  initialEigenVmap :: M.Map QueryId (Eigenvector PageId Double)
                   initialEigenVmap = fmap initialEigenv featureGraphs
 
 
@@ -587,16 +589,21 @@ main = do
 
               forM_ teleportations $ \teleportation -> do
                   let
-                      nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
+                      nextPageRankIter :: M.Map QueryId ( WeightVec EdgeFeature edgePh
+                                                        -> M.Map QueryId (Eigenvector PageId Double)
+                                                        -> (Ranking Double PageId, Eigenvector PageId Double)
+                                                        )
                       nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                               (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
                                                               -- !!!!
-                                                              pageRankConvergence queries featureGraphs nodeDistr initialEigenVmap
+                                                              pageRankConvergence queries featureGraphs nodeDistr
 
+
+                      eigvs = initialEigenVmap -- todo: need to thread this argument through the iteration
 
                       iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
                       iterResult = withStrategy (parTraversable $ evalTraversable rseq)
-                                 $ fmap ($ params') nextPageRankIter
+                                 $ fmap (\f -> f params' initialEigenVmap) nextPageRankIter  -- todo impedance matching with eigvs Map versus value
 
     --                   eigvs' :: M.Map QueryId (Eigenvector PageId Double)
     --                   eigvs' = fmap snd iterResult
@@ -804,14 +811,15 @@ makeNextPageRankIter ::  FeatureSpace EdgeFeature edgePh
                           CAR.RunFile.QueryId
                           (Graph PageId (EdgeFeatureVec edgePh))
                      -> M.Map QueryId (HM.HashMap PageId Double)
-                     -> M.Map CAR.RunFile.QueryId (Eigenvector PageId Double)
-                     -> M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
-makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) conv queries featureGraphs nodeDistr eigvs =
+                     -> M.Map QueryId (  WeightVec EdgeFeature edgePh
+                                      -> M.Map QueryId (Eigenvector PageId Double)
+                                      -> (Ranking Double PageId, Eigenvector PageId Double)
+                                      )
+makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) conv queries featureGraphs nodeDistr =
     M.fromList
-    $  [ (qid, \w -> produceWalkingGraph edgeFSpace prh conv featureGraph eigv0 qid nodeDistr w)
+    $  [ (qid, \w eigvs -> produceWalkingGraph edgeFSpace prh conv featureGraph qid nodeDistr w (eigvs >!< qid)) -- eigv0 as lamba
        | q <- queries
        , let qid = queryDocQueryId q
-             eigv0 = eigvs >!< qid  -- lookup the current pagerank vector for this query's graph
              featureGraph = featureGraphs >!< qid
        ]
 
@@ -821,15 +829,15 @@ produceWalkingGraph :: forall edgePh. ()
                     -> PageRankHyperParams
                     -> PageRankConvergence
                     -> Graph PageId (EdgeFeatureVec edgePh)
-                    -> Eigenvector PageId Double
                     -> QueryId
                     -> M.Map QueryId (HM.HashMap PageId Double)
                     -> WeightVec EdgeFeature edgePh
+                    -> Eigenvector PageId Double
                     -> (Ranking Double PageId, Eigenvector PageId Double)
-produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) conv featureGraph initialEigv query nodeDistr =
+produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) conv featureGraph query nodeDistr =
 -- prh : pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
-  \params ->
-    nextRerankIter params initialEigv
+  \params eigv ->
+    nextRerankIter params eigv
   where
     normalizer :: Normalisation EdgeFeature edgePh Double
     !normalizer = zNormalizer $ Foldable.toList featureGraph
@@ -859,7 +867,7 @@ produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) conv featureGraph 
                    -> (Ranking Double PageId, Eigenvector PageId Double)
     nextRerankIter params initial  =
           let graph = walkingGraph params
-              nexteigen = graphWalkToConvergence conv $ walkIters initial $ graph    -- todo replace with arbitrary convergence criterion
+              nexteigen = graphWalkToConvergence conv $ walkIters initial $ graph
               ranking = eigenvectorToRanking nexteigen
 --                           debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
           in (ranking, nexteigen)
