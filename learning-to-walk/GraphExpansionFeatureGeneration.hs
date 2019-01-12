@@ -115,7 +115,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
-data PageRankConvergence = L2Convergence | Iteration10 | Iteration2
+data PageRankConvergence = L2Convergence | Iteration10 | Iteration2 | Iteration1
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
@@ -484,7 +484,7 @@ main = do
                       let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
                           nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                                   (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                                  pageRankSteps queries featureGraphs nodeDistr eigvs
+                                                                  pageRankConvergence queries featureGraphs nodeDistr eigvs
 
                           rerank :: QueryId -> WeightVec EdgeFeature edgePh -> Ranking Double (PageId, IsRelevant)
                           rerank query w =
@@ -582,7 +582,7 @@ main = do
 
 
 
-                  pageRankSteps = 10    -- todo use proper convergence criterion
+--                   pageRankSteps = 10    -- todo use proper convergence criterion
 
 
               forM_ teleportations $ \teleportation -> do
@@ -591,7 +591,7 @@ main = do
                       nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                               (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
                                                               -- !!!!
-                                                              pageRankSteps queries featureGraphs nodeDistr initialEigenVmap
+                                                              pageRankConvergence queries featureGraphs nodeDistr initialEigenVmap
 
 
                       iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
@@ -798,7 +798,7 @@ main = do
 
 makeNextPageRankIter ::  FeatureSpace EdgeFeature edgePh
                      -> PageRankHyperParams
-                     -> Int
+                     -> PageRankConvergence
                      -> [QueryDoc]
                      -> M.Map
                           CAR.RunFile.QueryId
@@ -806,9 +806,9 @@ makeNextPageRankIter ::  FeatureSpace EdgeFeature edgePh
                      -> M.Map QueryId (HM.HashMap PageId Double)
                      -> M.Map CAR.RunFile.QueryId (Eigenvector PageId Double)
                      -> M.Map QueryId (WeightVec EdgeFeature edgePh -> (Ranking Double PageId, Eigenvector PageId Double))
-makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps queries featureGraphs nodeDistr eigvs =
+makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) conv queries featureGraphs nodeDistr eigvs =
     M.fromList
-    $  [ (qid, \w -> produceWalkingGraph edgeFSpace prh pageRankSteps featureGraph eigv0 qid nodeDistr w)
+    $  [ (qid, \w -> produceWalkingGraph edgeFSpace prh conv featureGraph eigv0 qid nodeDistr w)
        | q <- queries
        , let qid = queryDocQueryId q
              eigv0 = eigvs >!< qid  -- lookup the current pagerank vector for this query's graph
@@ -819,14 +819,14 @@ makeNextPageRankIter edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps que
 produceWalkingGraph :: forall edgePh. ()
                     => F.FeatureSpace EdgeFeature edgePh
                     -> PageRankHyperParams
-                    -> Int
+                    -> PageRankConvergence
                     -> Graph PageId (EdgeFeatureVec edgePh)
                     -> Eigenvector PageId Double
                     -> QueryId
                     -> M.Map QueryId (HM.HashMap PageId Double)
                     -> WeightVec EdgeFeature edgePh
                     -> (Ranking Double PageId, Eigenvector PageId Double)
-produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps featureGraph initialEigv query nodeDistr =
+produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) conv featureGraph initialEigv query nodeDistr =
 -- prh : pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
   \params ->
     nextRerankIter params initialEigv
@@ -859,7 +859,7 @@ produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) pageRankSteps feat
                    -> (Ranking Double PageId, Eigenvector PageId Double)
     nextRerankIter params initial  =
           let graph = walkingGraph params
-              nexteigen = (!!pageRankSteps) $ walkIters initial $ graph    -- todo replace with arbitrary convergence criterion
+              nexteigen = graphWalkToConvergence conv $ walkIters initial $ graph    -- todo replace with arbitrary convergence criterion
               ranking = eigenvectorToRanking nexteigen
 --                           debugRanking = unlines $ fmap show $ take 3 $ Ranking.toSortedList ranking
           in (ranking, nexteigen)
@@ -901,6 +901,7 @@ graphWalkToConvergence conv walkIters =
                        $ pageRankIters
         Iteration10   -> snd $ (!! 10)  pageRankIters
         Iteration2    -> snd $ (!! 2)  pageRankIters
+        Iteration1    -> snd $ (!! 1)  pageRankIters
 
 eigenvectorToRanking :: Eigenvector doc Double -> Ranking Double doc
 eigenvectorToRanking = Ranking.fromList . map swap . toEntries
