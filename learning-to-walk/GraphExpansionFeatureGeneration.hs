@@ -582,11 +582,6 @@ main = do
                   initialEigenVmap :: M.Map QueryId (Eigenvector PageId Double)
                   initialEigenVmap = fmap initialEigenv featureGraphs
 
-
-
---                   pageRankSteps = 10    -- todo use proper convergence criterion
-
-
               forM_ teleportations $ \teleportation -> do
                   let
                       nextPageRankIter :: M.Map QueryId ( WeightVec EdgeFeature edgePh
@@ -642,93 +637,6 @@ main = do
 
 
                   storeRankingData' outputFilePrefix predictedRankings ("walk-tele-" <> show teleportation)
-
-
-
-
-
-
-
---
---       GraphWalkModelFromFile modelFile -> do
---           putStrLn "loading model"
---           Just (SomeModel model) <-  Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
---           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
---
---               let nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- only positive entries, expected to sum to 1.0
---                   nodeDistr = nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun
---
---               let Just (F.FeatureMappingInto toEdgeVecSubset) =
---                     F.mapFeaturesInto (combinedFSpace fspaces) (edgeFSpace fspaces) (either (const Nothing) Just)
---
---               let params' :: WeightVec EdgeFeature edgePh
---                   params' = coerce (toEdgeVecSubset . modelToCombinedFeatureVec) $ modelWeights' model
---
---                   runRanking query = do
---                       let graphRanking = eigenvectorToRanking
---                                        $ graphWalkToConvergence pageRankConvergence
---                                        $ graphWalkRanking query params' (edgeFSpace fspaces) nodeDistr
---                           rankEntries =  [ CAR.RunFile.RankingEntry query pageId rank score (CAR.RunFile.MethodName (T.pack (show graphWalkModel)))
---                                         | (rank, (score, pageId)) <- zip [1..] (Ranking.toSortedList graphRanking)
---                                         ]
---
---     --                       fileId qid = T.unpack $ T.replace "/" "--" qid
---
---     --                   CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-"++ fileId (CAR.RunFile.unQueryId query) ++"-pagerank-test.run")
---     --                                     $
---                       return $ rankEntries
---
---               rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
---               CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
---
---             -- predict mode
---             -- alternative: load model from disk, then use graph feature vectors to produce a graph with edge weights (Graph PageId Double)
---             -- use pagerank on this graph to predict an alternative node ranking
---             -- save predicted node ranking as run-file
---           where   graphWalkRanking :: forall edgeFeatSubset.
---                                       QueryId -> WeightVec EdgeFeature edgeFeatSubset
---                                    -> FeatureSpace EdgeFeature edgeFeatSubset
---                                    -> M.Map QueryId (HM.HashMap PageId Double) ->  [Eigenvector PageId Double]
---                   graphWalkRanking query params' edgeFSpace' nodeDistr
---                          | any (< 0) graph' = error ("negative entries in graph' for query "++ show query ++ ": "++ show (count (< 0) graph'))
---                          | otherwise =
---         --                     let eigv = pageRankConvergence walkIters
---         --                     putStrLn $ show query <> " -> " <> show (take 2 $ toEntries eigv)
---                            -- exportGraphViz (filterGraphTopEdges $ dropDisconnected graph') (dotFileName query)
---         --                     in Ranking.fromList $ map swap $ toEntries eigv
---                             walkIters
---                         --                 | otherwise = traceShow (take 3 $ toEntries eigv) $ Ranking.fromList $ map swap $ toEntries eigv
---                       where
---                           count predicate = getSum . foldMap f
---                             where f x = if predicate x then Sum 1 else Sum 0
---
---                           candidates = candidateGraphGenerator query edgeRun entityRun
---                             where
---                               edgeRun = collapsedEdgedocRun >!< query
---                               entityRun = collapsedEntityRun >!< query
---
---                           graph :: Graph PageId (EdgeFeatureVec edgeFeatSubset)
---                           graph = generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup candidates
---
---
---                           normalizer :: Normalisation EdgeFeature edgeFeatSubset Double
---                           normalizer = zNormalizer $ Foldable.toList graph
---
---
---                           graph' :: Graph PageId Double
---                           graph' = dropLowEdges $ fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList graph)) graph
---                           -- for debugging...
---                         --                   graph' = fmap (\feats -> trace (show feats) ( tr  ( posifyDot params feats))) graph
---                             where
---                               normFeats :: EdgeFeatureVec edgeFeatSubset -> EdgeFeatureVec edgeFeatSubset
---                               normFeats fv = normFeatures normalizer fv
---                           walkIters :: [Eigenvector PageId Double]
---                           walkIters = case graphWalkModel of
---                                         PageRankWalk -> pageRank teleportation graph'
---                                         BiasedPersPageRankWalk -> persPageRankWithNonUniformSeeds (teleportation/2) seedNodeDistr graph'
---                                           where  betaTotal = teleportation/2
---                                                  seedNodeDistr = fmap (* betaTotal) (nodeDistr M.! query )
---
 
 
       ModelFromFile modelFile -> do
