@@ -594,36 +594,29 @@ main = do
                                                               pageRankConvergence queries featureGraphs nodeDistr
 
 
-                      eigvs = initialEigenVmap -- todo: need to thread this argument through the iteration
+                      eigvs = initialEigenVmap
+                      emptyRanking :: Ranking Double PageId
+                      emptyRanking = Ranking.fromSortedList []
 
-                      iterResult :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
-                      iterResult = withStrategy (parTraversable $ evalTraversable rseq)
-                                 $ fmap (\f -> f params' initialEigenVmap) nextPageRankIter  -- todo impedance matching with eigvs Map versus value
+                      eigvss :: [M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)]
+                      eigvss = iterate f $ fmap (\eigv -> (emptyRanking, eigv)) initialEigenVmap
+                        where
+                          f :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double) -> M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
+                          f accum = withStrategy (parTraversable $ evalTraversable rseq)
+                                         $ fmap (\f -> f params' eigvs) nextPageRankIter
+                            where eigvs = fmap snd accum
 
-    --                   eigvs' :: M.Map QueryId (Eigenvector PageId Double)
-    --                   eigvs' = fmap snd iterResult
-    --                   rankings' :: M.Map QueryId (Ranking Double (PageId, IsRelevant))
-    --                   rankings' = M.mapWithKey (\q (r,_) -> augmentWithQrels q r) iterResult
-                      predictedRankings :: M.Map QueryId (Ranking Double PageId)
-                      predictedRankings = fmap fst iterResult
+                      storeRankingData' :: (Int, M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)) -> IO ()
+                      storeRankingData' (iterNo, iterResult) = do
+                          let -- eigvs = fmap snd accum
+                              ranking :: M.Map QueryId (Ranking Double PageId)
+                              ranking = fmap fst iterResult
+                              modelDesc = "walk-tele-" <> show teleportation <> "-iteration-"<> show iterNo
 
-    --                   score' = metric rankings'
-    --                   printTopRanking rs =
-    --                       unlines $ take 3 $ M.elems $ fmap (show . take 2 . Ranking.toSortedList) rs
-    --                   !x = Debug.trace ("trainwalk score " <> (show score') <> "\n topRankEntries \n"<> (printTopRanking rankings') <> "\n params' "<> show params') $ 0
-
-    --               rankEntries <- concat <$> mapConcurrently (runRanking . queryDocQueryId) queries
-    --                   rankings =
-    --               CAR.RunFile.writeEntityRun  (outputFilePrefix ++ "-" ++ show graphWalkModel ++ "-test.run") rankEntries
-
-                      storeRankingData' ::  FilePath
-                               -> M.Map  CAR.RunFile.QueryId (Ranking Double PageId)
-                               -> String
-                               -> IO ()
-                      storeRankingData' outputFilePrefix ranking modelDesc = do
                           CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
                                $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
                                $ ranking
+
                         where l2rRankingToRankEntries methodName rankings =
                                   [ CAR.RunFile.RankingEntry { carQueryId = query
                                                              , carDocument = doc
@@ -635,8 +628,7 @@ main = do
                                   , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
                                   ]
 
-
-                  storeRankingData' outputFilePrefix predictedRankings ("walk-tele-" <> show teleportation)
+                  mapM_ storeRankingData' $ zip [1..] eigvss
 
 
       ModelFromFile modelFile -> do
