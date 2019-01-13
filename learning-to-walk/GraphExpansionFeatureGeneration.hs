@@ -865,6 +865,7 @@ filterFeaturesByExperimentSetting settings fname =
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True
+                    CandidateDivideEdgeFeats -> const True
                     CandidateStrict -> const True
                     CandidateGenerous -> const True
 
