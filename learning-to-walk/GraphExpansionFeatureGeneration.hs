@@ -625,10 +625,10 @@ main = do
                                                              , carMethodName = methodName
                                                              }
                                   | (query, ranking) <- M.toList rankings
-                                  , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..20]
+                                  , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
                                   ]
 
-                  mapM_ storeRankingData' $ zip [1..] eigvss
+                  mapM_ storeRankingData' $ zip [1..20] eigvss
 
 
       ModelFromFile modelFile -> do
