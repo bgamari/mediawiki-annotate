@@ -139,14 +139,14 @@ allRunFeatures = [ScoreF, RecipRankF] --[minBound..maxBound]
 
 data EntityFeature where
     EntRetrievalFeature :: !Run -> !RunFeature -> EntityFeature
-    EntIncidentEdgeDocsRecip :: EntityFeature
-    EntDegreeRecip :: EntityFeature
+--     EntIncidentEdgeDocsRecip :: EntityFeature
+--     EntDegreeRecip :: EntityFeature
     EntDegree  :: EntityFeature
     deriving (Show, Read, Ord, Eq)
 
 data EdgeFeature where
     EdgeRetrievalFeature :: !FromSource -> !Run -> !RunFeature -> EdgeFeature
-    EdgeDocKL  :: !FromSource -> EdgeFeature
+--     EdgeDocKL  :: !FromSource -> EdgeFeature
     EdgeCount  :: !FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq)
 
@@ -158,13 +158,15 @@ type CombinedFeature = Either EntityFeature EdgeFeature
 allEntityFeatures :: S.Set EntityFeature
 allEntityFeatures = S.fromList $
     (EntRetrievalFeature <$> allEntityRunsF <*> allRunFeatures)
-    <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
+    <> [EntDegree]
+--     <> [EntIncidentEdgeDocsRecip, EntDegreeRecip, EntDegree]
 
 
 allEdgeFeatures :: S.Set EdgeFeature
 allEdgeFeatures = S.fromList $
     (EdgeRetrievalFeature <$> allSources <*> allEdgeRunsF <*> allRunFeatures)
-    <> ([EdgeDocKL, EdgeCount] <*>  allSources)
+    <> ([EdgeCount] <*>  allSources)
+--     <> ([EdgeDocKL, EdgeCount] <*>  allSources)
 
 -- todo can we get rid of this?
 entSomeFSpace :: F.SomeFeatureSpace EntityFeature
@@ -385,8 +387,8 @@ makeEntFeatVector fspace xs =
 defaultEntityFeatures :: EntityFeature -> Double
 defaultEntityFeatures f =
     case f of
-      EntIncidentEdgeDocsRecip -> 0.0
-      EntDegreeRecip -> 0.0
+--       EntIncidentEdgeDocsRecip -> 0.0
+--       EntDegreeRecip -> 0.0
       EntDegree -> 0.0
       EntRetrievalFeature _ runF -> defaultRankFeatures runF
 
@@ -404,7 +406,7 @@ defaultEdgeFeatures :: EdgeFeature -> Double
 defaultEdgeFeatures f =
     case f of
       EdgeCount _ -> 0
-      EdgeDocKL _ -> 0
+--       EdgeDocKL _ -> 0
       EdgeRetrievalFeature _ _ runF -> defaultRankFeatures runF
 
 defaultRankFeatures :: RunFeature -> Double

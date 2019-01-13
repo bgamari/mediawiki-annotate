@@ -203,9 +203,9 @@ generateNodeFeatures entityFSpace query entityRun allEdgeDocs =
 
 entityScoreVec :: F.FeatureSpace EntityFeature entityFSpace -> MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec entityFSpace
 entityScoreVec entityFSpace entityRankEntry incidentEdgeDocs = makeEntFeatVector entityFSpace (
-      [ (EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
+      [ --(EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
   --  , (EntDegreeRecip, recip degree)
-      , (EntDegree, degree)
+       (EntDegree, degree)
       ]
       ++ entityScoreVecFromMultiRankings entityRankEntry
      )
@@ -217,7 +217,7 @@ entityScoreVec entityFSpace entityRankEntry incidentEdgeDocs = makeEntFeatVector
 
 
 -- ------------------- make edge features ---------------
-type FeatureGraphSettings = (Bool, Bool)
+type FeatureGraphSettings = (Bool, Bool, Bool)
 
 
 -- | used for train,test, and graph walk
@@ -229,7 +229,7 @@ generateEdgeFeatureGraph :: forall edgeFSpace.
                          -> Candidates
                          -> Graph PageId (EdgeFeatureVec edgeFSpace)
 generateEdgeFeatureGraph edgeFSpace
-                         (includeEdgesFromParas, includeEdgesFromPages)
+                         (includeEdgesFromParas, includeEdgesFromPages, divideEdgeFeats)
                          query
                          pagesLookup
                          cands@Candidates{ candidateEdgeDocs = allEdgeDocs
@@ -241,8 +241,8 @@ generateEdgeFeatureGraph edgeFSpace
         edgeDocsLookup = wrapEdgeDocsTocs $ HM.fromList $ [ (edgeDocParagraphId edgeDoc, edgeDoc) | edgeDoc <- allEdgeDocs]
 --         pagesLookup = wrapPagesTocs $ HM.fromList $  [ (pageDocId page, page) | page <- candidatePages]
 
-        edgeFeaturesFromPara = if includeEdgesFromParas then edgesFromParas edgeFSpace edgeDocsLookup edgeRun else []
-        edgeFeaturesFromPage = if includeEdgesFromPages then edgesFromPages edgeFSpace pagesLookup entityRun else []
+        edgeFeaturesFromPara = if includeEdgesFromParas then edgesFromParas edgeFSpace edgeDocsLookup edgeRun divideEdgeFeats else []
+        edgeFeaturesFromPage = if includeEdgesFromPages then edgesFromPages edgeFSpace pagesLookup entityRun divideEdgeFeats else []
 
         allHyperEdges :: HM.HashMap (PageId, PageId) (EdgeFeatureVec edgeFSpace)
         allHyperEdges = HM.fromListWith (F.^+^) $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
@@ -269,8 +269,9 @@ edgesFromParas :: forall edgeFSpace.
                   F.FeatureSpace EdgeFeature edgeFSpace
                -> EdgeDocsLookup
                -> [MultiRankingEntry ParagraphId GridRun]
+               -> Bool
                -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
-edgesFromParas edgeFSpace edgeDocsLookup edgeRuns =
+edgesFromParas edgeFSpace edgeDocsLookup edgeRuns divideEdgeFeats =
     let
         edgeDoc paraId = case edgeDocsLookup [paraId] of
                            [] -> error $ "No edgedoc for paraId "++show paraId
@@ -280,7 +281,7 @@ edgesFromParas edgeFSpace edgeDocsLookup edgeRuns =
                  -> F.FeatureVec EdgeFeature edgeFSpace Double
         edgeFeat paraId edgeEntry = edgeScoreVec edgeFSpace FromParas edgeEntry (edgeDoc paraId)
 
-        divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
+        dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
         edgeCardinality ed = HS.size $ edgeDocNeighbors ed
 
 
@@ -289,11 +290,11 @@ edgesFromParas edgeFSpace edgeDocsLookup edgeRuns =
         oneHyperEdge :: (ParagraphId, MultiRankingEntry ParagraphId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgeFSpace )]
         oneHyperEdge (paraId, edgeEntry) =
-              [ ((u, v) , featVec)-- dividedFeatVec)
+              [ ((u, v) , (if divideEdgeFeats then dividedFeatVec else featVec)) -- featVec)-- dividedFeatVec)
               | u <- HS.toList $ edgeDocNeighbors (edgeDoc paraId)
               , v <- HS.toList $ edgeDocNeighbors (edgeDoc paraId) -- include self links (v==u)!
               , let featVec = edgeFeat paraId edgeEntry
---               , let dividedFeatVec = divideEdgeFeats featVec (edgeCardinality (edgeDoc paraId))
+              , let dividedFeatVec = dividingEdgeFeats featVec (edgeCardinality (edgeDoc paraId))
               ]
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName edgeEntry, edgeEntry)
@@ -308,8 +309,9 @@ edgesFromPages :: forall edgeFSpace.
                   F.FeatureSpace EdgeFeature edgeFSpace
                -> PagesLookup
                -> [MultiRankingEntry PageId GridRun]
+               -> Bool
                -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
-edgesFromPages edgeFSpace pagesLookup entityRuns =
+edgesFromPages edgeFSpace pagesLookup entityRuns divideEdgeFeats =
     let
         page :: PageId -> Maybe PageDoc
         page pageId = case pagesLookup [pageId] of
@@ -326,7 +328,7 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
                  -> F.FeatureVec EdgeFeature edgeFSpace Double
         edgeFeat pageId entityEntry source pg = edgePageScoreVec edgeFSpace source entityEntry pg
 
-        divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
+        dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
 
         -- todo: Undo (temporarily deactivating feature division to diagnose loss of MAP)
@@ -335,14 +337,14 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgeFSpace)]
         oneHyperEdge (pageId, entityEntry) =
-              [ ((u, v) ,featVec) --  dividedFeatVec)
+              [ ((u, v) , (if divideEdgeFeats then dividedFeatVec else featVec))
               | Just p <- pure $ page pageId
               , let neighbors = pageNeighbors p
                     !cardinality = HS.size (pageDocOnlyNeighbors p) + 1
               , (u, uRole) <- neighbors
               , (v, vRole) <- neighbors -- include self links (v==u)!
               , let !featVec = edgeFeat pageId entityEntry (getSource uRole vRole) p
---               , let !dividedFeatVec = divideEdgeFeats featVec cardinality
+              , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromPagesOwnerLink
