@@ -473,9 +473,12 @@ main = do
                   -- todo: but can we move to the global name space?
 
                   -- todo: we call it repeatedly with the same eigvs, (oncefor the iteration and once for the computing the ranking. Is this intentional?
+
+
                   -- nextPageRankIter holds a map from query  to a function that computes one step of pagerank given a parameter :: WeightVec
+                  -- ! because we don't want to delay the computation. Danger of out-of-memory issues, but if we want multiple iterations we would need this anyway.
                   nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> M.Map QueryId (Eigenvector PageId Double) -> (Ranking Double PageId, Eigenvector PageId Double))
-                  nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
+                  !nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                           (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
                                                           pageRankConvergence queries featureGraphs nodeDistr
 
