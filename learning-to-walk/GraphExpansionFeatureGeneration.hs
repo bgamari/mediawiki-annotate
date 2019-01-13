@@ -139,7 +139,7 @@ opts :: Parser ( FilePath
                , Toc.IndexedCborPath PageId PageDoc
                , FilePath
                , ModelSource
-               , PosifyEdgeWeights
+               , [PosifyEdgeWeights]
                , [TeleportationProb]
                , [ExperimentSettings]
                , PageRankExperimentSettings
@@ -159,7 +159,7 @@ opts =
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
-    <*> option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate)
+    <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate))
     <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
@@ -260,7 +260,7 @@ main = do
       queryRestriction, numResults, gridRunFiles
       , edgeDocsCborFile, pagesDocCborFile
       , qrelFile, modelSource
-      , posifyEdgeWeightsOpt,  teleportations, experimentSettings
+      , posifyEdgeWeightsOpts,  teleportations, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
       , miniBatchParamsMaybe  ) <- execParser' 1 (helper <*> opts) mempty
     putStrLn $ "# Pages: " ++ show articlesFile
@@ -281,7 +281,7 @@ main = do
     putStrLn $ " Experimentation settings: "++ (show experimentSettings)
     putStrLn $ " model comes from : "++ (show modelSource)
     putStrLn $ " teleport (only for page rank) : "++ (show teleportations)
-    putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpt)
+    putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpts)
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
@@ -296,6 +296,10 @@ main = do
         teleportation = case teleportations of
                           (x:_) -> x
                           []    -> 0.1
+
+        posifyEdgeWeightsOpt = case posifyEdgeWeightsOpts of
+                          (x:_) -> x
+                          []    -> ExpDenormWeight
 
     queries' <-
         case querySrc of
@@ -570,28 +574,29 @@ main = do
                   initialEigenVmap = fmap initialEigenv featureGraphs
 
               forM_ teleportations $ \teleportation -> do
-                  let
-                      nextPageRankIter :: M.Map QueryId ( WeightVec EdgeFeature edgePh
-                                                        -> M.Map QueryId (Eigenvector PageId Double)
-                                                        -> (Ranking Double PageId, Eigenvector PageId Double)
-                                                        )
-                      nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
-                                                              (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                              pageRankConvergence queries featureGraphs nodeDistr
+                  forM_ posifyEdgeWeightsOpts $ \posifyEdgeWeightsOpt -> do
+                      let
+                          nextPageRankIter :: M.Map QueryId ( WeightVec EdgeFeature edgePh
+                                                            -> M.Map QueryId (Eigenvector PageId Double)
+                                                            -> (Ranking Double PageId, Eigenvector PageId Double)
+                                                            )
+                          nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
+                                                                  (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
+                                                                  pageRankConvergence queries featureGraphs nodeDistr
 
-                      eigvs = initialEigenVmap
-                      emptyRanking :: Ranking Double PageId
-                      emptyRanking = Ranking.fromSortedList []
+                          eigvs = initialEigenVmap
+                          emptyRanking :: Ranking Double PageId
+                          emptyRanking = Ranking.fromSortedList []
 
-                      eigvss :: [M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)]
-                      eigvss = iterate f $ fmap (\eigv -> (emptyRanking, eigv)) initialEigenVmap
-                        where
-                          f :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double) -> M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
-                          f accum = withStrategy (parTraversable $ evalTraversable rseq)
-                                         $ fmap (\f -> f params' eigvs) nextPageRankIter
-                            where eigvs = fmap snd accum
+                          eigvss :: [M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)]
+                          eigvss = iterate f $ fmap (\eigv -> (emptyRanking, eigv)) initialEigenVmap
+                            where
+                              f :: M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double) -> M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)
+                              f accum = withStrategy (parTraversable $ evalTraversable rseq)
+                                             $ fmap (\f -> f params' eigvs) nextPageRankIter
+                                where eigvs = fmap snd accum
 
-                  mapM_ (storeRankingData' outputFilePrefix ("walk-tele-" <> show teleportation)) $  [(i, fmap fst iterResult) | (i, iterResult) <- zip [1..20] eigvss]-- zip [1..20] eigvss
+                      mapM_ (storeRankingData' outputFilePrefix ("walk-tele-" <> show teleportation<> "-posify-" <> show posifyEdgeWeightsOpt)) $  [(i, fmap fst iterResult) | (i, iterResult) <- zip [2..9] eigvss]-- zip [1..20] eigvss
 
 
       ModelFromFile modelFile -> do
