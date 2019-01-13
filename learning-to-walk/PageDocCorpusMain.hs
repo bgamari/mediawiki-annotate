@@ -12,6 +12,7 @@ import Data.Monoid
 import Control.Monad
 import Data.Hashable
 import Codec.Serialise
+import Data.Maybe
 
 import Options.Applicative
 import LookupWrapper
@@ -20,9 +21,6 @@ import CAR.TocFile as Toc
 import CAR.Types
 import CAR.Types.CborList
 import CAR.Types.Files
-
-
-
 
 queryHelpDesc :: PP.Doc
 queryHelpDesc = "Create PageDoc corpus and toc"
@@ -36,17 +34,23 @@ buildPageDocToc cborPath =
 convertPageToPageDocMode =
     go <$> argument str (metavar "CBOR" <> help "page cbor file")
        <*> option str (long "output" <> short 'o' <> help "output index path")
+       <*> flag Nothing (Just NeighborsFromInlinks) (long "inlinks" <> help "Include entities linking to this page as neighbors")
+       <*> flag Nothing (Just NeighborsFromOutlinks) (long "outlinks" <> help "Include entities linked to by this page as neighbors")
   where
-    go inputPath outputPath = do
+    go inputPath outputPath neighborsFromInlinks neighborsFromOutlinks = do
         pages <- readPagesFile inputPath
-        exportPageDocsFromPages pages outputPath
+        exportPageDocsFromPages pages outputPath whichNeighbors
+      where     whichNeighbors :: [WhichNeighbors]
+                whichNeighbors = catMaybes [neighborsFromInlinks, neighborsFromOutlinks]
 
-    exportPageDocsFromPages:: [Page] -> FilePath -> IO ()
-    exportPageDocsFromPages pagesToExport outPath = do
+
+
+    exportPageDocsFromPages:: [Page] -> FilePath -> [WhichNeighbors] -> IO ()
+    exportPageDocsFromPages pagesToExport outPath whichNeighbors = do
         putStr "Writing pagedocs..."
         let edgeDocFile = outPath
     --     writeCarFile edgeDocFile $ map pageToEdgeDocs pagesToExport
-        writeCborList outPath (Just (1::Int)) $ foldMap pageToPageDocs pagesToExport
+        writeCborList outPath (Just (whichNeighbors)) $ foldMap (pageToPageDocs whichNeighbors) pagesToExport
         putStrLn "done"
 
 

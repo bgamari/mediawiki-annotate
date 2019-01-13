@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module LookupWrapper where
 
@@ -26,6 +27,10 @@ import Data.Hashable
 import Data.Maybe
 
 import qualified Data.SmallUtf8 as Utf8
+
+
+data WhichNeighbors = NeighborsFromOutlinks | NeighborsFromInlinks
+    deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 
 -- ---------------------------------------------
 -- Fetch pages from cbor
@@ -92,17 +97,24 @@ instance Hashable id => Hashable (AbstractDoc id) where
 
 -- -------  build ------------------
 
-pageToPageDocs :: Page -> [PageDoc]
-pageToPageDocs page =
+pageToPageDocs :: [WhichNeighbors] -> Page -> [PageDoc]
+pageToPageDocs whichNeighbors page =
     [convertPage page]
   where
+    fetchNeighbors :: Page -> WhichNeighbors -> [PageId]
+    fetchNeighbors page whichNeighbor =
+        case whichNeighbor of
+            NeighborsFromOutlinks -> pageLinkTargetIds page
+            NeighborsFromInlinks -> fromMaybe [] $ getMetadata _InlinkIds (pageMetadata page)
+            _ -> []
+
     convertPage :: Page -> PageDoc
     convertPage page@(Page pageName pageId _ _ _)  =
       let
         pageDocId             = pageId
         pageDocArticleId      = pageId
         pageDocNeighbors      = HS.fromList
-                              $ [pageId] ++ pageLinkTargetIds page
+                              $ [pageId] ++ concat (fmap (fetchNeighbors page) whichNeighbors)
         pageDocContent        = ""
       in AbstractDoc {..}
 
@@ -110,7 +122,7 @@ pageToPageDocs page =
 pageDocHasLinks :: AbstractDoc id -> Bool
 pageDocHasLinks p =  (>1) $ length $ pageDocNeighbors p
 
-pagesToPageDocs :: [Page] -> [PageDoc]
-pagesToPageDocs =
-    foldMap (pageToPageDocs)
+pagesToPageDocs :: [WhichNeighbors] -> [Page] -> [PageDoc]
+pagesToPageDocs whichNeighbors =
+    foldMap (pageToPageDocs whichNeighbors)
 
