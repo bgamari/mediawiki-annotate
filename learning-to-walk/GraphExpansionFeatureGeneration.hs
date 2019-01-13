@@ -159,7 +159,7 @@ opts =
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
-    <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound])) <> value Exponentiate))
+    <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))  ))
     <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
     <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
     <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
@@ -722,7 +722,7 @@ produceWalkingGraph :: forall edgePh. ()
                     -> Eigenvector PageId Double
                     -> (Ranking Double PageId, Eigenvector PageId Double)
 produceWalkingGraph edgeFSpace (prh@PageRankHyperParams {..}) conv featureGraph query nodeDistr =
--- prh : pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
+-- prh : pageRankExperimentSettings posifyEdgeWeights graphWalkModel teleportation
   \params eigv ->
     nextRerankIter params eigv
   where
