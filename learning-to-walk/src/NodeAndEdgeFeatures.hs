@@ -261,8 +261,8 @@ generateEdgeFeatureGraph edgeFSpace
             Graph.graphFromEdgesAndSingletons edgeFeaturesGraph singletonNodes
 
     in traceShow ("generateEdgeFeatureGraph", query,
-                   Graph.numNodes edgeFeatureGraphWithSingleNodes,
-                   F.dimension $ F.featureSpace $ head $ HM.elems allHyperEdges)
+                   " nodes:",Graph.numNodes edgeFeatureGraphWithSingleNodes,
+                   " edgeFeatures:", F.dimension $ F.featureSpace $ head $ HM.elems allHyperEdges)
       edgeFeatureGraphWithSingleNodes
 
 edgesFromParas :: forall edgeFSpace.
@@ -324,7 +324,8 @@ edgesFromPages edgeFSpace pagesLookup entityRuns =
                  -> F.FeatureVec EdgeFeature edgeFSpace Double
         edgeFeat pageId entityEntry source pg = edgePageScoreVec edgeFSpace source entityEntry pg
 
-        divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
+--         divideEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
+        divideEdgeFeats feats cardinality = feats -- todo: Undo (temporarily deactivating feature division to diagnose loss of MAP)
 
 
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
