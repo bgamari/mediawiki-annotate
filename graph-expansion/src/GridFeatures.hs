@@ -348,12 +348,16 @@ noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) =
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = True
 noEdgesFromPageLinkLink x = nothingElseButAggr x
 
-
-
 nothingElseButAggr :: CombinedFeature -> Bool
 nothingElseButAggr (Left (EntRetrievalFeature Aggr _)) = True
 nothingElseButAggr (Right (EdgeRetrievalFeature _ Aggr _)) = True
 nothingElseButAggr _ = False
+
+
+onlyExpEcmTestFeature :: CombinedFeature -> Bool
+onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 EcmX ParagraphIdx)) ScoreF)) = True
+onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX ParagraphIdx)) ScoreF)) = True
+onlyExpEcmTestFeature _ = False
 
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
