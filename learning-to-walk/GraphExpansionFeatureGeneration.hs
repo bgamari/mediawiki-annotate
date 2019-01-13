@@ -419,7 +419,6 @@ main = do
 
 
 
-
     case modelSource of
       GraphWalkTrainModel modelFile -> do
           let updatedModelFile = modelFile <> "walk.json"
@@ -469,23 +468,24 @@ main = do
                   initialEigenv graph' = PageRank.uniformInitial mapping
                     where !mapping = DenseMapping.mkDenseMapping (nodeSet graph')
 
+                  -- todo should we should parallelize nextPageRankIter computation: parallelize produceWalkingGraph over queries?
+                  -- todo: no, because the evaluation is driven by coordinatAscent (via: rerank query w)
+                  -- todo: but can we move to the global name space?
+
+                  -- todo: we call it repeatedly with the same eigvs, (oncefor the iteration and once for the computing the ranking. Is this intentional?
+                  -- nextPageRankIter holds a map from query  to a function that computes one step of pagerank given a parameter :: WeightVec
+                  nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> M.Map QueryId (Eigenvector PageId Double) -> (Ranking Double PageId, Eigenvector PageId Double))
+                  nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
+                                                          (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
+                                                          pageRankConvergence queries featureGraphs nodeDistr
+
                   iterate :: StdGen
                           -> WeightVec EdgeFeature edgePh
                           -> M.Map QueryId (Eigenvector PageId Double)
                           -> [(WeightVec EdgeFeature edgePh, M.Map QueryId (Eigenvector PageId Double), M.Map QueryId (Ranking Double (PageId, IsRelevant)))]
                   iterate gen0 params eigvs =
 
-                          -- todo should we should parallelize nextPageRankIter computation: parallelize produceWalkingGraph over queries?
-                          -- todo: no, because the evaluation is driven by coordinatAscent (via: rerank query w)
-                          -- todo: but can we move to the global name space?
-
-                          -- todo: we call it repeatedly with the same eigvs, (oncefor the iteration and once for the computing the ranking. Is this intentional?
-                          -- nextPageRankIter holds a map from query  to a function that computes one step of pagerank given a parameter :: WeightVec
-                      let nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> M.Map QueryId (Eigenvector PageId Double) -> (Ranking Double PageId, Eigenvector PageId Double))
-                          nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
-                                                                  (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                                  pageRankConvergence queries featureGraphs nodeDistr
-
+                      let
                           rerank :: QueryId -> WeightVec EdgeFeature edgePh -> Ranking Double (PageId, IsRelevant)
                           rerank query w =
                               let (ranking, _pageRank) = (nextPageRankIter >!< query) w eigvs     -- one step of pagerank for this query, then take ranking
@@ -518,7 +518,13 @@ main = do
                       in (params', eigvs',  rankings') : iterate gen2 params' eigvs'
 
                   iters = iterate gen0 initParams' (fmap initialEigenv featureGraphs)
-                  (newParams, eigenvs, trainRanking):_ = drop 2 iters
+
+                  dropQrels :: Ranking Double (PageId, IsRelevant) -> (Ranking Double PageId)
+                  dropQrels annRanking = fmap fst annRanking
+              mapM_ (storeRankingData' outputFilePrefix ("trainwalk-tele-" <> show teleportation)) $  [(i, fmap dropQrels r) | (i, (_,_,r)) <- zip [1..4] iters]-- zip [1..20] eigvss -- zip [1..20] iters -- eigenvs
+
+              let
+                  (newParams, _eigenvs, trainRanking):_ = drop 2 iters
                   trainScore :: Double
                   trainScore = metric trainRanking
 
@@ -526,30 +532,7 @@ main = do
               let model = Model newParams
                   formatQuery pageId = CAR.RunFile.QueryId $ T.pack $ unpackPageId pageId
 
-                  storeRankingData' ::  FilePath
-                           -> M.Map  CAR.RunFile.QueryId (Ranking Double (PageId, IsRelevant))
-                           -> Double
-                           -> String
-                           -> IO ()
-                  storeRankingData' outputFilePrefix ranking metricScore modelDesc = do
-                      putStrLn $ "Model "++modelDesc++" test metric "++ show (metricScore) ++ " MAP."
-                      CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
-                           $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
-                           $ ranking
-                    where l2rRankingToRankEntries methodName rankings =
-                              [ CAR.RunFile.RankingEntry { carQueryId = query
-                                                         , carDocument = doc
-                                                         , carRank = rank
-                                                         , carScore = rankScore
-                                                         , carMethodName = methodName
-                                                         }
-                              | (query, ranking) <- M.toList rankings
-                              , ((rankScore, (doc, rel)), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
-                              ]
-
-
               storeModelData outputFilePrefix updatedModelFile model trainScore "trainwalk"
-              storeRankingData' outputFilePrefix trainRanking trainScore "trainwalk"
 
 
 
@@ -590,9 +573,7 @@ main = do
                                                         )
                       nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
                                                               (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
-                                                              -- !!!!
                                                               pageRankConvergence queries featureGraphs nodeDistr
-
 
                       eigvs = initialEigenVmap
                       emptyRanking :: Ranking Double PageId
@@ -606,29 +587,7 @@ main = do
                                          $ fmap (\f -> f params' eigvs) nextPageRankIter
                             where eigvs = fmap snd accum
 
-                      storeRankingData' :: (Int, M.Map QueryId (Ranking Double PageId, Eigenvector PageId Double)) -> IO ()
-                      storeRankingData' (iterNo, iterResult) = do
-                          let -- eigvs = fmap snd accum
-                              ranking :: M.Map QueryId (Ranking Double PageId)
-                              ranking = fmap fst iterResult
-                              modelDesc = "walk-tele-" <> show teleportation <> "-iteration-"<> show iterNo
-
-                          CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
-                               $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
-                               $ ranking
-
-                        where l2rRankingToRankEntries methodName rankings =
-                                  [ CAR.RunFile.RankingEntry { carQueryId = query
-                                                             , carDocument = doc
-                                                             , carRank = rank
-                                                             , carScore = rankScore
-                                                             , carMethodName = methodName
-                                                             }
-                                  | (query, ranking) <- M.toList rankings
-                                  , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
-                                  ]
-
-                  mapM_ storeRankingData' $ zip [1..20] eigvss
+                  mapM_ (storeRankingData' outputFilePrefix ("walk-tele-" <> show teleportation)) $  [(i, fmap fst iterResult) | (i, iterResult) <- zip [1..20] eigvss]-- zip [1..20] eigvss
 
 
       ModelFromFile modelFile -> do
@@ -702,6 +661,25 @@ main = do
               trainMe miniBatchParams gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
 
 -- --------------------------------------
+
+storeRankingData' :: String -> String -> (Int, M.Map QueryId (Ranking Double PageId)) -> IO ()
+storeRankingData' outputFilePrefix modelDesc0 (iterNo, ranking) = do
+      let modelDesc = modelDesc0 <> "-iteration-"<> show iterNo -- "walk-tele-" <> show teleportation <> "-iteration-"<> show iterNo
+
+      CAR.RunFile.writeEntityRun (outputFilePrefix++"-model-"++modelDesc++".run")
+           $ l2rRankingToRankEntries (CAR.RunFile.MethodName $ T.pack $ "l2r "++modelDesc)
+           $ ranking
+
+    where l2rRankingToRankEntries methodName rankings =
+              [ CAR.RunFile.RankingEntry { carQueryId = query
+                                         , carDocument = doc
+                                         , carRank = rank
+                                         , carScore = rankScore
+                                         , carMethodName = methodName
+                                         }
+              | (query, ranking) <- M.toList rankings
+              , ((rankScore, doc), rank) <- (Ranking.toSortedList ranking) `zip` [1..]
+              ]
 
 makeNextPageRankIter ::  FeatureSpace EdgeFeature edgePh
                      -> PageRankHyperParams
