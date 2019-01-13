@@ -109,7 +109,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature
-                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDivideEdgeFeats
+                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -291,7 +291,7 @@ main = do
         featureGraphSettings :: FeatureGraphSettings
         featureGraphSettings = ( not $ (CandidateNoEdgeDocs `elem` experimentSettings)
                                , not $ (CandidateNoPageDocs `elem` experimentSettings)
-                               , CandidateDivideEdgeFeats `elem` experimentSettings
+                               , not $ (CandidateDisableDivideEdgeFeats `elem` experimentSettings)
                                )
         teleportation = case teleportations of
                           (x:_) -> x
@@ -865,7 +865,7 @@ filterFeaturesByExperimentSetting settings fname =
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True
-                    CandidateDivideEdgeFeats -> const True
+                    CandidateDisableDivideEdgeFeats -> const True
                     CandidateStrict -> const True
                     CandidateGenerous -> const True
 
