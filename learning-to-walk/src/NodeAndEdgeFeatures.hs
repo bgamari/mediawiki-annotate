@@ -126,7 +126,7 @@ isLowFeature :: forall entityPh edgePh.
              -> CombinedFeatureVec entityPh edgePh
              -> Bool
 isLowFeature spaces@(FeatureSpaces {..}) featVec =
-    F.l2Norm (defaultCombined F.^-^ featVec) < 0.1
+    F.l2Norm (defaultCombined F.^-^ featVec) < 10
   where
     !defaultCombined = stackFeatures spaces (makeDefaultEntFeatVector entityFSpace) (makeDefaultEdgeFeatVector edgeFSpace)
 
