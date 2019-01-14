@@ -80,7 +80,7 @@ lookupMode =
 
 modes = subparser
     $ command "convert-page" (info (helper <*> convertPageToPageDocMode) (progDesc "Convert pages to pagedocs" <> fullDesc))
-   <> command "toc" (info (helper <*> buildTocMode) (progDesc "build toc filed for edgedocs" <> fullDesc))
+   <> command "toc" (info (helper <*> buildTocMode) (progDesc "build toc filed for pagedocs" <> fullDesc))
    <> command "lookup" (info (helper <*> lookupMode) (progDesc "get pagedoc by pageId" <> fullDesc))
 
 main :: IO ()
