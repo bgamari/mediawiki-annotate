@@ -365,7 +365,7 @@ escapeSectionPath (SectionPath page headings) =
 
 parseSectionPath :: T.Text -> Maybe SectionPath
 parseSectionPath s
-  | pid:hs <- T.split (== '/') s =
+  | pid:hs <- T.split (== '/') s =   -- Todo this is wrong, as entity ids can contain slashes
         Just $ SectionPath (packPageId $ T.unpack pid) (map (packHeadingId . T.unpack) hs)
   | otherwise = Nothing
 
