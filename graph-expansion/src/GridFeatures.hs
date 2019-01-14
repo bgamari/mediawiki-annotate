@@ -182,32 +182,6 @@ edgeSomeFSpace = F.mkFeatureSpace allEdgeFeatures
 -- filtering of feature spaces
 -- -------------------------------------------
 
---
--- onlyAggrEdge :: EdgeFeature -> Bool
--- onlyAggrEdge (EdgeRetrievalFeature Aggr runf) = True
--- onlyAggrEdge _  = False
---
--- onlyScoreEdge :: EdgeFeature -> Bool
--- onlyScoreEdge (EdgeRetrievalFeature _ ScoreF) = True
--- onlyScoreEdge _  = False
---
--- onlyRREdge :: EdgeFeature -> Bool
--- onlyRREdge (EdgeRetrievalFeature _ RecipRankF) = True
--- onlyRREdge _  = False
---
---
--- onlyLessFeaturesEdge :: EdgeFeature -> Bool
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmX ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _) = True
--- onlyLessFeaturesEdge _  = False
---
--- onlyNoneFeaturesEdge :: EdgeFeature -> Bool
--- onlyNoneFeaturesEdge (EdgeRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _) = True
--- onlyNoneFeaturesEdge _  = False
 
 onlyPageEdge :: EdgeFeature -> Bool
 onlyPageEdge (EdgeRetrievalFeature  _ (GridRun' (GridRun Title _ _ _)) _) = True

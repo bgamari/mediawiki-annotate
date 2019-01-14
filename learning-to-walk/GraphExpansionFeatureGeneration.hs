@@ -110,7 +110,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
-                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats
+                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -290,10 +290,13 @@ main = do
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
         featureGraphSettings :: FeatureGraphSettings
-        featureGraphSettings = ( not $ (CandidateNoEdgeDocs `elem` experimentSettings)
-                               , not $ (CandidateNoPageDocs `elem` experimentSettings)
-                               , not $ (CandidateDisableDivideEdgeFeats `elem` experimentSettings)
-                               )
+        featureGraphSettings = FeatureGraphSettings
+                                 { fgsNoEdgeDocs = not $ (CandidateNoEdgeDocs `elem` experimentSettings)
+                                 , fgsNoPageDocs = not $ (CandidateNoPageDocs `elem` experimentSettings)
+                                 , fgsDisableDivideEdgeFeats =  not $ (CandidateDisableDivideEdgeFeats `elem` experimentSettings)
+                                 , fgsRemoveLowFeatures = CandidateRemoveLowNodes `elem` experimentSettings
+                                 }
+
         teleportation = case teleportations of
                           (x:_) -> x
                           []    -> 0.1
