@@ -2,6 +2,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ExistentialQuantification #-}
+
 
 module PageRank
    ( -- * Principle eigenvector representation
@@ -16,6 +19,8 @@ module PageRank
    , persPageRankWithSeeds
    , persPageRankWithNonUniformSeeds
    , persPageRankWithSeedsAndInitial
+     -- * Exception Handling
+   , PageRankException (..)
    ) where
 
 import GHC.Stack
@@ -30,13 +35,37 @@ import Data.Monoid
 import Data.Hashable
 import Data.Ix
 import Data.Bifunctor
+import Control.Exception
+import Data.Typeable
 
 import DenseMapping
 import Graph
 
+data PageRankException = forall n a. (Show n, Show a, VU.Unbox a)
+                                  => PageRankNanInResult { pageRankNanAlpha :: a
+                                                         , pageRankNanSeeds :: HM.HashMap n a
+                                                         , pageRankNanGraph :: Graph n a
+                                                         , pageRankNanXs    :: Eigenvector n a
+                                                         }
+                           deriving (Typeable)
+
+
+instance Show PageRankException where
+    show (PageRankNanInResult alpha seeds graph xs) =
+        unlines [ "persPageRank: NaN in result"
+                , ""
+                , "alpha = " ++ show alpha
+                , "seeds = " ++ show seeds
+                , "graph = " ++ show graph
+                , "eigenvector = " ++ show xs
+                ]
+instance Exception PageRankException
+
 data Eigenvector n a = Eigenvector { eigenvectorMapping :: !(DenseMapping n)
                                    , eigenvectorValues  :: !(VI.Vector VU.Vector (DenseId n) a)
                                    }
+instance (Show n, Show a, VU.Unbox a) => Show (Eigenvector n a) where
+    show = show . toEntries
 
 -- | A transition matrix
 type Transition n = VI.Vector VU.Vector (DenseId n, DenseId n)
@@ -228,14 +257,16 @@ persPageRankWithSeedsAndInitial mapping initial alpha seeds graph
     in initial : map (Eigenvector mapping . checkNaN) (iterate nextiter (eigenvectorValues initial))
   where
     checkNaN xs
-      | VU.any isNaN $ VI.vector xs = error $ unlines $
-        [ "persPageRank: NaN in result"
-        , ""
-        , "alpha = " ++ show alpha
-        , "seeds = " ++ show seeds
-        , "graph = " ++ show graph
-        , "eigenvector = " ++ show xs
-        ]
+      | VU.any isNaN $ VI.vector xs = throw $ PageRankNanInResult alpha seeds graph (Eigenvector mapping xs)
+--
+--       $ unlines $
+--         [ "persPageRank: NaN in result"
+--         , ""
+--         , "alpha = " ++ show alpha
+--         , "seeds = " ++ show seeds
+--         , "graph = " ++ show graph
+--         , "eigenvector = " ++ show xs
+--         ]
       | otherwise = xs
     !nodeRng  = denseRange mapping
     !numNodes = rangeSize nodeRng

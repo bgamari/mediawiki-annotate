@@ -28,6 +28,7 @@ import Data.Aeson
 import System.Random
 import GHC.Generics
 import GHC.Stack
+import Control.Exception
 
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
@@ -596,7 +597,13 @@ main = do
                                              $ fmap (\f -> f params' eigvs) nextPageRankIter
                                 where eigvs = fmap snd accum
 
-                      mapM_ (storeRankingData' outputFilePrefix ("walk-tele-" <> show teleportation<> "-posify-" <> show posifyEdgeWeightsOpt)) $  [(i, fmap fst iterResult) | (i, iterResult) <- zip [2..9] eigvss]-- zip [1..20] eigvss
+
+                          pageRankExceptionHandler :: PageRankException -> IO ()
+                          pageRankExceptionHandler ex = putStrLn $ show ex
+                      mapM_ ( handle pageRankExceptionHandler .
+                                storeRankingData' outputFilePrefix ("walk-tele-" <> show teleportation<> "-posify-" <> show posifyEdgeWeightsOpt) )
+
+                          $  [(i, fmap fst iterResult) | (i, iterResult) <- zip [2..9] eigvss]
 
 
       ModelFromFile modelFile -> do
