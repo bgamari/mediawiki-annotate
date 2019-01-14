@@ -109,7 +109,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
   deriving (Show)
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
-                        | ExpPage | ExpSection | ExpEcmTestFeature
+                        | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
                         | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
@@ -874,6 +874,7 @@ filterFeaturesByExperimentSetting settings fname =
                     NoEdgesFromPages -> noEdgesFromPages
                     NoEdgesFromPageLinkLink -> noEdgesFromPageLinkLink
                     ExpEcmTestFeature -> onlyExpEcmTestFeature
+                    OnlyNoneXFeature -> onlyNoneX
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True

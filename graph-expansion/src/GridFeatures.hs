@@ -361,6 +361,11 @@ onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 E
 onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX ParagraphIdx)) ScoreF)) = True
 onlyExpEcmTestFeature _ = False
 
+onlyNoneX :: CombinedFeature -> Bool
+onlyNoneX (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
+onlyNoneX (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
+onlyNoneX _ = False
+
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
 
