@@ -406,6 +406,11 @@ main = do
         !collapsedEntityRun =
             collapseRuns
             $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
+        collapsedAspectRun :: M.Map QueryId [MultiRankingEntry AspectId GridRun]
+        !collapsedAspectRun =
+            collapseRuns
+            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) aspectRuns
+        collapsedEdgedocRun :: M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
         !collapsedEdgedocRun =
             collapseRuns
             $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
@@ -413,6 +418,7 @@ main = do
         tr x = traceShow x x
     putStrLn "Computed collapsed runs."
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
+    putStrLn $ "queries from collapsed aspect runs: "++show (M.size collapsedAspectRun)
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
     let candidateGraphGenerator :: CandidateGraphGenerator
@@ -440,6 +446,7 @@ main = do
                     where
                       edgeRun = collapsedEdgedocRun >!< query
                       entityRun = collapsedEntityRun >!< query
+                      aspectRun = collapsedAspectRun >!< query
 
 
 
