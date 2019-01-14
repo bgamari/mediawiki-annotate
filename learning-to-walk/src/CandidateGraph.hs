@@ -45,6 +45,7 @@ data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
                              , candidateEntityRuns :: [MultiRankingEntry PageId GridRun]
                              , candidatePages :: [PageDoc]
+                             , candidateAspectRuns :: [MultiRankingEntry AspectId GridRun]
                              }
                 deriving (Generic)
 
@@ -63,7 +64,7 @@ selectGenerousCandidateGraph
     :: EdgeDocsLookup
     -> PagesLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun _aspectRun =
+selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun aspectRun =
     candidates
   where
     !candidates =
@@ -71,6 +72,8 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
         Candidates { candidateEdgeDocs = edgeDocs''
                    , candidateEdgeRuns = edgeRun''
                    , candidateEntityRuns = entityRun''
+                   , candidateAspectRuns = aspectRun''
+--                    , candidateAspectDocs = aspectDocs''
                    , candidatePages = [] --entityPages
                    }
 
@@ -95,17 +98,28 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
     -- and b) they have an edgeRun entry
 
     paraIdToEdgeRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- edgeRun]
+    aspectIdToAspectRun :: HM.HashMap AspectId (MultiRankingEntry AspectId GridRun)
+    aspectIdToAspectRun = HM.fromList [ (multiRankingEntryGetDocumentName run, run) | run <- aspectRun]
     pageIdToEntityRun = [(multiRankingEntryGetDocumentName run, run)  | run <- entityRun]
 
     edgeDocs = edgeDocsLookup $ HM.keys paraIdToEdgeRun
+--     aspectDocs = aspectDocsLookup $ HM.keys aspectIdToAspectRun -- todo cache aspect docs
 
 
     (edgeRun', edgeDocs')  = unzip
                                       $ [ (edgeEntry, edgeDoc)
-                                        |edgeDoc <- edgeDocs
+                                        | edgeDoc <- edgeDocs
                                         , let paraId = edgeDocParagraphId edgeDoc
                                         , Just edgeEntry <- pure $ paraId `HM.lookup` paraIdToEdgeRun
                                         ]
+
+
+--     (aspectRun', aspectDocs')  = unzip
+--                                       $ [ (aspectEntry, aspectDoc)
+--                                         | aspectDoc <- aspectDocs
+--                                         , let aspectId = aspectDocAspectId aspectDoc
+--                                         , Just aspectEntry <- pure $ aspectId `HM.lookup` aspectIdToAspectRun
+--                                         ]
 
   -- todo add entities adjacent to edgedocs
 
@@ -114,29 +128,20 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
                    ,  not $ "enwiki:Category:" `T.isPrefixOf` (T.pack $ unpackPageId docName)
                    ]
 
+    aspectRun'  =  [ entry
+                   | (aspectName, entry) <- HM.toList aspectIdToAspectRun
+--                    ,  not $ "enwiki:Category:" `T.isPrefixOf` (T.pack $ unpackPageId docName)
+                   ]
+
     entityRun'' = uniqBy multiRankingEntryGetDocumentName (entityRun')-- <> entityRunFake')
     edgeRun'' = uniqBy multiRankingEntryGetDocumentName edgeRun'
     edgeDocs'' = uniqBy edgeDocParagraphId edgeDocs'
---     entityPages :: [PageDoc]
---     entityPages = force $ pagesLookup $  HS.toList $ HS.fromList entitiesFromRuns --`HS.union` entitiesFromEdgeDocs
---         where entitiesFromRuns :: [PageId]
---               entitiesFromRuns = fmap multiRankingEntryGetDocumentName entityRun''
---               entitiesFromEdgeDocs :: HS.HashSet PageId
---               entitiesFromEdgeDocs = mconcat (fmap edgeDocNeighbors edgeDocs'')
+    aspectRun'' = uniqBy multiRankingEntryGetDocumentName aspectRun'
+--     aspectDocs'' = uniqBy aspectDocAspectId aspectDocs'
 
     fakeMultiPageEntry query doc =
         buildMultiTrecEntry  1000 (0.0, [])
 
---     fakeMultiPageEntry query page =
---            MultiRankingEntry { multiRankingEntryCollapsed = fakePageEntry query page
---                              , multiRankingEntryAll       = []
---                                                               }
---     fakePageEntry query page =     CAR.RunFile.RankingEntry { carQueryId     = query
---                                          , carDocument    = page
---                                          , carRank        = 1000
---                                          , carScore       = 0.0
---                                          , carMethodName  = CAR.RunFile.MethodName $ "fake"
---                                          }
 
 
 selectStrictCandidateGraph
@@ -148,6 +153,7 @@ selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''
                , candidatePages = entityPages
+               , candidateAspectRuns = []
                }
   where
     restrict :: (Eq a, Hashable a) => [a] -> HM.HashMap a b -> HM.HashMap a b

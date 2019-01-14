@@ -96,13 +96,14 @@ combineEntityEdgeFeatures spaces@(FeatureSpaces {..})
                                           , candidateEdgeRuns = edgeRun
                                           , candidateEntityRuns = entityRun
                                           , candidatePages = candidatePages
+                                          , candidateAspectRuns = aspectRun
                                           } =
     let
         edgeFeatureGraph :: Graph PageId (EdgeFeatureVec edgePh)
         edgeFeatureGraph = generateEdgeFeatureGraph edgeFSpace featureGraphSettings query pagesLookup cands
 
         nodeFeatures :: HM.HashMap PageId (EntityFeatureVec entityPh)
-        nodeFeatures = generateNodeFeatures entityFSpace query entityRun allEdgeDocs
+        nodeFeatures = generateNodeFeatures entityFSpace query entityRun aspectRun allEdgeDocs
 
 
         -- no need to use nodeEdgeFeatureGraph
@@ -208,32 +209,47 @@ changeKey f map_ =
 
 -- | generate node features
 generateNodeFeatures :: F.FeatureSpace EntityFeature entityPh
-                     -> QueryId -> [MultiRankingEntry PageId GridRun] -> [EdgeDoc]
+                     -> QueryId
+                     -> [MultiRankingEntry PageId GridRun]
+                     -> [MultiRankingEntry AspectId GridRun]
+                     -> [EdgeDoc]
                      -> HM.HashMap PageId (EntityFeatureVec entityPh)
-generateNodeFeatures entityFSpace query entityRun allEdgeDocs =
+generateNodeFeatures entityFSpace query entityRun aspectRun allEdgeDocs =
    let
-        universalGraph :: HM.HashMap PageId [EdgeDoc]
-        universalGraph = edgeDocsToUniverseGraph allEdgeDocs
-
-   in HM.fromList [ (entity, (entityScoreVec entityFSpace entityRankEntry edgeDocs))
-                  | entityRankEntry <- entityRun
+        pageIdToEdgeDocs :: HM.HashMap PageId [EdgeDoc]
+        pageIdToEdgeDocs = edgeDocsToUniverseGraph allEdgeDocs
+        pageIdToAspectRun :: HM.HashMap PageId [MultiRankingEntry AspectId GridRun]
+        pageIdToAspectRun = HM.fromListWith (<>)
+                            [ (aspectPageId, [entry])
+                            | entry <- aspectRun
+                            , let (aspectPageId, _) = multiRankingEntryGetDocumentName entry
+                            ]
+   in HM.fromList [ (entity, (entityScoreVec entityFSpace entityRankEntry aspectRankEntries edgeDocs))
+                  | entityRankEntry <- entityRun -- todo aspect: also include nodes that only appear in aspect rankings
                   , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
-                  , let edgeDocs = fromMaybe [] $ entity `HM.lookup` universalGraph
+                  , let aspectRankEntries = fromMaybe [] $ entity `HM.lookup` pageIdToAspectRun
+                  , let edgeDocs = fromMaybe [] $ entity `HM.lookup` pageIdToEdgeDocs
                   ]
+  where aspectHasPageId :: PageId -> AspectId -> Bool
+        aspectHasPageId pageId1 (pageId2, _) = pageId1 == pageId2
 
 
-entityScoreVec :: F.FeatureSpace EntityFeature entityPh -> MultiRankingEntry PageId GridRun -> [EdgeDoc] -> EntityFeatureVec entityPh
-entityScoreVec entityFSpace entityRankEntry incidentEdgeDocs = makeEntFeatVector entityFSpace (
+entityScoreVec :: F.FeatureSpace EntityFeature entityPh
+               -> MultiRankingEntry PageId GridRun
+               -> [MultiRankingEntry AspectId GridRun]
+               -> [EdgeDoc]
+               -> EntityFeatureVec entityPh
+entityScoreVec entityFSpace entityRankEntry aspectRankEntries incidentEdgeDocs = makeEntFeatVector entityFSpace (
       [ --(EntIncidentEdgeDocsRecip, recip numIncidentEdgeDocs)
   --  , (EntDegreeRecip, recip degree)
        (EntDegree, degree)
       ]
-      ++ entityScoreVecFromMultiRankings entityRankEntry
+      ++ entityScoreVecFromMultiRankings entityRankEntry aspectRankEntries
      )
 
   where
-   numIncidentEdgeDocs = realToFrac $ length incidentEdgeDocs
-   degree =  realToFrac $ HS.size $ HS.unions $ fmap edgeDocNeighbors incidentEdgeDocs
+--    numIncidentEdgeDocs = realToFrac $ length incidentEdgeDocs
+   degree =  realToFrac $ HS.size $ HS.unions $ fmap edgeDocNeighbors incidentEdgeDocs     -- todo aspect: degree only captures edgedocs: add PageDocs and AspectDocs
 
 
 
@@ -265,7 +281,7 @@ generateEdgeFeatureGraph edgeFSpace
         edgeFeaturesFromPage = if includeEdgesFromPages then edgesFromPages edgeFSpace pagesLookup entityRun divideEdgeFeats else []
 
         allHyperEdges :: HM.HashMap (PageId, PageId) (EdgeFeatureVec edgePh)
-        allHyperEdges = HM.fromListWith (F.^+^) $ edgeFeaturesFromPara ++ edgeFeaturesFromPage
+        allHyperEdges = HM.fromListWith (F.^+^) $ edgeFeaturesFromPara ++ edgeFeaturesFromPage -- todo aspects: edgeFeaturesFromAspects
 
         edgeFeaturesGraph :: [(PageId, PageId, EdgeFeatureVec edgePh)]
         edgeFeaturesGraph = [ (n1, n2, e)

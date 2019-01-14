@@ -279,7 +279,7 @@ makeFeatures entFSpace collapsedEntityRun =
                     | (query, entityRun) <- M.toList collapsedEntityRun
                     , entityRankEntry <- entityRun
                     , let pid = multiRankingEntryGetDocumentName entityRankEntry
-                    , let features =  makeEntFeatVector entFSpace (entityScoreVecFromMultiRankings entityRankEntry)
+                    , let features =  makeEntFeatVector entFSpace (entityScoreVecFromMultiRankings entityRankEntry [])
                     ]
 
 

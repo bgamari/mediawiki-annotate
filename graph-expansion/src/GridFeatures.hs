@@ -448,11 +448,18 @@ rankEdgeFeatures source run entry =
 
 
 
-entityScoreVecFromMultiRankings :: MultiRankingEntry PageId GridRun -> [(EntityFeature, Double)]
-entityScoreVecFromMultiRankings entityRankEntry =
+entityScoreVecFromMultiRankings :: MultiRankingEntry PageId GridRun -> [MultiRankingEntry AspectId GridRun] -> [(EntityFeature, Double)]
+entityScoreVecFromMultiRankings entityRankEntry aspectRankEntries =
       rankEntFeatures Aggr (multiRankingEntryCollapsed entityRankEntry)
-      ++ concat [ rankEntFeatures (GridRun' g) entry
-         | (g, entry) <- multiRankingEntryAll entityRankEntry
-         ]
+      ++ (featuresFromRankEntry entityRankEntry)
+      ++ (entityFeaturesFromAspects aspectRankEntries)
+  where
+     featuresFromRankEntry entityRankEntry =
+        concat [ rankEntFeatures (GridRun' g) entry
+                | (g, entry) <- multiRankingEntryAll entityRankEntry
+                ]
 
+     entityFeaturesFromAspects entries =
+        M.toList $ M.fromListWith (+)  -- multiple features with the same name? add their values!
+        $ concat $ fmap featuresFromRankEntry aspectRankEntries
 
