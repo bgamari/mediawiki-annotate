@@ -86,7 +86,7 @@ data RetrievalModel = Bm25 | Ql
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data ExpansionModel = NoneX | Rm | Rm1 | EcmX | EcmRm | EcmPsg | EcmPsg1
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
-data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx
+data IndexType = EcmIdx | EntityIdx | PageIdx | ParagraphIdx | AspectIdx
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 
 entityRunsF :: [GridRun]
@@ -99,6 +99,7 @@ entityRunsF = [ GridRun qm rm em it
                            ]
                            ++ [(EntityIdx, em) | em <- [minBound..maxBound]]
                            ++ [(PageIdx, em) | em <- [minBound..maxBound]]
+                           ++ [(AspectIdx, em) | em <- [minBound..maxBound]]
              ]
 
 
@@ -227,14 +228,19 @@ onlyRR x = nothingElseButAggr x
 onlyLessFeatures :: CombinedFeature -> Bool
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX AspectIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm AspectIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm1 EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm1 PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ Rm1 AspectIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg AspectIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 EntityIdx)) _)) = True
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 PageIdx)) _)) = True
+onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmPsg1 AspectIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ NoneX ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ Rm ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ Rm1 ParagraphIdx)) _)) = True
@@ -257,7 +263,7 @@ onlySimpleRmFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not
 
 onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
 onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
-     (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx])
+     (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
      &&  (retrievalModel == Bm25)
 
