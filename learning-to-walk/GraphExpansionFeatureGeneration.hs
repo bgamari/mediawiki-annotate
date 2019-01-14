@@ -280,6 +280,8 @@ main = do
     putStrLn $ "# numResults: "++ ( show (numResults))
 
     putStrLn $ " Experimentation settings: "++ (show experimentSettings)
+    putStrLn $ " edgeDocs lookup : "++ (show edgeDocsCborFile)
+    putStrLn $ " pageDocs lookup : "++ (show pagesDocCborFile)
     putStrLn $ " model comes from : "++ (show modelSource)
     putStrLn $ " teleport (only for page rank) : "++ (show teleportations)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpts)
