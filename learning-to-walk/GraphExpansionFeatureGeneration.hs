@@ -492,7 +492,7 @@ main = do
 
               -- only get the edge features out
               Just (F.FeatureMappingInto toEdgeVec) <- pure $ F.mapFeaturesInto (modelFeatures model) (edgeFSpace fspaces) (either (const Nothing) Just)
-
+              putStrLn $ "preparing graph walk ..."
               let initParams' :: WeightVec EdgeFeature edgePh
                   initParams' = coerce toEdgeVec $ modelWeights' model
 
@@ -510,10 +510,12 @@ main = do
                   -- nextPageRankIter holds a map from query  to a function that computes one step of pagerank given a parameter :: WeightVec
                   -- ! because we don't want to delay the computation. Danger of out-of-memory issues, but if we want multiple iterations we would need this anyway.
                   nextPageRankIter :: M.Map QueryId (WeightVec EdgeFeature edgePh -> M.Map QueryId (Eigenvector PageId Double) -> (Ranking Double PageId, Eigenvector PageId Double))
-                  !nextPageRankIter = makeNextPageRankIter (edgeFSpace fspaces)
+                  !nextPageRankIter = withStrategy (parTraversable rseq )
+                                     $ makeNextPageRankIter (edgeFSpace fspaces)
                                                           (PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation )
                                                           pageRankConvergence queries featureGraphs nodeDistr
-
+              putStrLn $ "...done preparing graph walk, starting interleaved optimization."
+              let
                   iterate :: StdGen
                           -> WeightVec EdgeFeature edgePh
                           -> M.Map QueryId (Eigenvector PageId Double)
