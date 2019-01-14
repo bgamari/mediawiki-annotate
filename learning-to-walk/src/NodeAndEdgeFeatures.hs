@@ -35,6 +35,7 @@ import qualified Data.List.NonEmpty as NE
 import Data.Bifunctor
 
 import CAR.Types hiding (Entity)
+import AspectUtils
 import GridFeatures
 
 import GraphExpansion
@@ -140,8 +141,9 @@ makeCombinedFeatureVec
     -> PagesLookup
     -> M.Map CAR.RunFile.QueryId [MultiRankingEntry PageId GridRun]
     -> M.Map CAR.RunFile.QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map CAR.RunFile.QueryId [MultiRankingEntry AspectId GridRun]
     -> M.Map (QueryId, T.Text) (CombinedFeatureVec entityPh edgePh)
-makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
+makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
     M.unions
     $ withStrategy (parBuffer 200 rwhnf)
       [ M.fromList
@@ -150,7 +152,8 @@ makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator page
         ]
       | (query, edgeRun) <- M.toList collapsedEdgedocRun
       , let entityRun = fromMaybe [] $ query `M.lookup` collapsedEntityRun
-      , let candidates = candidateGraphGenerator query edgeRun entityRun
+      , let aspectRun = fromMaybe [] $ query `M.lookup` collapsedAspectRun
+      , let candidates = candidateGraphGenerator query edgeRun entityRun aspectRun
       ]
 
 
@@ -162,11 +165,12 @@ makeStackedFeatures
     -> PagesLookup
     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map QueryId [MultiRankingEntry AspectId GridRun]
     -> M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityPh edgePh)
-makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
+makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
+                        $ makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
                         where crit = filterExpSettings (combinedFSpace fspaces)
 
         normalizer = zNormalizer $ M.elems docFeatures''
@@ -181,11 +185,12 @@ makeStackedFeatures'
     -> PagesLookup
     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+    -> M.Map QueryId [MultiRankingEntry AspectId GridRun]
     -> M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityPh edgePh)
-makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun =
+makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
     let docFeatures'' = withStrategy (parTraversable rwhnf)
                         $ fmap crit
-                        $ makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun
+                        $ makeCombinedFeatureVec fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
                         where crit = filterExpSettings (combinedFSpace fspaces)
 
         normalizer = zNormalizer $ M.elems docFeatures''

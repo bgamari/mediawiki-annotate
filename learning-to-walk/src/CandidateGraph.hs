@@ -24,6 +24,7 @@ import Data.Text as T
 
 import CAR.Types hiding (Entity)
 import CAR.Utils
+import AspectUtils
 import qualified CAR.RunFile as CarRun
 import GridFeatures
 
@@ -53,6 +54,7 @@ type CandidateGraphGenerator =
      QueryId
     -> [MultiRankingEntry ParagraphId GridRun]
     -> [MultiRankingEntry PageId GridRun]
+    -> [MultiRankingEntry AspectId GridRun]
     -> Candidates
 
 
@@ -61,7 +63,7 @@ selectGenerousCandidateGraph
     :: EdgeDocsLookup
     -> PagesLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun =
+selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun _aspectRun =
     candidates
   where
     !candidates =
@@ -141,7 +143,7 @@ selectStrictCandidateGraph
     :: EdgeDocsLookup
     -> PagesLookup
     -> CandidateGraphGenerator
-selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun =
+selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun _aspectRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''
