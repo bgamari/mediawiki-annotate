@@ -388,7 +388,7 @@ main = do
         (chunksOf 2 aspectRunFiles)
         :: IO [(GridRun, [RankingEntry AspectId])]
 
-    putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
+    putStrLn $ "Loaded AspectRuns: "<> show (length aspectRuns)
 
     putStrLn "Loading EdgeRuns..."
     edgeRuns <- fmap concat $ mapConcurrentlyL ncaps
