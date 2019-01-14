@@ -29,7 +29,7 @@ import Data.Maybe
 import qualified Data.SmallUtf8 as Utf8
 
 
-data WhichNeighbors = NeighborsFromOutlinks | NeighborsFromInlinks
+data WhichNeighbors = NeighborsFromOutlinks | NeighborsFromInlinks | NeighborsFromBidilinks
     deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 
 -- ---------------------------------------------
@@ -104,9 +104,15 @@ pageToPageDocs whichNeighbors page =
     fetchNeighbors :: Page -> WhichNeighbors -> [PageId]
     fetchNeighbors page whichNeighbor =
         case whichNeighbor of
-            NeighborsFromOutlinks -> pageLinkTargetIds page
-            NeighborsFromInlinks -> fromMaybe [] $ getMetadata _InlinkIds (pageMetadata page)
-            _ -> []
+            NeighborsFromOutlinks -> outlinks page
+            NeighborsFromInlinks -> inlinks page
+            NeighborsFromBidilinks ->
+                let outset = HS.fromList $ outlinks page
+                in  filter ( `HS.member` outset) $ inlinks page
+            x -> error $ "pageToPageDocs: No rules for WhichNeighbors "<> show x
+
+    outlinks page = pageLinkTargetIds page
+    inlinks page = fromMaybe [] $ getMetadata _InlinkIds (pageMetadata page)
 
     convertPage :: Page -> PageDoc
     convertPage page@(Page pageName pageId _ _ _)  =

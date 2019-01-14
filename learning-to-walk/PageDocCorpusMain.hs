@@ -36,12 +36,17 @@ convertPageToPageDocMode =
        <*> option str (long "output" <> short 'o' <> help "output index path")
        <*> flag Nothing (Just NeighborsFromInlinks) (long "inlinks" <> help "Include entities linking to this page as neighbors")
        <*> flag Nothing (Just NeighborsFromOutlinks) (long "outlinks" <> help "Include entities linked to by this page as neighbors")
+       <*> flag Nothing (Just NeighborsFromBidilinks) (long "bidilinks" <> help "Include entities only when in a bidirectional link (linked to and from this page) as neighbors")
   where
-    go inputPath outputPath neighborsFromInlinks neighborsFromOutlinks = do
+    go inputPath outputPath neighborsFromInlinks neighborsFromOutlinks neighborsFromBidilinks = do
         pages <- readPagesFile inputPath
         exportPageDocsFromPages pages outputPath whichNeighbors
       where     whichNeighbors :: [WhichNeighbors]
-                whichNeighbors = catMaybes [neighborsFromInlinks, neighborsFromOutlinks]
+                whichNeighbors =
+                    -- bidi trumps the other two. If bidi is Nothing, then use the concat of in/out
+                   if neighborsFromBidilinks == Just NeighborsFromBidilinks then
+                        [NeighborsFromBidilinks]
+                    else catMaybes [neighborsFromInlinks, neighborsFromOutlinks]
 
 
 
