@@ -884,8 +884,9 @@ filterFeaturesByExperimentSetting settings fname =
                     CandidateDisableDivideEdgeFeats -> const True
                     CandidateStrict -> const True
                     CandidateGenerous -> const True
+                    CandidateRemoveLowNodes -> const True
 
-
+                    x -> error $ " No information on what to do with ExperimentSettings "<> show x
 
 -- ----------------
 
