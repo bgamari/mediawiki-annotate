@@ -36,6 +36,7 @@ import qualified Data.Set as S
 import Data.Hashable
 
 import CAR.Types hiding (Entity)
+import AspectUtils
 
 import SimplIR.LearningToRank
 import qualified SimplIR.FeatureSpace as F
@@ -150,7 +151,7 @@ data EdgeFeature where
     EdgeCount  :: !FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq)
 
-data EntityOrEdge = Entity | Edge
+data EntityOrEdge = Entity | Edge | Aspect
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 type CombinedFeature = Either EntityFeature EdgeFeature

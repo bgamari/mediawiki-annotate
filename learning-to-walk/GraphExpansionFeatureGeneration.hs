@@ -54,6 +54,7 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
+import AspectUtils
 import GridFeatures
 
 import EdgeDocCorpus
@@ -273,9 +274,11 @@ main = do
         allCombinedFSpace = F.eitherSpaces allEntFSpace allEdgeFSpace
 
     let entityRunFiles  = [ (g, r) | (g, Entity, r) <- gridRunFiles]
+        aspectRunFiles  = [ (g, r) | (g, Aspect, r) <- gridRunFiles]
         edgedocRunFiles = [ (g, r) | (g, Edge, r) <- gridRunFiles]
 
     putStrLn $ "# Entity runs:  "++ (show $ fmap (show) (entityRunFiles ))
+    putStrLn $ "# Aspect runs:  "++ (show $ fmap (show) (aspectRunFiles ))
     putStrLn $ "# EdgeDoc runs: "++ ( show $ fmap (show) (edgedocRunFiles))
     putStrLn $ "# numResults: "++ ( show (numResults))
 
@@ -371,8 +374,19 @@ main = do
                      lift . internAll (each . CAR.RunFile.document)
                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
                  =<< liftIO (CAR.RunFile.readEntityRun path))))
-        (chunksOf 2 entityRunFiles)                                              -- todo why chunks of 2?!?
+        (chunksOf 2 entityRunFiles)
         :: IO [(GridRun, [RankingEntry PageId])]
+
+    putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
+
+    putStrLn "Loading AspectRuns..."
+    aspectRuns <- fmap concat $ mapConcurrentlyL ncaps
+        (runInternM . runInternM . mapM (mapM (\path ->
+                     lift . internAll (each . CAR.RunFile.document)
+                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
+                 =<< liftIO (readAspectRun path))))
+        (chunksOf 2 aspectRunFiles)
+        :: IO [(GridRun, [RankingEntry AspectId])]
 
     putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
 
@@ -382,7 +396,7 @@ main = do
                      lift . internAll (each . CAR.RunFile.document)
                  =<< internAll (each . CAR.RunFile.traverseText (const pure))
                  =<< liftIO (CAR.RunFile.readParagraphRun path))))
-        (chunksOf 2 edgedocRunFiles)                                             -- todo why chunks of 2?!?
+        (chunksOf 2 edgedocRunFiles)
         :: IO [(GridRun, [RankingEntry ParagraphId])]
 
     putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
@@ -395,7 +409,7 @@ main = do
         !collapsedEdgedocRun =
             collapseRuns
             $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
-
+         -- Todo: collapsed Aspect Runs
         tr x = traceShow x x
     putStrLn "Computed collapsed runs."
     putStrLn $ "queries from collapsed entity runs: "++show (M.size collapsedEntityRun)
