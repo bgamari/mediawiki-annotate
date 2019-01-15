@@ -46,22 +46,32 @@ multiAsRankingEntry multiRankingEntry = multiRankingEntryCollapsed multiRankingE
 
 -- | Given a list of runs, compute the "collapsed" ranking that would result
 -- summing the reciprocol rank of each item under all rankings.
-collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key)
+collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key, Show key)
              => [(key, [RankingEntry doc])]
              -> M.Map QueryId [MultiRankingEntry doc key]
 collapseRuns runs =
-    let listOfRunMaps :: M.Map QueryId [(key, RankingEntry doc)]
-        listOfRunMaps = fmap toList $ RunFile.groupByQuery' [ (key, elem)
-                                                            | (key, run) <- runs
-                                                            , elem <- run
-                                                            ]
+    if any (\(k, r) -> identicalScoreRanking r) runs then
+        error $ "MultiTrecRunFile collapsing run with identical scores :"
+                 <> show [ k | (k,r) <- runs, identicalScoreRanking r]
+    else
+       let listOfRunMaps :: M.Map QueryId [(key, RankingEntry doc)]
+           listOfRunMaps = fmap toList $ RunFile.groupByQuery' [ (key, elem)
+                                                                | (key, run) <- runs
+                                                                , elem <- run
+                                                                ]
 
-     in M.fromAscList
-        $ withStrategy (parBuffer 100 (evalTuple2 r0 rseq))
-        [ (query, collapseRankings rankings)
-        | (query, rankings) <- M.toAscList listOfRunMaps  -- fetch rankings for query
-        ]
+         in M.fromAscList
+            $ withStrategy (parBuffer 100 (evalTuple2 r0 rseq))
+            [ (query, collapseRankings rankings)
+            | (query, rankings) <- M.toAscList listOfRunMaps  -- fetch rankings for query
+            ]
 
+identicalScoreRanking :: [RankingEntry doc] -> Bool
+identicalScoreRanking ranking =
+    if null ranking then True else
+        let (anyElem : _) = ranking
+            anyScore = RunFile.carScore anyElem
+        in not $ any (\entry -> anyScore /= (RunFile.carScore entry) ) ranking
 
 -- rankings: rank entries for the same query, across different run files
 collapseRankings :: forall doc key. (Eq doc, Hashable doc)
