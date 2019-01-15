@@ -111,7 +111,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures | JustNone | JustSimpleRm | JustTitleAndSectionPath | NoEdgesFromParas | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
-                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
+                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateNoAspectDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -303,6 +303,7 @@ main = do
                                  , fgsNoPageDocs = not $ (CandidateNoPageDocs `elem` experimentSettings)
                                  , fgsDisableDivideEdgeFeats =  not $ (CandidateDisableDivideEdgeFeats `elem` experimentSettings)
                                  , fgsRemoveLowFeatures = CandidateRemoveLowNodes `elem` experimentSettings
+                                 , fgsNoAspectDocs = not $ (CandidateNoAspectDocs `elem` experimentSettings)
                                  }
 
         teleportation = case teleportations of

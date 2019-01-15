@@ -78,7 +78,7 @@ type PageDoc = AbstractDoc PageId
 type AspectDoc = AbstractDoc AspectId
 
 
-pageDocOnlyNeighbors :: PageDoc -> HS.HashSet PageId
+pageDocOnlyNeighbors :: AbstractDoc id -> HS.HashSet PageId
 pageDocOnlyNeighbors pageDoc = HS.filter (/= pageDocArticleId pageDoc) $ pageDocNeighbors pageDoc
 
 -- | compare first on the pageDocId, then on the DocArticle Id
