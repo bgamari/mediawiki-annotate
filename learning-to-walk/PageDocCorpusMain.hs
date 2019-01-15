@@ -26,6 +26,7 @@ import CAR.Types
 import CAR.Types.CborList
 import CAR.Types.Files
 import qualified Codec.Serialise  as CBOR
+import AspectUtils
 
 
 queryHelpDesc :: PP.Doc
@@ -88,13 +89,19 @@ convertPageToAspectDocMode =
 
 
 
-buildTocMode =
+buildPageDocTocMode =
     go <$> argument str (metavar "CBOR" <> help "PageDoc cbor file")
   where
     go inputPath = do
         void $ buildPageDocToc @PageId inputPath
 
-lookupMode =
+buildAspectDocTocMode =
+    go <$> argument str (metavar "CBOR" <> help "PageDoc cbor file")
+  where
+    go inputPath = do
+        void $ buildPageDocToc @AspectId inputPath
+
+lookupPageMode =
     go <$> argument (Toc.IndexedCborPath <$> str) (metavar "CBOR" <> help "PageDoc cbor file")
        <*> argument (packPageId <$> str) (metavar "PageId" <> help "page id of pagedoc to look up.")
   where
@@ -105,11 +112,24 @@ lookupMode =
             pageDoc = pageId `Toc.lookup` toc
         putStrLn $ show pageDoc
 
+lookupAspectMode =
+    go <$> argument (Toc.IndexedCborPath <$> str) (metavar "CBOR" <> help "AspectDoc cbor file")
+       <*> argument (parseAspectId' <$> str) (metavar "AspectId" <> help "aspect id of aspectdoc to look up.")
+  where
+    go :: Toc.IndexedCborPath AspectId AspectDoc -> AspectId -> IO ()
+    go inputPath aspectId = do
+        toc <- Toc.open inputPath
+        let aspectDoc :: Maybe AspectDoc
+            aspectDoc = aspectId `Toc.lookup` toc
+        putStrLn $ show aspectDoc
+
 modes = subparser
     $ command "convert-page-docs" (info (helper <*> convertPageToPageDocMode) (progDesc "Convert pages to pagedocs" <> fullDesc))
    <> command "convert-aspect-docs" (info (helper <*> convertPageToAspectDocMode) (progDesc "Convert pages to aspectdocs" <> fullDesc))
-   <> command "toc" (info (helper <*> buildTocMode) (progDesc "build toc filed for pagedocs" <> fullDesc))
-   <> command "lookup" (info (helper <*> lookupMode) (progDesc "get pagedoc by pageId" <> fullDesc))
+   <> command "page-toc" (info (helper <*> buildPageDocTocMode) (progDesc "build toc filed for pagedocs" <> fullDesc))
+   <> command "aspect-toc" (info (helper <*> buildAspectDocTocMode) (progDesc "build toc filed for aspectdocs" <> fullDesc))
+   <> command "page-lookup" (info (helper <*> lookupPageMode) (progDesc "get pagedoc by pageId" <> fullDesc))
+   <> command "aspect-lookup" (info (helper <*> lookupAspectMode) (progDesc "get aspectdoc by aspectId" <> fullDesc))
 
 main :: IO ()
 main = do
