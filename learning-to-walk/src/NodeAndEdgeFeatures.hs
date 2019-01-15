@@ -83,6 +83,9 @@ stackFeatures FeatureSpaces{..} uFeats eFeats =
     F.fromList combinedFSpace $ map (first Left) (F.toList uFeats) ++ map (first Right) (F.toList eFeats)
 
 
+keySet :: HM.HashMap k v -> HS.HashSet k
+keySet m = HS.fromMap $ fmap ( const () ) m
+
 -- | merge entity and edge features
 combineEntityEdgeFeatures
     :: forall entityPh edgePh.
@@ -109,13 +112,11 @@ combineEntityEdgeFeatures spaces@(FeatureSpaces {..})
         nodeFeatures :: HM.HashMap PageId (EntityFeatureVec entityPh)
         nodeFeatures = generateNodeFeatures entityFSpace query entityRun aspectRun allEdgeDocs
 
+        nodes = keySet nodeFeatures  `HS.union` nodeSet edgeFeatureGraph
 
-        -- no need to use nodeEdgeFeatureGraph
     in HM.fromList
        [ ((query, u), stackedFeatures)
-       | entityRankEntry <- entityRun
-       , let u = multiRankingEntryGetDocumentName entityRankEntry
-
+       | u <- HS.toList nodes
        , let uFeats = fromMaybe (makeDefaultEntFeatVector entityFSpace) $  u `HM.lookup` nodeFeatures
        , let edgeFeats =
                  fromMaybe [makeDefaultEdgeFeatVector edgeFSpace]
@@ -123,9 +124,24 @@ combineEntityEdgeFeatures spaces@(FeatureSpaces {..})
                  $ getNeighbors edgeFeatureGraph u
        , let stackedFeatures = stackFeatures spaces uFeats (F.aggregateWith (+) edgeFeats)
               -- stack node vector on top of projected edge feature vector
---        , (not $ fgsRemoveLowFeatures featureGraphSettings) || (not $ isLowFeature spaces stackedFeatures)
-              -- remove nodes whose feature vector is close to the default
        ]
+--
+--         -- no need to use nodeEdgeFeatureGraph
+--     in HM.fromList
+--        [ ((query, u), stackedFeatures)
+--        | entityRankEntry <- entityRun
+--        , let u = multiRankingEntryGetDocumentName entityRankEntry
+--
+--        , let uFeats = fromMaybe (makeDefaultEntFeatVector entityFSpace) $  u `HM.lookup` nodeFeatures
+--        , let edgeFeats =
+--                  fromMaybe [makeDefaultEdgeFeatVector edgeFSpace]
+--                  $ NE.nonEmpty $ HM.elems  -- gives Nothing in case of empty
+--                  $ getNeighbors edgeFeatureGraph u
+--        , let stackedFeatures = stackFeatures spaces uFeats (F.aggregateWith (+) edgeFeats)
+--               -- stack node vector on top of projected edge feature vector
+-- --        , (not $ fgsRemoveLowFeatures featureGraphSettings) || (not $ isLowFeature spaces stackedFeatures)
+--               -- remove nodes whose feature vector is close to the default
+--        ]
 
 isLowFeature :: forall entityPh edgePh.
                 FeatureSpaces entityPh edgePh
