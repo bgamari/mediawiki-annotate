@@ -399,7 +399,7 @@ edgesFromPages edgeFSpace pagesLookup entityRuns divideEdgeFeats =
                  -> FromSource
                  -> PageDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
-        edgeFeat pageId entityEntry source pg = edgePageScoreVec edgeFSpace source entityEntry pg
+        edgeFeat pageId entityEntry source pg = edgeFragmentScoreVec edgeFSpace source entityEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
@@ -443,30 +443,31 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
         aspect aspectId = case aspectLookup [aspectId] of
                            [] -> Debug.trace ("No aspectDoc for aspectId "++show aspectId) $ Nothing
                            (a:_) -> Just a
-         -- todo: use aspect
         pageNeighbors :: AspectDoc -> [(PageId, Role)]
-        pageNeighbors p = ([(pageDocArticleId p, RoleOwner)]) ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors p)
+        pageNeighbors aspectDoc = ([(pageDocArticleId aspectDoc, RoleOwner)])
+                                ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors aspectDoc)
 
         edgeFeat :: AspectId
                  -> MultiRankingEntry AspectId GridRun
                  -> FromSource
                  -> AspectDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
-        edgeFeat aspectId aspectEntry source pg = edgePageScoreVec edgeFSpace source aspectEntry pg
+        edgeFeat aspectId aspectEntry source pg =
+            edgeFragmentScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
         oneHyperEdge :: (AspectId, MultiRankingEntry AspectId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgePh)]
         oneHyperEdge (aspectId, aspectEntry) =
-              [ ((u, v) , (if divideEdgeFeats then dividedFeatVec else featVec))
-              | Just p <- pure $ aspect aspectId
-              , let neighbors = pageNeighbors p
-                    !cardinality = HS.size (pageDocOnlyNeighbors p) + 1
+              [ ((u, v) , featVec ) --   todo temporarily deactivating (if divideEdgeFeats then dividedFeatVec else featVec))
+              | Just aspectDoc <- pure $ aspect aspectId
+              , let neighbors = pageNeighbors aspectDoc
+--                     !cardinality = HS.size (pageDocOnlyNeighbors aspectDoc) + 1
               , (u, uRole) <- neighbors
               , (v, vRole) <- neighbors -- include self links (v==u)!
-              , let !featVec = edgeFeat aspectId aspectEntry (getSource uRole vRole) p
-              , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
+              , let !featVec = edgeFeat aspectId aspectEntry (getSource uRole vRole) aspectDoc
+--               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromAspects -- todo aspects: Include role features
@@ -488,19 +489,22 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
 
                           -- TODO use different features for page edge features
 
-edgePageScoreVec :: F.FeatureSpace EdgeFeature edgePh
+edgeFragmentScoreVec :: F.FeatureSpace EdgeFeature edgePh
                  -> FromSource
                  -> MultiRankingEntry p GridRun
                  -> AbstractDoc id
                  -> F.FeatureVec EdgeFeature edgePh Double
-edgePageScoreVec fspace source pageRankEntry _page =
-    makeEdgeFeatVector fspace
+edgeFragmentScoreVec fspace source rankEntry _pageDoc =
+    let  aggrFeats = rankEdgeFeatures source Aggr (multiRankingEntryCollapsed rankEntry)
+         perRunFeat = concat [ rankEdgeFeatures source (GridRun' g) entry
+                             | (g, entry) <- multiRankingEntryAll rankEntry
+                             ]
+    in Debug.trace ("edgeFragementScoreVec: aggrFeats "<> show aggrFeats)
+        $  makeEdgeFeatVector fspace
         $ ([ (EdgeCount source , 1.0)
            ]
-          ++ rankEdgeFeatures source Aggr (multiRankingEntryCollapsed pageRankEntry)
-          ++ concat [ rankEdgeFeatures source (GridRun' g) entry
-                    | (g, entry) <- multiRankingEntryAll pageRankEntry
-                    ]
+          ++ aggrFeats
+          ++ perRunFeat
          )
 
 
