@@ -403,10 +403,6 @@ edgesFromPages edgeFSpace pagesLookup entityRuns divideEdgeFeats =
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
-
-        -- todo: Undo (temporarily deactivating feature division to diagnose loss of MAP)
-
-
         oneHyperEdge :: (PageId, MultiRankingEntry PageId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgePh)]
         oneHyperEdge (pageId, entityEntry) =
@@ -459,10 +455,6 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
         edgeFeat aspectId aspectEntry source pg = edgePageScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
-
-
-        -- todo: Undo (temporarily deactivating feature division to diagnose loss of MAP)
-
 
         oneHyperEdge :: (AspectId, MultiRankingEntry AspectId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgePh)]
