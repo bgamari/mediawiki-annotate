@@ -47,15 +47,15 @@ import qualified CAR.RunFile as CarRun
 import qualified SimplIR.Format.TrecRunFile  as Run
 data AspectId = AspectFromTuple PageId HeadingId
               | AspectFromString T.Text
-              deriving (Show, Generic, Serialise, Hashable)
+              deriving (Show, Generic, Serialise)
 instance NFData AspectId
 
 
 -- | Not intended to be used. Internal string representation used to eq/compare AspectIds of different constructors
-internalAspectStr :: AspectId -> T.Text
+internalAspectStr :: AspectId -> String
 internalAspectStr (AspectFromTuple p h) =
-    T.pack $ ((unpackPageId p) <> "/" <> (unpackHeadingId h) )
-internalAspectStr (AspectFromString idStr) =  idStr
+    ((unpackPageId p) <> "/" <> (unpackHeadingId h) )
+internalAspectStr (AspectFromString idStr) =  T.unpack $ idStr
 
 instance Eq AspectId where
     aspect1@(AspectFromTuple p h) == aspect2@(AspectFromString _) =
@@ -67,6 +67,9 @@ instance Ord AspectId where
     compare aspect1 aspect2 =
         compare (internalAspectStr aspect1) (internalAspectStr aspect2)
 
+instance Hashable AspectId where
+    hashWithSalt salt aspect =
+        hashWithSalt salt $ internalAspectStr aspect
 
 --  | Constructor: make aspect from tuple
 makeAspectId :: PageId -> HeadingId -> AspectId
@@ -91,7 +94,7 @@ aspectMatchPageAndHeadingId :: PageId -> HeadingId -> AspectId -> Bool
 aspectMatchPageAndHeadingId pageId1 headingId1 (AspectFromTuple pageId2 headingId2) =
     pageId1 == pageId2 && headingId1 == headingId2
 aspectMatchPageAndHeadingId pageId1 headingId1 (AspectFromString idStr) =
-    internalAspectStr (AspectFromTuple pageId1 headingId1) == idStr
+    internalAspectStr (AspectFromTuple pageId1 headingId1) == T.unpack idStr
 
 
 -- | provide all valid (potential) page ids -- at least one!
