@@ -114,7 +114,7 @@ lookupPageMode =
 
 lookupAspectMode =
     go <$> argument (Toc.IndexedCborPath <$> str) (metavar "CBOR" <> help "AspectDoc cbor file")
-       <*> argument (parseAspectId' <$> str) (metavar "AspectId" <> help "aspect id of aspectdoc to look up.")
+       <*> argument (parseAspectId <$> str) (metavar "AspectId" <> help "aspect id of aspectdoc to look up.")
   where
     go :: Toc.IndexedCborPath AspectId AspectDoc -> AspectId -> IO ()
     go inputPath aspectId = do

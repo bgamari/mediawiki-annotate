@@ -31,6 +31,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Data.Maybe
+import Data.Foldable
 import qualified Data.List.NonEmpty as NE
 import Data.Bifunctor
 
@@ -122,7 +123,7 @@ combineEntityEdgeFeatures spaces@(FeatureSpaces {..})
                  $ getNeighbors edgeFeatureGraph u
        , let stackedFeatures = stackFeatures spaces uFeats (F.aggregateWith (+) edgeFeats)
               -- stack node vector on top of projected edge feature vector
-       , (not $ fgsRemoveLowFeatures featureGraphSettings) || (not $ isLowFeature spaces stackedFeatures)
+--        , (not $ fgsRemoveLowFeatures featureGraphSettings) || (not $ isLowFeature spaces stackedFeatures)
               -- remove nodes whose feature vector is close to the default
        ]
 
@@ -228,16 +229,15 @@ generateNodeFeatures entityFSpace query entityRun aspectRun allEdgeDocs =
         pageIdToAspectRun = HM.fromListWith (<>)
                             [ (aspectPageId, [entry])
                             | entry <- aspectRun
-                            , let (aspectPageId, _) = multiRankingEntryGetDocumentName entry
+                            , aspectPageId <- toList $ aspectValidPageIds $ multiRankingEntryGetDocumentName entry
                             ]
    in HM.fromList [ (entity, (entityScoreVec entityFSpace entityRankEntry aspectRankEntries edgeDocs))
                   | entityRankEntry <- entityRun -- todo aspect: also include nodes that only appear in aspect rankings
                   , let entity = multiRankingEntryGetDocumentName entityRankEntry  -- for each entity in ranking...
-                  , let aspectRankEntries = fromMaybe [] $ entity `HM.lookup` pageIdToAspectRun
+                  , let aspectRankEntries = fromMaybe [] $ entity `HM.lookup` pageIdToAspectRun    -- todo aspect: configuration to switch off
                   , let edgeDocs = fromMaybe [] $ entity `HM.lookup` pageIdToEdgeDocs
                   ]
-  where aspectHasPageId :: PageId -> AspectId -> Bool
-        aspectHasPageId pageId1 (pageId2, _) = pageId1 == pageId2
+
 
 
 entityScoreVec :: F.FeatureSpace EntityFeature entityPh
@@ -277,7 +277,11 @@ generateEdgeFeatureGraph :: forall edgePh.
                          -> Candidates
                          -> Graph PageId (EdgeFeatureVec edgePh)
 generateEdgeFeatureGraph edgeFSpace
-                         (FeatureGraphSettings includeEdgesFromParas includeEdgesFromPages divideEdgeFeats filterLowNodes includeEdgesFromAspects)
+                         FeatureGraphSettings { fgsNoEdgeDocs =includeEdgesFromParas
+                                              , fgsNoPageDocs = includeEdgesFromPages
+                                              , fgsDisableDivideEdgeFeats = divideEdgeFeats
+                                              , fgsNoAspectDocs = includeEdgesFromAspects
+                                              }
                          query
                          pagesLookup aspectLookup
                          cands@Candidates{ candidateEdgeDocs = allEdgeDocs

@@ -22,6 +22,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 
 
+
 module AspectUtils where
 
 import qualified Data.Text as T
@@ -29,16 +30,97 @@ import Data.List
 import Data.Maybe
 import Data.Foldable as Foldable
 import GHC.Stack
+import GHC.Generics
+import Codec.Serialise
+import Control.DeepSeq
+import Data.Hashable
+-- import Control.Concurrent.Async
+import qualified Data.List.NonEmpty as NE
+import Data.List.NonEmpty ( NonEmpty ((:|)))
+
+
 
 -- import Data.Hashable--import Data.List.Split
 
 import CAR.Types hiding (Entity)
 import qualified CAR.RunFile as CarRun
 import qualified SimplIR.Format.TrecRunFile  as Run
-type AspectId = (PageId, HeadingId)
+data AspectId = AspectFromTuple PageId HeadingId
+              | AspectFromString T.Text
+              deriving (Show, Generic, Serialise, Hashable)
+instance NFData AspectId
 
+
+-- | Not intended to be used. Internal string representation used to eq/compare AspectIds of different constructors
+internalAspectStr :: AspectId -> T.Text
+internalAspectStr (AspectFromTuple p h) =
+    T.pack $ ((unpackPageId p) <> "/" <> (unpackHeadingId h) )
+internalAspectStr (AspectFromString idStr) =  idStr
+
+instance Eq AspectId where
+    aspect1@(AspectFromTuple p h) == aspect2@(AspectFromString _) =
+        internalAspectStr aspect1 == internalAspectStr aspect2
+    aspect2@(AspectFromString _) == aspect1@(AspectFromTuple p h) =
+        internalAspectStr aspect1 == internalAspectStr aspect2
+
+instance Ord AspectId where
+    compare aspect1 aspect2 =
+        compare (internalAspectStr aspect1) (internalAspectStr aspect2)
+
+
+--  | Constructor: make aspect from tuple
 makeAspectId :: PageId -> HeadingId -> AspectId
-makeAspectId p h = (p, h)
+makeAspectId p h = AspectFromTuple p h
+
+-- | Constructor: make aspect from String
+parseAspectId :: T.Text -> AspectId
+parseAspectId s =
+    AspectFromString s
+
+
+-- | pageId check
+aspectHasPageId :: PageId -> AspectId -> Bool
+aspectHasPageId pageId1 (AspectFromTuple pageId2 _) = pageId1 == pageId2
+aspectHasPageId pageId1 (AspectFromString idStr) =
+    let pageId1S = T.pack $ ((unpackPageId pageId1) <> "/" )
+    in  pageId1S `T.isPrefixOf` idStr
+
+
+-- | pageId and headingId check
+aspectMatchPageAndHeadingId :: PageId -> HeadingId -> AspectId -> Bool
+aspectMatchPageAndHeadingId pageId1 headingId1 (AspectFromTuple pageId2 headingId2) =
+    pageId1 == pageId2 && headingId1 == headingId2
+aspectMatchPageAndHeadingId pageId1 headingId1 (AspectFromString idStr) =
+    internalAspectStr (AspectFromTuple pageId1 headingId1) == idStr
+
+
+-- | provide all valid (potential) page ids -- at least one!
+aspectValidPageIds :: AspectId -> NE.NonEmpty PageId
+aspectValidPageIds (AspectFromTuple pageId _) = pageId :| []
+aspectValidPageIds (AspectFromString idStr) =
+    let validPageIdStrings = inits $ T.splitOn "/" idStr
+    in NE.fromList
+       $ fmap (packPageId . T.unpack . (T.intercalate "/")) validPageIdStrings
+
+
+-- | provide the matching heading id (for a valid page id)
+getAspectHeadingId :: AspectId -> PageId -> Maybe HeadingId
+getAspectHeadingId (AspectFromTuple p h) p2 =
+    if p == p2 then
+        Just h
+    else
+        Nothing
+getAspectHeadingId (AspectFromString idStr) p2 =
+    if p2Str `T.isPrefixOf` idStr then
+        if T.length idStr > (T.length p2Str) +1 then
+            let hStr = T.drop ((T.length p2Str)+1) idStr
+            in Just $ packHeadingId $ T.unpack hStr
+        else
+            Nothing -- not enough string left for a heading
+    else
+        Nothing -- does not match given PageId
+  where p2Str = T.pack $ unpackPageId p2
+
 
 -- --------------------------
 --    TrecRunFile for Aspect Runs
@@ -46,50 +128,11 @@ makeAspectId p h = (p, h)
 
 type AspectRankingEntry = CarRun.RankingEntry' AspectId
 
-parseAspectId :: T.Text -> [AspectId]
-parseAspectId s =
-    case T.split (== '/') s of
-        []          -> []
-        pid:[]      -> []
-        pid:hs:[]   -> [makeId pid hs]
-        splits      ->  let positions :: [Int]
-                            positions = [ i
-                                        | (s, i) <- (T.unpack s) `zip` [1..]
-                                        , s == '/'
-                                        ]
-                        in [ makeId pref suffix
-                           | pos <- positions
-                           , let (pref,slashSuffix) = T.splitAt pos s
-                                 suffix = T.drop 1 slashSuffix
-                           ]
-  where makeId :: T.Text -> T.Text -> AspectId
-        makeId pid hs = ((packPageId $ T.unpack pid), (packHeadingId $ T.unpack hs))
-
-parseAspectId' :: T.Text -> AspectId
-parseAspectId' s =
-    case T.split (== '/') s of
-        []          -> error "[]"
-        pid:[]      -> error "pid:[]"
-        pid:hs:[]   -> makeId pid hs
-        splits      ->  let positions :: [Int]
-                            positions = [ i
-                                        | (s, i) <- (T.unpack s) `zip` [1..]
-                                        , s == '/'
-                                        ]
-                        in head $
-                           [ makeId pref suffix
-                           | pos <- positions
-                           , let (pref,slashSuffix) = T.splitAt pos s
-                                 suffix = T.drop 1 slashSuffix
-                           ]
-  where makeId :: T.Text -> T.Text -> AspectId
-        makeId pid hs = ((packPageId $ T.unpack pid), (packHeadingId $ T.unpack hs))
-
 
 readAspectRun :: FilePath -> IO [AspectRankingEntry]
 readAspectRun path = map (CarRun.toCarRankingEntry parseDoc) <$> Run.readRunFile path
   where parseDoc :: (Run.DocumentName -> AspectId)
-        parseDoc = parseAspectId'
+        parseDoc = parseAspectId
 
 head' :: HasCallStack => [a] -> a
 head' (x:_) = x
