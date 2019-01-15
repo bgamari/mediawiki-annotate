@@ -63,8 +63,9 @@ type CandidateGraphGenerator =
 selectGenerousCandidateGraph
     :: EdgeDocsLookup
     -> PagesLookup
+    -> AspectLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun aspectRun =
+selectGenerousCandidateGraph edgeDocsLookup pagesLookup aspectLookup _queryId edgeRun entityRun aspectRun =
     candidates
   where
     !candidates =
@@ -147,8 +148,9 @@ selectGenerousCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityR
 selectStrictCandidateGraph
     :: EdgeDocsLookup
     -> PagesLookup
+    -> AspectLookup
     -> CandidateGraphGenerator
-selectStrictCandidateGraph edgeDocsLookup pagesLookup _queryId edgeRun entityRun _aspectRun =
+selectStrictCandidateGraph edgeDocsLookup pagesLookup _aspectLookup _queryId edgeRun entityRun _aspectRun =
     Candidates { candidateEdgeDocs = edgeDocs''
                , candidateEdgeRuns = edgeRun''
                , candidateEntityRuns = entityRun''

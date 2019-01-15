@@ -428,9 +428,9 @@ main = do
 
     let candidateGraphGenerator :: CandidateGraphGenerator
         candidateGraphGenerator = if CandidateStrict `elem` experimentSettings  then
-                                     selectStrictCandidateGraph edgeDocsLookup pagesLookup
+                                     selectStrictCandidateGraph edgeDocsLookup pagesLookup aspectLookup
                                   else -- (CandidateStrict or none)
-                                      selectGenerousCandidateGraph edgeDocsLookup pagesLookup
+                                      selectGenerousCandidateGraph edgeDocsLookup pagesLookup aspectLookup
 
 
         pageRankHyperParams = PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
@@ -445,7 +445,7 @@ main = do
             where
               f :: QueryId -> Graph PageId (EdgeFeatureVec edgeFSpace)
               f query =
-                  generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup candidates
+                  generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup aspectLookup candidates
                 where
                   !candidates = Debug.trace "created candidate graph." $ candidateGraphGenerator query edgeRun entityRun aspectRun
                     where
@@ -473,7 +473,7 @@ main = do
 
                   nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- xyes, only positive entries, expected to sum to 1.0
                   !nodeDistr =
-                      nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+                      nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
                   augmentWithQrels :: QueryId -> Ranking Double PageId -> Ranking Double (PageId, IsRelevant)
                   augmentWithQrels query =
@@ -585,7 +585,7 @@ main = do
               let
                   nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- xyes, only positive entries, expected to sum to 1.0
                   !nodeDistr =
-                      nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+                      nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
                   -- todo nodeDistr should not be strict, as some graph walks don't use it
 
                   -- only edge model weights
@@ -659,7 +659,7 @@ main = do
                         in franking
 
 
-              let docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+              let docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
@@ -684,7 +684,7 @@ main = do
                                             $ F.featureNameSet allCombinedFSpace
           in mkFeatureSpaces features $ \_ fspaces -> do
 
-              let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+              let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature _
@@ -847,16 +847,17 @@ nodeDistrPriorForGraphwalk
     -> FeatureGraphSettings
     -> CandidateGraphGenerator
     -> PagesLookup
+    -> AspectLookup
     -> WeightVec CombinedFeature (F.Stack '[entityPh, edgePh])
     -> M.Map QueryId [MultiRankingEntry PageId GridRun]
     -> M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
     -> M.Map QueryId [MultiRankingEntry AspectId GridRun]
     -> M.Map QueryId (HM.HashMap PageId Double)
 nodeDistrPriorForGraphwalk
-    fspaces featureGraphSettings candidateGraphGenerator pagesLookup model collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
+    fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup model collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
 
   let docFeatures :: M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityPh edgePh)
-      docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+      docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
       degreeCentrality = fmap (model `score`) docFeatures
       queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
