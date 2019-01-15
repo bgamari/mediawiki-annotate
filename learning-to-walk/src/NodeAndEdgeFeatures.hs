@@ -295,7 +295,7 @@ generateEdgeFeatureGraph edgeFSpace
         edgeFeaturesFromAspect = if includeEdgesFromAspects then edgesFromAspects edgeFSpace aspectLookup aspectRun divideEdgeFeats else []
 
         allHyperEdges :: HM.HashMap (PageId, PageId) (EdgeFeatureVec edgePh)
-        allHyperEdges = HM.fromListWith (F.^+^) $ edgeFeaturesFromPara ++ edgeFeaturesFromPage -- todo aspects: edgeFeaturesFromAspects
+        allHyperEdges = HM.fromListWith (F.^+^) $ edgeFeaturesFromPara ++ edgeFeaturesFromPage ++ edgeFeaturesFromAspect  -- todo aspects: edgeFeaturesFromAspects
 
         edgeFeaturesGraph :: [(PageId, PageId, EdgeFeatureVec edgePh)]
         edgeFeaturesGraph = [ (n1, n2, e)
