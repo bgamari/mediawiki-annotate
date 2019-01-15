@@ -129,11 +129,11 @@ allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
 allEdgeRunsF :: [Run]
 allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 allSources :: [FromSource]
-allSources = [FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
+allSources = [FromParas, FromAspects, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
-data FromSource = FromParas | FromPagesOwnerLink | FromPagesLinkOwner | FromPagesLinkLink  | FromPagesSelf
+data FromSource = FromParas | FromAspects | FromPagesOwnerLink | FromPagesLinkOwner | FromPagesLinkLink  | FromPagesSelf
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
@@ -305,17 +305,29 @@ onlySection x = nothingElseButAggr x
 noEdgesFromParas :: CombinedFeature -> Bool
 noEdgesFromParas (Left _) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromParas (_) _)) = False
+noEdgesFromParas (Right (EdgeRetrievalFeature FromAspects (_) _)) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = True
 noEdgesFromParas x = nothingElseButAggr x
 
+noEdgesFromAspects :: CombinedFeature -> Bool
+noEdgesFromAspects (Left _) = True
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromParas (_) _)) = True
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromAspects (_) _)) = False
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = True
+noEdgesFromAspects (Right (EdgeRetrievalFeature FromPagesSelf (_) _)) = True
+noEdgesFromAspects x = nothingElseButAggr x
+
 -- FromParas, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
 
 noEdgesFromPages :: CombinedFeature -> Bool
 noEdgesFromPages (Left _) = True
 noEdgesFromPages (Right (EdgeRetrievalFeature FromParas (_) _)) = True
+noEdgesFromPages (Right (EdgeRetrievalFeature FromAspects (_) _)) = True
 noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = False
 noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = False
 noEdgesFromPages (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = False
@@ -325,6 +337,7 @@ noEdgesFromPages x = nothingElseButAggr x
 noEdgesFromPageLinkLink :: CombinedFeature -> Bool
 noEdgesFromPageLinkLink (Left _) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromParas (_) _)) = True
+noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromAspects (_) _)) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesOwnerLink (_) _)) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkOwner (_) _)) = True
 noEdgesFromPageLinkLink (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = False

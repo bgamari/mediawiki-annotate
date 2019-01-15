@@ -457,10 +457,10 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource
-                getSource RoleOwner RoleLink = FromPagesOwnerLink
-                getSource RoleLink RoleOwner = FromPagesLinkOwner
-                getSource RoleLink RoleLink = FromPagesLinkLink
-                getSource RoleOwner RoleOwner = FromPagesSelf
+                getSource RoleOwner RoleLink = FromAspects
+                getSource RoleLink RoleOwner = FromAspects
+                getSource RoleLink RoleLink = FromAspects
+                getSource RoleOwner RoleOwner = FromAspects
                 getSource u v = error $ "edgesFromPages: Don't know source for roles "<>show u <> ", "<> show v
 
 
