@@ -62,6 +62,10 @@ instance Eq AspectId where
         internalAspectStr aspect1 == internalAspectStr aspect2
     aspect2@(AspectFromString _) == aspect1@(AspectFromTuple p h) =
         internalAspectStr aspect1 == internalAspectStr aspect2
+    (AspectFromTuple p1 h1) == (AspectFromTuple p2 h2) =
+        p1 == p2 && h1 == h2
+    (AspectFromString idStr1) == (AspectFromString idStr2) =
+        idStr1 == idStr2
 
 instance Ord AspectId where
     compare aspect1 aspect2 =
