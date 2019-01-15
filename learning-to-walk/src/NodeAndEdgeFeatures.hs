@@ -482,7 +482,8 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
 --                , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 100)  (multiRankingEntryAll aspectEntry))
 --                 || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed aspectEntry )<= 100)      -- todo make 10 configurable
                ]
-    in Debug.trace ("NodeEndEdgeFeatures edgesFromAspects: producing "<> show (length x) <> " hyperedges: \n"<> (unlines $ fmap show $ (take 3 x)))
+        fstRun = multiRankingEntryCollapsed $  head' aspectRuns
+    in Debug.trace ("NodeEndEdgeFeatures edgesFromAspects: producing "<> show (length x) <> " hyperedges. \n One aspectRun entry "<>show fstRun <>"\n Hyperedges: \n "<> (unlines $ fmap show $ (take 3 x)))
        $ x
 
 
