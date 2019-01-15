@@ -28,6 +28,7 @@ import qualified Data.Text as T
 import Data.List
 import Data.Maybe
 import Data.Foldable as Foldable
+import GHC.Stack
 
 -- import Data.Hashable--import Data.List.Split
 
@@ -90,3 +91,6 @@ readAspectRun path = map (CarRun.toCarRankingEntry parseDoc) <$> Run.readRunFile
   where parseDoc :: (Run.DocumentName -> AspectId)
         parseDoc = parseAspectId'
 
+head' :: HasCallStack => [a] -> a
+head' (x:_) = x
+head' [] = error $ "head': empty list"

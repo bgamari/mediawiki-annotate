@@ -52,6 +52,8 @@ import LookupWrapper
 import CandidateGraph
 import Debug.Trace as Debug
 
+
+
 data FeatureSpaces entityPh edgePh = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edgePh
                                                    , entityFSpace :: F.FeatureSpace EntityFeature entityPh
                                                    , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entityPh, edgePh])
@@ -312,7 +314,7 @@ generateEdgeFeatureGraph edgeFSpace
 
     in traceShow ("generateEdgeFeatureGraph", query,
                    " nodes:",Graph.numNodes edgeFeatureGraphWithSingleNodes,
-                   " edgeFeatures:", F.dimension $ F.featureSpace $ head $ HM.elems allHyperEdges)
+                   " edgeFeatures:", F.dimension $ F.featureSpace $ head' $ HM.elems allHyperEdges)
       edgeFeatureGraphWithSingleNodes
 
 edgesFromParas :: forall edgePh.

@@ -695,7 +695,7 @@ main = do
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
                   totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
-              putStrLn $ "Feature dimension: "++show (F.dimension $ F.featureSpace $ (\(_,a,_) -> a) $ head $ snd $ M.elemAt 0 allData)
+              putStrLn $ "Feature dimension: "++show (F.dimension $ F.featureSpace $ (\(_,a,_) -> a) $ head' $ snd $ M.elemAt 0 allData)
               putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                         " queries and "++ show totalElems ++" items total of which "++
                         show totalPos ++" are positive."
@@ -832,7 +832,7 @@ graphWalkToConvergence conv walkIters =
 
    in case conv of
         L2Convergence -> snd
-                       $ head
+                       $ head'
                        $ dropWhile (\(x,y) -> relChange x y > 1e-3)
                        $ pageRankIters
         Iteration10   -> snd $ (!! 10)  pageRankIters
