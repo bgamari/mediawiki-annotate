@@ -139,6 +139,7 @@ opts :: Parser ( FilePath
                , [(GridRun, EntityOrEdge, FilePath)]
                , Toc.IndexedCborPath ParagraphId EdgeDoc
                , Toc.IndexedCborPath PageId PageDoc
+               , Toc.IndexedCborPath AspectId AspectDoc
                , FilePath
                , ModelSource
                , [PosifyEdgeWeights]
@@ -150,7 +151,7 @@ opts :: Parser ( FilePath
                , Maybe MiniBatchParams
                )
 opts =
-    (,,,,,,,,,,,,,,,,)
+    (,,,,,,,,,,,,,,,,,)
     <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
     <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     <*> querySource
@@ -159,6 +160,7 @@ opts =
     <*> some gridRunParser
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
+    <*> (option (Toc.IndexedCborPath <$> str)  ( long "aspect-doc-cbor" <> metavar "AspectDoc-CBOR" <> help "AspectDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
     <*> modelSource
     <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))  ))
@@ -260,7 +262,7 @@ main = do
 
     (articlesFile, outputFilePrefix, querySrc,
       queryRestriction, numResults, gridRunFiles
-      , edgeDocsCborFile, pagesDocCborFile
+      , edgeDocsCborFile, pagesDocCborFile, aspectDocCborFile
       , qrelFile, modelSource
       , posifyEdgeWeightsOpts,  teleportations, experimentSettings
       , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
@@ -285,6 +287,7 @@ main = do
     putStrLn $ " Experimentation settings: "++ (show experimentSettings)
     putStrLn $ " edgeDocs lookup : "++ (show edgeDocsCborFile)
     putStrLn $ " pageDocs lookup : "++ (show pagesDocCborFile)
+    putStrLn $ " aspectDocs lookup : "++ (show aspectDocCborFile)
     putStrLn $ " model comes from : "++ (show modelSource)
     putStrLn $ " teleport (only for page rank) : "++ (show teleportations)
     putStrLn $ " posify with (only for page rank) : "++ (show posifyEdgeWeightsOpts)
@@ -361,10 +364,12 @@ main = do
                     $ filter (\q-> queryDocQueryId q `elem` queryRestriction) queries'
     putStrLn $ "# query count: " ++ show (length queries)
 
-    putStrLn "Loading edgeDocsLookup."
+    putStrLn "Loading edgeDocsLookup, pageDocLookup, aspectDocLookup."
     edgeDocsLookup <- readEdgeDocsToc edgeDocsCborFile
     pagesLookup <- readAbstractDocToc pagesDocCborFile
                    :: IO (AbstractLookup PageId)
+    aspectLookup <- readAbstractDocToc aspectDocCborFile
+                   :: IO (AbstractLookup AspectId)
 
     ncaps <- getNumCapabilities
 
