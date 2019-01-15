@@ -500,8 +500,7 @@ edgeFragmentScoreVec fspace source rankEntry _pageDoc =
          perRunFeat = concat [ rankEdgeFeatures source (GridRun' g) entry
                              | (g, entry) <- multiRankingEntryAll rankEntry
                              ]
-    in Debug.trace ("edgeFragementScoreVec: aggrFeats "<> show aggrFeats)
-        $  makeEdgeFeatVector fspace
+    in  makeEdgeFeatVector fspace
         $ ([ (EdgeCount source , 1.0)
            ]
           ++ aggrFeats
