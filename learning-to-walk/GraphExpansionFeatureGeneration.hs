@@ -113,7 +113,9 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
                         | JustNone | JustSimpleRm | JustTitleAndSectionPath
                         | NoEdgesFromParas | NoEdgesFromAspects | NoEdgesFromPages | NoEdgesFromPageLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
-                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateNoAspectDocs | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
+                        | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateNoAspectDocs
+                        | CandidatesMadeNotFromEntityRuns | CandidatesMadeNotFromEdgeRuns | CandidatesMadeNotFromAspectRuns
+                        | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -430,10 +432,15 @@ main = do
     putStrLn $ "queries from collapsed edge doc runs: "++show (M.size collapsedEdgedocRun)
 
     let candidateGraphGenerator :: CandidateGraphGenerator
-        candidateGraphGenerator = if CandidateStrict `elem` experimentSettings  then
-                                     selectStrictCandidateGraph edgeDocsLookup pagesLookup aspectLookup
-                                  else -- (CandidateStrict or none)
-                                      selectGenerousCandidateGraph edgeDocsLookup pagesLookup aspectLookup
+        candidateGraphGenerator =
+            let candidateGraphSettings = CandidateGraphSettings {  cfsMadeFromEntityRuns = not $ CandidatesMadeNotFromEntityRuns `elem` experimentSettings
+                                                                 , cfsMadeFromEdgeRuns =  not $ CandidatesMadeNotFromEdgeRuns `elem` experimentSettings
+                                                                 , cfsMadeFromAspectRuns = not$ CandidatesMadeNotFromAspectRuns `elem` experimentSettings
+                                                                 }
+            in  if CandidateStrict `elem` experimentSettings  then
+                   selectStrictCandidateGraph edgeDocsLookup pagesLookup aspectLookup
+                else -- (CandidateStrict or none)
+                    selectGenerousCandidateGraph candidateGraphSettings edgeDocsLookup pagesLookup aspectLookup
 
 
         pageRankHyperParams = PageRankHyperParams pageRankExperimentSettings posifyEdgeWeightsOpt graphWalkModel teleportation
@@ -921,6 +928,9 @@ filterFeaturesByExperimentSetting settings fname =
                     CandidateStrict -> const True
                     CandidateGenerous -> const True
                     CandidateRemoveLowNodes -> const True
+                    CandidatesMadeNotFromEntityRuns -> const True
+                    CandidatesMadeNotFromEdgeRuns -> const True
+                    CandidatesMadeNotFromAspectRuns -> const True
 
                     x -> error $ " No information on what to do with ExperimentSettings "<> show x
 

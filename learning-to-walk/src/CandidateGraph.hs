@@ -40,6 +40,11 @@ import Debug.Trace
 
 
 
+data CandidateGraphSettings = CandidateGraphSettings { cfsMadeFromEntityRuns :: Bool
+                                                     , cfsMadeFromEdgeRuns :: Bool
+                                                     , cfsMadeFromAspectRuns :: Bool
+                                                     }
+
 -- --------------- Candidate graph  ------------------------
 data Candidates = Candidates { candidateEdgeDocs :: [EdgeDoc]
                              , candidateEdgeRuns :: [MultiRankingEntry ParagraphId GridRun]
@@ -61,19 +66,20 @@ type CandidateGraphGenerator =
 
 
 selectGenerousCandidateGraph
-    :: EdgeDocsLookup
+    :: CandidateGraphSettings
+    -> EdgeDocsLookup
     -> PagesLookup
     -> AspectLookup
     -> CandidateGraphGenerator
-selectGenerousCandidateGraph edgeDocsLookup pagesLookup aspectLookup _queryId edgeRun entityRun aspectRun =
+selectGenerousCandidateGraph CandidateGraphSettings{..} edgeDocsLookup pagesLookup aspectLookup _queryId edgeRun entityRun aspectRun =
     candidates
   where
     !candidates =
         force $
-        Candidates { candidateEdgeDocs = edgeDocs''
-                   , candidateEdgeRuns = edgeRun''
-                   , candidateEntityRuns = entityRun''
-                   , candidateAspectRuns = aspectRun''
+        Candidates { candidateEdgeDocs = if cfsMadeFromEdgeRuns then edgeDocs'' else []
+                   , candidateEdgeRuns = if cfsMadeFromEdgeRuns then edgeRun'' else []
+                   , candidateEntityRuns = if cfsMadeFromEntityRuns then entityRun'' else []
+                   , candidateAspectRuns = if cfsMadeFromAspectRuns then aspectRun'' else []
 --                    , candidateAspectDocs = aspectDocs''
                    , candidatePages = [] --entityPages
                    }
