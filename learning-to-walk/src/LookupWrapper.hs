@@ -26,6 +26,8 @@ import qualified Data.HashMap.Strict as HM
 import Data.Hashable
 import Data.Maybe
 
+import AspectUtils
+
 import qualified Data.SmallUtf8 as Utf8
 
 
@@ -39,6 +41,7 @@ data WhichNeighbors = NeighborsFromOutlinks | NeighborsFromInlinks | NeighborsFr
 type AbstractLookup id =  ([id] -> [AbstractDoc id])
 
 type PagesLookup = AbstractLookup PageId
+type AspectLookup = AbstractLookup AspectId
 
 
 readPagesToc :: Toc.IndexedCborPath PageId Page -> IO ([PageId] -> [Page])
@@ -72,11 +75,13 @@ data AbstractDoc pageDocId = AbstractDoc { pageDocId              :: !pageDocId
                        deriving (Show, Generic)
 
 type PageDoc = AbstractDoc PageId
+type AspectDoc = AbstractDoc AspectId
 
 
 pageDocOnlyNeighbors :: PageDoc -> HS.HashSet PageId
 pageDocOnlyNeighbors pageDoc = HS.filter (/= pageDocArticleId pageDoc) $ pageDocNeighbors pageDoc
 
+-- | compare first on the pageDocId, then on the DocArticle Id
 instance Ord id => Ord (AbstractDoc id) where
     compare = comparing $ \x -> (pageDocId x, pageDocArticleId x)
 
@@ -93,9 +98,12 @@ instance Hashable id => Hashable (AbstractDoc id) where
         hashWithSalt salt (pageDocId x, pageDocArticleId x)
 
 
+pageDocHasLinks :: AbstractDoc id -> Bool
+pageDocHasLinks p =  (>1) $ length $ pageDocNeighbors p
 
 
--- -------  build ------------------
+
+-- -------  build PageDoc ------------------
 
 pageToPageDocs :: [WhichNeighbors] -> Page -> [PageDoc]
 pageToPageDocs whichNeighbors page =
@@ -125,10 +133,31 @@ pageToPageDocs whichNeighbors page =
       in AbstractDoc {..}
 
 
-pageDocHasLinks :: AbstractDoc id -> Bool
-pageDocHasLinks p =  (>1) $ length $ pageDocNeighbors p
-
 pagesToPageDocs :: [WhichNeighbors] -> [Page] -> [PageDoc]
 pagesToPageDocs whichNeighbors =
     foldMap (pageToPageDocs whichNeighbors)
 
+-- -------  build AspectDoc ------------------
+
+pageToAspectDocs :: Page -> [AspectDoc]
+pageToAspectDocs page =
+    mapMaybe (convertSkel page) (pageSkeleton page)
+  where
+    convertSkel :: Page -> PageSkeleton -> Maybe AspectDoc
+    convertSkel _ (Para _ ) = Nothing
+    convertSkel _ (Image _ _) = Nothing
+    convertSkel _ (List _ _ ) = Nothing
+    convertSkel _ (Infobox _ _ ) = Nothing
+    convertSkel page@(Page pageName pageId _ _ _)  section@(Section _ headingId children) =
+      let
+        pageDocId             = makeAspectId pageId headingId
+        pageDocArticleId      = pageId
+        pageDocNeighbors      = HS.fromList
+                              $ [pageId] ++ (fmap linkTargetId $ pageSkeletonLinks section)
+        pageDocContent        = TL.toStrict $ TL.concat $ pageSkeletonFulltext section
+      in Just $ AbstractDoc {..}
+
+
+pagesToAspectDocs :: [Page] -> [AspectDoc]
+pagesToAspectDocs =
+    foldMap pageToAspectDocs

@@ -36,6 +36,9 @@ import qualified CAR.RunFile as CarRun
 import qualified SimplIR.Format.TrecRunFile  as Run
 type AspectId = (PageId, HeadingId)
 
+makeAspectId :: PageId -> HeadingId -> AspectId
+makeAspectId p h = (p, h)
+
 -- --------------------------
 --    TrecRunFile for Aspect Runs
 -- --------------------------

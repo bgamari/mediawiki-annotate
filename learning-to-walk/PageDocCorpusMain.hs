@@ -6,6 +6,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 import Data.Monoid
@@ -13,6 +15,8 @@ import Control.Monad
 import Data.Hashable
 import Codec.Serialise
 import Data.Maybe
+import GHC.Generics
+import Data.Hashable
 
 import Options.Applicative
 import LookupWrapper
@@ -21,9 +25,15 @@ import CAR.TocFile as Toc
 import CAR.Types
 import CAR.Types.CborList
 import CAR.Types.Files
+import qualified Codec.Serialise  as CBOR
+
 
 queryHelpDesc :: PP.Doc
 queryHelpDesc = "Create PageDoc corpus and toc"
+
+data AbstractDocHeader = AspectDocHeader | PageDocHeader [WhichNeighbors]
+                  deriving (Show, Eq, Ord, Generic, CBOR.Serialise)
+
 
 
 buildPageDocToc :: (Eq i, Hashable i, Serialise i) => FilePath -> IO (IndexedCborPath i (AbstractDoc i))
@@ -55,7 +65,24 @@ convertPageToPageDocMode =
         putStr "Writing pagedocs..."
         let edgeDocFile = outPath
     --     writeCarFile edgeDocFile $ map pageToEdgeDocs pagesToExport
-        writeCborList outPath (Just (whichNeighbors)) $ foldMap (pageToPageDocs whichNeighbors) pagesToExport
+        writeCborList outPath (Just (PageDocHeader whichNeighbors)) $ foldMap (pageToPageDocs whichNeighbors) pagesToExport
+        putStrLn "done"
+
+
+convertPageToAspectDocMode =
+    go <$> argument str (metavar "CBOR" <> help "page cbor file")
+       <*> option str (long "output" <> short 'o' <> help "output index path")
+  where
+    go inputPath outputPath = do
+        pages <- readPagesFile inputPath
+        exportAspectDocsFromPages pages outputPath
+
+    exportAspectDocsFromPages:: [Page] -> FilePath -> IO ()
+    exportAspectDocsFromPages pagesToExport outPath = do
+        putStr "Writing aspectsdocs..."
+        let edgeDocFile = outPath
+    --     writeCarFile edgeDocFile $ map pageToEdgeDocs pagesToExport
+        writeCborList outPath (Just (AspectDocHeader)) $ foldMap pageToAspectDocs pagesToExport
         putStrLn "done"
 
 
@@ -79,7 +106,8 @@ lookupMode =
         putStrLn $ show pageDoc
 
 modes = subparser
-    $ command "convert-page" (info (helper <*> convertPageToPageDocMode) (progDesc "Convert pages to pagedocs" <> fullDesc))
+    $ command "convert-page-docs" (info (helper <*> convertPageToPageDocMode) (progDesc "Convert pages to pagedocs" <> fullDesc))
+   <> command "convert-aspect-docs" (info (helper <*> convertPageToAspectDocMode) (progDesc "Convert pages to aspectdocs" <> fullDesc))
    <> command "toc" (info (helper <*> buildTocMode) (progDesc "build toc filed for pagedocs" <> fullDesc))
    <> command "lookup" (info (helper <*> lookupMode) (progDesc "get pagedoc by pageId" <> fullDesc))
 
