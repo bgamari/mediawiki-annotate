@@ -453,7 +453,7 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
                  -> AspectDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
         edgeFeat aspectId aspectEntry source pg =
-            edgeFragmentScoreVec edgeFSpace source aspectEntry pg
+            Debug.trace ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry) $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
