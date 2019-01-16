@@ -64,13 +64,9 @@ collapseRuns runs =
 
          in M.fromAscList
             $ withStrategy (parBuffer 100 (evalTuple2 r0 rseq))
-            [ (query, traceSh "collapseRuns: "
-                            (collapseRankings rankings))
+            [ (query, (collapseRankings rankings))
             | (query, rankings) <- M.toAscList listOfRunMaps  -- fetch rankings for query
             ]
-
-traceSh :: Show a => String -> [a] -> [a]
-traceSh msg x = Debug.trace ((show msg) <> (show $ take 10 x)) $ x
 
 identicalScoreRanking :: [RankingEntry doc] -> Bool
 identicalScoreRanking ranking =
