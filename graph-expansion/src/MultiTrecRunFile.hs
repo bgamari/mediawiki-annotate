@@ -19,6 +19,8 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
 import qualified CAR.RunFile as RunFile
 
+import qualified Debug.Trace as Debug
+
 
 type Score = Double
 type Rank = Int
@@ -46,11 +48,12 @@ multiAsRankingEntry multiRankingEntry = multiRankingEntryCollapsed multiRankingE
 
 -- | Given a list of runs, compute the "collapsed" ranking that would result
 -- summing the reciprocol rank of each item under all rankings.
-collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key, Show key)
+collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key, Show key, Show doc)
              => [(key, [RankingEntry doc])]
              -> M.Map QueryId [MultiRankingEntry doc key]
 collapseRuns runs =
-    if any (\(k, r) -> identicalScoreRanking r) runs then
+    Debug.trace  ("collapseRuns: "<> show [(k, head r) | (k,r) <- runs])
+      $ if any (\(k, r) -> identicalScoreRanking r) runs then
         error $ "MultiTrecRunFile collapsing run with identical scores :"
                  <> show [ k | (k,r) <- runs, identicalScoreRanking r]
     else
