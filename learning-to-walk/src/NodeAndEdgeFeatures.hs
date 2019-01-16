@@ -444,47 +444,41 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
         pageNeighbors aspectDoc = ([(pageDocArticleId aspectDoc, RoleOwner)])
                                 ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors aspectDoc)
 
-        debugTr info x = x --Debug.trace (show info <> show x) $ x
         edgeFeat :: AspectId
                  -> MultiRankingEntry AspectId GridRun
                  -> FromSource
                  -> AspectDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
         edgeFeat aspectId aspectEntry source pg =
-            debugTr ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry<> "  Result=\n")
-                $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
+                edgeFragmentScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
         oneHyperEdge :: (AspectId, MultiRankingEntry AspectId GridRun)
                      -> [((PageId, PageId), EdgeFeatureVec edgePh)]
         oneHyperEdge (aspectId, aspectEntry) =
-              [ ((u, v) , featVec ) --   todo temporarily deactivating (if divideEdgeFeats then dividedFeatVec else featVec))
+              [ ((u, v), if divideEdgeFeats then dividedFeatVec else featVec)
               | Just aspectDoc <- pure $ aspect aspectId
               , let neighbors = pageNeighbors aspectDoc
---                     !cardinality = HS.size (pageDocOnlyNeighbors aspectDoc) + 1
+                    !cardinality = HS.size (pageDocOnlyNeighbors aspectDoc) + 1
               , (u, uRole) <- neighbors
               , (v, vRole) <- neighbors -- include self links (v==u)!
               , let !featVec = edgeFeat aspectId aspectEntry (getSource uRole vRole) aspectDoc
---               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
+              , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               ]
           where getSource :: Role -> Role -> FromSource
-                getSource RoleOwner RoleLink = FromAspects -- todo aspects: Include role features
-                getSource RoleLink RoleOwner = FromAspects
-                getSource RoleLink RoleLink = FromAspects
-                getSource RoleOwner RoleOwner = FromAspects
+                getSource RoleOwner RoleLink = FromAspectsOwnerLink -- todo aspects: Include role features
+                getSource RoleLink RoleOwner = FromAspectsLinkOwner
+                getSource RoleLink RoleLink = FromAspectsLinkLink
+                getSource RoleOwner RoleOwner = FromAspectsSelf
                 getSource u v = error $ "edgesFromPages: Don't know source for roles "<>show u <> ", "<> show v
 
 
-        x = mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName aspectEntry, aspectEntry)
+    in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName aspectEntry, aspectEntry)
                | aspectEntry <- aspectRuns
 --                , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 100)  (multiRankingEntryAll aspectEntry))
 --                 || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed aspectEntry )<= 100)      -- todo make 10 configurable
                ]
-        fstRun = multiRankingEntryCollapsed $  head' aspectRuns
-    in x-- Debug.trace ("NodeEndEdgeFeatures edgesFromAspects: producing "<> show (length x) <> " hyperedges. \n One aspectRun entry "<>show fstRun <>"\n Hyperedges: \n "<> (unlines $ fmap show $ (take 3 x)))
---        Debug.trace ("NodeAndEdgeFeatures edgesFromAspectes: aspectRuns "<> show (head aspectRuns))
---        $ x
 
 
 
