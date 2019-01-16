@@ -102,19 +102,38 @@ entityRunsF = [ GridRun qm rm em it
                            ++ [(AspectIdx, em) | em <- [minBound..maxBound]]
              ]
 
+pageEdgeRunsF :: [GridRun]
+pageEdgeRunsF =    [ GridRun qm rm em it
+                   | qm <- [minBound..maxBound]
+                   , rm <- [minBound..maxBound]
+                   , (it, em) <- [(EntityIdx, em) | em <- [NoneX, Rm, EcmPsg]] -- for edges derived from pages
+                                 ++ [(PageIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from pages
+                   ]
+paraEdgeRunsF :: [GridRun]
+paraEdgeRunsF = [ GridRun qm rm em it
+                | qm <- [minBound..maxBound]
+                , rm <- [minBound..maxBound]
+                , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg), (EcmIdx, Rm1), (EcmIdx, EcmPsg1)
+                              , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg), (ParagraphIdx, Rm1), (ParagraphIdx, EcmPsg1)]
+                ]
+aspectEdgeRunsF :: [GridRun]
+aspectEdgeRunsF =  [ GridRun qm rm em it
+                   | qm <- [minBound..maxBound]
+                   , rm <- [minBound..maxBound]
+                   , (it, em) <-  [(AspectIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from aspects
+                   ]
 
-edgeRunsF :: [GridRun]
-edgeRunsF = [ GridRun qm rm em it
-             | qm <- [minBound..maxBound]
-             , rm <- [minBound..maxBound]
-             , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg), (EcmIdx, Rm1), (EcmIdx, EcmPsg1)
-                           , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg), (ParagraphIdx, Rm1), (ParagraphIdx, EcmPsg1)
-                           ]
-                           ++ [(EntityIdx, em) | em <- [NoneX, Rm, EcmPsg]] -- for edges derived from pages
-                           ++ [(PageIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from pages
-                           ++ [(AspectIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from pages
-             ]
-
+-- edgeRunsF :: [GridRun]
+-- edgeRunsF = [ GridRun qm rm em it
+--              | qm <- [minBound..maxBound]
+--              , rm <- [minBound..maxBound]
+--              , (it, em) <- [ (EcmIdx, NoneX), (EcmIdx, Rm), (EcmIdx, EcmPsg), (EcmIdx, Rm1), (EcmIdx, EcmPsg1)
+--                            , (ParagraphIdx, NoneX), (ParagraphIdx, Rm), (ParagraphIdx, EcmPsg), (ParagraphIdx, Rm1), (ParagraphIdx, EcmPsg1)
+--                            ]
+--                            ++ [(EntityIdx, em) | em <- [NoneX, Rm, EcmPsg]] -- for edges derived from pages
+--                            ++ [(PageIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from pages
+--                            ++ [(AspectIdx, em) | em <- [NoneX, Rm, EcmPsg]]  -- for edges derived from pages
+--              ]
 
 
 data GridRun = GridRun !QueryModel !RetrievalModel !ExpansionModel !IndexType
@@ -127,10 +146,11 @@ data Run = GridRun' GridRun | Aggr
          deriving (Show, Read, Ord, Eq, Generic, Serialise)
 allEntityRunsF :: [Run]
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
-allEdgeRunsF :: [Run]
-allEdgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
+pageSources = [FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
+paraSources = [FromParas]
+aspectSources = [FromAspects]
 allSources :: [FromSource]
-allSources = [FromParas, FromAspects, FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
+allSources = pageSources <> paraSources <> aspectSources
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
@@ -167,9 +187,14 @@ allEntityFeatures = S.fromList $
 
 allEdgeFeatures :: S.Set EdgeFeature
 allEdgeFeatures = S.fromList $
-    (EdgeRetrievalFeature <$> allSources <*> allEdgeRunsF <*> allRunFeatures)
+    (EdgeRetrievalFeature <$> paraSources <*> withAggr paraEdgeRunsF <*> allRunFeatures)
+    <> (EdgeRetrievalFeature <$> pageSources <*> withAggr pageEdgeRunsF <*> allRunFeatures)
+    <> (EdgeRetrievalFeature <$> aspectSources <*> withAggr aspectEdgeRunsF <*> allRunFeatures)
     <> ([EdgeCount] <*>  allSources)
---     <> ([EdgeDocKL, EdgeCount] <*>  allSources)
+--     <> ([EdgeDocKl] <*>  allSources)
+  where withAggr edgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
+--         edgeRunsF = paraEdgeRunsF <> pageEdgeRunsF <> aspectEdgeRunsF
+--          = [FromPara]
 
 -- todo can we get rid of this?
 entSomeFSpace :: F.SomeFeatureSpace EntityFeature
