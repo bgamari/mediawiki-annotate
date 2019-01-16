@@ -332,10 +332,7 @@ generateEdgeFeatureGraph edgeFSpace
         edgeFeatureGraphWithSingleNodes =
             Graph.graphFromEdgesAndSingletons edgeFeaturesGraph singletonNodes
 
-    in traceShow ("generateEdgeFeatureGraph", query,
-                   " nodes:",Graph.numNodes edgeFeatureGraphWithSingleNodes,
-                   " edgeFeatures:", F.dimension $ F.featureSpace $ head' $ HM.elems allHyperEdges)
-      edgeFeatureGraphWithSingleNodes
+    in edgeFeatureGraphWithSingleNodes
 
 edgesFromParas :: forall edgePh.
                   F.FeatureSpace EdgeFeature edgePh
@@ -447,14 +444,15 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
         pageNeighbors aspectDoc = ([(pageDocArticleId aspectDoc, RoleOwner)])
                                 ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors aspectDoc)
 
-        debugTr info x = Debug.trace (show info <> show x) $ x
+        debugTr info x = x --Debug.trace (show info <> show x) $ x
         edgeFeat :: AspectId
                  -> MultiRankingEntry AspectId GridRun
                  -> FromSource
                  -> AspectDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
         edgeFeat aspectId aspectEntry source pg =
-            debugTr ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry<> "  Result=\n") $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
+            debugTr ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry<> "  Result=\n")
+                $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
