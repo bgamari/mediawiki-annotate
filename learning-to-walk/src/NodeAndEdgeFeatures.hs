@@ -447,13 +447,14 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
         pageNeighbors aspectDoc = ([(pageDocArticleId aspectDoc, RoleOwner)])
                                 ++ (fmap (\v -> (v, RoleLink)) $ HS.toList $ pageDocOnlyNeighbors aspectDoc)
 
+        debugTr info x = Debug.trace (show info <> show x) $ x
         edgeFeat :: AspectId
                  -> MultiRankingEntry AspectId GridRun
                  -> FromSource
                  -> AspectDoc
                  -> F.FeatureVec EdgeFeature edgePh Double
         edgeFeat aspectId aspectEntry source pg =
-            Debug.trace ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry) $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
+            debugTr ("NodeAndEdgeFeatures. edgesFromAspects: aspectEntry = "<> show aspectEntry<> "  Result=\n") $ edgeFragmentScoreVec edgeFSpace source aspectEntry pg
 
         dividingEdgeFeats feats cardinality = F.scale (1 / (realToFrac cardinality)) feats
 
@@ -483,9 +484,9 @@ edgesFromAspects edgeFSpace aspectLookup aspectRuns divideEdgeFeats =
 --                 || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed aspectEntry )<= 100)      -- todo make 10 configurable
                ]
         fstRun = multiRankingEntryCollapsed $  head' aspectRuns
-    in -- Debug.trace ("NodeEndEdgeFeatures edgesFromAspects: producing "<> show (length x) <> " hyperedges. \n One aspectRun entry "<>show fstRun <>"\n Hyperedges: \n "<> (unlines $ fmap show $ (take 3 x)))
-       Debug.trace ("NodeAndEdgeFeatures edgesFromAspectes: aspectRuns "<> show (head aspectRuns))
-       $ x
+    in x-- Debug.trace ("NodeEndEdgeFeatures edgesFromAspects: producing "<> show (length x) <> " hyperedges. \n One aspectRun entry "<>show fstRun <>"\n Hyperedges: \n "<> (unlines $ fmap show $ (take 3 x)))
+--        Debug.trace ("NodeAndEdgeFeatures edgesFromAspectes: aspectRuns "<> show (head aspectRuns))
+--        $ x
 
 
 
