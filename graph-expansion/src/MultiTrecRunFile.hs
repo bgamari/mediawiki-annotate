@@ -36,7 +36,7 @@ type RankingEntry doc = RunFile.RankingEntry' doc -- CAR.RunFile definition
 data MultiRankingEntry doc key = MultiRankingEntry { multiRankingEntryCollapsed :: !(RankingEntry doc)
                                                    , multiRankingEntryAll       :: [(key, RankingEntry doc)]
                                                    }
-                               deriving (Generic)
+                               deriving (Generic, Show)
 instance (NFData doc, NFData key) => NFData (MultiRankingEntry doc key)
 
 multiRankingEntryGetDocumentName :: MultiRankingEntry doc key -> doc
@@ -52,8 +52,7 @@ collapseRuns :: forall doc key. (Eq doc, Hashable doc, Hashable key, Show key, S
              => [(key, [RankingEntry doc])]
              -> M.Map QueryId [MultiRankingEntry doc key]
 collapseRuns runs =
-    Debug.trace  ("collapseRuns: "<> show [(k, head r) | (k,r) <- runs])
-      $ if any (\(k, r) -> identicalScoreRanking r) runs then
+    if any (\(k, r) -> identicalScoreRanking r) runs then
         error $ "MultiTrecRunFile collapsing run with identical scores :"
                  <> show [ k | (k,r) <- runs, identicalScoreRanking r]
     else
@@ -65,9 +64,13 @@ collapseRuns runs =
 
          in M.fromAscList
             $ withStrategy (parBuffer 100 (evalTuple2 r0 rseq))
-            [ (query, collapseRankings rankings)
+            [ (query, traceSh "collapseRuns: "
+                            (collapseRankings rankings))
             | (query, rankings) <- M.toAscList listOfRunMaps  -- fetch rankings for query
             ]
+
+traceSh :: Show a => String -> [a] -> [a]
+traceSh msg x = Debug.trace ((show msg) <> (show $ take 10 x)) $ x
 
 identicalScoreRanking :: [RankingEntry doc] -> Bool
 identicalScoreRanking ranking =
