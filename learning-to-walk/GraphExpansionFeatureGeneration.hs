@@ -455,7 +455,7 @@ main = do
             where
               f :: QueryId -> Graph PageId (EdgeFeatureVec edgeFSpace)
               f query =
-                  generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup aspectLookup candidates
+                  generateEdgeFeatureGraph edgeFSpace' featureGraphSettings query pagesLookup aspectLookup candidates mempty -- todo add node features instead of mempty!!
                 where
                   !candidates = Debug.trace "created candidate graph." $ candidateGraphGenerator query edgeRun entityRun aspectRun
                     where

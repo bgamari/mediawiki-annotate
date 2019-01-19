@@ -171,6 +171,7 @@ data EntityFeature where
 
 data EdgeFeature where
     EdgeRetrievalFeature :: !FromSource -> !Run -> !RunFeature -> EdgeFeature
+    NeighborFeature :: !EntityFeature -> EdgeFeature
 --     EdgeDocKL  :: !FromSource -> EdgeFeature
     EdgeCount  :: !FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq)
