@@ -111,7 +111,8 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures
                         | JustNone | JustSimpleRm | JustTitleAndSectionPath
-                        | NoEdgesFromParas | NoEdgesFromAspects | NoEdgesFromPages | NoEdgesFromPageLinkLink
+                        | NoNeighborFeats | NoRawEdgeFeats
+                        | NoEdgesFromParas | NoEdgesFromAspects | NoEdgesFromPages | NoEdgesFromLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
                         | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateNoAspectDocs
                         | CandidatesMadeNotFromEntityRuns | CandidatesMadeNotFromEdgeRuns | CandidatesMadeNotFromAspectRuns
@@ -904,6 +905,8 @@ filterFeaturesByExperimentSetting settings fname =
                     AllExp -> const True
                     NoEdgeFeats -> noEdge
                     NoEntityFeats -> noEntity
+                    NoNeighborFeats -> noNeighborFeats
+                    NoRawEdgeFeats -> noRawEdge
                     AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
                     JustAggr -> onlyAggr
                     NoAggr -> not . onlyAggr
@@ -918,7 +921,7 @@ filterFeaturesByExperimentSetting settings fname =
                     NoEdgesFromParas -> noEdgesFromParas
                     NoEdgesFromAspects -> noEdgesFromAspects
                     NoEdgesFromPages -> noEdgesFromPages
-                    NoEdgesFromPageLinkLink -> noEdgesFromPageLinkLink
+                    NoEdgesFromLinkLink -> noEdgesFromLinkLink
                     ExpEcmTestFeature -> onlyExpEcmTestFeature
                     OnlyNoneXFeature -> onlyNoneX
 
