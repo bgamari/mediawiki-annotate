@@ -250,7 +250,7 @@ main = do
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData allData)
           gen0 <- newStdGen  -- needed by learning to rank
-          trainMe miniBatchParams gen0 allData entFSpace metric outputFilePrefix modelFile
+          trainMe miniBatchParams EvalNoCutoff gen0 allData entFSpace metric outputFilePrefix modelFile
 
 --
 -- expSettingToCrit :: [ExperimentSettings] ->  (CombinedFeature -> Bool)

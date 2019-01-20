@@ -62,6 +62,7 @@ type BestFoldResults f s = Folds (M.Map Q [(DocId, FeatureVec f s Double, Rel)],
 
 trainMe :: forall f s. (Ord f, Show f)
         => MiniBatchParams
+        -> EvalCutoff
         -> StdGen
         -> TrainData f s
         -> FeatureSpace f s
@@ -69,7 +70,7 @@ trainMe :: forall f s. (Ord f, Show f)
         -> FilePath
         -> FilePath
         -> IO ()
-trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile = do
+trainMe miniBatchParams evalCutoff gen0 trainData fspace metric outputFilePrefix modelFile = do
           -- train me!
           let nRestarts = 5
               nFolds = 5
@@ -81,7 +82,7 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
 
           let trainFun :: FoldIdx -> TrainData f s -> [(Model f s, Double)]
               trainFun foldIdx =
-                  take nRestarts . trainWithRestarts miniBatchParams gen0 metric infoStr fspace
+                  take nRestarts . trainWithRestarts miniBatchParams evalCutoff gen0 metric infoStr fspace
                 where
                   infoStr = show foldIdx
 
@@ -96,7 +97,7 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
 
           -- full train
           let fullRestarts = withStrategy (parTraversable rdeepseq)
-                             $ take nRestarts $ trainWithRestarts miniBatchParams gen0 metric "full" fspace trainData
+                             $ take nRestarts $ trainWithRestarts miniBatchParams evalCutoff gen0 metric "full" fspace trainData
               (model, trainScore) =  bestModel $  fullRestarts
               actions2 = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
 
@@ -106,6 +107,7 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
 trainWithRestarts
     :: forall f s. (Show f)
     => MiniBatchParams
+    -> EvalCutoff
     -> StdGen
     -> ScoringMetric IsRelevant CAR.RunFile.QueryId
     -> String
@@ -113,7 +115,7 @@ trainWithRestarts
     -> TrainData f s
     -> [(Model f s, Double)]
        -- ^ an infinite list of restarts
-trainWithRestarts miniBatchParams gen0 metric info fspace trainData =
+trainWithRestarts miniBatchParams evalCutoff gen0 metric info fspace trainData =
   let trainData' = discardUntrainable trainData
 
       rngSeeds :: [StdGen]
@@ -123,7 +125,7 @@ trainWithRestarts miniBatchParams gen0 metric info fspace trainData =
       restartModel restart =
           learnToRank miniBatchParams
                       (defaultConvergence info' 1e-2 100 2)
-                      EvalNoCutoff trainData' fspace metric
+                      evalCutoff trainData' fspace metric
         where
           info' = info <> " restart " <> show restart
       modelsWithTrainScore :: [(Model f s,Double)]

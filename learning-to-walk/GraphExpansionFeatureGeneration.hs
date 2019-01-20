@@ -719,7 +719,7 @@ main = do
 
               putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
               gen0 <- newStdGen  -- needed by learning to rank
-              trainMe miniBatchParams gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
+              trainMe miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
 
 -- --------------------------------------
 
