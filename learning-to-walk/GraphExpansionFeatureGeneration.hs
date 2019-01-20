@@ -669,7 +669,7 @@ main = do
                         in franking
 
 
-              let docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+              let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
@@ -867,7 +867,7 @@ nodeDistrPriorForGraphwalk
     fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup model collapsedEntityRun collapsedEdgedocRun collapsedAspectRun =
 
   let docFeatures :: M.Map (QueryId, QRel.DocumentName) (CombinedFeatureVec entityPh edgePh)
-      docFeatures = makeStackedFeatures' fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+      docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
       degreeCentrality = fmap (model `score`) docFeatures
       queryToScoredList = M.fromListWith (<>) [(q, [(d, score)]) | ((q,d), score) <- M.toList degreeCentrality ]
