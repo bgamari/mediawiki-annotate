@@ -23,7 +23,7 @@ import CAR.Import.Entities
 import CAR.Import.Templates
 import CAR.Import.Utils
 import Network.URI
-import Data.Char (ord, chr)
+import Data.Char (ord)
 import qualified Data.ByteString.Short as SBS
 
 import qualified Data.SmallUtf8 as Utf8
