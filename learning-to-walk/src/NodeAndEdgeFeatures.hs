@@ -63,6 +63,9 @@ m >!< key =
         Nothing -> error $ ">!<: Can't lookup key "<> show key <> " in map. Map size: "<> show (length m) <>" Example keys " <> (show $ take 10 $ M.keys m)<> "..."
 
 
+data Role = RoleOwner | RoleLink
+         deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
 data FeatureSpaces entityPh edgePh = FeatureSpaces { edgeFSpace :: F.FeatureSpace EdgeFeature edgePh
                                                    , entityFSpace :: F.FeatureSpace EntityFeature entityPh
                                                    , combinedFSpace :: F.FeatureSpace CombinedFeature (F.Stack '[entityPh, edgePh])
@@ -84,15 +87,15 @@ mkFeatureSpaces fspace f = runIdentity $ do
     modelToCombinedFeatureVec <- pure $ fromMaybe (error "mkFeatureSpaces: impossible") $ F.mapFeaturesInto fspace combinedFSpace Just
     pure $ f modelToCombinedFeatureVec FeatureSpaces{..}
 
-
-stackFeatures :: forall entityPh edgePh.
-                   FeatureSpaces entityPh edgePh
-                -> EntityFeatureVec entityPh
-                -> EdgeFeatureVec edgePh
-                -> CombinedFeatureVec entityPh edgePh
-stackFeatures FeatureSpaces{..} uFeats eFeats =
-    F.fromList combinedFSpace $ map (first Left) (F.toList uFeats) ++ map (first Right) (F.toList eFeats)
-
+--
+-- stackFeatures :: forall entityPh edgePh.
+--                    FeatureSpaces entityPh edgePh
+--                 -> EntityFeatureVec entityPh
+--                 -> EdgeFeatureVec edgePh
+--                 -> CombinedFeatureVec entityPh edgePh
+-- stackFeatures FeatureSpaces{..} uFeats eFeats =
+--     F.fromList combinedFSpace $ map (first Left) (F.toList uFeats) ++ map (first Right) (F.toList eFeats)
+--
 
 keySet :: HM.HashMap k v -> HS.HashSet k
 keySet m = HS.fromMap $ fmap ( const () ) m
@@ -125,16 +128,6 @@ combineEntityEdgeFeatures spaces@(FeatureSpaces {..})
 
         res = makeCombinedFeatures combinedFSpace nodeFeatures edgeFeatures
     in res
-
-isLowFeature :: forall entityPh edgePh.
-                FeatureSpaces entityPh edgePh
-             -> CombinedFeatureVec entityPh edgePh
-             -> Bool
-isLowFeature spaces@(FeatureSpaces {..}) featVec =
-    F.l2Norm (defaultCombined F.^-^ featVec) < 10
-  where
-    !defaultCombined = stackFeatures spaces (makeDefaultEntFeatVector entityFSpace) (makeDefaultEdgeFeatVector edgeFSpace)
-
 
 
 -- | merge node and edge features (used for both training, prediction, and walking)
@@ -255,26 +248,6 @@ makeEdgeFeatures :: forall edgePh entityPh .
 makeEdgeFeatures edgeFSpace features = runST
                                      $ F.foldM (F.mkFeaturesF edgeFSpace defaultEdgeFeatures (+)) features
 
-makeCombinedFeatures :: forall edgePh entityPh .
-                    F.FeatureSpace CombinedFeature (F.Stack '[entityPh,edgePh])
-                 -> HM.HashMap PageId [( EntityFeature, Double)]
-                 -> [((PageId, PageId), EdgeFeature, Double)]
-                 -> M.Map PageId (CombinedFeatureVec entityPh edgePh)
-makeCombinedFeatures combinedFSpace nodeFeatures edgeFeatures =
-    let nodeFeatures' = [ (u,f,v ) | (u, feats) <- HM.toList nodeFeatures, (f,v) <- feats]
-        features = fmap projectEntFs nodeFeatures'
-                 ++ fmap projectEdgeFs edgeFeatures
-    in runST
-       $ F.foldM (F.mkFeaturesF combinedFSpace defaultCombinedFeatures (+)) features
-  where defaultCombinedFeatures (Left f) = defaultEntityFeatures f
-        defaultCombinedFeatures (Right f) = defaultEdgeFeatures f
-        projectEntFs (u, feat, value) =
-            (u, Left (feat), value)
-        projectEdgeFs ((u,v), feat, value) =  -- aggregate over incoming edges
-            (v, Right (feat), value)
-
-
-
 
 -- | used for train,test, and graph walk
 generateEdgeFeatureGraph :: forall edgePh entityPh .
@@ -381,24 +354,17 @@ edgesFromParas edgeDocsLookup edgeRuns divideEdgeFeats nodeFeatures =
         oneHyperEdge (paraId, edgeEntry) =
               let !featVec = edgeFeat paraId edgeEntry
                   dividedFeatVec = dividingEdgeFeats featVec (edgeCardinality (edgeDoc paraId))
-                  !normFeatVec = if divideEdgeFeats then dividedFeatVec else featVec
+                  !normFeatVec = (if divideEdgeFeats then dividedFeatVec else featVec)
               in concat
-                 [ prefixFeatureVectorWithItem (u,v) normFeatVec -- stack normFeatVec  oppositeNodeFeatVec ) -- featVec)-- dividedFeatVec)
+                 [ prefixFeatureVectorWithItem (u,v) ( normFeatVec ++ neighFs)-- stack normFeatVec  oppositeNodeFeatVec ) -- featVec)-- dividedFeatVec)
                  | u <- HS.toList $ edgeDocNeighbors (edgeDoc paraId)
                  , v <- HS.toList $ edgeDocNeighbors (edgeDoc paraId) -- include self links (v==u)!
---                  , let oppositeNodeFeatVec = nodeFeatures >!< v
+                 , let neighFs = neighborFeatures u v nodeFeatures
                  ]
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName edgeEntry, edgeEntry)
                | edgeEntry <- edgeRuns
                ]
-
-prefixFeatureVectorWithItem :: a -> [(f,v)] -> [(a,f,v)]
-prefixFeatureVectorWithItem item features =
-    fmap (\(feat,value) -> (item, feat, value) ) features
-
-data Role = RoleOwner | RoleLink
-         deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 
 edgesFromPages :: forall entityPh.
@@ -428,7 +394,7 @@ edgesFromPages pagesLookup entityRuns divideEdgeFeats nodeFeatures =
                      ->  [((PageId, PageId), EdgeFeature, Double)]
         oneHyperEdge (pageId, entityEntry) =
             concat
-            $ [ prefixFeatureVectorWithItem (u, v) (if divideEdgeFeats then dividedFeatVec else featVec)
+            $ [ prefixFeatureVectorWithItem (u, v) (normFeatVec ++ neighFs)
               | Just p <- pure $ page pageId
               , let neighbors = pageNeighbors p
                     !cardinality = HS.size (pageDocOnlyNeighbors p) + 1
@@ -436,6 +402,8 @@ edgesFromPages pagesLookup entityRuns divideEdgeFeats nodeFeatures =
               , (v, vRole) <- neighbors -- include self links (v==u)!
               , let !featVec = edgeFeat pageId entityEntry (getSource uRole vRole) p
               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
+              , let normFeatVec = (if divideEdgeFeats then dividedFeatVec else featVec)
+              , let neighFs = neighborFeatures u v nodeFeatures
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromPagesOwnerLink
@@ -482,7 +450,7 @@ edgesFromAspects aspectLookup aspectRuns divideEdgeFeats nodeFeatures =
                      -> [((PageId, PageId), EdgeFeature, Double)]
         oneHyperEdge (aspectId, aspectEntry) =
             concat
-            $ [ prefixFeatureVectorWithItem (u, v) (if divideEdgeFeats then dividedFeatVec else featVec)
+            $ [ prefixFeatureVectorWithItem (u, v) (normFeatVec ++ neighFs)
               | Just aspectDoc <- pure $ aspect aspectId
               , let neighbors = pageNeighbors aspectDoc
                     !cardinality = HS.size (pageDocOnlyNeighbors aspectDoc) + 1
@@ -490,9 +458,11 @@ edgesFromAspects aspectLookup aspectRuns divideEdgeFeats nodeFeatures =
               , (v, vRole) <- neighbors -- include self links (v==u)!
               , let !featVec = edgeFeat aspectId aspectEntry (getSource uRole vRole) aspectDoc
               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
+              , let normFeatVec = if divideEdgeFeats then dividedFeatVec else featVec
+              , let neighFs = neighborFeatures u v nodeFeatures
               ]
           where getSource :: Role -> Role -> FromSource
-                getSource RoleOwner RoleLink = FromAspectsOwnerLink -- todo aspects: Include role features
+                getSource RoleOwner RoleLink = FromAspectsOwnerLink
                 getSource RoleLink RoleOwner = FromAspectsLinkOwner
                 getSource RoleLink RoleLink = FromAspectsLinkLink
                 getSource RoleOwner RoleOwner = FromAspectsSelf
@@ -507,7 +477,39 @@ edgesFromAspects aspectLookup aspectRuns divideEdgeFeats nodeFeatures =
 
 
 
-                          -- TODO use different features for page edge features
+
+-- | stack node and edge features, while edge features are aggregated over incoming edges (i.e., summing over u)
+-- | Also see 'neighborFeatures'
+makeCombinedFeatures :: forall edgePh entityPh .
+                    F.FeatureSpace CombinedFeature (F.Stack '[entityPh,edgePh])
+                 -> HM.HashMap PageId [( EntityFeature, Double)]
+                 -> [((PageId, PageId), EdgeFeature, Double)]
+                 -> M.Map PageId (CombinedFeatureVec entityPh edgePh)
+makeCombinedFeatures combinedFSpace nodeFeatures edgeFeatures =
+    let nodeFeatures' = [ (u,f,v ) | (u, feats) <- HM.toList nodeFeatures, (f,v) <- feats]
+        features = fmap projectEntFs nodeFeatures'
+                 ++ fmap projectEdgeFs edgeFeatures
+    in runST
+       $ F.foldM (F.mkFeaturesF combinedFSpace defaultCombinedFeatures (+)) features
+  where defaultCombinedFeatures (Left f) = defaultEntityFeatures f
+        defaultCombinedFeatures (Right f) = defaultEdgeFeatures f
+        projectEntFs (u, feat, value) =
+            (u, Left (feat), value)
+        projectEdgeFs ((u,v), feat, value) =  -- aggregate over incoming edges
+            (v, Right (feat), value)
+
+
+
+-- | convert node features into opposite/outgoing neigbor features. Opposite node is "from" u!
+-- | Also see 'makeCombinedFeatures'
+neighborFeatures :: PageId -> PageId -> HM.HashMap PageId [(EntityFeature, Double)] -> [(EdgeFeature, Double)]
+neighborFeatures u v nodeFeatures =
+    fmap ( first NeighborFeature ) $ fromMaybe [] $ u `HM.lookup` nodeFeatures  -- todo Rethink if this should be u or v!
+
+prefixFeatureVectorWithItem :: a -> [(f,v)] -> [(a,f,v)]
+prefixFeatureVectorWithItem item features =
+    fmap (\(feat,value) -> (item, feat, value) ) features
+
 
 edgeFragmentScoreVec ::  FromSource
                  -> MultiRankingEntry p GridRun
