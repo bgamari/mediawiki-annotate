@@ -23,21 +23,15 @@
 
 module TrainAndStore where
 
-import Options.Applicative
 import Data.Aeson
-import GHC.Generics
-import Codec.Serialise
 
 import qualified Data.Map.Strict as M
-import qualified Data.Set as S
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import Data.List
-import Data.List.Split
 import Data.Foldable as Foldable
 import Data.Function
 import Data.Bifunctor
-import Data.Hashable
 import System.Random
 import Control.Parallel.Strategies
 import Control.Concurrent.Map
@@ -48,13 +42,11 @@ import qualified CAR.RunFile as CarRun
 
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
-import qualified SimplIR.FeatureSpace as F
-import SimplIR.FeatureSpace (dimension, FeatureSpace, FeatureVec, featureNames, mkFeatureSpace)
+import SimplIR.FeatureSpace (FeatureSpace, FeatureVec)
 
 import qualified CAR.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
-import MultiTrecRunFile
 import SimplIR.TrainUtils
 
 
@@ -87,7 +79,7 @@ trainMe miniBatchParams gen0 trainData fspace metric outputFilePrefix modelFile 
               !folds = force $ mkSequentialFolds nFolds (M.keys trainData)
           putStrLn "made folds"
 
-          let trainFun :: FoldIdx -> _
+          let trainFun :: FoldIdx -> TrainData f s -> [(Model f s, Double)]
               trainFun foldIdx =
                   take nRestarts . trainWithRestarts miniBatchParams gen0 metric infoStr fspace
                 where
@@ -179,7 +171,7 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
         testRanking ::   M.Map Q (Ranking SimplIR.LearningToRank.Score (DocId, Rel))
         testRanking = fold bestRankingPerFold'
 
-        testScore = metric testRanking
+        _testScore = metric testRanking
 
 --         dumpAll = [ do storeRankingData outputFilePrefix ranking metric modelDesc
 --                        storeModelData outputFilePrefix modelFile model trainScore modelDesc
@@ -235,7 +227,7 @@ l2rRankingToRankEntries methodName rankings =
                              , carMethodName = methodName
                              }
   | (query, ranking) <- M.toList rankings
-  , ((rankScore, (doc, rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
+  , ((rankScore, (doc, _rel)), rank) <- Ranking.toSortedList ranking `zip` [1..]
   ]
 
 
