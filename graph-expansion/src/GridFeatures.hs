@@ -461,6 +461,7 @@ defaultEdgeFeatures f =
       EdgeCount _ -> 0
 --       EdgeDocKL _ -> 0
       EdgeRetrievalFeature _ _ runF -> defaultRankFeatures runF
+      NeighborFeature x -> defaultEntityFeatures x
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
