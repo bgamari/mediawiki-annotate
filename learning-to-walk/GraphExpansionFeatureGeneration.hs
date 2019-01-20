@@ -498,7 +498,7 @@ main = do
                                                           , QRel.isPositive r
                                                           ]
 
-                  metric :: ScoringMetric IsRelevant QueryId _
+                  metric :: ScoringMetric IsRelevant QueryId
                   metric = meanAvgPrec (\q -> fromMaybe 0 $ q `M.lookup` totalRels)  Relevant
 
                   !someKindOfTrainingData = M.fromList $ [(q,q) | q <- intersect (M.keys totalRels) (M.keys featureGraphs) ] -- totalRels does not include queries for which there is no training data
@@ -674,7 +674,7 @@ main = do
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
-                  allData = augmentWithQrels qrel docFeatures Relevant
+                  allData = augmentWithQrels qrel docFeatures
 
     --               !metric = avgMetricQrel qrel
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
@@ -684,7 +684,7 @@ main = do
                         " queries and "++ show totalElems ++" items total of which "++
                         show totalPos ++" are positive."
 
-              let trainRanking = withStrategy (parTraversable rwhnf)
+              let trainRanking = withStrategy (parTraversable rseq)
                                $ rerankRankings' model' allData
               storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
 
@@ -699,9 +699,10 @@ main = do
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature _
-                  allData = augmentWithQrels qrel docFeatures Relevant
+                  allData = augmentWithQrels qrel docFeatures
 
-                  !metric = avgMetricQrel qrel
+                  metric :: ScoringMetric IsRelevant CAR.RunFile.QueryId
+                  !metric = meanAvgPrec (totalRelevantFromQRels qrel) Relevant
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
                   totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 

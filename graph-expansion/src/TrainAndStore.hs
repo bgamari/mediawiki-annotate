@@ -65,7 +65,7 @@ trainMe :: forall f s. (Ord f, Show f)
         -> StdGen
         -> TrainData f s
         -> FeatureSpace f s
-        -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+        -> ScoringMetric IsRelevant CAR.RunFile.QueryId
         -> FilePath
         -> FilePath
         -> IO ()
@@ -107,7 +107,7 @@ trainWithRestarts
     :: forall f s. (Show f)
     => MiniBatchParams
     -> StdGen
-    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId
     -> String
     -> FeatureSpace f s
     -> TrainData f s
@@ -157,7 +157,7 @@ bestRankingPerFold bestPerFold' =
 dumpKFoldModelsAndRankings
     :: forall f s. (Ord f, Show f)
     => FoldRestartResults f s
-    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId
     -> FilePath
     -> FilePath
     -> [IO ()]
@@ -186,7 +186,8 @@ dumpKFoldModelsAndRankings foldRestartResults metric outputFilePrefix modelFile 
         dumpBest =
             [ do storeRankingData outputFilePrefix ranking metric modelDesc
                  storeModelData outputFilePrefix modelFile model trainScore modelDesc
-            | (foldNo, (testData,  ~(model, trainScore)))  <- zip [0..] $ toList bestPerFold'
+            | (foldNo, (testData,  ~(model, trainScore)))  <- zip [0 :: Integer ..]
+                                                              $ toList bestPerFold'
             , let ranking = rerankRankings' model testData
             , let modelDesc = "fold-"<> show foldNo <> "-best"
             ]
@@ -202,7 +203,7 @@ dumpFullModelsAndRankings
     :: forall f s. (Ord f, Show f)
     => M.Map Q [(DocId, FeatureVec f s Double, Rel)]
     -> (Model f s, Double)
-    -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+    -> ScoringMetric IsRelevant CAR.RunFile.QueryId
     -> FilePath
     -> FilePath
     -> [IO()]
@@ -248,7 +249,7 @@ storeModelData outputFilePrefix modelFile model trainScore modelDesc = do
 
 storeRankingData ::  FilePath
                -> M.Map  CAR.RunFile.QueryId (Ranking Double (QRel.DocumentName, IsRelevant))
-               -> ScoringMetric IsRelevant CAR.RunFile.QueryId QRel.DocumentName
+               -> ScoringMetric IsRelevant CAR.RunFile.QueryId
                -> String
                -> IO ()
 storeRankingData outputFilePrefix ranking metric modelDesc = do

@@ -230,9 +230,11 @@ main = do
           let docFeatures = makeFeatures entFSpace collapsedEntityRun
 
               allData :: TrainData EntityFeature allEntFeats
-              allData = augmentWithQrels qrel docFeatures Relevant
+              allData = augmentWithQrels qrel docFeatures
 
-              metric = avgMetricQrel qrel
+              metric :: ScoringMetric IsRelevant QueryId
+              metric = meanAvgPrec (totalRelevantFromQRels qrel) Relevant
+
               totalElems = getSum . foldMap ( Sum . length ) $ allData
               totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
