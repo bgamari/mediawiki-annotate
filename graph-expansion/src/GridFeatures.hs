@@ -144,12 +144,14 @@ instance NFData GridRun where
 
 data Run = GridRun' GridRun | Aggr
          deriving (Show, Read, Ord, Eq, Generic, Serialise)
+
 allEntityRunsF :: [Run]
 allEntityRunsF = (GridRun' <$> entityRunsF) <> [Aggr]
+
+pageSources, paraSources, aspectSources, allSources :: [FromSource]
 pageSources = [FromPagesOwnerLink, FromPagesLinkOwner, FromPagesLinkLink, FromPagesSelf]
 paraSources = [FromParas]
 aspectSources = [FromAspectsOwnerLink, FromAspectsLinkOwner, FromAspectsLinkLink, FromAspectsSelf]
-allSources :: [FromSource]
 allSources = pageSources <> paraSources <> aspectSources
 
 data RunFeature = ScoreF | RecipRankF | CountF --LinearRankF | BucketRankF
@@ -240,9 +242,9 @@ noRawEdge (Right (EdgeRetrievalFeature _ _ _)) = False
 noRawEdge _  = True
 
 onlyAggr :: CombinedFeature -> Bool
-onlyAggr (Left (EntRetrievalFeature Aggr runf)) = True
-onlyAggr (Right (EdgeRetrievalFeature _ Aggr runf)) = True
-onlyAggr (Right (NeighborFeature (EntRetrievalFeature Aggr runf))) = True
+onlyAggr (Left (EntRetrievalFeature Aggr _runf)) = True
+onlyAggr (Right (EdgeRetrievalFeature _ Aggr _runf)) = True
+onlyAggr (Right (NeighborFeature (EntRetrievalFeature Aggr _runf))) = True
 onlyAggr _  = False
 
 onlyScore :: CombinedFeature -> Bool
@@ -290,9 +292,8 @@ onlySimpleRmFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalMo
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
 onlySimpleRmFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
     onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType
-onlySimpleRmFeatures (Left (EntRetrievalFeature Aggr runf)) = True
-onlySimpleRmFeatures (Right (EdgeRetrievalFeature _ Aggr runf)) = True
-onlySimpleRmFeatures (Left (EntRetrievalFeature Aggr runf)) = True
+onlySimpleRmFeatures (Left (EntRetrievalFeature Aggr _runf)) = True
+onlySimpleRmFeatures (Right (EdgeRetrievalFeature _ Aggr _runf)) = True
 onlySimpleRmFeatures (Left (EntDegree)) = False
 onlySimpleRmFeatures (Right (EdgeCount _)) = False
 onlySimpleRmFeatures (Right (NeighborFeature entF)) = onlySimpleRmFeatures (Left entF)
