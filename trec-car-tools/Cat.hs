@@ -1,6 +1,3 @@
-import Data.Proxy
-import Control.Monad
-import Data.Semigroup hiding (option)
 import qualified Data.HashSet as HS
 import Options.Applicative
 import Codec.Serialise
@@ -34,8 +31,8 @@ main = do
 
 catFiles :: (File a, Serialise a)
          => (FilePath -> IO (Provenance, [a])) -> FilePath -> [FilePath] -> Maybe T.Text -> IO ()
-catFiles read output files newDataReleaseName = do
-    pages <- mapM read files
+catFiles readF output files newDataReleaseName = do
+    pages <- mapM readF files
     let siteProvs = HS.toList $ foldMap (HS.fromList . siteProvenances . fst) pages
         prov = fst $ head pages
         prov' = prov { siteProvenances = siteProvs
