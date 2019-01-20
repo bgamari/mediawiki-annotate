@@ -3,9 +3,7 @@
 import Control.Monad
 import Data.Foldable
 import Data.Maybe
-import Data.Monoid
 
-import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.List
@@ -13,12 +11,11 @@ import System.FilePath
 
 import Options.Applicative
 
-import CAR.Types
+import CAR.Types hiding (transform)
 import CAR.ToolVersion
 import CAR.CarExports as Exports
 import CAR.AnnotationsFile as AnnsFile
 import CAR.QRelFile
-import qualified CAR.NameToIdMap as CARN
 
 
 options :: Parser (FilePath, [PageName], [PageId], [Exporter])
@@ -116,16 +113,16 @@ resolveSubsumption annotations =
 
 resolveEntitySubsumption ::  [EntityAnnotation IsRelevant] -> [EntityAnnotation IsRelevant]
 resolveEntitySubsumption annotations =
-        [ (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) id rel)
-        | (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) id rel) <- annotations
+        [ (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) entityId rel)
+        | (EntityAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) entityId rel) <- annotations
         , headingPrefix <- heads headings
         ]
   where heads xs = map reverse $ tails $ reverse xs
 
 resolveEntityPassageSubsumption ::  [EntityPassageAnnotation IsRelevant] -> [EntityPassageAnnotation IsRelevant]
 resolveEntityPassageSubsumption annotations =
-        [ (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) id id' rel)
-        | (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) id id' rel) <- annotations
+        [ (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headingPrefix}) entityId entityId' rel)
+        | (EntityPassageAnnotation (SectionPath {sectionPathPageId=pageid, sectionPathHeadings=headings}) entityId entityId' rel) <- annotations
         , headingPrefix <- heads headings
         ]
   where heads xs = map reverse $ tails $ reverse xs
@@ -151,8 +148,8 @@ exportEntityAnnotations cutSectionPath transform outPath _prov pagesToExport = d
 exportEntityPassageAnnotations :: (SectionPath -> SectionPath) -> ([EntityPassageAnnotation IsRelevant] -> [EntityPassageAnnotation IsRelevant]) -> FilePath -> Exporter
 exportEntityPassageAnnotations cutSectionPath transform outPath _prov pagesToExport = do
     putStr "Writing section relevance annotations..."
-    let cutAnnotation (EntityPassageAnnotation sectionPath entityId paraId rel) =
-          EntityPassageAnnotation (cutSectionPath sectionPath) entityId paraId rel
+    let cutAnnotation (EntityPassageAnnotation sectionPath entityId paragId rel) =
+          EntityPassageAnnotation (cutSectionPath sectionPath) entityId paragId rel
     writeEntityPassageQRel outPath
           $ transform
           $ S.toList
