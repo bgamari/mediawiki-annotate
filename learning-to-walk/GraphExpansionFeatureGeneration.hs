@@ -352,13 +352,15 @@ main = do
                         if rel1 == rel2 then rel1
                         else error $ "Qrel file contains conflicting relevance data for (query, item): "<> qrelFile
 
-
         lookupQrel :: IsRelevant -> QueryId -> PageId -> IsRelevant
         lookupQrel def query document =
-            fromMaybe def $ do
-                m <- query `M.lookup` qrelMap
-                r <- document `M.lookup` m
-                return r
+            let query' = CAR.RunFile.unQueryId query
+            in  if (T.pack $ unpackPageId document) == query'  || (aspectHasPageId document $ parseAspectId query')
+                    then Relevant
+                else fromMaybe def $ do
+                        m <- query `M.lookup` qrelMap
+                        r <- document `M.lookup` m
+                        return r
 
 
     queries <-
@@ -696,6 +698,37 @@ main = do
           in mkFeatureSpaces features $ \_ fspaces -> do
 
               let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+
+                  augmentWithQrels :: forall f s.
+                                      [QRel.Entry QueryId  QRel.DocumentName IsRelevant]
+                                   -> M.Map (QueryId,  QRel.DocumentName) (FeatureVec f s Double)
+                                   -> M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
+                  augmentWithQrels qrel docFeatures =
+                      let relevance :: M.Map (QueryId,  QRel.DocumentName) IsRelevant
+                          relevance = M.fromList [ ((qid, doc), rel)
+                                                 | QRel.Entry qid doc rel <- qrel
+                                                 ]
+
+                          -- | when query starts with document, then its relevant even if there is no explicit qrels entry
+                          queryMatchRelevance :: QueryId ->  QRel.DocumentName -> IsRelevant
+                          queryMatchRelevance qid doc =
+                              let query' = CAR.RunFile.unQueryId qid
+                                  doc' =  doc
+                                  doc'' = packPageId $ T.unpack doc'
+                              in if (query' == doc') || (aspectHasPageId doc'' $ parseAspectId query')
+                                        then Relevant
+                                        else NotRelevant
+
+                          franking :: M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
+                          franking = M.fromListWith (++)
+                                     [ (qid, [(doc, features, relDocs)])
+                                     | ((qid, doc), features) <- M.assocs docFeatures
+                                     , let def = queryMatchRelevance qid doc
+                                     , let relDocs = M.findWithDefault def (qid, doc) relevance
+                                     ]
+                      in franking
+
+
 
               putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               let allData :: TrainData CombinedFeature _
