@@ -169,14 +169,14 @@ data EntityFeature where
 --     EntIncidentEdgeDocsRecip :: EntityFeature
 --     EntDegreeRecip :: EntityFeature
     EntDegree  :: EntityFeature
-    deriving (Show, Read, Ord, Eq)
+    deriving (Show, Read, Ord, Eq, Generic, Serialise)
 
 data EdgeFeature where
     EdgeRetrievalFeature :: !FromSource -> !Run -> !RunFeature -> EdgeFeature
     NeighborFeature :: !EntityFeature -> EdgeFeature
 --     EdgeDocKL  :: !FromSource -> EdgeFeature
     EdgeCount  :: !FromSource -> EdgeFeature
-    deriving (Show, Read, Ord, Eq)
+    deriving (Show, Read, Ord, Eq, Generic, Serialise)
 
 data EntityOrEdge = Entity | Edge | Aspect
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)

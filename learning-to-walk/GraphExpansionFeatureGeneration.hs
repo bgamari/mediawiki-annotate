@@ -12,6 +12,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 import Control.Concurrent.Async
 import Control.DeepSeq hiding (rwhnf)
@@ -29,6 +30,7 @@ import System.Random
 import GHC.Generics
 import GHC.Stack
 import Control.Exception
+import System.FilePath
 
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
@@ -47,6 +49,8 @@ import Data.Hashable
 import Control.Concurrent
 import Control.Concurrent.Map
 import Data.List.Split
+import qualified Codec.Serialise as CBOR
+
 
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
@@ -697,6 +701,7 @@ main = do
                                             $ F.featureNameSet allCombinedFSpace
           in mkFeatureSpaces features $ \_ fspaces -> do
 
+
               let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
                   augmentWithQrels :: forall f s.
@@ -730,11 +735,48 @@ main = do
 
 
 
-              putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-              let allData :: TrainData CombinedFeature _
+                  allData :: TrainData CombinedFeature _
                   allData = augmentWithQrels qrel docFeatures
 
-                  metric :: ScoringMetric IsRelevant CAR.RunFile.QueryId
+
+              putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
+              BSL.writeFile (outputFilePrefix <.> "alldata.cbor") $ CBOR.serialise
+                  $ SerialisedTrainingData fspaces allData
+
+              train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+
+data SerialisedTrainingData
+    = forall entityPh edgePh . SerialisedTrainingData { serialisedFSpaces :: FeatureSpaces entityPh edgePh
+                                                      , serialisedAllData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
+                                                      }
+
+instance CBOR.Serialise IsRelevant
+
+instance CBOR.Serialise SerialisedTrainingData where
+    encode (SerialisedTrainingData {..}) =
+      CBOR.encode (F.featureNames $ entityFSpace serialisedFSpaces)
+      <> CBOR.encode (F.featureNames $ edgeFSpace serialisedFSpaces)
+      <> CBOR.encode (fmap (fmap (\(a,b,c) -> (a, F.toVector b, c))) serialisedAllData)
+
+    decode = do
+      entityFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
+      edgeFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
+      let fspaces = FeatureSpaces { combinedFSpace = F.eitherSpaces entityFSpace edgeFSpace, .. }
+      allData <- CBOR.decode
+      let unpackRawFVec (x,y,z)
+            | Just v <- F.unsafeFromVector (combinedFSpace fspaces) y = (x,v,z)
+            | otherwise = error $ "Serialise(SerialisedTrainingData): Deserialise failure in unpackRawFVec for docid "<> show x
+      return $ SerialisedTrainingData fspaces $ fmap (fmap unpackRawFVec) allData
+
+train :: FeatureSpaces entityPh edgePh
+      ->  TrainData CombinedFeature _
+      -> [QRel.Entry CAR.RunFile.QueryId doc IsRelevant]
+      -> MiniBatchParams
+      -> FilePath
+      -> FilePath
+      -> IO()
+train fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
+              let metric :: ScoringMetric IsRelevant CAR.RunFile.QueryId
                   !metric = meanAvgPrec (totalRelevantFromQRels qrel) Relevant
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
                   totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
@@ -753,6 +795,8 @@ main = do
               putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
               gen0 <- newStdGen  -- needed by learning to rank
               trainMe miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
+
+
 
 -- --------------------------------------
 

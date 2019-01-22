@@ -71,13 +71,14 @@ import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
 import qualified SimplIR.Format.TrecRunFile as Run
 import qualified Data.SmallUtf8 as Utf8
+import qualified Codec.Serialise as CBOR
 import CAR.Types
 import Debug.Trace
 
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
                 deriving (Eq, Ord, Show, FromJSON, ToJSON, Hashable)
-                deriving newtype (NFData)
+                deriving newtype (NFData, CBOR.Serialise)
 
 
 newtype MethodName = MethodName { unMethodName :: T.Text }
