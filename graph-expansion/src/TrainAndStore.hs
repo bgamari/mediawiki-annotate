@@ -124,7 +124,7 @@ trainWithRestarts miniBatchParams evalCutoff gen0 metric info fspace trainData =
       restartModel :: Int -> StdGen -> (Model f s, Double)
       restartModel restart =
           learnToRank miniBatchParams
-                      (defaultConvergence info' 1e-2 100 2)
+                      (defaultConvergence info' 1e-2 10 0)
                       evalCutoff trainData' fspace metric
         where
           info' = info <> " restart " <> show restart
