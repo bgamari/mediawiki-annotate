@@ -13,6 +13,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 import Control.Concurrent.Async
 import Control.DeepSeq hiding (rwhnf)
@@ -99,7 +100,6 @@ type EntityIndex = Index.OnDiskIndex Term PageId Int
 
 data SeedDerivation = SeedsFromLeadSection
                     | SeedsFromEntityIndex EntityIndex
-                    -- | SeedsFromHeadingEntityLinks -- TODO
 
 data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
                  | QueriesFromJson FilePath
@@ -140,77 +140,94 @@ data GraphWalkModel = PageRankWalk | BiasedPersPageRankWalk
 type TeleportationProb = Double
 
 
-opts :: Parser ( FilePath
-               , FilePath
-               , QuerySource
-               , [CarRun.QueryId]
-               , NumResults
-               , [(GridRun, EntityOrEdge, FilePath)]
-               , Toc.IndexedCborPath ParagraphId EdgeDoc
-               , Toc.IndexedCborPath PageId PageDoc
-               , Toc.IndexedCborPath AspectId AspectDoc
-               , FilePath
-               , ModelSource
-               , [PosifyEdgeWeights]
-               , [TeleportationProb]
-               , [ExperimentSettings]
-               , PageRankExperimentSettings
-               , PageRankConvergence
-               , GraphWalkModel
-               , Maybe MiniBatchParams
-               )
-opts =
-    (,,,,,,,,,,,,,,,,,)
-    <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
-    <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
-    <*> querySource
-    <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
-    <*> option auto (short 'k' <> long "num-results" <> help "use number of results of input rankings (per query)")
-    <*> some gridRunParser
-    <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
-    <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
-    <*> (option (Toc.IndexedCborPath <$> str)  ( long "aspect-doc-cbor" <> metavar "AspectDoc-CBOR" <> help "AspectDoc cbor file"))
-    <*> (option str (long "qrel" <> metavar "QRel-FILE"))
-    <*> modelSource
-    <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))  ))
-    <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
-    <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
-    <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
-    <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
-    <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
-    <*> optional minibatchParser
-    where
+data FlowParser = NormalFlowArguments' NormalFlowArguments | FlowTrainOnly' FlowTrainOnly
 
-      querySource :: Parser QuerySource
-      querySource =
-              fromCborTitle
-          <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
-          <|> fromEntityIndex
-        where
-          queryDeriv =
-              flag QueryFromPageTitle QueryFromSectionPaths
-                   (long "query-from-sections" <> help "Use sections as query documents")
-          fromCborTitle =
-              QueriesFromCbor
-                <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
-                <*> queryDeriv
-                <*> pure SeedsFromLeadSection
+opts :: Parser (FlowParser)
+opts = fmap NormalFlowArguments' normalArgs  <|> fmap FlowTrainOnly' trainArgs
+  where
+    trainArgs = FlowTrainOnly
+        <$>  (option str (long "qrel" <> metavar "QRel-FILE"))
+        <*> optional minibatchParser
+        <*> (option str (long "train-data" <> metavar "File with serialized training data"))
+        <*> (option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file"))
+        <*> option str (short 'm' <> long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
 
-          fromEntityIndex =
-              QueriesFromCbor
-                <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
-                <*> queryDeriv
-                <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+    normalArgs = NormalFlowArguments
+        <$> argument str (help "articles file" <> metavar "ANNOTATIONS-FILE")
+        <*> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+        <*> querySource
+        <*> many (option (CarRun.QueryId . T.pack <$> str) (long "query" <> metavar "QUERY" <> help "execute only this query"))
+        <*> option auto (short 'k' <> long "num-results" <> help "use number of results of input rankings (per query)")
+        <*> some gridRunParser
+        <*> (option (Toc.IndexedCborPath <$> str)  ( long "edge-doc-cbor" <> metavar "EdgeDoc-CBOR" <> help "EdgeDoc cbor file"))
+        <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
+        <*> (option (Toc.IndexedCborPath <$> str)  ( long "aspect-doc-cbor" <> metavar "AspectDoc-CBOR" <> help "AspectDoc cbor file"))
+        <*> (option str (long "qrel" <> metavar "QRel-FILE"))
+        <*> modelSource
+        <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))  ))
+        <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
+        <*> many (option auto (long "exp" <> metavar "EXP" <> help ("one or more switches for experimentation. Choices: " ++(show [minBound @ExperimentSettings .. maxBound]))))
+        <*> option auto (long "pagerank-settings" <> metavar "PREXP" <> help ("Option for how to ensure positive edge weights. Choices: " ++(show [PageRankNormal,PageRankJustStructure,  PageRankWeightOffset1, PageRankWeightOffset01])) <> value PageRankNormal)
+        <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
+        <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
+        <*> optional minibatchParser
+      where
+          querySource :: Parser QuerySource
+          querySource =
+                  fromCborTitle
+              <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
+              <|> fromEntityIndex
+            where
+              queryDeriv =
+                  flag QueryFromPageTitle QueryFromSectionPaths
+                       (long "query-from-sections" <> help "Use sections as query documents")
+              fromCborTitle =
+                  QueriesFromCbor
+                    <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
+                    <*> queryDeriv
+                    <*> pure SeedsFromLeadSection
 
-      modelSource :: Parser ModelSource
-      modelSource =
-            option (TrainModel <$> str) (long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
-        <|> option (ModelFromFile <$> str) (long "test-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
-        <|> option (GraphWalkModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model for graph walking from Model-FILE")
-        <|> option (GraphWalkTrainModel <$> str) (long "train-walk-model" <> metavar "Model-FILE" <> help "train learning-to-rank model for graph walking from Model-FILE")
+              fromEntityIndex =
+                  QueriesFromCbor
+                    <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
+                    <*> queryDeriv
+                    <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+
+          modelSource :: Parser ModelSource
+          modelSource =
+                option (TrainModel <$> str) (long "train-model" <> metavar "Model-FILE" <> help "train learning-to-rank model and write to Model-FILE")
+            <|> option (ModelFromFile <$> str) (long "test-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
+            <|> option (GraphWalkModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model for graph walking from Model-FILE")
+            <|> option (GraphWalkTrainModel <$> str) (long "train-walk-model" <> metavar "Model-FILE" <> help "train learning-to-rank model for graph walking from Model-FILE")
 
 
 
+
+-- --------------------------------- Training Data Serialisation ------------------------------------------------------
+
+
+data SerialisedTrainingData
+    = forall entityPh edgePh . SerialisedTrainingData { serialisedFSpaces :: FeatureSpaces entityPh edgePh
+                                                      , serialisedAllData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
+                                                      }
+
+instance CBOR.Serialise IsRelevant
+
+instance CBOR.Serialise SerialisedTrainingData where
+    encode (SerialisedTrainingData {..}) =
+      CBOR.encode (F.featureNames $ entityFSpace serialisedFSpaces)
+      <> CBOR.encode (F.featureNames $ edgeFSpace serialisedFSpaces)
+      <> CBOR.encode (fmap (fmap (\(a,b,c) -> (a, F.toVector b, c))) serialisedAllData)
+
+    decode = do
+      entityFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
+      edgeFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
+      let fspaces = FeatureSpaces { combinedFSpace = F.eitherSpaces entityFSpace edgeFSpace, .. }
+      allData <- CBOR.decode
+      let unpackRawFVec (x,y,z)
+            | Just v <- F.unsafeFromVector (combinedFSpace fspaces) y = (x,v,z)
+            | otherwise = error $ "Serialise(SerialisedTrainingData): Deserialise failure in unpackRawFVec for docid "<> show x
+      return $ SerialisedTrainingData fspaces $ fmap (fmap unpackRawFVec) allData
 
 -- --------------------------------- Query Doc ------------------------------------------------------
 
@@ -268,14 +285,57 @@ m >!< key =
 main :: IO ()
 main = do
     hSetBuffering stdout LineBuffering
+    oneortheother <- execParser' 1 (helper <*> opts) mempty
+    case oneortheother of
+        NormalFlowArguments' args -> normalFlow args
+        FlowTrainOnly' args -> trainOnlyFlow args
 
-    (articlesFile, outputFilePrefix, querySrc,
-      queryRestriction, numResults, gridRunFiles
-      , edgeDocsCborFile, pagesDocCborFile, aspectDocCborFile
-      , qrelFile, modelSource
-      , posifyEdgeWeightsOpts,  teleportations, experimentSettings
-      , pageRankExperimentSettings, pageRankConvergence, graphWalkModel
-      , miniBatchParamsMaybe  ) <- execParser' 1 (helper <*> opts) mempty
+
+data  FlowTrainOnly
+    = FlowTrainOnly { qrelFile :: FilePath
+                    , miniBatchParamsMaybe :: Maybe MiniBatchParams
+                    , serialisedDataFile :: FilePath
+                    , outputFilePrefix :: FilePath
+                    , modelFile :: FilePath
+                    }
+
+trainOnlyFlow :: FlowTrainOnly -> IO ()
+trainOnlyFlow FlowTrainOnly {..} = do
+    let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
+        fixQRel :: QRel.Entry QRel.QueryId QRel.DocumentName QRel.IsRelevant
+                -> QRel.Entry CAR.RunFile.QueryId QRel.DocumentName QRel.IsRelevant
+        fixQRel (QRel.Entry qid docId rel) = QRel.Entry (CAR.RunFile.QueryId qid) docId rel
+    qrel <- map fixQRel <$> QRel.readQRel @IsRelevant qrelFile
+
+    --  allData :: TrainData CombinedFeature _
+    SerialisedTrainingData fspaces allData <- CBOR.deserialise <$> BSL.readFile (serialisedDataFile)
+    train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+
+
+
+data NormalFlowArguments
+    = NormalFlowArguments
+                       { articlesFile ::  FilePath
+                       , outputFilePrefix :: FilePath
+                       , querySrc :: QuerySource
+                       , queryRestriction:: [CarRun.QueryId]
+                       , numResults :: NumResults
+                       , gridRunFiles:: [(GridRun, EntityOrEdge, FilePath)]
+                       , edgeDocsCborFile :: Toc.IndexedCborPath ParagraphId EdgeDoc
+                       , pagesDocCborFile :: Toc.IndexedCborPath PageId PageDoc
+                       , aspectDocCborFile :: Toc.IndexedCborPath AspectId AspectDoc
+                       , qrelFile :: FilePath
+                       , modelSource :: ModelSource
+                       , posifyEdgeWeightsOpts :: [PosifyEdgeWeights]
+                       , teleportations :: [TeleportationProb]
+                       , experimentSettings :: [ExperimentSettings]
+                       , pageRankExperimentSettings :: PageRankExperimentSettings
+                       , pageRankConvergence :: PageRankConvergence
+                       , graphWalkModel :: GraphWalkModel
+                       , miniBatchParamsMaybe :: Maybe MiniBatchParams
+                       }
+normalFlow :: NormalFlowArguments -> IO ()
+normalFlow NormalFlowArguments {..}  = do
     putStrLn $ "# Pages: " ++ show articlesFile
     putStrLn $ "# Query restriction: " ++ show queryRestriction
 
@@ -304,7 +364,9 @@ main = do
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
 
-    let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
+    let serialisedDataFile = outputFilePrefix <.> "alldata.cbor"
+
+        miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
         featureGraphSettings :: FeatureGraphSettings
         featureGraphSettings = FeatureGraphSettings
@@ -745,28 +807,6 @@ main = do
 
               train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
-data SerialisedTrainingData
-    = forall entityPh edgePh . SerialisedTrainingData { serialisedFSpaces :: FeatureSpaces entityPh edgePh
-                                                      , serialisedAllData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
-                                                      }
-
-instance CBOR.Serialise IsRelevant
-
-instance CBOR.Serialise SerialisedTrainingData where
-    encode (SerialisedTrainingData {..}) =
-      CBOR.encode (F.featureNames $ entityFSpace serialisedFSpaces)
-      <> CBOR.encode (F.featureNames $ edgeFSpace serialisedFSpaces)
-      <> CBOR.encode (fmap (fmap (\(a,b,c) -> (a, F.toVector b, c))) serialisedAllData)
-
-    decode = do
-      entityFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
-      edgeFSpace <- F.unsafeFromFeatureList <$> CBOR.decode
-      let fspaces = FeatureSpaces { combinedFSpace = F.eitherSpaces entityFSpace edgeFSpace, .. }
-      allData <- CBOR.decode
-      let unpackRawFVec (x,y,z)
-            | Just v <- F.unsafeFromVector (combinedFSpace fspaces) y = (x,v,z)
-            | otherwise = error $ "Serialise(SerialisedTrainingData): Deserialise failure in unpackRawFVec for docid "<> show x
-      return $ SerialisedTrainingData fspaces $ fmap (fmap unpackRawFVec) allData
 
 train :: FeatureSpaces entityPh edgePh
       ->  TrainData CombinedFeature _
