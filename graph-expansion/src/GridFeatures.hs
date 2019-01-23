@@ -265,6 +265,13 @@ onlyRR (Right (NeighborFeature (EntRetrievalFeature _ RecipRankF))) = True
 onlyRR (Right (NeighborSourceFeature _ (EntRetrievalFeature _ RecipRankF))) = True
 onlyRR x = nothingElseButAggr x
 
+onlyCount :: CombinedFeature -> Bool
+onlyCount (Left (EntRetrievalFeature _ CountF)) = True
+onlyCount (Right (EdgeRetrievalFeature _ _ CountF)) = True
+onlyCount (Right (NeighborFeature (EntRetrievalFeature _ CountF))) = True
+onlyCount (Right (NeighborSourceFeature _ (EntRetrievalFeature _ CountF))) = True
+onlyCount x = nothingElseButAggr x
+
 
 onlyLessFeatures :: CombinedFeature -> Bool
 onlyLessFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX EntityIdx)) _)) = True
@@ -313,6 +320,28 @@ onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
      (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
      &&  (retrievalModel == Bm25)
+
+
+-- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
+onlySimpleRmCountFeatures :: CombinedFeature -> Bool
+onlySimpleRmCountFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
+    onlySimpleRmCountFeaturesHelper retrievalModel expansionModel indexType
+onlySimpleRmCountFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ retrievalModel expansionModel indexType)) _)) =
+    onlySimpleRmCountFeaturesHelper retrievalModel expansionModel indexType
+onlySimpleRmCountFeatures (Left (EntRetrievalFeature Aggr _runf)) = True
+onlySimpleRmCountFeatures (Right (EdgeRetrievalFeature _ Aggr _runf)) = True
+onlySimpleRmCountFeatures (Left (EntDegree)) = True
+onlySimpleRmCountFeatures (Right (EdgeCount _)) = True
+onlySimpleRmCountFeatures (Right (NeighborFeature entF)) = onlySimpleRmCountFeatures (Left entF)
+onlySimpleRmCountFeatures (Right (NeighborSourceFeature  _ entF)) = onlySimpleRmCountFeatures (Left entF)
+onlySimpleRmCountFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not specify this feature: " <> show other <> " Returning True.")    True
+
+onlySimpleRmCountFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
+onlySimpleRmCountFeaturesHelper retrievalModel expansionModel indexType =
+     (indexType `S.member` S.fromList [PageIdx, ParagraphIdx, AspectIdx])
+     &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX])
+     &&  (retrievalModel == Bm25)
+
 
 onlyNoneFeatures :: CombinedFeature -> Bool
 onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
