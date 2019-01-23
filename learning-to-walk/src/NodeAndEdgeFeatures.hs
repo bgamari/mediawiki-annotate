@@ -329,6 +329,10 @@ dividingEdgeFeats ::  [( EdgeFeature, Double)] -> Int ->  [(EdgeFeature, Double)
 dividingEdgeFeats feats cardinality = fmap ( second $  (/ (realToFrac cardinality)) ) feats -- F.scale (1 / (realToFrac cardinality)) feats
 
 
+-- rankScore in GridFeatures
+edgeScoreScale :: MultiRankingEntry a GridRun -> Double
+edgeScoreScale e =  CAR.RunFile.carScore $ multiRankingEntryCollapsed  e
+
 edgesFromParas :: forall entityPh.
                   EdgeDocsLookup
                -> [MultiRankingEntry ParagraphId GridRun]
@@ -359,7 +363,7 @@ edgesFromParas edgeDocsLookup edgeRuns divideEdgeFeats nodeFeatures =
                  [ prefixFeatureVectorWithItem (u,v) ( normFeatVec ++ neighFs)-- stack normFeatVec  oppositeNodeFeatVec ) -- featVec)-- dividedFeatVec)
                  | u <- HS.toList $ edgeDocNeighbors (edgeDoc paraId)
                  , v <- HS.toList $ edgeDocNeighbors (edgeDoc paraId) -- include self links (v==u)!
-                 , let neighFs = neighborFeatures FromParas u v nodeFeatures
+                 , let neighFs = neighborFeatures FromParas u v (edgeScoreScale edgeEntry) nodeFeatures
                  ]
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName edgeEntry, edgeEntry)
@@ -404,7 +408,7 @@ edgesFromPages pagesLookup entityRuns divideEdgeFeats nodeFeatures =
               , let !featVec = edgeFeat pageId entityEntry source p
               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               , let normFeatVec = (if divideEdgeFeats then dividedFeatVec else featVec)
-              , let neighFs = neighborFeatures source u v nodeFeatures
+              , let neighFs = neighborFeatures source u v (edgeScoreScale entityEntry) nodeFeatures
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromPagesOwnerLink
@@ -461,7 +465,7 @@ edgesFromAspects aspectLookup aspectRuns divideEdgeFeats nodeFeatures =
               , let !featVec = edgeFeat aspectId aspectEntry source aspectDoc
               , let !dividedFeatVec = dividingEdgeFeats featVec cardinality
               , let normFeatVec = if divideEdgeFeats then dividedFeatVec else featVec
-              , let neighFs = neighborFeatures source u v nodeFeatures
+              , let neighFs = neighborFeatures source u v (edgeScoreScale aspectEntry) nodeFeatures
               ]
           where getSource :: Role -> Role -> FromSource
                 getSource RoleOwner RoleLink = FromAspectsOwnerLink
@@ -504,10 +508,11 @@ makeCombinedFeatures combinedFSpace nodeFeatures edgeFeatures =
 
 -- | convert node features into opposite/outgoing neigbor features. Opposite node is "from" u!
 -- | Also see 'makeCombinedFeatures'
-neighborFeatures :: FromSource -> PageId -> PageId -> HM.HashMap PageId [(EntityFeature, Double)] -> [(EdgeFeature, Double)]
-neighborFeatures source u v nodeFeatures =
+neighborFeatures :: FromSource -> PageId -> PageId -> Double -> HM.HashMap PageId [(EntityFeature, Double)] -> [(EdgeFeature, Double)]
+neighborFeatures source u v scale nodeFeatures =
     (fmap ( first NeighborFeature ) $ uFeats)
     ++ (fmap ( first (NeighborSourceFeature source)) $ uFeats)
+    ++ (fmap ( first (NeighborSourceScaleFeature source)) $ fmap (\(f,value) -> (f, value *scale)) uFeats)
   where uFeats = fromMaybe [] $ u `HM.lookup` nodeFeatures
 
 prefixFeatureVectorWithItem :: a -> [(f,v)] -> [(a,f,v)]

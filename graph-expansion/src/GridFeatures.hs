@@ -175,6 +175,7 @@ data EdgeFeature where
     EdgeRetrievalFeature :: !FromSource -> !Run -> !RunFeature -> EdgeFeature
     NeighborFeature :: !EntityFeature -> EdgeFeature
     NeighborSourceFeature :: !FromSource -> !EntityFeature -> EdgeFeature
+    NeighborSourceScaleFeature :: !FromSource -> !EntityFeature -> EdgeFeature
 --     EdgeDocKL  :: !FromSource -> EdgeFeature
     EdgeCount  :: !FromSource -> EdgeFeature
     deriving (Show, Read, Ord, Eq, Generic, Serialise)
@@ -199,6 +200,7 @@ allEdgeFeatures = S.fromList $
     <> ([EdgeCount] <*>  allSources)
     <> (NeighborFeature <$> (S.toList allEntityFeatures))
     <> (NeighborSourceFeature <$> allSources <*> (S.toList allEntityFeatures))
+    <> (NeighborSourceScaleFeature <$> allSources <*> (S.toList allEntityFeatures))
   where withAggr edgeRunsF = (GridRun' <$> edgeRunsF) <> [Aggr]
 
 -- todo can we get rid of this?
@@ -238,6 +240,7 @@ noEdge _  = True
 noNeighborFeats :: CombinedFeature -> Bool
 noNeighborFeats (Right (NeighborFeature _)) = False
 noNeighborFeats (Right (NeighborSourceFeature _ _)) = False
+noNeighborFeats (Right (NeighborSourceScaleFeature _ _)) = False
 noNeighborFeats _  = True
 
 noRawEdge :: CombinedFeature -> Bool
@@ -249,6 +252,7 @@ onlyAggr (Left (EntRetrievalFeature Aggr _runf)) = True
 onlyAggr (Right (EdgeRetrievalFeature _ Aggr _runf)) = True
 onlyAggr (Right (NeighborFeature (EntRetrievalFeature Aggr _runf))) = True
 onlyAggr (Right (NeighborSourceFeature _ (EntRetrievalFeature Aggr _runf))) = True
+onlyAggr (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature Aggr _runf))) = True
 onlyAggr _  = False
 
 onlyScore :: CombinedFeature -> Bool
@@ -256,6 +260,7 @@ onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
 onlyScore (Right (EdgeRetrievalFeature _ _ ScoreF)) = True
 onlyScore (Right (NeighborFeature (EntRetrievalFeature _ ScoreF))) = True
 onlyScore (Right (NeighborSourceFeature _ (EntRetrievalFeature _ ScoreF))) = True
+onlyScore (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ ScoreF))) = True
 onlyScore x = nothingElseButAggr x
 
 onlyRR :: CombinedFeature -> Bool
@@ -263,6 +268,7 @@ onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
 onlyRR (Right (EdgeRetrievalFeature _ _ RecipRankF)) = True
 onlyRR (Right (NeighborFeature (EntRetrievalFeature _ RecipRankF))) = True
 onlyRR (Right (NeighborSourceFeature _ (EntRetrievalFeature _ RecipRankF))) = True
+onlyRR (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ RecipRankF))) = True
 onlyRR x = nothingElseButAggr x
 
 onlyCount :: CombinedFeature -> Bool
@@ -270,6 +276,7 @@ onlyCount (Left (EntRetrievalFeature _ CountF)) = True
 onlyCount (Right (EdgeRetrievalFeature _ _ CountF)) = True
 onlyCount (Right (NeighborFeature (EntRetrievalFeature _ CountF))) = True
 onlyCount (Right (NeighborSourceFeature _ (EntRetrievalFeature _ CountF))) = True
+onlyCount (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ CountF))) = True
 onlyCount x = nothingElseButAggr x
 
 
@@ -297,6 +304,7 @@ onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmPsg Pa
 onlyLessFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmPsg1 ParagraphIdx)) _)) = True
 onlyLessFeatures (Right (NeighborFeature entF)) = onlyLessFeatures (Left entF)
 onlyLessFeatures (Right (NeighborSourceFeature _ entF)) = onlyLessFeatures (Left entF)
+onlyLessFeatures (Right (NeighborSourceScaleFeature _ entF)) = onlyLessFeatures (Left entF)
 onlyLessFeatures x = nothingElseButAggr x
 
 
@@ -312,6 +320,7 @@ onlySimpleRmFeatures (Left (EntDegree)) = False
 onlySimpleRmFeatures (Right (EdgeCount _)) = False
 onlySimpleRmFeatures (Right (NeighborFeature entF)) = onlySimpleRmFeatures (Left entF)
 onlySimpleRmFeatures (Right (NeighborSourceFeature  _ entF)) = onlySimpleRmFeatures (Left entF)
+onlySimpleRmFeatures (Right (NeighborSourceScaleFeature  _ entF)) = onlySimpleRmFeatures (Left entF)
 onlySimpleRmFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not specify this feature: " <> show other <> " Returning True.")    True
 
 
@@ -334,6 +343,7 @@ onlySimpleRmCountFeatures (Left (EntDegree)) = True
 onlySimpleRmCountFeatures (Right (EdgeCount _)) = True
 onlySimpleRmCountFeatures (Right (NeighborFeature entF)) = onlySimpleRmCountFeatures (Left entF)
 onlySimpleRmCountFeatures (Right (NeighborSourceFeature  _ entF)) = onlySimpleRmCountFeatures (Left entF)
+onlySimpleRmCountFeatures (Right (NeighborSourceScaleFeature  _ entF)) = onlySimpleRmCountFeatures (Left entF)
 onlySimpleRmCountFeatures other = Debug.trace ("Warning: onlySimpleRmFeatures did not specify this feature: " <> show other <> " Returning True.")    True
 
 onlySimpleRmCountFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> Bool
@@ -348,6 +358,7 @@ onlyNoneFeatures (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _))
 onlyNoneFeatures (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ NoneX _)) _)) = True
 onlyNoneFeatures (Right (NeighborFeature entF)) = onlyNoneFeatures (Left entF)
 onlyNoneFeatures (Right (NeighborSourceFeature _ entF)) = onlyNoneFeatures (Left entF)
+onlyNoneFeatures (Right (NeighborSourceScaleFeature _ entF)) = onlyNoneFeatures (Left entF)
 onlyNoneFeatures x  = nothingElseButAggr x
 
 
@@ -358,6 +369,7 @@ onlyPage (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title _ _ _)) _)) = T
 onlyPage (Right (EdgeRetrievalFeature _ (GridRun' (GridRun All _ _ _)) _)) = True
 onlyPage (Right (NeighborFeature entF)) = onlyPage (Left entF)
 onlyPage (Right (NeighborSourceFeature _ entF)) = onlyPage (Left entF)
+onlyPage (Right (NeighborSourceScaleFeature _ entF)) = onlyPage (Left entF)
 onlyPage x = nothingElseButAggr x
 
 onlyTitleAndSectionPath :: CombinedFeature -> Bool
@@ -369,6 +381,7 @@ onlyTitleAndSectionPath (Left (EntRetrievalFeature Aggr runf)) = True
 onlyTitleAndSectionPath (Right (EdgeRetrievalFeature _ Aggr runf)) = True
 onlyTitleAndSectionPath (Right (NeighborFeature entF)) = onlyTitleAndSectionPath (Left entF)
 onlyTitleAndSectionPath (Right (NeighborSourceFeature _ entF)) = onlyTitleAndSectionPath (Left entF)
+onlyTitleAndSectionPath (Right (NeighborSourceScaleFeature _ entF)) = onlyTitleAndSectionPath (Left entF)
 onlyTitleAndSectionPath x = nothingElseButAggr x
 
 onlySection :: CombinedFeature -> Bool
@@ -382,6 +395,7 @@ onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Interior _ _ _)) _
 onlySection (Right (EdgeRetrievalFeature _ (GridRun' (GridRun GridFeatures.SectionPath _ _ _)) _)) = True
 onlySection (Right (NeighborFeature entF)) = onlySection (Left entF)
 onlySection (Right (NeighborSourceFeature _ entF)) = onlySection (Left entF)
+onlySection (Right (NeighborSourceScaleFeature _ entF)) = onlySection (Left entF)
 onlySection x = nothingElseButAggr x
 
 
@@ -390,18 +404,21 @@ noEdgesFromParas :: CombinedFeature -> Bool
 noEdgesFromParas (Left _) = True
 noEdgesFromParas (Right (EdgeRetrievalFeature s (_) _)) = not $ (isBaseSource SPara s)
 noEdgesFromParas (Right (NeighborSourceFeature s entF)) = not $ (isBaseSource SPara s)
+noEdgesFromParas (Right (NeighborSourceScaleFeature s entF)) = not $ (isBaseSource SPara s)
 noEdgesFromParas x = nothingElseButAggr x
 
 noEdgesFromAspects :: CombinedFeature -> Bool
 noEdgesFromAspects (Left _) = True
 noEdgesFromAspects (Right (EdgeRetrievalFeature s (_) _)) = not $ (isBaseSource SAspect s)
 noEdgesFromAspects (Right (NeighborSourceFeature s entF)) = not $ (isBaseSource SAspect s)
+noEdgesFromAspects (Right (NeighborSourceScaleFeature s entF)) = not $ (isBaseSource SAspect s)
 noEdgesFromAspects x = nothingElseButAggr x
 
 noEdgesFromPages :: CombinedFeature -> Bool
 noEdgesFromPages (Left _) = True
 noEdgesFromPages (Right (EdgeRetrievalFeature s (_) _)) = not $ (isBaseSource SPage s)
 noEdgesFromPages (Right (NeighborSourceFeature s entF)) = not $ (isBaseSource SPage s)
+noEdgesFromPages (Right (NeighborSourceScaleFeature s entF)) = not $ (isBaseSource SPage s)
 noEdgesFromPages x = nothingElseButAggr x
 
 noEdgesFromLinkLink :: CombinedFeature -> Bool
@@ -410,6 +427,8 @@ noEdgesFromLinkLink (Right (EdgeRetrievalFeature FromAspectsLinkLink (_) _)) = F
 noEdgesFromLinkLink (Right (EdgeRetrievalFeature FromPagesLinkLink (_) _)) = False
 noEdgesFromLinkLink (Right (NeighborSourceFeature FromPagesLinkLink entF)) = False
 noEdgesFromLinkLink (Right (NeighborSourceFeature FromAspectsLinkLink entF)) = False
+noEdgesFromLinkLink (Right (NeighborSourceScaleFeature FromPagesLinkLink entF)) = False
+noEdgesFromLinkLink (Right (NeighborSourceScaleFeature FromAspectsLinkLink entF)) = False
 noEdgesFromLinkLink (Right (EdgeRetrievalFeature _ (_) _)) = True
 noEdgesFromLinkLink x = nothingElseButAggr x
 
@@ -434,6 +453,7 @@ nothingElseButAggr (Right (EdgeCount _ )) = True
 nothingElseButAggr (Right (EdgeRetrievalFeature _ Aggr _)) = True
 nothingElseButAggr (Right (NeighborFeature entF)) = nothingElseButAggr (Left entF)
 nothingElseButAggr (Right (NeighborSourceFeature _ entF)) = nothingElseButAggr (Left entF)
+nothingElseButAggr (Right (NeighborSourceScaleFeature _ entF)) = nothingElseButAggr (Left entF)
 nothingElseButAggr _ = False
 
 
@@ -441,6 +461,7 @@ onlyExpEcmTestFeature :: CombinedFeature -> Bool
 onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 EcmX ParagraphIdx)) ScoreF)) = True
 onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX ParagraphIdx)) ScoreF)) = True
 onlyExpEcmTestFeature (Right (NeighborSourceFeature _ entF)) = onlyExpEcmTestFeature (Left entF)
+onlyExpEcmTestFeature (Right (NeighborSourceScaleFeature _ entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature (Right (NeighborFeature entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature _ = False
 
@@ -449,18 +470,25 @@ onlyNoneX (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 NoneX _)) Sco
 onlyNoneX (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
 onlyNoneX (Right (NeighborFeature entF)) = onlyNoneX (Left entF)
 onlyNoneX (Right (NeighborSourceFeature _ entF)) = onlyNoneX (Left entF)
-onlyNoneX (Right (NeighborSourceFeature _ entF)) = onlyNoneX (Left entF)
-onlyNoneX (Right (NeighborFeature entF)) = onlyNoneX (Left entF)
+onlyNoneX (Right (NeighborSourceScaleFeature _ entF)) = onlyNoneX (Left entF)
 onlyNoneX _ = False
 
 onlySourceNeighbors :: CombinedFeature -> Bool
 onlySourceNeighbors  (Right (NeighborSourceFeature _ _)) = True
 onlySourceNeighbors  (Right (NeighborFeature _)) = False
+onlySourceNeighbors  (Right (NeighborSourceScaleFeature _ _)) = False
 onlySourceNeighbors _ = True
+
+onlyScaledSourceNeighbors :: CombinedFeature -> Bool
+onlyScaledSourceNeighbors  (Right (NeighborSourceFeature _ _)) = False
+onlyScaledSourceNeighbors  (Right (NeighborFeature _)) = False
+onlyScaledSourceNeighbors  (Right (NeighborSourceScaleFeature _ _)) = True
+onlyScaledSourceNeighbors _ = True
 
 onlyUnsourcedNeighbors :: CombinedFeature -> Bool
 onlyUnsourcedNeighbors  (Right (NeighborSourceFeature _ _)) = False
 onlyUnsourcedNeighbors  (Right (NeighborFeature _)) = True
+onlyUnsourcedNeighbors  (Right (NeighborSourceScaleFeature _ _)) = False
 onlyUnsourcedNeighbors _ = True
 
 
@@ -512,6 +540,7 @@ defaultEdgeFeatures f =
       EdgeRetrievalFeature _ _ runF -> defaultRankFeatures runF
       NeighborFeature x -> defaultEntityFeatures x
       NeighborSourceFeature _ x -> defaultEntityFeatures x
+      NeighborSourceScaleFeature _ x -> defaultEntityFeatures x
 
 defaultRankFeatures :: RunFeature -> Double
 defaultRankFeatures runF =
