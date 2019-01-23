@@ -82,7 +82,7 @@ gridRunParser = option (str >>= parseGridRunFile) (long "grid-run")
 
 data QueryModel = All | Title | SubTree | LeafHeading | Interior | SectionPath
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
-data RetrievalModel = Bm25 | Ql
+data RetrievalModel = Bm25 | Ql | Sdm
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
 data ExpansionModel = NoneX | Rm | Rm1 | EcmX | EcmRm | EcmPsg | EcmPsg1
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
@@ -162,7 +162,7 @@ data FromSource = FromParas
          deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise)
 
 allRunFeatures :: [RunFeature]
-allRunFeatures = [ScoreF, RecipRankF] --[minBound..maxBound]
+allRunFeatures = [ScoreF, RecipRankF, CountF] --[minBound..maxBound]
 
 data EntityFeature where
     EntRetrievalFeature :: !Run -> !RunFeature -> EntityFeature
@@ -319,7 +319,7 @@ onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> B
 onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
      (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
-     &&  (retrievalModel == Bm25)
+     &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
 
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType
@@ -340,7 +340,7 @@ onlySimpleRmCountFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType
 onlySimpleRmCountFeaturesHelper retrievalModel expansionModel indexType =
      (indexType `S.member` S.fromList [PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX])
-     &&  (retrievalModel == Bm25)
+     &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
 
 
 onlyNoneFeatures :: CombinedFeature -> Bool
@@ -429,6 +429,8 @@ isBaseSource src FromParas = src == SPara
 
 nothingElseButAggr :: CombinedFeature -> Bool
 nothingElseButAggr (Left (EntRetrievalFeature Aggr _)) = True
+nothingElseButAggr (Left (EntDegree)) = True
+nothingElseButAggr (Right (EdgeCount _ )) = True
 nothingElseButAggr (Right (EdgeRetrievalFeature _ Aggr _)) = True
 nothingElseButAggr (Right (NeighborFeature entF)) = nothingElseButAggr (Left entF)
 nothingElseButAggr (Right (NeighborSourceFeature _ entF)) = nothingElseButAggr (Left entF)
@@ -438,6 +440,8 @@ nothingElseButAggr _ = False
 onlyExpEcmTestFeature :: CombinedFeature -> Bool
 onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 EcmX ParagraphIdx)) ScoreF)) = True
 onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX ParagraphIdx)) ScoreF)) = True
+onlyExpEcmTestFeature (Right (NeighborSourceFeature _ entF)) = onlyExpEcmTestFeature (Left entF)
+onlyExpEcmTestFeature (Right (NeighborFeature entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature _ = False
 
 onlyNoneX :: CombinedFeature -> Bool
@@ -445,6 +449,8 @@ onlyNoneX (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 NoneX _)) Sco
 onlyNoneX (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
 onlyNoneX (Right (NeighborFeature entF)) = onlyNoneX (Left entF)
 onlyNoneX (Right (NeighborSourceFeature _ entF)) = onlyNoneX (Left entF)
+onlyNoneX (Right (NeighborSourceFeature _ entF)) = onlyNoneX (Left entF)
+onlyNoneX (Right (NeighborFeature entF)) = onlyNoneX (Left entF)
 onlyNoneX _ = False
 
 onlySourceNeighbors :: CombinedFeature -> Bool
