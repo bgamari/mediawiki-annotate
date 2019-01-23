@@ -30,7 +30,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import qualified Data.Text as T
 import Data.Maybe
-import Data.Foldable
+import Data.Foldable  as Foldable
 import qualified Data.List.NonEmpty as NE
 import Data.Bifunctor
 import Control.Monad.ST
@@ -54,6 +54,10 @@ import EdgeDocCorpus
 import LookupWrapper
 import CandidateGraph
 import Debug.Trace as Debug
+
+-- ---
+import CAR.Retrieve  as Retrieve
+
 
 
 (>!<) :: (Show k, Ord k, HasCallStack) => M.Map k v -> k -> v
@@ -586,4 +590,34 @@ edgeScoreVec source edgedocsRankEntry edgeDoc
 textToTokens :: T.Text -> Retrieve.TermCounts
 textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
 -}
+
+-- --------------------------------
+
+
+edgeDocKullbackLeibler :: [T.Text] -> [T.Text] -> Double
+edgeDocKullbackLeibler baseDoc frontDoc =
+    let (backTermCounts, backTotal) = termCountsAndTotal baseDoc
+        (termCounts, total) = termCountsAndTotal frontDoc
+    in kullbackLeibler (termCounts, total) (backTermCounts, backTotal)
+
+
+kullbackLeibler :: (TermCounts, Int) -> (TermCounts, Int) -> Double
+kullbackLeibler (termCounts, total) (backTermCounts, backTotal) =
+                    Foldable.sum $ [ pi * (log pi - log qi)
+                                    | (term,count) <- HM.toList (getTermCounts termCounts)
+                                    , let pi = (realToFrac count) / (realToFrac total)
+                                    , let bcount = fromJust $ term `HM.lookup` (getTermCounts backTermCounts)
+                                    , let qi = (realToFrac bcount) / (realToFrac backTotal)
+                                    ]
+
+termCountsAndTotal :: [T.Text] -> (Retrieve.TermCounts, Int)
+termCountsAndTotal texts =
+                      let termCounts =
+                            foldMap (textToTokens) texts
+                          total = Foldable.sum $ HM.elems $ getTermCounts $ termCounts
+                      in (termCounts, total)
+
+
+textToTokens :: T.Text -> Retrieve.TermCounts
+textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
 

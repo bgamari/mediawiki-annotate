@@ -180,6 +180,7 @@ normalArgs = NormalFlowArguments
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     <*> optional minibatchParser
+    <*> optional (option str (short 'd' <> long "train-data" <> metavar "TRAIN-DATA-FILE" <> help "load training data from serialized file (instead of creating it from scratch)"))
   where
       querySource :: Parser QuerySource
       querySource =
@@ -201,6 +202,7 @@ normalArgs = NormalFlowArguments
                 <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
                 <*> queryDeriv
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+
 
       modelSource :: Parser ModelSource
       modelSource =
@@ -342,6 +344,7 @@ data NormalFlowArguments
                        , pageRankConvergence :: PageRankConvergence
                        , graphWalkModel :: GraphWalkModel
                        , miniBatchParamsMaybe :: Maybe MiniBatchParams
+                       , trainDataFileOpt :: Maybe FilePath
                        }
 normalFlow :: NormalFlowArguments -> IO ()
 normalFlow NormalFlowArguments {..}  = do
@@ -730,40 +733,56 @@ normalFlow NormalFlowArguments {..}  = do
       ModelFromFile modelFile -> do
           Just (SomeModel model) <-  trace "loading model" $ Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
+              case trainDataFileOpt of
+                  Just trainDataFile -> do
+                       SerialisedTrainingData dataFspaces allData <- CBOR.deserialise <$> BSL.readFile (serialisedDataFile)
+                       let Just featProj = F.project (combinedFSpace fspaces) (combinedFSpace dataFspaces)
+                           model' = coerce featProj (modelWeights' model)
 
-              let model' = coerce modelToCombinedFeatureVec model          -- todo: maybe rename to modelFeatureSubsetProjection
+                           totalElems = getSum . foldMap ( Sum . length ) $ allData
+                           totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
+
+                       putStrLn $ "Test model with (trainData) "++ show (M.size allData) ++
+                                 " queries and "++ show totalElems ++" items total of which "++
+                                 show totalPos ++" are positive."
+
+                       let trainRanking = withStrategy (parTraversable rseq)
+                                        $ rerankRankings' model' allData
+                       storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
+
+                  Nothing ->  do
+                          let model' = coerce modelToCombinedFeatureVec model          -- todo: maybe rename to modelFeatureSubsetProjection
+
+                          let augmentNoQrels     :: forall docId queryId f s.
+                                                    (Ord queryId, Ord docId)
+                                                 => M.Map (queryId, docId) (FeatureVec f s Double)
+                                                 -> M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
+                              augmentNoQrels docFeatures =
+                                    let franking :: M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
+                                        franking = M.fromListWith (++)
+                                                   [ (qid, [(doc, features, Relevant)])
+                                                   | ((qid, doc), features) <- M.assocs docFeatures
+                                                   ]
+                                    in franking
 
 
-              let augmentNoQrels     :: forall docId queryId f s.
-                                        (Ord queryId, Ord docId)
-                                     => M.Map (queryId, docId) (FeatureVec f s Double)
-                                     -> M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
-                  augmentNoQrels docFeatures =
-                        let franking :: M.Map queryId [(docId, FeatureVec f s Double, IsRelevant)]
-                            franking = M.fromListWith (++)
-                                       [ (qid, [(doc, features, Relevant)])
-                                       | ((qid, doc), features) <- M.assocs docFeatures
-                                       ]
-                        in franking
+                          let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
 
+                          putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
+                          let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
+                              allData = augmentWithQrels qrel docFeatures
 
-              let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+                --               !metric = avgMetricQrel qrel
+                              totalElems = getSum . foldMap ( Sum . length ) $ allData
+                              totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
 
-              putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-              let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
-                  allData = augmentWithQrels qrel docFeatures
+                          putStrLn $ "Test model with (trainData) "++ show (M.size allData) ++
+                                    " queries and "++ show totalElems ++" items total of which "++
+                                    show totalPos ++" are positive."
 
-    --               !metric = avgMetricQrel qrel
-                  totalElems = getSum . foldMap ( Sum . length ) $ allData
-                  totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
-
-              putStrLn $ "Test model with (trainData) "++ show (M.size allData) ++
-                        " queries and "++ show totalElems ++" items total of which "++
-                        show totalPos ++" are positive."
-
-              let trainRanking = withStrategy (parTraversable rseq)
-                               $ rerankRankings' model' allData
-              storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
+                          let trainRanking = withStrategy (parTraversable rseq)
+                                           $ rerankRankings' model' allData
+                          storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
 
 
       TrainModel modelFile ->
