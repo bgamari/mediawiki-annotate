@@ -380,9 +380,7 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
     putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
 
-    let serialisedDataFile = outputFilePrefix <.> "alldata.cbor"
-
-        miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
+    let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
         featureGraphSettings :: FeatureGraphSettings
         featureGraphSettings = FeatureGraphSettings
@@ -739,7 +737,7 @@ normalFlow NormalFlowArguments {..}  = do
           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
               case trainDataFileOpt of
                   Just trainDataFile -> do
-                       SerialisedTrainingData dataFspaces allData <- CBOR.deserialise <$> BSL.readFile (serialisedDataFile)
+                       SerialisedTrainingData dataFspaces allData <- CBOR.deserialise <$> BSL.readFile (trainDataFile)
                        let Just featProj = F.project (combinedFSpace fspaces) (combinedFSpace dataFspaces)
                            model' = coerce featProj (modelWeights' model)
 
