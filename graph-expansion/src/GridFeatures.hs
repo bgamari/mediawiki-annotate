@@ -450,10 +450,12 @@ onlyNoneX _ = False
 onlySourceNeighbors :: CombinedFeature -> Bool
 onlySourceNeighbors  (Right (NeighborSourceFeature _ _)) = True
 onlySourceNeighbors  (Right (NeighborFeature _)) = False
+onlySourceNeighbors _ = True
 
 onlyUnsourcedNeighbors :: CombinedFeature -> Bool
 onlyUnsourcedNeighbors  (Right (NeighborSourceFeature _ _)) = False
 onlyUnsourcedNeighbors  (Right (NeighborFeature _)) = True
+onlyUnsourcedNeighbors _ = True
 
 
 -- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
