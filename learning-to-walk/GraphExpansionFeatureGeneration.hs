@@ -305,13 +305,16 @@ main = do
 data  FlowTrainOnly
     = FlowTrainOnly { qrelFile :: FilePath
                     , miniBatchParamsMaybe :: Maybe MiniBatchParams
-                    , serialisedDataFile :: FilePath
+                    , trainDataFileOpt :: FilePath
                     , outputFilePrefix :: FilePath
                     , modelFile :: FilePath
                     }
 
 trainOnlyFlow :: FlowTrainOnly -> IO ()
 trainOnlyFlow FlowTrainOnly {..} = do
+    putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
+    putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
+
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
         fixQRel :: QRel.Entry QRel.QueryId QRel.DocumentName QRel.IsRelevant
                 -> QRel.Entry CAR.RunFile.QueryId QRel.DocumentName QRel.IsRelevant
@@ -319,7 +322,7 @@ trainOnlyFlow FlowTrainOnly {..} = do
     qrel <- map fixQRel <$> QRel.readQRel @IsRelevant qrelFile
 
     --  allData :: TrainData CombinedFeature _
-    SerialisedTrainingData fspaces allData <- CBOR.deserialise <$> BSL.readFile (serialisedDataFile)
+    SerialisedTrainingData fspaces allData <- CBOR.deserialise <$> BSL.readFile (trainDataFileOpt)
     train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 
@@ -375,6 +378,7 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
+    putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
 
     let serialisedDataFile = outputFilePrefix <.> "alldata.cbor"
 
