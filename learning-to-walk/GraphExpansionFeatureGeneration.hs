@@ -116,6 +116,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | LessFeatures
                         | JustNone | JustSimpleRm | JustTitleAndSectionPath
                         | NoNeighborFeats | NoRawEdgeFeats
+                        | JustSourceNeighbors | JustUnsourcedNeighbors
                         | NoEdgesFromParas | NoEdgesFromAspects | NoEdgesFromPages | NoEdgesFromLinkLink
                         | ExpPage | ExpSection | ExpEcmTestFeature | OnlyNoneXFeature
                         | CandidateNoEdgeDocs | CandidateNoPageDocs | CandidateNoAspectDocs
@@ -1050,6 +1051,9 @@ filterFeaturesByExperimentSetting settings fname =
                     NoEdgesFromLinkLink -> noEdgesFromLinkLink
                     ExpEcmTestFeature -> onlyExpEcmTestFeature
                     OnlyNoneXFeature -> onlyNoneX
+                    JustSourceNeighbors -> onlySourceNeighbors
+                    JustUnsourcedNeighbors -> onlyUnsourcedNeighbors
+
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True
