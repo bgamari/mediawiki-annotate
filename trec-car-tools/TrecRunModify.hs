@@ -27,6 +27,7 @@ opts = subparser
     $  cmd "entity-drop-paragraphs"   entityDropParagraphs'
     <> cmd "entity-fix-id" entityFixId'
     <> cmd "drop-duplicates" dropDuplicates'
+    <> cmd "drop-query-entities" dropQueryEntities'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     pagesFile = argument str (help "Pages file" <> metavar "CBOR")
@@ -34,12 +35,25 @@ opts = subparser
     outputFile = option str (long "output" <> short 'o' <> help "Output run file" <> metavar "RUNFILE")
     entityDropParagraphs' =
         entityDropParagraphs <$> inputFile <*> outputFile
+    dropQueryEntities' =
+        dropQueryEntities <$> inputFile <*> outputFile
 
     entityFixId' =
         entityFixId <$> pagesFile <*> inputFile <*> outputFile
     dropDuplicates' =
         dropDuplicates <$> inputFile <*> outputFile
 
+
+
+    dropQueryEntities inputRunFile outputRunFile = do
+        rankings <- readEntityRun inputRunFile :: IO [RF.EntityRankingEntry]
+        let filteredRankings = filter dropQueryEntityFromEntityRankEntry rankings
+        writeEntityRun outputRunFile filteredRankings
+      where dropQueryEntityFromEntityRankEntry :: EntityRankingEntry -> Bool
+            dropQueryEntityFromEntityRankEntry  r =
+                let entityName = T.pack $ unpackPageId $ carDocument r --(carDocument r)
+                    query = unQueryId $ carQueryId r
+                in entityName `T.isPrefixOf` query
 
 
     entityDropParagraphs inputRunFile outputRunFile = do
