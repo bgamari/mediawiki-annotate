@@ -53,7 +53,7 @@ opts = subparser
             dropQueryEntityFromEntityRankEntry  r =
                 let entityName = T.pack $ unpackPageId $ carDocument r --(carDocument r)
                     query = unQueryId $ carQueryId r
-                in entityName `T.isPrefixOf` query
+                in not $  entityName `T.isPrefixOf` query
 
 
     entityDropParagraphs inputRunFile outputRunFile = do
