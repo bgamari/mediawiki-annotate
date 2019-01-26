@@ -503,7 +503,7 @@ onlyGraex3 (Right (EdgeRetrievalFeature FromParas (GridRun' (GridRun Title Bm25 
     && (ex == NoneX || ex == Rm || ex == EcmPsg)
 onlyGraex3 (Left (EntRetrievalFeature Aggr rmodel)) = (rmodel == ScoreF || rmodel == RecipRankF )
 onlyGraex3 (Right (EdgeRetrievalFeature FromParas Aggr rmodel)) = (rmodel == ScoreF || rmodel == RecipRankF )
-onlyGraex _ = False
+onlyGraex3 _ = False
 
 
 
