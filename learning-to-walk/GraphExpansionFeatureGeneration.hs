@@ -1090,8 +1090,10 @@ filterFeaturesByExperimentSetting settings fname =
                     CandidatesMadeNotFromEntityRuns -> const True
                     CandidatesMadeNotFromEdgeRuns -> const True
                     CandidatesMadeNotFromAspectRuns -> const True
-
-                    x -> error $ " No information on what to do with ExperimentSettings "<> show x
+                    CandidateNoAspectDocs -> const True
+                    CandidateNoPageDocs -> const True
+                    CandidateNoEdgeDocs -> const True
+                    x -> Debug.trace (" No information on what to do with ExperimentSettings "<> show x) $ const True
 
 -- ----------------
 
