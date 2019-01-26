@@ -492,7 +492,19 @@ onlyUnsourcedNeighbors  (Right (NeighborSourceScaleFeature _ _)) = False
 onlyUnsourcedNeighbors _ = True
 
 
--- Right (EdgeRetrievalFeature (GridRun' QueryModel RetrievalModel ExpansionModel IndexType) RecipRankF)
+onlyGraex3 :: CombinedFeature -> Bool
+onlyGraex3 (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 ex idx)) rmodel )) =
+    (rmodel == ScoreF || rmodel == RecipRankF )
+    && (idx == EntityIdx || idx == PageIdx || idx == ParagraphIdx)
+    && (ex == NoneX || ex == Rm || ex == EcmX || ex == EcmPsg)
+onlyGraex3 (Right (EdgeRetrievalFeature FromParas (GridRun' (GridRun Title Bm25 ex idx)) rmodel)) =
+    (rmodel == ScoreF || rmodel == RecipRankF )
+    && (idx == ParagraphIdx)
+    && (ex == NoneX || ex == Rm || ex == EcmPsg)
+onlyGraex3 (Left (EntRetrievalFeature Aggr rmodel)) = (rmodel == ScoreF || rmodel == RecipRankF )
+onlyGraex3 (Right (EdgeRetrievalFeature FromParas Aggr rmodel)) = (rmodel == ScoreF || rmodel == RecipRankF )
+onlyGraex _ = False
+
 
 
 
