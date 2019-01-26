@@ -462,52 +462,52 @@ normalFlow NormalFlowArguments {..}  = do
 
     ncaps <- getNumCapabilities
 
-    putStrLn "Loading EntityRuns..."
-    entityRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (CAR.RunFile.readEntityRun path))))
-        (chunksOf 2 entityRunFiles)
-        :: IO [(GridRun, [RankingEntry PageId])]
+    let internRunFile :: forall doc m. (Eq doc, Hashable doc, Monad m)
+                      => [RankingEntry doc] -> m [RankingEntry doc]
+        internRunFile =
+              runInternM @doc
+            . runInternM @T.Text
+            . mapM (\entry -> lift . internAll (CAR.RunFile.document)
+                                =<< internAll (CAR.RunFile.traverseText (const pure)) entry)
 
-    putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
+        loadGridRuns :: forall doc. (Eq doc, Hashable doc)
+                     => String
+                     -> (FilePath -> IO [RankingEntry doc])
+                     -> [(GridRun, FilePath)]
+                     -> IO (M.Map GridRun [RankingEntry doc])
+        loadGridRuns type_ readRunFile runFiles = do
+            putStrLn $ "Loading "++type_++"..."
+            let querySet = S.fromList $ map queryDocQueryId queries
+                filterQueries :: Monad m => [RankingEntry doc] -> m [RankingEntry doc]
+                filterQueries = return . filter isInterestingQuery
+                  where
+                    isInterestingQuery entry = CAR.RunFile.carQueryId entry `S.member` querySet
 
-    putStrLn "Loading AspectRuns..."
-    aspectRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (readAspectRun path))))
-        (chunksOf 2 aspectRunFiles)
-        :: IO [(GridRun, [RankingEntry AspectId])]
+                loadQueryRun :: FilePath -> IO [RankingEntry doc]
+                loadQueryRun path = internRunFile =<< filterQueries =<< liftIO (readRunFile path)
 
-    putStrLn $ "Loaded AspectRuns: "<> show (length aspectRuns)
+            runs <- mapConcurrentlyL ncaps (traverse loadQueryRun) runFiles
+            putStrLn $ "Loaded "++type_++": "<> show (length runFiles)
+            return $! M.fromListWith (<>) runs
 
-    putStrLn "Loading EdgeRuns..."
-    edgeRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (CAR.RunFile.readParagraphRun path))))
-        (chunksOf 2 edgedocRunFiles)
-        :: IO [(GridRun, [RankingEntry ParagraphId])]
 
-    putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
+    entityRuns <- loadGridRuns "EntityRuns" CAR.RunFile.readEntityRun    entityRunFiles
+    aspectRuns <- loadGridRuns "AspectRuns" readAspectRun                aspectRunFiles
+    edgeRuns   <- loadGridRuns "EdgeRuns"   CAR.RunFile.readParagraphRun edgedocRunFiles
 
     putStrLn "Computing collapsed runs..."
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
         !collapsedEntityRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
         collapsedAspectRun :: M.Map QueryId [MultiRankingEntry AspectId GridRun]
         !collapsedAspectRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) aspectRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) aspectRuns
         collapsedEdgedocRun :: M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
         !collapsedEdgedocRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
          -- Todo: collapsed Aspect Runs
         tr x = traceShow x x
     putStrLn "Computed collapsed runs."
