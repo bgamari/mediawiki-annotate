@@ -424,8 +424,8 @@ edgesFromPages pagesLookup entityRuns divideEdgeFeats nodeFeatures =
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName entityEntry, entityEntry)
                | entityEntry <- entityRuns
-               , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 10)  (multiRankingEntryAll entityEntry))
-                || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed entityEntry )<= 10)      -- todo make 10 configurable
+               , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 100)  (multiRankingEntryAll entityEntry))
+                || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed entityEntry )<= 100)      -- todo make 10 configurable
                ]
 
 
@@ -481,8 +481,8 @@ edgesFromAspects aspectLookup aspectRuns divideEdgeFeats nodeFeatures =
 
     in mconcat [ oneHyperEdge (multiRankingEntryGetDocumentName aspectEntry, aspectEntry)
                | aspectEntry <- aspectRuns
---                , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 100)  (multiRankingEntryAll aspectEntry))
---                 || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed aspectEntry )<= 100)      -- todo make 10 configurable
+               , (any (\(_, entry) -> (CAR.RunFile.carRank entry) <= 100)  (multiRankingEntryAll aspectEntry))
+                || ( (CAR.RunFile.carRank $ multiRankingEntryCollapsed aspectEntry )<= 100)      -- todo make 10 configurable
                ]
 
 
