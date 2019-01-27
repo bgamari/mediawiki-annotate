@@ -93,16 +93,16 @@ trainMe includeCv miniBatchParams evalCutoff gen0 trainData fspace metric output
 
               strat :: Strategy (Folds (a, [(Model f s, Double)]))
               strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
-          foldRestartResults' <- withStrategyIO strat foldRestartResults
-
-          let cvActions = dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
 
           -- full train
           let fullRestarts = withStrategy (parTraversable rdeepseq)
                              $ take nRestarts $ trainWithRestarts miniBatchParams evalCutoff gen0 metric "full" fspace trainData
               (model, trainScore) =  bestModel $  fullRestarts
               fullActions = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
-          if includeCv then
+
+          if includeCv then do
+              foldRestartResults' <- withStrategyIO strat foldRestartResults
+              let cvActions = dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
               mapConcurrentlyL_ 24 id $ fullActions ++ cvActions
           else
               mapConcurrentlyL_ 24 id $ fullActions
