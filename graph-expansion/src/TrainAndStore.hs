@@ -61,7 +61,8 @@ type BestFoldResults f s = Folds (M.Map Q [(DocId, FeatureVec f s Double, Rel)],
 
 
 trainMe :: forall f s. (Ord f, Show f)
-        => MiniBatchParams
+        => Bool
+        -> MiniBatchParams
         -> EvalCutoff
         -> StdGen
         -> TrainData f s
@@ -70,10 +71,11 @@ trainMe :: forall f s. (Ord f, Show f)
         -> FilePath
         -> FilePath
         -> IO ()
-trainMe miniBatchParams evalCutoff gen0 trainData fspace metric outputFilePrefix modelFile = do
+trainMe includeCv miniBatchParams evalCutoff gen0 trainData fspace metric outputFilePrefix modelFile = do
           -- train me!
           let nRestarts = 5
               nFolds = 5
+
 
           -- folded CV
                                 -- todo load external folds
@@ -93,15 +95,17 @@ trainMe miniBatchParams evalCutoff gen0 trainData fspace metric outputFilePrefix
               strat = parTraversable (evalTuple2 r0 (parTraversable rdeepseq))
           foldRestartResults' <- withStrategyIO strat foldRestartResults
 
-          let actions1 = dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
+          let cvActions = dumpKFoldModelsAndRankings foldRestartResults' metric outputFilePrefix modelFile
 
           -- full train
           let fullRestarts = withStrategy (parTraversable rdeepseq)
                              $ take nRestarts $ trainWithRestarts miniBatchParams evalCutoff gen0 metric "full" fspace trainData
               (model, trainScore) =  bestModel $  fullRestarts
-              actions2 = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
-
-          mapConcurrentlyL_ 24 id $ actions1 ++ actions2
+              fullActions = dumpFullModelsAndRankings trainData (model, trainScore) metric outputFilePrefix modelFile
+          if includeCv then
+              mapConcurrentlyL_ 24 id $ fullActions ++ cvActions
+          else
+              mapConcurrentlyL_ 24 id $ fullActions
           putStrLn "dumped all models and rankings"
 
 trainWithRestarts

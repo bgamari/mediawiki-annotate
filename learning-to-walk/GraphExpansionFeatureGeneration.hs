@@ -183,6 +183,7 @@ normalArgs = NormalFlowArguments
     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     <*> optional minibatchParser
     <*> optional (option str (short 'd' <> long "train-data" <> metavar "TRAIN-DATA-FILE" <> help "load training data from serialized file (instead of creating it from scratch)"))
+    <*> option auto (long "include-cv" <> metavar "BOOL" <> help "if set to false, cross validation is skipped" <> value True)
   where
       querySource :: Parser QuerySource
       querySource =
@@ -325,7 +326,7 @@ trainOnlyFlow FlowTrainOnly {..} = do
 
     --  allData :: TrainData CombinedFeature _
     SerialisedTrainingData fspaces allData <- CBOR.deserialise <$> BSL.readFile (trainDataFileOpt)
-    train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+    train True fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 
 
@@ -350,6 +351,7 @@ data NormalFlowArguments
                        , graphWalkModel :: GraphWalkModel
                        , miniBatchParamsMaybe :: Maybe MiniBatchParams
                        , trainDataFileOpt :: Maybe FilePath
+                       , includeCv :: Bool
                        }
 normalFlow :: NormalFlowArguments -> IO ()
 normalFlow NormalFlowArguments {..}  = do
@@ -381,6 +383,7 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
     putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
+    putStrLn $ " Include Crossvalidation?  "++ (show includeCv)
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
@@ -837,17 +840,18 @@ normalFlow NormalFlowArguments {..}  = do
               BSL.writeFile (outputFilePrefix <.> "alldata.cbor") $ CBOR.serialise
                   $ SerialisedTrainingData fspaces allData
 
-              train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+              train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 
-train :: FeatureSpaces entityPh edgePh
+train :: Bool
+      -> FeatureSpaces entityPh edgePh
       ->  TrainData CombinedFeature _
       -> [QRel.Entry CAR.RunFile.QueryId doc IsRelevant]
       -> MiniBatchParams
       -> FilePath
       -> FilePath
       -> IO()
-train fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
+train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
               let metric :: ScoringMetric IsRelevant CAR.RunFile.QueryId
                   !metric = meanAvgPrec (totalRelevantFromQRels qrel) Relevant
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
@@ -866,7 +870,7 @@ train fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
 
               putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
               gen0 <- newStdGen  -- needed by learning to rank
-              trainMe miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
+              trainMe includeCv miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
 
 
 
