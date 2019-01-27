@@ -244,9 +244,11 @@ main = do
 
           let displayTrainData :: Show f => TrainData f s -> [String]
               displayTrainData trainData =
-                [ show k ++ " -> "++ show elem
+                [ show k ++ " " ++ show d ++ " " ++ show r ++ " -> "++ show prettyFv
                 | (k,list) <- M.toList trainData
-                , elem <- list]
+                , (d,fvec, r) <- list
+                , let prettyFv = unlines $ fmap show $ F.toList fvec
+                ]
 
           putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData allData)
           gen0 <- newStdGen  -- needed by learning to rank

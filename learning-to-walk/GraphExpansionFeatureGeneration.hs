@@ -861,12 +861,14 @@ train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile 
               putStrLn $ "Training model with (trainData) "++ show (M.size allData) ++
                         " queries and "++ show totalElems ++" items total of which "++
                         show totalPos ++" are positive."
-
-              let displayTrainData :: Show f => TrainData f s -> [String]
+              let
+                  displayTrainData :: Show f => TrainData f s -> [String]
                   displayTrainData trainData =
-                    [ show k ++ " -> "++ show elm
+                    [ show k ++ " " ++ show d ++ " " ++ show r ++ " -> "++ show prettyFv
                     | (k,list) <- M.toList trainData
-                    , elm <- list]
+                    , (d,fvec, r) <- list
+                    , let prettyFv = unlines $ fmap show $ F.toList fvec
+                    ]
 
               putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
               gen0 <- newStdGen  -- needed by learning to rank
