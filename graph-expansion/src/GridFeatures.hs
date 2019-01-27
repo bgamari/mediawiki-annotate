@@ -267,6 +267,7 @@ onlyRunFeature f (Left (EntRetrievalFeature Aggr ff)) = f==ff
 onlyRunFeature f (Right (EdgeRetrievalFeature _ Aggr ff)) = f==ff
 onlyRunFeature f (Left (EntDegree)) = False
 onlyRunFeature f (Right (EdgeCount _ )) = False
+onlyRunFeature f x = Debug.trace ("onlyRunFeature "<> show f <> " not defined for "<> show x) $ False
 
 
 
