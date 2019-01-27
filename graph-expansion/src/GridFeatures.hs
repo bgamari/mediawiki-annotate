@@ -328,7 +328,17 @@ onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> B
 onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
      (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
-     &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
+    -- &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
+
+acceptRetrievalModel :: _ -> CombinedFeature -> Bool
+acceptRetrievalModel r (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalModel _ _)) _)) = r == retrievalModel
+acceptRetrievalModel r (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ retrievalModel _ _)) _)) = r == retrievalModel
+acceptRetrievalModel r (Right (NeighborFeature entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel r (Right (NeighborSourceFeature  _ entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel r (Right (NeighborSourceScaleFeature  _ entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel _ x = nothingElseButAggr x
+
+
 
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType

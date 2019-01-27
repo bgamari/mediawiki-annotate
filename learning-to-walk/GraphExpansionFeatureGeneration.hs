@@ -123,6 +123,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
                         | CandidatesMadeNotFromEntityRuns | CandidatesMadeNotFromEdgeRuns | CandidatesMadeNotFromAspectRuns
                         | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
                         | Graex3
+                        | OnlyBm25 | OnlySdm | OnlyQl
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -1079,7 +1080,9 @@ filterFeaturesByExperimentSetting settings fname =
                     JustScaledSourceNeighbors -> onlyScaledSourceNeighbors
                     JustUnsourcedNeighbors -> onlyUnsourcedNeighbors
                     Graex3 -> onlyGraex3
-
+                    OnlyBm25 -> acceptRetrievalModel Bm25
+                    OnlySdm -> acceptRetrievalModel Sdm
+                    OnlyQl -> acceptRetrievalModel Ql
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True
