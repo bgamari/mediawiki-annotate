@@ -777,7 +777,7 @@ normalFlow NormalFlowArguments {..}  = do
 
                           putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
                           let allData :: TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
-                              allData = augmentWithQrels qrel docFeatures
+                              allData = SimplIR.LearningToRankWrapper.augmentWithQrels qrel docFeatures
 
                 --               !metric = avgMetricQrel qrel
                               totalElems = getSum . foldMap ( Sum . length ) $ allData
@@ -798,49 +798,63 @@ normalFlow NormalFlowArguments {..}  = do
                                             $ F.featureNameSet allCombinedFSpace
           in mkFeatureSpaces features $ \_ fspaces -> do
 
-
-              let docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
-
-                  augmentWithQrels :: forall f s.
-                                      [QRel.Entry QueryId  QRel.DocumentName IsRelevant]
-                                   -> M.Map (QueryId,  QRel.DocumentName) (FeatureVec f s Double)
-                                   -> M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
-                  augmentWithQrels qrel docFeatures =
-                      let relevance :: M.Map (QueryId,  QRel.DocumentName) IsRelevant
-                          relevance = M.fromList [ ((qid, doc), rel)
-                                                 | QRel.Entry qid doc rel <- qrel
-                                                 ]
-
-                          -- | when query starts with document, then its relevant even if there is no explicit qrels entry
-                          queryMatchRelevance :: QueryId ->  QRel.DocumentName -> IsRelevant
-                          queryMatchRelevance qid doc =
-                              let query' = CAR.RunFile.unQueryId qid
-                                  doc' =  doc
-                                  doc'' = packPageId $ T.unpack doc'
-                              in if (query' == doc') || (aspectHasPageId doc'' $ parseAspectId query')
-                                        then Relevant
-                                        else NotRelevant
-
-                          franking :: M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
-                          franking = M.fromListWith (++)
-                                     [ (qid, [(doc, features, relDocs)])
-                                     | ((qid, doc), features) <- M.assocs docFeatures
-                                     , let def = queryMatchRelevance qid doc
-                                     , let relDocs = M.findWithDefault def (qid, doc) relevance
-                                     ]
-                      in franking
-
-
-
-                  allData :: TrainData CombinedFeature _
-                  allData = augmentWithQrels qrel docFeatures
-
-
-              putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
+              let allData = buildTrainData fspaces qrel featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+              --putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
               BSL.writeFile (outputFilePrefix <.> "alldata.cbor") $ CBOR.serialise
                   $ SerialisedTrainingData fspaces allData
 
               train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+
+
+buildTrainData :: FeatureSpaces entityPh edgePh
+               -> [QRel.Entry QueryId QRel.DocumentName IsRelevant]
+               -> FeatureGraphSettings
+               -> CandidateGraphGenerator
+               -> PagesLookup
+               -> AspectLookup
+               -> ML.Map QueryId [MultiRankingEntry PageId GridRun]
+               -> ML.Map QueryId [MultiRankingEntry ParagraphId GridRun]
+               -> ML.Map QueryId [MultiRankingEntry AspectId GridRun]
+               -> ML.Map QueryId
+                         [(QRel.DocumentName,
+                           FeatureVec CombinedFeature (F.Stack '[entityPh, edgePh]) Double,
+                           IsRelevant)]
+buildTrainData fspaces qrel featureGraphSettings
+               candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun
+               collapsedEdgedocRun collapsedAspectRun =
+    Main.augmentWithQrels qrel docFeatures
+  where
+    docFeatures = makeStackedFeatures fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+
+augmentWithQrels :: forall f s.
+                    [QRel.Entry QueryId  QRel.DocumentName IsRelevant]
+                  -> M.Map (QueryId,  QRel.DocumentName) (FeatureVec f s Double)
+                  -> M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
+augmentWithQrels qrel docFeatures =
+    let relevance :: M.Map (QueryId,  QRel.DocumentName) IsRelevant
+        relevance = M.fromList [ ((qid, doc), rel)
+                                | QRel.Entry qid doc rel <- qrel
+                                ]
+
+        -- | when query starts with document, then its relevant even if there is no explicit qrels entry
+        queryMatchRelevance :: QueryId ->  QRel.DocumentName -> IsRelevant
+        queryMatchRelevance qid doc =
+            let query' = CAR.RunFile.unQueryId qid
+                doc' =  doc
+                doc'' = packPageId $ T.unpack doc'
+            in if (query' == doc') || (aspectHasPageId doc'' $ parseAspectId query')
+                      then Relevant
+                      else NotRelevant
+
+        franking :: M.Map QueryId [( QRel.DocumentName, FeatureVec f s Double, IsRelevant)]
+        franking = M.fromListWith (++)
+                    [ (qid, [(doc, features, relDocs)])
+                    | ((qid, doc), features) <- M.assocs docFeatures
+                    , let def = queryMatchRelevance qid doc
+                    , let relDocs = M.findWithDefault def (qid, doc) relevance
+                    ]
+    in franking
+
 
 
 train :: Bool
