@@ -255,29 +255,20 @@ onlyAggr (Right (NeighborSourceFeature _ (EntRetrievalFeature Aggr _runf))) = Tr
 onlyAggr (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature Aggr _runf))) = True
 onlyAggr _  = False
 
-onlyScore :: CombinedFeature -> Bool
-onlyScore (Left (EntRetrievalFeature _ ScoreF)) = True
-onlyScore (Right (EdgeRetrievalFeature _ _ ScoreF)) = True
-onlyScore (Right (NeighborFeature (EntRetrievalFeature _ ScoreF))) = True
-onlyScore (Right (NeighborSourceFeature _ (EntRetrievalFeature _ ScoreF))) = True
-onlyScore (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ ScoreF))) = True
-onlyScore x = nothingElseButAggr x
 
-onlyRR :: CombinedFeature -> Bool
-onlyRR (Left (EntRetrievalFeature _ RecipRankF)) = True
-onlyRR (Right (EdgeRetrievalFeature _ _ RecipRankF)) = True
-onlyRR (Right (NeighborFeature (EntRetrievalFeature _ RecipRankF))) = True
-onlyRR (Right (NeighborSourceFeature _ (EntRetrievalFeature _ RecipRankF))) = True
-onlyRR (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ RecipRankF))) = True
-onlyRR x = nothingElseButAggr x
 
-onlyCount :: CombinedFeature -> Bool
-onlyCount (Left (EntRetrievalFeature _ CountF)) = True
-onlyCount (Right (EdgeRetrievalFeature _ _ CountF)) = True
-onlyCount (Right (NeighborFeature (EntRetrievalFeature _ CountF))) = True
-onlyCount (Right (NeighborSourceFeature _ (EntRetrievalFeature _ CountF))) = True
-onlyCount (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ CountF))) = True
-onlyCount x = nothingElseButAggr x
+onlyRunFeature :: RunFeature -> CombinedFeature -> Bool
+onlyRunFeature f (Left (EntRetrievalFeature _ ff)) = f==ff
+onlyRunFeature f (Right (EdgeRetrievalFeature _ _ ff)) = f==ff
+onlyRunFeature f (Right (NeighborFeature (EntRetrievalFeature _ ff))) = f==ff
+onlyRunFeature f (Right (NeighborSourceFeature _ (EntRetrievalFeature _ ff))) = f==ff
+onlyRunFeature f (Right (NeighborSourceScaleFeature _ (EntRetrievalFeature _ ff))) = f==ff
+onlyRunFeature f (Left (EntRetrievalFeature Aggr ff)) = f==ff
+onlyRunFeature f (Right (EdgeRetrievalFeature _ Aggr ff)) = f==ff
+onlyRunFeature f (Left (EntDegree)) = False
+onlyRunFeature f (Right (EdgeCount _ )) = False
+onlyRunFeature f x = Debug.trace ("onlyRunFeature "<> show f <> " not defined for "<> show x) $ False
+
 
 
 onlyLessFeatures :: CombinedFeature -> Bool
@@ -328,7 +319,17 @@ onlySimpleRmFeaturesHelper :: RetrievalModel -> ExpansionModel -> IndexType -> B
 onlySimpleRmFeaturesHelper retrievalModel expansionModel indexType =
      (indexType `S.member` S.fromList [EntityIdx, PageIdx, ParagraphIdx, AspectIdx])
      &&  (expansionModel `S.member`  S.fromList [NoneX, Rm, EcmX, EcmPsg])
-     &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
+    -- &&  (retrievalModel == Bm25 || retrievalModel == Sdm)
+
+acceptRetrievalModel :: _ -> CombinedFeature -> Bool
+acceptRetrievalModel r (Left (EntRetrievalFeature (GridRun' (GridRun _ retrievalModel _ _)) _)) = r == retrievalModel
+acceptRetrievalModel r (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ retrievalModel _ _)) _)) = r == retrievalModel
+acceptRetrievalModel r (Right (NeighborFeature entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel r (Right (NeighborSourceFeature  _ entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel r (Right (NeighborSourceScaleFeature  _ entF)) = acceptRetrievalModel r (Left entF)
+acceptRetrievalModel _ x = nothingElseButAggr x
+
+
 
 
 -- GridRun  QueryModel RetrievalModel ExpansionModel IndexType

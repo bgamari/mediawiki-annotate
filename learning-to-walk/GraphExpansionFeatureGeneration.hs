@@ -123,6 +123,7 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
                         | CandidatesMadeNotFromEntityRuns | CandidatesMadeNotFromEdgeRuns | CandidatesMadeNotFromAspectRuns
                         | CandidateStrict | CandidateGenerous | CandidateDisableDivideEdgeFeats | CandidateRemoveLowNodes
                         | Graex3
+                        | OnlyBm25 | OnlySdm | OnlyQl
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
@@ -182,6 +183,7 @@ normalArgs = NormalFlowArguments
     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     <*> optional minibatchParser
     <*> optional (option str (short 'd' <> long "train-data" <> metavar "TRAIN-DATA-FILE" <> help "load training data from serialized file (instead of creating it from scratch)"))
+    <*> option auto (long "include-cv" <> metavar "BOOL" <> help "if set to false, cross validation is skipped" <> value True)
   where
       querySource :: Parser QuerySource
       querySource =
@@ -324,7 +326,7 @@ trainOnlyFlow FlowTrainOnly {..} = do
 
     --  allData :: TrainData CombinedFeature _
     SerialisedTrainingData fspaces allData <- CBOR.deserialise <$> BSL.readFile (trainDataFileOpt)
-    train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+    train True fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 
 
@@ -349,6 +351,7 @@ data NormalFlowArguments
                        , graphWalkModel :: GraphWalkModel
                        , miniBatchParamsMaybe :: Maybe MiniBatchParams
                        , trainDataFileOpt :: Maybe FilePath
+                       , includeCv :: Bool
                        }
 normalFlow :: NormalFlowArguments -> IO ()
 normalFlow NormalFlowArguments {..}  = do
@@ -380,6 +383,7 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
     putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
+    putStrLn $ " Include Crossvalidation?  "++ (show includeCv)
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
@@ -462,52 +466,52 @@ normalFlow NormalFlowArguments {..}  = do
 
     ncaps <- getNumCapabilities
 
-    putStrLn "Loading EntityRuns..."
-    entityRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (CAR.RunFile.readEntityRun path))))
-        (chunksOf 2 entityRunFiles)
-        :: IO [(GridRun, [RankingEntry PageId])]
+    let internRunFile :: forall doc m. (Eq doc, Hashable doc, Monad m)
+                      => [RankingEntry doc] -> m [RankingEntry doc]
+        internRunFile =
+              runInternM @doc
+            . runInternM @T.Text
+            . mapM (\entry -> lift . internAll (CAR.RunFile.document)
+                                =<< internAll (CAR.RunFile.traverseText (const pure)) entry)
 
-    putStrLn $ "Loaded EntityRuns: "<> show (length entityRuns)
+        loadGridRuns :: forall doc. (Eq doc, Hashable doc)
+                     => String
+                     -> (FilePath -> IO [RankingEntry doc])
+                     -> [(GridRun, FilePath)]
+                     -> IO (M.Map GridRun [RankingEntry doc])
+        loadGridRuns type_ readRunFile runFiles = do
+            putStrLn $ "Loading "++type_++"..."
+            let querySet = S.fromList $ map queryDocQueryId queries
+                filterQueries :: Monad m => [RankingEntry doc] -> m [RankingEntry doc]
+                filterQueries = return . filter isInterestingQuery
+                  where
+                    isInterestingQuery entry = CAR.RunFile.carQueryId entry `S.member` querySet
 
-    putStrLn "Loading AspectRuns..."
-    aspectRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (readAspectRun path))))
-        (chunksOf 2 aspectRunFiles)
-        :: IO [(GridRun, [RankingEntry AspectId])]
+                loadQueryRun :: FilePath -> IO [RankingEntry doc]
+                loadQueryRun path = internRunFile =<< filterQueries =<< liftIO (readRunFile path)
 
-    putStrLn $ "Loaded AspectRuns: "<> show (length aspectRuns)
+            runs <- mapConcurrentlyL ncaps (traverse loadQueryRun) runFiles
+            putStrLn $ "Loaded "++type_++": "<> show (length runFiles)
+            return $! M.fromListWith (<>) runs
 
-    putStrLn "Loading EdgeRuns..."
-    edgeRuns <- fmap concat $ mapConcurrentlyL ncaps
-        (runInternM . runInternM . mapM (mapM (\path ->
-                     lift . internAll (each . CAR.RunFile.document)
-                 =<< internAll (each . CAR.RunFile.traverseText (const pure))
-                 =<< liftIO (CAR.RunFile.readParagraphRun path))))
-        (chunksOf 2 edgedocRunFiles)
-        :: IO [(GridRun, [RankingEntry ParagraphId])]
 
-    putStrLn $ "Loaded EdgeRuns: "<> show (length edgeRuns)
+    entityRuns <- loadGridRuns "EntityRuns" CAR.RunFile.readEntityRun    entityRunFiles
+    aspectRuns <- loadGridRuns "AspectRuns" readAspectRun                aspectRunFiles
+    edgeRuns   <- loadGridRuns "EdgeRuns"   CAR.RunFile.readParagraphRun edgedocRunFiles
 
     putStrLn "Computing collapsed runs..."
     let collapsedEntityRun :: M.Map QueryId [MultiRankingEntry PageId GridRun]
         !collapsedEntityRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) entityRuns
         collapsedAspectRun :: M.Map QueryId [MultiRankingEntry AspectId GridRun]
         !collapsedAspectRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) aspectRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) aspectRuns
         collapsedEdgedocRun :: M.Map QueryId [MultiRankingEntry ParagraphId GridRun]
         !collapsedEdgedocRun =
             collapseRuns
-            $ map (fmap $ filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
+            $ M.toList $ fmap (filter (\entry -> CAR.RunFile.carRank entry <= numResults)) edgeRuns
          -- Todo: collapsed Aspect Runs
         tr x = traceShow x x
     putStrLn "Computed collapsed runs."
@@ -836,17 +840,18 @@ normalFlow NormalFlowArguments {..}  = do
               BSL.writeFile (outputFilePrefix <.> "alldata.cbor") $ CBOR.serialise
                   $ SerialisedTrainingData fspaces allData
 
-              train fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+              train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 
-train :: FeatureSpaces entityPh edgePh
+train :: Bool
+      -> FeatureSpaces entityPh edgePh
       ->  TrainData CombinedFeature _
       -> [QRel.Entry CAR.RunFile.QueryId doc IsRelevant]
       -> MiniBatchParams
       -> FilePath
       -> FilePath
       -> IO()
-train fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
+train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
               let metric :: ScoringMetric IsRelevant CAR.RunFile.QueryId
                   !metric = meanAvgPrec (totalRelevantFromQRels qrel) Relevant
                   totalElems = getSum . foldMap ( Sum . length ) $ allData
@@ -865,7 +870,7 @@ train fspaces allData qrel miniBatchParams outputFilePrefix modelFile =  do
 
               putStrLn $ "Training Data = \n" ++ intercalate "\n" (take 10 $ displayTrainData $ force allData)
               gen0 <- newStdGen  -- needed by learning to rank
-              trainMe miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
+              trainMe includeCv miniBatchParams (EvalCutoffAt 100) gen0 allData (combinedFSpace fspaces) metric outputFilePrefix modelFile
 
 
 
@@ -1059,9 +1064,9 @@ filterFeaturesByExperimentSetting settings fname =
                     AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
                     JustAggr -> onlyAggr
                     NoAggr -> not . onlyAggr
-                    JustScore -> onlyScore
-                    JustRecip -> onlyRR
-                    JustCount -> onlyCount
+                    JustScore -> onlyRunFeature ScoreF
+                    JustRecip -> onlyRunFeature RecipRankF
+                    JustCount -> onlyRunFeature CountF
                     LessFeatures -> onlyLessFeatures
                     JustNone -> onlyNoneFeatures
                     ExpPage -> onlyPage
@@ -1079,7 +1084,9 @@ filterFeaturesByExperimentSetting settings fname =
                     JustScaledSourceNeighbors -> onlyScaledSourceNeighbors
                     JustUnsourcedNeighbors -> onlyUnsourcedNeighbors
                     Graex3 -> onlyGraex3
-
+                    OnlyBm25 -> acceptRetrievalModel Bm25
+                    OnlySdm -> acceptRetrievalModel Sdm
+                    OnlyQl -> acceptRetrievalModel Ql
 
                     CandidateNoEdgeDocs -> const True
                     CandidateNoPageDocs -> const True

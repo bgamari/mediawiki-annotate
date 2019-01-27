@@ -95,6 +95,7 @@ data RankingEntry' doc = RankingEntry { carQueryId     :: !QueryId
 instance NFData doc => NFData (RankingEntry' doc)
 
 
+-- Among other purposes, this is used for interning text (i.e., recycle string instances of identical strings
 $(makeLensesWith abbreviatedFields ''RankingEntry')
 $(makeWrapped ''QueryId)
 $(makeWrapped ''MethodName)

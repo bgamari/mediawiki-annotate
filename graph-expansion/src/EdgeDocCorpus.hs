@@ -79,14 +79,7 @@ wrapEdgeDocsTocs paraId2EdgeDoc =
 readEdgeDocsToc :: Toc.IndexedCborPath ParagraphId EdgeDoc -> IO EdgeDocsLookup
 readEdgeDocsToc edgeDocsFileWithToc = do
     toc <- Toc.open edgeDocsFileWithToc
-    return $ \paragraphIds -> mapMaybe (look toc) paragraphIds
-  where look toc pid =
-          let r = pid `Toc.lookup` toc
-              msg = if r == Nothing then
-                        ("Not found edgedoc id "++ show pid)
-                    else
-                        (".")
-          in Debug.trace (msg) $ r
+    return $ \paragraphIds -> mapMaybe (`Toc.lookup` toc) paragraphIds
 
 
 
