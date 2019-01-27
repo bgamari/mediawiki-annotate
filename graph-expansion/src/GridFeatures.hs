@@ -459,16 +459,16 @@ nothingElseButAggr _ = False
 
 
 onlyExpEcmTestFeature :: CombinedFeature -> Bool
-onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 EcmX ParagraphIdx)) ScoreF)) = True
-onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX ParagraphIdx)) ScoreF)) = True
+onlyExpEcmTestFeature (Left (EntRetrievalFeature (GridRun' (GridRun _ _ EcmX _)) _)) = True
+onlyExpEcmTestFeature (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ EcmX _)) _)) = True
 onlyExpEcmTestFeature (Right (NeighborSourceFeature _ entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature (Right (NeighborSourceScaleFeature _ entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature (Right (NeighborFeature entF)) = onlyExpEcmTestFeature (Left entF)
 onlyExpEcmTestFeature _ = False
 
 onlyNoneX :: CombinedFeature -> Bool
-onlyNoneX (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
-onlyNoneX (Right (EdgeRetrievalFeature _ (GridRun' (GridRun Title Bm25 NoneX _)) ScoreF)) = True
+onlyNoneX (Left (EntRetrievalFeature (GridRun' (GridRun _ _ NoneX _)) _)) = True
+onlyNoneX (Right (EdgeRetrievalFeature _ (GridRun' (GridRun _ _ NoneX _)) _)) = True
 onlyNoneX (Right (NeighborFeature entF)) = onlyNoneX (Left entF)
 onlyNoneX (Right (NeighborSourceFeature _ entF)) = onlyNoneX (Left entF)
 onlyNoneX (Right (NeighborSourceScaleFeature _ entF)) = onlyNoneX (Left entF)
@@ -494,11 +494,11 @@ onlyUnsourcedNeighbors _ = True
 
 
 onlyGraex3 :: CombinedFeature -> Bool
-onlyGraex3 (Left (EntRetrievalFeature (GridRun' (GridRun Title Bm25 ex idx)) rmodel )) =
+onlyGraex3 (Left (EntRetrievalFeature (GridRun' (GridRun _ Bm25 ex idx)) rmodel )) =
     (rmodel == ScoreF || rmodel == RecipRankF )
     && (idx == EntityIdx || idx == PageIdx || idx == ParagraphIdx)
     && (ex == NoneX || ex == Rm || ex == EcmX || ex == EcmPsg)
-onlyGraex3 (Right (EdgeRetrievalFeature FromParas (GridRun' (GridRun Title Bm25 ex idx)) rmodel)) =
+onlyGraex3 (Right (EdgeRetrievalFeature FromParas (GridRun' (GridRun _ Bm25 ex idx)) rmodel)) =
     (rmodel == ScoreF || rmodel == RecipRankF )
     && (idx == ParagraphIdx)
     && (ex == NoneX || ex == Rm || ex == EcmPsg)
