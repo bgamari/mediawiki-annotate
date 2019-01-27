@@ -1064,9 +1064,9 @@ filterFeaturesByExperimentSetting settings fname =
                     AllEdgeWeightsOne -> const True -- needs to be handled elsewhere
                     JustAggr -> onlyAggr
                     NoAggr -> not . onlyAggr
-                    JustScore -> onlyScore
-                    JustRecip -> onlyRR
-                    JustCount -> onlyCount
+                    JustScore -> onlyRunFeature ScoreF
+                    JustRecip -> onlyRunFeature RecipRankF
+                    JustCount -> onlyRunFeature CountF
                     LessFeatures -> onlyLessFeatures
                     JustNone -> onlyNoneFeatures
                     ExpPage -> onlyPage
