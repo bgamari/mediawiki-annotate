@@ -19,6 +19,7 @@ import Control.Concurrent.Async
 import Control.DeepSeq hiding (rwhnf)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad
 import Control.Parallel.Strategies
 import Control.Lens (each)
 import Data.Coerce
@@ -189,6 +190,8 @@ normalArgs = NormalFlowArguments
     <*> optional minibatchParser
     <*> optional (option str (short 'd' <> long "train-data" <> metavar "TRAIN-DATA-FILE" <> help "load training data from serialized file (instead of creating it from scratch)"))
     <*> option auto (long "include-cv" <> metavar "BOOL" <> help "if set to false, cross validation is skipped" <> value True)
+    <*> option auto (long "do-write-train-data" <> metavar "BOOL" <> help "if set to false, no train data is written" <> value True)
+    <*> option auto (long "do-train-model" <> metavar "BOOL" <> help "if set to false, training is skipped" <> value True)
   where
       querySource :: Parser QuerySource
       querySource =
@@ -363,6 +366,8 @@ data NormalFlowArguments
                        , miniBatchParamsMaybe :: Maybe MiniBatchParams
                        , trainDataFileOpt :: Maybe FilePath
                        , includeCv :: Bool
+                       , doWriteTrainData :: Bool
+                       , doTrainModel :: Bool
                        }
 normalFlow :: NormalFlowArguments -> IO ()
 normalFlow NormalFlowArguments {..}  = do
@@ -395,6 +400,8 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
     putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
     putStrLn $ " Include Crossvalidation?  "++ (show includeCv)
+    putStrLn $ " Write train data ?  "++ (show doWriteTrainData)
+    putStrLn $ " Do train model?  "++ (show doTrainModel)
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
@@ -822,8 +829,11 @@ normalFlow NormalFlowArguments {..}  = do
                         return allData'
 
               putStrLn $ "Made docFeatures: "<> show (F.dimension $ combinedFSpace fspaces)
-              writeTrainData (outputFilePrefix <.> "alldata.cbor") $ SerialisedTrainingData fspaces allData
-              train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
+              when doWriteTrainData $
+                  writeTrainData (outputFilePrefix <.> "alldata.cbor") $ SerialisedTrainingData fspaces allData
+
+              when doTrainModel $
+                  train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
 writeTrainData :: FilePath -> SerialisedTrainingData -> IO ()
 writeTrainData fname = BSL.writeFile fname . CBOR.serialise
