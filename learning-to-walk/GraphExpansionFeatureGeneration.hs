@@ -738,7 +738,7 @@ normalFlow NormalFlowArguments {..}  = do
                                        $ fmap swap
                                        $ HM.toList (nodeDistr >!< queryId)
                               graph' = filterNodes (`S.member` topNodes)  graph
-                          in graph'
+                          in graph
 
 
               forM_ (ML.toList weightedGraphs) $
