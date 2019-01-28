@@ -884,7 +884,7 @@ augmentWithQrels qrel docFeatures =
 
 train :: Bool
       -> FeatureSpaces entityPh edgePh
-      ->  TrainData CombinedFeature _
+      ->  TrainData CombinedFeature (F.Stack '[entityPh, edgePh])
       -> [QRel.Entry CAR.RunFile.QueryId doc IsRelevant]
       -> MiniBatchParams
       -> FilePath
