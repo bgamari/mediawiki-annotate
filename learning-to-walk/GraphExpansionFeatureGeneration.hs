@@ -107,6 +107,10 @@ data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
 data RankingType = EntityRanking | EntityPassageRanking
   deriving (Show)
 
+data TrainDataSource = TrainDataFromFile FilePath
+                     | BuildTrainData
+  deriving (Show)
+
 data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | GraphWalkModelFromFile FilePath -- filename to read model from for graph walks
                  | TrainModel FilePath -- filename to write resulting file to
@@ -174,6 +178,7 @@ normalArgs = NormalFlowArguments
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "page-doc-cbor" <> metavar "PageDoc-CBOR" <> help "PageDoc cbor file"))
     <*> (option (Toc.IndexedCborPath <$> str)  ( long "aspect-doc-cbor" <> metavar "AspectDoc-CBOR" <> help "AspectDoc cbor file"))
     <*> (option str (long "qrel" <> metavar "QRel-FILE"))
+    <*> trainDataSource
     <*> modelSource
     <*> many (option auto (long "posify" <> metavar "OPT" <> help ("Option for how to ensure positive edge weights. For walking without training multiple posify options can be given Choices: " ++(show [minBound @PosifyEdgeWeights .. maxBound]))  ))
     <*> many (option auto (long "teleport" <> help "teleport probability (for page rank), for walking without training multiple teleports can be given" ))
@@ -206,6 +211,11 @@ normalArgs = NormalFlowArguments
                 <*> queryDeriv
                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
 
+
+      trainDataSource :: Parser TrainDataSource
+      trainDataSource =
+            option (TrainDataFromFile <$> str) (long "train-data" <> metavar "TrainData-FILE" <> help "read training data from file")
+        <|> pure BuildTrainData
 
       modelSource :: Parser ModelSource
       modelSource =
@@ -342,6 +352,7 @@ data NormalFlowArguments
                        , pagesDocCborFile :: Toc.IndexedCborPath PageId PageDoc
                        , aspectDocCborFile :: Toc.IndexedCborPath AspectId AspectDoc
                        , qrelFile :: FilePath
+                       , trainDataSource :: TrainDataSource
                        , modelSource :: ModelSource
                        , posifyEdgeWeightsOpts :: [PosifyEdgeWeights]
                        , teleportations :: [TeleportationProb]
@@ -742,7 +753,7 @@ normalFlow NormalFlowArguments {..}  = do
           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
               case trainDataFileOpt of
                   Just trainDataFile -> do
-                       SerialisedTrainingData dataFspaces allData <- CBOR.deserialise <$> BSL.readFile (trainDataFile)
+                       SerialisedTrainingData dataFspaces allData <- readTrainData trainDataFile
                        let Just featProj = F.project (combinedFSpace fspaces) (combinedFSpace dataFspaces)
                            model' = coerce featProj (modelWeights' model)
 
@@ -798,13 +809,27 @@ normalFlow NormalFlowArguments {..}  = do
                                             $ F.featureNameSet allCombinedFSpace
           in mkFeatureSpaces features $ \_ fspaces -> do
 
-              let allData = buildTrainData fspaces qrel featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
-              --putStrLn $ "Made docFeatures: "<>  show (length docFeatures)
-              BSL.writeFile (outputFilePrefix <.> "alldata.cbor") $ CBOR.serialise
-                  $ SerialisedTrainingData fspaces allData
+              allData <- case trainDataSource of
+                    BuildTrainData ->
+                        return $ buildTrainData fspaces qrel
+                            featureGraphSettings candidateGraphGenerator pagesLookup
+                            aspectLookup collapsedEntityRun collapsedEdgedocRun
+                            collapsedAspectRun
+                    TrainDataFromFile fname -> do
+                        SerialisedTrainingData dataFSpaces allData <- readTrainData fname
+                        Just proj <- pure $ F.project (combinedFSpace dataFSpaces) (combinedFSpace fspaces)
+                        let allData' = fmap (map $ \(a,b,c) -> (a, proj b, c)) allData
+                        return allData'
 
+              putStrLn $ "Made docFeatures: "<> show (F.dimension $ combinedFSpace fspaces)
+              writeTrainData (outputFilePrefix <.> "alldata.cbor") $ SerialisedTrainingData fspaces allData
               train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile
 
+writeTrainData :: FilePath -> SerialisedTrainingData -> IO ()
+writeTrainData fname = BSL.writeFile fname . CBOR.serialise
+
+readTrainData :: FilePath -> IO SerialisedTrainingData
+readTrainData fname = CBOR.deserialise <$> BSL.readFile fname
 
 buildTrainData :: FeatureSpaces entityPh edgePh
                -> [QRel.Entry QueryId QRel.DocumentName IsRelevant]
