@@ -719,8 +719,6 @@ normalFlow NormalFlowArguments {..}  = do
                   featureGraphs :: ML.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
                   featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
 
-
-
                   weightedGraphs :: ML.Map QueryId (Graph PageId (Double))
                   weightedGraphs = M.mapWithKey weightGraph featureGraphs
                     where
@@ -743,7 +741,7 @@ normalFlow NormalFlowArguments {..}  = do
 
               forM_ (ML.toList weightedGraphs) $
                   \(queryId, graph) ->
-                      exportGraphViz  graph (dotFileName queryId)
+                      exportGraphViz  (filterGraphByPaths 2 ("hi", "hi2") graph) (dotFileName queryId)
 
               putStrLn $ show weightedGraphs
 
@@ -1274,6 +1272,21 @@ posifyDot expSettings posifyOpt normalizer params' allFeatures =
 -- ---------------------------------------------
 -- Graphviz export
 -- ---------------------------------------------
+
+filterGraphByPaths :: forall n e. (Hashable n, Ord n)
+                   => Int
+                   -> (n, n)
+                   -> Graph n e
+                   -> Graph n e
+filterGraphByPaths k (n1, n2) graph = filterNodes (`S.member` nodes) graph
+  where
+    go :: Int -> S.Set n -> n -> S.Set n
+    go 0 _ _ = mempty
+    go i accum n
+      | n == n2 = S.insert n accum
+      | otherwise = foldMap (go (i-1) (S.insert n accum))
+                    $ HM.keys $ Graph.getNeighbors graph n
+    nodes = go (k+1) mempty n1
 
 exportGraphViz :: Graph PageId Double -> FilePath -> IO ()
 exportGraphViz fancyWeightedGraph dotFilename = do
