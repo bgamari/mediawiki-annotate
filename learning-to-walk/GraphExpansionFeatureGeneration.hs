@@ -116,6 +116,7 @@ data ModelSource = ModelFromFile FilePath -- filename to read model from
                  | GraphWalkModelFromFile FilePath -- filename to read model from for graph walks
                  | TrainModel FilePath -- filename to write resulting file to
                  | GraphWalkTrainModel FilePath -- filename to read model from
+                 | GraphvizModelFromFile FilePath -- filename to read model from
   deriving (Show)
 
 data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsOne | JustAggr | NoAggr | JustScore | JustRecip | JustCount | LessFeatures
@@ -226,6 +227,7 @@ normalArgs = NormalFlowArguments
         <|> option (ModelFromFile <$> str) (long "test-model" <> metavar "Model-FILE" <> help "read learning-to-rank model from Model-FILE")
         <|> option (GraphWalkModelFromFile <$> str) (long "read-model" <> metavar "Model-FILE" <> help "read learning-to-rank model for graph walking from Model-FILE")
         <|> option (GraphWalkTrainModel <$> str) (long "train-walk-model" <> metavar "Model-FILE" <> help "train learning-to-rank model for graph walking from Model-FILE")
+        <|> option (GraphvizModelFromFile <$> str) (long "graphviz-model" <> metavar "Model-FILE" <> help "export graphviz using Model-FILE")
 
 
 
@@ -431,11 +433,6 @@ normalFlow NormalFlowArguments {..}  = do
               QueryDocList queries <- either error id . Data.Aeson.eitherDecode <$> BSL.readFile queryFile
               return queries
 
-    let dotFileName :: QueryId -> FilePath
-        dotFileName queryId = outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot"
-
-        filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
-        filterGraphTopEdges graph =  graph -- filterEdges (\_ _ weight -> weight > 5.0) graph
 
     let fixQRel :: QRel.Entry QRel.QueryId QRel.DocumentName QRel.IsRelevant
                 -> QRel.Entry CAR.RunFile.QueryId QRel.DocumentName QRel.IsRelevant
@@ -693,6 +690,64 @@ normalFlow NormalFlowArguments {..}  = do
               storeModelData outputFilePrefix updatedModelFile model trainScore "trainwalk"
 
 
+      GraphvizModelFromFile modelFile -> do
+          putStrLn "loading model"
+          Just (SomeModel model) <-  Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
+          mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
+              let
+
+
+                  dotFileName :: QueryId -> FilePath
+                  dotFileName queryId = outputFilePrefix ++ "-"++ T.unpack (CAR.RunFile.unQueryId queryId) ++"-graphviz.dot"
+
+                  filterGraphTopEdges :: Graph PageId Double -> Graph PageId Double
+                  filterGraphTopEdges graph =  graph -- filterEdges (\_ _ weight -> weight > 5.0) graph
+
+
+                  nodeDistr :: M.Map QueryId (HM.HashMap PageId Double) -- xyes, only positive entries, expected to sum to 1.0
+                  !nodeDistr =
+                      nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
+                  -- todo nodeDistr should not be strict, as some graph walks don't use it
+
+                  Just (F.FeatureMappingInto toEdgeVecSubset) =
+                    F.mapFeaturesInto (combinedFSpace fspaces) (edgeFSpace fspaces) (either (const Nothing) Just)
+
+                  -- only edge model weights
+                  params' :: WeightVec EdgeFeature edgePh
+                  params' = coerce (toEdgeVecSubset . modelToCombinedFeatureVec) $ modelWeights' model
+
+                  featureGraphs :: ML.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
+                  featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
+
+
+
+                  weightedGraphs :: ML.Map QueryId (Graph PageId (Double))
+                  weightedGraphs = M.mapWithKey weightGraph featureGraphs
+                    where
+                      weightGraph :: QueryId -> Graph PageId (EdgeFeatureVec edgePh) -> Graph PageId Double
+                      weightGraph queryId featureGraph =
+                          let normalizer :: Normalisation EdgeFeature edgePh Double
+                              !normalizer = zNormalizer $ Foldable.toList featureGraph
+                              graph = fmap (posifyDot pageRankExperimentSettings posifyEdgeWeightsOpt normalizer params' (Foldable.toList featureGraph)) featureGraph
+                              -- graph' = dropLowEdges graph
+                              topNodes :: S.Set PageId
+                              topNodes = S.fromList $ fmap snd
+                                       $ Ranking.toSortedList
+                                       $ Ranking.takeTop 100
+                                       $ Ranking.fromList
+                                       $ fmap swap
+                                       $ HM.toList (nodeDistr >!< queryId)
+                              graph' = filterNodes (`S.member` topNodes)  graph
+                          in graph'
+
+
+              forM_ (ML.toList weightedGraphs) $
+                  \(queryId, graph) ->
+                      exportGraphViz  graph (dotFileName queryId)
+
+              putStrLn $ show weightedGraphs
+
+
 
       GraphWalkModelFromFile modelFile -> do
           putStrLn "loading model"
@@ -704,16 +759,15 @@ normalFlow NormalFlowArguments {..}  = do
                       nodeDistrPriorForGraphwalk fspaces featureGraphSettings candidateGraphGenerator pagesLookup aspectLookup (coerce modelToCombinedFeatureVec $ modelWeights' model) collapsedEntityRun collapsedEdgedocRun collapsedAspectRun
                   -- todo nodeDistr should not be strict, as some graph walks don't use it
 
+                  Just (F.FeatureMappingInto toEdgeVecSubset) =
+                    F.mapFeaturesInto (combinedFSpace fspaces) (edgeFSpace fspaces) (either (const Nothing) Just)
+
                   -- only edge model weights
                   params' :: WeightVec EdgeFeature edgePh
                   params' = coerce (toEdgeVecSubset . modelToCombinedFeatureVec) $ modelWeights' model
 
                   featureGraphs :: ML.Map QueryId (Graph PageId (EdgeFeatureVec edgePh))
                   featureGraphs = makeFeatureGraphs (edgeFSpace fspaces)
-
-
-                  Just (F.FeatureMappingInto toEdgeVecSubset) =
-                    F.mapFeaturesInto (combinedFSpace fspaces) (edgeFSpace fspaces) (either (const Nothing) Just)
 
 
                   initialEigenv :: Graph PageId a -> Eigenvector PageId Double
