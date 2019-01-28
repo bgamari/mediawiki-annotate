@@ -11,6 +11,7 @@ module Graph
     , numNodes
     , getNeighbors
     , filterEdges
+    , filterNodes
     , dropDisconnected
 
     -- * construct graphs
