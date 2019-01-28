@@ -975,7 +975,7 @@ train includeCv fspaces allData qrel miniBatchParams outputFilePrefix modelFile 
               let
                   displayTrainData :: Show f => TrainData f s -> [String]
                   displayTrainData trainData =
-                    [ show k ++ " " ++ show d ++ " " ++ show r ++ " -> "++ show prettyFv
+                    [ show k ++ " " ++ show d ++ " " ++ show r ++ " -> "++ prettyFv
                     | (k,list) <- M.toList trainData
                     , (d,fvec, r) <- list
                     , let prettyFv = unlines $ fmap show $ F.toList fvec
