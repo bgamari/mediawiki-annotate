@@ -193,6 +193,9 @@ normalArgs = NormalFlowArguments
     <*> option auto (long "include-cv" <> metavar "BOOL" <> help "if set to false, cross validation is skipped" <> value True)
     <*> option auto (long "do-write-train-data" <> metavar "BOOL" <> help "if set to false, no train data is written" <> value True)
     <*> option auto (long "do-train-model" <> metavar "BOOL" <> help "if set to false, training is skipped" <> value True)
+    <*> option auto (long "graphviz-path-restriction" <> metavar "HOPS" <> help "Graphviz: path length restriction (1 is direct links)" <> value 2)
+    <*> optional (option (packPageId <$> str) (long "graphviz-source-entity" <> metavar "PAGEID" <> help "Graphviz: source entity" ))
+    <*> optional (option (packPageId <$> str) (long "graphviz-target-entity" <> metavar "PAGEID" <> help "Graphviz: target entity" ))
   where
       querySource :: Parser QuerySource
       querySource =
@@ -370,6 +373,9 @@ data NormalFlowArguments
                        , includeCv :: Bool
                        , doWriteTrainData :: Bool
                        , doTrainModel :: Bool
+                       , graphVizPathRestriction :: Int
+                       , graphVizSourceEntity :: Maybe PageId
+                       , graphVizTargetEntity :: Maybe PageId
                        }
 normalFlow :: NormalFlowArguments -> IO ()
 normalFlow NormalFlowArguments {..}  = do
@@ -403,7 +409,9 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
     putStrLn $ " Include Crossvalidation?  "++ (show includeCv)
     putStrLn $ " Write train data ?  "++ (show doWriteTrainData)
-    putStrLn $ " Do train model?  "++ (show doTrainModel)
+    putStrLn $ " GraphVizExport: pathRestriction  "++ (show graphVizPathRestriction)
+    putStrLn $ " GraphVizExport: graphVizSourceEntity  "++ (show graphVizSourceEntity)
+    putStrLn $ " GraphVizExport: targetEntity  "++ (show graphVizTargetEntity)
 
     let miniBatchParams = fromMaybe defaultMiniBatchParams miniBatchParamsMaybe
 
@@ -739,9 +747,11 @@ normalFlow NormalFlowArguments {..}  = do
                           in graph
 
 
+                  Just source = graphVizSourceEntity
+                  Just target = graphVizTargetEntity
               forM_ (ML.toList weightedGraphs) $
                   \(queryId, graph) ->
-                      exportGraphViz  (filterGraphByPaths 2 ("hi", "hi2") graph) (dotFileName queryId)
+                      exportGraphViz  (filterGraphByPaths graphVizPathRestriction (source, target) graph) (dotFileName queryId)
 
               putStrLn $ show weightedGraphs
 
