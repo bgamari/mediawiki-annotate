@@ -821,8 +821,9 @@ normalFlow NormalFlowArguments {..}  = do
               case trainDataSource of
                   TrainDataFromFile trainDataFile -> do
                        SerialisedTrainingData dataFspaces allData <- readTrainData trainDataFile
-                       let Just featProj = F.project (combinedFSpace fspaces) (combinedFSpace dataFspaces)
-                           model' = coerce featProj (modelWeights' model)
+                       F.ProjectBothResult fspace modelProj featProj <- pure $ F.projectBoth (combinedFSpace fspaces) (combinedFSpace dataFspaces)
+                       let model' = coerce (modelProj . modelToCombinedFeatureVec) model
+                           allData' = fmap (map $ \(a,b,c) -> (a, featProj b, c)) allData
 
                            totalElems = getSum . foldMap ( Sum . length ) $ allData
                            totalPos = getSum . foldMap ( Sum . length . filter (\(_,_,rel) -> rel == Relevant)) $ allData
@@ -832,7 +833,7 @@ normalFlow NormalFlowArguments {..}  = do
                                  show totalPos ++" are positive."
 
                        let trainRanking = withStrategy (parTraversable rseq)
-                                        $ rerankRankings' model' allData
+                                        $ rerankRankings' model' allData'
                        storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
 
                   BuildTrainData ->  do
