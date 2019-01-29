@@ -189,7 +189,6 @@ normalArgs = NormalFlowArguments
     <*> option auto (long "pagerank-convergence" <> metavar "CONV" <> help ("How pagerank determines convergence. Choices: " ++(show [minBound @PageRankConvergence .. maxBound])) <> value Iteration10)
     <*> option auto (long "graph-walk-model" <> metavar "PAGERANK" <> help ("Graph walk model. Choices: " ++(show [minBound @GraphWalkModel .. maxBound])) <> value PageRankWalk)
     <*> optional minibatchParser
-    <*> optional (option str (short 'd' <> long "train-data" <> metavar "TRAIN-DATA-FILE" <> help "load training data from serialized file (instead of creating it from scratch)"))
     <*> option auto (long "include-cv" <> metavar "BOOL" <> help "if set to false, cross validation is skipped" <> value True)
     <*> option auto (long "do-write-train-data" <> metavar "BOOL" <> help "if set to false, no train data is written" <> value True)
     <*> option auto (long "do-train-model" <> metavar "BOOL" <> help "if set to false, training is skipped" <> value True)
@@ -369,7 +368,6 @@ data NormalFlowArguments
                        , pageRankConvergence :: PageRankConvergence
                        , graphWalkModel :: GraphWalkModel
                        , miniBatchParamsMaybe :: Maybe MiniBatchParams
-                       , trainDataFileOpt :: Maybe FilePath
                        , includeCv :: Bool
                        , doWriteTrainData :: Bool
                        , doTrainModel :: Bool
@@ -406,7 +404,7 @@ normalFlow NormalFlowArguments {..}  = do
     putStrLn $ " pageRankExperimentSettings (only for page rank) : "++ (show pageRankExperimentSettings)
     putStrLn $ " graphWalkModel (only for page rank) : "++ (show graphWalkModel)
     putStrLn $ " MinbatchParams (only for training) : "++ (show miniBatchParamsMaybe)
-    putStrLn $ " TrainDataFile : "++ (show trainDataFileOpt)
+    putStrLn $ " TrainDataSource : "++ (show trainDataSource)
     putStrLn $ " Include Crossvalidation?  "++ (show includeCv)
     putStrLn $ " Write train data ?  "++ (show doWriteTrainData)
     putStrLn $ " GraphVizExport: pathRestriction  "++ (show graphVizPathRestriction)
