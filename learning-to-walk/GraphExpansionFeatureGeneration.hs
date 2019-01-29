@@ -820,8 +820,8 @@ normalFlow NormalFlowArguments {..}  = do
       ModelFromFile modelFile -> do
           Just (SomeModel model) <-  trace "loading model" $ Data.Aeson.decode @(SomeModel CombinedFeature) <$> BSL.readFile modelFile
           mkFeatureSpaces (modelFeatures model) $ \(F.FeatureMappingInto modelToCombinedFeatureVec) (fspaces :: FeatureSpaces entityPh edgePh) -> do
-              case trainDataFileOpt of
-                  Just trainDataFile -> do
+              case trainDataSource of
+                  TrainDataFromFile trainDataFile -> do
                        SerialisedTrainingData dataFspaces allData <- readTrainData trainDataFile
                        let Just featProj = F.project (combinedFSpace fspaces) (combinedFSpace dataFspaces)
                            model' = coerce featProj (modelWeights' model)
@@ -837,7 +837,7 @@ normalFlow NormalFlowArguments {..}  = do
                                         $ rerankRankings' model' allData
                        storeRankingDataNoMetric outputFilePrefix trainRanking "learn2walk-degreecentrality"
 
-                  Nothing ->  do
+                  BuildTrainData ->  do
                           let model' = coerce modelToCombinedFeatureVec model          -- todo: maybe rename to modelFeatureSubsetProjection
 
                           let augmentNoQrels     :: forall docId queryId f s.
