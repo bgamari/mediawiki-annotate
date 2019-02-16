@@ -202,17 +202,21 @@ opts = subparser
                  , stubPageId = packPageId $ T.unpack queryId
                  , stubType = ArticlePage
                  , stubMetadata = emptyPageMetadata
-                 , stubSkeleton = [Para (content questionContent)]
+                 , stubSkeleton = [mkParagraph questionContent, mkSection questionContent]
                  }
           where
             pageName = packPageName $ T.unpack questionTitle
-            content :: T.Text -> Paragraph
-            content text = mkParagraph [ParaText text]
 
 
 
-mkParagraph :: [ParaBody] -> Paragraph
-mkParagraph bodies = Paragraph (paraBodiesToId bodies) bodies
+mkParagraph :: T.Text -> PageSkeleton
+mkParagraph text = Para $ Paragraph (paraBodiesToId bodies) bodies
+  where bodies = [ParaText text]
+
+mkSection :: T.Text -> PageSkeleton
+mkSection text = Section heading (sectionHeadingToId heading) []
+  where heading = SectionHeading text
+
 
 
 parseEntity :: T.Text -> Maybe T.Text
