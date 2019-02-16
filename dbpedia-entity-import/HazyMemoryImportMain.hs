@@ -61,12 +61,23 @@ data HazyMemoryLine = HazyMemoryLine { queryId       :: !QueryId
 -- instance NFData HazyMemoryLine where
 --     rnf r = r `seq` ()
 
+
+readHazyMemoryFiles :: [FilePath] ->  IO [HazyMemoryLine]
+readHazyMemoryFiles (f1:rest) = do
+    d1 <- readHazyMemoryFile f1
+    drest <- readHazyMemoryFiles rest
+    return $ mconcat [d1, drest]
+readHazyMemoryFiles [] = do
+    pure []
+
+
 readHazyMemoryFile :: FilePath -> IO [HazyMemoryLine]
 readHazyMemoryFile fname = do
     catMaybes . flip (zipWith parse) [1 :: Int ..] . TL.lines <$> TL.readFile fname
   where
     parse x lineNo
-      | qid:qtitle:qcontent: wikiAnswer:imdbAnswer:answerText1:answerText2:answerText3:_ <- TL.words x
+      | lineNo == 1 = Nothing  --  dismiss headers
+      | qid:qtitle:qcontent: wikiAnswer:imdbAnswer:answerText1:answerText2:answerText3:_ <- TL.splitOn "\t" x
       = Just HazyMemoryLine { queryId = TL.toStrict qid
                           , questionTitle = TL.toStrict qtitle
                           , questionContent = TL.toStrict qcontent
@@ -98,12 +109,13 @@ opts = subparser
     cmd name action = command name (info (helper <*> action) fullDesc)
     pagesFile = option str (short 'A' <> long "articles" <> help "articles file" <> metavar "ANNOTATIONS FILE")
     inputQrelsFile = argument str (help "dbpedia qrels file" <> metavar "QRELS")
+    inputRawDataFile = argument str (help "hazy memory tsv file" <> metavar "TSV")
     inputRunsFile = argument str (help "dbpedia run file" <> metavar "RUN")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     importQrels' =
-        importQrels <$> inputQrelsFile <*> pagesFile <*> outputFile
+        importQrels <$> (many inputRawDataFile) <*> pagesFile <*> outputFile
     importCbor' =
-        importCbor <$> inputRunsFile <*> pagesFile <*> outputFile
+        importCbor <$> (many inputRawDataFile) <*> outputFile
 
 
     transformEntity :: (T.Text -> PageName) -> (PageName -> Maybe (S.Set PageId)) -> PageBundle -> T.Text -> [PageId]
@@ -132,10 +144,10 @@ opts = subparser
     dummyPageIdSet name =
          S.singleton $ packPageId ("undefined:" ++ T.unpack (T.replace " " "_" (T.pack (unpackPageName name))))
 
-    importQrels :: FilePath -> FilePath -> FilePath -> IO()
-    importQrels inFile articlesFile outputFile = do
+    importQrels :: [FilePath] -> FilePath -> FilePath -> IO()
+    importQrels inFiles articlesFile outputFile = do
 
-        inData <- readHazyMemoryFile inFile
+        inData <- readHazyMemoryFiles inFiles
                :: IO [HazyMemoryLine]
 
 
@@ -164,10 +176,10 @@ opts = subparser
                 entry2
 --
 
-    importCbor :: FilePath -> FilePath -> FilePath -> IO()
-    importCbor inFile articlesFile outputFile = do
+    importCbor :: [FilePath] -> FilePath -> IO()
+    importCbor inFiles outputFile = do
 
-        inData <- readHazyMemoryFile inFile
+        inData <- readHazyMemoryFiles inFiles
                :: IO [HazyMemoryLine]
         let outPages = fmap toPage inData
             releaseName = "hazy-v1.0"
@@ -198,34 +210,6 @@ opts = subparser
             content text = mkParagraph [ParaText text]
 
 
-
-
---         inRun <- RF.readRunFile inRunsFile
---                  :: IO [RF.RankingEntry]
---         articlesBundle <- CAR.openPageBundle articlesFile
---
---         let transFormEntity' = transformEntity  silentCantParseHandler silentCantFindHandler articlesBundle
---
---             outRun =  [ entry {RF.documentName = unwrapPageId doc'}
---                        | entry <- inRun
---                        , let doc = RF.documentName entry
---                        , doc' <- transFormEntity' doc
---                        ]
---         RF.writeRunFile outputFile $ filterDuplicateEntries outRun
---       where
---         unwrapPageId = T.pack . CAR.unpackPageId
---
---         filterDuplicateEntries :: [RF.RankingEntry] ->  [RF.RankingEntry]
---         filterDuplicateEntries runEntries =
---             HM.elems
---             $ HM.fromListWith chooseHigher
---             [ ((RF.queryId entry, RF.documentName entry), entry) |  entry <- runEntries]
---
---         chooseHigher entry1 entry2 =
---            if RF.documentScore entry1 >= RF.documentScore entry2 then
---                 entry1
---            else
---                 entry2
 
 mkParagraph :: [ParaBody] -> Paragraph
 mkParagraph bodies = Paragraph (paraBodiesToId bodies) bodies
