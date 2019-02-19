@@ -44,7 +44,7 @@ let
         epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" ./epfl-section-recommendation {};
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" ./dbpedia-entity-import {};
         learning-to-walk     = self.callCabal2nix "learning-to-walk" ./learning-to-walk {};
-
+        tag-me               = self.callCabal2nix "tag-me" ./tag-me {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {
