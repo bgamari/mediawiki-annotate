@@ -106,7 +106,7 @@ agreementClasses = map (HS.fromList . map QRel.GradedRelevance)
 
 toBinary :: QRel.GradedRelevance -> QRel.IsRelevant
 toBinary (QRel.GradedRelevance n)
-  | n > 2     = QRel.Relevant
+  | n > 0     = QRel.Relevant
   | otherwise = QRel.NotRelevant
 
 invertAssessments ::   HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel) ->  HM.HashMap (QueryId, DocumentId) [(Assessor, rel)]
