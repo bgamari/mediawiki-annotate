@@ -25,6 +25,7 @@ packages:
     trec-news/
     epfl-section-recommendation/
     dbpedia-entity-import/
+    tag-me/
 
 package mediawiki-parser
     tests: True
