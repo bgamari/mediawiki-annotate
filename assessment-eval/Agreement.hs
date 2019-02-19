@@ -53,20 +53,38 @@ relType =
                                        , s
                                        , "; expected 'binary', 'graded', or 'off-by-one'"]
 
-opts :: Parser ([FilePath], RelType, TableRenderer)
+opts :: Parser ([FilePath], [FilePath], RelType, TableRenderer)
 opts =
-    (,,)
+    (,,,)
     <$> some (argument str (metavar "QREL" <> help "Each a qrel file with judgements from a single assessor"))
+    <*> many (option str (short 'a'<> long "auto-qrels" <> metavar "AUTO-QREL" <> help "Each a qrel file with auto assessments"))
     <*> relType
     <*> tableRenderer
 
 
 main :: IO ()
 main = do
-    (files, relType, renderTable) <- execParser $ info  (helper <*> opts) mempty
+    (files, autoFiles, relType, renderTable) <- execParser $ info  (helper <*> opts) mempty
     let readAssessor path = HM.singleton (assessorFromFilepath path) <$> readAssessments path
-    assessments <- HM.unions <$> mapM readAssessor files
+    manuAssessments <- HM.unions <$> mapM readAssessor files
         :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
+
+
+    autoAssessments' <- HM.unions <$> mapM readAssessor autoFiles
+        :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
+    let autoAssessments :: HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance)
+        autoAssessments = fmap assumeMissingAsNonRelevant autoAssessments'
+          where assumeMissingAsNonRelevant :: HM.HashMap  (QueryId, DocumentId) QRel.GradedRelevance ->  HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance
+                assumeMissingAsNonRelevant autoMap' =
+                    HM.unionWith (\judg _default -> judg) autoMap' qdDefaultAsNegatives
+                qdDefaultAsNegatives ::  HM.HashMap  (QueryId, DocumentId) QRel.GradedRelevance
+                qdDefaultAsNegatives =  HM.fromList
+                                     $ [ ((q,d), (QRel.GradedRelevance 0))
+                                       | (_, lst) <- HM.toList manuAssessments
+                                       , ((q,d),_) <- HM.toList lst
+                                       ]
+
+    let assessments = HM.union manuAssessments autoAssessments
 
 
     case relType of
