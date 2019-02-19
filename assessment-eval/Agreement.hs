@@ -44,7 +44,7 @@ data RelType = Binary | Graded | OffByOne
 
 relType :: Parser RelType
 relType =
-    option (str >>= parse) (short 'r' <> long "relevance" <> help "relevance type")
+    option (str >>= parse) (short 'r' <> long "relevance" <> help "relevance type; one of 'binary', 'graded', 'off-by-one'")
   where
     parse "binary"     = pure Binary
     parse "graded"     = pure Graded
@@ -68,10 +68,14 @@ main = do
     assessments <- HM.unions <$> mapM readAssessor files
         :: IO (HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) QRel.GradedRelevance))
 
+
     case relType of
-      Binary   -> report renderTable Nothing $ fmap (fmap toBinary) assessments
-      Graded   -> report renderTable Nothing assessments
-      OffByOne -> report renderTable (Just agreementClasses) assessments
+      Binary   -> report renderTable binaryRel Nothing  $ fmap (fmap toBinary) assessments
+      Graded   -> report renderTable gradedCarRel Nothing assessments
+      OffByOne -> report renderTable gradedCarRel (Just agreementClasses) assessments
+  where gradedCarRel = (map QRel.GradedRelevance [-2, -1, 0, 1, 2,3])
+        binaryRel = [QRel.Relevant, QRel.NotRelevant]
+
 
 agreementClasses :: [HS.HashSet QRel.GradedRelevance]
 agreementClasses = map (HS.fromList . map QRel.GradedRelevance)
@@ -87,16 +91,48 @@ toBinary (QRel.GradedRelevance n)
   | n > 2     = QRel.Relevant
   | otherwise = QRel.NotRelevant
 
-report :: (Hashable rel, Eq rel)
+invertAssessments ::   HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel) ->  HM.HashMap (QueryId, DocumentId) [(Assessor, rel)]
+invertAssessments assessments =
+    HM.fromListWith (<>)
+    $ [ ((query,doc), [(assessor, r)] )
+      | (assessor, qd2r) <- HM.toList assessments
+      , ((query, doc), r) <- HM.toList qd2r
+      ]
+
+countConfusion :: (Eq rel, Hashable rel) => HM.HashMap (QueryId, DocumentId) [(Assessor, rel)] -> HM.HashMap (rel,rel) Int
+countConfusion invAssessments =
+    HM.fromListWith (+)
+    $ [ ((r1,r2), 1)
+      | ((query,doc), lst) <- HM.toList invAssessments
+      , ((assess1, r1),(assess2,r2)) <- allPairs lst
+      ]
+  where allPairs xs =
+            [ (x,y)
+            | (x,ys) <- zip xs (drop 1 $ tails xs)
+            , y <- ys
+            ]
+
+report :: (Hashable rel, Eq rel, Show rel)
+       => TableRenderer
+       -> [rel]
+       -> Maybe [HS.HashSet rel]
+       -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
+       -> IO ()
+report (TableRenderer renderTable) relLabels agreementClasses assessments = do
+    putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
+    reportCohen  (TableRenderer renderTable) agreementClasses assessments
+    reportFleiss assessments
+    reportConfusion  (TableRenderer renderTable) relLabels assessments
+    return ()
+
+reportCohen :: (Hashable rel, Eq rel, Show rel)
        => TableRenderer
        -> Maybe [HS.HashSet rel]
        -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
        -> IO ()
-report (TableRenderer renderTable) agreementClasses assessments = do
-    putStrLn $ "Assessment counts: "++show (fmap HM.size assessments)
+reportCohen (TableRenderer renderTable) agreementClasses assessments = do
     let assessors :: [Assessor]
         assessors = sort $ HM.keys assessments
-
     putStrLn "Cohen:"
     putStrLn $ renderTable showAssessor showAssessor (maybe "" showFloat3)
       $ Table (Group SingleLine $ map Header assessors) (Group SingleLine $ map Header assessors)
@@ -112,9 +148,35 @@ report (TableRenderer renderTable) agreementClasses assessments = do
               , let Just a' = HM.lookup a assessments
               ]
 
-    putStrLn $ "Fleiss: "<>showFloat3 (fleissKappa $ HM.elems assessments)
-    return ()
 
+reportFleiss :: (Hashable rel, Eq rel, Show rel)
+       => HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
+       -> IO ()
+reportFleiss  assessments  = do
+    let assessors :: [Assessor]
+        assessors = sort $ HM.keys assessments
+    putStrLn $ "Fleiss: "<>showFloat3 (fleissKappa $ HM.elems assessments)
+
+
+
+reportConfusion :: (Hashable rel, Eq rel, Show rel)
+       => TableRenderer
+       -> [rel]
+       -> HM.HashMap Assessor (HM.HashMap (QueryId, DocumentId) rel)
+       -> IO ()
+reportConfusion (TableRenderer renderTable) relLabels  assessments = do
+    let assessors :: [Assessor]
+        assessors = sort $ HM.keys assessments
+        invAssessments = invertAssessments assessments
+        confTable =  countConfusion invAssessments
+    putStrLn $ "Confusion matrix:"
+    putStrLn $ renderTable show show (maybe "" show)
+             $ Table (Group SingleLine $ map Header relLabels) (Group SingleLine $ map Header relLabels)
+               [ [ (r1,r2) `HM.lookup` confTable
+                 | r2 <- relLabels
+                 ]
+               | r1 <- relLabels
+               ]
 showAssessor :: Assessor -> String
 showAssessor = T.unpack . unAssessor
 
