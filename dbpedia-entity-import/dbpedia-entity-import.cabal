@@ -52,6 +52,7 @@ executable hazymemory-import
                        aeson >=1.2 && <1.4,
                        optparse-applicative >= 0.14,
                        simplir,
+                       tag-me,
                        trec-car-tools
   default-language:    Haskell2010
 
