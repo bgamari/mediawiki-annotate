@@ -48,7 +48,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     TagMe
-  build-depends:       base >=4.11 && <4.12,
+  build-depends:       base >=4.11 && <4.13,
                        servant-client,
                        servant,
                        text >=1.2 && <1.3,
@@ -59,7 +59,7 @@ library
 
 executable tag-me
   main-is:             TagMeMain.hs
-  build-depends:       base >=4.11 && <4.12,
-                       text >=1.2 && <1.3,
+  build-depends:       base,
+                       text,
                        tag-me
   default-language:    Haskell2010
