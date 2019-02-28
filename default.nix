@@ -11,15 +11,7 @@ let
       sha256 = "26rnyxqmr93ahml0fjfa6hmjpmx8sbpfdr52krd3sd6ic9n5p5ix";
     };
 
-  cabalFilter = path: type:
-    let pathBaseName = baseNameOf path;
-    in !(lib.hasPrefix "dist-newstyle" pathBaseName) &&
-       !(lib.hasPrefix ".git" pathBaseName) &&
-       !(lib.hasPrefix ".ghc.environment" pathBaseName) &&
-       !(lib.hasPrefix ".iml" pathBaseName) &&
-       !(lib.hasPrefix "dist" pathBaseName);
-
-  localDir = builtins.filterSource cabalFilter;
+  localDir = nixpkgs.nix-gitignore.gitignoreSourcePure [ ./.gitignore ];
 
   simplirNix = import ./simplir { inherit nixpkgs; };
 
@@ -39,12 +31,12 @@ let
         db-export            = self.callCabal2nix "db-export" (localDir ./db-export) {};
         wordnet-export       = nixpkgs.callPackage (import ./wordnet-export) { haskellPackages = self; };
         multilang-car        = self.callCabal2nix "multilang-car" (localDir ./multilang-car) {};
-        tqa-import           = self.callCabal2nix "tqa-import" ./tqa-import {};
-        trec-news            = self.callCabal2nix "trec-news" ./trec-news {};
-        epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" ./epfl-section-recommendation {};
-        dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" ./dbpedia-entity-import {};
-        learning-to-walk     = self.callCabal2nix "learning-to-walk" ./learning-to-walk {};
-        tag-me               = self.callCabal2nix "tag-me" ./tag-me {};
+        tqa-import           = self.callCabal2nix "tqa-import" (localDir ./tqa-import) {};
+        trec-news            = self.callCabal2nix "trec-news" (localDir ./trec-news) {};
+        epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" (localDir ./epfl-section-recommendation) {};
+        dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
+        learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
+        tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {
