@@ -120,7 +120,7 @@ opts = subparser
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     inputRawDataFile = argument str (help "pubmed text file" <> metavar "TXT")
-    maxLen = option auto (help "max length of text to submit to TagMe" <> metavar "L")
+    maxLen = option auto (short 'l' <> long "max-len" <> help "max length of text to submit to TagMe" <> metavar "L")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen
