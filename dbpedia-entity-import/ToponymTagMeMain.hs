@@ -78,7 +78,7 @@ readPubmedFiles [] = do
 readPubmedFile :: FilePath -> IO PubmedDocument
 readPubmedFile fname = do
     text <- T.readFile fname
-    let text' = T.take 200 $  T.replace "\n" " " text
+    let text' = T.replace "\n" " " text
     return PubmedDocument { content = text'
                          , filename = T.pack $ takeBaseName fname
                          }
