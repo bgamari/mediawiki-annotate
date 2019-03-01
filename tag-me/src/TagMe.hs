@@ -65,7 +65,7 @@ type API = "tag" :> QueryParam "gcube-token" Token
                  :> QueryParam "long_text" Bool
 --                  :> QueryParam "include_all_spots" Bool  -- not supported in cucrrent Annotation format
 --                  :> QueryParam "epsilon" Double -- not really supported by the TagMe api anymore
-                 :> Get '[JSON] TagMeResponse
+                 :> Post '[JSON] TagMeResponse
 
 data Annotation = Annotation { spot :: T.Text
                              , start :: Int
