@@ -16,7 +16,7 @@ module TagMe
   , Token(..)
   , defaultTagMeOptions, TagMeOptions(..)
   -- * Return type
-  , TextBody(..)
+  , TextBody(..), Annotation(..)
   ) where
 
 import Servant.Client
