@@ -8,6 +8,7 @@
 module TagMe
   ( annotateWithEntityLinks
   , annotateWithEntityLinksConf
+  , entityLinkAnnotationsConf
   -- * Environment for tag me communication
   , mkTagMeEnv, TagMeEnv
   -- * Supported TagMe languages
@@ -170,10 +171,17 @@ defaultTagMeOptions = TagMeOptions False False False True (Language "en")
 annotateWithEntityLinks :: TagMeEnv -> Token -> T.Text -> IO [TextBody]
 annotateWithEntityLinks env token text  = annotateWithEntityLinksConf env token text defaultTagMeOptions
 
+-- ^ Run tagme and convert to TextBody
 annotateWithEntityLinksConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [TextBody]
-annotateWithEntityLinksConf env token text (TagMeOptions {..}) = run env $ do
+annotateWithEntityLinksConf env token text opt = do
+    anns <- entityLinkAnnotationsConf env token text opt
+    return $ toTextBodies text anns
+
+-- ^ just run Tagme and hand back annotations (no TextBody conversion)
+entityLinkAnnotationsConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [Annotation]
+entityLinkAnnotationsConf env token text (TagMeOptions {..}) = run env $ do
     response <- tagMe token text language inclAbstract inclCategories isTweet isLongText
-    return $ toTextBodies text (annotations response)
+    return $ annotations response
 
 
 newtype TagMeEnv = TagMeEnv ClientEnv

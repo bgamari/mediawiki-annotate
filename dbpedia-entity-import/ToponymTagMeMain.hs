@@ -66,20 +66,19 @@ data PubmedAnnotations = PubmedAnnotations { doc :: PubmedDocument
 data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
         deriving (Aeson.ToJSON, Generic)
 
-readPubmedFiles :: [FilePath] -> Int ->  IO [PubmedDocument]
-readPubmedFiles (f1:rest) maxLen = do
-    d1 <- readPubmedFile f1 maxLen
-    drest <- readPubmedFiles rest maxLen
+readPubmedFiles :: [FilePath] -> IO [PubmedDocument]
+readPubmedFiles (f1:rest) = do
+    d1 <- readPubmedFile f1
+    drest <- readPubmedFiles rest
     return $ d1:drest
-readPubmedFiles [] _ = do
+readPubmedFiles [] = do
     pure []
 
 
-readPubmedFile :: FilePath -> Int -> IO PubmedDocument
-readPubmedFile fname maxLen = do
+readPubmedFile :: FilePath -> IO PubmedDocument
+readPubmedFile fname  = do
     text <- T.readFile fname
-    let text' = T.take maxLen  text -- $  T.replace "\n" " " text
-    return PubmedDocument { content = text'
+    return PubmedDocument { content = text
                          , filename = T.pack $ takeBaseName fname
                          }
 
@@ -88,13 +87,21 @@ writePubmedAnnotations :: FilePath -> [PubmedAnnotations] -> IO ()
 writePubmedAnnotations fname outData =
     BSL.writeFile fname $ Aeson.encode $ ToponymWrapper outData
 
-tagData :: TagMe.TagMeEnv -> TagMe.Token -> PubmedDocument -> IO [TagMe.Annotation]
-tagData env tagMeToken document = do
-    let t = content document
-    res <- annotateWithEntityLinksConf env tagMeToken t tagMeOptions
-    return [ annotation
-           | TextEntityLink _  annotation <- res
-           ]
+tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> PubmedDocument -> IO [TagMe.Annotation]
+tagData env tagMeToken maxLen document = do
+    let txt = content document
+    anns <- sequence
+            [ do anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
+                 return [ ann { start = (start ann) + i*maxLen
+                              , end = (end ann) + i*maxLen}
+                        | ann <- anns
+                        ]
+            | (i, t) <- zip [0..] $ T.chunksOf maxLen txt
+            ]
+    return $ mconcat anns
+--     return [ annotation
+--            | TextEntityLink _  annotation <- res
+--            ]
 
 
 
@@ -130,9 +137,9 @@ opts = subparser
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
         env <- mkTagMeEnv
 
-        inData <- readPubmedFiles inFiles maxLen
+        inData <- readPubmedFiles inFiles
                :: IO [PubmedDocument]
-        annotatedInData <- sequence [ do anns <- tagData env tagMeToken line
+        annotatedInData <- sequence [ do anns <- tagData env tagMeToken maxLen line
                                          return PubmedAnnotations {doc = line, annotations = anns}
                                     | line <- inData
                                     ]
