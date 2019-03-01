@@ -6,6 +6,7 @@
 
 import Data.Monoid hiding (All, Any)
 import Control.Monad
+import System.Environment
 
 import qualified Data.HashSet as HS
 import qualified Data.HashMap.Strict as HM
@@ -41,6 +42,8 @@ import qualified Data.Text.Lazy.Builder.Int as TB
 import qualified Data.Text.Lazy.Builder.RealFloat as TB
 import qualified Data.Text.Lazy.Read as TL.Read
 import qualified Data.Text.Lazy.IO as TL
+
+import TagMe
 
 type QueryId = T.Text
 type Content = T.Text
@@ -94,6 +97,38 @@ readHazyMemoryFile fname = do
             Left err -> error $ "readHazyMemoryLine: "++fname++" ("++show lineNo++"): Error parsing "++place++": "++err++": "++TL.unpack str
             Right (x,_) -> x
 
+writeHazyMemoryFiles :: FilePath -> [(HazyMemoryLine, [Annotation])] -> IO()
+writeHazyMemoryFiles fname annLines = do
+    TL.writeFile fname lns
+  where hazyToString :: (HazyMemoryLine,[Annotation]) -> TL.Text
+        hazyToString (HazyMemoryLine {..}, anns) =
+            TL.intercalate "\t"
+            $ fmap (TL.pack . show) [queryId, questionTitle, questionContent, answerWikiEntity, answerImdbEntity]
+              ++ predictedAnswerEntities anns
+              ++ [TL.pack ""]
+              ++ fmap (TL.pack . show) answerTexts
+        lns = TL.unlines $ fmap hazyToString annLines
+        predictedAnswerEntities :: [Annotation] -> [TL.Text]
+        predictedAnswerEntities anns = fmap (TL.pack . T.unpack . title) anns
+
+
+tagData :: TagMe.TagMeEnv -> TagMe.Token -> HazyMemoryLine -> IO [TagMe.Annotation]
+tagData env tagMeToken hazyLine = do
+    ress <- mapM (\t -> annotateWithEntityLinksConf env tagMeToken t tagMeOptions) $ (answerTexts hazyLine)
+    return [ annotation
+           | res <- ress
+           , TextEntityLink _  annotation <- res
+           ]
+
+
+
+tagMeOptions :: TagMeOptions
+tagMeOptions = TagMeOptions { inclAbstract = False
+                            , inclCategories = True
+                            , isTweet = False
+                            , isLongText = False
+                            , language = langEn
+                            }
 
 
 helpDescr :: PP.Doc
@@ -114,6 +149,8 @@ opts = subparser
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     importQrels' =
         importQrels <$> (many inputRawDataFile) <*> pagesFile <*> outputFile
+    extractTrueAnswers' =
+        extractTrueAnswers <$> (many inputRawDataFile) <*> pagesFile <*> outputFile
     importCbor' =
         importCbor <$> (many inputRawDataFile) <*> outputFile
 
@@ -174,6 +211,36 @@ opts = subparser
                 entry1
            else
                 entry2
+
+    extractTrueAnswers :: [FilePath] -> FilePath -> FilePath -> IO()
+    extractTrueAnswers inFiles articlesFile outputFile = do
+        tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
+        env <- mkTagMeEnv
+
+        inData <- readHazyMemoryFiles inFiles
+               :: IO [HazyMemoryLine]
+        annotatedInData <- sequence [ do anns <- tagData env tagMeToken line
+                                         return (line, anns)
+                                    | line <- inData
+                                    ]
+                           :: IO [(HazyMemoryLine, [Annotation])]
+
+        writeHazyMemoryFiles outputFile annotatedInData
+      where
+
+        unwrapPageId = T.pack . CAR.unpackPageId
+
+        filterDuplicateQrels :: [QF.Entry QF.QueryId  QF.DocumentName QF.IsRelevant] ->  [QF.Entry QF.QueryId  QF.DocumentName QF.IsRelevant]
+        filterDuplicateQrels qrelEntries =
+            HM.elems
+            $ HM.fromListWith chooseHigher
+            [ ((QF.queryId entry, QF.documentName entry), entry) |  entry <- qrelEntries]
+
+        chooseHigher entry1 entry2 =
+           if QF.relevance entry1 >= QF.relevance entry2 then
+                entry1
+           else
+                entry2
 --
 
     importCbor :: [FilePath] -> FilePath -> IO()
@@ -184,7 +251,7 @@ opts = subparser
         let outPages = fmap toPage inData
             releaseName = "hazy-v1.0"
             siteProv = SiteProvenance { provSiteId = "hazymemory"
-                                  , language = Language "en-us"
+                                  , language = CAR.Types.Language "en-us"
                                   , sourceName = "hazymemory"
                                   , siteComments = []
                                   }
