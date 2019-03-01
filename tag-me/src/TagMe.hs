@@ -64,7 +64,7 @@ type API = "tag" :> QueryParam "gcube-token" Token
                  :> QueryParam "include_categories" Bool
                  :> QueryParam "tweet" Bool
                  :> QueryParam "long_text" Bool
---                  :> QueryParam "include_all_spots" Bool  -- not supported in cucrrent Annotation format
+                 :> QueryParam "include_all_spots" Bool  -- always false
 --                  :> QueryParam "epsilon" Double -- not really supported by the TagMe api anymore
                  :> Post '[JSON] TagMeResponse
 
@@ -112,7 +112,7 @@ instance FromJSON TagMeResponse where
         TagMeResponse <$> o .: "annotations"
 
 tagMe :: Token -> T.Text -> Language -> Bool -> Bool -> Bool -> Bool ->  ClientM TagMeResponse
-tagMe a b c d e f g = client (Proxy @API) (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g)
+tagMe a b c d e f g = client (Proxy @API) (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g) (Just False)
 
 
 -- ----------------------------------------------
