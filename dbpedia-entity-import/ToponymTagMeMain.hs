@@ -91,7 +91,8 @@ tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> PubmedDocument -> IO [TagMe.A
 tagData env tagMeToken maxLen document = do
     let txt = content document
     anns <- sequence
-            [ do anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
+            [ do putStrLn $ (show (filename document)) <> " " <> (show i) <> ": " <> (show (T.take 10 t)) <> "... "
+                 anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
                  return [ ann { start = (start ann) + i*maxLen
                               , end = (end ann) + i*maxLen}
                         | ann <- anns
