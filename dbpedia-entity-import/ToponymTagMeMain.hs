@@ -66,19 +66,19 @@ data PubmedAnnotations = PubmedAnnotations { doc :: PubmedDocument
 data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
         deriving (Aeson.ToJSON, Generic)
 
-readPubmedFiles :: [FilePath] ->  IO [PubmedDocument]
-readPubmedFiles (f1:rest) = do
-    d1 <- readPubmedFile f1
-    drest <- readPubmedFiles rest
+readPubmedFiles :: [FilePath] -> Int ->  IO [PubmedDocument]
+readPubmedFiles (f1:rest) maxLen = do
+    d1 <- readPubmedFile f1 maxLen
+    drest <- readPubmedFiles rest maxLen
     return $ d1:drest
-readPubmedFiles [] = do
+readPubmedFiles [] _ = do
     pure []
 
 
-readPubmedFile :: FilePath -> IO PubmedDocument
-readPubmedFile fname = do
+readPubmedFile :: FilePath -> Int -> IO PubmedDocument
+readPubmedFile fname maxLen = do
     text <- T.readFile fname
-    let text' = T.take 2000 $  T.replace "\n" " " text
+    let text' = T.take maxLen  text -- $  T.replace "\n" " " text
     return PubmedDocument { content = text'
                          , filename = T.pack $ takeBaseName fname
                          }
@@ -120,16 +120,17 @@ opts = subparser
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     inputRawDataFile = argument str (help "pubmed text file" <> metavar "TXT")
+    maxLen = option auto (help "max length of text to submit to TagMe" <> metavar "L")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     annotatePubMed' =
-        annotatePubMed <$> (many inputRawDataFile) <*> outputFile
+        annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen
 
-    annotatePubMed :: [FilePath] -> FilePath -> IO()
-    annotatePubMed inFiles outputFile = do
+    annotatePubMed :: [FilePath] -> FilePath -> Int -> IO()
+    annotatePubMed inFiles outputFile maxLen = do
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
         env <- mkTagMeEnv
 
-        inData <- readPubmedFiles inFiles
+        inData <- readPubmedFiles inFiles maxLen
                :: IO [PubmedDocument]
         annotatedInData <- sequence [ do anns <- tagData env tagMeToken line
                                          return PubmedAnnotations {doc = line, annotations = anns}
