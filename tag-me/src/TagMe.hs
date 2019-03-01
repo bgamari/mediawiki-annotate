@@ -77,7 +77,20 @@ data Annotation = Annotation { spot :: T.Text
                              , dbpediaCategories :: Maybe [T.Text]
                              , abstract :: Maybe T.Text
                              }
-    deriving Show
+    deriving (Show)
+
+instance ToJSON Annotation where
+    toJSON Annotation{..} = object
+        [ "spot" .= spot
+        , "start" .= start
+        , "end" .= end
+        , "link_probability" .= linkProbability
+        , "rho" .= rho
+        , "id" .= id
+        , "title" .= title
+        , "dbpedia_categories" .= dbpediaCategories
+        , "abstract" .= abstract
+        ]
 
 instance FromJSON Annotation where
     parseJSON = withObject "annotation" $ \o ->

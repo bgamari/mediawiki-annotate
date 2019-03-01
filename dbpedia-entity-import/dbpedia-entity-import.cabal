@@ -56,3 +56,26 @@ executable hazymemory-import
                        trec-car-tools
   default-language:    Haskell2010
 
+executable toponym-tagme
+  main-is:             ToponymTagMeMain.hs
+  other-extensions:    DeriveAnyClass, DerivingStrategies
+  build-depends:       base,
+                       containers,
+                       trifecta >= 1.5,
+                       parsers >= 0.12,
+                       ansi-wl-pprint,
+                       text >=1.2 && <1.3,
+                       bytestring >= 0.10,
+                       optparse-applicative >= 0.12,
+                       binary-serialise-cbor,
+                       unordered-containers >= 0.2,
+                       hashable >= 1.2,
+                       serialise,
+                       aeson >=1.2 && <1.5,
+                       optparse-applicative >= 0.14,
+                       filepath,
+                       simplir,
+                       tag-me,
+                       trec-car-tools
+  default-language:    Haskell2010
+
