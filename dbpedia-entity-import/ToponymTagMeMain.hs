@@ -9,6 +9,8 @@
 import Data.Monoid hiding (All, Any)
 import Control.Monad
 import System.Environment
+import Control.Exception
+import Servant.Client
 
 import qualified Data.HashSet as HS
 import qualified Data.HashMap.Strict as HM
@@ -151,13 +153,17 @@ opts = subparser
 
         inData <- readPubmedFiles inFiles
                :: IO [PubmedDocument]
-        annotatedInData <- sequence [ do anns <- tagData env tagMeToken maxLen overlapLen line
-                                         return PubmedAnnotations {doc = line, annotations = anns}
-                                    | line <- inData
+        annotatedInData <- sequence [ handle (handler doc) $
+                                          do anns <- tagData env tagMeToken maxLen overlapLen doc
+                                             return $ Just $ PubmedAnnotations {doc = doc, annotations = anns}
+                                    | doc <- inData
                                     ]
-                           :: IO [PubmedAnnotations]
+                           :: IO [Maybe PubmedAnnotations]
 
-        writePubmedAnnotations outputFile annotatedInData
-
+        writePubmedAnnotations outputFile $ catMaybes annotatedInData
+    handler :: PubmedDocument -> ClientError -> IO (Maybe PubmedAnnotations)
+    handler PubmedDocument{filename = fname} e = do
+        putStrLn $ "TagmeServerError: "<> show fname <>  " : "<> show e
+        return Nothing
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
