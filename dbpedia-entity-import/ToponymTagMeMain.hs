@@ -51,6 +51,7 @@ import qualified Data.Aeson as Aeson
 import GHC.Generics
 import System.FilePath
 
+import Debug.Trace as Trace
 import TagMe
 
 data PubmedDocument = PubmedDocument { content :: T.Text
@@ -106,6 +107,7 @@ tagData env tagMeToken maxLen document = do
 
 overlapChunks :: Int -> Int -> T.Text -> [T.Text]
 overlapChunks k o text =
+    Debug.traceShowId
     [ substring start (start+o) text
     | start <- [0, k .. T.length text]
     ]
