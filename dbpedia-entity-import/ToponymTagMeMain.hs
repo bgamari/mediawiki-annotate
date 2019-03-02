@@ -108,7 +108,7 @@ tagData env tagMeToken maxLen document = do
 overlapChunks :: Int -> Int -> T.Text -> [T.Text]
 overlapChunks k o text =
     Debug.traceShowId
-    [ substring start (start+o) text
+    [ substring start (start+k+o) text
     | start <- [0, k .. T.length text]
     ]
   where
