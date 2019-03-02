@@ -80,8 +80,8 @@ readPubmedFile :: FilePath -> IO PubmedDocument
 readPubmedFile fname  = do
     text <- T.readFile fname
     return PubmedDocument { content = text
-                         , filename = T.pack $ takeBaseName fname
-                         }
+                          , filename = T.pack $ takeBaseName fname
+                          }
 
 
 writePubmedAnnotations :: FilePath -> [PubmedAnnotations] -> IO ()
