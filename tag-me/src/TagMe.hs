@@ -29,6 +29,7 @@ import Data.Aeson
 import Data.Proxy
 import Data.List
 import Data.String
+import Data.Maybe
 import Control.Exception
 
 
@@ -74,11 +75,12 @@ data Annotation = Annotation { spot :: T.Text
                              , linkProbability :: Double
                              , rho :: Double
                              , id :: Int
-                             , title :: T.Text
+                             , title :: Maybe T.Text
                              , dbpediaCategories :: Maybe [T.Text]
                              , abstract :: Maybe T.Text
                              }
     deriving (Show)
+
 
 instance ToJSON Annotation where
     toJSON Annotation{..} = object
@@ -101,7 +103,7 @@ instance FromJSON Annotation where
                    <*> o .: "link_probability"
                    <*> o .: "rho"
                    <*> o .: "id"
-                   <*> o .: "title"
+                   <*> o .:? "title"
                    <*> o .:? "dbpedia_categories"
                    <*> o .:? "abstract"
 
@@ -181,7 +183,7 @@ annotateWithEntityLinksConf env token text opt = do
 entityLinkAnnotationsConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [Annotation]
 entityLinkAnnotationsConf env token text (TagMeOptions {..}) = run env $ do
     response <- tagMe token text language inclAbstract inclCategories isTweet isLongText
-    return $ annotations response
+    return $ filter (\a -> not $ isNothing $ title a) $ annotations $ response
 
 
 newtype TagMeEnv = TagMeEnv ClientEnv

@@ -109,7 +109,7 @@ writeHazyMemoryFiles fname annLines = do
               ++ fmap (TL.pack . show) answerTexts
         lns = TL.unlines $ fmap hazyToString annLines
         predictedAnswerEntities :: [Annotation] -> [TL.Text]
-        predictedAnswerEntities anns = fmap (TL.pack . T.unpack . title) anns
+        predictedAnswerEntities anns = fmap (TL.pack . T.unpack . fromJust . title) anns
 
 
 tagData :: TagMe.TagMeEnv -> TagMe.Token -> HazyMemoryLine -> IO [TagMe.Annotation]
