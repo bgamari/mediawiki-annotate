@@ -97,13 +97,22 @@ tagData env tagMeToken maxLen document = do
                               , end = (end ann) + i*maxLen}
                         | ann <- anns
                         ]
-            | (i, t) <- zip [0..] $ T.chunksOf maxLen txt
+            | (i, t) <- zip [0..] $ overlapChunks maxLen 100 txt
             ]
     return $ mconcat anns
---     return [ annotation
---            | TextEntityLink _  annotation <- res
---            ]
 
+
+
+
+overlapChunks :: Int -> Int -> T.Text -> [T.Text]
+overlapChunks k o text =
+    [ substring start (start+o) text
+    | start <- [0, k .. T.length text]
+    ]
+  where
+    substring:: Int -> Int -> T.Text -> T.Text
+    substring start end text =
+        T.take (end-start) $ T.drop start text
 
 
 tagMeOptions :: TagMeOptions
