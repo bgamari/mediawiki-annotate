@@ -88,8 +88,8 @@ writePubmedAnnotations :: FilePath -> [PubmedAnnotations] -> IO ()
 writePubmedAnnotations fname outData =
     BSL.writeFile fname $ Aeson.encode $ ToponymWrapper outData
 
-tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> PubmedDocument -> IO [TagMe.Annotation]
-tagData env tagMeToken maxLen document = do
+tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> PubmedDocument -> IO [TagMe.Annotation]
+tagData env tagMeToken maxLen overlapLen document = do
     let txt = content document
     anns <- sequence
             [ do putStrLn $ (show (filename document)) <> " " <> (show i) <> ": " <> (show (T.take 10 t)) <> "... "
@@ -98,7 +98,7 @@ tagData env tagMeToken maxLen document = do
                               , end = (end ann) + i*maxLen}
                         | ann <- anns
                         ]
-            | (i, t) <- zip [0..] $ overlapChunks maxLen 100 txt
+            | (i, t) <- zip [0..] $ overlapChunks maxLen overlapLen txt
             ]
     return $ mconcat anns
 
@@ -107,7 +107,6 @@ tagData env tagMeToken maxLen document = do
 
 overlapChunks :: Int -> Int -> T.Text -> [T.Text]
 overlapChunks k o text =
-    Debug.traceShowId
     [ substring start (start+k+o) text
     | start <- [0, k .. T.length text]
     ]
@@ -140,18 +139,19 @@ opts = subparser
     cmd name action = command name (info (helper <*> action) fullDesc)
     inputRawDataFile = argument str (help "pubmed text file" <> metavar "TXT")
     maxLen = option auto (short 'l' <> long "max-len" <> help "max length of text to submit to TagMe" <> metavar "L")
+    overlapLen = option auto (short 'L' <> long "overlap-len" <> help "length of overlaps of text to submit to TagMe" <> metavar "O")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     annotatePubMed' =
-        annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen
+        annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen
 
-    annotatePubMed :: [FilePath] -> FilePath -> Int -> IO()
-    annotatePubMed inFiles outputFile maxLen = do
+    annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> IO()
+    annotatePubMed inFiles outputFile maxLen overlapLen  = do
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
         env <- mkTagMeEnv
 
         inData <- readPubmedFiles inFiles
                :: IO [PubmedDocument]
-        annotatedInData <- sequence [ do anns <- tagData env tagMeToken maxLen line
+        annotatedInData <- sequence [ do anns <- tagData env tagMeToken maxLen overlapLen line
                                          return PubmedAnnotations {doc = line, annotations = anns}
                                     | line <- inData
                                     ]
