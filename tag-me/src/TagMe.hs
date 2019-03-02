@@ -4,6 +4,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DerivingStrategies #-}
 
 module TagMe
   ( annotateWithEntityLinks
@@ -23,6 +26,9 @@ module TagMe
 import Servant.Client
 import Servant.API
 import Network.HTTP.Client.TLS
+import Web.FormUrlEncoded
+
+import GHC.Generics
 
 import qualified Data.Text as T
 import Data.Aeson
@@ -39,10 +45,12 @@ import Control.Exception
 
 
 newtype Token = Token T.Text
-    deriving (Show, Eq, FromJSON, ToJSON, IsString, ToHttpApiData)
+    deriving stock (Show, Eq)
+    deriving newtype (FromJSON, ToJSON, IsString, ToHttpApiData)
 
 newtype Language = Language T.Text
-    deriving (Show, Eq, FromJSON, ToJSON, ToHttpApiData)
+    deriving stock (Show, Eq)
+    deriving newtype (FromJSON, ToJSON, IsString, ToHttpApiData)
 
 -- ^
 langEn :: Language
@@ -56,10 +64,12 @@ langDe = Language "de"
 tagMeBaseUrl :: BaseUrl
 tagMeBaseUrl = BaseUrl Https "tagme.d4science.org" 443 "/tagme"
 
+data TagMePayload = TagMePayload { text :: T.Text, lang :: Language }
+    deriving (ToForm, Generic)
 
 type API = "tag" :> QueryParam "gcube-token" Token
-                 :> ReqBody '[PlainText] T.Text
-                 :> QueryParam "lang" Language
+                 :> ReqBody '[FormUrlEncoded] TagMePayload
+--                  :> QueryParam "lang" Language
                  -- optional  Params
                  :> QueryParam "include_abstract" Bool
                  :> QueryParam "include_categories" Bool
@@ -114,7 +124,7 @@ instance FromJSON TagMeResponse where
         TagMeResponse <$> o .: "annotations"
 
 tagMe :: Token -> T.Text -> Language -> Bool -> Bool -> Bool -> Bool ->  ClientM TagMeResponse
-tagMe a txt c d e f g = client (Proxy @API) (Just a) txt (Just c) (Just d) (Just e) (Just f) (Just g) (Just False)
+tagMe a txt c d e f g = client (Proxy @API) (Just a) (TagMePayload txt c) (Just d) (Just e) (Just f) (Just g) (Just False)
 
 
 -- ----------------------------------------------
