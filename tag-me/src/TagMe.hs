@@ -58,7 +58,7 @@ tagMeBaseUrl = BaseUrl Https "tagme.d4science.org" 443 "/tagme"
 
 
 type API = "tag" :> QueryParam "gcube-token" Token
-                 :> QueryParam "text" T.Text
+                 :> ReqBody '[PlainText] T.Text
                  :> QueryParam "lang" Language
                  -- optional  Params
                  :> QueryParam "include_abstract" Bool
@@ -114,7 +114,7 @@ instance FromJSON TagMeResponse where
         TagMeResponse <$> o .: "annotations"
 
 tagMe :: Token -> T.Text -> Language -> Bool -> Bool -> Bool -> Bool ->  ClientM TagMeResponse
-tagMe a b c d e f g = client (Proxy @API) (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g) (Just False)
+tagMe a txt c d e f g = client (Proxy @API) (Just a) txt (Just c) (Just d) (Just e) (Just f) (Just g) (Just False)
 
 
 -- ----------------------------------------------
