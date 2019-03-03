@@ -59,15 +59,15 @@ import TagMe
 data PubmedDocument = PubmedDocument { content :: T.Text
                                      , filename :: T.Text
                                      }
-        deriving (Aeson.ToJSON, Generic)
+        deriving (Aeson.ToJSON, Aeson.FromJSON, Generic)
 
 data PubmedAnnotations = PubmedAnnotations { doc :: PubmedDocument
                                            , annotations :: [Annotation]
                                            }
-        deriving (Aeson.ToJSON, Generic)
+        deriving (Aeson.ToJSON, Aeson.FromJSON, Generic)
 
 data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
-        deriving (Aeson.ToJSON, Generic)
+        deriving (Aeson.ToJSON, Aeson.FromJSON, Generic)
 
 readPubmedFiles :: [FilePath] -> IO [PubmedDocument]
 readPubmedFiles (f1:rest) = do
@@ -89,6 +89,13 @@ readPubmedFile fname  = do
 writePubmedAnnotations :: FilePath -> [PubmedAnnotations] -> IO ()
 writePubmedAnnotations fname outData =
     BSL.writeFile fname $ Aeson.encode $ ToponymWrapper outData
+
+readPubmedAnnotations :: FilePath -> IO [PubmedAnnotations]
+readPubmedAnnotations fname = do
+    contents <- BSL.readFile fname
+    return $ list
+           $ fromJust $ Aeson.decode
+           $ contents
 
 tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> PubmedDocument -> IO [TagMe.Annotation]
 tagData env tagMeToken maxLen overlapLen document = do
@@ -134,9 +141,61 @@ helpDescr =
     "Convert PubMed documents to TagMe annotations."
 
 
+annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> Int -> IO()
+annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
+    tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
+    env <- mkTagMeEnv httpTimeout
+
+    inData <- readPubmedFiles inFiles
+           :: IO [PubmedDocument]
+    annotatedInData <- sequence [ handle (handler doc) $
+                                      do anns <- tagData env tagMeToken maxLen overlapLen doc
+                                         return $ Just $ PubmedAnnotations {doc = doc, annotations = anns}
+                                | doc <- inData
+                                ]
+                       :: IO [Maybe PubmedAnnotations]
+
+    writePubmedAnnotations outputFile $ catMaybes annotatedInData
+  where
+    handler :: PubmedDocument -> ClientError -> IO (Maybe PubmedAnnotations)
+    handler PubmedDocument{filename = fname} e = do
+        putStrLn $ "TagmeServerError: "<> show fname <>  " : "<> show e
+        return Nothing
+
+
+placePatterns :: [T.Text]
+placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
+
+predictToponyms :: FilePath -> FilePath -> FilePath -> IO ()
+predictToponyms trainInFile predictInFile outputFile = do
+    predictData <- readPubmedAnnotations predictInFile
+    writePubmedAnnotations outputFile $ catMaybes $ fmap onlyPlaces predictData
+  where
+    onlyPlaces :: PubmedAnnotations -> Maybe PubmedAnnotations
+    onlyPlaces pub@PubmedAnnotations {annotations = annotations } =
+        let annotation' = filter onlyPlaceAnnotations annotations
+        in if null annotation' then Nothing
+           else Just $ pub { annotations = annotation'}
+
+    onlyPlaceAnnotations :: Annotation -> Bool
+    onlyPlaceAnnotations Annotation{..} =
+        let Just categories = dbpediaCategories
+            placeCats = [ cat
+                        | cat <- categories
+                        , pat <- placePatterns
+                        , pat `T.isInfixOf` (T.toLower cat)
+                        ]
+--             !x =  Debug.traceShow (title, placeCats) $ placeCats
+        in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
+
+
+
+
+
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "annotate"   annotatePubMed'
+    <> cmd "predict"   predictToponyms'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     inputRawDataFile = argument str (help "pubmed text file" <> metavar "TXT")
@@ -144,27 +203,13 @@ opts = subparser
     overlapLen = option auto (short 'L' <> long "overlap-len" <> help "length of overlaps of text to submit to TagMe" <> metavar "O")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     httpTimeout = option auto (short 't' <> long "timeout" <> metavar "SECONDS" <> help "Timeout for HTTP requests")
+    trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
+    predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
-    annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> Int -> IO()
-    annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
-        tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
-        env <- mkTagMeEnv httpTimeout
+    predictToponyms' =
+        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile
 
-        inData <- readPubmedFiles inFiles
-               :: IO [PubmedDocument]
-        annotatedInData <- sequence [ handle (handler doc) $
-                                          do anns <- tagData env tagMeToken maxLen overlapLen doc
-                                             return $ Just $ PubmedAnnotations {doc = doc, annotations = anns}
-                                    | doc <- inData
-                                    ]
-                           :: IO [Maybe PubmedAnnotations]
-
-        writePubmedAnnotations outputFile $ catMaybes annotatedInData
-    handler :: PubmedDocument -> ClientError -> IO (Maybe PubmedAnnotations)
-    handler PubmedDocument{filename = fname} e = do
-        putStrLn $ "TagmeServerError: "<> show fname <>  " : "<> show e
-        return Nothing
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
