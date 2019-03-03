@@ -199,10 +199,10 @@ entityLinkAnnotationsConf env token text (TagMeOptions {..}) = run env $ do
 
 newtype TagMeEnv = TagMeEnv ClientEnv
 
-mkTagMeEnv :: IO TagMeEnv
-mkTagMeEnv = do
-    let timeout = responseTimeoutMicro $ seconds 300
-        settings = defaultManagerSettings { managerResponseTimeout = timeout}
+mkTagMeEnv :: Int -> IO TagMeEnv
+mkTagMeEnv timeout = do
+    let timeout' = responseTimeoutMicro $ seconds timeout
+        settings = defaultManagerSettings { managerResponseTimeout = timeout'}
     mgr <- newTlsManagerWith settings
     return $ TagMeEnv $ mkClientEnv mgr tagMeBaseUrl
   where seconds x = x * 1000 * 1000

@@ -6,7 +6,7 @@ import Data.Text as T
 main :: IO ()
 main = do
     tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
-    env <- mkTagMeEnv
+    env <- mkTagMeEnv 300
 
     let tagMeOptions = TagMeOptions { inclAbstract = False
                                     , inclCategories = False

@@ -215,7 +215,7 @@ opts = subparser
     extractTrueAnswers :: [FilePath] -> FilePath -> FilePath -> IO()
     extractTrueAnswers inFiles articlesFile outputFile = do
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
-        env <- mkTagMeEnv
+        env <- mkTagMeEnv 300
 
         inData <- readHazyMemoryFiles inFiles
                :: IO [HazyMemoryLine]

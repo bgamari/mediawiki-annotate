@@ -143,13 +143,14 @@ opts = subparser
     maxLen = option auto (short 'l' <> long "max-len" <> help "max length of text to submit to TagMe" <> metavar "L")
     overlapLen = option auto (short 'L' <> long "overlap-len" <> help "length of overlaps of text to submit to TagMe" <> metavar "O")
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
+    httpTimeout = option auto (short 't' <> long "timeout" <> metavar "SECONDS" <> help "Timeout for HTTP requests")
     annotatePubMed' =
-        annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen
+        annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
-    annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> IO()
-    annotatePubMed inFiles outputFile maxLen overlapLen  = do
+    annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> Int -> IO()
+    annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
-        env <- mkTagMeEnv
+        env <- mkTagMeEnv httpTimeout
 
         inData <- readPubmedFiles inFiles
                :: IO [PubmedDocument]
