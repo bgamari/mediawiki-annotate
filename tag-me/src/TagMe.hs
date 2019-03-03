@@ -25,6 +25,7 @@ module TagMe
 
 import Servant.Client
 import Servant.API
+import Network.HTTP.Client hiding (Proxy)
 import Network.HTTP.Client.TLS
 import Web.FormUrlEncoded
 
@@ -200,9 +201,11 @@ newtype TagMeEnv = TagMeEnv ClientEnv
 
 mkTagMeEnv :: IO TagMeEnv
 mkTagMeEnv = do
-    mgr <- newTlsManager
+    let timeout = responseTimeoutMicro $ seconds 300
+        settings = defaultManagerSettings { managerResponseTimeout = timeout}
+    mgr <- newTlsManagerWith settings
     return $ TagMeEnv $ mkClientEnv mgr tagMeBaseUrl
-
+  where seconds x = x * 1000 * 1000
 
 run :: TagMeEnv -> ClientM a -> IO a
 run (TagMeEnv env) action = do
