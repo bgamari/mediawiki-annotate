@@ -21,6 +21,7 @@ import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 import Data.Maybe
 import Data.Char
 import Data.Void
+import Data.Foldable
 import Control.Monad (void)
 import Options.Applicative
 import qualified Data.Binary.Serialise.CBOR as CBOR
@@ -32,6 +33,12 @@ import qualified SimplIR.Format.QRel as QF
 import qualified SimplIR.Format.TrecRunFile as RF
 import CAR.AnnotationsFile as CAR
 import qualified Debug.Trace as Debug
+
+
+
+import qualified Data.HashMap.Strict as HM
+import qualified Data.Set as S
+import Numeric.Log
 
 
 -- import Control.DeepSeq
@@ -68,6 +75,57 @@ data PubmedAnnotations = PubmedAnnotations { doc :: PubmedDocument
 
 data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
         deriving (Aeson.ToJSON, Aeson.FromJSON, Generic)
+
+
+-- Naive Bayes types
+type Pos = Int
+type Neg = Int
+data NBTuple = NBTuple { intPositives, intNegatives :: !Int }
+
+aPos, aNeg :: NBTuple
+aPos = NBTuple 1 0
+aNeg = NBTuple 0 1
+
+instance Monoid NBTuple where
+    mempty = NBTuple 0 0
+instance Semigroup NBTuple where
+    NBTuple a b <> NBTuple c d = NBTuple (a+c) (b+d)
+
+
+
+data NBLogTuple = NBLogTuple { positives, negatives :: !(Log Double) }
+data NBModel = NBModel { totals :: NBLogTuple
+                       , stats :: HM.HashMap T.Text NBLogTuple}
+
+mkNaiveBayesModel :: NBTuple -> HM.HashMap T.Text NBTuple -> NBModel
+mkNaiveBayesModel t s =
+    NBModel { totals = toLog t, stats = fmap toLog s}
+  where toLog :: NBTuple -> NBLogTuple
+        toLog (NBTuple p n) = NBLogTuple (realToFrac p) (realToFrac n)
+
+
+
+nbLikelihood :: NBModel -> [T.Text] -> Log Double
+nbLikelihood NBModel{..} feats =
+    let !featSet = S.fromList feats
+
+    in toRatio totals * product [ toRatio x
+                               | f <- feats
+                               , let Just x = f `HM.lookup` stats
+                               ]
+                     * product [ toFlipRatio x
+                               | (f,x) <- HM.toList stats
+                               , not $ f `S.member` featSet
+                               ]
+  where
+    toRatio :: NBLogTuple -> Log Double
+    toRatio (NBLogTuple pos neg) =
+        pos / neg
+
+    toFlipRatio :: NBLogTuple -> Log Double
+    toFlipRatio (NBLogTuple pos neg) =
+        neg / pos
+
 
 readPubmedFiles :: [FilePath] -> IO [PubmedDocument]
 readPubmedFiles (f1:rest) = do
@@ -168,17 +226,21 @@ placePatterns = ["place", "capital", "province" , "nations", "countries", "terri
 
 predictToponyms :: FilePath -> FilePath -> FilePath -> IO ()
 predictToponyms trainInFile predictInFile outputFile = do
+    trainData <- readPubmedAnnotations trainInFile
+    let model = trainNaive trainData
     predictData <- readPubmedAnnotations predictInFile
-    writePubmedAnnotations outputFile $ catMaybes $ fmap onlyPlaces predictData
+    writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model) predictData
   where
-    onlyPlaces :: PubmedAnnotations -> Maybe PubmedAnnotations
-    onlyPlaces pub@PubmedAnnotations {annotations = annotations } =
-        let annotation' = filter onlyPlaceAnnotations annotations
+    onlyPlaces :: NBModel -> PubmedAnnotations -> Maybe PubmedAnnotations
+    onlyPlaces model (pub@PubmedAnnotations {annotations = annotations }) =
+        let annotation' = filter (onlyPlaceAnnotations model) annotations
         in if null annotation' then Nothing
            else Just $ pub { annotations = annotation'}
 
-    onlyPlaceAnnotations :: Annotation -> Bool
-    onlyPlaceAnnotations Annotation{..} =
+    onlyPlaceAnnotations model = (predictNaive model)
+
+    onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
+    onlyPlaceAnnotationsHeuristic Annotation{..} =
         let Just categories = dbpediaCategories
             placeCats = [ cat
                         | cat <- categories
@@ -188,8 +250,37 @@ predictToponyms trainInFile predictInFile outputFile = do
 --             !x =  Debug.traceShow (title, placeCats) $ placeCats
         in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
 
+    trainNaive :: [PubmedAnnotations] -> NBModel
+    trainNaive trainData =
+        let totals :: NBTuple
+            !totals = foldMap (\(isPos, _ ) -> if isPos then aPos else aNeg) trainData'
+            perCatCounts :: HM.HashMap T.Text NBTuple
+            !perCatCounts =
+                HM.fromListWith (<>)
+                $ [ (cat, counts)
+                  | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData'
+                  , cat <- categories
+                  , let counts = if isPos then aPos else aNeg
+                  ]
+        in mkNaiveBayesModel totals perCatCounts
+      where trainData' =
+                [ (isPos, ann)
+                | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
+                , ann <- anns
+                , let isPos = isPositive pubmedFilePath ann
+                ]
+    predictNaive :: NBModel -> Annotation -> Bool
+    predictNaive model Annotation{dbpediaCategories = Just categories} =
+        let score = nbLikelihood model categories
+        in score > 0.6
 
 
+
+
+
+        -- todo get ground truth pos/neg
+    isPositive :: T.Text -> Annotation -> Bool
+    isPositive _ _ = True
 
 
 opts :: Parser (IO ())

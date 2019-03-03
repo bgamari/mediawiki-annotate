@@ -75,6 +75,7 @@ executable toponym-tagme
                        optparse-applicative >= 0.14,
                        filepath,
                        servant-client>=0.16,
+                       log-domain,
                        simplir,
                        tag-me,
                        trec-car-tools
