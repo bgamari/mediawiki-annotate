@@ -202,7 +202,7 @@ newtype TagMeEnv = TagMeEnv ClientEnv
 mkTagMeEnv :: Int -> IO TagMeEnv
 mkTagMeEnv timeout = do
     let timeout' = responseTimeoutMicro $ seconds timeout
-        settings = defaultManagerSettings { managerResponseTimeout = timeout'}
+        settings = tlsManagerSettings { managerResponseTimeout = timeout'}
     mgr <- newTlsManagerWith settings
     return $ TagMeEnv $ mkClientEnv mgr tagMeBaseUrl
   where seconds x = x * 1000 * 1000
