@@ -96,7 +96,11 @@ mkNaiveBayesModel t s =
 
 
 nbLikelihood :: NBModel -> [T.Text] -> Log Double
-nbLikelihood NBModel{..} feats =
+nbLikelihood NBModel{..} feats
+  | null feats = 0.0
+  | otherwise =
+
+
     let !featSet = S.fromList feats
 
     in checkNan $ -- toRatio totals *
