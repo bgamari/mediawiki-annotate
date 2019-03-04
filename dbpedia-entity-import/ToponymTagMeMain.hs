@@ -296,7 +296,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 threshGaussian = scoreHalfGaussian predictions'
                 threshMedian = scoreHalfMedian predictions'
 
-            in Debug.trace ("thresh50="<> show thresh50<> "  threshGaussian="<> show threshGaussian <> " threshMedian="<> show threshMedian) $ threshGaussian
+            in Debug.trace ("thresh50="<> show thresh50<> "  threshGaussian="<> show threshGaussian <> " threshMedian="<> show threshMedian) $ threshMedian
         where
                 scoreThresHalfRecall predictions' =
                     let numPos = length $ filter snd predictions'
