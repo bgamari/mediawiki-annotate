@@ -59,6 +59,7 @@ executable hazymemory-import
 executable toponym-tagme
   main-is:             ToponymTagMeMain.hs
   other-extensions:    DeriveAnyClass, DerivingStrategies
+  other-modules:       ToponymGroundTruthParser
   build-depends:       base,
                        containers,
                        trifecta >= 1.5,
@@ -76,6 +77,7 @@ executable toponym-tagme
                        filepath,
                        servant-client>=0.16,
                        log-domain,
+                       trifecta,
                        simplir,
                        tag-me,
                        trec-car-tools
