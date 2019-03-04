@@ -74,11 +74,14 @@ loadGroundTruthFromFile fname = do
 
         labelClass <- many alphaNum
         char ' '
-        labelOffsetStart <- fromIntegral <$> integer
-        labelOffsetEnd <- fromIntegral <$> integer
+        offsetss <- flip sepBy1 (char ';') $ do
+            labelOffsetStart <- fromIntegral <$> integer
+            labelOffsetEnd <- fromIntegral <$> integer
+            return (labelOffsetStart, labelOffsetEnd)
+        let offsets = (fst $ head offsetss, snd $ last offsetss)
 
         labelEntity <- many $ notChar '\n'
         newline
 
-        return $ Just $ GroundTruthEntry labelClass (labelOffsetStart, labelOffsetEnd) labelEntity
+        return $ Just $ GroundTruthEntry labelClass offsets labelEntity
 
