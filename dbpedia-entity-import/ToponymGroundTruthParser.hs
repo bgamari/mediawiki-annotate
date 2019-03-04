@@ -14,6 +14,8 @@ import Data.Foldable
 import qualified Data.Text as T
 import Data.List (partition)
 import Control.Applicative
+import qualified Data.HashMap.Strict as HM
+
 
 import System.FilePath
 import Text.Trifecta as Tri
@@ -22,13 +24,18 @@ import Text.Trifecta as Tri
 
 type Offsets = (Int, Int)
 
+loadGroundTruthHashMap :: [FilePath] -> IO (HM.HashMap T.Text ([Offsets], [Offsets]))
+loadGroundTruthHashMap files = do
+    res <- loadGroundTruthFromFiles files
+    return $ HM.fromList res
+
 loadGroundTruthFromFiles :: [FilePath] -> IO [(T.Text, ([Offsets], [Offsets]))]
 loadGroundTruthFromFiles (f1:rest) = do
     d1 <- loadGroundTruthFromFile f1
     drest <- loadGroundTruthFromFiles rest
     return $ d1:drest
 loadGroundTruthFromFiles [] = do
-    pure []
+    pure mempty
 
 
 

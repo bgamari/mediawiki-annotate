@@ -24,7 +24,9 @@ import Data.Void
 import Data.Foldable
 import Control.Monad (void)
 import Options.Applicative
-import qualified Data.Binary.Serialise.CBOR as CBOR
+import qualified Data.HashMap.Strict as HM
+import qualified Data.Set as S
+import Numeric.Log
 
 import CAR.Types.AST as CAR
 import CAR.ToolVersion
@@ -34,33 +36,18 @@ import qualified SimplIR.Format.TrecRunFile as RF
 import CAR.AnnotationsFile as CAR
 import qualified Debug.Trace as Debug
 
-
-
-import qualified Data.HashMap.Strict as HM
-import qualified Data.Set as S
-import Numeric.Log
-
-
--- import Control.DeepSeq
-import Data.Char
-import Data.Maybe
 import Data.Semigroup hiding (option)
 
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy as TL
--- import qualified Data.Text.Lazy.Builder as TB
--- import qualified Data.Text.Lazy.Builder.Int as TB
--- import qualified Data.Text.Lazy.Builder.RealFloat as TB
--- import qualified Data.Text.Lazy.Read as TL.Read
 import qualified Data.Text.Lazy.IO as TL
 import qualified Data.ByteString.Lazy as BSL
-
 import qualified Data.Aeson as Aeson
 import GHC.Generics
 import System.FilePath
 
-import Debug.Trace as Trace
+import ToponymGroundTruthParser
 import TagMe
 
 data PubmedDocument = PubmedDocument { content :: T.Text
@@ -125,6 +112,7 @@ nbLikelihood NBModel{..} feats =
     toFlipRatio :: NBLogTuple -> Log Double
     toFlipRatio (NBLogTuple pos neg) =
         neg / pos
+
 
 
 readPubmedFiles :: [FilePath] -> IO [PubmedDocument]
@@ -224,10 +212,11 @@ annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
 placePatterns :: [T.Text]
 placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
 
-predictToponyms :: FilePath -> FilePath -> FilePath -> IO ()
-predictToponyms trainInFile predictInFile outputFile = do
+predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> IO ()
+predictToponyms trainInFile predictInFile outputFile groundTruthFiles = do
     trainData <- readPubmedAnnotations trainInFile
-    let model = trainNaive trainData
+    groundTruthData <- loadGroundTruthHashMap groundTruthFiles
+    let model = trainNaive (isPositiveData groundTruthData) trainData
     predictData <- readPubmedAnnotations predictInFile
     writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model) predictData
   where
@@ -250,8 +239,8 @@ predictToponyms trainInFile predictInFile outputFile = do
 --             !x =  Debug.traceShow (title, placeCats) $ placeCats
         in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
 
-    trainNaive :: [PubmedAnnotations] -> NBModel
-    trainNaive trainData =
+    trainNaive :: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> NBModel
+    trainNaive isPositive trainData =
         let totals :: NBTuple
             !totals = foldMap (\(isPos, _ ) -> if isPos then aPos else aNeg) trainData'
             perCatCounts :: HM.HashMap T.Text NBTuple
@@ -275,14 +264,17 @@ predictToponyms trainInFile predictInFile outputFile = do
         in score > 0.6
 
 
-
-
-
         -- todo get ground truth pos/neg
-    isPositive :: T.Text -> Annotation -> Bool
-    isPositive _ _ = True
-
-
+    isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
+    isPositiveData groundTruthData docname Annotation{..} =
+        case docname `HM.lookup` groundTruthData of
+          Just (posOffsets, negOffsets) -> not $ null $ filter ((start, end) `offsetsIntersect`) posOffsets
+          Nothing -> False
+      where offsetsIntersect :: Offsets -> Offsets -> Bool
+            offsetsIntersect (s1, e1)  (s2, e2) =
+                if s1 > s2 && s1 < e2 then True
+                else if s2 > s1 && s2 < e1 then True
+                   else False
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "annotate"   annotatePubMed'
@@ -296,11 +288,12 @@ opts = subparser
     httpTimeout = option auto (short 't' <> long "timeout" <> metavar "SECONDS" <> help "Timeout for HTTP requests")
     trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
     predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
+    groundTruthFiles = many <$> option str (short 'g' <> long "ground-truth" <> metavar "ANN" <> help "Ground truth in (*.ann format)")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
     predictToponyms' =
-        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile
+        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles
 
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
