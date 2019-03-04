@@ -288,7 +288,7 @@ opts = subparser
     httpTimeout = option auto (short 't' <> long "timeout" <> metavar "SECONDS" <> help "Timeout for HTTP requests")
     trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
     predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
-    groundTruthFiles = many <$> option str (short 'g' <> long "ground-truth" <> metavar "ANN" <> help "Ground truth in (*.ann format)")
+    groundTruthFiles = many <$> argument str (metavar "ANN" <> help "Ground truth in (*.ann format)")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
