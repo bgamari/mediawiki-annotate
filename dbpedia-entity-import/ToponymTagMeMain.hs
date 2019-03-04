@@ -212,21 +212,23 @@ annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
 placePatterns :: [T.Text]
 placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
 
-predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> IO ()
-predictToponyms trainInFile predictInFile outputFile groundTruthFiles = do
+predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> Double -> IO ()
+predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThresh' = do
+    let scoreThresh :: Log Double
+        scoreThresh = realToFrac scoreThresh'
     trainData <- readPubmedAnnotations trainInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
     let model = trainNaive (isPositiveData groundTruthData) trainData
     predictData <- readPubmedAnnotations predictInFile
-    writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model) predictData
+    writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model scoreThresh) predictData
   where
-    onlyPlaces :: NBModel -> PubmedAnnotations -> Maybe PubmedAnnotations
-    onlyPlaces model (pub@PubmedAnnotations {annotations = annotations }) =
-        let annotation' = filter (onlyPlaceAnnotations model) annotations
+    onlyPlaces :: NBModel -> Log Double -> PubmedAnnotations -> Maybe PubmedAnnotations
+    onlyPlaces model scoreThresh (pub@PubmedAnnotations {annotations = annotations }) =
+        let annotation' = filter (onlyPlaceAnnotations model scoreThresh) annotations
         in if null annotation' then Nothing
            else Just $ pub { annotations = annotation'}
 
-    onlyPlaceAnnotations model = (predictNaive model)
+    onlyPlaceAnnotations model scoreThresh = (predictNaive model scoreThresh)
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
@@ -258,10 +260,10 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles = do
                 , ann <- anns
                 , let isPos = isPositive pubmedFilePath ann
                 ]
-    predictNaive :: NBModel -> Annotation -> Bool
-    predictNaive model Annotation{dbpediaCategories = Just categories} =
+    predictNaive :: NBModel -> Log Double -> Annotation -> Bool
+    predictNaive model scoreThresh Annotation{dbpediaCategories = Just categories} =
         let score = nbLikelihood model categories
-        in score > 0.6
+        in score > scoreThresh
 
 
         -- todo get ground truth pos/neg
@@ -289,11 +291,12 @@ opts = subparser
     trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
     predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
     groundTruthFiles = many $ argument str (metavar "ANN" <> help "Ground truth in (*.ann format)")
+    scoreThresh = option auto (long "score-thresh" <> metavar "DOUBLE" <> help "Minimum threshold for positive place prediction")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
     predictToponyms' =
-        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles
+        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> scoreThresh
 
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
