@@ -331,8 +331,8 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
 
     predictNaive :: NBModel -> Annotation -> Log Double
     predictNaive model Annotation{dbpediaCategories = Just categories} =
-        Debug.traceShowId $ nbLikelihood model categories
-
+        let score = nbLikelihood model categories
+        in Debug.trace (show $ ln score)$ score
 
         -- todo get ground truth pos/neg
     isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
