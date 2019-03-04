@@ -262,7 +262,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 ]
     predictNaive :: NBModel -> Log Double -> Annotation -> Bool
     predictNaive model scoreThresh Annotation{dbpediaCategories = Just categories} =
-        let score = nbLikelihood model categories
+        let score = Debug.traceShowId $ nbLikelihood model categories
         in score > scoreThresh
 
 
