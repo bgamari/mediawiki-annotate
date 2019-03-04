@@ -99,7 +99,8 @@ nbLikelihood :: NBModel -> [T.Text] -> Log Double
 nbLikelihood NBModel{..} feats =
     let !featSet = S.fromList feats
 
-    in checkNan $ toRatio totals * product [ toRatio x
+    in checkNan $ -- toRatio totals *
+                        product [ toRatio x
                                | f <- feats
                                , Just x <- pure $ f `HM.lookup` stats
                                ]
