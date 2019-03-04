@@ -99,7 +99,7 @@ nbLikelihood :: NBModel -> [T.Text] -> Log Double
 nbLikelihood NBModel{..} feats =
     let !featSet = S.fromList feats
 
-    in toRatio totals * product [ toRatio x
+    in checkNan $ toRatio totals * product [ toRatio x
                                | f <- feats
                                , Just x <- pure $ f `HM.lookup` stats
                                ]
@@ -115,6 +115,14 @@ nbLikelihood NBModel{..} feats =
     toFlipRatio :: NBLogTuple -> Log Double
     toFlipRatio (NBLogTuple pos neg) =
         neg / pos
+
+    checkNan :: Log Double -> Log Double
+    checkNan score =
+        if isInfinite $ ln score then
+            error $ "Model score is infinite. Features: "<> show feats
+        else if isNaN $ ln score then
+            error $ "Model score is Nan. Features: "<> show feats
+        else score
 
 
 
