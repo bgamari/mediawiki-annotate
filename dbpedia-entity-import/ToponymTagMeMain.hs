@@ -22,6 +22,8 @@ import Data.Maybe
 import Data.Char
 import Data.Void
 import Data.Foldable
+import Data.List
+import Data.Ord
 import Control.Monad (void)
 import Options.Applicative
 import qualified Data.HashMap.Strict as HM
@@ -230,11 +232,15 @@ placePatterns = ["place", "capital", "province" , "nations", "countries", "terri
 
 predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> Double -> IO ()
 predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThresh' = do
-    let scoreThresh :: Log Double
-        scoreThresh = realToFrac scoreThresh'
+    let scoreThresh'' :: Log Double
+        scoreThresh'' = realToFrac scoreThresh'
     trainData <- readPubmedAnnotations trainInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
+    groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
+
     let model = trainNaive (isPositiveData groundTruthData) trainData
+    let scoreThresh = trainThresh (isPositiveData groundTruthValData) model trainData     -- todo load validation data from file
+
     predictData <- readPubmedAnnotations predictInFile
     writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model scoreThresh) predictData
   where
@@ -244,7 +250,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
         in if null annotation' then Nothing
            else Just $ pub { annotations = annotation'}
 
-    onlyPlaceAnnotations model scoreThresh = (predictNaive model scoreThresh)
+    onlyPlaceAnnotations model scoreThresh ann = (predictNaive model ann > scoreThresh)
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
@@ -276,10 +282,56 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 , ann <- anns
                 , let isPos = isPositive pubmedFilePath ann
                 ]
-    predictNaive :: NBModel -> Log Double -> Annotation -> Bool
-    predictNaive model scoreThresh Annotation{dbpediaCategories = Just categories} =
-        let score = Debug.traceShowId $ nbLikelihood model categories
-        in score > scoreThresh
+
+    trainThresh  :: ( T.Text -> Annotation -> Bool) -> NBModel -> [PubmedAnnotations] -> Log Double
+    trainThresh isPositive model validateData =
+            let predictions = [ (score, isPos)
+                              | PubmedAnnotations {doc = PubmedDocument {filename = fname}, annotations = annotations} <- validateData
+                              , ann <- annotations
+                              , let score =  predictNaive model ann
+                              , let isPos = isPositive fname ann
+                              ]
+                predictions' = sortOn (Down. fst) predictions
+                thresh50 = scoreThresHalfRecall predictions'
+                threshGaussian = scoreHalfGaussian predictions'
+                threshMedian = scoreHalfMedian predictions'
+
+            in Debug.trace ("thresh50="<> show thresh50<> "  threshGaussian="<> show threshGaussian <> " threshMedian="<> show threshMedian) $ threshGaussian
+        where
+                scoreThresHalfRecall predictions' =
+                    let numPos = length $ filter snd predictions'
+                        predictCountAccumPos :: [(Int, (Log Double, Bool))]
+                        x:: (Int, [(Int, (Log Double, Bool))])
+                        x@(_, predictCountAccumPos) =
+                           mapAccumL f 0 predictions'
+                            where f :: Int -> (Log Double, Bool) -> (Int, (Int, (Log Double, Bool)))
+                                  f count x@(_, isPos) = (count', (count', x))
+                                    where
+                                      count'
+                                        | isPos = count+1
+                                        | otherwise = count
+                        scoreThresh :: Log Double
+                        (_, (scoreThresh, _)) = head $ dropWhile (\(c,_) -> c < numPos `div` 2) predictCountAccumPos
+                    in scoreThresh
+
+                scoreHalfGaussian predictions' =
+                    let (poss, negs) = partition snd predictions'
+                    in (avg poss) + (avg negs) /2
+
+                  where avg list = 1/ realToFrac (length list) * (Numeric.Log.sum $ fmap fst list)
+
+                scoreHalfMedian predictions' =
+                    let (poss, negs) = partition snd predictions'
+                    in (med poss) + (med negs) /2
+
+                  where med list =
+                          let (medScore, _) = last $ take (length list `div` 2) list
+                          in medScore
+
+
+    predictNaive :: NBModel -> Annotation -> Log Double
+    predictNaive model Annotation{dbpediaCategories = Just categories} =
+        Debug.traceShowId $ nbLikelihood model categories
 
 
         -- todo get ground truth pos/neg
