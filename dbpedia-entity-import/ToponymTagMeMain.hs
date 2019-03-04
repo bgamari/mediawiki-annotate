@@ -98,7 +98,7 @@ nbLikelihood NBModel{..} feats =
 
     in toRatio totals * product [ toRatio x
                                | f <- feats
-                               , let Just x = f `HM.lookup` stats
+                               , Just x <- pure $ f `HM.lookup` stats
                                ]
                      * product [ toFlipRatio x
                                | (f,x) <- HM.toList stats
