@@ -91,7 +91,7 @@ mkNaiveBayesModel :: NBTuple -> HM.HashMap T.Text NBTuple -> NBModel
 mkNaiveBayesModel t s =
     NBModel { totals = toLog t, stats = fmap toLog s}
   where toLog :: NBTuple -> NBLogTuple
-        toLog (NBTuple p n) = NBLogTuple (realToFrac p) (realToFrac n)
+        toLog (NBTuple p n) = NBLogTuple (realToFrac (p+1)) (realToFrac (n+1))
 
 
 
