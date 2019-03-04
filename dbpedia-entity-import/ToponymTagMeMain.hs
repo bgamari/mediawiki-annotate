@@ -68,6 +68,7 @@ data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
 type Pos = Int
 type Neg = Int
 data NBTuple = NBTuple { intPositives, intNegatives :: !Int }
+                 deriving (Show)
 
 aPos, aNeg :: NBTuple
 aPos = NBTuple 1 0
@@ -81,8 +82,10 @@ instance Semigroup NBTuple where
 
 
 data NBLogTuple = NBLogTuple { positives, negatives :: !(Log Double) }
+                 deriving (Show)
 data NBModel = NBModel { totals :: NBLogTuple
                        , stats :: HM.HashMap T.Text NBLogTuple}
+                 deriving (Show)
 
 mkNaiveBayesModel :: NBTuple -> HM.HashMap T.Text NBTuple -> NBModel
 mkNaiveBayesModel t s =
@@ -218,7 +221,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
         scoreThresh = realToFrac scoreThresh'
     trainData <- readPubmedAnnotations trainInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
-    let model = trainNaive (isPositiveData groundTruthData) trainData
+    let model = Debug.traceShowId $ trainNaive (isPositiveData groundTruthData) trainData
     predictData <- readPubmedAnnotations predictInFile
     writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model scoreThresh) predictData
   where
@@ -262,7 +265,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 ]
     predictNaive :: NBModel -> Log Double -> Annotation -> Bool
     predictNaive model scoreThresh Annotation{dbpediaCategories = Just categories} =
-        let score = nbLikelihood model categories
+        let score = Debug.traceShowId $ nbLikelihood model categories
         in score > scoreThresh
 
 
