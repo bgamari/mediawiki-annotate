@@ -100,6 +100,7 @@ mkNaiveBayesModel t s =
 nbLikelihood :: NaiveBayesMode -> NBModel -> [T.Text] -> Log Double
 nbLikelihood nbMode NBModel{..} feats
   | null feats = 0.0
+  | not $ any (`HM.member` stats) feats = 0.0
   | otherwise =
 
 
@@ -255,16 +256,17 @@ annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
 placePatterns :: [T.Text]
 placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
 
-predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> NaiveBayesMode -> IO ()
-predictToponyms trainInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
+predictToponyms :: FilePath -> FilePath -> FilePath -> FilePath -> [FilePath] -> NaiveBayesMode -> IO ()
+predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
 --     let scoreThresh'' :: Log Double
 --         scoreThresh'' = realToFrac scoreThresh'
     trainData <- readPubmedAnnotations trainInFile
+    validateData <- readPubmedAnnotations validateInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
-    groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
+--     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
 
     let model = trainNaive (isPositiveData groundTruthData) trainData
-    let scoreThresh = trainThresh (isPositiveData groundTruthValData) model trainData     -- todo load validation data from file
+    let scoreThresh = trainThresh (isPositiveData groundTruthData) model validateData     -- todo load validation data from file
 
     predictData <- readPubmedAnnotations predictInFile
     writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model scoreThresh) predictData
@@ -432,6 +434,7 @@ opts = subparser
     outputFile = option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output file")
     httpTimeout = option auto (short 't' <> long "timeout" <> metavar "SECONDS" <> help "Timeout for HTTP requests")
     trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
+    validateInFile = option str (short 'V' <> long "validate" <> metavar "JSON" <> help "Validation annotations (in JSON format)")
     predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
     groundTruthFiles = many $ argument str (metavar "ANN" <> help "Ground truth in (*.ann format)")
 
@@ -446,7 +449,7 @@ opts = subparser
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
     predictToponyms' =
-        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> naiveBayesMode
+        predictToponyms <$> trainInFile <*> validateInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> naiveBayesMode
 
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
