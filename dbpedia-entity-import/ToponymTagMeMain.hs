@@ -110,10 +110,10 @@ nbLikelihood NBModel{..} feats
                                | f <- feats
                                , Just x <- pure $ f `HM.lookup` stats
                                ]
-                     * product [ toFlipRatio x
-                               | (f,x) <- HM.toList stats
-                               , not $ f `S.member` featSet
-                               ]
+--                      * product [ toFlipRatio x
+--                                | (f,x) <- HM.toList stats
+--                                , not $ f `S.member` featSet
+--                                ]
   where
     toRatio :: NBLogTuple -> Log Double
     toRatio (NBLogTuple pos neg) =
