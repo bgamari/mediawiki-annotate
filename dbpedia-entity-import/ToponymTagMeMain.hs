@@ -175,7 +175,12 @@ tagData env tagMeToken maxLen overlapLen document = do
             ]
     return $ mconcat anns
 
-
+data Confusion = Confusion {tp::Int, tn :: Int, fp :: Int, fn::Int}
+f1 ::Confusion -> Double
+f1 Confusion{..} =
+    let prec = (realToFrac tp)/(realToFrac (tp + fp))
+        recall = (realToFrac tp)/(realToFrac (tp + fn))
+    in  2 * prec * recall / (prec + recall)
 
 
 overlapChunks :: Int -> Int -> T.Text -> [T.Text]
@@ -295,9 +300,20 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 thresh50 = scoreThresHalfRecall predictions'
                 threshGaussian = scoreHalfGaussian predictions'
                 threshMedian = scoreHalfMedian predictions'
+                threshF1 = scoreThreshMaxF1 predictions'
 
-            in Debug.trace ("thresh50="<> show thresh50<> "  threshGaussian="<> show threshGaussian <> " threshMedian="<> show threshMedian) $ threshMedian
-        where
+                preds :: [(Confusion, (Log Double, Bool))]
+                !preds = rankQuality predictions'
+                xxx :: Log Double -> (Log Double, Double)
+                xxx thresh =
+                    let ((conf, (_, _)) : _) = dropWhile (\(_, (score, _)) -> score > thresh) preds
+                    in (thresh, f1 conf)
+            in Debug.trace ("threshF1="<> show (xxx threshF1)
+                       <> " thresh50="<> show (xxx thresh50)
+                       <> " threshGaussian="<> show (xxx threshGaussian)
+                       <> " threshMedian="<> show (xxx threshMedian)  )
+                       $ threshMedian
+      where
                 scoreThresHalfRecall predictions' =
                     let numPos = length $ filter snd predictions'
                         predictCountAccumPos :: [(Int, (Log Double, Bool))]
@@ -313,6 +329,41 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                         scoreThresh :: Log Double
                         (_, (scoreThresh, _)) = head $ dropWhile (\(c,_) -> c < numPos `div` 2) predictCountAccumPos
                     in scoreThresh
+
+                scoreThreshMaxF1 predictions' =
+                    let numPos = length $ filter snd predictions'
+                        numTotal = length predictions'
+
+                        predictCountAccumPos :: [(Double, (Log Double, Bool))]
+                        x:: (Confusion, [(Double, (Log Double, Bool))])
+                        x@(_, predictCountAccumPos) =
+                           mapAccumL f Confusion{tp =0, fn=0, fp=numPos, tn=(numTotal-numPos)} predictions'
+                            where f :: Confusion -> (Log Double, Bool) -> (Confusion, (Double, (Log Double, Bool)))
+                                  f conf@Confusion{} x@(_, isPos) = (conf', (f1 conf', x))
+                                    where
+                                      conf'
+                                        | isPos =     conf{ tp= (tp conf)+1, fp= (fp conf)-1}
+                                        | otherwise = conf{ fn= (fn conf)+1, tn= (tn conf)-1}
+                        scoreThresh :: Log Double
+                        (_, (scoreThresh, _)) = maximumBy (comparing fst) predictCountAccumPos
+                    in scoreThresh
+
+                rankQuality :: [(Log Double, Bool)] -> [(Confusion, (Log Double, Bool))]
+                rankQuality predictions' =
+                    let numPos = length $ filter snd predictions'
+                        numTotal = length predictions'
+
+                        predictCountAccumPos :: [(Confusion, (Log Double, Bool))]
+                        x:: (Confusion, [(Confusion, (Log Double, Bool))])
+                        x@(_, predictCountAccumPos) =
+                           mapAccumL f Confusion{tp =0, fn=0, fp=numPos, tn=(numTotal-numPos)} predictions'
+                            where f :: Confusion -> (Log Double, Bool) -> (Confusion, (Confusion, (Log Double, Bool)))
+                                  f conf@Confusion{} x@(_, isPos) = (conf', (conf', x))
+                                    where
+                                      conf'
+                                        | isPos =     conf{ tp= (tp conf)+1, fp= (fp conf)-1}
+                                        | otherwise = conf{ fn= (fn conf)+1, tn= (tn conf)-1}
+                    in  predictCountAccumPos
 
                 scoreHalfGaussian predictions' =
                     let (poss, negs) = partition snd predictions'
