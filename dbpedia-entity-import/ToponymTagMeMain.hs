@@ -138,9 +138,11 @@ nbLikelihood nbMode NBModel{..} feats
   where
     toRatio :: NBLogTuple -> NBLogTuple -> Log Double
     toRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
-        if normPos == 0 || normNeg == 0 || neg == 0 then 1
-        else (pos/normPos) / (neg/normNeg)
-
+        if pos == 0 then 1e-5 else
+        if neg == 0 then 1  else
+        if normPos == 0  then 1 else
+            -- else (pos/normPos) / (neg/normNeg)
+            pos * normNeg / (normPos * neg)
     toFlipRatio :: NBLogTuple -> NBLogTuple  -> Log Double
     toFlipRatio totals stats =
         toRatio (flip totals) (flip stats)
