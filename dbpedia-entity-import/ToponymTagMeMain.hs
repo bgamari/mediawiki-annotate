@@ -312,7 +312,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                        <> " thresh50="<> show (xxx thresh50)
                        <> " threshGaussian="<> show (xxx threshGaussian)
                        <> " threshMedian="<> show (xxx threshMedian)  )
-                       $ threshMedian
+                       $ threshF1
       where
                 scoreThresHalfRecall predictions' =
                     let numPos = length $ filter snd predictions'
