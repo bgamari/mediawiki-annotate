@@ -108,41 +108,41 @@ nbLikelihood nbMode NBModel{..} feats
         likelihood =
             case nbMode of
               NBFull ->
-                   toRatio totals *
-                      product [ toRatio x
+                   toRatio (NBLogTuple 1 1) totals *
+                      product [ toRatio totals x
                              | f <- feats
                              , Just x <- pure $ f `HM.lookup` stats
                              ]
-                   * product [ toFlipRatio x
+                   * product [ toFlipRatio totals x
                              | (f,x) <- HM.toList stats
                              , not $ f `S.member` featSet
                              ]
               NBNoClass ->
-                   product [ toRatio x
+                   product [ toRatio totals x
                              | f <- feats
                              , Just x <- pure $ f `HM.lookup` stats
                              ]
-                   * product [ toFlipRatio x
+                   * product [ toFlipRatio totals x
                              | (f,x) <- HM.toList stats
                              , not $ f `S.member` featSet
                              ]
 
 
               NBNoNegFeats ->
-                      product [ toRatio x
+                      product [ toRatio totals x
                              | f <- feats
                              , Just x <- pure $ f `HM.lookup` stats
                              ]
 
     in checkNan $ likelihood
   where
-    toRatio :: NBLogTuple -> Log Double
-    toRatio (NBLogTuple pos neg) =
-        pos / neg
+    toRatio :: NBLogTuple -> NBLogTuple -> Log Double
+    toRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
+        (pos/normPos) / (neg/normNeg)
 
-    toFlipRatio :: NBLogTuple -> Log Double
-    toFlipRatio (NBLogTuple pos neg) =
-        neg / pos
+    toFlipRatio :: NBLogTuple -> NBLogTuple  -> Log Double
+    toFlipRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
+        (neg/normNeg) / (pos/normPos)
 
     checkNan :: Log Double -> Log Double
     checkNan score =
