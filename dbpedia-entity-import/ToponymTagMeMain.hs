@@ -138,11 +138,13 @@ nbLikelihood nbMode NBModel{..} feats
   where
     toRatio :: NBLogTuple -> NBLogTuple -> Log Double
     toRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
-        (pos/normPos) / (neg/normNeg)
+        if normPos == 0 || normNeg == 0 || neg == 0 then 1
+        else (pos/normPos) / (neg/normNeg)
 
     toFlipRatio :: NBLogTuple -> NBLogTuple  -> Log Double
-    toFlipRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
-        (neg/normNeg) / (pos/normPos)
+    toFlipRatio totals stats =
+        toRatio (flip totals) (flip stats)
+      where flip (NBLogTuple p n) = NBLogTuple n p
 
     checkNan :: Log Double -> Log Double
     checkNan score =
