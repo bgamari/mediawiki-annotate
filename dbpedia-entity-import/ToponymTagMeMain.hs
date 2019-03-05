@@ -409,8 +409,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     predictNaive :: NaiveBayesMode -> NBModel -> Annotation -> Log Double
     predictNaive naiveBayesMode model Annotation{dbpediaCategories = Just categories} =
         let score = nbLikelihood naiveBayesMode model categories
---         in Debug.trace (show $ ln score)$ score
-        in score
+        in Debug.trace (show $ ln score)$ score
+--         in score
 
     isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
     isPositiveData groundTruthData docname Annotation{..} =
