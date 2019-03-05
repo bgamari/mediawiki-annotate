@@ -97,23 +97,43 @@ mkNaiveBayesModel t s =
 
 
 
-nbLikelihood :: NBModel -> [T.Text] -> Log Double
-nbLikelihood NBModel{..} feats
+nbLikelihood :: NaiveBayesMode -> NBModel -> [T.Text] -> Log Double
+nbLikelihood nbMode NBModel{..} feats
   | null feats = 0.0
   | otherwise =
 
 
     let !featSet = S.fromList feats
+        likelihood =
+            case nbMode of
+              NBFull ->
+                   toRatio totals *
+                      product [ toRatio x
+                             | f <- feats
+                             , Just x <- pure $ f `HM.lookup` stats
+                             ]
+                   * product [ toFlipRatio x
+                             | (f,x) <- HM.toList stats
+                             , not $ f `S.member` featSet
+                             ]
+              NBNoClass ->
+                   product [ toRatio x
+                             | f <- feats
+                             , Just x <- pure $ f `HM.lookup` stats
+                             ]
+                   * product [ toFlipRatio x
+                             | (f,x) <- HM.toList stats
+                             , not $ f `S.member` featSet
+                             ]
 
-    in checkNan $  toRatio totals *
-                        product [ toRatio x
-                               | f <- feats
-                               , Just x <- pure $ f `HM.lookup` stats
-                               ]
-                     * product [ toFlipRatio x
-                               | (f,x) <- HM.toList stats
-                               , not $ f `S.member` featSet
-                               ]
+
+              NBNoNegFeats ->
+                      product [ toRatio x
+                             | f <- feats
+                             , Just x <- pure $ f `HM.lookup` stats
+                             ]
+
+    in checkNan $ likelihood
   where
     toRatio :: NBLogTuple -> Log Double
     toRatio (NBLogTuple pos neg) =
@@ -235,10 +255,10 @@ annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
 placePatterns :: [T.Text]
 placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
 
-predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> Double -> IO ()
-predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThresh' = do
-    let scoreThresh'' :: Log Double
-        scoreThresh'' = realToFrac scoreThresh'
+predictToponyms :: FilePath -> FilePath -> FilePath -> [FilePath] -> NaiveBayesMode -> IO ()
+predictToponyms trainInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
+--     let scoreThresh'' :: Log Double
+--         scoreThresh'' = realToFrac scoreThresh'
     trainData <- readPubmedAnnotations trainInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
@@ -255,7 +275,7 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
         in if null annotation' then Nothing
            else Just $ pub { annotations = annotation'}
 
-    onlyPlaceAnnotations model scoreThresh ann = (predictNaive model ann > scoreThresh)
+    onlyPlaceAnnotations model scoreThresh ann = (predictNaive naiveBayesMode  model ann > scoreThresh)
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
@@ -293,13 +313,13 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
             let predictions = [ (score, isPos)
                               | PubmedAnnotations {doc = PubmedDocument {filename = fname}, annotations = annotations} <- validateData
                               , ann <- annotations
-                              , let score =  predictNaive model ann
+                              , let score =  predictNaive naiveBayesMode model ann
                               , let isPos = isPositive fname ann
                               ]
                 predictions' = sortOn (Down. fst) predictions
-                thresh50 = scoreThresHalfRecall predictions'
-                threshGaussian = scoreHalfGaussian predictions'
-                threshMedian = scoreHalfMedian predictions'
+--                 thresh50 = scoreThresHalfRecall predictions'
+--                 threshGaussian = scoreHalfGaussian predictions'
+--                 threshMedian = scoreHalfMedian predictions'
                 threshF1 = scoreThreshMaxF1 predictions'
 
                 preds :: [(Confusion, (Log Double, Bool))]
@@ -308,10 +328,10 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 xxx thresh =
                     let ((conf, (_, _)) : _) = dropWhile (\(_, (score, _)) -> score > thresh) preds
                     in (thresh, f1 conf)
-            in Debug.trace ("threshF1="<> show (xxx threshF1)
-                       <> " thresh50="<> show (xxx thresh50)
-                       <> " threshGaussian="<> show (xxx threshGaussian)
-                       <> " threshMedian="<> show (xxx threshMedian)  )
+            in Debug.trace ("threshF1="<> show (xxx threshF1) )
+--                        <> " thresh50="<> show (xxx thresh50)
+--                        <> " threshGaussian="<> show (xxx threshGaussian)
+--                        <> " threshMedian="<> show (xxx threshMedian)  )
                        $ threshF1
       where
                 scoreThresHalfRecall predictions' =
@@ -380,9 +400,9 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                           in medScore
 
 
-    predictNaive :: NBModel -> Annotation -> Log Double
-    predictNaive model Annotation{dbpediaCategories = Just categories} =
-        let score = nbLikelihood model categories
+    predictNaive :: NaiveBayesMode -> NBModel -> Annotation -> Log Double
+    predictNaive naiveBayesMode model Annotation{dbpediaCategories = Just categories} =
+        let score = nbLikelihood naiveBayesMode model categories
 --         in Debug.trace (show $ ln score)$ score
         in score
 
@@ -396,6 +416,10 @@ predictToponyms trainInFile predictInFile outputFile groundTruthFiles scoreThres
                 if s1 > s2 && s1 < e2 then True
                 else if s2 > s1 && s2 < e1 then True
                    else False
+
+data NaiveBayesMode =  NBFull | NBNoClass | NBNoNegFeats
+
+
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "annotate"   annotatePubMed'
@@ -410,12 +434,19 @@ opts = subparser
     trainInFile = option str (short 'T' <> long "train" <> metavar "JSON" <> help "Training annotations (in JSON format)")
     predictInFile = option str (short 'P' <> long "predict" <> metavar "JSON" <> help "Prediction annotations (in JSON format)")
     groundTruthFiles = many $ argument str (metavar "ANN" <> help "Ground truth in (*.ann format)")
-    scoreThresh = option auto (long "score-thresh" <> metavar "DOUBLE" <> help "Minimum threshold for positive place prediction")
+
+
+    naiveBayesMode = flag' NBFull ( long "nb-full" <> help "full naive bayes likelihood")
+                       <|> flag' NBNoClass ( long "nb-no-class" <> help "naive bayes likelihood without class prior")
+                       <|> flag' NBNoNegFeats ( long "nb-no-neg-feats" <> help "naive bayes likelihood without class prior and without negative feature information")
+
+
+--     scoreThresh = option auto (long "score-thresh" <> metavar "DOUBLE" <> help "Minimum threshold for positive place prediction")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
     predictToponyms' =
-        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> scoreThresh
+        predictToponyms <$> trainInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> naiveBayesMode
 
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
