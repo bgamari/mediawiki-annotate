@@ -38,6 +38,8 @@ import qualified SimplIR.Format.TrecRunFile as RF
 import CAR.AnnotationsFile as CAR
 import qualified Debug.Trace as Debug
 
+import qualified Data.SVM as SVM
+import qualified Data.IntMap.Strict as IntMap
 import Data.Semigroup hiding (option)
 
 import qualified Data.Text as T
@@ -264,24 +266,48 @@ predictToponyms :: FilePath -> FilePath -> FilePath -> FilePath -> [FilePath] ->
 predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
 --     let scoreThresh'' :: Log Double
 --         scoreThresh'' = realToFrac scoreThresh'
+    print "Loading data..."
     trainData <- readPubmedAnnotations trainInFile
     validateData <- readPubmedAnnotations validateInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
 --     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
 
-    let model = trainNaive (isPositiveData groundTruthData) trainData
-    let scoreThresh = trainThresh (isPositiveData groundTruthData) model validateData     -- todo load validation data from file
+    print "Training Svm..."
+    (allCategories, svmModel) <- trainSvm (isPositiveData groundTruthData) trainData
+--     saveModel svmModel "toponym.model.svm"
 
+--     print "Training Naive Bayes ..."
+--     let model = trainNaive (isPositiveData groundTruthData) trainData
+--     print "Training Naive Bayes Threshold..."
+--     let scoreThresh = trainThresh (isPositiveData groundTruthData) model validateData     -- todo load validation data from file
+
+    print "Loading predict data..."
     predictData <- readPubmedAnnotations predictInFile
-    writePubmedAnnotations outputFile $ catMaybes $ fmap (onlyPlaces model scoreThresh) predictData
+--     print "Predicting with Naive Bayes..."
+--     let preds = fmap (predictToponyms model scoreThresh) predictData
+    print "Predicting with Svm..."
+    preds <- mapM (predictToponymsSvm svmModel allCategories) predictData
+    writePubmedAnnotations outputFile $ catMaybes $ preds
   where
-    onlyPlaces :: NBModel -> Log Double -> PubmedAnnotations -> Maybe PubmedAnnotations
-    onlyPlaces model scoreThresh (pub@PubmedAnnotations {annotations = annotations }) =
+    predictToponymsNaiveBayes :: NBModel -> Log Double -> PubmedAnnotations -> Maybe PubmedAnnotations
+    predictToponymsNaiveBayes model scoreThresh (pub@PubmedAnnotations {annotations = annotations }) =
         let annotation' = filter (onlyPlaceAnnotations model scoreThresh) annotations
         in if null annotation' then Nothing
            else Just $ pub { annotations = annotation'}
 
+    predictToponymsSvm :: SVM.Model -> HM.HashMap T.Text Int -> PubmedAnnotations -> IO (Maybe PubmedAnnotations)
+    predictToponymsSvm  model allCategories (pub@PubmedAnnotations {annotations = annotations }) = do
+        annotation' <- filterM (onlySvmPlaceAnnotations model allCategories) annotations
+        return $ if null annotation' then Nothing
+                 else Just $ pub { annotations = annotation'}
+
     onlyPlaceAnnotations model scoreThresh ann = (predictNaive naiveBayesMode  model ann > scoreThresh)
+
+    onlySvmPlaceAnnotations  :: SVM.Model -> HM.HashMap T.Text Int -> Annotation -> IO Bool
+    onlySvmPlaceAnnotations model allCategories ann = do
+        let vector = annToSvmVector allCategories ann
+        result <- SVM.predict model vector
+        return $ result >0.0
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
@@ -293,6 +319,37 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                         ]
 --             !x =  Debug.traceShow (title, placeCats) $ placeCats
         in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
+
+    annToSvmVector :: HM.HashMap T.Text Int -> Annotation -> IntMap.IntMap Double
+    annToSvmVector allCategories Annotation{dbpediaCategories = Just categories} =
+        let catSet = S.fromList categories
+            feats = IntMap.fromList
+                      $ [ (fIdx, 1.0)
+                        | cat <- categories
+                        , let Just fIdx = cat `HM.lookup` allCategories
+                        ]
+        in feats
+
+    trainSvm:: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> IO (HM.HashMap T.Text Int,  SVM.Model)
+    trainSvm isPositive trainData = do
+        let allCategories = let catList = S.toList $ S.fromList [cat | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData', cat <- categories]
+                            in HM.fromList $ zip catList [1..]
+            trainData =
+                [ (labelTo isPos, annToSvmVector allCategories ann)
+                | (isPos, ann) <- trainData'
+                ]
+        svmModel <- SVM.train (SVM.CSvc 0.1) SVM.Linear trainData
+        return (allCategories, svmModel)
+      where trainData' =
+                [ (isPos, ann)
+                | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
+                , ann <- anns
+                , let isPos = isPositive pubmedFilePath ann
+                ]
+            labelTo :: Bool -> Double
+            labelTo True = 1.0
+            labelTo False = -1.0
+
 
     trainNaive :: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> NBModel
     trainNaive isPositive trainData =
