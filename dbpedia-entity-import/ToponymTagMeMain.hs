@@ -308,7 +308,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     onlySvmPlaceAnnotations model allCategories ann = do
         let vector = annToSvmVector allCategories ann
         result <- SVM.predict model vector
-        return $ result >0.0
+        return $ Debug.trace (show result) $ result >0.0
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
