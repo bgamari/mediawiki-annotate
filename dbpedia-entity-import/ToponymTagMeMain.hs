@@ -341,17 +341,19 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                                           , w <- T.words cat
                                           ]
                             in HM.fromList $ zip catList [1..]
-            trainData =
+            trainData'' =
                 [ (labelTo isPos, annToSvmVector allCategories ann)
                 | (isPos, ann) <- trainData'
                 ]
             numPosTrain = length $ filter fst trainData'
-            trainData'' = filter (\(x,_)-> x>0) trainData
+            (posTrainData'', negTrainData'') = partition (\(x,_)-> x>0) trainData''
+            trainData''' = posTrainData'' <> take numPosTrain negTrainData''
+
             !bla = Debug.trace (unlines $ fmap show trainData'') $ 0
 
-        cvResult <-  SVM.crossValidate (SVM.OneClassSvm 0.1) SVM.Linear trainData'' 5
+        cvResult <-  SVM.crossValidate (SVM.CSvc 0.1) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
-        svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear $ trainData''
+        svmModel <- SVM.train (SVM.CSvc 0.1) SVM.Linear $ trainData'''
         return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
