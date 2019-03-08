@@ -477,8 +477,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
           Nothing -> False
       where offsetsIntersect :: Offsets -> Offsets -> Bool
             offsetsIntersect (s1, e1)  (s2, e2) =
-                if s1 > s2 && s1 < e2 then True
-                else if s2 > s1 && s2 < e1 then True
+                if s1 > s2 && s1 < e2 then (Debug.trace "isPositive" True)
+                else if s2 > s1 && s2 < e1 then (Debug.trace "isPositive" True)
                    else False
 
 data NaiveBayesMode =  NBFull | NBNoClass | NBNoNegFeats
