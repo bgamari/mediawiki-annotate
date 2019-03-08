@@ -348,7 +348,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 , let isPos = isPositive pubmedFilePath ann
                 ]
             labelTo :: Bool -> Double
-            labelTo True = 1.0
+            labelTo True = Debug.trace "+" $ 1.0
             labelTo False = -1.0
 
 
