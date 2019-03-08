@@ -474,7 +474,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     isPositiveData groundTruthData docname Annotation{..} =
         case docname `HM.lookup` groundTruthData of
           Just (posOffsets, negOffsets) -> let res = not $ null $ filter ((start, end) `offsetsIntersect`) posOffsets
-                                           in Debug.trace ("posOffsets" <> show posOffsets <> "\n searching "<> show (start, end)) res
+                                           in Debug.trace (show docname <> show res) res
+                                           --in Debug.trace ("posOffsets" <> show posOffsets <> "\n searching "<> show (start, end)) res
           Nothing -> False
       where offsetsIntersect :: Offsets -> Offsets -> Bool
             offsetsIntersect (s1, e1)  (s2, e2) =
