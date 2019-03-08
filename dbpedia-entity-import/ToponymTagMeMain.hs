@@ -288,6 +288,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     print "Predicting with Svm..."
     preds <- mapM (predictToponymsSvm svmModel allCategories) predictData
     writePubmedAnnotations outputFile $ catMaybes $ preds
+    print "Done"
   where
     predictToponymsNaiveBayes :: NBModel -> Log Double -> PubmedAnnotations -> Maybe PubmedAnnotations
     predictToponymsNaiveBayes model scoreThresh (pub@PubmedAnnotations {annotations = annotations }) =
