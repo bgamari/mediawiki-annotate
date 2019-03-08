@@ -274,7 +274,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
     print "Training Svm..."
     (allCategories, svmModel) <- trainSvm (isPositiveData groundTruthData) trainData
---     saveModel svmModel "toponym.model.svm"
+    SVM.saveModel svmModel "toponym.model.svm"
 
 --     print "Training Naive Bayes ..."
 --     let model = trainNaive (isPositiveData groundTruthData) trainData
@@ -348,6 +348,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             numPosTrain = length $ filter fst trainData'
             trainData'' = filter (\(x,_)-> x>0) trainData
             !bla = Debug.trace (unlines $ fmap show trainData'') $ 0
+
+        cvResult <-  SVM.crossValidate (SVM.OneClassSvm 0.1) SVM.Linear trainData'' 5
+        let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
         svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear $ trainData''
         return $ (allCategories, svmModel)
       where trainData' =
