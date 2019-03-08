@@ -472,7 +472,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
     isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
     isPositiveData groundTruthData docname Annotation{..} =
-        case docname `HM.lookup` groundTruthData of
+        Debug.trace ("truth for "<> (show docname) <> " "<> (show $ isJust (docname `HM.lookup` groundTruthData))) $ case docname `HM.lookup` groundTruthData of
           Just (posOffsets, negOffsets) -> not $ null $ filter ((start, end) `offsetsIntersect`) posOffsets
           Nothing -> False
       where offsetsIntersect :: Offsets -> Offsets -> Bool
