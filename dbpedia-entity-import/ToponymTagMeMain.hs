@@ -340,8 +340,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 | (isPos, ann) <- trainData'
                 ]
             numPosTrain = length $ filter fst trainData'
-        svmModel <- SVM.train (SVM.CSvc 0.1) SVM.Linear trainData
-        return $ Debug.trace ("numPostTrain "<> show numPosTrain) $ (allCategories, svmModel)
+        svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear trainData
+        return $ Debug.trace ("numPosOneClassSvmtTrain "<> show numPosTrain) $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
                 | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
