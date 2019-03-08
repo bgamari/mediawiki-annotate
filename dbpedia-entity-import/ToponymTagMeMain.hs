@@ -340,7 +340,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 | (isPos, ann) <- trainData'
                 ]
             numPosTrain = length $ filter fst trainData'
-        svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear $ filter (\(x,_)-> x>0) trainData
+            trainData'' = filter (\(x,_)-> x>0) trainData
+            !bla = Debug.trace (unlines $ fmap show trainData'') $ 0
+        svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear $ trainData''
         return $ Debug.trace ("numPosOneClassSvmtTrain "<> show numPosTrain) $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
@@ -349,7 +351,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 , let isPos = isPositive pubmedFilePath ann
                 ]
             labelTo :: Bool -> Double
-            labelTo True = Debug.trace "+" $ 1.0
+            labelTo True =  1.0
             labelTo False = -1.0
 
 
