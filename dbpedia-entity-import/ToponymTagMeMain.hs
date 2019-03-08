@@ -327,13 +327,19 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             feats = IntMap.fromList
                       $ [ (fIdx, 1.0)
                         | cat <- categories
-                        , let Just fIdx = cat `HM.lookup` allCategories
+                        , w <- T.words cat
+                        , let Just fIdx = w `HM.lookup` allCategories
                         ]
         in feats
 
     trainSvm:: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> IO (HM.HashMap T.Text Int,  SVM.Model)
     trainSvm isPositive trainData = do
-        let allCategories = let catList = S.toList $ S.fromList [cat | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData', cat <- categories]
+        let allCategories = let catList = S.toList $ S.fromList
+                                          $ [w
+                                          | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData'
+                                          , cat <- categories
+                                          , w <- T.words cat
+                                          ]
                             in HM.fromList $ zip catList [1..]
             trainData =
                 [ (labelTo isPos, annToSvmVector allCategories ann)
@@ -343,7 +349,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             trainData'' = filter (\(x,_)-> x>0) trainData
             !bla = Debug.trace (unlines $ fmap show trainData'') $ 0
         svmModel <- SVM.train (SVM.OneClassSvm 0.1) SVM.Linear $ trainData''
-        return $ Debug.trace ("numPosOneClassSvmtTrain "<> show numPosTrain) $ (allCategories, svmModel)
+        return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
                 | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
