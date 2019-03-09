@@ -263,6 +263,16 @@ annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
 placePatterns :: [T.Text]
 placePatterns = ["place", "capital", "province" , "nations", "countries", "territories", "territory", "geography", "continent"]
 
+data TrainData = TrainData { vocabulary :: HM.HashMap T.Text Int
+                           , allTrainData :: SVM.Problem
+                           , balancedTrainData :: SVM.Problem
+                           , numPos :: Int
+                           , posBalancedTrainData :: SVM.Problem
+                           , negBalancedTrainData :: SVM.Problem
+                           }
+
+
+
 predictToponyms :: FilePath -> FilePath -> FilePath -> FilePath -> [FilePath] -> NaiveBayesMode -> IO ()
 predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
 --     let scoreThresh'' :: Log Double
@@ -274,7 +284,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 --     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
 
     print "Training Svm..."
-    (allCategories, svmModel) <- trainSvm (isPositiveData groundTruthData) trainData
+    let allCategories = pubMedDataToAllFeatures trainData
+
+    svmModel <- trainSvm (isPositiveData groundTruthData) allCategories trainData
 --     SVM.saveModel svmModel "toponym.model.svm"
 
 --     print "Training Naive Bayes ..."
@@ -322,39 +334,68 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 --             !x =  Debug.traceShow (title, placeCats) $ placeCats
         in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
 
+
+-- --------------------------------
+    enumerateFeatures :: Annotation -> [T.Text]
+    enumerateFeatures Annotation{dbpediaCategories = Just categories} =
+        [ w
+        | cat <- categories
+        , w <- T.words cat
+        ]
+
+    enumerateFeatures Annotation{dbpediaCategories = Nothing} = []
+
+    -- | produce allCategories data
+    pubMedDataToAllFeatures :: [PubmedAnnotations] -> HM.HashMap T.Text Int
+    pubMedDataToAllFeatures trainData =
+            let allCategories = let catList = S.toList $ S.fromList
+                                              $ [ feat
+                                                | PubmedAnnotations {annotations =  anns} <- trainData
+                                                , ann <- anns
+                                                , feat <- enumerateFeatures ann
+                                                ]
+                                in HM.fromList $ zip catList [1..]
+            in allCategories
+
+
     annToSvmVector :: HM.HashMap T.Text Int -> Annotation -> IntMap.IntMap Double
-    annToSvmVector allCategories Annotation{dbpediaCategories = Just categories} =
-        let catSet = S.fromList categories
-            feats = IntMap.fromList
+    annToSvmVector allCategories ann =
+        let feats = IntMap.fromList
                       $ [ (fIdx, 1.0)
-                        | cat <- categories
-                        , w <- T.words cat
-                        , let Just fIdx = w `HM.lookup` allCategories
+                        | feat <- enumerateFeatures ann
+                        , Just fIdx <- pure $ feat `HM.lookup` allCategories
                         ]
         in feats
 
-    trainSvm:: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> IO (HM.HashMap T.Text Int,  SVM.Model)
-    trainSvm isPositive trainData = do
-        let allCategories = let catList = S.toList $ S.fromList
-                                          $ [w
-                                          | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData'
-                                          , cat <- categories
-                                          , w <- T.words cat
-                                          ]
-                            in HM.fromList $ zip catList [1..]
-            trainData'' =
-                [ (labelTo isPos, annToSvmVector allCategories ann)
-                | (isPos, ann) <- trainData'
+
+    pubmedDataToSvmTrainData :: ( T.Text -> Annotation -> Bool) -> HM.HashMap T.Text Int-> [PubmedAnnotations] -> TrainData
+    pubmedDataToSvmTrainData isPositive allCategories trainData =
+            let
+                trainData'' =
+                    [ (labelTo isPos, annToSvmVector allCategories ann)
+                    | (isPos, ann) <- trainData'
+                    ]
+                numPosTrain = length $ filter fst trainData'
+                (posTrainData'', negTrainData_) = partition (\(x,_)-> x>0) trainData''
+                negTrainData'' =  take numPosTrain negTrainData_
+                trainData''' = posTrainData'' <>  negTrainData''
+            in TrainData {vocabulary = allCategories, allTrainData = trainData'', balancedTrainData=trainData''', numPos=numPosTrain, posBalancedTrainData=posTrainData'', negBalancedTrainData=negTrainData''}
+      where trainData' =
+                [ (isPos, ann)
+                | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
+                , ann <- anns
+                , let isPos = isPositive pubmedFilePath ann
                 ]
-            numPosTrain = length $ filter fst trainData'
-            (posTrainData'', negTrainData_) = partition (\(x,_)-> x>0) trainData''
-            negTrainData'' =  take numPosTrain negTrainData_
-            trainData''' = posTrainData'' <>  negTrainData''
+            labelTo :: Bool -> Double
+            labelTo True =  1.0
+            labelTo False = -1.0
 
-            -- !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
+-- --------------------------------
 
---         cvResult <-  SVM.crossValidate (SVM.CSvc 2.0 ) SVM.Linear trainData''' 5
---         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
+    trainSvm :: ( T.Text -> Annotation -> Bool) -> HM.HashMap T.Text Int -> [PubmedAnnotations] -> IO SVM.Model
+    trainSvm isPositive allCategories trainData = do
+        let TrainData {vocabulary = _, allTrainData = trainData'', balancedTrainData=trainData''', numPos=numPosTrain, posBalancedTrainData=posTrainData'', negBalancedTrainData=negTrainData''}
+               = pubmedDataToSvmTrainData isPositive allCategories trainData
         forM_ [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0] (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
@@ -370,16 +411,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
             )
         svmModel <- SVM.train (SVM.CSvc 2.0) SVM.Linear $ trainData'''
-        return $ (allCategories, svmModel)
-      where trainData' =
-                [ (isPos, ann)
-                | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
-                , ann <- anns
-                , let isPos = isPositive pubmedFilePath ann
-                ]
-            labelTo :: Bool -> Double
-            labelTo True =  1.0
-            labelTo False = -1.0
+        return $ svmModel
 
 
     trainNaive :: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> NBModel
