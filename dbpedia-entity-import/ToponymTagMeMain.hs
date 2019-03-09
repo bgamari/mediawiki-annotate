@@ -349,11 +349,16 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             (posTrainData'', negTrainData'') = partition (\(x,_)-> x>0) trainData''
             trainData''' = posTrainData'' <> take numPosTrain negTrainData''
 
-            !bla = Debug.trace (unlines $ fmap show trainData'') $ 0
+            !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
 
         cvResult <-  SVM.crossValidate (SVM.CSvc 0.1) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
         svmModel <- SVM.train (SVM.CSvc 0.1) SVM.Linear $ trainData'''
+
+        posPred <- mapM (SVM.predict svmModel) $ fmap snd $ posTrainData''
+        negPred <- mapM (SVM.predict svmModel)  $ fmap snd $ negTrainData''
+        putStrLn $ "pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
+
         return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
@@ -462,20 +467,20 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                                         | isPos =     conf{ tp= (tp conf)+1, fp= (fp conf)-1}
                                         | otherwise = conf{ fn= (fn conf)+1, tn= (tn conf)-1}
                     in  predictCountAccumPos
-
-                scoreHalfGaussian predictions' =
-                    let (poss, negs) = partition snd predictions'
-                    in (avg poss) + (avg negs) /2
-
-                  where avg list = 1/ realToFrac (length list) * (Numeric.Log.sum $ fmap fst list)
-
-                scoreHalfMedian predictions' =
-                    let (poss, negs) = partition snd predictions'
-                    in (med poss) + (med negs) /2
-
-                  where med list =
-                          let (medScore, _) = last $ take (length list `div` 2) list
-                          in medScore
+--
+--                 scoreHalfGaussian predictions' =
+--                     let (poss, negs) = partition snd predictions'
+--                     in (avg poss) + (avg negs) /2
+--
+--                   where avg list = 1/ realToFrac (length list) * (Numeric.Log.sum $ fmap fst list)
+--
+--                 scoreHalfMedian predictions' =
+--                     let (poss, negs) = partition snd predictions'
+--                     in (med poss) + (med negs) /2
+--
+--                   where med list =
+--                           let (medScore, _) = last $ take (length list `div` 2) list
+--                           in medScore
 
 
     predictNaive :: NaiveBayesMode -> NBModel -> Annotation -> Log Double
@@ -497,6 +502,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 if s1 > s2 && s1 < e2 then (Debug.trace "isPositive" True)
                 else if s2 > s1 && s2 < e1 then (Debug.trace "isPositive" True)
                    else False
+
+avg :: [Double] -> Double
+avg list = 1/ realToFrac (length list) * (Data.List.sum list)
 
 data NaiveBayesMode =  NBFull | NBNoClass | NBNoNegFeats
 
