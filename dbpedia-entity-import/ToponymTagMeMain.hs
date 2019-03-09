@@ -286,7 +286,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     print "Training Svm..."
     let allCategories = pubMedDataToAllFeatures trainData
 
-    svmModel <- trainSvm (isPositiveData groundTruthData) allCategories trainData
+    svmModel <- trainSvm (isPositiveData groundTruthData) allCategories trainData validateData
 --     SVM.saveModel svmModel "toponym.model.svm"
 
 --     print "Training Naive Bayes ..."
@@ -392,26 +392,30 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
 -- --------------------------------
 
-    trainSvm :: ( T.Text -> Annotation -> Bool) -> HM.HashMap T.Text Int -> [PubmedAnnotations] -> IO SVM.Model
-    trainSvm isPositive allCategories trainData = do
-        let TrainData {vocabulary = _, allTrainData = trainData'', balancedTrainData=trainData''', numPos=numPosTrain, posBalancedTrainData=posTrainData'', negBalancedTrainData=negTrainData''}
+    trainSvm :: ( T.Text -> Annotation -> Bool) -> HM.HashMap T.Text Int -> [PubmedAnnotations] -> [PubmedAnnotations] -> IO SVM.Model
+    trainSvm isPositive allCategories trainData validateData = do
+        let TrainData {vocabulary = _, allTrainData = trainData'', balancedTrainData=trainData''', numPos=_, posBalancedTrainData=_, negBalancedTrainData=_}
                = pubmedDataToSvmTrainData isPositive allCategories trainData
-        forM_ [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0] (\c -> do
+            TrainData {vocabulary = _, allTrainData = _, balancedTrainData=_, numPos=numPosTrain, posBalancedTrainData=posTrainData'', negBalancedTrainData=negTrainData''}
+               = pubmedDataToSvmTrainData isPositive allCategories validateData
+        forM_ [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0]
+          (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
-
             posPred <- mapM (SVM.predict svmModel) $ fmap snd $ posTrainData''
             negPred <- mapM (SVM.predict svmModel)  $ fmap snd $ negTrainData''
-            let confusion = (Confusion {
-                                tp= length $ filter (>0) posPred
-                              , fn = length $ filter (<=0) posPred
-                              , tn= length $ filter (<=0) negPred
-                              , fp= length $ filter (>0) negPred
-                              })
-            putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
-            )
+            debugOutput c posPred negPred
+          )
         svmModel <- SVM.train (SVM.CSvc 2.0) SVM.Linear $ trainData'''
         return $ svmModel
+      where debugOutput c posPred negPred = do
+                    let confusion = (Confusion {
+                                        tp= length $ filter (>0) posPred
+                                      , fn = length $ filter (<=0) posPred
+                                      , tn= length $ filter (<=0) negPred
+                                      , fp= length $ filter (>0) negPred
+                                      })
+                    putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
 
 
     trainNaive :: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> NBModel
