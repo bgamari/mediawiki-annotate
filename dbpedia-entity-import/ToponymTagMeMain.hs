@@ -308,7 +308,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     onlySvmPlaceAnnotations model allCategories ann = do
         let vector = annToSvmVector allCategories ann
         result <- SVM.predict model vector
-        return $ Debug.trace (show result) $ result >0.0
+        return $ result >0.0
 
     onlyPlaceAnnotationsHeuristic :: Annotation -> Bool
     onlyPlaceAnnotationsHeuristic Annotation{..} =
@@ -349,7 +349,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             (posTrainData'', negTrainData'') = partition (\(x,_)-> x>0) trainData''
             trainData''' = posTrainData'' <> take numPosTrain negTrainData''
 
-            !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
+            -- !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
 
         cvResult <-  SVM.crossValidate (SVM.CSvc 0.5) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
@@ -495,8 +495,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     predictNaive :: NaiveBayesMode -> NBModel -> Annotation -> Log Double
     predictNaive naiveBayesMode model Annotation{dbpediaCategories = Just categories} =
         let score = nbLikelihood naiveBayesMode model categories
-        in Debug.trace (show $ ln score)$ score
---         in score
+--         in Debug.trace (show $ ln score)$ score
+        in score
 
     isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
     isPositiveData groundTruthData docname Annotation{..} =
@@ -508,8 +508,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
           Nothing -> False
       where offsetsIntersect :: Offsets -> Offsets -> Bool
             offsetsIntersect (s1, e1)  (s2, e2) =
-                if s1 > s2 && s1 < e2 then (Debug.trace "isPositive" True)
-                else if s2 > s1 && s2 < e1 then (Debug.trace "isPositive" True)
+                if s1 > s2 && s1 < e2 then True
+                else if s2 > s1 && s2 < e1 then True
                    else False
 
 avg :: [Double] -> Double
