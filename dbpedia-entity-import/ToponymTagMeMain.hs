@@ -203,6 +203,7 @@ tagData env tagMeToken maxLen overlapLen document = do
     return $ mconcat anns
 
 data Confusion = Confusion {tp::Int, tn :: Int, fp :: Int, fn::Int}
+                    deriving (Show)
 f1 ::Confusion -> Double
 f1 Confusion{..} =
     let prec = (realToFrac tp)/(realToFrac (tp + fp))
@@ -353,19 +354,19 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
         cvResult <-  SVM.crossValidate (SVM.CSvc 0.5) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
-        forM_ [0.01, 0.1, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0] (\c -> do
+        forM_ [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0] (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
 
             posPred <- mapM (SVM.predict svmModel) $ fmap snd $ posTrainData''
             negPred <- mapM (SVM.predict svmModel)  $ fmap snd $ negTrainData''
-            let f1Score = f1 (Confusion {
+            let confusion = (Confusion {
                                 tp= length $ filter (>0) posPred
+                              , fn = length $ filter (<=0) posPred
                               , tn= length $ filter (<=0) negPred
                               , fp= length $ filter (>0) negPred
-                              , fn = length $ filter (<=0) posPred
                               })
-            putStrLn $ "C="<>show c <>" f1="<> show f1Score <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
+            putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
             )
         svmModel <- SVM.train (SVM.CSvc 0.5) SVM.Linear $ trainData'''
         return $ (allCategories, svmModel)
