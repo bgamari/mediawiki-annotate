@@ -347,8 +347,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 | (isPos, ann) <- trainData'
                 ]
             numPosTrain = length $ filter fst trainData'
-            (posTrainData'', negTrainData'') = partition (\(x,_)-> x>0) trainData''
-            trainData''' = posTrainData'' <> take numPosTrain negTrainData''
+            (posTrainData'', negTrainData_) = partition (\(x,_)-> x>0) trainData''
+            negTrainData'' =  take numPosTrain negTrainData_
+            trainData''' = posTrainData'' <>  negTrainData''
 
             -- !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
 
