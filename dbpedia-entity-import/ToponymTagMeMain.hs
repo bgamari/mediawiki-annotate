@@ -274,7 +274,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
     print "Training Svm..."
     (allCategories, svmModel) <- trainSvm (isPositiveData groundTruthData) trainData
-    SVM.saveModel svmModel "toponym.model.svm"
+--     SVM.saveModel svmModel "toponym.model.svm"
 
 --     print "Training Naive Bayes ..."
 --     let model = trainNaive (isPositiveData groundTruthData) trainData
@@ -351,7 +351,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
             !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
 
-        cvResult <-  SVM.crossValidate (SVM.CSvc 0.1) SVM.Linear trainData''' 5
+        cvResult <-  SVM.crossValidate (SVM.CSvc 0.5) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
         forM_ [0.01, 0.1, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0] (\c -> do
 
@@ -359,9 +359,15 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
             posPred <- mapM (SVM.predict svmModel) $ fmap snd $ posTrainData''
             negPred <- mapM (SVM.predict svmModel)  $ fmap snd $ negTrainData''
-            putStrLn $ "C="<>show c <>" pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
+            let f1Score = f1 (Confusion {
+                                tp= length $ filter (>0) posPred
+                              , tn= length $ filter (<=0) negPred
+                              , fp= length $ filter (>0) negPred
+                              , fn = length $ filter (<=0) posPred
+                              })
+            putStrLn $ "C="<>show c <>" f1="<> show f1Score <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
             )
-        svmModel <- SVM.train (SVM.CSvc 2.5) SVM.Linear $ trainData'''
+        svmModel <- SVM.train (SVM.CSvc 0.5) SVM.Linear $ trainData'''
         return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
