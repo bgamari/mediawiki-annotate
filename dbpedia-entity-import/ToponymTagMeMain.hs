@@ -293,7 +293,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                = pubmedDataToSvmTrainData isPositive allCategories trainData
             TrainData {vocabulary = _, allTrainData = _, balancedTrainData=_, numPos=numPosTrain, posBalancedTrainData=posTrainData'', negBalancedTrainData=negTrainData''}
                = pubmedDataToSvmTrainData isPositive allCategories validateData
-        criteria <- forM [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0]
+        criteria <- forM [0.001, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
           (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
