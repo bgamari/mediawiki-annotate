@@ -283,11 +283,12 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
 --     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
 
-    print "Training Svm..."
+    print "Tuning Svm..."
     let allCategories = pubMedDataToAllFeatures trainData
-
-
     tunedSvmParam <- tuneSvmParam (isPositiveData groundTruthData) allCategories trainData validateData
+    print $ "Tuning result = "<> show tunedSvmParam
+
+    print "Tuning Svm..."
     svmModel <- trainSvm (isPositiveData groundTruthData) allCategories tunedSvmParam trainData
 --     SVM.saveModel svmModel "toponym.model.svm"
 
@@ -343,6 +344,9 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
         [ w
         | cat <- categories
         , w <- T.words cat
+        ] ++
+        [ cat
+        | cat <- categories
         ]
 
     enumerateFeatures Annotation{dbpediaCategories = Nothing} = []
