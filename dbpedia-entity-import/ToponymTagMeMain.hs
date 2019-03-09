@@ -304,8 +304,11 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             return (criterion,c)
           )
           :: IO [(Double, Double)]
-        return $ snd $ maximumBy (comparing fst) criteria
-      where debugOutput :: Double -> [Double] -> [Double] -> IO Double
+        return $ snd $ maximumBy fstThenInvSnd criteria
+      where fstThenInvSnd :: (Double,Double) -> (Double,Double) -> Ordering
+            fstThenInvSnd (s1,c1) (s2,c2) = if s1==s2 then (compare (-c1) (-c2)) else (compare s1 s2)
+
+            debugOutput :: Double -> [Double] -> [Double] -> IO Double
             debugOutput c posPred negPred = do
                     let confusion = (Confusion {
                                         tp= length $ filter (>0) posPred
