@@ -30,6 +30,4 @@
 [submodule "vendor/frisby"]
 	path = vendor/frisby
 	url = git://github.com/bgamari/frisby
-[submodule "vendor/HSvm"]
-	path = vendor/HSvm
-	url = git@github.com:bgamari/HSvm.git
+

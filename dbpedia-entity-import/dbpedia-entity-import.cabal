@@ -76,7 +76,7 @@ executable toponym-tagme
                        optparse-applicative >= 0.14,
                        filepath,
                        servant-client>=0.16,
-                       HSvm,
+                       HSvm>=0.1.1.3.22,
                        log-domain,
                        trifecta,
                        simplir,
