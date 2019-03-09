@@ -353,8 +353,8 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
             -- !bla = Debug.trace (unlines $ fmap show trainData''') $ 0
 
-        cvResult <-  SVM.crossValidate (SVM.CSvc 0.5) SVM.Linear trainData''' 5
-        let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
+--         cvResult <-  SVM.crossValidate (SVM.CSvc 2.0 ) SVM.Linear trainData''' 5
+--         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
         forM_ [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0] (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
@@ -369,7 +369,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                               })
             putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
             )
-        svmModel <- SVM.train (SVM.CSvc 0.5) SVM.Linear $ trainData'''
+        svmModel <- SVM.train (SVM.CSvc 2.0) SVM.Linear $ trainData'''
         return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
