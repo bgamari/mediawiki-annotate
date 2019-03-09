@@ -67,99 +67,6 @@ data PubmedAnnotations = PubmedAnnotations { doc :: PubmedDocument
 data ToponymWrapper = ToponymWrapper { list :: [PubmedAnnotations]}
         deriving (Aeson.ToJSON, Aeson.FromJSON, Generic)
 
-
--- Naive Bayes types
-type Pos = Int
-type Neg = Int
-data NBTuple = NBTuple { intPositives, intNegatives :: !Int }
-                 deriving (Show)
-
-aPos, aNeg :: NBTuple
-aPos = NBTuple 1 0
-aNeg = NBTuple 0 1
-
-instance Monoid NBTuple where
-    mempty = NBTuple 0 0
-instance Semigroup NBTuple where
-    NBTuple a b <> NBTuple c d = NBTuple (a+c) (b+d)
-
-
-
-data NBLogTuple = NBLogTuple { positives, negatives :: !(Log Double) }
-                 deriving (Show)
-data NBModel = NBModel { totals :: NBLogTuple
-                       , stats :: HM.HashMap T.Text NBLogTuple}
-                 deriving (Show)
-
-mkNaiveBayesModel :: NBTuple -> HM.HashMap T.Text NBTuple -> NBModel
-mkNaiveBayesModel t s =
-    NBModel { totals = toLog t, stats = fmap toLog s}
-  where toLog :: NBTuple -> NBLogTuple
-        toLog (NBTuple p n) = NBLogTuple (realToFrac (p+1)) (realToFrac (n+1))
-
-
-
-nbLikelihood :: NaiveBayesMode -> NBModel -> [T.Text] -> Log Double
-nbLikelihood nbMode NBModel{..} feats
-  | null feats = 0.0
-  | not $ any (`HM.member` stats) feats = 0.0
-  | otherwise =
-
-
-    let !featSet = S.fromList feats
-        likelihood =
-            case nbMode of
-              NBFull ->
-                   toRatio (NBLogTuple 1 1) totals *
-                      product [ toRatio totals x
-                             | f <- feats
-                             , Just x <- pure $ f `HM.lookup` stats
-                             ]
-                   * product [ toFlipRatio totals x
-                             | (f,x) <- HM.toList stats
-                             , not $ f `S.member` featSet
-                             ]
-              NBNoClass ->
-                   product [ toRatio totals x
-                             | f <- feats
-                             , Just x <- pure $ f `HM.lookup` stats
-                             ]
-                   * product [ toFlipRatio totals x
-                             | (f,x) <- HM.toList stats
-                             , not $ f `S.member` featSet
-                             ]
-
-
-              NBNoNegFeats ->
-                      product [ toRatio totals x
-                             | f <- feats
-                             , Just x <- pure $ f `HM.lookup` stats
-                             ]
-
-    in checkNan $ likelihood
-  where
-    toRatio :: NBLogTuple -> NBLogTuple -> Log Double
-    toRatio (NBLogTuple normPos normNeg) (NBLogTuple pos neg) =
-        if pos == 0 then 1e-5 else
-        if neg == 0 then 1  else
-        if normPos == 0  then 1 else
-            -- else (pos/normPos) / (neg/normNeg)
-            pos * normNeg / (normPos * neg)
-    toFlipRatio :: NBLogTuple -> NBLogTuple  -> Log Double
-    toFlipRatio totals stats =
-        toRatio (flip totals) (flip stats)
-      where flip (NBLogTuple p n) = NBLogTuple n p
-
-    checkNan :: Log Double -> Log Double
-    checkNan score =
-        if isInfinite $ ln score then
-            error $ "Model score is infinite. Features: "<> show feats
-        else if isNaN $ ln score then
-            error $ "Model score is Nan. Features: "<> show feats
-        else score
-
-
-
 readPubmedFiles :: [FilePath] -> IO [PubmedDocument]
 readPubmedFiles (f1:rest) = do
     d1 <- readPubmedFile f1
@@ -230,14 +137,6 @@ tagMeOptions = TagMeOptions { inclAbstract = False
                             , language = langEn
                             }
 
-
-
-
-helpDescr :: PP.Doc
-helpDescr =
-    "Convert PubMed documents to TagMe annotations."
-
-
 annotatePubMed :: [FilePath] -> FilePath -> Int -> Int -> Int -> IO()
 annotatePubMed inFiles outputFile maxLen overlapLen httpTimeout = do
     tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
@@ -273,15 +172,12 @@ data TrainData = TrainData { vocabulary :: HM.HashMap T.Text Int
 
 
 
-predictToponyms :: FilePath -> FilePath -> FilePath -> FilePath -> [FilePath] -> NaiveBayesMode -> IO ()
-predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthFiles naiveBayesMode = do
---     let scoreThresh'' :: Log Double
---         scoreThresh'' = realToFrac scoreThresh'
+predictToponyms :: FilePath -> FilePath -> FilePath -> FilePath -> [FilePath] -> IO ()
+predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthFiles = do
     print "Loading data..."
     trainData <- readPubmedAnnotations trainInFile
     validateData <- readPubmedAnnotations validateInFile
     groundTruthData <- loadGroundTruthHashMap groundTruthFiles
---     groundTruthValData <- loadGroundTruthHashMap groundTruthFiles -- load validation ground truth
 
     print "Tuning Svm..."
     let allCategories = pubMedDataToAllFeatures trainData
@@ -290,35 +186,21 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
     print "Tuning Svm..."
     svmModel <- trainSvm (isPositiveData groundTruthData) allCategories tunedSvmParam trainData
---     SVM.saveModel svmModel "toponym.model.svm"
-
---     print "Training Naive Bayes ..."
---     let model = trainNaive (isPositiveData groundTruthData) trainData
---     print "Training Naive Bayes Threshold..."
---     let scoreThresh = trainThresh (isPositiveData groundTruthData) model validateData     -- todo load validation data from file
 
     print "Loading predict data..."
     predictData <- readPubmedAnnotations predictInFile
---     print "Predicting with Naive Bayes..."
---     let preds = fmap (predictToponyms model scoreThresh) predictData
+
     print "Predicting with Svm..."
     preds <- mapM (predictToponymsSvm svmModel allCategories) predictData
     writePubmedAnnotations outputFile $ catMaybes $ preds
     print "Done"
   where
-    predictToponymsNaiveBayes :: NBModel -> Log Double -> PubmedAnnotations -> Maybe PubmedAnnotations
-    predictToponymsNaiveBayes model scoreThresh (pub@PubmedAnnotations {annotations = annotations }) =
-        let annotation' = filter (onlyPlaceAnnotations model scoreThresh) annotations
-        in if null annotation' then Nothing
-           else Just $ pub { annotations = annotation'}
 
     predictToponymsSvm :: SVM.Model -> HM.HashMap T.Text Int -> PubmedAnnotations -> IO (Maybe PubmedAnnotations)
     predictToponymsSvm  model allCategories (pub@PubmedAnnotations {annotations = annotations }) = do
         annotation' <- filterM (onlySvmPlaceAnnotations model allCategories) annotations
         return $ if null annotation' then Nothing
                  else Just $ pub { annotations = annotation'}
-
-    onlyPlaceAnnotations model scoreThresh ann = (predictNaive naiveBayesMode  model ann > scoreThresh)
 
     onlySvmPlaceAnnotations  :: SVM.Model -> HM.HashMap T.Text Int -> Annotation -> IO Bool
     onlySvmPlaceAnnotations model allCategories ann = do
@@ -334,7 +216,6 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                         , pat <- placePatterns
                         , pat `T.isInfixOf` (T.toLower cat)
                         ]
---             !x =  Debug.traceShow (title, placeCats) $ placeCats
         in (not $ null $ placeCats) && (spot /= "et" && spot /= "al")
 
 
@@ -435,131 +316,10 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                     putStrLn $ "C="<>show c <>" f1="<> show (f1 confusion) <> " " <> show confusion <> " pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
                     return $ f1 confusion
 
-    trainNaive :: ( T.Text -> Annotation -> Bool) -> [PubmedAnnotations] -> NBModel
-    trainNaive isPositive trainData =
-        let totals :: NBTuple
-            !totals = foldMap (\(isPos, _ ) -> if isPos then aPos else aNeg) trainData'
-            perCatCounts :: HM.HashMap T.Text NBTuple
-            !perCatCounts =
-                HM.fromListWith (<>)
-                $ [ (cat, counts)
-                  | (isPos, Annotation{dbpediaCategories = Just categories}) <- trainData'
-                  , cat <- categories
-                  , let counts = if isPos then aPos else aNeg
-                  ]
-        in mkNaiveBayesModel totals perCatCounts
-      where trainData' =
-                [ (isPos, ann)
-                | PubmedAnnotations { doc =  PubmedDocument {filename = pubmedFilePath }, annotations =  anns} <- trainData
-                , ann <- anns
-                , let isPos = isPositive pubmedFilePath ann
-                ]
-
-    trainThresh  :: ( T.Text -> Annotation -> Bool) -> NBModel -> [PubmedAnnotations] -> Log Double
-    trainThresh isPositive model validateData =
-            let predictions = [ (score, isPos)
-                              | PubmedAnnotations {doc = PubmedDocument {filename = fname}, annotations = annotations} <- validateData
-                              , ann <- annotations
-                              , let score =  predictNaive naiveBayesMode model ann
-                              , let isPos = isPositive fname ann
-                              ]
-                predictions' = sortOn (Down. fst) predictions
---                 thresh50 = scoreThresHalfRecall predictions'
---                 threshGaussian = scoreHalfGaussian predictions'
---                 threshMedian = scoreHalfMedian predictions'
-                threshF1 = scoreThreshMaxF1 predictions'
-
-                preds :: [(Confusion, (Log Double, Bool))]
-                !preds = rankQuality predictions'
-                xxx :: Log Double -> (Log Double, Double)
-                xxx thresh =
-                    let ((conf, (_, _)) : _) = dropWhile (\(_, (score, _)) -> score > thresh) preds
-                    in (thresh, f1 conf)
-            in Debug.trace ("threshF1="<> show (xxx threshF1) )
---                        <> " thresh50="<> show (xxx thresh50)
---                        <> " threshGaussian="<> show (xxx threshGaussian)
---                        <> " threshMedian="<> show (xxx threshMedian)  )
-                       $ threshF1
-      where
-                scoreThresHalfRecall predictions' =
-                    let numPos = length $ filter snd predictions'
-                        predictCountAccumPos :: [(Int, (Log Double, Bool))]
-                        x:: (Int, [(Int, (Log Double, Bool))])
-                        x@(_, predictCountAccumPos) =
-                           mapAccumL f 0 predictions'
-                            where f :: Int -> (Log Double, Bool) -> (Int, (Int, (Log Double, Bool)))
-                                  f count x@(_, isPos) = (count', (count', x))
-                                    where
-                                      count'
-                                        | isPos = count+1
-                                        | otherwise = count
-                        scoreThresh :: Log Double
-                        (_, (scoreThresh, _)) = head $ dropWhile (\(c,_) -> c < numPos `div` 2) predictCountAccumPos
-                    in scoreThresh
-
-                scoreThreshMaxF1 predictions' =
-                    let numPos = length $ filter snd predictions'
-                        numTotal = length predictions'
-
-                        predictCountAccumPos :: [(Double, (Log Double, Bool))]
-                        x:: (Confusion, [(Double, (Log Double, Bool))])
-                        x@(_, predictCountAccumPos) =
-                           mapAccumL f Confusion{tp =0, fn=0, fp=numPos, tn=(numTotal-numPos)} predictions'
-                            where f :: Confusion -> (Log Double, Bool) -> (Confusion, (Double, (Log Double, Bool)))
-                                  f conf@Confusion{} x@(_, isPos) = (conf', (f1 conf', x))
-                                    where
-                                      conf'
-                                        | isPos =     conf{ tp= (tp conf)+1, fp= (fp conf)-1}
-                                        | otherwise = conf{ fn= (fn conf)+1, tn= (tn conf)-1}
-                        scoreThresh :: Log Double
-                        (_, (scoreThresh, _)) = maximumBy (comparing fst) predictCountAccumPos
-                    in scoreThresh
-
-                rankQuality :: [(Log Double, Bool)] -> [(Confusion, (Log Double, Bool))]
-                rankQuality predictions' =
-                    let numPos = length $ filter snd predictions'
-                        numTotal = length predictions'
-
-                        predictCountAccumPos :: [(Confusion, (Log Double, Bool))]
-                        x:: (Confusion, [(Confusion, (Log Double, Bool))])
-                        x@(_, predictCountAccumPos) =
-                           mapAccumL f Confusion{tp =0, fn=0, fp=numPos, tn=(numTotal-numPos)} predictions'
-                            where f :: Confusion -> (Log Double, Bool) -> (Confusion, (Confusion, (Log Double, Bool)))
-                                  f conf@Confusion{} x@(_, isPos) = (conf', (conf', x))
-                                    where
-                                      conf'
-                                        | isPos =     conf{ tp= (tp conf)+1, fp= (fp conf)-1}
-                                        | otherwise = conf{ fn= (fn conf)+1, tn= (tn conf)-1}
-                    in  predictCountAccumPos
---
---                 scoreHalfGaussian predictions' =
---                     let (poss, negs) = partition snd predictions'
---                     in (avg poss) + (avg negs) /2
---
---                   where avg list = 1/ realToFrac (length list) * (Numeric.Log.sum $ fmap fst list)
---
---                 scoreHalfMedian predictions' =
---                     let (poss, negs) = partition snd predictions'
---                     in (med poss) + (med negs) /2
---
---                   where med list =
---                           let (medScore, _) = last $ take (length list `div` 2) list
---                           in medScore
-
-
-    predictNaive :: NaiveBayesMode -> NBModel -> Annotation -> Log Double
-    predictNaive naiveBayesMode model Annotation{dbpediaCategories = Just categories} =
-        let score = nbLikelihood naiveBayesMode model categories
---         in Debug.trace (show $ ln score)$ score
-        in score
-
     isPositiveData :: HM.HashMap T.Text ([Offsets], [Offsets]) ->  T.Text -> Annotation -> Bool
     isPositiveData groundTruthData docname Annotation{..} =
         case docname `HM.lookup` groundTruthData of
           Just (posOffsets, negOffsets) -> not $ null $ filter ((start, end) `offsetsIntersect`) posOffsets
-
-                                           --in Debug.trace (show docname <> show res) res
-                                           --in Debug.trace ("posOffsets" <> show posOffsets <> "\n searching "<> show (start, end)) res
           Nothing -> False
       where offsetsIntersect :: Offsets -> Offsets -> Bool
             offsetsIntersect (s1, e1)  (s2, e2) =
@@ -570,8 +330,15 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 avg :: [Double] -> Double
 avg list = 1/ realToFrac (length list) * (Data.List.sum list)
 
-data NaiveBayesMode =  NBFull | NBNoClass | NBNoNegFeats
 
+
+-- ---- Command Line interface ----
+
+helpDescr :: PP.Doc
+helpDescr =
+    "SemEval Toponym track 19 - TagMe baseline \n" <>
+    "annotate: Convert PubMed documents to TagMe annotations.\n" <>
+    "predict: Filter TagMe Annotation using SVM (training included in this step) "
 
 opts :: Parser (IO ())
 opts = subparser
@@ -590,17 +357,11 @@ opts = subparser
     groundTruthFiles = many $ argument str (metavar "ANN" <> help "Ground truth in (*.ann format)")
 
 
-    naiveBayesMode = flag' NBFull ( long "nb-full" <> help "full naive bayes likelihood")
-                       <|> flag' NBNoClass ( long "nb-no-class" <> help "naive bayes likelihood without class prior")
-                       <|> flag' NBNoNegFeats ( long "nb-no-neg-feats" <> help "naive bayes likelihood without class prior and without negative feature information")
-
-
---     scoreThresh = option auto (long "score-thresh" <> metavar "DOUBLE" <> help "Minimum threshold for positive place prediction")
     annotatePubMed' =
         annotatePubMed <$> (many inputRawDataFile) <*> outputFile <*> maxLen <*> overlapLen <*> httpTimeout
 
     predictToponyms' =
-        predictToponyms <$> trainInFile <*> validateInFile <*> predictInFile <*> outputFile <*> groundTruthFiles <*> naiveBayesMode
+        predictToponyms <$> trainInFile <*> validateInFile <*> predictInFile <*> outputFile <*> groundTruthFiles
 
 main :: IO ()
 main = join $ execParser' 1 (helper <*> opts) (progDescDoc $ Just helpDescr)
