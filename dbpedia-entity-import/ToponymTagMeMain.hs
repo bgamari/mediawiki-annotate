@@ -353,7 +353,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
 
         cvResult <-  SVM.crossValidate (SVM.CSvc 0.1) SVM.Linear trainData''' 5
         let !bla1 =  Debug.trace ("crossvalidate" <> show cvResult) $ 0
-        forM_ [0.01, 0.1, 0.5, 1.0, 10.0] (\c -> do
+        forM_ [0.01, 0.1, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0] (\c -> do
 
             svmModel <- SVM.train (SVM.CSvc c) SVM.Linear $ trainData'''
 
