@@ -361,7 +361,7 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
             negPred <- mapM (SVM.predict svmModel)  $ fmap snd $ negTrainData''
             putStrLn $ "C="<>show c <>" pos="<> show (avg posPred) <>"  neg="<> show (avg negPred)
             )
-        svmModel <- SVM.train (SVM.CSvc 0.5) SVM.Linear $ trainData'''
+        svmModel <- SVM.train (SVM.CSvc 2.5) SVM.Linear $ trainData'''
         return $ (allCategories, svmModel)
       where trainData' =
                 [ (isPos, ann)
