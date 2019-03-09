@@ -32,4 +32,4 @@
 	url = git://github.com/bgamari/frisby
 [submodule "vendor/HSvm"]
 	path = vendor/HSvm
-	url = git@github.com:paulrzcz/HSvm.git
+	url = git@github.com:bgamari/HSvm.git
