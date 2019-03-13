@@ -26,6 +26,7 @@ packages:
     epfl-section-recommendation/
     dbpedia-entity-import/
     tag-me/
+    evalmetrics/
 
 package mediawiki-parser
     tests: True
