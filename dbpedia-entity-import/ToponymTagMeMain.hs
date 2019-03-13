@@ -330,8 +330,6 @@ predictToponyms trainInFile validateInFile predictInFile outputFile groundTruthF
                 else if s2 > s1 && s2 < e1 then True
                    else False
 
-avg :: [Double] -> Double
-avg list = 1/ realToFrac (length list) * (Data.List.sum list)
 
 
 

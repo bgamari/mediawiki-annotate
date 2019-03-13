@@ -5,9 +5,11 @@ module EvalConfusionMatrix
     , f1
     , precision
     , recall
+    , avg
     )
 where
 
+import Data.List
 
 data Confusion = Confusion {tp::Int, tn :: Int, fp :: Int, fn::Int}
                     deriving (Show)
@@ -24,3 +26,6 @@ precision Confusion{..} =
 recall :: Confusion -> Double
 recall Confusion{..} =
     (realToFrac tp)/(realToFrac (tp + fn))
+
+avg :: [Double] -> Double
+avg list = 1/ realToFrac (length list) * (Data.List.sum list)
