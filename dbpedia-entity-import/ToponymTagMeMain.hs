@@ -99,35 +99,10 @@ readPubmedAnnotations fname = do
 
 
 
-tagText :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> T.Text -> IO [TagMe.Annotation]
-tagText env tagMeToken maxLen overlapLen txt = do
-    anns <- sequence
-            [ do anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
-                 return [ ann { start = (start ann) + i*maxLen
-                              , end = (end ann) + i*maxLen}
-                        | ann <- anns
-                        ]
-            | (i, t) <- zip [0..] $ overlapChunks maxLen overlapLen txt
-            ]
-    return $ mconcat anns
-
-
 
 tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> PubmedDocument -> IO [TagMe.Annotation]
 tagData env tagMeToken maxLen overlapLen document =
-    tagText env tagMeToken maxLen overlapLen (content document)
-
-
-overlapChunks :: Int -> Int -> T.Text -> [T.Text]
-overlapChunks k o text =
-    [ substring start (start+k+o) text
-    | start <- [0, k .. T.length text]
-    ]
-  where
-    substring:: Int -> Int -> T.Text -> T.Text
-    substring start end text =
-        T.take (end-start) $ T.drop start text
-
+    tagLongText env tagMeToken tagMeOptions maxLen overlapLen (content document)
 
 tagMeOptions :: TagMeOptions
 tagMeOptions = TagMeOptions { inclAbstract = False

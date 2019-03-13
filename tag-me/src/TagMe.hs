@@ -21,6 +21,8 @@ module TagMe
   , defaultTagMeOptions, TagMeOptions(..)
   -- * Return type
   , TextBody(..), Annotation(..)
+  -- * tagMe for long texts that need to be chunked
+  , tagLongText
   ) where
 
 import Servant.Client
@@ -165,6 +167,31 @@ toTextBodies text annotations =
         (plainText, textRest) = T.splitAt posStart text
         (linkText, text') = T.splitAt posLen textRest
 
+
+
+
+tagLongText :: TagMeEnv -> Token -> TagMeOptions -> Int -> Int -> T.Text -> IO [Annotation]
+tagLongText env tagMeToken tagMeOptions maxLen  overlapLen txt = do
+    anns <- sequence
+            [ do anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
+                 return [ ann { start = (start ann) + i*maxLen
+                              , end = (end ann) + i*maxLen}
+                        | ann <- anns
+                        ]
+            | (i, t) <- zip [0..] $ overlapChunks maxLen overlapLen txt
+            ]
+    return $ mconcat anns
+
+  where
+    overlapChunks :: Int -> Int -> T.Text -> [T.Text]
+    overlapChunks k o text =
+        [ substring start (start+k+o) text
+        | start <- [0, k .. T.length text]
+        ]
+      where
+        substring:: Int -> Int -> T.Text -> T.Text
+        substring start end text =
+            T.take (end-start) $ T.drop start text
 
 
 -- ----------------------------------------------
