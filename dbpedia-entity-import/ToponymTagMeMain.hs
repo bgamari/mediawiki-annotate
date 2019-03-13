@@ -53,6 +53,7 @@ import System.FilePath
 
 import ToponymGroundTruthParser
 import TagMe
+import EvalConfusionMatrix
 
 data PubmedDocument = PubmedDocument { content :: T.Text
                                      , filename :: T.Text
@@ -95,12 +96,13 @@ readPubmedAnnotations fname = do
            $ fromJust $ Aeson.decode
            $ contents
 
-tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> PubmedDocument -> IO [TagMe.Annotation]
-tagData env tagMeToken maxLen overlapLen document = do
-    let txt = content document
+
+
+
+tagText :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> T.Text -> IO [TagMe.Annotation]
+tagText env tagMeToken maxLen overlapLen txt = do
     anns <- sequence
-            [ do putStrLn $ (show (filename document)) <> " " <> (show i) <> ": " <> (show (T.take 10 t)) <> "... "
-                 anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
+            [ do anns <- entityLinkAnnotationsConf env tagMeToken t tagMeOptions
                  return [ ann { start = (start ann) + i*maxLen
                               , end = (end ann) + i*maxLen}
                         | ann <- anns
@@ -109,13 +111,11 @@ tagData env tagMeToken maxLen overlapLen document = do
             ]
     return $ mconcat anns
 
-data Confusion = Confusion {tp::Int, tn :: Int, fp :: Int, fn::Int}
-                    deriving (Show)
-f1 ::Confusion -> Double
-f1 Confusion{..} =
-    let prec = (realToFrac tp)/(realToFrac (tp + fp))
-        recall = (realToFrac tp)/(realToFrac (tp + fn))
-    in  2 * prec * recall / (prec + recall)
+
+
+tagData :: TagMe.TagMeEnv -> TagMe.Token -> Int -> Int -> PubmedDocument -> IO [TagMe.Annotation]
+tagData env tagMeToken maxLen overlapLen document =
+    tagText env tagMeToken maxLen overlapLen (content document)
 
 
 overlapChunks :: Int -> Int -> T.Text -> [T.Text]

@@ -81,6 +81,7 @@ executable toponym-tagme
                        trifecta,
                        simplir,
                        tag-me,
+                       evalmetrics,
                        trec-car-tools
   default-language:    Haskell2010
 
