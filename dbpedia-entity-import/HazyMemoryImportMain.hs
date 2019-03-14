@@ -104,12 +104,22 @@ writeHazyMemoryFiles fname annLines = do
         hazyToString (HazyMemoryLine {..}, anns) =
             TL.intercalate "\t"
             $ fmap (TL.pack . show) [queryId, questionTitle, questionContent, answerWikiEntity, answerImdbEntity]
-              ++ predictedAnswerEntities anns
+              ++ [predictedAnswerEntities anns]
               ++ [TL.pack ""]
               ++ fmap (TL.pack . show) answerTexts
+              ++ [TL.pack ""]
+              ++ predictedAnswerCats anns
         lns = TL.unlines $ fmap hazyToString annLines
-        predictedAnswerEntities :: [Annotation] -> [TL.Text]
-        predictedAnswerEntities anns = fmap (TL.pack . T.unpack . fromJust . title) anns
+        predictedAnswerEntities :: [Annotation] -> TL.Text
+        predictedAnswerEntities anns = TL.intercalate ", "$ fmap (TL.pack . T.unpack . fromJust . title) anns
+        predictedAnswerCats :: [Annotation] -> [TL.Text]
+        predictedAnswerCats anns =
+            fmap getBoth anns
+          where getTitle = TL.pack . T.unpack . fromJust . title
+                getCats ann =  fmap (TL.pack . T.unpack) $ fromMaybe [] $ dbpediaCategories ann
+
+                getBoth :: Annotation -> TL.Text
+                getBoth ann = getTitle ann <> (TL.pack "[") <> (TL.intercalate "," $ getCats ann) <> (TL.pack "]")
 
 
 tagData :: TagMe.TagMeEnv -> TagMe.Token -> HazyMemoryLine -> IO [TagMe.Annotation]
@@ -117,7 +127,7 @@ tagData env tagMeToken hazyLine = do
     ress <- mapM (\t -> annotateWithEntityLinksConf env tagMeToken t tagMeOptions) $ (answerTexts hazyLine)
     return [ annotation
            | res <- ress
-           , TextEntityLink _  annotation <- res
+           , annotation <- res
            ]
 
 
@@ -140,6 +150,7 @@ opts :: Parser (IO ())
 opts = subparser
     $  cmd "import-qrels"   importQrels'
     <>  cmd "import-cbor"   importCbor'
+    <>  cmd "extract-answers"   extractTrueAnswers'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     pagesFile = option str (short 'A' <> long "articles" <> help "articles file" <> metavar "ANNOTATIONS FILE")
@@ -213,7 +224,7 @@ opts = subparser
                 entry2
 
     extractTrueAnswers :: [FilePath] -> FilePath -> FilePath -> IO()
-    extractTrueAnswers inFiles articlesFile outputFile = do
+    extractTrueAnswers inFiles _articlesFile outputFile = do
         tagMeToken <- Token . T.pack <$> getEnv "TAG_ME_TOKEN"
         env <- mkTagMeEnv 300
 
