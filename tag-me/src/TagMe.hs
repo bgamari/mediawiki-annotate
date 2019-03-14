@@ -30,6 +30,7 @@ import Servant.API
 import Network.HTTP.Client hiding (Proxy)
 import Network.HTTP.Client.TLS
 import Web.FormUrlEncoded
+import Control.Monad
 
 import GHC.Generics
 
@@ -209,19 +210,26 @@ data TagMeOptions = TagMeOptions { inclAbstract :: Bool
 defaultTagMeOptions = TagMeOptions False False False True (Language "en")
 
 annotateWithEntityLinks :: TagMeEnv -> Token -> T.Text -> IO [TextBody]
-annotateWithEntityLinks env token text  = annotateWithEntityLinksConf env token text defaultTagMeOptions
+annotateWithEntityLinks env token text  = annotateWithEntityLinksBodiesConf env token text defaultTagMeOptions
 
 -- ^ Run tagme and convert to TextBody
-annotateWithEntityLinksConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [TextBody]
+annotateWithEntityLinksConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [Annotation]
 annotateWithEntityLinksConf env token text opt = do
+    anns <- entityLinkAnnotationsConf env token text opt
+    return $ anns
+
+annotateWithEntityLinksBodiesConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [TextBody]
+annotateWithEntityLinksBodiesConf env token text opt = do
     anns <- entityLinkAnnotationsConf env token text opt
     return $ toTextBodies text anns
 
 -- ^ just run Tagme and hand back annotations (no TextBody conversion)
 entityLinkAnnotationsConf :: TagMeEnv -> Token -> T.Text -> TagMeOptions -> IO [Annotation]
 entityLinkAnnotationsConf env token text (TagMeOptions {..}) = run env $ do
-    response <- tagMe token text language inclAbstract inclCategories isTweet isLongText
-    return $ filter (\a -> not $ isNothing $ title a) $ annotations $ response
+    if (T.null text) then (return [])
+    else do
+        response <- tagMe token text language inclAbstract inclCategories isTweet isLongText
+        return $ filter (\a -> not $ isNothing $ title a) $ annotations $ response
 
 
 newtype TagMeEnv = TagMeEnv ClientEnv
