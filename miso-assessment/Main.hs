@@ -24,18 +24,13 @@ import Types
 import qualified Debug.Trace as Debug
 
 
+data AssessmentModel =
+    AssessmentModel { page :: AssessmentPage }
+    | FileNotFoundErrorModel { filename :: MisoString }
+    | ErrorMessageModel { errorMessage :: MisoString }
+    | LoadingPageModel
+  deriving (Eq)
 
-statusAssessmentPage :: MisoString -> AssessmentPage
-statusAssessmentPage status = AssessmentPage {
-        apTitle = fromMisoString status,
-        apRunId = "",
-        apSquid = QueryId "",
-        apQueryFacets = [],
-        apParagraphs = []
-    }
-
--- | Type synonym for an application model
-type Model = AssessmentPage
 
 -- | Sum type for application events
 data Action
@@ -45,12 +40,35 @@ data Action
   | Initialize
   deriving (Show)
 
+
+
+
+emptyAssessmentPage :: AssessmentPage
+emptyAssessmentPage = AssessmentPage {
+        apTitle = "",
+        apRunId = "",
+        apSquid = QueryId "",
+        apQueryFacets = [],
+        apParagraphs = []
+    }
+
+emptyAssessmentModel :: AssessmentModel
+emptyAssessmentModel = LoadingPageModel
+
+
+
+
+
+-- | Type synonym for an application model
+type Model = AssessmentModel
+
+
 -- | Entry point for a miso application
 main :: IO ()
 main = startApp App {..}
   where
     initialAction = Initialize -- FetchAssessmentPage "water-distribution" -- initial action to be executed on application load
-    model  = statusAssessmentPage "Loading page..."  -- initial model
+    model  = LoadingPageModel  -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
     events = defaultEvents        -- default delegated events
@@ -60,7 +78,8 @@ main = startApp App {..}
 -- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
 updateModel (FetchAssessmentPage pageName) m = m <# do
-    page <- getAssessmentPage pageName
+    page <- fetchJson $ getAssessmentPageFilePath pageName
+
     return $ case page of 
       Right p -> SetAssessmentPage p
       Left e  -> ReportError $ ms e
@@ -72,8 +91,8 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage p) _ = noEff p
-updateModel (ReportError e) _ = noEff $ statusAssessmentPage e
+updateModel (SetAssessmentPage p) _ = noEff $ AssessmentModel p
+updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
 
 -- updateModel Home m = m <# do
 --                h <- windowInnerHeight
@@ -82,55 +101,12 @@ updateModel (ReportError e) _ = noEff $ statusAssessmentPage e
 -- updateModel SayHelloWorld m = m <# do
 --   putStrLn "Hello World" >> pure NoOp
 
--- | Constructs a virtual DOM from a model
-viewModel :: Model -> View Action
-viewModel AssessmentPage{..} = div_ []
---     H.head prologue
-   [ h1_ [] [text $ ms apTitle]
-   , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
-   , p_ [] [text "Run: ", text $ ms apRunId]
-   , hr_ []
-   , ol_ [] $ fmap (wrapLi . renderParagraph) apParagraphs
-   ]
-  where wrapLi v = li_ [] [v]
-        renderParagraph :: Paragraph -> View action
-        renderParagraph Paragraph{..} = div_ []
-          [ p_ [] [text $ ms $ unpackParagraphId paraId]
-          , p_ [] $ fmap renderParaBody paraBody
-          ]
-        renderParaBody :: ParaBody -> View action
-        renderParaBody (ParaText txt) = text $ ms txt
-        renderParaBody (ParaLink Link{..}) = a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]
 
 
---
--- -- === Pretty section Path ====
--- viewHeader :: SectionPathWithName -> H.Html
--- viewHeader spr@SectionPathWithName{..} = do
---     div_ [class_ "overview-heading-query"] [
---         text $ prettySectionPath spr,
---
---         p_ [] [ text $ wikipediaSection spr "Wikipedia" ],
---
---         div_ [] [
---             span_ "Query ID: " ,
---             code_ $ text_ (escapeSectionPath sprQueryId)
---         ],
---
---         div_ [
---             p_  [] [
---                 text "Back to ",
---                 a_ [href_ "./"] $ text "Outline",
---                 text " / ",
---                 a_  [HA.href "../"] $ text "Topic List"
---             ]
---         ]
---     ]
 
-
-getAssessmentPage :: String -> IO (Either String AssessmentPage)
-getAssessmentPage pageName =
-    fetchJson $ ms
+getAssessmentPageFilePath :: String -> MisoString
+getAssessmentPageFilePath pageName =
+    ms
 --     $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
     $ "http://localhost:8000/data/" <> pageName <> ".json"
 
@@ -153,4 +129,38 @@ fetchJson url = do
                   , reqWithCredentials = False
                   , reqData = NoData
                   }
+
+-- ------------- Presentation ----------------------
+
+-- | Constructs a virtual DOM from a model
+viewModel :: Model -> View Action
+viewModel AssessmentModel{ page= AssessmentPage{..}} = div_ []
+--     H.head prologue
+   [ h1_ [] [text $ ms apTitle]
+   , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
+   , p_ [] [text "Run: ", text $ ms apRunId]
+   , hr_ []
+   , ol_ [] $ fmap (wrapLi . renderParagraph) apParagraphs
+   ]
+  where wrapLi v = li_ [] [v]
+        renderParagraph :: Paragraph -> View action
+        renderParagraph Paragraph{..} = div_ []
+          [ p_ [] [text $ ms $ unpackParagraphId paraId]
+          , p_ [] $ fmap renderParaBody paraBody
+          ]
+        renderParaBody :: ParaBody -> View action
+        renderParaBody (ParaText txt) = text $ ms txt
+        renderParaBody (ParaLink Link{..}) = a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]
+
+viewModel LoadingPageModel = viewErrorMessage $ "Loading Page"
+viewModel FileNotFoundErrorModel { .. }= viewErrorMessage $ "File not Found " <> ms filename
+viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
+
+
+
+viewErrorMessage :: MisoString -> View Action
+viewErrorMessage msg = div_ []
+    [ h1_[] [text $ msg ],
+      p_[] [ a_ [ href_ "/"] [text "Back to start..."]]
+    ]
 
