@@ -1,13 +1,20 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Types where
 
-import CAR.Types
+import GHC.Generics
 import Data.Aeson
+import qualified Data.Text as T
+
+import CAR.Types
+
+newtype QueryId = QueryId { unQueryId :: T.Text }
+                deriving (Eq, Ord, Show, FromJSON, ToJSON)
 
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor
@@ -32,8 +39,8 @@ data AssessmentFacet =
         apHeadingId :: HeadingId
     }
   deriving (Show, Generic)
-instance FromJSON AssessmentPage where
+instance FromJSON AssessmentFacet where
     parseJSON = genericParseJSON jsonOptions
-instance ToJSON AssessmentPage where
+instance ToJSON AssessmentFacet where
     toEncoding = genericToEncoding jsonOptions
 

@@ -1,21 +1,38 @@
 { pkgs ? (import ../simplir/nixpkgs.nix {}) }:
 
 let
-  trec-car-tools = pkgs.haskell.packages.ghcjs.callCabal2nix "trec-car-tools" ../trec-car-tools { inherit mediawiki-parser simplir;};
-  http-parsers = pkgs.haskell.packages.ghcjs.callCabal2nix "http-parsers" ../simplir/vendor/http-parsers {};
-  indexed-vector = pkgs.haskell.packages.ghcjs.callCabal2nix "indexed-vector" ../simplir/vendor/indexed-vector {};
-  mediawiki-parser = pkgs.haskell.packages.ghcjs.callCabal2nix "mediawiki-parser" ../mediawiki-parser {};
-  simplir-html-clean = pkgs.haskell.packages.ghcjs.callCabal2nix "simplir-html-clean" ../simplir/simplir-html-clean {};
-  simplir = pkgs.haskell.packages.ghcjs.callCabal2nix "simplir" ../simplir/simplir { inherit http-parsers indexed-vector simplir-html-clean; };
-
-
   result = import (pkgs.fetchFromGitHub {
     owner = "dmjio";
     repo = "miso";
     sha256 = "1wvdizaq81a50jd121qlk47hnix0q0r1pnq2jqkwyy5ssfq6hpb6";
     rev = "8b5249b966f1406badbada3feebcfbbeab8afa87";
   }) {};
-in pkgs.haskell.packages.ghcjs.callPackage ./app.nix {
-  miso = result.miso-ghcjs;
-  inherit trec-car-tools;
-}
+
+  haskellPackages = pkgs.haskell.packages.ghcjs.override {
+    overrides = self: super: let lib = pkgs.haskell.lib; in {
+      trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../trec-car-types { };
+      mediawiki-parser = lib.dontCheck (haskellPackages.callCabal2nix "mediawiki-parser" ../mediawiki-parser { tasty-silver = null; });
+
+      doctest = null;
+      temporary = lib.dontCheck super.temporary;
+      ListLike = lib.dontCheck super.ListLike;
+      QuickCheck = lib.dontCheck super.QuickCheck;
+      comonad = lib.dontCheck super.comonad;
+      half = lib.dontCheck super.half;
+      lens = lib.dontCheck super.lens;
+      semigroupoids = lib.dontCheck super.semigroupoids;
+      tasty-quickcheck = lib.dontCheck super.tasty-quickcheck;
+      scientific = lib.dontCheck super.scientific;
+      aeson = lib.dontCheck super.aeson;
+      cryptohash-sha1 = lib.dontCheck super.cryptohash-sha1;
+      text-short = lib.dontCheck super.text-short;
+      cborg = lib.dontCheck super.cborg;
+      serialise = lib.dontCheck super.serialise;
+      http-types = lib.dontCheck super.http-types;
+      http-media = lib.dontCheck super.http-media;
+      servant = lib.dontCheck super.servant;
+    };
+  };
+in 
+  haskellPackages.callCabal2nix "app" ./. { }
+

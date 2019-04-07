@@ -8,9 +8,10 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Types
-  build-depends:       base
-                      , aeson
-                      , trec-car-tools
+  build-depends:       base,
+                       aeson,
+                       text,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable app
