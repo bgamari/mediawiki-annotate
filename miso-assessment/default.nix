@@ -31,6 +31,7 @@ let
       http-types = lib.dontCheck super.http-types;
       http-media = lib.dontCheck super.http-media;
       servant = lib.dontCheck super.servant;
+      jsaddle = self.callHackage "jsaddle" "0.9.6.0" {};
     };
   };
 in 

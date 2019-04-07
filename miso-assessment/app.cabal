@@ -22,5 +22,6 @@ executable app
                        miso,
                        aeson,
                        app,
+                       jsaddle-dom,
                        trec-car-types
   default-language:    Haskell2010

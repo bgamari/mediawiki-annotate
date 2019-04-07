@@ -13,9 +13,15 @@ import Data.Aeson
 import JavaScript.Web.XMLHttpRequest
 import Control.Exception
 import qualified Data.ByteString as BS
+import Data.Maybe
+
+import JSDOM.URLSearchParams
+import JavaScript.Web.Location
 
 import CAR.Types
 import Types
+
+
 
 statusAssessmentPage :: MisoString -> AssessmentPage
 statusAssessmentPage status = AssessmentPage {
@@ -34,13 +40,14 @@ data Action
   = FetchAssessmentPage String
   | SetAssessmentPage AssessmentPage
   | ReportError MisoString
+  | Initialize
   deriving (Show)
 
 -- | Entry point for a miso application
 main :: IO ()
 main = startApp App {..}
   where
-    initialAction = FetchAssessmentPage "default" -- initial action to be executed on application load
+    initialAction = Initialize -- FetchAssessmentPage "water-distribution" -- initial action to be executed on application load
     model  = statusAssessmentPage "Loading page..."  -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
@@ -55,6 +62,13 @@ updateModel (FetchAssessmentPage pageName) m = m <# do
     return $ case page of 
       Right p -> SetAssessmentPage p
       Left e  -> ReportError $ ms e
+updateModel (Initialize) m = m <# do
+    loc <- getWindowLocation >>= getHref
+    params <- newURLSearchParams loc
+    maybeQ <- get params ("q" :: MisoString)
+    let query = fromMaybe "default" maybeQ
+    return $ FetchAssessmentPage query
+
 updateModel (SetAssessmentPage p) _ = noEff p
 updateModel (ReportError e) _ = noEff $ statusAssessmentPage e
 
@@ -113,7 +127,9 @@ viewModel AssessmentPage{..} = div_ []
 
 getAssessmentPage :: String -> IO (Either String AssessmentPage)
 getAssessmentPage pageName =
-    fetchJson $ ms $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
+    fetchJson $ ms
+--     $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
+    $ "http://localhost:8000/data/" <> pageName <> ".json"
 
 fetchJson :: forall a. FromJSON a => JSString -> IO (Either String a)
 fetchJson url = do
