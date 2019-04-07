@@ -12,14 +12,14 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     CAR.Types
-                       CAR.Types.Provenance
-                       CAR.Types.AST
-                       CAR.Types.AST.Pretty
-                       CAR.Types.CborList
-                       CAR.Types.Files
+  reexported-modules:  CAR.Types,
+                       CAR.Types.Provenance,
+                       CAR.Types.AST,
+                       CAR.Types.AST.Pretty,
+                       CAR.Types.CborList,
+                       CAR.Types.Files,
                        CAR.Types.Orphans
-                       CAR.RunFile
+  exposed-modules:     CAR.RunFile
                        CAR.AnnotationsFile
                        CAR.CarExports
                        CAR.QRelFile
@@ -63,7 +63,8 @@ library
                        regex-compat,
                        simplir,
                        optparse-applicative,
-                       mediawiki-parser >= 0.1
+                       mediawiki-parser >= 0.1,
+                       trec-car-types
 
 executable trec-car-cat
   main-is:             Cat.hs
