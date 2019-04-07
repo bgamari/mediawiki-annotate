@@ -203,6 +203,7 @@ executable trec-car-extract-link-contexts
                        text,
                        containers,
                        optparse-applicative >= 0.12,
+                       simplir-galago,
                        hashable,
                        trec-car-tools,
                        dlist
