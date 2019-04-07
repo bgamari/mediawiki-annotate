@@ -1,10 +1,5 @@
-{ pkgs ? import ((import <nixpkgs> {}).fetchFromGitHub {
-    owner = "NixOS";
-    repo = "nixpkgs";
-    rev = "a0aeb23";
-    sha256 = "04dgg0f2839c1kvlhc45hcksmjzr8a22q1bgfnrx71935ilxl33d";
-  }){}
-}:
+{ pkgs ? (import ../simplir/nixpkgs.nix {}) }:
+
 let
   trec-car-tools = pkgs.haskell.packages.ghcjs.callCabal2nix "trec-car-tools" ../trec-car-tools { inherit mediawiki-parser simplir;};
   http-parsers = pkgs.haskell.packages.ghcjs.callCabal2nix "http-parsers" ../simplir/vendor/http-parsers {};

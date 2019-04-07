@@ -52,10 +52,15 @@ let
           rev = "a2d500316fecb8ee49c034e2781862c8606b96af";
           sha256 = "17d3ljibsdsxbsqrdjx6rn0ww8ck0lycp2pwfh71ilvwbm5wlbyb";
         }) {};
+
+        servant = self.callHackage "servant" "0.16" {};
+        servant-client = self.callHackage "servant-client" "0.16" {};
+        servant-client-core = self.callHackage "servant-client-core" "0.16" {};
+        servant-server = self.callHackage "servant-server" "0.16" {};
       };
     in trecCarPackages // { inherit trecCarPackages; };
 
-  haskellPackages = nixpkgs.haskell.packages.ghc863.override {
+  haskellPackages = nixpkgs.haskell.packages.ghc864.override {
     overrides = lib.composeExtensions simplirNix.haskellOverrides haskellOverrides;
   };
 in {
