@@ -163,7 +163,7 @@ newtype SectionHeading = SectionHeading { getSectionHeading :: T.Text }
                        deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData, FromJSON, ToJSON)
 
 data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
-               deriving (Show, Generic)
+               deriving (Eq, Show, Generic)
 instance CBOR.Serialise Paragraph
 instance NFData Paragraph
 
@@ -193,14 +193,14 @@ data Link = Link { linkTarget   :: !PageName
                  , linkTargetId :: !PageId
                  , linkAnchor   :: !T.Text
                  }
-          deriving (Show, Generic)
+          deriving (Eq, Show, Generic)
 instance CBOR.Serialise Link
 instance NFData Link where
     rnf Link{..} = rnf linkSection `seq` ()
 
 data ParaBody = ParaText !T.Text
               | ParaLink !Link
-              deriving (Show, Generic)
+              deriving (Eq, Show, Generic)
 instance CBOR.Serialise ParaBody
 instance NFData ParaBody
 
