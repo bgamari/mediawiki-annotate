@@ -1,11 +1,4 @@
 name:                evalmetrics
-
--- The package version.  See the Haskell package versioning policy (PVP)
--- for standards guiding when and how versions should be incremented.
--- https://wiki.haskell.org/Package_versioning_policy
--- PVP summary:      +-+------- breaking API changes
---                   | | +----- non-breaking API additions
---                   | | | +--- code changes with no API change
 version:             0.1.0.0
 
 synopsis:            Data Science Evaluation Metrics such as F1-Measure
@@ -37,7 +30,7 @@ library
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.11 && <4.12
+  build-depends:       base >=4.7 && <4.13
 
   -- Directories containing source files.
   hs-source-dirs:      src
