@@ -34,6 +34,15 @@ let
       jsaddle = self.callHackage "jsaddle" "0.9.6.0" {};
     };
   };
-in 
-  haskellPackages.callCabal2nix "app" ./. { }
 
+  app = haskellPackages.callCabal2nix "app" ./. { };
+in 
+  pkgs.stdenv.mkDerivation {
+    name = "app2";
+    src = app;
+    installPhase = ''
+      mkdir $out
+      cp -R bin/app.jsexe/*.js $out
+      cp ${./index.html} $out/index.html
+    '';
+  }

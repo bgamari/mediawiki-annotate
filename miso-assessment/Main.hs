@@ -21,6 +21,8 @@ import JavaScript.Web.Location
 import CAR.Types
 import Types
 
+import qualified Debug.Trace as Debug
+
 
 
 statusAssessmentPage :: MisoString -> AssessmentPage
@@ -63,7 +65,8 @@ updateModel (FetchAssessmentPage pageName) m = m <# do
       Right p -> SetAssessmentPage p
       Left e  -> ReportError $ ms e
 updateModel (Initialize) m = m <# do
-    loc <- getWindowLocation >>= getHref
+    -- new URLSearchParams(window.location.search).get("q")
+    loc <- getWindowLocation >>= getSearch
     params <- newURLSearchParams loc
     maybeQ <- get params ("q" :: MisoString)
     let query = fromMaybe "default" maybeQ
