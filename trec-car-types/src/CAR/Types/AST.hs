@@ -144,6 +144,11 @@ unpackPageId (PageId s) = Short.toString s
 newtype HeadingId = HeadingId SBS.ShortByteString
                   deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData)
 
+instance ToJSON HeadingId where
+    toJSON = toJSON . unpackHeadingId
+instance FromJSON HeadingId where
+    parseJSON o = packHeadingId <$> parseJSON o
+
 sectionHeadingToId :: SectionHeading -> HeadingId
 sectionHeadingToId (SectionHeading h) = HeadingId $ urlEncodeText $ T.unpack h
 
@@ -155,7 +160,7 @@ packHeadingId = HeadingId . packSBS
 
 -- | The text of a section heading.
 newtype SectionHeading = SectionHeading { getSectionHeading :: T.Text }
-                       deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData)
+                       deriving (Show, Eq, Ord, Generic, Hashable, CBOR.Serialise, NFData, FromJSON, ToJSON)
 
 data Paragraph = Paragraph { paraId :: !ParagraphId, paraBody :: [ParaBody] }
                deriving (Show, Generic)
