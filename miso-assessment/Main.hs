@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Haskell module declaration
-module MisoAssessmentMain where
+module Main where
 
 -- | Miso framework import
 import Miso
@@ -53,3 +53,5 @@ viewModel x = div_ [] [
  , text (ms x)
  , button_ [ onClick SubtractOne ] [ text "-" ]
  ]
+
+

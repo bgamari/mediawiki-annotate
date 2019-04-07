@@ -6,6 +6,14 @@
   }){}
 }:
 let
+  trec-car-tools = pkgs.haskell.packages.ghcjs.callCabal2nix "trec-car-tools" ../trec-car-tools { inherit mediawiki-parser simplir;};
+  http-parsers = pkgs.haskell.packages.ghcjs.callCabal2nix "http-parsers" ../simplir/vendor/http-parsers {};
+  indexed-vector = pkgs.haskell.packages.ghcjs.callCabal2nix "indexed-vector" ../simplir/vendor/indexed-vector {};
+  mediawiki-parser = pkgs.haskell.packages.ghcjs.callCabal2nix "mediawiki-parser" ../mediawiki-parser {};
+  simplir-html-clean = pkgs.haskell.packages.ghcjs.callCabal2nix "simplir-html-clean" ../simplir/simplir-html-clean {};
+  simplir = pkgs.haskell.packages.ghcjs.callCabal2nix "simplir" ../simplir/simplir { inherit http-parsers indexed-vector simplir-html-clean; };
+
+
   result = import (pkgs.fetchFromGitHub {
     owner = "dmjio";
     repo = "miso";
@@ -14,4 +22,5 @@ let
   }) {};
 in pkgs.haskell.packages.ghcjs.callPackage ./app.nix {
   miso = result.miso-ghcjs;
+  inherit trec-car-tools;
 }

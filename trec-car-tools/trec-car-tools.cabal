@@ -149,7 +149,6 @@ executable trec-car-legal-entity-ids
                        unordered-containers,
                        text,
                        containers,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        filepath,
@@ -164,7 +163,6 @@ executable trec-car-extract-kb
                        unordered-containers,
                        text,
                        containers,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        trec-car-tools
@@ -204,7 +202,6 @@ executable trec-car-extract-link-contexts
                        unordered-containers,
                        text,
                        containers,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        trec-car-tools,
