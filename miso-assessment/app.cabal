@@ -16,5 +16,11 @@ library
 
 executable app
   main-is:             Main.hs
-  build-depends:       base, miso
+  build-depends:       base,
+                       bytestring,
+                       ghcjs-base,
+                       miso,
+                       aeson,
+                       app,
+                       trec-car-types
   default-language:    Haskell2010

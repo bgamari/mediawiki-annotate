@@ -19,6 +19,14 @@ newtype QueryId = QueryId { unQueryId :: T.Text }
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor
 
+-- orphans
+instance FromJSON ParaBody
+instance FromJSON Paragraph
+instance FromJSON Link
+instance ToJSON ParaBody
+instance ToJSON Paragraph
+instance ToJSON Link
+
 data AssessmentPage =
     AssessmentPage {
         apTitle :: T.Text,
@@ -27,7 +35,7 @@ data AssessmentPage =
         apQueryFacets :: [AssessmentFacet],
         apParagraphs :: [Paragraph]
     }
-  deriving (Show, Generic)
+  deriving (Eq, Show, Generic)
 instance FromJSON AssessmentPage where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentPage where
@@ -38,7 +46,7 @@ data AssessmentFacet =
         apHeading :: SectionHeading,
         apHeadingId :: HeadingId
     }
-  deriving (Show, Generic)
+  deriving (Eq, Show, Generic)
 instance FromJSON AssessmentFacet where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentFacet where
