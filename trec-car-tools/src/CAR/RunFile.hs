@@ -70,7 +70,7 @@ import qualified Text.Regex as TR
 import qualified Data.Map.Strict as M
 import qualified Data.Sequence as Seq
 import qualified SimplIR.Format.TrecRunFile as Run
-import qualified Data.SmallUtf8 as Utf8
+import qualified Data.Text.Short as Short
 import qualified Codec.Serialise as CBOR
 import CAR.Types
 import Debug.Trace
@@ -196,7 +196,7 @@ constructPassageEntity ep =
           EntityAndPassage e p -> (Just p, Just e)
 
 pageIdToQueryId :: PageId -> QueryId
-pageIdToQueryId (PageId s) = QueryId $ Utf8.toText s
+pageIdToQueryId (PageId s) = QueryId $ Short.toText s
 
 sectionPathToQueryId :: SectionPath -> QueryId
 sectionPathToQueryId = QueryId . T.pack . escapeSectionPath

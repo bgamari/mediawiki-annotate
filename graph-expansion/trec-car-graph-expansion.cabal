@@ -306,7 +306,7 @@ executable graph-expansion-build-kb-index
                        pipes-bytestring,
                        snowball,
                        trec-car-tools,
-                       simplir,
+                       text-short,
                        warc,
                        filepath,
                        containers,

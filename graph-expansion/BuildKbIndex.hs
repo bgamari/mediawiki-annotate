@@ -23,7 +23,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import qualified Data.SmallUtf8 as Utf8
+import qualified Data.Text.Short as Short
 import System.IO
 import Data.Aeson
 import Numeric.Log hiding (sum)
@@ -122,7 +122,7 @@ writeRecords path recs = withFile path WriteMode $ \hdl ->
     runEffect $ mapM_ encodeRecord recs >-> PBS.toHandle hdl
 
 pageIdToRecordId :: PageId -> Warc.RecordId
-pageIdToRecordId = RecordId . Uri . Utf8.toByteString . unPageId
+pageIdToRecordId = RecordId . Uri . Short.toByteString . unPageId
 
 -- dsxyz
 edgeDocModes :: Parser (IO ())

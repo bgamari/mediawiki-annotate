@@ -49,7 +49,9 @@ module CAR.Types.AST
 import Data.Foldable
 import Data.Char (ord, chr)
 import Data.List (intercalate)
+import Data.Maybe
 import Data.Semigroup
+import Data.Functor.Contravariant
 import Control.DeepSeq
 import Control.Monad (when, replicateM)
 import GHC.Generics
@@ -70,12 +72,11 @@ import qualified Data.Vector as V
 import Data.Hashable
 import Data.String
 import qualified Control.Lens as L
+import Data.Text.Short (ShortText)
+import qualified Data.Text.Short as Short
 
 import Data.MediaWiki.Markup
 import CAR.Types.Orphans ()
-
--- SimplIR
-import qualified Data.SmallUtf8 as Utf8
 
 unpackSBS :: SBS.ShortByteString -> String
 unpackSBS = map (chr . fromIntegral) . SBS.unpack
@@ -95,36 +96,49 @@ newtype SiteId = SiteId T.Text
                          FromJSON, ToJSON, FromJSONKey, CBOR.Serialise)
 
 -- | An ASCII-only form of a page name.
-newtype PageId = PageId {unPageId :: Utf8.SmallUtf8}
-               deriving (Show, Eq, Ord, Generic, IsString, NFData,
-                         FromJSON, FromJSONKey, ToJSON, ToJSONKey, Binary)
+newtype PageId = PageId {unPageId :: ShortText}
+               deriving (Show, Eq, Ord, Generic, IsString, NFData)
 instance Hashable PageId
+instance Binary PageId where
+    get = PageId . Short.fromText <$> get
+    put = put . Short.toText . unPageId
+instance FromJSON PageId where
+    parseJSON o = PageId . Short.fromText <$> parseJSON o
+instance FromJSONKey PageId where
+    fromJSONKey = fmap (PageId . Short.fromText) fromJSONKey
+instance ToJSON PageId where
+    toJSON = toJSON . Short.toText . unPageId
+    toEncoding = toEncoding . Short.toText . unPageId
+instance ToJSONKey PageId where
+    toJSONKey = contramap (Short.toText . unPageId) toJSONKey
 instance CBOR.Serialise PageId where
-    encode (PageId p) = CBOR.encode (Utf8.toByteString p)
-    decode = PageId . Utf8.unsafeFromByteString <$> CBOR.decode
+    encode (PageId p) = CBOR.encode (Short.toByteString p)
+    decode = maybe err (pure . PageId) . Short.fromByteString =<< CBOR.decode
+      where err = fail "Serialise.decode(PageId): invalid UTF-8 encoding"
 
 {-# Deprecated pageNameToId "Use nameToId index" #-}
 pageNameToId :: SiteId -> PageName -> PageId
 pageNameToId (SiteId s) (PageName n) =
-    PageId
-    $ Utf8.unsafeFromShortByteString
+    maybe err PageId
+    $ Short.fromShortByteString
     $ urlEncodeText
     $ T.unpack s ++ ":" ++ T.unpack n
+  where err = error "pageNameToId: invalid UTF-8 encoding"
 
 pageIdToName :: PageId -> PageName
 pageIdToName (PageId pid) =
     PageName
     $ T.tail $ T.dropWhile (/=':')
-    $ T.pack $ unEscapeString $ Utf8.toString pid
+    $ T.pack $ unEscapeString $ Short.toString pid
 
 packPageName :: String -> PageName
 packPageName = PageName . T.pack
 
 packPageId :: String -> PageId
-packPageId = PageId . Utf8.fromString
+packPageId = PageId . Short.fromString
 
 unpackPageId :: PageId -> String
-unpackPageId (PageId s) = Utf8.toString s
+unpackPageId (PageId s) = Short.toString s
 
 -- | An ASCII-only form of a section heading.
 newtype HeadingId = HeadingId SBS.ShortByteString

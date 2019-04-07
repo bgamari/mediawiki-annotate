@@ -22,6 +22,7 @@ library
   build-depends:       base,
                        serialise,
                        text >=1.2 && <1.3,
+                       text-short,
                        bytestring >=0.10 && <0.11,
                        filepath >=1.4 && <1.5,
                        attoparsec >=0.13 && <0.14,
@@ -54,7 +55,6 @@ library
                        postgresql-simple >=0.5 && <0.7,
                        unordered-containers >=0.2 && <0.3,
                        trec-car-tools,
-                       simplir,
                        mediawiki-parser
   default-language:    Haskell2010
 

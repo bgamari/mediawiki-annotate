@@ -25,8 +25,7 @@ import CAR.Import.Utils
 import Network.URI
 import Data.Char (ord)
 import qualified Data.ByteString.Short as SBS
-
-import qualified Data.SmallUtf8 as Utf8
+import qualified Data.Text.Short as Short
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
@@ -45,7 +44,8 @@ defaultConfig =
 pageNameToId :: SiteId -> PageName -> PageId
 pageNameToId (SiteId s) (PageName n) =
     PageId
-    $ Utf8.unsafeFromShortByteString
+    $ fromMaybe (error "pageNameToId: invalid UTF-8 encoding")
+    $ Short.fromShortByteString
     $ urlEncodeText
     $ T.unpack s ++ ":" ++ T.unpack n
   where urlEncodeText :: String -> SBS.ShortByteString

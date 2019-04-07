@@ -61,7 +61,7 @@ instance Hashable EdgeDoc where
         hashWithSalt salt (edgeDocParagraphId x, edgeDocArticleId x)
 
 anonymousPageId :: PageId
-anonymousPageId = PageId $ Utf8.unsafeFromShortByteString "enwiki:anonymous"
+anonymousPageId = PageId "enwiki:anonymous"
 
 
 

@@ -60,6 +60,7 @@ library
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
                        text,
+                       text-short,
                        regex-compat,
                        simplir,
                        optparse-applicative,
