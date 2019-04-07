@@ -64,4 +64,8 @@ in
       cp ${./html/assess.css} $out/assess.css
       cp ${./html/assess.html} $out/assess.html
     '';
+    passthru = {
+      env = app.env;
+      raw = app;
+    };
   }
