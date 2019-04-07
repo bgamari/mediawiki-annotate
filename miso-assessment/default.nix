@@ -35,14 +35,33 @@ let
     };
   };
 
-  app = haskellPackages.callCabal2nix "app" ./. { };
+  app =
+    let
+      src = pkgs.nix-gitignore.gitignoreSource ["default.nix" "html"] ./.;
+    in haskellPackages.callCabal2nix "app" src { };
+
+  combined = pkgs.stdenv.mkDerivation {
+    name = "app-minified";
+    nativeBuildInputs = [ pkgs.closurecompiler ];
+    src = app;
+    buildPhase = ''
+      cd bin/app.jsexe
+      closure-compiler all.js \
+        --externs=all.js.externs > all.min.js
+    '';
+    installPhase = ''
+      mkdir -p $out
+      cp all.min.js $out
+    '';
+  };
 in 
   pkgs.stdenv.mkDerivation {
     name = "app2";
-    src = app;
+    src = combined;
     installPhase = ''
       mkdir $out
-      cp -R bin/app.jsexe/*.js $out
-      cp ${./index.html} $out/index.html
+      cp all.min.js $out/all.js
+      cp ${./html/assess.css} $out/assess.css
+      cp ${./html/assess.html} $out/assess.html
     '';
   }
