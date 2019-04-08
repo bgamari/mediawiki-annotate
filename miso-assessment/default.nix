@@ -63,6 +63,8 @@ in
       cp all.min.js $out/all.js
       cp ${./html/assess.css} $out/assess.css
       cp ${./html/assess.html} $out/assess.html
+      cp -R ${./data} $out/data
+      chmod 755 $out/data
     '';
     passthru = {
       env = app.env;
