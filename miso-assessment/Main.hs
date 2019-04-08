@@ -55,14 +55,24 @@ data AssessmentKey = AssessmentKey {
     }
   deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
 
+
+
+data AssessmentState = AssessmentState {
+                    labelState :: M.Map AssessmentKey AssessmentLabel
+                    , notesState :: M.Map AssessmentKey T.Text
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
+
+emptyAssessmentState = AssessmentState { labelState = mempty, notesState = mempty }
+
 data SavedAssessments = SavedAssessments {
-        savedData :: M.Map AssessmentKey AssessmentLabel
+        savedData :: AssessmentState
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
 data AssessmentModel =
     AssessmentModel { page :: AssessmentPage
-                    , labelState :: M.Map AssessmentKey AssessmentLabel
+                    , state :: AssessmentState
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
     | ErrorMessageModel { errorMessage :: MisoString }
@@ -88,6 +98,7 @@ data Action
   | Noop
   | FlagSaveSuccess
   | SaveAssessments
+  | SetNotes UserId QueryId ParagraphId MisoString
   deriving (Show)
 
 
@@ -130,22 +141,34 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage p) _ = noEff $ AssessmentModel p mempty  -- todo load from storage
+updateModel (SetAssessmentPage p) _ = noEff $ (AssessmentModel p emptyAssessmentState)  -- todo load from storage
 updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
 
-updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {..} =  newModel <# do
-    let key = storageKey userId queryId paraId
+updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+    let key = storageKey "label" userId queryId paraId
         value = label
     putStrLn $ show key <> "   " <> show value
     setLocalStorage key value
     return Noop
   where newModel =
             let labelState' = M.insert (AssessmentKey userId queryId paraId) label labelState
-            in m {labelState = labelState'}
+            in m {state = state{labelState = labelState'}}
+
+updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+    let key = storageKey "notes" userId queryId paraId
+        value = txt
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+    return Noop
+  where newModel =
+            let notesState' = M.insert (AssessmentKey userId queryId paraId) (T.pack $ fromMisoString txt) notesState
+            in m {state = state{notesState = notesState'}}
+
+
 updateModel Noop m = noEff m
 
 updateModel SaveAssessments m = m <# do
-    res <- uploadAssessments $ labelState m
+    res <- uploadAssessments $ state m
     return $ case res of
       Right () -> FlagSaveSuccess
       Left e  -> ReportError $ ms $ show e
@@ -155,9 +178,9 @@ updateModel FlagSaveSuccess m = m <# do
     return Noop
 
 
-storageKey :: UserId -> QueryId -> ParagraphId -> MisoString
-storageKey userId queryId paraId =
-    (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
+storageKey :: String -> UserId -> QueryId -> ParagraphId -> MisoString
+storageKey category userId queryId paraId =
+    (ms category) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
 
 -- updateModel Home m = m <# do
 --                h <- windowInnerHeight
@@ -175,8 +198,8 @@ getAssessmentPageFilePath pageName =
 --     $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
     $ "http://localhost:8000/data/" <> pageName <> ".json"
 
-uploadAssessments ::  M.Map AssessmentKey AssessmentLabel -> IO (Either FetchJSONError ())
-uploadAssessments labelState = do
+uploadAssessments ::  AssessmentState -> IO (Either FetchJSONError ())
+uploadAssessments assessmentState = do
     putStrLn $ "uploadURL " <> (show uploadUrl)
     resp <- handle onError $ fmap Right $ xhrByteString req
     case resp of
@@ -193,7 +216,7 @@ uploadAssessments labelState = do
                   , reqLogin = Nothing
                   , reqHeaders = []
                   , reqWithCredentials = False
-                  , reqData = StringData $ ms$  Data.Aeson.encode $  SavedAssessments labelState
+                  , reqData = StringData $ ms$  Data.Aeson.encode $  SavedAssessments assessmentState
                   }
 
 data FetchJSONError = XHRFailed XHRError
@@ -227,7 +250,7 @@ fetchJson url = do
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel AssessmentModel{ page= AssessmentPage{..}, labelState = labelState} = div_ []
+viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { labelState= labelState}} = div_ []
 --     H.head prologue
    [ h1_ [] [text $ ms apTitle]
    , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
@@ -255,17 +278,27 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, labelState = labelState} = 
               in button_ [ class_ ("btn btn-sm "<> active)
                          , onClick (SetAssessment defaultUser queryId paraId label) ]
                          [text $ prettyLabel label]
+        mkNotesField key paraId =
+            div_ [] [
+                input_ [ type_ "text"
+                       , size_ "20"
+                       , maxlength_ "50"
+                       , onInput (\str -> SetNotes defaultUser queryId paraId str)
+                       ]
+            ]
 
         queryId = apSquid
         renderParagraph :: Paragraph -> View Action
         renderParagraph Paragraph{..} =
-            li_ [class_ "entity-snippet-li"] [
+            let assessmentKey = (AssessmentKey defaultUser queryId paraId)
+            in li_ [class_ "entity-snippet-li"] [
                 p_ [] [
                     span_ [class_ "annotation"][ -- data-item  data-query
                         div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
-                            mkButtons (AssessmentKey defaultUser queryId paraId) paraId
+                            mkButtons assessmentKey paraId
                         ]
                     ]
+                    , mkNotesField assessmentKey paraId
                     , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
                     , p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
                 ]
