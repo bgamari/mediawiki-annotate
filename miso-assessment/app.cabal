@@ -11,6 +11,7 @@ library
   build-depends:       base,
                        aeson,
                        text,
+                       hashable,
                        trec-car-types
   default-language:    Haskell2010
 
@@ -23,5 +24,8 @@ executable app
                        aeson,
                        app,
                        jsaddle-dom,
+                       text,
+                       hashable,
+                       containers,
                        trec-car-types
   default-language:    Haskell2010

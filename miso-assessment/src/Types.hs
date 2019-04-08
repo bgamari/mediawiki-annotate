@@ -15,11 +15,12 @@ import Data.Aeson
 import Data.Aeson.Types
 import Control.Applicative
 import qualified Data.Text as T
+import Data.Hashable
 
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord, Show, FromJSON, ToJSON)
+                deriving (Eq, Hashable, Ord, Show, FromJSON, ToJSON)
 
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor

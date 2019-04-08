@@ -2,6 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric#-}
 
 -- | Haskell module declaration
 module Main where
@@ -11,9 +13,15 @@ import Miso
 import Miso.String
 import Data.Aeson
 import JavaScript.Web.XMLHttpRequest
+
+import GHC.Generics
 import Control.Exception
 import qualified Data.ByteString as BS
+import qualified Data.Map.Strict as M
 import Data.Maybe
+import Data.Hashable
+
+import qualified Data.Text as T
 
 import JSDOM.URLSearchParams
 import JavaScript.Web.Location
@@ -24,13 +32,51 @@ import Types
 import qualified Debug.Trace as Debug
 
 
+
+data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
+    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+
+prettyLabel :: AssessmentLabel -> MisoString
+prettyLabel MustLabel = "Must"
+prettyLabel ShouldLabel = "Should"
+prettyLabel CanLabel = "Can"
+prettyLabel TopicLabel = "Topic"
+prettyLabel NonRelLabel = "No"
+prettyLabel TrashLabel = "Trash"
+prettyLabel DuplicateLabel = "Duplicate"
+prettyLabel UnsetLabel = "x"
+
+
+
+data AssessmentKey = AssessmentKey {
+        userId :: UserId
+        , queryId :: QueryId
+        , paragraphId :: ParagraphId
+    }
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+
+data SavedAssessments = SavedAssessments {
+        savedData :: M.Map AssessmentKey AssessmentLabel
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
+
 data AssessmentModel =
-    AssessmentModel { page :: AssessmentPage }
+    AssessmentModel { page :: AssessmentPage
+                    , labelState :: M.Map AssessmentKey AssessmentLabel
+                    }
     | FileNotFoundErrorModel { filename :: MisoString }
     | ErrorMessageModel { errorMessage :: MisoString }
     | LoadingPageModel
   deriving (Eq)
 
+
+type UserId = T.Text
+defaultUser :: UserId
+defaultUser = "defaultuser"
+
+
+uploadUrl :: JSString
+uploadUrl = "/assessment"
 
 -- | Sum type for application events
 data Action
@@ -38,19 +84,13 @@ data Action
   | SetAssessmentPage AssessmentPage
   | ReportError MisoString
   | Initialize
+  | SetAssessment UserId QueryId ParagraphId AssessmentLabel
+  | Noop
+  | FlagSaveSuccess
+  | SaveAssessments
   deriving (Show)
 
 
-
-
-emptyAssessmentPage :: AssessmentPage
-emptyAssessmentPage = AssessmentPage {
-        apTitle = "",
-        apRunId = "",
-        apSquid = QueryId "",
-        apQueryFacets = [],
-        apParagraphs = []
-    }
 
 emptyAssessmentModel :: AssessmentModel
 emptyAssessmentModel = LoadingPageModel
@@ -90,8 +130,34 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage p) _ = noEff $ AssessmentModel p
+updateModel (SetAssessmentPage p) _ = noEff $ AssessmentModel p mempty  -- todo load from storage
 updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
+
+updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {..} =  newModel <# do
+    let key = storageKey userId queryId paraId
+        value = label
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+    return Noop
+  where newModel =
+            let labelState' = M.insert (AssessmentKey userId queryId paraId) label labelState
+            in m {labelState = labelState'}
+updateModel Noop m = noEff m
+
+updateModel SaveAssessments m = m <# do
+    res <- uploadAssessments $ labelState m
+    return $ case res of
+      Right () -> FlagSaveSuccess
+      Left e  -> ReportError $ ms $ show e
+
+updateModel FlagSaveSuccess m = m <# do
+    alert "saved"
+    return Noop
+
+
+storageKey :: UserId -> QueryId -> ParagraphId -> MisoString
+storageKey userId queryId paraId =
+    (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
 
 -- updateModel Home m = m <# do
 --                h <- windowInnerHeight
@@ -109,10 +175,32 @@ getAssessmentPageFilePath pageName =
 --     $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
     $ "http://localhost:8000/data/" <> pageName <> ".json"
 
+uploadAssessments ::  M.Map AssessmentKey AssessmentLabel -> IO (Either FetchJSONError ())
+uploadAssessments labelState = do
+    putStrLn $ "uploadURL " <> (show uploadUrl)
+    resp <- handle onError $ fmap Right $ xhrByteString req
+    case resp of
+      Right (Response{..})
+        | status == 200      -> pure $ Right ()
+      Right resp             -> pure $ Left $ BadResponse (status resp) (contents resp)
+      Left err               -> pure $ Left $ XHRFailed err
+  where
+    onError :: XHRError -> IO (Either XHRError (Response BS.ByteString))
+    onError = pure . Left
+
+    req = Request { reqMethod = POST
+                  , reqURI = uploadUrl
+                  , reqLogin = Nothing
+                  , reqHeaders = []
+                  , reqWithCredentials = False
+                  , reqData = StringData $ ms$  Data.Aeson.encode $  SavedAssessments labelState
+                  }
+
 data FetchJSONError = XHRFailed XHRError
                     | InvalidJSON String
                     | BadResponse { badRespStatus :: Int, badRespContents :: Maybe BS.ByteString }
                     deriving (Eq, Show)
+
 
 fetchJson :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError a)
 fetchJson url = do
@@ -139,25 +227,43 @@ fetchJson url = do
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel AssessmentModel{ page= AssessmentPage{..}} = div_ []
+viewModel AssessmentModel{ page= AssessmentPage{..}, labelState = labelState} = div_ []
 --     H.head prologue
    [ h1_ [] [text $ ms apTitle]
    , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
    , p_ [] [text "Run: ", text $ ms apRunId]
+   , button_ [onClick SaveAssessments] [text "Upload"]
    , hr_ []
    , ol_ [] $ fmap (renderParagraph) apParagraphs
    ]
   where wrapLi v = li_ [] [v]
-        renderParagraph :: Paragraph -> View action
+        mkButtons key paraId =
+            div_ [class_ "btn-group"] [         --  , role_ "toolbar"
+                mkButton paraId MustLabel
+              , mkButton paraId ShouldLabel
+              , mkButton paraId CanLabel
+              , mkButton paraId TopicLabel
+              , mkButton paraId NonRelLabel
+              , mkButton paraId TrashLabel
+              , mkButton paraId DuplicateLabel
+              , mkButton paraId UnsetLabel
+            ]
+          where
+            current = fromMaybe UnsetLabel $ key `M.lookup` labelState
+            mkButton paraId label =
+              let active = if label==current then "active" else ""
+              in button_ [ class_ ("btn btn-sm "<> active)
+                         , onClick (SetAssessment defaultUser queryId paraId label) ]
+                         [text $ prettyLabel label]
+
+        queryId = apSquid
+        renderParagraph :: Paragraph -> View Action
         renderParagraph Paragraph{..} =
             li_ [class_ "entity-snippet-li"] [
                 p_ [] [
                     span_ [class_ "annotation"][ -- data-item  data-query
-                        div_ [class_ "btn-toolbar annotate" ] [ -- data_ann_od role_ "toolbar"
-                            div_ [class_ "btn-group"] [         --  , role_ "toolbar"
-                                button_ [class_ "btn btn-sm" ][text "Must"]   -- data-value="5"
-                                , button_ [class_ "btn btn-sm" ][text "Should"]   -- data-value="4"
-                            ]
+                        div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
+                            mkButtons (AssessmentKey defaultUser queryId paraId) paraId
                         ]
                     ]
                     , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
