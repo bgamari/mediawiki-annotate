@@ -48,6 +48,20 @@ prettyLabel DuplicateLabel = "Duplicate"
 prettyLabel UnsetLabel = "x"
 
 
+data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
+    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+
+prettyTransition :: AssessmentTransitionLabel -> MisoString
+prettyTransition RedundantTransition = "Redundant"
+prettyTransition SameTransition = "Same"
+prettyTransition AppropriateTransition = "Good"
+prettyTransition SwitchTransition = "Switch"
+prettyTransition OfftopicTransition = "ToOfftopic"
+prettyTransition ToNonRelTransition = "ToNonRel"
+prettyTransition UnsetTransition = "x"
+
+
+
 
 data AssessmentKey = AssessmentKey {
         userId :: UserId
@@ -59,8 +73,8 @@ data AssessmentKey = AssessmentKey {
 data AssessmentTransitionKey = AssessmentTransitionKey {
         userId :: UserId
         , queryId :: QueryId
-        , fromParagraphId :: ParagraphId
-        , toParagraphId :: ParagraphId
+        , paragraphId1 :: ParagraphId
+        , paragraphId2 :: ParagraphId
     }
   deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
 
@@ -69,10 +83,18 @@ data AssessmentTransitionKey = AssessmentTransitionKey {
 data AssessmentState = AssessmentState {
                     labelState :: M.Map AssessmentKey AssessmentLabel
                     , notesState :: M.Map AssessmentKey T.Text
+                    , facetState :: M.Map AssessmentKey AssessmentFacet
+                    , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
+                    , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
-emptyAssessmentState = AssessmentState { labelState = mempty, notesState = mempty }
+emptyAssessmentState = AssessmentState { labelState = mempty
+                                       , notesState = mempty
+                                       , facetState = mempty
+                                       , transitionLabelState = mempty
+                                       , transitionNotesState = mempty
+                                       }
 
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
@@ -104,17 +126,18 @@ data Action
   | ReportError MisoString
   | Initialize
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
+  | SetFacet UserId QueryId ParagraphId AssessmentFacet
+  | SetNotes UserId QueryId ParagraphId MisoString
+  | SetTransitionAssessment UserId QueryId ParagraphId ParagraphId AssessmentTransitionLabel
   | Noop
   | FlagSaveSuccess
   | SaveAssessments
-  | SetNotes UserId QueryId ParagraphId MisoString
   deriving (Show)
 
 
 
 emptyAssessmentModel :: AssessmentModel
 emptyAssessmentModel = LoadingPageModel
-
 
 
 
@@ -163,6 +186,17 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
             let labelState' = M.insert (AssessmentKey userId queryId paraId) label labelState
             in m {state = state{labelState = labelState'}}
 
+
+updateModel (SetFacet userId queryId paraId facet) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+    let key = storageKey "facet" userId queryId paraId
+        value = facet
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+    return Noop
+  where newModel =
+            let facetState' = M.insert (AssessmentKey userId queryId paraId) facet facetState
+            in m {state = state{facetState = facetState'}}
+
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
     let key = storageKey "notes" userId queryId paraId
         value = txt
@@ -172,6 +206,17 @@ updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@
   where newModel =
             let notesState' = M.insert (AssessmentKey userId queryId paraId) (T.pack $ fromMisoString txt) notesState
             in m {state = state{notesState = notesState'}}
+
+
+updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+    let key = storageKeyTransition "transition" userId queryId paraId1 paraId2
+        value = label
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+    return Noop
+  where newModel =
+            let transitionLabelState' = M.insert (AssessmentTransitionKey userId queryId paraId1 paraId2) label transitionLabelState
+            in m {state = state{transitionLabelState = transitionLabelState'}}
 
 
 updateModel Noop m = noEff m
@@ -190,6 +235,14 @@ updateModel FlagSaveSuccess m = m <# do
 storageKey :: String -> UserId -> QueryId -> ParagraphId -> MisoString
 storageKey category userId queryId paraId =
     (ms category) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
+
+storageKeyTransition :: String -> UserId -> QueryId -> ParagraphId -> ParagraphId -> MisoString
+storageKeyTransition category userId queryId paraId1 paraId2 =
+    (ms category) <> "-"
+    <> (ms $ userId) <> "-"
+    <> (ms $ unQueryId queryId) <> "-"
+    <> (ms $ unpackParagraphId paraId1)  <> "-"
+    <> (ms $ unpackParagraphId paraId2)
 
 -- updateModel Home m = m <# do
 --                h <- windowInnerHeight
@@ -275,7 +328,10 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
                go []         = []
        in interleave renderParagraph renderTransition apParagraphs
    ]
-  where mkButtons key paraId =
+  where
+        queryId = apSquid
+
+        mkButtons key paraId =
             div_ [class_ "btn-group"] [         --  , role_ "toolbar"
                 mkButton paraId MustLabel
               , mkButton paraId ShouldLabel
@@ -303,13 +359,55 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
                        ]
             ]
 
-        queryId = apSquid
+        mkQueryFacetField key paraId =
+            let idStr = storageKey "transition" defaultUser queryId paraId
+                facetList :: [AssessmentFacet]
+                facetList = apQueryFacets
+            in div_ [] [
+                label_ [for_ idStr ] [text "Query Facet"
+                    , (select_ [id_ idStr]
+                        $ (fmap renderFacet facetList)
+                        <> [ option_ [value_ $ "NONE"] [text $ "NONE OF THESE"]
+                           , option_ [value_ $ "UNJUDGED"] [text $ "Please select"]]
+                       )
+                    ]
+                ]
+
+          where renderFacet :: AssessmentFacet -> View Action
+                renderFacet AssessmentFacet{..}=
+                    let headingId = unpackHeadingId $  apHeadingId
+                        headingText = getSectionHeading $ apHeading
+                    in option_ [value_ $ ms $ headingId] [text $ ms $ headingText ]
+
+
+
+
+        mkTransitionButtons key paraId1 paraId2 =
+                    div_ [class_ "trans-group"] [
+                        mkButton paraId1 paraId2 RedundantTransition
+                      , mkButton paraId1 paraId2 SameTransition
+                      , mkButton paraId1 paraId2 AppropriateTransition
+                      , mkButton paraId1 paraId2 SwitchTransition
+                      , mkButton paraId1 paraId2 OfftopicTransition
+                      , mkButton paraId1 paraId2 ToNonRelTransition
+                      , mkButton paraId1 paraId2 UnsetTransition
+                    ]
+                  where
+--                     current = fromMaybe UnsetLabel $ key `M.lookup` labelState       -- todo fetch state
+                    mkButton paraId1 paraId2 label =
+                      let active = "" -- if label==current then "active" else ""
+                      in button_ [ class_ ("btn btn-sm "<> active)
+                                 , onClick (SetTransitionAssessment defaultUser queryId paraId1 paraId2 label) ]
+                                 [text $ prettyTransition label]
+
 
         renderTransition:: Paragraph -> Paragraph -> View Action
         renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
+                idStr = storageKey "transition" defaultUser queryId paraId1
             in  div_ [] [
-                    p_ [] [text $ "Transition "<> (ms $ unpackParagraphId paraId1)
+                    mkTransitionButtons assessmentKey paraId1 paraId2
+                    ,p_ [] [text $ "Transition "<> (ms $ unpackParagraphId paraId1)
                                                <> " -> " <> (ms$ unpackParagraphId paraId2)]
                 ]
         renderParagraph :: Paragraph -> View Action
@@ -318,6 +416,7 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
             in li_ [class_ "entity-snippet-li"] [
                 p_ [] [
                     mkNotesField assessmentKey paraId
+                    , mkQueryFacetField assessmentKey paraId
                     ,  span_ [class_ "annotation"][ -- data-item  data-query
                         div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
                             mkButtons assessmentKey paraId
