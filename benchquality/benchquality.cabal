@@ -18,7 +18,7 @@ library
   ghc-options:         -Wall
   hs-source-dirs:      src
   exposed-modules:     TrecEvalFile
-  build-depends:       base >=4.9 && <4.12,
+  build-depends:       base >=4.9,
                        async,
                        bytestring,
                        unordered-containers,
@@ -217,6 +217,7 @@ executable appendix-table
                        pandoc >= 2.4,
                        benchquality
   default-language:    Haskell2010
+  buildable:           False
 
 executable appendix-desc
   main-is:             AppendixDesc.hs
@@ -258,3 +259,4 @@ executable appendix-desc
                        pandoc >= 2.4,
                        benchquality
   default-language:    Haskell2010
+  buildable:           False

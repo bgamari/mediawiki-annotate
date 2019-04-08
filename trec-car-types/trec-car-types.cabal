@@ -23,6 +23,7 @@ library
                        CAR.Types.AST.Pretty
   other-extensions:    ScopedTypeVariables, TypeApplications, BangPatterns, DataKinds, FlexibleContexts, DeriveGeneric, TypeFamilies, OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, RankNTypes, StandaloneDeriving, TemplateHaskell
   build-depends:       base >=4.8 && <4.13,
+                       contravariant,
                        bytestring >=0.10 && <0.11,
                        text >=1.2 && <1.3,
                        hashable >=1.2 && <1.3,

@@ -5,6 +5,7 @@ allow-newer:
 
 packages:
     trec-car-tools/
+    trec-car-types/
     multilang-car/
     assessment-eval/
     mediawiki-parser/
