@@ -4,6 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric#-}
+{-# LANGUAGE DuplicateRecordFields#-}
 
 -- | Haskell module declaration
 module Main where
@@ -52,6 +53,14 @@ data AssessmentKey = AssessmentKey {
         userId :: UserId
         , queryId :: QueryId
         , paragraphId :: ParagraphId
+    }
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+
+data AssessmentTransitionKey = AssessmentTransitionKey {
+        userId :: UserId
+        , queryId :: QueryId
+        , fromParagraphId :: ParagraphId
+        , toParagraphId :: ParagraphId
     }
   deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
 
@@ -257,10 +266,16 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
    , p_ [] [text "Run: ", text $ ms apRunId]
    , button_ [onClick SaveAssessments] [text "Upload"]
    , hr_ []
-   , ol_ [] $ fmap (renderParagraph) apParagraphs
+   , ol_ [] $
+       let interleave :: (a -> b) -> (a -> a -> b) -> [a] -> [b]
+           interleave f g = go
+             where
+               go (x:y:rest) = f x : g x y : go (y:rest)
+               go [x]        = [f x]
+               go []         = []
+       in interleave renderParagraph renderTransition apParagraphs
    ]
-  where wrapLi v = li_ [] [v]
-        mkButtons key paraId =
+  where mkButtons key paraId =
             div_ [class_ "btn-group"] [         --  , role_ "toolbar"
                 mkButton paraId MustLabel
               , mkButton paraId ShouldLabel
@@ -279,8 +294,9 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
                          , onClick (SetAssessment defaultUser queryId paraId label) ]
                          [text $ prettyLabel label]
         mkNotesField key paraId =
-            div_ [] [
-                input_ [ type_ "text"
+            div_ [class_ "notes-div"] [
+                input_ [ class_ "notes-field"
+                       , type_ "text"
                        , size_ "20"
                        , maxlength_ "50"
                        , onInput (\str -> SetNotes defaultUser queryId paraId str)
@@ -288,17 +304,25 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
             ]
 
         queryId = apSquid
+
+        renderTransition:: Paragraph -> Paragraph -> View Action
+        renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
+            let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
+            in  div_ [] [
+                    p_ [] [text $ "Transition "<> (ms $ unpackParagraphId paraId1)
+                                               <> " -> " <> (ms$ unpackParagraphId paraId2)]
+                ]
         renderParagraph :: Paragraph -> View Action
         renderParagraph Paragraph{..} =
             let assessmentKey = (AssessmentKey defaultUser queryId paraId)
             in li_ [class_ "entity-snippet-li"] [
                 p_ [] [
-                    span_ [class_ "annotation"][ -- data-item  data-query
+                    mkNotesField assessmentKey paraId
+                    ,  span_ [class_ "annotation"][ -- data-item  data-query
                         div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
                             mkButtons assessmentKey paraId
                         ]
                     ]
-                    , mkNotesField assessmentKey paraId
                     , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
                     , p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
                 ]
