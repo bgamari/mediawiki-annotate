@@ -35,7 +35,7 @@
 
 .entity-snippet-li {
     display: inline-table;
-    width: 400px;
+    width: 600px;
     text-align: left;
     background-color: #dce7f1;
     border-style: solid;
@@ -45,6 +45,21 @@
     padding: 20px;
     margin: 4px;
     vertical-align: top;
+}
+
+.facet-select {
+    background-color:#ffffff
+}
+
+.facet-option {
+    background-color:#ffffff
+}
+
+.notes-div {
+}
+
+.notes-field{
+    background-color:#ffffff
 }
 
 a {
@@ -62,4 +77,27 @@ a:hover {
 
 .passage-orig-entity {
     font-weight:bold;
+}
+
+
+.active-display-btn {
+    background-color: #286090;
+    border-color: #286090;
+    color: #fff;
+}
+
+.hidden-display {
+    display:none;
+}
+
+.display-button-btn {
+    background-color: #dce7f1;
+    border-color: #a9d1f5;
+    color: #286090;
+}
+
+.display-button-btn:hover{
+    background-color: #dce7f1;
+    border-color: #a9d1f5;
+    color: #286090;
 }

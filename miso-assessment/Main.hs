@@ -13,6 +13,7 @@ module Main where
 import Miso
 import Miso.String
 import Data.Aeson
+import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
 import GHC.Generics
@@ -101,9 +102,18 @@ data SavedAssessments = SavedAssessments {
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
+
+
+data DisplayConfig = DisplayConfig { displayAssessments :: Bool}
+  deriving (Eq)
+
+defaultDisplayConfig = DisplayConfig {displayAssessments = False}
+
+
 data AssessmentModel =
     AssessmentModel { page :: AssessmentPage
                     , state :: AssessmentState
+                    , config :: DisplayConfig
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
     | ErrorMessageModel { errorMessage :: MisoString }
@@ -126,12 +136,13 @@ data Action
   | ReportError MisoString
   | Initialize
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
-  | SetFacet UserId QueryId ParagraphId AssessmentFacet
+  | SetFacet UserId QueryId ParagraphId MisoString
   | SetNotes UserId QueryId ParagraphId MisoString
   | SetTransitionAssessment UserId QueryId ParagraphId ParagraphId AssessmentTransitionLabel
   | Noop
   | FlagSaveSuccess
   | SaveAssessments
+  | DisplayAssessments
   deriving (Show)
 
 
@@ -173,7 +184,12 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage p) _ = noEff $ (AssessmentModel p emptyAssessmentState)  -- todo load from storage
+updateModel (SetAssessmentPage page) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig)  -- todo load from storage
+    where page' = page{apQueryFacets = facets'}
+          facets' = (apQueryFacets $ page)
+                  <> [ AssessmentFacet{apHeading=(SectionHeading "NONE OF THESE")
+                     , apHeadingId=packHeadingId "NONE_OF_THESE" }
+                     ]
 updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
@@ -187,15 +203,22 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
             in m {state = state{labelState = labelState'}}
 
 
-updateModel (SetFacet userId queryId paraId facet) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state@AssessmentState{..}, page=AssessmentPage{apQueryFacets =facetList}} =  newModel <# do
     let key = storageKey "facet" userId queryId paraId
-        value = facet
+        value = headingIdStr
     putStrLn $ show key <> "   " <> show value
     setLocalStorage key value
+    putStrLn $ "SetFacet "<> show queryId <> " - " <> unpackParagraphId paraId <> " - " <> (fromMisoString headingIdStr)
     return Noop
   where newModel =
-            let facetState' = M.insert (AssessmentKey userId queryId paraId) facet facetState
-            in m {state = state{facetState = facetState'}}
+            let facetState' =
+                    case [ f
+                         | f@AssessmentFacet {apHeadingId=hid} <- facetList
+                         , (unpackHeadingId hid) == (fromMisoString headingIdStr)
+                         ] of
+                    (facet:_) -> M.insert (AssessmentKey userId queryId paraId) facet facetState
+                    otherwise -> M.delete (AssessmentKey userId queryId paraId) facetState
+            in m {state = state{ facetState = facetState'}}
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
     let key = storageKey "notes" userId queryId paraId
@@ -227,9 +250,17 @@ updateModel SaveAssessments m = m <# do
       Right () -> FlagSaveSuccess
       Left e  -> ReportError $ ms $ show e
 
-updateModel FlagSaveSuccess m = m <# do
-    alert "saved"
+updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryId}} = m <# do
+    alert $ "Uploaded annotations for page " <> (ms $ unQueryId queryId)
     return Noop
+
+updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
+    noEff $ m { config =
+                    c {
+                        displayAssessments = not display
+                      }
+              }
+
 
 
 storageKey :: String -> UserId -> QueryId -> ParagraphId -> MisoString
@@ -257,8 +288,10 @@ storageKeyTransition category userId queryId paraId1 paraId2 =
 getAssessmentPageFilePath :: String -> MisoString
 getAssessmentPageFilePath pageName =
     ms
---     $ "http://trec-car.cs.unh.edu:8080/data/" <> pageName <> ".json"
-    $ "http://localhost:8000/data/" <> pageName <> ".json"
+    $ "/data/" <> pageName <> ".json"
+
+--     $ "http://trec-car2.cs.unh.edu:8080/data/" <> pageName <> ".json"
+--     $ "http://localhost:8000/data/" <> pageName <> ".json"
 
 uploadAssessments ::  AssessmentState -> IO (Either FetchJSONError ())
 uploadAssessments assessmentState = do
@@ -312,35 +345,52 @@ fetchJson url = do
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { labelState= labelState}} = div_ []
---     H.head prologue
-   [ h1_ [] [text $ ms apTitle]
-   , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
-   , p_ [] [text "Run: ", text $ ms apRunId]
-   , button_ [onClick SaveAssessments] [text "Upload"]
-   , hr_ []
-   , ol_ [] $
-       let interleave :: (a -> b) -> (a -> a -> b) -> [a] -> [b]
-           interleave f g = go
-             where
-               go (x:y:rest) = f x : g x y : go (y:rest)
-               go [x]        = [f x]
-               go []         = []
-       in interleave renderParagraph renderTransition apParagraphs
-   ]
+viewModel AssessmentModel{
+            page= AssessmentPage{..}
+            , state = s@AssessmentState { labelState = labelState
+                                      , transitionLabelState = transitionState}
+            , config = c@DisplayConfig {..}
+          } =
+
+    div_ []
+       [ h1_ [] [text $ ms apTitle]
+       , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
+       , p_ [] [text "Run: ", text $ ms apRunId]
+       , button_ [onClick SaveAssessments] [text "Upload"]
+       , button_ [onClick DisplayAssessments, class_ hiddenDisplayBtn] [text "Display"]
+       , textarea_ [class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
+            text $  ms$  AesonPretty.encodePretty $  SavedAssessments s
+       ]
+       , hr_ []
+       , ol_ [] $
+           let interleave :: (a -> b) -> (a -> a -> b) -> [a] -> [b]
+               interleave f g = go
+                 where
+                   go (x:y:rest) = f x : g x y : go (y:rest)
+                   go [x]        = [f x]
+                   go []         = []
+           in interleave renderParagraph renderTransition apParagraphs
+       ]
   where
+        hiddenDisplay = if displayAssessments then "active-display" else "hidden-display"
+        hiddenDisplayBtn = if displayAssessments then "active-display-btn" else "display-btn"
         queryId = apSquid
 
+        facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
+
         mkButtons key paraId =
-            div_ [class_ "btn-group"] [         --  , role_ "toolbar"
-                mkButton paraId MustLabel
-              , mkButton paraId ShouldLabel
-              , mkButton paraId CanLabel
-              , mkButton paraId TopicLabel
-              , mkButton paraId NonRelLabel
-              , mkButton paraId TrashLabel
-              , mkButton paraId DuplicateLabel
-              , mkButton paraId UnsetLabel
+            div_[] [
+            label_ [for_ "relevance"] [text ""] -- Relevance Assessments:"
+            ,span_ [class_ "btn-group", id_ "relevance"] [         --  , role_ "toolbar"
+                    mkButton paraId MustLabel
+                  , mkButton paraId ShouldLabel
+                  , mkButton paraId CanLabel
+                  , mkButton paraId TopicLabel
+                  , mkButton paraId NonRelLabel
+                  , mkButton paraId TrashLabel
+                  , mkButton paraId DuplicateLabel
+                  , mkButton paraId UnsetLabel
+                ]
             ]
           where
             current = fromMaybe UnsetLabel $ key `M.lookup` labelState
@@ -351,12 +401,14 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
                          [text $ prettyLabel label]
         mkNotesField key paraId =
             div_ [class_ "notes-div"] [
-                input_ [ class_ "notes-field"
-                       , type_ "text"
-                       , size_ "20"
-                       , maxlength_ "50"
-                       , onInput (\str -> SetNotes defaultUser queryId paraId str)
-                       ]
+                label_ [] [text "Notes:"
+                    , input_ [ class_ "notes-field"
+                           , type_ "text"
+                           , size_ "50"
+                           , maxlength_ "100"
+                           , onInput (\str -> SetNotes defaultUser queryId paraId str)
+                          ]
+                ]
             ]
 
         mkQueryFacetField key paraId =
@@ -364,11 +416,13 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
                 facetList :: [AssessmentFacet]
                 facetList = apQueryFacets
             in div_ [] [
-                label_ [for_ idStr ] [text "Query Facet"
-                    , (select_ [id_ idStr]
-                        $ (fmap renderFacet facetList)
-                        <> [ option_ [value_ $ "NONE"] [text $ "NONE OF THESE"]
-                           , option_ [value_ $ "UNJUDGED"] [text $ "Please select"]]
+                label_ [for_ idStr ] [text "Best fitting query Facet:"
+                    , (select_ [ class_ "facet-select"
+                               , id_ idStr
+                               , onChange (\str -> SetFacet defaultUser queryId paraId str)
+                               ]
+                        $ [ option_ [ class_ "facet-option", value_ $ ""] [text $ "Please select"]]
+                        <> (fmap renderFacet facetList)
                        )
                     ]
                 ]
@@ -383,19 +437,21 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
 
 
         mkTransitionButtons key paraId1 paraId2 =
-                    div_ [class_ "trans-group"] [
-                        mkButton paraId1 paraId2 RedundantTransition
-                      , mkButton paraId1 paraId2 SameTransition
-                      , mkButton paraId1 paraId2 AppropriateTransition
-                      , mkButton paraId1 paraId2 SwitchTransition
-                      , mkButton paraId1 paraId2 OfftopicTransition
-                      , mkButton paraId1 paraId2 ToNonRelTransition
-                      , mkButton paraId1 paraId2 UnsetTransition
+                    label_ [] [text "Transition Quality:"
+                        ,div_ [class_ "trans-group"] [
+                            mkButton paraId1 paraId2 RedundantTransition
+                          , mkButton paraId1 paraId2 SameTransition
+                          , mkButton paraId1 paraId2 AppropriateTransition
+                          , mkButton paraId1 paraId2 SwitchTransition
+                          , mkButton paraId1 paraId2 OfftopicTransition
+                          , mkButton paraId1 paraId2 ToNonRelTransition
+                          , mkButton paraId1 paraId2 UnsetTransition
+                        ]
                     ]
                   where
---                     current = fromMaybe UnsetLabel $ key `M.lookup` labelState       -- todo fetch state
+                    current = fromMaybe UnsetTransition $ key `M.lookup` transitionState       -- todo fetch state
                     mkButton paraId1 paraId2 label =
-                      let active = "" -- if label==current then "active" else ""
+                      let active = if label==current then "active" else ""
                       in button_ [ class_ ("btn btn-sm "<> active)
                                  , onClick (SetTransitionAssessment defaultUser queryId paraId1 paraId2 label) ]
                                  [text $ prettyTransition label]
@@ -405,10 +461,10 @@ viewModel AssessmentModel{ page= AssessmentPage{..}, state = AssessmentState { l
         renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
                 idStr = storageKey "transition" defaultUser queryId paraId1
-            in  div_ [] [
-                    mkTransitionButtons assessmentKey paraId1 paraId2
-                    ,p_ [] [text $ "Transition "<> (ms $ unpackParagraphId paraId1)
-                                               <> " -> " <> (ms$ unpackParagraphId paraId2)]
+            in  span_ [class_ "annotation"] [
+                    div_ [class_ "btn-toolbar annotate" ] [
+                        mkTransitionButtons assessmentKey paraId1 paraId2
+                    ]
                 ]
         renderParagraph :: Paragraph -> View Action
         renderParagraph Paragraph{..} =

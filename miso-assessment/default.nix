@@ -62,6 +62,7 @@ in
       mkdir $out
       cp all.min.js $out/all.js
       cp ${./html/assess.css} $out/assess.css
+      cp ${app}/bin/app.jsexe/runmain.js $out/
       cp ${./html/assess.html} $out/assess.html
       cp -R ${./data} $out/data
       chmod 755 $out/data
