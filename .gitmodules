@@ -33,4 +33,4 @@
 
 [submodule "miso-library"]
 	path = miso-library
-	url = git@github.com:dmjio/miso.git
+	url = https://github.com/dmjio/miso.git
