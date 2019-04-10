@@ -87,6 +87,7 @@ data AssessmentState = AssessmentState {
                     , facetState :: M.Map AssessmentKey AssessmentFacet
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
+                    , hiddenState :: M.Map AssessmentKey Bool
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
@@ -95,6 +96,7 @@ emptyAssessmentState = AssessmentState { labelState = mempty
                                        , facetState = mempty
                                        , transitionLabelState = mempty
                                        , transitionNotesState = mempty
+                                       , hiddenState = mempty
                                        }
 
 data SavedAssessments = SavedAssessments {
@@ -138,6 +140,7 @@ data Action
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
   | SetFacet UserId QueryId ParagraphId MisoString
   | SetNotes UserId QueryId ParagraphId MisoString
+  | ToggleHidden UserId QueryId ParagraphId
   | SetTransitionAssessment UserId QueryId ParagraphId ParagraphId AssessmentTransitionLabel
   | Noop
   | FlagSaveSuccess
@@ -230,6 +233,16 @@ updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@
             let notesState' = M.insert (AssessmentKey userId queryId paraId) (T.pack $ fromMisoString txt) notesState
             in m {state = state{notesState = notesState'}}
 
+updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
+    let key = storageKey "hidden" userId queryId paraId
+        value = show $ newState
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+    return Noop
+  where newModel = m {state = state{hiddenState = hiddenState'}}
+        oldState = fromMaybe False $ M.lookup  (AssessmentKey userId queryId paraId) hiddenState
+        newState = not oldState
+        hiddenState' = M.insert (AssessmentKey userId queryId paraId) (newState) hiddenState
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
     let key = storageKeyTransition "transition" userId queryId paraId1 paraId2
@@ -348,7 +361,9 @@ viewModel :: Model -> View Action
 viewModel AssessmentModel{
             page= AssessmentPage{..}
             , state = s@AssessmentState { labelState = labelState
-                                      , transitionLabelState = transitionState}
+                                      , transitionLabelState = transitionState
+                                      , hiddenState = hiddenState
+                                      }
             , config = c@DisplayConfig {..}
           } =
 
@@ -377,6 +392,11 @@ viewModel AssessmentModel{
         queryId = apSquid
 
         facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
+
+        mkHidable className key paraId =
+            div_[] [
+                button_ [class_ ("hider "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
+            ]
 
         mkButtons key paraId =
             div_[] [
@@ -461,25 +481,39 @@ viewModel AssessmentModel{
         renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
                 idStr = storageKey "transition" defaultUser queryId paraId1
+
+
+-- Trying to hide transition when paragraph is hidden ---
+--  ...however this does not work, as then the next transition has the wrong "para1"
+--                 psgAssessmentKey = (AssessmentKey defaultUser queryId paraId1)
+--                 isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
+--                 hiddenStateClass = if isHidden then "hidden-panel" else "shown-panel"
+
             in  span_ [class_ "annotation"] [
-                    div_ [class_ "btn-toolbar annotate" ] [
+                    div_ [class_ ("btn-toolbar annotate") ] [
                         mkTransitionButtons assessmentKey paraId1 paraId2
                     ]
                 ]
         renderParagraph :: Paragraph -> View Action
         renderParagraph Paragraph{..} =
             let assessmentKey = (AssessmentKey defaultUser queryId paraId)
-            in li_ [class_ "entity-snippet-li"] [
+                isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
+                hiddenStateClass = if isHidden then "hidden-panel" else "shown-panel"
+                hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
+            in li_ [class_ ("entity-snippet-li")] [
                 p_ [] [
-                    mkNotesField assessmentKey paraId
-                    , mkQueryFacetField assessmentKey paraId
-                    ,  span_ [class_ "annotation"][ -- data-item  data-query
-                        div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
-                            mkButtons assessmentKey paraId
+                      mkHidable hidableClass assessmentKey paraId
+                    , div_ [class_ hiddenStateClass] [
+                        mkNotesField assessmentKey paraId
+                        , mkQueryFacetField assessmentKey paraId
+                        ,  span_ [class_ "annotation"][ -- data-item  data-query
+                            div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
+                                mkButtons assessmentKey paraId
+                            ]
                         ]
+                        , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
+                        , p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
                     ]
-                    , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
-                    , p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
                 ]
             ]
         renderParaBody :: ParaBody -> View action

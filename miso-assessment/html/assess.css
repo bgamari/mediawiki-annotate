@@ -101,3 +101,23 @@ a:hover {
     border-color: #a9d1f5;
     color: #286090;
 }
+
+.hidden-panel {
+    display:none
+}
+
+.shown-panel {
+}
+
+
+.hidable-hidden {
+    background-color: #286090;
+    border-color: #286090;
+    color: #fff;
+}
+
+.hidable-shown {
+    background-color: #dce7f1;
+    border-color: #a9d1f5;
+    color: #286090;
+}
