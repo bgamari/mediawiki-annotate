@@ -35,7 +35,7 @@
 
 .entity-snippet-li {
     display: inline-table;
-    width: 600px;
+    width: 1000px;
     text-align: left;
     background-color: #dce7f1;
     border-style: solid;
@@ -48,18 +48,19 @@
 }
 
 .facet-select {
-    background-color:#ffffff
+    background-color:#fff;
 }
 
 .facet-option {
-    background-color:#ffffff
+    background-color:#fff;
 }
 
 .notes-div {
 }
 
 .notes-field{
-    background-color:#ffffff
+    background-color:#fff;
+    width:100%;
 }
 
 a {
@@ -109,6 +110,10 @@ a:hover {
 .shown-panel {
 }
 
+.assessment-display {
+    background-color: white;
+}
+
 
 .hidable-hidden {
     background-color: #286090;
@@ -120,4 +125,32 @@ a:hover {
     background-color: #dce7f1;
     border-color: #a9d1f5;
     color: #286090;
+}
+
+.queryterm-span {
+    background-color: #89ccf0;
+    color: #000;
+}
+
+.facetterm-span {
+    background-color: #b6e3ff;
+}
+
+.container {
+    width: 100%;
+    margin: auto;
+}
+.container-annotate {
+    width: 50%;
+    float: left;
+    padding: 5px;
+}
+.container-content {
+    margin-left: 50%;
+    padding: 5px;
+}
+
+.hidden-transition-annotation {
+    background-color:#a0a0a0;
+    display:none;
 }

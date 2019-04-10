@@ -20,6 +20,7 @@ import GHC.Generics
 import Control.Exception
 import qualified Data.ByteString as BS
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import Data.Maybe
 import Data.Hashable
 
@@ -146,6 +147,7 @@ data Action
   | FlagSaveSuccess
   | SaveAssessments
   | DisplayAssessments
+  | ClearAssessments
   deriving (Show)
 
 
@@ -176,10 +178,11 @@ main = startApp App {..}
 updateModel :: Action -> Model -> Effect Action Model
 updateModel (FetchAssessmentPage pageName) m = m <# do
     page <- fetchJson $ getAssessmentPageFilePath pageName
-
-    return $ case page of 
+    return $ case page of
       Right p -> SetAssessmentPage p
       Left e  -> ReportError $ ms $ show e
+
+
 updateModel (Initialize) m = m <# do
     loc <- getWindowLocation >>= getSearch
     params <- newURLSearchParams loc
@@ -266,6 +269,11 @@ updateModel SaveAssessments m = m <# do
 updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryId}} = m <# do
     alert $ "Uploaded annotations for page " <> (ms $ unQueryId queryId)
     return Noop
+
+updateModel ClearAssessments m@AssessmentModel{ page=page} = m <# do
+    -- remove from browser data
+    return $ SetAssessmentPage page
+
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
     noEff $ m { config =
@@ -355,6 +363,7 @@ fetchJson url = do
                   }
 
 -- ------------- Presentation ----------------------
+data SpanType = QuerySpan | FacetSpan
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
@@ -373,20 +382,44 @@ viewModel AssessmentModel{
        , p_ [] [text "Run: ", text $ ms apRunId]
        , button_ [onClick SaveAssessments] [text "Upload"]
        , button_ [onClick DisplayAssessments, class_ hiddenDisplayBtn] [text "Display"]
-       , textarea_ [class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
-            text $  ms$  AesonPretty.encodePretty $  SavedAssessments s
+       , button_ [onClick ClearAssessments] [text "Clear"]
+       , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
+            text $  ms $  AesonPretty.encodePretty $  SavedAssessments s
        ]
        , hr_ []
-       , ol_ [] $
-           let interleave :: (a -> b) -> (a -> a -> b) -> [a] -> [b]
-               interleave f g = go
-                 where
-                   go (x:y:rest) = f x : g x y : go (y:rest)
-                   go [x]        = [f x]
-                   go []         = []
-           in interleave renderParagraph renderTransition apParagraphs
+       , ol_ [] $ paragraphsAndTransitions apParagraphs
+
        ]
   where
+        paragraphsAndTransitions :: [Paragraph] -> [View Action]
+        paragraphsAndTransitions apParagraphs  =
+            go apParagraphs Nothing
+          where
+            -- | we iterate over paragraphs, keeping track of the last unhidden para,
+            -- | because that is where the next transition is counted from
+            -- | We don't add a transition of the there is no previous unhidden para (i.e., Nothing)
+            -- | the next unhidden is para2, only if its hidden, then we use the last previous one.b
+            go :: [Paragraph] -> Maybe Paragraph -> [View Action]
+            go apParagraphs prevPara =
+               case apParagraphs of
+                 [] -> []
+                 para2:rest ->
+                    let optTransition =
+                            case prevPara of
+                            Just para1 ->
+                                 [ renderTransition para1 para2]
+                            Nothing -> []
+                        prevPara' = (if (not $ isHidden para2) then Just para2 else prevPara)
+                    in optTransition
+                         <> [renderParagraph para2]
+                         <> go rest prevPara'
+
+
+        isHidden Paragraph{paraId = paraId} =
+                let assessmentKey = (AssessmentKey defaultUser queryId paraId)
+                    isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
+                in isHidden
+
         hiddenDisplay = if displayAssessments then "active-display" else "hidden-display"
         hiddenDisplayBtn = if displayAssessments then "active-display-btn" else "display-btn"
         queryId = apSquid
@@ -422,12 +455,19 @@ viewModel AssessmentModel{
         mkNotesField key paraId =
             div_ [class_ "notes-div"] [
                 label_ [] [text "Notes:"
-                    , input_ [ class_ "notes-field"
-                           , type_ "text"
-                           , size_ "50"
-                           , maxlength_ "100"
-                           , onInput (\str -> SetNotes defaultUser queryId paraId str)
-                          ]
+                    , textarea_ [ class_ "notes-field"
+                                , maxlength_ "1000"
+                                , wrap_ "true"
+                                , cols_ "100"
+                                , placeholder_ "This text relevant, because..."
+                                , onInput (\str -> SetNotes defaultUser queryId paraId str)
+                      ][]
+--                     , input_ [ class_ "notes-field"
+--                            , type_ "text"
+--                            , size_ "70"
+--                            , maxlength_ "100"
+--                            , onInput (\str -> SetNotes defaultUser queryId paraId str)
+--                           ]
                 ]
             ]
 
@@ -436,8 +476,9 @@ viewModel AssessmentModel{
                 facetList :: [AssessmentFacet]
                 facetList = apQueryFacets
             in div_ [] [
-                label_ [for_ idStr ] [text "Best fitting query Facet:"
+                label_ [for_ idStr ] [text "Best fitting query facet:"
                     , (select_ [ class_ "facet-select"
+                               , multiple_ True
                                , id_ idStr
                                , onChange (\str -> SetFacet defaultUser queryId paraId str)
                                ]
@@ -481,15 +522,9 @@ viewModel AssessmentModel{
         renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
                 idStr = storageKey "transition" defaultUser queryId paraId1
-
-
--- Trying to hide transition when paragraph is hidden ---
---  ...however this does not work, as then the next transition has the wrong "para1"
---                 psgAssessmentKey = (AssessmentKey defaultUser queryId paraId1)
---                 isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
---                 hiddenStateClass = if isHidden then "hidden-panel" else "shown-panel"
-
-            in  span_ [class_ "annotation"] [
+                hiddenTransitionClass :: String
+                hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
+            in  span_ [class_ (ms $ "transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
                         mkTransitionButtons assessmentKey paraId1 paraId2
                     ]
@@ -502,22 +537,61 @@ viewModel AssessmentModel{
                 hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
             in li_ [class_ ("entity-snippet-li")] [
                 p_ [] [
-                      mkHidable hidableClass assessmentKey paraId
-                    , div_ [class_ hiddenStateClass] [
-                        mkNotesField assessmentKey paraId
-                        , mkQueryFacetField assessmentKey paraId
-                        ,  span_ [class_ "annotation"][ -- data-item  data-query
-                            div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
-                                mkButtons assessmentKey paraId
+                 mkHidable hidableClass assessmentKey paraId
+                , div_ [class_ hiddenStateClass] [
+                    section_ [class_ "container"] [
+                    div_ [class_ "container-annotate"] [
+                            mkNotesField assessmentKey paraId
+                            , mkQueryFacetField assessmentKey paraId
+                            ,  span_ [class_ "annotation"][ -- data-item  data-query
+                                div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
+                                    mkButtons assessmentKey paraId
+                                ]
                             ]
-                        ]
-                        , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
-                        , p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
+                            , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
+                    ], div_ [class_ "container-content"][
+                             p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
+                    ]
                     ]
                 ]
+                ]
             ]
+
+
         renderParaBody :: ParaBody -> View action
-        renderParaBody (ParaText txt) = text $ ms txt
+--         renderParaBody (ParaText txt) = text $ ms txt
+        renderParaBody (ParaText txt) =
+            let queryStrings :: [T.Text]
+                queryStrings = [apTitle]
+                facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
+                queryWords =  S.fromList
+                           $ [ T.toLower s
+                             | str <- queryStrings
+                             , s <- T.words str
+                             , (T.length s) > 3
+                             ]
+                facetWords =  S.fromList
+                           $ [ T.toLower s
+                             | str <- facetStrings
+                             , s <- T.words str
+                             , (T.length s) > 3
+                             ]
+                wordsFound :: [(T.Text, Maybe SpanType)]
+                wordsFound = [ (word, spanType)
+                             | word <- T.words txt
+                             , let spanType = if ((T.toLower word) `S.member` queryWords) then Just QuerySpan
+                                              else if ((T.toLower word) `S.member` facetWords) then Just FacetSpan
+                                              else Nothing
+                             ]
+            in span_[] $ foldMap renderWord wordsFound
+          where renderWord :: (T.Text, Maybe SpanType) -> [View action]
+                renderWord (str, Just QuerySpan) =
+                    [span_[class_ "queryterm-span"] [text $ ms str], text " "]
+                renderWord (str, Just FacetSpan) =
+                    [span_[class_ "facetterm-span"] [text $ ms str], text " "]
+                renderWord (str, Nothing) =
+                    [text $ ms (str <> " ")]
+
         renderParaBody (ParaLink Link{..}) = a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]
 
 viewModel LoadingPageModel = viewErrorMessage $ "Loading Page"
