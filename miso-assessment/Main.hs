@@ -56,7 +56,7 @@ data AssessmentTransitionLabel = RedundantTransition | SameTransition | Appropri
 prettyTransition :: AssessmentTransitionLabel -> MisoString
 prettyTransition RedundantTransition = "Redundant"
 prettyTransition SameTransition = "Same"
-prettyTransition AppropriateTransition = "Good"
+prettyTransition AppropriateTransition = "Coherent"
 prettyTransition SwitchTransition = "Switch"
 prettyTransition OfftopicTransition = "ToOfftopic"
 prettyTransition ToNonRelTransition = "ToNonRel"
@@ -109,19 +109,26 @@ data SavedAssessments = SavedAssessments {
 
 data DisplayConfig = DisplayConfig { displayAssessments :: Bool}
   deriving (Eq)
-
 defaultDisplayConfig = DisplayConfig {displayAssessments = False}
 
+data ParaSpan = QuerySpan T.Text
+              | FacetSpan T.Text
+              | PlainSpan T.Text
+              | EntitySpan Link
+  deriving (Eq)
+type AnnotatedSpans = [ParaSpan]   -- todo inline type
 
 data AssessmentModel =
     AssessmentModel { page :: AssessmentPage
                     , state :: AssessmentState
                     , config :: DisplayConfig
+                    , viewCache :: M.Map ParagraphId AnnotatedSpans
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
     | ErrorMessageModel { errorMessage :: MisoString }
     | LoadingPageModel
   deriving (Eq)
+
 
 
 type UserId = T.Text
@@ -156,8 +163,6 @@ emptyAssessmentModel :: AssessmentModel
 emptyAssessmentModel = LoadingPageModel
 
 
-
-
 -- | Type synonym for an application model
 type Model = AssessmentModel
 
@@ -190,12 +195,16 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage page) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig)  -- todo load from storage
+updateModel (SetAssessmentPage page) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig viewCache)  -- todo load from storage
     where page' = page{apQueryFacets = facets'}
           facets' = (apQueryFacets $ page)
                   <> [ AssessmentFacet{apHeading=(SectionHeading "NONE OF THESE")
                      , apHeadingId=packHeadingId "NONE_OF_THESE" }
                      ]
+          viewCache = buildViewTable page
+
+
+
 updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
@@ -209,13 +218,14 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
             in m {state = state{labelState = labelState'}}
 
 
-updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state@AssessmentState{..}, page=AssessmentPage{apQueryFacets =facetList}} =  newModel <# do
-    let key = storageKey "facet" userId queryId paraId
-        value = headingIdStr
-    putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
-    putStrLn $ "SetFacet "<> show queryId <> " - " <> unpackParagraphId paraId <> " - " <> (fromMisoString headingIdStr)
-    return Noop
+updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state@AssessmentState{..}, page=AssessmentPage{apQueryFacets =facetList}} =
+    newModel <# do
+        let key = storageKey "facet" userId queryId paraId
+            value = headingIdStr
+        putStrLn $ show key <> "   " <> show value
+        setLocalStorage key value
+        putStrLn $ "SetFacet "<> show queryId <> " - " <> unpackParagraphId paraId <> " - " <> (fromMisoString headingIdStr)
+        return Noop
   where newModel =
             let facetState' =
                     case [ f
@@ -363,7 +373,6 @@ fetchJson url = do
                   }
 
 -- ------------- Presentation ----------------------
-data SpanType = QuerySpan | FacetSpan
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
@@ -374,6 +383,7 @@ viewModel AssessmentModel{
                                       , hiddenState = hiddenState
                                       }
             , config = c@DisplayConfig {..}
+            , viewCache = viewCache
           } =
 
     div_ []
@@ -428,7 +438,8 @@ viewModel AssessmentModel{
 
         mkHidable className key paraId =
             div_[] [
-                button_ [class_ ("hider "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
+                button_ [class_ ("hider annotate btn btn-sm "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
+--                 button_ [class_ ("hider "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
             ]
 
         mkButtons key paraId =
@@ -460,7 +471,7 @@ viewModel AssessmentModel{
                                 , wrap_ "true"
                                 , cols_ "100"
                                 , placeholder_ "This text relevant, because..."
-                                , onInput (\str -> SetNotes defaultUser queryId paraId str)
+                                , onChange (\str -> SetNotes defaultUser queryId paraId str)
                       ][]
 --                     , input_ [ class_ "notes-field"
 --                            , type_ "text"
@@ -534,7 +545,8 @@ viewModel AssessmentModel{
             let assessmentKey = (AssessmentKey defaultUser queryId paraId)
                 isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
                 hiddenStateClass = if isHidden then "hidden-panel" else "shown-panel"
-                hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
+                hidableClass = if isHidden then "active hidable-hidden" else ""
+--                 hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
             in li_ [class_ ("entity-snippet-li")] [
                 p_ [] [
                  mkHidable hidableClass assessmentKey paraId
@@ -550,54 +562,31 @@ viewModel AssessmentModel{
                             ]
                             , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
                     ], div_ [class_ "container-content"][
-                             p_ [class_ "entity-snippet-li-text"] $ fmap renderParaBody paraBody
+                             p_ [class_ "entity-snippet-li-text"] $ renderParaBodies paraId
                     ]
                     ]
                 ]
                 ]
             ]
-
-
-        renderParaBody :: ParaBody -> View action
---         renderParaBody (ParaText txt) = text $ ms txt
-        renderParaBody (ParaText txt) =
-            let queryStrings :: [T.Text]
-                queryStrings = [apTitle]
-                facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
-                queryWords =  S.fromList
-                           $ [ T.toLower s
-                             | str <- queryStrings
-                             , s <- T.words str
-                             , (T.length s) > 3
-                             ]
-                facetWords =  S.fromList
-                           $ [ T.toLower s
-                             | str <- facetStrings
-                             , s <- T.words str
-                             , (T.length s) > 3
-                             ]
-                wordsFound :: [(T.Text, Maybe SpanType)]
-                wordsFound = [ (word, spanType)
-                             | word <- T.words txt
-                             , let spanType = if ((T.toLower word) `S.member` queryWords) then Just QuerySpan
-                                              else if ((T.toLower word) `S.member` facetWords) then Just FacetSpan
-                                              else Nothing
-                             ]
-            in span_[] $ foldMap renderWord wordsFound
-          where renderWord :: (T.Text, Maybe SpanType) -> [View action]
-                renderWord (str, Just QuerySpan) =
-                    [span_[class_ "queryterm-span"] [text $ ms str], text " "]
-                renderWord (str, Just FacetSpan) =
-                    [span_[class_ "facetterm-span"] [text $ ms str], text " "]
-                renderWord (str, Nothing) =
+        renderParaBodies :: ParagraphId -> [View Action]
+        renderParaBodies paraId  =
+            let annotatedTextsSpans = fromJust $ paraId `M.lookup` viewCache
+            in foldMap renderWord annotatedTextsSpans
+          where renderWord :: (ParaSpan) -> [View Action]
+                renderWord (QuerySpan str) =
+                    [span_ [class_ "queryterm-span"] [text $ ms str], text " "]
+                renderWord (FacetSpan str) =
+                    [span_ [class_ "facetterm-span"] [text $ ms str], text " "]
+                renderWord (PlainSpan str) =
                     [text $ ms (str <> " ")]
+                renderWord (EntitySpan Link{..}) =
+                    [a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]]
 
-        renderParaBody (ParaLink Link{..}) = a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]
+
 
 viewModel LoadingPageModel = viewErrorMessage $ "Loading Page"
 viewModel FileNotFoundErrorModel { .. }= viewErrorMessage $ "File not Found " <> ms filename
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
-
 
 
 viewErrorMessage :: MisoString -> View Action
@@ -605,4 +594,37 @@ viewErrorMessage msg = div_ []
     [ h1_[] [text $ msg ],
       p_[] [ a_ [ href_ "/"] [text "Back to start..."]]
     ]
+
+
+buildViewTable :: AssessmentPage -> M.Map ParagraphId AnnotatedSpans
+buildViewTable AssessmentPage{..} =
+    let queryStrings :: [T.Text]
+        queryStrings = [apTitle]
+        facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
+        queryWords =  S.fromList
+                   $ [ T.toCaseFold s
+                     | str <- queryStrings
+                     , s <- T.words str
+                     , (T.length s) > 3
+                     ]
+        facetWords =  S.fromList
+                   $ [ T.toCaseFold s
+                     | str <- facetStrings
+                     , s <- T.words str
+                     , (T.length s) > 3
+                     ]
+        annotatedTextSpans :: ParaBody -> AnnotatedSpans
+        annotatedTextSpans (ParaText txt) =
+             [ spanType
+             | word <- T.words txt
+             , let spanType = if ((T.toCaseFold word) `S.member` queryWords) then QuerySpan word
+                              else if ((T.toCaseFold word) `S.member` facetWords) then FacetSpan word
+                              else PlainSpan word
+             ]
+        annotatedTextSpans (ParaLink link) = [EntitySpan link]
+
+    in M.fromList $ [ (paraId p, spans)
+                    | p <- apParagraphs
+                    , let spans = foldMap annotatedTextSpans $ paraBody p
+                    ]
 
