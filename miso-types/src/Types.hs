@@ -62,6 +62,7 @@ data AssessmentPage =
 instance FromJSON AssessmentPage where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentPage where
+    toJSON = genericToJSON jsonOptions
     toEncoding = genericToEncoding jsonOptions
 
 data AssessmentFacet =
@@ -73,6 +74,7 @@ data AssessmentFacet =
 instance FromJSON AssessmentFacet where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentFacet where
+    toJSON = genericToJSON jsonOptions
     toEncoding = genericToEncoding jsonOptions
 
 -- --------------------------------------
@@ -126,7 +128,7 @@ emptyAssessmentState = AssessmentState { labelState = mempty
                                        , transitionNotesState = mempty
                                        , hiddenState = mempty
                                        }
-
+                -- todo add query id
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
     }
