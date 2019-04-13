@@ -36,9 +36,6 @@ import qualified Debug.Trace as Debug
 
 
 
-data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
-
 prettyLabel :: AssessmentLabel -> MisoString
 prettyLabel MustLabel = "Must"
 prettyLabel ShouldLabel = "Should"
@@ -50,9 +47,6 @@ prettyLabel DuplicateLabel = "Duplicate"
 prettyLabel UnsetLabel = "x"
 
 
-data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
-
 prettyTransition :: AssessmentTransitionLabel -> MisoString
 prettyTransition RedundantTransition = "Redundant"
 prettyTransition SameTransition = "Same"
@@ -61,50 +55,6 @@ prettyTransition SwitchTransition = "Switch"
 prettyTransition OfftopicTransition = "ToOfftopic"
 prettyTransition ToNonRelTransition = "ToNonRel"
 prettyTransition UnsetTransition = "x"
-
-
-
-
-data AssessmentKey = AssessmentKey {
-        userId :: UserId
-        , queryId :: QueryId
-        , paragraphId :: ParagraphId
-    }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
-
-data AssessmentTransitionKey = AssessmentTransitionKey {
-        userId :: UserId
-        , queryId :: QueryId
-        , paragraphId1 :: ParagraphId
-        , paragraphId2 :: ParagraphId
-    }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
-
-
-
-data AssessmentState = AssessmentState {
-                    labelState :: M.Map AssessmentKey AssessmentLabel
-                    , notesState :: M.Map AssessmentKey T.Text
-                    , facetState :: M.Map AssessmentKey AssessmentFacet
-                    , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
-                    , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
-                    , hiddenState :: M.Map AssessmentKey Bool
-    }
-  deriving (Eq, FromJSON, ToJSON, Generic)
-
-emptyAssessmentState = AssessmentState { labelState = mempty
-                                       , notesState = mempty
-                                       , facetState = mempty
-                                       , transitionLabelState = mempty
-                                       , transitionNotesState = mempty
-                                       , hiddenState = mempty
-                                       }
-
-data SavedAssessments = SavedAssessments {
-        savedData :: AssessmentState
-    }
-  deriving (Eq, FromJSON, ToJSON, Generic)
-
 
 
 data DisplayConfig = DisplayConfig { displayAssessments :: Bool}
@@ -130,10 +80,6 @@ data AssessmentModel =
   deriving (Eq)
 
 
-
-type UserId = T.Text
-defaultUser :: UserId
-defaultUser = "defaultuser"
 
 
 uploadUrl :: JSString
@@ -533,9 +479,8 @@ viewModel AssessmentModel{
         renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
                 idStr = storageKey "transition" defaultUser queryId paraId1
-                hiddenTransitionClass :: String
                 hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
-            in  span_ [class_ (ms $ "transition-annotation annotation " <> hiddenTransitionClass)] [
+            in  span_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
                         mkTransitionButtons assessmentKey paraId1 paraId2
                     ]

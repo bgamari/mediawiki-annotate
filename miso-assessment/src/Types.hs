@@ -5,6 +5,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DuplicateRecordFields#-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 
 module Types where
@@ -16,11 +18,13 @@ import Data.Aeson.Types
 import Control.Applicative
 import qualified Data.Text as T
 import Data.Hashable
+import qualified Data.Map.Strict as M
 
 import CAR.Types
 
 newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Hashable, Ord, Show, FromJSON, ToJSON)
+                deriving (Eq, Ord, Show)
+                deriving newtype (Hashable, FromJSON, ToJSON)
 
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor
@@ -70,4 +74,61 @@ instance FromJSON AssessmentFacet where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentFacet where
     toEncoding = genericToEncoding jsonOptions
+
+-- --------------------------------------
+
+type UserId = T.Text
+defaultUser :: UserId
+defaultUser = "defaultuser"
+
+
+data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
+    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+
+data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
+    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+
+
+
+
+
+data AssessmentKey = AssessmentKey {
+        userId :: UserId
+        , queryId :: QueryId
+        , paragraphId :: ParagraphId
+    }
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+
+data AssessmentTransitionKey = AssessmentTransitionKey {
+        userId :: UserId
+        , queryId :: QueryId
+        , paragraphId1 :: ParagraphId
+        , paragraphId2 :: ParagraphId
+    }
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+
+
+
+data AssessmentState = AssessmentState {
+                    labelState :: M.Map AssessmentKey AssessmentLabel
+                    , notesState :: M.Map AssessmentKey T.Text
+                    , facetState :: M.Map AssessmentKey AssessmentFacet
+                    , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
+                    , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
+                    , hiddenState :: M.Map AssessmentKey Bool
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
+
+emptyAssessmentState = AssessmentState { labelState = mempty
+                                       , notesState = mempty
+                                       , facetState = mempty
+                                       , transitionLabelState = mempty
+                                       , transitionNotesState = mempty
+                                       , hiddenState = mempty
+                                       }
+
+data SavedAssessments = SavedAssessments {
+        savedData :: AssessmentState
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
 
