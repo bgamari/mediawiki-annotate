@@ -24,6 +24,7 @@ library
                        text,
                        containers,
                        hashable,
+                       time,
                        trec-car-types
   default-language:    Haskell2010
 

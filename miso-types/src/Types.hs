@@ -19,6 +19,7 @@ import Control.Applicative
 import qualified Data.Text as T
 import Data.Hashable
 import qualified Data.Map.Strict as M
+import Data.Time
 
 import CAR.Types
 
@@ -118,6 +119,7 @@ data AssessmentState = AssessmentState {
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
                     , hiddenState :: M.Map AssessmentKey Bool
+                    , metaData :: AssessmentMetaData
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
@@ -128,6 +130,18 @@ emptyAssessmentState = AssessmentState { labelState = mempty
                                        , transitionNotesState = mempty
                                        , hiddenState = mempty
                                        }
+
+data AssessmentMetaData {
+   assessmentRuns :: [AssessmentRun]
+   , userId :: UserId
+   , timeStamp :: UTCTime
+   }
+
+
+data AssessmentRun {
+        apRunId :: T.Text,
+        apSquid :: QueryId
+}
                 -- todo add query id
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
