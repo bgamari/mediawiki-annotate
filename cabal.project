@@ -20,6 +20,7 @@ packages:
     assessment-interface/
     assessment-interface/annotation/server
     filter-duplicates/
+    miso-types/
     vendor/*
     benchquality/
     tqa-import/
