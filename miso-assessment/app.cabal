@@ -29,6 +29,7 @@ executable app
                        text,
                        hashable,
                        containers,
+                       time,
                        miso-types,
                        trec-car-types
   default-language:    Haskell2010

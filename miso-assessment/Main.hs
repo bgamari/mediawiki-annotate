@@ -23,6 +23,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.Maybe
 import Data.Hashable
+import Data.Time
 
 import qualified Data.Text as T
 
@@ -73,6 +74,7 @@ data AssessmentModel =
                     , state :: AssessmentState
                     , config :: DisplayConfig
                     , viewCache :: M.Map ParagraphId AnnotatedSpans
+                    , timeCache :: UTCTime
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
     | ErrorMessageModel { errorMessage :: MisoString }
@@ -88,7 +90,7 @@ uploadUrl = "/assessment"
 -- | Sum type for application events
 data Action
   = FetchAssessmentPage String
-  | SetAssessmentPage AssessmentPage
+  | SetAssessmentPage AssessmentPage UTCTime
   | ReportError MisoString
   | Initialize
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
@@ -129,8 +131,9 @@ main = startApp App {..}
 updateModel :: Action -> Model -> Effect Action Model
 updateModel (FetchAssessmentPage pageName) m = m <# do
     page <- fetchJson $ getAssessmentPageFilePath pageName
+    now <- getCurrentTime
     return $ case page of
-      Right p -> SetAssessmentPage p
+      Right p -> SetAssessmentPage p now
       Left e  -> ReportError $ ms $ show e
 
 
@@ -141,13 +144,14 @@ updateModel (Initialize) m = m <# do
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
 
-updateModel (SetAssessmentPage page) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig viewCache)  -- todo load from storage
+updateModel (SetAssessmentPage page now) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig viewCache timeCache)  -- todo load from storage
     where page' = page{apQueryFacets = facets'}
           facets' = (apQueryFacets $ page)
                   <> [ AssessmentFacet{apHeading=(SectionHeading "NONE OF THESE")
                      , apHeadingId=packHeadingId "NONE_OF_THESE" }
                      ]
           viewCache = buildViewTable page
+          timeCache = now
 
 
 
@@ -217,7 +221,7 @@ updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@Ass
 updateModel Noop m = noEff m
 
 updateModel SaveAssessments m = m <# do
-    res <- uploadAssessments $ state m
+    res <- uploadAssessments m
     return $ case res of
       Right () -> FlagSaveSuccess
       Left e  -> ReportError $ ms $ show e
@@ -227,8 +231,9 @@ updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryI
     return Noop
 
 updateModel ClearAssessments m@AssessmentModel{ page=page} = m <# do
+    now <- getCurrentTime
     -- remove from browser data
-    return $ SetAssessmentPage page
+    return $ SetAssessmentPage page now
 
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
@@ -270,10 +275,11 @@ getAssessmentPageFilePath pageName =
 --     $ "http://trec-car2.cs.unh.edu:8080/data/" <> pageName <> ".json"
 --     $ "http://localhost:8000/data/" <> pageName <> ".json"
 
-uploadAssessments ::  AssessmentState -> IO (Either FetchJSONError ())
-uploadAssessments assessmentState = do
+uploadAssessments ::  AssessmentModel -> IO (Either FetchJSONError ())
+uploadAssessments m = do
     putStrLn $ "uploadURL " <> (show uploadUrl)
-    resp <- handle onError $ fmap Right $ xhrByteString req
+    now <- getCurrentTime
+    resp <- handle onError $ fmap Right $ xhrByteString $ req now
     case resp of
       Right (Response{..})
         | status == 200      -> pure $ Right ()
@@ -283,13 +289,25 @@ uploadAssessments assessmentState = do
     onError :: XHRError -> IO (Either XHRError (Response BS.ByteString))
     onError = pure . Left
 
-    req = Request { reqMethod = POST
+    req now = Request { reqMethod = POST
                   , reqURI = uploadUrl
                   , reqLogin = Nothing
                   , reqHeaders = []
                   , reqWithCredentials = False
-                  , reqData = StringData $ ms$  Data.Aeson.encode $  SavedAssessments assessmentState
+                  , reqData = StringData $ ms $  Data.Aeson.encode $  makeSavedAssessments m now
                   }
+
+makeSavedAssessments :: AssessmentModel -> UTCTime -> SavedAssessments
+makeSavedAssessments m@AssessmentModel{page= page, state = state} now =
+    SavedAssessments state meta
+  where meta = AssessmentMetaData {
+           assessmentRuns = [AssessmentRun { runId = apRunId page
+                                           , squid = apSquid page}]
+         , userId = defaultUser
+         , timeStamp = now
+        }
+
+
 
 data FetchJSONError = XHRFailed XHRError
                     | InvalidJSON String
@@ -322,7 +340,7 @@ fetchJson url = do
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel AssessmentModel{
+viewModel m@AssessmentModel{
             page= AssessmentPage{..}
             , state = s@AssessmentState { labelState = labelState
                                       , transitionLabelState = transitionState
@@ -330,6 +348,7 @@ viewModel AssessmentModel{
                                       }
             , config = c@DisplayConfig {..}
             , viewCache = viewCache
+            , timeCache = timeCache
           } =
 
     div_ []
@@ -340,7 +359,7 @@ viewModel AssessmentModel{
        , button_ [onClick DisplayAssessments, class_ hiddenDisplayBtn] [text "Display"]
        , button_ [onClick ClearAssessments] [text "Clear"]
        , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
-            text $  ms $  AesonPretty.encodePretty $  SavedAssessments s
+            text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache
        ]
        , hr_ []
        , ol_ [] $ paragraphsAndTransitions apParagraphs

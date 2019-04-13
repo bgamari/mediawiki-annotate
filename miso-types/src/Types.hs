@@ -119,7 +119,6 @@ data AssessmentState = AssessmentState {
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
                     , hiddenState :: M.Map AssessmentKey Bool
-                    , metaData :: AssessmentMetaData
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
@@ -131,20 +130,23 @@ emptyAssessmentState = AssessmentState { labelState = mempty
                                        , hiddenState = mempty
                                        }
 
-data AssessmentMetaData {
-   assessmentRuns :: [AssessmentRun]
+data AssessmentMetaData = AssessmentMetaData {
+     assessmentRuns :: [AssessmentRun]
    , userId :: UserId
    , timeStamp :: UTCTime
    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
 
 
-data AssessmentRun {
-        apRunId :: T.Text,
-        apSquid :: QueryId
-}
-                -- todo add query id
+data AssessmentRun = AssessmentRun {
+          runId :: T.Text
+        , squid :: QueryId
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic)
+
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
+       , metaData :: AssessmentMetaData
     }
   deriving (Eq, FromJSON, ToJSON, Generic)
 
