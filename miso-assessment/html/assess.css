@@ -154,3 +154,31 @@ a:hover {
     background-color:#a0a0a0;
     display:none;
 }
+
+
+
+
+ol {
+    list-style-type: none;
+    counter-reset: ol-counter;
+}
+ol > li:before {
+    content: counter(ol-counter);
+    counter-increment: ol-counter;
+}
+
+
+
+
+/*.container-annotate{
+    display:none;
+}
+
+.transition-annotation{
+    display:none;
+}
+
+.hider{
+    display:none;
+}
+/*

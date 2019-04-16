@@ -11,19 +11,21 @@ module Main where
 
 -- | Miso framework import
 import Miso
-import Miso.String
+import Miso.String hiding (concatMap)
 import Data.Aeson
 import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
-import GHC.Generics
 import Control.Exception
 import qualified Data.ByteString as BS
+-- import qualified Data.ByteString.Char8 as BS
+import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.Maybe
-import Data.Hashable
 import Data.Time
+import Data.Char
+import Language.Porter
 
 import qualified Data.Text as T
 
@@ -59,14 +61,15 @@ prettyTransition UnsetTransition = "x"
 
 
 data DisplayConfig = DisplayConfig { displayAssessments :: Bool}
-  deriving (Eq)
+  deriving (Eq, Show)
+defaultDisplayConfig :: DisplayConfig
 defaultDisplayConfig = DisplayConfig {displayAssessments = False}
 
 data ParaSpan = QuerySpan T.Text
               | FacetSpan T.Text
               | PlainSpan T.Text
               | EntitySpan Link
-  deriving (Eq)
+  deriving (Eq, Show)
 type AnnotatedSpans = [ParaSpan]   -- todo inline type
 
 data AssessmentModel =
@@ -75,11 +78,12 @@ data AssessmentModel =
                     , config :: DisplayConfig
                     , viewCache :: M.Map ParagraphId AnnotatedSpans
                     , timeCache :: UTCTime
+                    , stopwords :: S.Set T.Text
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
-    | ErrorMessageModel { errorMessage :: MisoString }
-    | LoadingPageModel
-  deriving (Eq)
+    | ErrorMessageModel { errorMessage :: MisoString, oldModel :: AssessmentModel }
+    | LoadingPageModel { maybeStopwords :: Maybe (S.Set T.Text) }
+  deriving (Eq, Show)
 
 
 
@@ -103,12 +107,13 @@ data Action
   | SaveAssessments
   | DisplayAssessments
   | ClearAssessments
+  | LoadStopWordList BS.ByteString
   deriving (Show)
 
 
 
 emptyAssessmentModel :: AssessmentModel
-emptyAssessmentModel = LoadingPageModel
+emptyAssessmentModel = LoadingPageModel {maybeStopwords = Nothing }
 
 
 -- | Type synonym for an application model
@@ -120,7 +125,7 @@ main :: IO ()
 main = startApp App {..}
   where
     initialAction = Initialize -- FetchAssessmentPage "water-distribution" -- initial action to be executed on application load
-    model  = LoadingPageModel  -- initial model
+    model  = emptyAssessmentModel -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
     events = defaultEvents        -- default delegated events
@@ -129,33 +134,68 @@ main = startApp App {..}
 
 -- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
-updateModel (FetchAssessmentPage pageName) m = m <# do
-    page <- fetchJson $ getAssessmentPageFilePath pageName
-    now <- getCurrentTime
-    return $ case page of
-      Right p -> SetAssessmentPage p now
-      Left e  -> ReportError $ ms $ show e
 
+updateModel (Initialize) m@LoadingPageModel{} = m <# do
+    stopWordFile <- fetchByteString $ getStopwordUrl
+    return $ case stopWordFile of
+      Right stopcontent -> LoadStopWordList stopcontent
+      Left e -> ReportError $ ms $ show e
 
-updateModel (Initialize) m = m <# do
+updateModel (LoadStopWordList stopwordList) m = newModel <# do
+    -- determine page to load
     loc <- getWindowLocation >>= getSearch
     params <- newURLSearchParams loc
     maybeQ <- get params ("q" :: MisoString)
     let query = fromMaybe "default" maybeQ
     return $ FetchAssessmentPage query
+  where newModel =
+            let stopwords :: S.Set T.Text
+                stopwords = S.fromList $ T.lines $ Data.Text.Encoding.decodeUtf8 stopwordList
+            in case m of
+                m@LoadingPageModel{} -> m {maybeStopwords = Just stopwords}
+                m@AssessmentModel{} -> m {stopwords = stopwords}
 
-updateModel (SetAssessmentPage page now) _ = noEff $ (AssessmentModel page' emptyAssessmentState defaultDisplayConfig viewCache timeCache)  -- todo load from storage
-    where page' = page{apQueryFacets = facets'}
+updateModel (FetchAssessmentPage pageName) m = m <# do
+    page <- fetchJson $ getAssessmentPageFilePath pageName
+    now' <- getCurrentTime
+    return $ case page of
+      Right p -> SetAssessmentPage p now'
+      Left e  -> ReportError $ ms $ show e
+
+updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
+
+updateModel (SetAssessmentPage page now') m =
+        case m of
+            AssessmentModel {stopwords = stopwords} ->
+                    noEff $ AssessmentModel  { page=page'
+                                     , state=emptyAssessmentState
+                                     , config = defaultDisplayConfig
+                                     , viewCache = viewCache stopwords
+                                     , timeCache = timeCache
+                                     , stopwords = stopwords  -- todo load from storage
+                                     }
+            LoadingPageModel {maybeStopwords = Just stopwords} ->
+                    noEff $ AssessmentModel  { page=page'
+                                     , state=emptyAssessmentState
+                                     , config = defaultDisplayConfig
+                                     , viewCache = viewCache stopwords
+                                     , timeCache = timeCache
+                                     , stopwords = stopwords  -- todo load from storage
+                                     }
+            _ -> m <# do return $ ReportError $ (ms  ("Unexpected model for SetAssessmentPage "<>  show m))
+
+  where   page' = page{apQueryFacets = facets'}
           facets' = (apQueryFacets $ page)
-                  <> [ AssessmentFacet{apHeading=(SectionHeading "NONE OF THESE")
-                     , apHeadingId=packHeadingId "NONE_OF_THESE" }
+                  <> [ AssessmentFacet { apHeading=(SectionHeading "NONE OF THESE")
+                                       , apHeadingId=packHeadingId "NONE_OF_THESE"
+                                       }
                      ]
-          viewCache = buildViewTable page
-          timeCache = now
+          viewCache stopwords = buildViewTable page stopwords
+          timeCache = now'
+-- Initialization completed. React to user events.
 
 
 
-updateModel (ReportError e) _ = noEff $ ErrorMessageModel e
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
     let key = storageKey "label" userId queryId paraId
@@ -231,9 +271,9 @@ updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryI
     return Noop
 
 updateModel ClearAssessments m@AssessmentModel{ page=page} = m <# do
-    now <- getCurrentTime
+    now' <- getCurrentTime
     -- remove from browser data
-    return $ SetAssessmentPage page now
+    return $ SetAssessmentPage page now'
 
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
@@ -242,6 +282,19 @@ updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displa
                         displayAssessments = not display
                       }
               }
+
+
+updateModel (SetAssessmentPage x1 x2) m = m <# do
+    return $ ReportError $ ms ("unreachable: updateModel SetAssessmentPage "<> show x1 <>" "<> show x2 <> " " <> show m)
+
+updateModel x m = m <# do
+    return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
+
+
+
+
+
+
 
 
 
@@ -265,7 +318,8 @@ storageKeyTransition category userId queryId paraId1 paraId2 =
 --   putStrLn "Hello World" >> pure NoOp
 
 
-
+getStopwordUrl :: MisoString
+getStopwordUrl = "/inquery-en.txt"
 
 getAssessmentPageFilePath :: String -> MisoString
 getAssessmentPageFilePath pageName =
@@ -278,8 +332,8 @@ getAssessmentPageFilePath pageName =
 uploadAssessments ::  AssessmentModel -> IO (Either FetchJSONError ())
 uploadAssessments m = do
     putStrLn $ "uploadURL " <> (show uploadUrl)
-    now <- getCurrentTime
-    resp <- handle onError $ fmap Right $ xhrByteString $ req now
+    now' <- getCurrentTime
+    resp <- handle onError $ fmap Right $ xhrByteString $ req now'
     case resp of
       Right (Response{..})
         | status == 200      -> pure $ Right ()
@@ -289,22 +343,22 @@ uploadAssessments m = do
     onError :: XHRError -> IO (Either XHRError (Response BS.ByteString))
     onError = pure . Left
 
-    req now = Request { reqMethod = POST
+    req now' = Request { reqMethod = POST
                   , reqURI = uploadUrl
                   , reqLogin = Nothing
                   , reqHeaders = []
                   , reqWithCredentials = False
-                  , reqData = StringData $ ms $  Data.Aeson.encode $  makeSavedAssessments m now
+                  , reqData = StringData $ ms $  Data.Aeson.encode $  makeSavedAssessments m now'
                   }
 
 makeSavedAssessments :: AssessmentModel -> UTCTime -> SavedAssessments
-makeSavedAssessments m@AssessmentModel{page= page, state = state} now =
+makeSavedAssessments m@AssessmentModel{page= page, state = state} now' =
     SavedAssessments state meta
   where meta = AssessmentMetaData {
            assessmentRuns = [AssessmentRun { runId = apRunId page
                                            , squid = apSquid page}]
          , userId = defaultUser
-         , timeStamp = now
+         , timeStamp = now'
         }
 
 
@@ -314,14 +368,21 @@ data FetchJSONError = XHRFailed XHRError
                     | BadResponse { badRespStatus :: Int, badRespContents :: Maybe BS.ByteString }
                     deriving (Eq, Show)
 
-
 fetchJson :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError a)
 fetchJson url = do
+    result <- fetchByteString url
+    case result of
+        Left err          -> pure $ Left err
+        Right byteStr -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict byteStr
+
+
+fetchByteString:: JSString -> IO (Either FetchJSONError BS.ByteString)
+fetchByteString url = do
     resp <- handle onError $ fmap Right $ xhrByteString req
     case resp of
       Right (Response{..})
         | status == 200
-        , Just d <- contents -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict d
+        , Just c <- contents -> pure $ Right c
       Right resp             -> pure $ Left $ BadResponse (status resp) (contents resp)
       Left err               -> pure $ Left $ XHRFailed err
   where
@@ -349,6 +410,7 @@ viewModel m@AssessmentModel{
             , config = c@DisplayConfig {..}
             , viewCache = viewCache
             , timeCache = timeCache
+            , stopwords = _
           } =
 
     div_ []
@@ -392,19 +454,18 @@ viewModel m@AssessmentModel{
 
         isHidden Paragraph{paraId = paraId} =
                 let assessmentKey = (AssessmentKey defaultUser queryId paraId)
-                    isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
-                in isHidden
+                in fromMaybe False $ assessmentKey `M.lookup` hiddenState
 
         hiddenDisplay = if displayAssessments then "active-display" else "hidden-display"
         hiddenDisplayBtn = if displayAssessments then "active-display-btn" else "display-btn"
         queryId = apSquid
 
-        facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
+-- todo delete
+--         facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
 
-        mkHidable className key paraId =
+        mkHidable className _key paraId =
             div_[] [
                 button_ [class_ ("hider annotate btn btn-sm "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
---                 button_ [class_ ("hider "<> className), onClick (ToggleHidden defaultUser queryId paraId)] [text "Hide from Article"]
             ]
 
         mkButtons key paraId =
@@ -428,7 +489,7 @@ viewModel m@AssessmentModel{
               in button_ [ class_ ("btn btn-sm "<> active)
                          , onClick (SetAssessment defaultUser queryId paraId label) ]
                          [text $ prettyLabel label]
-        mkNotesField key paraId =
+        mkNotesField _key paraId =
             div_ [class_ "notes-div"] [
                 label_ [] [text "Notes:"
                     , textarea_ [ class_ "notes-field"
@@ -438,16 +499,10 @@ viewModel m@AssessmentModel{
                                 , placeholder_ "This text relevant, because..."
                                 , onChange (\str -> SetNotes defaultUser queryId paraId str)
                       ][]
---                     , input_ [ class_ "notes-field"
---                            , type_ "text"
---                            , size_ "70"
---                            , maxlength_ "100"
---                            , onInput (\str -> SetNotes defaultUser queryId paraId str)
---                           ]
                 ]
             ]
 
-        mkQueryFacetField key paraId =
+        mkQueryFacetField _key paraId =
             let idStr = storageKey "transition" defaultUser queryId paraId
                 facetList :: [AssessmentFacet]
                 facetList = apQueryFacets
@@ -476,18 +531,18 @@ viewModel m@AssessmentModel{
         mkTransitionButtons key paraId1 paraId2 =
                     label_ [] [text "Transition Quality:"
                         ,div_ [class_ "trans-group"] [
-                            mkButton paraId1 paraId2 RedundantTransition
-                          , mkButton paraId1 paraId2 SameTransition
-                          , mkButton paraId1 paraId2 AppropriateTransition
-                          , mkButton paraId1 paraId2 SwitchTransition
-                          , mkButton paraId1 paraId2 OfftopicTransition
-                          , mkButton paraId1 paraId2 ToNonRelTransition
-                          , mkButton paraId1 paraId2 UnsetTransition
+                            mkButton RedundantTransition
+                          , mkButton SameTransition
+                          , mkButton AppropriateTransition
+                          , mkButton SwitchTransition
+                          , mkButton OfftopicTransition
+                          , mkButton ToNonRelTransition
+                          , mkButton UnsetTransition
                         ]
                     ]
                   where
                     current = fromMaybe UnsetTransition $ key `M.lookup` transitionState       -- todo fetch state
-                    mkButton paraId1 paraId2 label =
+                    mkButton label =
                       let active = if label==current then "active" else ""
                       in button_ [ class_ ("btn btn-sm "<> active)
                                  , onClick (SetTransitionAssessment defaultUser queryId paraId1 paraId2 label) ]
@@ -495,9 +550,9 @@ viewModel m@AssessmentModel{
 
 
         renderTransition:: Paragraph -> Paragraph -> View Action
-        renderTransition p1@Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
+        renderTransition Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
-                idStr = storageKey "transition" defaultUser queryId paraId1
+--                 idStr = storageKey "transition" defaultUser queryId paraId1
                 hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
             in  span_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
@@ -505,11 +560,11 @@ viewModel m@AssessmentModel{
                     ]
                 ]
         renderParagraph :: Paragraph -> View Action
-        renderParagraph Paragraph{..} =
+        renderParagraph p@Paragraph{..} =
             let assessmentKey = (AssessmentKey defaultUser queryId paraId)
-                isHidden = fromMaybe False $ assessmentKey `M.lookup` hiddenState
-                hiddenStateClass = if isHidden then "hidden-panel" else "shown-panel"
-                hidableClass = if isHidden then "active hidable-hidden" else ""
+                hidden = isHidden p -- fromMaybe False $ assessmentKey `M.lookup` hiddenState
+                hiddenStateClass = if hidden then "hidden-panel" else "shown-panel"
+                hidableClass = if hidden then "active hidable-hidden" else ""
 --                 hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
             in li_ [class_ ("entity-snippet-li")] [
                 p_ [] [
@@ -538,17 +593,17 @@ viewModel m@AssessmentModel{
             in foldMap renderWord annotatedTextsSpans
           where renderWord :: (ParaSpan) -> [View Action]
                 renderWord (QuerySpan str) =
-                    [span_ [class_ "queryterm-span"] [text $ ms str], text " "]
+                    [span_ [class_ "queryterm-span"] [text $ ms str]]
                 renderWord (FacetSpan str) =
-                    [span_ [class_ "facetterm-span"] [text $ ms str], text " "]
+                    [span_ [class_ "facetterm-span"] [text $ ms str]]
                 renderWord (PlainSpan str) =
-                    [text $ ms (str <> " ")]
+                    [text $ ms str]
                 renderWord (EntitySpan Link{..}) =
                     [a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]]
 
 
 
-viewModel LoadingPageModel = viewErrorMessage $ "Loading Page"
+viewModel LoadingPageModel { .. } = viewErrorMessage $ "Loading Page"
 viewModel FileNotFoundErrorModel { .. }= viewErrorMessage $ "File not Found " <> ms filename
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
 
@@ -560,31 +615,35 @@ viewErrorMessage msg = div_ []
     ]
 
 
-buildViewTable :: AssessmentPage -> M.Map ParagraphId AnnotatedSpans
-buildViewTable AssessmentPage{..} =
-    let queryStrings :: [T.Text]
-        queryStrings = [apTitle]
-        facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
-        queryWords =  S.fromList
-                   $ [ T.toCaseFold s
-                     | str <- queryStrings
-                     , s <- T.words str
-                     , (T.length s) > 3
-                     ]
-        facetWords =  S.fromList
-                   $ [ T.toCaseFold s
-                     | str <- facetStrings
-                     , s <- T.words str
-                     , (T.length s) > 3
-                     ]
+buildViewTable :: AssessmentPage -> S.Set T.Text -> M.Map ParagraphId AnnotatedSpans
+buildViewTable AssessmentPage{..} stopwords =
+    let facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
+        queryWords :: S.Set T.Text
+        queryWords = Debug.traceShowId --"queryWords"
+                   $ S.fromList
+                   $ mapMaybe termToStem
+                   $ tokenizeStemmer stopwords apTitle
+        facetWords :: S.Set T.Text
+        facetWords = traceShowPrefix "facetWords"
+                   $ S.fromList
+                   $ mapMaybe termToStem
+                   $ concatMap ( tokenizeStemmer stopwords) facetStrings
+
         annotatedTextSpans :: ParaBody -> AnnotatedSpans
         annotatedTextSpans (ParaText txt) =
-             [ spanType
-             | word <- T.words txt
-             , let spanType = if ((T.toCaseFold word) `S.member` queryWords) then QuerySpan word
-                              else if ((T.toCaseFold word) `S.member` facetWords) then FacetSpan word
-                              else PlainSpan word
-             ]
+             traceShowPrefix "text"
+             $ fmap toSpan $ tokenizeStemmer stopwords txt
+           where toSpan :: Term -> ParaSpan
+                 toSpan Punct{surface = word} =
+                      PlainSpan word
+                 toSpan Term{surface = word, stemmed = Nothing} =
+                      PlainSpan word
+                 toSpan Term{surface = word, stemmed = Just stemmed} =
+                      if (stemmed `S.member` queryWords)
+                      then QuerySpan word
+                      else if  stemmed `S.member` facetWords
+                           then FacetSpan word
+                           else PlainSpan word
         annotatedTextSpans (ParaLink link) = [EntitySpan link]
 
     in M.fromList $ [ (paraId p, spans)
@@ -592,3 +651,39 @@ buildViewTable AssessmentPage{..} =
                     , let spans = foldMap annotatedTextSpans $ paraBody p
                     ]
 
+  where traceShowPrefix :: Show x => String -> x -> x
+        traceShowPrefix pref x = Debug.traceShow (pref <> ": " <> show x) x
+
+data Term = Term { surface :: T.Text, stemmed :: Maybe T.Text }
+          | Punct { surface :: T.Text }
+        deriving (Eq, Show)
+termToStem :: Term -> Maybe T.Text
+termToStem Punct {} = Nothing
+termToStem Term {stemmed = value} = value
+
+
+tokenizeStemmer :: S.Set T.Text -> T.Text ->  [Term]
+tokenizeStemmer stopwords txt =
+    mySplit isSplit txt
+  where isSplit :: Char -> Bool
+        isSplit c =
+            isSpace c || isSymbol c || isPunctuation c
+
+        mySplit :: (Char -> Bool) -> T.Text -> [Term]
+        mySplit pred txt = go txt
+            where go :: T.Text -> [Term]
+                  go "" = []
+                  go txt =
+                      let (word, rest) = T.break pred txt
+                          (punct, right) = T.span pred rest
+                      in if T.length word > 0
+                           then [Term{ surface = word, stemmed = myStem word}, Punct punct] <> go right
+                           else [Punct punct] <> go right
+
+        myStem :: T.Text -> Maybe T.Text
+        myStem word =
+            let lowerWord = T.toCaseFold word
+                stemmed = stem $ T.unpack $ lowerWord
+            in  if Prelude.length stemmed < 3 || lowerWord `S.member` stopwords
+                    then Nothing
+                    else (Just $ T.pack stemmed)

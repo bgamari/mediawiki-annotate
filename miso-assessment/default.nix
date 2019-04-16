@@ -33,6 +33,7 @@ let
       http-media = lib.dontCheck super.http-media;
       servant = lib.dontCheck super.servant;
       jsaddle = self.callHackage "jsaddle" "0.9.6.0" {};
+      porter = self.callCabal2nix "porter" ../vendor/porter {};
     };
   };
 
@@ -65,6 +66,7 @@ in
       cp ${./html/assess.css} $out/assess.css
       cp ${app}/bin/app.jsexe/runmain.js $out/
       cp ${./html/assess.html} $out/assess.html
+      cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data
     '';

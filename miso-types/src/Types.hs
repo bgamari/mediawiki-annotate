@@ -100,7 +100,7 @@ data AssessmentKey = AssessmentKey {
         , queryId :: QueryId
         , paragraphId :: ParagraphId
     }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic, Show)
 
 data AssessmentTransitionKey = AssessmentTransitionKey {
         userId :: UserId
@@ -108,7 +108,7 @@ data AssessmentTransitionKey = AssessmentTransitionKey {
         , paragraphId1 :: ParagraphId
         , paragraphId2 :: ParagraphId
     }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic)
+  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic, Show)
 
 
 
@@ -120,7 +120,7 @@ data AssessmentState = AssessmentState {
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
                     , hiddenState :: M.Map AssessmentKey Bool
     }
-  deriving (Eq, FromJSON, ToJSON, Generic)
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 emptyAssessmentState = AssessmentState { labelState = mempty
                                        , notesState = mempty
@@ -135,18 +135,18 @@ data AssessmentMetaData = AssessmentMetaData {
    , userId :: UserId
    , timeStamp :: UTCTime
    }
-  deriving (Eq, FromJSON, ToJSON, Generic)
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 
 data AssessmentRun = AssessmentRun {
           runId :: T.Text
         , squid :: QueryId
     }
-  deriving (Eq, FromJSON, ToJSON, Generic)
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
        , metaData :: AssessmentMetaData
     }
-  deriving (Eq, FromJSON, ToJSON, Generic)
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
