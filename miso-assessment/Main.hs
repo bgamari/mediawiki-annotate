@@ -11,12 +11,13 @@ module Main where
 
 -- | Miso framework import
 import Miso
-import Miso.String hiding (concatMap, filter, length)
+import Miso.String hiding (concatMap, filter, length, zip)
 import Data.Aeson
 import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
 import Control.Exception
+import Control.Monad
 import qualified Data.ByteString as BS
 -- import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text.Encoding
@@ -115,10 +116,12 @@ data Action
   | ClearAssessments
   | LoadStopWordList BS.ByteString
   | FetchedAuthUsername BS.ByteString
+  | LoadAssessmentsFromLocalStorage
+  | SetState AssessmentState
   deriving (Show)
 
-data StorageTag = LabelTag | FacetTag | HiddenTag | TransitionTag
-    deriving (Show, IsString, Read, Eq)
+data StorageTag = LabelTag | FacetTag | NotesTag | HiddenTag | TransitionTag
+    deriving (Show, Read, Eq, Enum)
 
 emptyAssessmentModel :: AssessmentModel
 emptyAssessmentModel = LoadingPageModel { maybeStopwords = Nothing
@@ -207,7 +210,8 @@ updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 updateModel (SetAssessmentPage page now') m =
         case m of
             AssessmentModel {stopwords = stopwords, username = username} ->
-                    noEff $ AssessmentModel  { page=page'
+                    return LoadAssessmentsFromLocalStorage #>
+                                   AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
                                      , config = defaultDisplayConfig
                                      , viewCache = viewCache stopwords
@@ -218,7 +222,8 @@ updateModel (SetAssessmentPage page now') m =
             LoadingPageModel {maybeStopwords = Just stopwords
                              , maybeUsername = Just authUsername
                              } ->
-                    noEff $ AssessmentModel  { page=page'
+                    return LoadAssessmentsFromLocalStorage #>
+                                    AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
                                      , config = defaultDisplayConfig
                                      , viewCache = viewCache stopwords
@@ -234,12 +239,60 @@ updateModel (SetAssessmentPage page now') m =
                      ]
           viewCache stopwords = buildViewTable page stopwords
           timeCache = now'
+
 -- Initialization completed. React to user events.
+
+updateModel LoadAssessmentsFromLocalStorage m@AssessmentModel{page=page@AssessmentPage{..}, state=state, username=userId'} = m <# do
+    let AssessmentState {..} = state
+
+    facetState' <- fetchLocalState FacetTag
+    labelState' <- fetchLocalState LabelTag
+    notesState' <- fetchLocalState NotesTag
+    hiddenState' <- fetchLocalState HiddenTag
+    transitionState' <- fetchLocalTransition TransitionTag
+
+
+    return $ Debug.traceShowId $ SetState
+           $ state { facetState = tomap facetState'
+                   , labelState = tomap labelState'
+                   , notesState = tomap notesState'
+                   , hiddenState = tomap hiddenState'
+                   , transitionLabelState = tomap transitionState'
+                   }
+  where tomap s = M.fromList $ catMaybes s
+        queryId = apSquid
+        userId = defaultUser
+        fetchLocalState tag =
+           forM apParagraphs
+           $ \(Paragraph {paraId = paraId}) -> do
+                let key = storageKey tag userId queryId paraId
+                    assessmentKey = AssessmentKey {userId=userId, queryId=queryId, paragraphId=paraId}
+                value <- getLocalStorage key
+                return $ case value of
+                            (Left _) ->  Debug.trace (".") $ Nothing
+                            Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
+
+        -- Todo problem: we don't know which transitions we will render,
+        -- this may create new phantom transition assessments to which the user may not have access to in the interface
+        -- also we create quadratic effort
+
+        fetchLocalTransition tag =
+           forM [ (p1 , p2) | p1 <- apParagraphs, p2 <- apParagraphs, p1 /= p2 ]
+           $ \((Paragraph {paraId = paraId1}),(Paragraph {paraId = paraId2})) -> do
+                let key = storageKeyTransition tag userId queryId paraId1 paraId2
+                    assessmentKey = AssessmentTransitionKey {userId=userId, queryId=queryId, paragraphId1=paraId1, paragraphId2=paraId2}
+                value <- getLocalStorage key
+                return $ case value of
+                            (Left _) ->  Debug.trace (".") $ Nothing
+                            Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
+
+
+updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
 
 
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalState "label" userId queryId paraId label
+    saveLocalState LabelTag userId queryId paraId label
     return Noop
   where newModel =
             let labelState' = M.insert (AssessmentKey userId queryId paraId) label labelState
@@ -248,7 +301,7 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state@AssessmentState{..}, page=AssessmentPage{apQueryFacets =facetList}} =
     newModel <# do
-        saveLocalState "facet" userId queryId paraId headingIdStr
+        saveLocalState FacetTag userId queryId paraId headingIdStr
         return Noop
   where newModel =
             let facetState' =
@@ -261,14 +314,14 @@ updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {sta
             in m {state = state{ facetState = facetState'}}
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalState "notes" userId queryId paraId txt
+    saveLocalState NotesTag userId queryId paraId txt
     return Noop
   where newModel =
             let notesState' = M.insert (AssessmentKey userId queryId paraId) (T.pack $ fromMisoString txt) notesState
             in m {state = state{notesState = notesState'}}
 
 updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalState "hidden" userId queryId paraId newState
+    saveLocalState HiddenTag userId queryId paraId newState
     return Noop
   where newModel = m {state = state{hiddenState = hiddenState'}}
         oldState = fromMaybe False $ M.lookup  (AssessmentKey userId queryId paraId) hiddenState
@@ -276,7 +329,7 @@ updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@
         hiddenState' = M.insert (AssessmentKey userId queryId paraId) (newState) hiddenState
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalTransition "transition" userId queryId paraId1 paraId2 label
+    saveLocalTransition TransitionTag userId queryId paraId1 paraId2 label
     return Noop
   where newModel =
             let transitionLabelState' = M.insert (AssessmentTransitionKey userId queryId paraId1 paraId2) label transitionLabelState
@@ -575,7 +628,7 @@ viewModel m@AssessmentModel{
             ]
 
         mkQueryFacetField _key paraId =
-            let idStr = storageKey "transition" defaultUser queryId paraId
+            let idStr = storageKey TransitionTag defaultUser queryId paraId
                 facetList :: [AssessmentFacet]
                 facetList = apQueryFacets
             in div_ [] [
@@ -624,7 +677,7 @@ viewModel m@AssessmentModel{
         renderTransition:: Paragraph -> Paragraph -> View Action
         renderTransition Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = (AssessmentTransitionKey defaultUser queryId paraId1 paraId2)
---                 idStr = storageKey "transition" defaultUser queryId paraId1
+--                 idStr = storageKey TransitionTag defaultUser queryId paraId1
                 hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
             in  span_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
