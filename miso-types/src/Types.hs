@@ -57,7 +57,9 @@ data AssessmentPage =
         apRunId :: T.Text,
         apSquid :: QueryId,
         apQueryFacets :: [AssessmentFacet],
-        apParagraphs :: [Paragraph]
+        apParagraphs :: [Paragraph],
+        apParagraphAssessments :: Maybe [ParagraphAssessments],
+        apParagraphOrigins :: Maybe [ParagraphOrgins]
     }
   deriving (Eq, Show, Generic)
 instance FromJSON AssessmentPage where
@@ -75,6 +77,33 @@ data AssessmentFacet =
 instance FromJSON AssessmentFacet where
     parseJSON = genericParseJSON jsonOptions
 instance ToJSON AssessmentFacet where
+    toJSON = genericToJSON jsonOptions
+    toEncoding = genericToEncoding jsonOptions
+
+data ParagraphAssessments =
+    ParagraphAssessments {
+        apParaId :: ParagraphId,
+        apFacet :: HeadingId,
+        apAssessment :: AssessmentLabel
+    }
+  deriving (Eq, Show, Generic)
+instance FromJSON ParagraphAssessments where
+    parseJSON = genericParseJSON jsonOptions
+instance ToJSON ParagraphAssessments where
+    toJSON = genericToJSON jsonOptions
+    toEncoding = genericToEncoding jsonOptions
+
+data ParagraphOrgins =
+    ParagraphOrgins {
+        apParaId :: ParagraphId,
+        apFacet :: HeadingId,
+        apRankScore :: Double,
+        apRank :: Int
+    }
+  deriving (Eq, Show, Generic)
+instance FromJSON ParagraphOrgins where
+    parseJSON = genericParseJSON jsonOptions
+instance ToJSON ParagraphOrgins where
     toJSON = genericToJSON jsonOptions
     toEncoding = genericToEncoding jsonOptions
 

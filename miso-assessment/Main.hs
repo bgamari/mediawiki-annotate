@@ -11,7 +11,7 @@ module Main where
 
 -- | Miso framework import
 import Miso
-import Miso.String hiding (concatMap)
+import Miso.String hiding (concatMap, filter, length)
 import Data.Aeson
 import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
@@ -25,6 +25,7 @@ import qualified Data.Set as S
 import Data.Maybe
 import Data.Time
 import Data.Char
+import Data.String
 import Language.Porter
 
 import qualified Data.Text as T
@@ -79,10 +80,15 @@ data AssessmentModel =
                     , viewCache :: M.Map ParagraphId AnnotatedSpans
                     , timeCache :: UTCTime
                     , stopwords :: S.Set T.Text
+                    , username :: BS.ByteString
                     }
     | FileNotFoundErrorModel { filename :: MisoString }
-    | ErrorMessageModel { errorMessage :: MisoString, oldModel :: AssessmentModel }
-    | LoadingPageModel { maybeStopwords :: Maybe (S.Set T.Text) }
+    | ErrorMessageModel { errorMessage :: MisoString
+                        , oldModel :: AssessmentModel
+                        }
+    | LoadingPageModel { maybeStopwords :: Maybe (S.Set T.Text)
+                       , maybeUsername :: Maybe BS.ByteString
+                       }
   deriving (Eq, Show)
 
 
@@ -108,14 +114,20 @@ data Action
   | DisplayAssessments
   | ClearAssessments
   | LoadStopWordList BS.ByteString
+  | FetchedAuthUsername BS.ByteString
   deriving (Show)
 
-
+data StorageTag = LabelTag | FacetTag | HiddenTag | TransitionTag
+    deriving (Show, IsString, Read, Eq)
 
 emptyAssessmentModel :: AssessmentModel
-emptyAssessmentModel = LoadingPageModel {maybeStopwords = Nothing }
+emptyAssessmentModel = LoadingPageModel { maybeStopwords = Nothing
+                                        , maybeUsername = Nothing
+                                        }
 
-
+noneFacet =  AssessmentFacet { apHeading=(SectionHeading "NONE OF THESE")
+                               , apHeadingId=packHeadingId "NONE_OF_THESE"
+                               }
 -- | Type synonym for an application model
 type Model = AssessmentModel
 
@@ -132,14 +144,38 @@ main = startApp App {..}
     subs   = []                   -- empty subscription list
     mountPoint = Nothing          -- mount point for application (Nothing defaults to 'body')
 
+
+saveLocalState :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> a -> JSM ()
+saveLocalState tag userId queryId paraId label = do
+    let key = storageKey tag userId queryId paraId
+        value = label
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+
+saveLocalTransition :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> ParagraphId -> a -> JSM ()
+saveLocalTransition tag userId queryId paraId1 paraId2 label = do
+    let key = storageKeyTransition tag userId queryId paraId1 paraId2
+        value = label
+    putStrLn $ show key <> "   " <> show value
+    setLocalStorage key value
+
+
+
 -- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
 
 updateModel (Initialize) m@LoadingPageModel{} = m <# do
+    userresponse <- fetchByteString $ getUsernameUrl
+    return $ case userresponse of
+      Right authUsername -> FetchedAuthUsername authUsername
+      Left e -> ReportError $ ms $ show e
+
+updateModel (FetchedAuthUsername authUsername) m = m {maybeUsername = Just authUsername } <# do
     stopWordFile <- fetchByteString $ getStopwordUrl
     return $ case stopWordFile of
       Right stopcontent -> LoadStopWordList stopcontent
       Left e -> ReportError $ ms $ show e
+
 
 updateModel (LoadStopWordList stopwordList) m = newModel <# do
     -- determine page to load
@@ -150,10 +186,14 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
     return $ FetchAssessmentPage query
   where newModel =
             let stopwords :: S.Set T.Text
-                stopwords = S.fromList $ T.lines $ Data.Text.Encoding.decodeUtf8 stopwordList
+                stopwords = S.fromList $ T.lines $ decodeByteString stopwordList
             in case m of
                 m@LoadingPageModel{} -> m {maybeStopwords = Just stopwords}
                 m@AssessmentModel{} -> m {stopwords = stopwords}
+                m@ErrorMessageModel{} -> m
+
+
+
 
 updateModel (FetchAssessmentPage pageName) m = m <# do
     page <- fetchJson $ getAssessmentPageFilePath pageName
@@ -166,29 +206,31 @@ updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 
 updateModel (SetAssessmentPage page now') m =
         case m of
-            AssessmentModel {stopwords = stopwords} ->
+            AssessmentModel {stopwords = stopwords, username = username} ->
                     noEff $ AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
                                      , config = defaultDisplayConfig
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
                                      , stopwords = stopwords  -- todo load from storage
+                                     , username = username
                                      }
-            LoadingPageModel {maybeStopwords = Just stopwords} ->
+            LoadingPageModel {maybeStopwords = Just stopwords
+                             , maybeUsername = Just authUsername
+                             } ->
                     noEff $ AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
                                      , config = defaultDisplayConfig
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
                                      , stopwords = stopwords  -- todo load from storage
+                                     , username = authUsername
                                      }
             _ -> m <# do return $ ReportError $ (ms  ("Unexpected model for SetAssessmentPage "<>  show m))
 
   where   page' = page{apQueryFacets = facets'}
           facets' = (apQueryFacets $ page)
-                  <> [ AssessmentFacet { apHeading=(SectionHeading "NONE OF THESE")
-                                       , apHeadingId=packHeadingId "NONE_OF_THESE"
-                                       }
+                  <> [ noneFacet
                      ]
           viewCache stopwords = buildViewTable page stopwords
           timeCache = now'
@@ -196,12 +238,8 @@ updateModel (SetAssessmentPage page now') m =
 
 
 
-
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    let key = storageKey "label" userId queryId paraId
-        value = label
-    putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+    saveLocalState "label" userId queryId paraId label
     return Noop
   where newModel =
             let labelState' = M.insert (AssessmentKey userId queryId paraId) label labelState
@@ -210,11 +248,7 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state@AssessmentState{..}, page=AssessmentPage{apQueryFacets =facetList}} =
     newModel <# do
-        let key = storageKey "facet" userId queryId paraId
-            value = headingIdStr
-        putStrLn $ show key <> "   " <> show value
-        setLocalStorage key value
-        putStrLn $ "SetFacet "<> show queryId <> " - " <> unpackParagraphId paraId <> " - " <> (fromMisoString headingIdStr)
+        saveLocalState "facet" userId queryId paraId headingIdStr
         return Noop
   where newModel =
             let facetState' =
@@ -227,20 +261,14 @@ updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {sta
             in m {state = state{ facetState = facetState'}}
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    let key = storageKey "notes" userId queryId paraId
-        value = txt
-    putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+    saveLocalState "notes" userId queryId paraId txt
     return Noop
   where newModel =
             let notesState' = M.insert (AssessmentKey userId queryId paraId) (T.pack $ fromMisoString txt) notesState
             in m {state = state{notesState = notesState'}}
 
 updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    let key = storageKey "hidden" userId queryId paraId
-        value = show $ newState
-    putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+    saveLocalState "hidden" userId queryId paraId newState
     return Noop
   where newModel = m {state = state{hiddenState = hiddenState'}}
         oldState = fromMaybe False $ M.lookup  (AssessmentKey userId queryId paraId) hiddenState
@@ -248,10 +276,7 @@ updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@
         hiddenState' = M.insert (AssessmentKey userId queryId paraId) (newState) hiddenState
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    let key = storageKeyTransition "transition" userId queryId paraId1 paraId2
-        value = label
-    putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+    saveLocalTransition "transition" userId queryId paraId1 paraId2 label
     return Noop
   where newModel =
             let transitionLabelState' = M.insert (AssessmentTransitionKey userId queryId paraId1 paraId2) label transitionLabelState
@@ -298,13 +323,13 @@ updateModel x m = m <# do
 
 
 
-storageKey :: String -> UserId -> QueryId -> ParagraphId -> MisoString
-storageKey category userId queryId paraId =
-    (ms category) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
+storageKey :: StorageTag -> UserId -> QueryId -> ParagraphId -> MisoString
+storageKey tag userId queryId paraId =
+    (ms $ show tag) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
 
-storageKeyTransition :: String -> UserId -> QueryId -> ParagraphId -> ParagraphId -> MisoString
-storageKeyTransition category userId queryId paraId1 paraId2 =
-    (ms category) <> "-"
+storageKeyTransition :: StorageTag -> UserId -> QueryId -> ParagraphId -> ParagraphId -> MisoString
+storageKeyTransition tag userId queryId paraId1 paraId2 =
+    (ms $ show tag) <> "-"
     <> (ms $ userId) <> "-"
     <> (ms $ unQueryId queryId) <> "-"
     <> (ms $ unpackParagraphId paraId1)  <> "-"
@@ -317,6 +342,9 @@ storageKeyTransition category userId queryId paraId1 paraId2 =
 -- updateModel SayHelloWorld m = m <# do
 --   putStrLn "Hello World" >> pure NoOp
 
+
+getUsernameUrl :: MisoString
+getUsernameUrl = "/username"
 
 getStopwordUrl :: MisoString
 getStopwordUrl = "/inquery-en.txt"
@@ -397,6 +425,9 @@ fetchByteString url = do
                   , reqData = NoData
                   }
 
+decodeByteString :: BS.ByteString -> T.Text
+decodeByteString bs = Data.Text.Encoding.decodeUtf8 bs
+
 -- ------------- Presentation ----------------------
 
 -- | Constructs a virtual DOM from a model
@@ -411,12 +442,14 @@ viewModel m@AssessmentModel{
             , viewCache = viewCache
             , timeCache = timeCache
             , stopwords = _
+            , username = authUsername
           } =
 
     div_ []
        [ h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
+       , div_ [class_ "infopanel"] $ createInfoPanel m
        , button_ [onClick SaveAssessments] [text "Upload"]
        , button_ [onClick DisplayAssessments, class_ hiddenDisplayBtn] [text "Display"]
        , button_ [onClick ClearAssessments] [text "Clear"]
@@ -428,6 +461,45 @@ viewModel m@AssessmentModel{
 
        ]
   where
+        createInfoPanel :: AssessmentModel -> [View Action]
+        createInfoPanel m@AssessmentModel{
+            page= AssessmentPage{..}
+            , state = s@AssessmentState { labelState = labelState'
+                                      , transitionLabelState = transitionState'
+                                      , hiddenState = hiddenState'
+                                      , facetState = facetState'
+                                      }
+            , username = authUsername
+          } =
+            [ p_ [] [text "You logged on as user: ", text $ ms $ decodeByteString authUsername]
+            , p_ [] [text "Remaining assessments on this page:"]
+            , ul_ [] [
+                li_ [] [text $ "facets: " <> (ms $ show numMissingFacetAsessments )]
+                , li_ [] [text $ "relevance: " <> (ms $ show numMissingLabelAsessments) ]
+                , li_ [] [text $ "transitions: " <> (ms $ show numMissingTransitionAsessments) ]
+              ]
+            ]
+          where totalParas = S.fromList $ fmap paraId apParagraphs
+                visParas =
+                    (totalParas `S.difference`)
+                    $ S.fromList
+                    $ [p | (AssessmentKey {paragraphId=p},True)<-  M.toList hiddenState']
+                facetAssessments =
+                    S.map (\(AssessmentKey {paragraphId=p})-> p) $ M.keysSet facetState'
+                labelAssessments :: S.Set ParagraphId
+                labelAssessments =
+                    S.map (\(AssessmentKey {paragraphId=p})-> p) $ M.keysSet labelState'
+                visTransitionAssessments =
+                    S.filter (\(p1,p2)-> p1 `S.member` visParas && p2 `S.member` visParas)
+                    $ S.map (\(AssessmentTransitionKey {paragraphId1=p1, paragraphId2=p2})-> (p1,p2))
+                    $ M.keysSet transitionState'
+                numMissingFacetAsessments = length $ visParas `S.difference` facetAssessments
+                numMissingLabelAsessments = length $ visParas `S.difference` labelAssessments
+                numMissingTransitionAsessments =
+                    let numTransitions = (length visParas)-1
+                    in numTransitions - (length visTransitionAssessments)
+        createInfoPanel _ = []
+
         paragraphsAndTransitions :: [Paragraph] -> [View Action]
         paragraphsAndTransitions apParagraphs  =
             go apParagraphs Nothing
@@ -619,20 +691,17 @@ buildViewTable :: AssessmentPage -> S.Set T.Text -> M.Map ParagraphId AnnotatedS
 buildViewTable AssessmentPage{..} stopwords =
     let facetStrings = fmap (getSectionHeading . apHeading) apQueryFacets
         queryWords :: S.Set T.Text
-        queryWords = Debug.traceShowId --"queryWords"
-                   $ S.fromList
+        queryWords = S.fromList
                    $ mapMaybe termToStem
                    $ tokenizeStemmer stopwords apTitle
         facetWords :: S.Set T.Text
-        facetWords = traceShowPrefix "facetWords"
-                   $ S.fromList
+        facetWords = S.fromList
                    $ mapMaybe termToStem
                    $ concatMap ( tokenizeStemmer stopwords) facetStrings
 
         annotatedTextSpans :: ParaBody -> AnnotatedSpans
         annotatedTextSpans (ParaText txt) =
-             traceShowPrefix "text"
-             $ fmap toSpan $ tokenizeStemmer stopwords txt
+             fmap toSpan $ tokenizeStemmer stopwords txt
            where toSpan :: Term -> ParaSpan
                  toSpan Punct{surface = word} =
                       PlainSpan word
