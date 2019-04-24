@@ -7,13 +7,14 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 ## Installation
 
- 1. Checkout the repository: `git clone git://github.com/bgamari/mediawiki-annotate`
+ 1. Clone this repository
  2. Checkout the submodules: `cd mediawiki-annotate; git submodule update --init --recursive`
 
 
 ### With Nix
 
-Simply type `nix build -f . binaries`. This will produce a `./result` directory containing all tools in the package.
+Simply type `nix build -f . binaries` - or alternatively, for parallel builds on `$n` cores use `nix build -j $n -f . binaries`
+This will produce a `./result` directory containing all tools in the package.
 
 To speed up the build you can also use the [Cachix](https://cachix.org/) [cache](https://trec-car-tools.cachix.org/),
 ```bash
