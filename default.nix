@@ -38,8 +38,9 @@ let
         epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" (localDir ./epfl-section-recommendation) {};
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
         ent-rank             = self.callCabal2nix "ent-rank" (localDir ./ent-rank) {};
-	learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
+        learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
+        miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {
