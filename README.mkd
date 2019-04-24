@@ -13,7 +13,9 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 ### With Nix
 
-Simply type `nix build -f . binaries` - or alternatively, for parallel builds on `$n` cores use `nix build -j $n -f . binaries`
+Simply type `nix build -f . binaries` 
+Or alternatively: for parallel builds on `$n` cores use `nix build -j $n -f . binaries`
+
 This will produce a `./result` directory containing all tools in the package.
 
 To speed up the build you can also use the [Cachix](https://cachix.org/) [cache](https://trec-car-tools.cachix.org/),
