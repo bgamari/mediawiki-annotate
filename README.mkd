@@ -15,7 +15,7 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 Simply type `nix build -f . binaries` 
 
-Or alternatively: for parallel builds on `$n` cores use `nix build -j $n -f . binaries`
+Or alternatively: for parallel builds on `$n` cores use `nix build --max-jobs $n -f . binaries`
 
 This will produce a `./result` directory containing all tools in the package.
 
