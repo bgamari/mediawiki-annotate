@@ -37,7 +37,8 @@ let
         trec-news            = self.callCabal2nix "trec-news" (localDir ./trec-news) {};
         epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" (localDir ./epfl-section-recommendation) {};
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
-        learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
+        ent-rank             = self.callCabal2nix "ent-rank" (localDir ./ent-rank) {};
+	learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};

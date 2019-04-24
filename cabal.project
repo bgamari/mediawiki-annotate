@@ -12,6 +12,7 @@ packages:
     mediawiki-import/
     db-export/
     graph-expansion/
+    ent-rank/
     learning-to-walk/
     graph-algorithms/
     simplir/*/*.cabal

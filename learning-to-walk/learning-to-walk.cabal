@@ -13,59 +13,7 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 
-
-library
-  ghc-options:         -Wall
-  hs-source-dirs:      src
-  exposed-modules:     CandidateGraph,
-                       NodeAndEdgeFeatures,
-                       LookupWrapper
-  build-depends:       base,
-                       async,
-                       bytestring,
-                       unordered-containers,
-                       text,
-                       vector,
-                       indexed-vector,
-                       containers,
-                       stm,
-                       deepseq,
-                       simplir-galago,
-                       optparse-applicative >= 0.12,
-                       hashable,
-                       heaps,
-                       psqueues,
-                       graphviz,
-                       transformers,
-                       aeson,
-                       simplir,
-                       simplir-disk-index,
-                       pipes,
-                       serialise,
-                       pipes-safe,
-                       pipes,
-                       foldl,
-                       parallel,
-                       serialise,
-                       filepath,
-                       log-domain,
-                       snowball,
-                       time,
-                       dlist,
-                       random,
-                       split,
-                       graph-algorithms,
-                       simplir-word-embedding,
-                       trec-car-tools,
-                       lens,
-                       wl-pprint-text,
-                       trec-car-graph-expansion
-  default-language:    Haskell2010
-
-
-
-
-executable graph-expansion-feature-generation
+executable learn2walk-feature-generation
   main-is:             GraphExpansionFeatureGeneration.hs
 --  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
@@ -110,53 +58,7 @@ executable graph-expansion-feature-generation
                        simplir-word-embedding,
                        trec-car-graph-expansion,
                        trec-car-tools,
-                       learning-to-walk
+                       ent-rank
   default-language:    Haskell2010
 
-
-executable graph-expansion-page-doc
-  main-is:             PageDocCorpusMain.hs
-  ghc-options:         -Wall -rtsopts
-  build-depends:       base,
-                       text >= 1.2,
-                       bytestring,
-                       optparse-applicative >= 0.13,
-                       serialise,
-                       parallel,
-                       filepath,
-                       hashable,
-                       deepseq,
-                       foldl,
-                       unordered-containers >= 0.2,
-                       containers,
-                       pipes,
-                       pipes-safe,
-                       pipes-bytestring,
-                       snowball,
-                       trec-car-tools,
-                       simplir,
-                       warc,
-                       filepath,
-                       containers,
-                       unordered-containers >= 0.2,
-                       dlist >= 0.7,
-                       log-domain,
-                       simplir,
-                       simplir-disk-index,
-                       trec-car-tools,
-                       profunctors,
-                       foldl >=1.2 && <1.5,
-                       pipes,
-                       pipes-safe,
-                       text,
-                       serialise,
-                       aeson,
-                       bytestring,
-                       optparse-applicative >= 0.12,
-                       trec-car-tools,
-                       trec-car-graph-expansion,
-                       ansi-wl-pprint,
-                       hashable,
-                       learning-to-walk
-  default-language:    Haskell2010
 
