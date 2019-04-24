@@ -47,7 +47,19 @@ instance  FromJSON ParaBody where
         text = (withObject "ParaText" $ \o -> ParaText <$> o .: "text") v
 
 instance ToJSON ParaBody where
-    toJSON = undefined
+    toJSON (ParaLink Link {..}) =
+        let maybeSection =
+                case linkSection of
+                Nothing -> []
+                Just section -> ["entity_section" .= section]
+        in object ([ "entity" .= unpackPageId linkTargetId
+                   , "text" .= linkAnchor
+                   , "entity_name" .= unpackPageName linkTarget
+                   ]
+                   <> maybeSection
+                  )
+
+    toJSON (ParaText txt) = object [ "text" .= txt ]
 
 
 
@@ -96,7 +108,7 @@ instance ToJSON ParagraphAssessments where
 data ParagraphOrgins =
     ParagraphOrgins {
         apParaId :: ParagraphId,
-        apFacet :: HeadingId,
+        apSectionPath ::  T.Text, -- HeadingId,
         apRankScore :: Double,
         apRank :: Int
     }
@@ -110,8 +122,6 @@ instance ToJSON ParagraphOrgins where
 -- --------------------------------------
 
 type UserId = T.Text
-defaultUser :: UserId
-defaultUser = "defaultuser"
 
 
 data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
@@ -144,7 +154,7 @@ data AssessmentTransitionKey = AssessmentTransitionKey {
 data AssessmentState = AssessmentState {
                     labelState :: M.Map AssessmentKey AssessmentLabel
                     , notesState :: M.Map AssessmentKey T.Text
-                    , facetState :: M.Map AssessmentKey AssessmentFacet
+                    , facetState :: M.Map AssessmentKey [AssessmentFacet]
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
                     , hiddenState :: M.Map AssessmentKey Bool
