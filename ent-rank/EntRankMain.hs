@@ -1310,7 +1310,7 @@ instance Dot.PrintDot PageId where
 dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
-    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (w/10.0), Dot.Weight $ Dot.Int (ceiling w) ]
+    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (penwidth w), Dot.Weight $ Dot.Int (edgeweight w) ]
                                     , Dot.fmtNode = \(_,a) -> [Dot.toLabel a]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
                                                                               , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
@@ -1320,6 +1320,26 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
             | (a, ns) <- HM.toList $ getGraph graph
             , (b, w) <- HM.toList ns
             ]
+
+    !sortedWeights =  sort $ fmap (\(_,_,w) -> w) edges
+    min = head sortedWeights
+    max = last sortedWeights
+    mid = sortedWeights !! midIdx
+      where     midIdx = (length sortedWeights) `div` 2
+
+    threequarts = sortedWeights !! threequartsIdx
+      where     threequartsIdx = ((length sortedWeights) `div` 4) * 3
+
+    penwidth w =
+        if w < mid then 1
+        else if w < threequarts then 2
+        else 3
+
+    edgeweight w =
+        if w < mid then 1
+        else if w < threequarts then 2
+        else 5
+
 
 -- ---------------------------------------------
 -- Node rankings to teleportation distribution
