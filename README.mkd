@@ -7,6 +7,10 @@ documents. The `wiki-annotate` executable expects MediaWiki
 
 ## Installation
 
+ 1. Checkout the repository: `git clone git://github.com/bgamari/mediawiki-annotate`
+ 2. Checkout the submodules: `cd mediawiki-annotate; git submodule update --init --recursive`
+
+
 ### With Nix
 
 Simply type `nix build -f . binaries`. This will produce a `./result` directory containing all tools in the package.
@@ -28,8 +32,6 @@ sudo apt-get install libicu-dev zlib1g-dev libexpat1-dev libpq-dev liblzma-dev
 
 Then,
 
- 1. Checkout the repository: `git clone git://github.com/bgamari/mediawiki-annotate`
- 2. Checkout the submodules: `cd mediawiki-annotate; git submodule update --init --recursive`
  3. Build it: `cabal new-build`
  4. Move the executables to `bin/`: `mkdir -p bin; for i in $(find dist-newstyle/build/ -executable -a -type f -a -! -iname '*.so'); do ln -fs $(pwd)/$i bin/$(basename $i); done`
  
