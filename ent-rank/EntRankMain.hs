@@ -1312,7 +1312,7 @@ dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
     params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> edgeFormat(w)
-                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.Style [Dot.SItem Dot.Solid [], Dot.SItem Dot.Filled []],  Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.5)]]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.Style [Dot.SItem Dot.Filled []],  Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.5)]]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
                                                                               , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
                                     }
