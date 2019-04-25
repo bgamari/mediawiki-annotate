@@ -84,6 +84,7 @@ import Graph
 import qualified Data.GraphViz as Dot
 import qualified Data.GraphViz.Attributes.Complete as Dot
 import qualified Data.GraphViz.Commands.IO as Dot
+import qualified Data.GraphViz.Attributes.Colors.SVG as DotSvg
 import Control.Monad
 
 import GridFeatures
@@ -1311,9 +1312,9 @@ dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
     params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (penwidth w), Dot.Weight $ Dot.Int (edgeweight w) ]
-                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.0)]]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
-                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
+                                                                              , Dot.Overlap $   Dot.CompressOverlap ]] -- Dot.PrismOverlap Nothing] ]
                                     }
     nodes = [ (a, unpackPageName $ pageIdToName a) | a <- HS.toList $ nodeSet graph ]
     edges = [ (a,b,w)
