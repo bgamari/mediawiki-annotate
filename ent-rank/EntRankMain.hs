@@ -1312,9 +1312,11 @@ dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
     params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> edgeFormat(w)
-                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.Style [Dot.SItem Dot.Filled []],  Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.5)]]
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.Style [Dot.SItem Dot.Filled []],  Dot.FillColor $ Dot.toColorList [Dot.SVGColor DotSvg.White]]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
-                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
+                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing
+                                                                              , Dot.ColorScheme Dot.SVG
+                                                                              ] ]
                                     }
     nodes = [ (a, unpackPageName $ pageIdToName a) | a <- HS.toList $ nodeSet graph ]
     edges = [ (a,b,w)
@@ -1337,13 +1339,13 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
 
     edgeFormat w
         | w < mid =
-            [ Dot.penWidth 1, Dot.Weight $ Dot.Int 1, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0.5)] ]
+            [ Dot.penWidth 1, Dot.Weight $ Dot.Int 1, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 128] ]
         | w < threequarts =
-            [ Dot.penWidth 2, Dot.Weight $ Dot.Int 2, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0.7)]]
+            [ Dot.penWidth 2, Dot.Weight $ Dot.Int 2, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 200] ]
         | w < percentile =
-            [ Dot.penWidth 4, Dot.Weight $ Dot.Int 4, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0)]]
+            [ Dot.penWidth 4, Dot.Weight $ Dot.Int 4, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 255] ]
         | otherwise =
-            [ Dot.penWidth 6, Dot.Weight $ Dot.Int 8, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Black) (Just 0)] ]
+            [ Dot.penWidth 6, Dot.Weight $ Dot.Int 8, Dot.FillColor $ Dot.toColorList [Dot.SVGColor DotSvg.Black] ]
 
 
 
