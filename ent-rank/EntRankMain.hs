@@ -1311,8 +1311,8 @@ instance Dot.PrintDot PageId where
 dotGraph :: Graph PageId Double -> Dot.DotGraph PageId
 dotGraph graph = Dot.graphElemsToDot params nodes edges
   where
-    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (penwidth w), Dot.Weight $ Dot.Int (edgeweight w) ]
-                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.0)]]
+    params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> edgeFormat(w)
+                                    , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.Style [Dot.SItem Dot.Solid [], Dot.SItem Dot.Filled []],  Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.5)]]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
                                                                               , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
                                     }
@@ -1331,15 +1331,20 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
     threequarts = sortedWeights !! threequartsIdx
       where     threequartsIdx = ((length sortedWeights) `div` 4) * 3
 
-    penwidth w =
-        if w < mid then 1
-        else if w < threequarts then 2
-        else 3
+    percentile = sortedWeights !! ninetyIdx
+      where     ninetyIdx = ((length sortedWeights) `div` 10) * 9
 
-    edgeweight w =
-        if w < mid then 1
-        else if w < threequarts then 2
-        else 5
+
+    edgeFormat w
+        | w < mid =
+            [ Dot.penWidth 1, Dot.Weight $ Dot.Int 1, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0.5)] ]
+        | w < threequarts =
+            [ Dot.penWidth 2, Dot.Weight $ Dot.Int 2, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0.7)]]
+        | w < percentile =
+            [ Dot.penWidth 4, Dot.Weight $ Dot.Int 4, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Gray) (Just 0)]]
+        | otherwise =
+            [ Dot.penWidth 6, Dot.Weight $ Dot.Int 8, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.Black) (Just 0)] ]
+
 
 
 -- ---------------------------------------------
