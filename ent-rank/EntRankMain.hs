@@ -1339,11 +1339,14 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
 
     edgeFormat w
         | w < mid =
-            [ Dot.penWidth 1, Dot.Weight $ Dot.Int 1, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 128] ]
+            let c = Dot.toColorList [Dot.RGBA 128 128 128 128]
+            in [ Dot.penWidth 1, Dot.Weight $ Dot.Int 1, Dot.FillColor c, Dot.Color c  ]
         | w < threequarts =
-            [ Dot.penWidth 2, Dot.Weight $ Dot.Int 2, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 200] ]
+            let c = Dot.toColorList [Dot.RGBA 128 128 128 200]
+            in [ Dot.penWidth 2, Dot.Weight $ Dot.Int 2, Dot.FillColor c, Dot.Color c ]
         | w < percentile =
-            [ Dot.penWidth 4, Dot.Weight $ Dot.Int 4, Dot.FillColor $ Dot.toColorList [Dot.RGBA 128 128 128 255] ]
+            let c = Dot.toColorList [Dot.RGBA 128 128 128 255]
+            in [ Dot.penWidth 4, Dot.Weight $ Dot.Int 4, Dot.FillColor c, Dot.Color c ]
         | otherwise =
             [ Dot.penWidth 6, Dot.Weight $ Dot.Int 8, Dot.FillColor $ Dot.toColorList [Dot.SVGColor DotSvg.Black] ]
 
