@@ -1314,7 +1314,7 @@ dotGraph graph = Dot.graphElemsToDot params nodes edges
     params = Dot.nonClusteredParams { Dot.fmtEdge = \(_,_,w) -> [ Dot.penWidth (penwidth w), Dot.Weight $ Dot.Int (edgeweight w) ]
                                     , Dot.fmtNode = \(_,a) -> [Dot.toLabel a, Dot.FillColor [Dot.WC (Dot.SVGColor DotSvg.White) (Just 0.0)]]
                                     , Dot.globalAttributes = [ Dot.GraphAttrs [ Dot.OutputOrder Dot.EdgesFirst
-                                                                              , Dot.Overlap $   Dot.CompressOverlap ]] -- Dot.PrismOverlap Nothing] ]
+                                                                              , Dot.Overlap $ Dot.PrismOverlap Nothing] ]
                                     }
     nodes = [ (a, unpackPageName $ pageIdToName a) | a <- HS.toList $ nodeSet graph ]
     edges = [ (a,b,w)
