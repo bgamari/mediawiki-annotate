@@ -59,10 +59,10 @@ instance  FromJSON ParaBody where
       where
         link = withObject "ParaLink" $ \o -> do
             linkSection <- o .:? "entity_section"
-            linkTargetId <- o .: "entity"
+            linkTargetId <- packPageId <$> o .: "entity"
             linkAnchor <- o .: "text"
-            linkTarget <- o .: "entity_name"
-            ParaLink $ Link {..}
+            linkTarget <- packPageName <$> o .: "entity_name"
+            return $ ParaLink $ Link {..}
         text = (withObject "ParaText" $ \o -> ParaText <$> o .: "text") v
 
 instance ToJSON ParaBody where
