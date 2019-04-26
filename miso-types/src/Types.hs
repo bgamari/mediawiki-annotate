@@ -29,14 +29,28 @@ newtype QueryId = QueryId { unQueryId :: T.Text }
 
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor
+json2Options = defaultOptions { fieldLabelModifier = camelTo2 '_' }     -- camel case -> snake case
 
 -- orphans
 -- instance FromJSON ParaBody
-instance FromJSON Paragraph
-instance FromJSON Link
+-- instance FromJSON Paragraph
+-- instance FromJSON Link
 -- instance ToJSON ParaBody
-instance ToJSON Paragraph
-instance ToJSON Link
+-- instance ToJSON Paragraph
+-- instance ToJSON Link
+
+instance FromJSON Paragraph where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON Paragraph where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
+
+instance FromJSON Link where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON Link where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
+
 
 
 instance  FromJSON ParaBody where
