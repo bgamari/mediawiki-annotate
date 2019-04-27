@@ -1,0 +1,2421 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc",
+            "rank": 1,
+            "rank_score": 0.9661888525391855,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "7103b067ca3796173aeed77524108cea308b779e",
+            "rank": 2,
+            "rank_score": 0.9410156002578883,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "f08f4dfdc8f30de422c1eb7a33c9edd9e9e3968d",
+            "rank": 3,
+            "rank_score": 0.8971892118259581,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "bbca916dfdafcf7f4e216f162526ab55b9cca947",
+            "rank": 4,
+            "rank_score": 0.8848114362393498,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "9d11f059941f8b8af0fc6042812a837dd2a22340",
+            "rank": 5,
+            "rank_score": 0.8651518023211997,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "863ac7ae24b47103277e01929cb2b32fc9e4ab8c",
+            "rank": 6,
+            "rank_score": 0.8572128465546576,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "52a33010f8d0060515f32844348d0478d60d77fe",
+            "rank": 7,
+            "rank_score": 0.8495580110000378,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "decb194dc57e235b5f34ca55687c1275d44fcccf",
+            "rank": 8,
+            "rank_score": 0.8477683777256884,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "1c1329a5d824cac3a8c92816617a36d786c5fb41",
+            "rank": 9,
+            "rank_score": 0.8444690626828404,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921",
+            "rank": 10,
+            "rank_score": 0.8430924337135373,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "c4c6c50fc808d4c943145370c997bac34653980f",
+            "rank": 11,
+            "rank_score": 0.8403490683189739,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "f2b7ef19e576e4b52a3d25449d3d85c0cdc4da44",
+            "rank": 12,
+            "rank_score": 0.8358111985602059,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "1206b57830bf438e7db71d039f5dbbd75be91b50",
+            "rank": 13,
+            "rank_score": 0.8274393311274018,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "65ebdf4b6d2447a57a35b22de3d6110fe4d5138b",
+            "rank": 14,
+            "rank_score": 0.8272519218233407,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "9d21beb449a4fa908932c68ec0f2f3836ff977d8",
+            "rank": 15,
+            "rank_score": 0.8264541461197197,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "8e373bda4748c6d6fec9859cd674371b36635da3",
+            "rank": 16,
+            "rank_score": 0.8258223725992367,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "1f81fcf1b7687bf4516dba2ca19c73d1cbe4f311",
+            "rank": 17,
+            "rank_score": 0.823459660223257,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "6e9588105a1b45952de944aab0637af22e7bab13",
+            "rank": 18,
+            "rank_score": 0.8202982343346211,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "259798855bf815b79dc65ed5c1268f224c6379e7",
+            "rank": 19,
+            "rank_score": 0.8157548571995823,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "7c3a3aedd926d3a37ad8396f33baac6e78645a1c",
+            "rank": 20,
+            "rank_score": 0.8083020672385813,
+            "section_path": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        },
+        {
+            "para_id": "93b0370a7c36d9c278ce0c8d7ffb1351e4444956",
+            "rank": 1,
+            "rank_score": 0.9223600494087237,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921",
+            "rank": 2,
+            "rank_score": 0.92224997414157,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc",
+            "rank": 3,
+            "rank_score": 0.9083117820007589,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "f76b1e9a2ae137f36872df07d6ae4cf5bc60d881",
+            "rank": 4,
+            "rank_score": 0.898523471159757,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "7103b067ca3796173aeed77524108cea308b779e",
+            "rank": 5,
+            "rank_score": 0.8889689756928447,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "733a4b8dfb4ba4f995ddf5a157a94bd53d5c10bb",
+            "rank": 6,
+            "rank_score": 0.8780858920272983,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "2776e91bad61bd3c4ca7aca6abb6f5e7ca5bd0a6",
+            "rank": 7,
+            "rank_score": 0.8665131625372933,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "25ef5b2189026beae71958f06af46b4d431688b4",
+            "rank": 8,
+            "rank_score": 0.8542334686345887,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "392cdeb821d740271099ed21ec56e344024a6d00",
+            "rank": 9,
+            "rank_score": 0.8527301580343749,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "cd3cf3782ef0be74642e3bad596c65f345d5be69",
+            "rank": 10,
+            "rank_score": 0.8501301423569999,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "5fe5ca0b7898d6de9222e4c4a7b7564cd50d8585",
+            "rank": 11,
+            "rank_score": 0.8498148567930998,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "3ab826e11e168af0aa32663d247cd31d7beb2f85",
+            "rank": 12,
+            "rank_score": 0.8463373121859545,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "91c919b463226d74134f5bb8919ff68dd43c36ed",
+            "rank": 13,
+            "rank_score": 0.8460399109761844,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "b14a6ef0bde9bd86380447ab23c2a3a34b30207e",
+            "rank": 14,
+            "rank_score": 0.8445278069122554,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "99b0d8337dc117dd9192edcc06cbe7a3b0a5b2f8",
+            "rank": 15,
+            "rank_score": 0.8363523438847047,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "b024df3f6aaeb065551357d0a8b13ef16b19b219",
+            "rank": 16,
+            "rank_score": 0.8307507474009553,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "863ac7ae24b47103277e01929cb2b32fc9e4ab8c",
+            "rank": 17,
+            "rank_score": 0.8089754686036418,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "fc89d0016384309b6013be2bb7e0f642624d325a",
+            "rank": 18,
+            "rank_score": 0.8012226665750423,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "03f053fb76db9ce79b32f62ca84742b75a232b54",
+            "rank": 19,
+            "rank_score": 0.8001053512889444,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "ac3405551ed3082d55e79372e2a3d47050d6c39c",
+            "rank": 20,
+            "rank_score": 0.7906846541581372,
+            "section_path": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921",
+            "rank": 1,
+            "rank_score": 0.9376753759642148,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "25ef5b2189026beae71958f06af46b4d431688b4",
+            "rank": 2,
+            "rank_score": 0.9006064180387607,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "2776e91bad61bd3c4ca7aca6abb6f5e7ca5bd0a6",
+            "rank": 3,
+            "rank_score": 0.889948793790025,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc",
+            "rank": 4,
+            "rank_score": 0.8844487266952241,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "91c919b463226d74134f5bb8919ff68dd43c36ed",
+            "rank": 5,
+            "rank_score": 0.8736728404532408,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "03f053fb76db9ce79b32f62ca84742b75a232b54",
+            "rank": 6,
+            "rank_score": 0.8556740313857556,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "d9fad64e1d5788c4a6357b0f280fdd27898f33f6",
+            "rank": 7,
+            "rank_score": 0.8540713643947878,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "93b0370a7c36d9c278ce0c8d7ffb1351e4444956",
+            "rank": 8,
+            "rank_score": 0.8485476152213138,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "202204867c3f07b057d2a1b5b2094c480559acd3",
+            "rank": 9,
+            "rank_score": 0.8425340780238184,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "1b544ad8b37f382143e56eae756490055ad2a237",
+            "rank": 10,
+            "rank_score": 0.8386237086182725,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "392cdeb821d740271099ed21ec56e344024a6d00",
+            "rank": 11,
+            "rank_score": 0.8190137547332734,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "7103b067ca3796173aeed77524108cea308b779e",
+            "rank": 12,
+            "rank_score": 0.8152047067868131,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "c85fee15d80d3afbcacd15df676c43838cca78ef",
+            "rank": 13,
+            "rank_score": 0.8008854101589182,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "36e99da80857fba50d356e8e7bb1990f9130f4be",
+            "rank": 14,
+            "rank_score": 0.7995217398502112,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "9286060d95421e5d381e22622acbd69c8f8c56c9",
+            "rank": 15,
+            "rank_score": 0.7968657137467003,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "b14a6ef0bde9bd86380447ab23c2a3a34b30207e",
+            "rank": 16,
+            "rank_score": 0.7956810955878706,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "74444a4de23b201e4103cba9d16d7a92555e0442",
+            "rank": 17,
+            "rank_score": 0.7940568265317974,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "9b162dfd23cf3978358087e6203211f8d49d9d12",
+            "rank": 18,
+            "rank_score": 0.7921425394974819,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "5fe5ca0b7898d6de9222e4c4a7b7564cd50d8585",
+            "rank": 19,
+            "rank_score": 0.7912105708407727,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "cd3cf3782ef0be74642e3bad596c65f345d5be69",
+            "rank": 20,
+            "rank_score": 0.7871163171871876,
+            "section_path": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921",
+            "rank": 1,
+            "rank_score": 0.9772484867934337,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "2776e91bad61bd3c4ca7aca6abb6f5e7ca5bd0a6",
+            "rank": 2,
+            "rank_score": 0.9555045761862203,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "25ef5b2189026beae71958f06af46b4d431688b4",
+            "rank": 3,
+            "rank_score": 0.9091219200240965,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "d9fad64e1d5788c4a6357b0f280fdd27898f33f6",
+            "rank": 4,
+            "rank_score": 0.8857551958257043,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc",
+            "rank": 5,
+            "rank_score": 0.8553074331082944,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "93b0370a7c36d9c278ce0c8d7ffb1351e4444956",
+            "rank": 6,
+            "rank_score": 0.8443497210717218,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "1b544ad8b37f382143e56eae756490055ad2a237",
+            "rank": 7,
+            "rank_score": 0.8409545027150043,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "91c919b463226d74134f5bb8919ff68dd43c36ed",
+            "rank": 8,
+            "rank_score": 0.8327446842666921,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "392cdeb821d740271099ed21ec56e344024a6d00",
+            "rank": 9,
+            "rank_score": 0.8298989703480701,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "4c4577ebb17a1f3729b5bce8b6886c0e6ea7fba1",
+            "rank": 10,
+            "rank_score": 0.8283741564447684,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "f76b1e9a2ae137f36872df07d6ae4cf5bc60d881",
+            "rank": 11,
+            "rank_score": 0.8178310241124962,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "c85fee15d80d3afbcacd15df676c43838cca78ef",
+            "rank": 12,
+            "rank_score": 0.8173140669290153,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "99c3eab962e485c84871d781ca76bcc1a14149fa",
+            "rank": 13,
+            "rank_score": 0.8119198983464434,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "6a40a0005de796f1429dc4704d481283e5ae3096",
+            "rank": 14,
+            "rank_score": 0.8003335054069658,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "f08f4dfdc8f30de422c1eb7a33c9edd9e9e3968d",
+            "rank": 15,
+            "rank_score": 0.7972056710502937,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "8fda764723078609ffde8061240c3ae91885ac59",
+            "rank": 16,
+            "rank_score": 0.7969625200052199,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "761c31b4632748bf593c965ed86e733bfbb7e5fa",
+            "rank": 17,
+            "rank_score": 0.7959541580844736,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "35a3e2428d7896345818b84f39b8c55231cdbe35",
+            "rank": 18,
+            "rank_score": 0.7929352515423813,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "6750339b5b56ec91a3dcfadfd53ed0a845dda854",
+            "rank": 19,
+            "rank_score": 0.7926800129896739,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "03f053fb76db9ce79b32f62ca84742b75a232b54",
+            "rank": 20,
+            "rank_score": 0.7894249989403841,
+            "section_path": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921",
+            "rank": 1,
+            "rank_score": 0.9501556555096935,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "1b544ad8b37f382143e56eae756490055ad2a237",
+            "rank": 2,
+            "rank_score": 0.9324906909328352,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "2776e91bad61bd3c4ca7aca6abb6f5e7ca5bd0a6",
+            "rank": 3,
+            "rank_score": 0.9190961118092543,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "25ef5b2189026beae71958f06af46b4d431688b4",
+            "rank": 4,
+            "rank_score": 0.8815039486756817,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc",
+            "rank": 5,
+            "rank_score": 0.8494103969011109,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "93b0370a7c36d9c278ce0c8d7ffb1351e4444956",
+            "rank": 6,
+            "rank_score": 0.8449396519242263,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "d9fad64e1d5788c4a6357b0f280fdd27898f33f6",
+            "rank": 7,
+            "rank_score": 0.8394215625120311,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "f76b1e9a2ae137f36872df07d6ae4cf5bc60d881",
+            "rank": 8,
+            "rank_score": 0.8255019339567131,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "91c919b463226d74134f5bb8919ff68dd43c36ed",
+            "rank": 9,
+            "rank_score": 0.8182155002841414,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "99c3eab962e485c84871d781ca76bcc1a14149fa",
+            "rank": 10,
+            "rank_score": 0.814093356781304,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "03f053fb76db9ce79b32f62ca84742b75a232b54",
+            "rank": 11,
+            "rank_score": 0.7900432095316152,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "ac3405551ed3082d55e79372e2a3d47050d6c39c",
+            "rank": 12,
+            "rank_score": 0.7891675850444224,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "392cdeb821d740271099ed21ec56e344024a6d00",
+            "rank": 13,
+            "rank_score": 0.7837996332856114,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "4c4577ebb17a1f3729b5bce8b6886c0e6ea7fba1",
+            "rank": 14,
+            "rank_score": 0.7793127876535472,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "863ac7ae24b47103277e01929cb2b32fc9e4ab8c",
+            "rank": 15,
+            "rank_score": 0.7792570245375935,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "8fda764723078609ffde8061240c3ae91885ac59",
+            "rank": 16,
+            "rank_score": 0.7779081383652943,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "ae12241fd83518677267fa0db28d9f7329931920",
+            "rank": 17,
+            "rank_score": 0.7700134442369387,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "761c31b4632748bf593c965ed86e733bfbb7e5fa",
+            "rank": 18,
+            "rank_score": 0.7672412546503207,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "202204867c3f07b057d2a1b5b2094c480559acd3",
+            "rank": 19,
+            "rank_score": 0.7641855280737306,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "para_id": "35a3e2428d7896345818b84f39b8c55231cdbe35",
+            "rank": 20,
+            "rank_score": 0.7641816162064152,
+            "section_path": "enwiki:Radiocarbon%20dating/Background"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "Dendrochronology can also be used in concert with "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " to allow for more accurate date measurements using radiocarbon dating on archaeological sites. It is known that the concentration of carbon-14 in the atmosphere is not constant. By performing radiocarbon dating on timber samples in a known chronology, radiocarbon dates can be plotted against real time generating a calibration curve that can be used for future radiocarbon samples."
+                }
+            ],
+            "para_id": "d574245167bba2cb10c02d1b87943eb7fc9c53bc"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Measurement of radiocarbon was originally done by beta-counting devices, which counted the amount of "
+                },
+                {
+                    "entity": "enwiki:Beta%20particle",
+                    "entity_name": "Beta particle",
+                    "link_section": null,
+                    "text": "beta radiation"
+                },
+                {
+                    "text": " emitted by decaying  atoms in a sample. More recently, "
+                },
+                {
+                    "entity": "enwiki:Accelerator%20mass%20spectrometry",
+                    "entity_name": "Accelerator mass spectrometry",
+                    "link_section": null,
+                    "text": "accelerator mass spectrometry"
+                },
+                {
+                    "text": " has become the method of choice; it counts all the  atoms in the sample and not just the few that happen to decay during the measurements; it can therefore be used with much smaller samples (as small as individual plant seeds), and gives results much more quickly. The development of radiocarbon dating has had a profound impact on "
+                },
+                {
+                    "entity": "enwiki:Archaeology",
+                    "entity_name": "Archaeology",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": ". In addition to permitting more accurate dating within archaeological sites than previous methods, it allows comparison of dates of events across great distances. Histories of archaeology often refer to its impact as the \"radiocarbon revolution\".  Radiocarbon dating has allowed key transitions in prehistory to be dated, such as the end of the "
+                },
+                {
+                    "entity": "enwiki:Younger%20Dryas",
+                    "entity_name": "Younger Dryas",
+                    "link_section": null,
+                    "text": "last ice age"
+                },
+                {
+                    "text": ", and the beginning of the "
+                },
+                {
+                    "entity": "enwiki:Neolithic",
+                    "entity_name": "Neolithic",
+                    "link_section": null,
+                    "text": "Neolithic"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Bronze%20Age",
+                    "entity_name": "Bronze Age",
+                    "link_section": null,
+                    "text": "Bronze Age"
+                },
+                {
+                    "text": " in different regions."
+                }
+            ],
+            "para_id": "7103b067ca3796173aeed77524108cea308b779e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "All experts agree that stone circles are of pre-Christian date, but beyond that stone circles have proven difficult to date accurately. "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "Radiocarbon dating"
+                },
+                {
+                    "text": " has produced a wide range of dates at different sites. This is at least partly due to an inadequacy of materials suitable for radiocarbon dating that can be reliably obtained from the sites. The diversity of radiocarbon evidence may also suggest that stone circles were constructed over a very long period, or were sometimes reconstructed at later dates. It is often not clear when building started. A further obstacle to dating is that there are generally no other archaeological artifacts associated with the stone circles. Traditional archaeological artifacts, such as pottery "
+                },
+                {
+                    "entity": "enwiki:Sherd",
+                    "entity_name": "Sherd",
+                    "link_section": null,
+                    "text": "sherd"
+                },
+                {
+                    "text": "s, bones, etc., are not often found at the sites, and when found are frequently of a later date than the associated stone circle."
+                }
+            ],
+            "para_id": "f08f4dfdc8f30de422c1eb7a33c9edd9e9e3968d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A key concept in interpreting radiocarbon dates is "
+                },
+                {
+                    "entity": "enwiki:Association%20(archaeology)",
+                    "entity_name": "Association (archaeology)",
+                    "link_section": null,
+                    "text": "archaeological association"
+                },
+                {
+                    "text": ": what is the true relationship between two or more objects at an archaeological site?  It frequently happens that a sample for radiocarbon dating can be taken directly from the object of interest, but there are also many cases where this is not possible.  Metal grave goods, for example, cannot be radiocarbon dated, but they may be found in a grave with a coffin, charcoal, or other material which can be assumed to have been deposited at the same time.  In these cases a date for the coffin or charcoal is indicative of the date of deposition of the grave goods, because of the direct functional relationship between the two.  There are also cases where there is no functional relationship, but the association is reasonably strong: for example, a layer of charcoal in a rubbish pit provides a date which has a relationship to the rubbish pit."
+                }
+            ],
+            "para_id": "bbca916dfdafcf7f4e216f162526ab55b9cca947"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dating the finds from the \"Court of the Pile Dwellers\" has been a problem.  Because of the limited knowledge of the archaeological discipline at the time, no record of the "
+                },
+                {
+                    "entity": "enwiki:Stratigraphy%20(archaeology)",
+                    "entity_name": "Stratigraphy (archaeology)",
+                    "link_section": null,
+                    "text": "stratification"
+                },
+                {
+                    "text": " of the objects was kept.  They cannot be placed in sequence. There is no sign of "
+                },
+                {
+                    "entity": "enwiki:Europe",
+                    "entity_name": "Europe",
+                    "link_section": null,
+                    "text": "Europe"
+                },
+                {
+                    "text": "an trade goods or influence in the finds. "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "Radiocarbon dating"
+                },
+                {
+                    "text": " did not exist at the time of excavation. "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "Radiocarbon dating"
+                },
+                {
+                    "text": " of objects which have been handled and stored away from their original environment for long periods may not be reliable. In the 1960s an attempt to radiocarbon date some objects yielded a date of 1670 AD. A second attempt in 1975 using five different objects yielded dates from 55 AD to 850 AD."
+                }
+            ],
+            "para_id": "9d11f059941f8b8af0fc6042812a837dd2a22340"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The dating framework provided by radiocarbon led to a change in the prevailing view of how innovations spread through prehistoric Europe. Researchers had previously thought that many ideas spread by diffusion through the continent, or by invasions of peoples bringing new cultural ideas with them. As radiocarbon dates began to prove these ideas wrong in many instances, it became apparent that these innovations must sometimes have arisen locally. This has been described as a \"second radiocarbon revolution\", and with regard to British prehistory, archaeologist "
+                },
+                {
+                    "entity": "enwiki:Richard%20J.%20C.%20Atkinson",
+                    "entity_name": "Richard J. C. Atkinson",
+                    "link_section": null,
+                    "text": "Richard Atkinson"
+                },
+                {
+                    "text": " has characterized the impact of radiocarbon dating as \"radical ... therapy\" for the \"progressive disease of invasionism\". More broadly, the success of radiocarbon dating stimulated interest in analytical and statistical approaches to archaeological data.  Taylor has also described the impact of AMS, and the ability to obtain accurate measurements from very small samples, as ushering in a third radiocarbon revolution."
+                }
+            ],
+            "para_id": "863ac7ae24b47103277e01929cb2b32fc9e4ab8c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The development of radiocarbon dating has had a profound impact on archaeologyoften described as the \"radiocarbon revolution\".  In the words of anthropologist R. E. Taylor, \" data made a world prehistory possible by contributing a time scale that transcends local, regional and continental boundaries\". It provides more accurate dating within sites than previous methods, which usually derived either from stratigraphy or from typologies (e.g. of stone tools or pottery); it also allows comparison and synchronization of events across great distances. The advent of radiocarbon dating may even have led to better field methods in archaeology, since better data recording leads to firmer association of objects with the samples to be tested. These improved field methods were sometimes motivated by attempts to prove that a  date was incorrect. Taylor also suggests that the availability of definite date information freed archaeologists from the need to focus so much of their energy on determining the dates of their finds, and led to an expansion of the questions archaeologists were willing to research. For example, from the 1970s questions about the evolution of human behaviour were much more frequently seen in archaeology."
+                }
+            ],
+            "para_id": "52a33010f8d0060515f32844348d0478d60d77fe"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The RSPM hosted the initial meeting of the "
+                },
+                {
+                    "entity": "enwiki:Society%20for%20American%20Archaeology",
+                    "entity_name": "Society for American Archaeology",
+                    "link_section": null,
+                    "text": "Society for American Archaeology"
+                },
+                {
+                    "text": " in 1935 and inaugurated the Massachusetts Archaeological Society five years later. During the 1950s Fred Johnson chaired the "
+                },
+                {
+                    "entity": "enwiki:American%20Anthropological%20Association",
+                    "entity_name": "American Anthropological Association",
+                    "link_section": null,
+                    "text": "American Anthropological Association"
+                },
+                {
+                    "text": " committee linking the needs of archaeologists with the expertise of "
+                },
+                {
+                    "entity": "enwiki:Willard%20Libby",
+                    "entity_name": "Willard Libby",
+                    "link_section": null,
+                    "text": "Willard F. Libby"
+                },
+                {
+                    "text": " to develop "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "Carbon 14 dating"
+                },
+                {
+                    "text": " for archaeological sites. The Peabody hosted the 1954 Conference on Radiocarbon Dating and the 1956 International Conference on Radiocarbon Dating with representatives from seven European countries, Canada, and the United States."
+                }
+            ],
+            "para_id": "decb194dc57e235b5f34ca55687c1275d44fcccf"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Oxidizable carbon ratio dating is a method of "
+                },
+                {
+                    "entity": "enwiki:Chronological%20dating",
+                    "entity_name": "Chronological dating",
+                    "link_section": null,
+                    "text": "dating"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Archaeology",
+                    "entity_name": "Archaeology",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Earth%20science",
+                    "entity_name": "Earth science",
+                    "link_section": null,
+                    "text": "earth science"
+                },
+                {
+                    "text": " that can be used to derive or estimate the age of soil and sediment samples up to 35,000 years old. The method is experimental, and it is not as widely used in "
+                },
+                {
+                    "entity": "enwiki:Archaeology",
+                    "entity_name": "Archaeology",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": " as other "
+                },
+                {
+                    "text": "chronometric"
+                },
+                {
+                    "text": " methods such as "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "1c1329a5d824cac3a8c92816617a36d786c5fb41"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "During the early 1990s, it became obvious with an increasing number of high-resolution radiocarbon dates associated with the Younger Dryas that this distinct paleoclimatic period is very difficult to date in detail using radiocarbon dating. Radiocarbon dating of samples on either side of the Aller\u00f8d\u2013Younger Dryas Boundary yielded dates that exhibited a very rapid age shift. Typically, they jump from 11,000 radiocarbon years BP to 10,700\u201310,600 radiocarbon years BP at the boundary. The 11,000 radiocarbon years BP dates clearly pre-dates the boundary. The first (oldest) overlying Younger Dryas radiocarbon samples often yielded ages of 10,700\u201310,600 radiocarbon years BP without any evidence of either an intervening unconformity or other evidence of erosion or nondeposition. Radiocarbon dates of terrestrial macrofossils and tree rings in Europe show that this decline in apparent radiocarbon age occurred over about a 50-year period. For the Younger Dryas\u2013Preboreal transition, high-resolution dating of identified plant macrofossils yielded dates that fall within so-called radiocarbon plateau, i.e., a 200- to 250-year-long period when radiocarbon dating yields dates that are all roughly the same. As a result, the end of Younger Dryas can at best can only be estimated to have occurred sometime about 10,000\u201310,050 radiocarbon years BP."
+                }
+            ],
+            "para_id": "52f17f4dbff158c36196199a4d63f2a754dcd921"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Stave churches can be dated in various ways: by historical records or inscriptions, by stylistic means using construction details or ornaments, or by "
+                },
+                {
+                    "entity": "enwiki:Dendrochronology",
+                    "entity_name": "Dendrochronology",
+                    "link_section": null,
+                    "text": "dendrochronology"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": ". Often historical records or inscriptions will point to a year when the church is known to have existed. Archaeological excavations can yield finds which can provide "
+                },
+                {
+                    "entity": "enwiki:Relative%20dating",
+                    "entity_name": "Relative dating",
+                    "link_section": null,
+                    "text": "relative dating"
+                },
+                {
+                    "text": " for the structure, whereas "
+                },
+                {
+                    "entity": "enwiki:Absolute%20dating",
+                    "entity_name": "Absolute dating",
+                    "link_section": null,
+                    "text": "absolute dating"
+                },
+                {
+                    "text": " methods such as radiocarbon dating and dendrochronology can provide a more exact date. One drawback of dendrochronology is that it tends to overlook the possibility that the wood could have been reused from an older structure, or felled and left for many years before use."
+                }
+            ],
+            "para_id": "c4c6c50fc808d4c943145370c997bac34653980f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Half-life",
+                    "entity_name": "Half-life",
+                    "link_section": null,
+                    "text": "half-life"
+                },
+                {
+                    "text": " of carbon-14 is 5,730\u00b140 years. Libby realized that when plants and animals die they cease to ingest fresh carbon-14, thereby giving any organic compound a built-in nuclear clock. He published his theory in 1946, and expanded on it in his monograph Radiocarbon Dating in 1955. He also developed sensitive radiation detectors that could use the technique. Tests against "
+                },
+                {
+                    "entity": "enwiki:Sequoia%20(genus)",
+                    "entity_name": "Sequoia (genus)",
+                    "link_section": null,
+                    "text": "sequoia"
+                },
+                {
+                    "text": " with known dates from their tree rings showed "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " to be reliable and accurate. The technique revolutionised "
+                },
+                {
+                    "entity": "enwiki:Archaeology",
+                    "entity_name": "Archaeology",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Paleontology",
+                    "entity_name": "Paleontology",
+                    "link_section": null,
+                    "text": "palaeontology"
+                },
+                {
+                    "text": " and other disciplines that dealt with ancient artefacts. In 1960, he was awarded the "
+                },
+                {
+                    "entity": "enwiki:Nobel%20Prize%20in%20Chemistry",
+                    "entity_name": "Nobel Prize in Chemistry",
+                    "link_section": null,
+                    "text": "Nobel Prize in Chemistry"
+                },
+                {
+                    "text": " \"for his method to use carbon-14 for age determination in archaeology, geology, geophysics, and other branches of science\". He also discovered that "
+                },
+                {
+                    "entity": "enwiki:Tritium",
+                    "entity_name": "Tritium",
+                    "link_section": null,
+                    "text": "tritium"
+                },
+                {
+                    "text": " similarly could be used for dating water, and therefore wine."
+                }
+            ],
+            "para_id": "f2b7ef19e576e4b52a3d25449d3d85c0cdc4da44"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Estimated dates of initial settlement of Easter Island have ranged from 300 to 1200 "
+                },
+                {
+                    "entity": "enwiki:Common%20Era",
+                    "entity_name": "Common Era",
+                    "link_section": null,
+                    "text": "CE"
+                },
+                {
+                    "text": ", approximately coinciding with the arrival of the first settlers in Hawaii. Rectifications in "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " have changed almost all of the previously posited early settlement dates in Polynesia. Rapa Nui is now considered to have been settled in the narrower range of 700 to 1100 CE. Ongoing archaeological studies suggest a still-later date: \"Radiocarbon dates for the earliest stratigraphic layers at Anakena, Easter Island, and analysis of previous radiocarbon dates imply that the island was colonized late, about 1200 CE. Significant ecological impacts and major cultural investments in monumental architecture and statuary thus began soon after initial settlement.\""
+                }
+            ],
+            "para_id": "1206b57830bf438e7db71d039f5dbbd75be91b50"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "As in Egypt and the eastern Mediterranean, radiocarbon dates run one or two centuries earlier than the dates proposed by archaeologists. It is not at all clear which group is right, if either. Mechanisms have been proposed for explaining why radiocarbon dates in the region might be skewed. Equally logical arguments have been made suggesting that the archaeological dates are too late. Time will tell. The spread of accelerator based carbon dating techniques may help clear up the issue. Another promising front is the dating of lime plaster from structures. Recently, radiocarbon dates from the final destruction of "
+                },
+                {
+                    "entity": "enwiki:Ebla",
+                    "entity_name": "Ebla",
+                    "link_section": null,
+                    "text": "Ebla"
+                },
+                {
+                    "text": " have been shown to definitely favour the middle chronology (with the fall of Babylon and Aleppo at c. 1595 BCE), and do not seem to fall with the ultra-low chronology (same event at c. 1499 BCE), although it is emphasized that this is not to be seen as a decisive argument."
+                }
+            ],
+            "para_id": "65ebdf4b6d2447a57a35b22de3d6110fe4d5138b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dendrochronology has three main areas of application: "
+                },
+                {
+                    "entity": "enwiki:Paleoecology",
+                    "entity_name": "Paleoecology",
+                    "link_section": null,
+                    "text": "paleoecology"
+                },
+                {
+                    "text": ", where it is used to determine certain aspects of past "
+                },
+                {
+                    "entity": "enwiki:Ecology",
+                    "entity_name": "Ecology",
+                    "link_section": null,
+                    "text": "ecologies"
+                },
+                {
+                    "text": " (most prominently climate); "
+                },
+                {
+                    "entity": "enwiki:Archaeology",
+                    "entity_name": "Archaeology",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": ", where it is used to date old buildings, etc.; and "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": ", where it is used to calibrate radiocarbon ages (see below)."
+                }
+            ],
+            "para_id": "9d21beb449a4fa908932c68ec0f2f3836ff977d8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "After the war he went to "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Oxford",
+                    "entity_name": "University of Oxford",
+                    "link_section": null,
+                    "text": "Oxford"
+                },
+                {
+                    "text": " to study the work of "
+                },
+                {
+                    "entity": "enwiki:William%20Stukeley",
+                    "entity_name": "William Stukeley",
+                    "link_section": null,
+                    "text": "William Stukeley"
+                },
+                {
+                    "text": ", but in 1946 was offered the "
+                },
+                {
+                    "entity": "enwiki:John%20Abercromby,%205th%20Baron%20Abercromby",
+                    "entity_name": "John Abercromby, 5th Baron Abercromby",
+                    "link_section": null,
+                    "text": "Abercromby"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:List%20of%20professorships%20at%20the%20University%20of%20Edinburgh",
+                    "entity_name": "List of professorships at the University of Edinburgh",
+                    "link_section": null,
+                    "text": "Chair in Archaeology"
+                },
+                {
+                    "text": " at "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Edinburgh",
+                    "entity_name": "University of Edinburgh",
+                    "link_section": null,
+                    "text": "Edinburgh University"
+                },
+                {
+                    "text": " (now part of the "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Edinburgh%20School%20of%20History,%20Classics%20and%20Archaeology",
+                    "entity_name": "University of Edinburgh School of History, Classics and Archaeology",
+                    "link_section": null,
+                    "text": "School of History, Classics and Archaeology"
+                },
+                {
+                    "text": "), in succession to "
+                },
+                {
+                    "entity": "enwiki:V.%20Gordon%20Childe",
+                    "entity_name": "V. Gordon Childe",
+                    "link_section": null,
+                    "text": "Gordon Childe"
+                },
+                {
+                    "text": ". Piggott succeeded in making Edinburgh an archaeology department of international standing. He continued to publish widely including Neolithic Cultures of the British Isles (1954) which was considered highly influential until "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " tests did not match its chronology. Piggott said that radiocarbon dating was \"archaeologically unacceptable\", because every other shred of evidence pointed towards his dates being correct. Ancient Europe (1965), however remained a popular survey of Old World prehistory for more than twenty years, demonstrating his view of the solidarity and continuity of the past in Europe. In 1956 his childless marriage ended."
+                }
+            ],
+            "para_id": "8e373bda4748c6d6fec9859cd674371b36635da3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Electron Spin Resonance Dating is being used in fields like radiation chemistry, biochemistry, and as well as geology, archaeology, and anthropology. ESR dating is used instead of Radiocarbon dating because ESR dating can date newly formed materials or previously heated rock. The dating of buried teeth has served as the basis for the dating of human remains. Studies have been used to date burnt flint and quartz found in certain ancient ceramics. Newer ESR dating applications include dating previous earthquakes from fault gouge, past volcanic eruptions, and tectonic activity along coastlines."
+                }
+            ],
+            "para_id": "1f81fcf1b7687bf4516dba2ca19c73d1cbe4f311"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The difference between "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " and OSL is that the former is used to date organic materials, while the latter is used to date minerals. Events that can be dated using OSL are, for example, the mineral's last exposure to sunlight; "
+                },
+                {
+                    "entity": "enwiki:Lake%20Mungo%20remains",
+                    "entity_name": "Lake Mungo remains",
+                    "link_section": null,
+                    "text": "Mungo Man"
+                },
+                {
+                    "text": ", Australia's oldest human find, was dated in this manner. It is also used for dating the deposition of geological sediments after they have been transported by air ("
+                },
+                {
+                    "entity": "enwiki:Aeolian%20processes",
+                    "entity_name": "Aeolian processes",
+                    "link_section": null,
+                    "text": "aeolian"
+                },
+                {
+                    "text": " sediments) or rivers ("
+                },
+                {
+                    "entity": "enwiki:Fluvial",
+                    "entity_name": "Fluvial",
+                    "link_section": null,
+                    "text": "fluvial"
+                },
+                {
+                    "text": " sediments). In archaeology, OSL dating is applied to ceramics: The dated event is the time of their last heating to a high temperature (in excess of 400 \u00b0C)."
+                }
+            ],
+            "para_id": "6e9588105a1b45952de944aab0637af22e7bab13"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Minze Stuiver is a geochemist who was at the forefront of geoscience research from the 1960s until his retirement in 1998.  He helped transform "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " from a simple tool for archaeology and geology to a precise technique with applications in solar physics, oceanography, geochemistry, and carbon dynamics.  Minze Stuiver\u2019s research encompassed the use of radiocarbon (C) to understand solar cycles and radiocarbon production, ocean circulation, lake carbon dynamics and archaeology as well as the use of stable isotopes to document past climate changes."
+                }
+            ],
+            "para_id": "259798855bf815b79dc65ed5c1268f224c6379e7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Hallstatt plateau is a term used in "
+                },
+                {
+                    "entity": "enwiki:Archaeological%20science",
+                    "entity_name": "Archaeological science",
+                    "link_section": null,
+                    "text": "archaeology"
+                },
+                {
+                    "text": " that refers to a consistently flat area on graphs that plot "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " against calendar dates.  Radiocarbon dates of around 2450 BP (Before Present) always calibrate to ca. 800-400 BC, no matter the measurement precision.  The carbon 14 dating method is hampered by this large plateau on the calibration curve from ca. 800-400 BC (at 2450 BP), a critical period in human technological development.  Just before and after the plateau, calibration is accurate; during the plateau only techniques like "
+                },
+                {
+                    "entity": "enwiki:Wiggle%20matching",
+                    "entity_name": "Wiggle matching",
+                    "link_section": null,
+                    "text": "wiggle matching"
+                },
+                {
+                    "text": " can yield useful calendar ages."
+                }
+            ],
+            "para_id": "7c3a3aedd926d3a37ad8396f33baac6e78645a1c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The above calculations make several assumptions, such as that the level of  in the atmosphere has remained constant over time. In fact, the level of  in the atmosphere has varied significantly and as a result the values provided by the equation above have to be corrected by using data from other sources.  This is done by calibration curves, which convert a measurement of  in a sample into an estimated calendar age.  The calculations involve several steps and include an intermediate value called the \"radiocarbon age\", which is the age in \"radiocarbon years\" of the sample: an age quoted in radiocarbon years means that no calibration curve has been used \u2212 the calculations for radiocarbon years assume that the / ratio has not changed over time.  Calculating radiocarbon ages also requires the value of the half-life for , which for more than a decade after Libby's initial work was thought to be 5,568 years.  This was revised in the early 1960s to 5,730 years, which meant that many calculated dates in papers published prior to this were incorrect (the error in the half-life is about 3%).  For consistency with these early papers, and to avoid the risk of a double correction for the incorrect half-life, radiocarbon ages are still calculated using the incorrect half-life value.  A correction for the half-life is incorporated into calibration curves, so even though radiocarbon ages are calculated using a half-life value that is known to be incorrect, the final reported calibrated date, in calendar years, is accurate.  When a date is quoted, the reader should be aware that if it is an uncalibrated date (a term used for dates given in radiocarbon years) it may differ substantially from the best estimate of the actual calendar date, both because it uses the wrong value for the half-life of , and because no correction (calibration) has been applied for the historical variation of  in the atmosphere over time."
+                }
+            ],
+            "para_id": "93b0370a7c36d9c278ce0c8d7ffb1351e4444956"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "Radiocarbon dating"
+                },
+                {
+                    "text": " measurements produce ages in \"radiocarbon years\", which must be converted to calendar ages by a process called calibration.  Calibration is needed because the atmospheric / ratio, which is a key element in calculating radiocarbon ages, has not been constant historically. Although "
+                },
+                {
+                    "entity": "enwiki:Willard%20Libby",
+                    "entity_name": "Willard Libby",
+                    "link_section": null,
+                    "text": "Willard Libby"
+                },
+                {
+                    "text": ", the inventor of radiocarbon dating, had pointed out as early as 1955 the possibility that the / ratio might have varied over time, it was not until discrepancies began to accumulate between measured ages and known historical dates for artefacts that it became clear that a correction would need to be applied to radiocarbon ages to obtain calendar dates. Radiocarbon years ago may be abbreviated ya (years ago). A general term used reflecting evidence from any method is "
+                },
+                {
+                    "entity": "enwiki:Before%20Present",
+                    "entity_name": "Before Present",
+                    "link_section": null,
+                    "text": "Before Present"
+                },
+                {
+                    "text": " (BP)."
+                }
+            ],
+            "para_id": "f76b1e9a2ae137f36872df07d6ae4cf5bc60d881"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The usual presentation of a radiocarbon date, as a specific date plus or minus an error term, obscures the fact that the true age of the object being measured may lie outside the range of dates quoted. In 1970, the British Museum radiocarbon laboratory ran weekly measurements on the same sample for six months. The results varied widely (though consistently with a normal distribution of errors in the measurements), and included multiple date ranges (of 1\u03c3 confidence) that did not overlap with each other. The extreme measurements included one with a maximum age of under 4,400 years, and another with a minimum age of over 4,500 years."
+                }
+            ],
+            "para_id": "733a4b8dfb4ba4f995ddf5a157a94bd53d5c10bb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dates determined using radiocarbon dating come in two kinds: uncalibrated (also called Libby or raw) and calibrated (also called Cambridge) dates. Uncalibrated radiocarbon dates should be clearly noted as such by \"uncalibrated years BP\", because they are not identical to calendar dates. This has to do with the fact that the level of atmospheric radiocarbon ("
+                },
+                {
+                    "entity": "enwiki:Carbon-14",
+                    "entity_name": "Carbon-14",
+                    "link_section": null,
+                    "text": "carbon-14"
+                },
+                {
+                    "text": " or C) has not been strictly constant during the span of time that can be radiocarbon-dated. Uncalibrated radiocarbon ages can be converted to calendar dates by means of "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": "Calibration",
+                    "text": "calibration curves"
+                },
+                {
+                    "text": " based on comparison of raw radiocarbon dates of samples independently dated by other methods, such as "
+                },
+                {
+                    "entity": "enwiki:Dendrochronology",
+                    "entity_name": "Dendrochronology",
+                    "link_section": null,
+                    "text": "dendrochronology"
+                },
+                {
+                    "text": " (dating on the basis of tree growth-rings) and "
+                },
+                {
+                    "entity": "enwiki:Stratigraphy",
+                    "entity_name": "Stratigraphy",
+                    "link_section": null,
+                    "text": "stratigraphy"
+                },
+                {
+                    "text": " (dating on the basis of sediment layers in mud or sedimentary rock). Such calibrated dates are expressed as cal BP, where \"cal\" indicates \"calibrated years\", or \"calendar years\", before 1950."
+                }
+            ],
+            "para_id": "2776e91bad61bd3c4ca7aca6abb6f5e7ca5bd0a6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Numerous radiocarbon dates have been collected from the sediments, which fill the basins of Carolina bays. The majority of these samples, from which these dates were obtained, were collected from cores of undisturbed sediments that filled Carolina bays in North and South Carolina. These cores were collected to reconstruct region paleoenvironmental records using pollen, diatoms, and other fossils found in the distinctly and conformably layered sediments that fill the Carolina bays. Additional radiocarbon dates have been obtained from organic matter collected from the undisturbed sediments filling Carolina bays by Bliley and Burney, Mixon and Pilkey, Thom, and Kaczorowski. Many radiocarbon dates, which were obtained from organic matter preserved within undisturbed sediments are greater than 14,000 "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "BP"
+                },
+                {
+                    "text": " radiocarbon in age. The finite radiocarbon dates range in age from 440 \u00b1 50 to 27,700 \u00b12,600 BP radiocarbon in age. Some samples are so old, they contained insufficient radiocarbon for dating, which results in \"greater than\" dates. For example, samples from sediments filling Carolina bays have been dated at greater than 38,000 to 49,550 BP radiocarbon years."
+                }
+            ],
+            "para_id": "25ef5b2189026beae71958f06af46b4d431688b4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Pleistocene",
+                    "entity_name": "Pleistocene",
+                    "link_section": null,
+                    "text": "Pleistocene"
+                },
+                {
+                    "text": " is a geological epoch that began about 2.6 million years ago.  The "
+                },
+                {
+                    "entity": "enwiki:Holocene",
+                    "entity_name": "Holocene",
+                    "link_section": null,
+                    "text": "Holocene"
+                },
+                {
+                    "text": ", the current geological epoch, begins about 11,700 years ago, when the Pleistocene ends.  Establishing the date of this boundary \u2212 which is defined by sharp climatic warming \u2212 as accurately as possible has been a goal of geologists for much of the 20th century.  At "
+                },
+                {
+                    "entity": "enwiki:Two%20Creeks,%20Wisconsin",
+                    "entity_name": "Two Creeks, Wisconsin",
+                    "link_section": null,
+                    "text": "Two Creeks"
+                },
+                {
+                    "text": ", in Wisconsin, a fossil forest was discovered ("
+                },
+                {
+                    "entity": "enwiki:Two%20Creeks%20Buried%20Forest%20State%20Natural%20Area",
+                    "entity_name": "Two Creeks Buried Forest State Natural Area",
+                    "link_section": null,
+                    "text": "Two Creeks Buried Forest State Natural Area"
+                },
+                {
+                    "text": "), and subsequent research determined that the destruction of the forest was caused by the Valders ice readvance, the last southward movement of ice before the end of the Pleistocene in that area.  Before the advent of radiocarbon dating, the fossilized trees had been dated by correlating sequences of annually deposited layers of sediment at Two Creeks with sequences in Scandinavia. This led to estimates that the trees were between 24,000 and 19,000 years old, and hence this was taken to be the date of the last advance of the "
+                },
+                {
+                    "entity": "enwiki:Wisconsin%20glaciation",
+                    "entity_name": "Wisconsin glaciation",
+                    "link_section": null,
+                    "text": "Wisconsin glaciation"
+                },
+                {
+                    "text": " before its final retreat marked the end of the Pleistocene in North America.  In 1952 Libby published radiocarbon dates for several samples from the Two Creeks site and two similar sites nearby; the dates were averaged to 11,404 BP with a standard error of 350 years.  This result was uncalibrated, as the need for calibration of radiocarbon ages was not yet understood.  Further results over the next decade supported an average date of 11,350 BP, with the results thought to be most accurate averaging 11,600 BP.  There was initial resistance to these results on the part of "
+                },
+                {
+                    "entity": "enwiki:Ernst%20Antevs",
+                    "entity_name": "Ernst Antevs",
+                    "link_section": null,
+                    "text": "Ernst Antevs"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "entity": "enwiki:Paleobotany",
+                    "entity_name": "Paleobotany",
+                    "link_section": null,
+                    "text": "palaeobotanist"
+                },
+                {
+                    "text": " who had worked on the Scandinavian varve series, but his objections were eventually discounted by other geologists.  In the 1990s samples were tested with AMS, yielding (uncalibrated) dates ranging from 11,640 BP to 11,800 BP, both with a standard error of 160 years.  Subsequently, a sample from the fossil forest was used in an interlaboratory test, with results provided by over 70 laboratories.  These tests produced a median age of 11,788 \u00b1 8 BP (2\u03c3 confidence) which when calibrated gives a date range of 13,730 to 13,550 cal BP.  The Two Creeks radiocarbon dates are now regarded as a key result in developing the modern understanding of North American glaciation at the end of the Pleistocene."
+                }
+            ],
+            "para_id": "392cdeb821d740271099ed21ec56e344024a6d00"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Libby and "
+                },
+                {
+                    "entity": "enwiki:James%20R.%20Arnold",
+                    "entity_name": "James R. Arnold",
+                    "link_section": null,
+                    "text": "James Arnold"
+                },
+                {
+                    "text": " proceeded to test the radiocarbon dating theory by analyzing samples with known ages. For example, two samples taken from the tombs of two Egyptian kings, "
+                },
+                {
+                    "entity": "enwiki:Djoser",
+                    "entity_name": "Djoser",
+                    "link_section": null,
+                    "text": "Zoser"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Sneferu",
+                    "entity_name": "Sneferu",
+                    "link_section": null,
+                    "text": "Sneferu"
+                },
+                {
+                    "text": ", independently dated to 2625 BC plus or minus 75 years, were dated by radiocarbon measurement to an average of 2800 BC plus or minus 250 years. These results were published in Science in 1949. Within 11 years of their announcement, more than 20 radiocarbon dating laboratories had been set up worldwide. "
+                }
+            ],
+            "para_id": "cd3cf3782ef0be74642e3bad596c65f345d5be69"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The method was developed by "
+                },
+                {
+                    "entity": "enwiki:Willard%20Libby",
+                    "entity_name": "Willard Libby",
+                    "link_section": null,
+                    "text": "Willard Libby"
+                },
+                {
+                    "text": " in the late 1940s and soon became a standard tool for archaeologists. Libby received the "
+                },
+                {
+                    "entity": "enwiki:List%20of%20Nobel%20laureates%20in%20Chemistry",
+                    "entity_name": "List of Nobel laureates in Chemistry",
+                    "link_section": null,
+                    "text": "Nobel Prize"
+                },
+                {
+                    "text": " for his work in 1960. The radiocarbon dating method is based on the fact that radiocarbon is constantly being created in the atmosphere by the interaction of "
+                },
+                {
+                    "entity": "enwiki:Cosmic%20ray",
+                    "entity_name": "Cosmic ray",
+                    "link_section": null,
+                    "text": "cosmic ray"
+                },
+                {
+                    "text": "s with atmospheric "
+                },
+                {
+                    "entity": "enwiki:Nitrogen",
+                    "entity_name": "Nitrogen",
+                    "link_section": null,
+                    "text": "nitrogen"
+                },
+                {
+                    "text": ". The resulting radiocarbon combines with atmospheric "
+                },
+                {
+                    "entity": "enwiki:Oxygen",
+                    "entity_name": "Oxygen",
+                    "link_section": null,
+                    "text": "oxygen"
+                },
+                {
+                    "text": " to form radioactive "
+                },
+                {
+                    "entity": "enwiki:Carbon%20dioxide",
+                    "entity_name": "Carbon dioxide",
+                    "link_section": null,
+                    "text": "carbon dioxide"
+                },
+                {
+                    "text": ", which is incorporated into plants by "
+                },
+                {
+                    "entity": "enwiki:Photosynthesis",
+                    "entity_name": "Photosynthesis",
+                    "link_section": null,
+                    "text": "photosynthesis"
+                },
+                {
+                    "text": "; animals then acquire  by eating the plants. When the animal or plant dies, it stops exchanging carbon with its environment, and from that point onwards the amount of  it contains begins to decrease as the  undergoes "
+                },
+                {
+                    "entity": "enwiki:Radioactive%20decay",
+                    "entity_name": "Radioactive decay",
+                    "link_section": null,
+                    "text": "radioactive decay"
+                },
+                {
+                    "text": ". Measuring the amount of  in a sample from a dead plant or animal such as a piece of wood or a fragment of bone provides information that can be used to calculate when the animal or plant died. The older a sample is, the less  there is to be detected, and because the "
+                },
+                {
+                    "entity": "enwiki:Half-life",
+                    "entity_name": "Half-life",
+                    "link_section": null,
+                    "text": "half-life"
+                },
+                {
+                    "text": " of  (the period of time after which half of a given sample will have decayed) is about 5,730 years, the oldest dates that can be reliably measured by radiocarbon dating are around 50,000 years ago, although special preparation methods occasionally permit dating of older samples."
+                }
+            ],
+            "para_id": "5fe5ca0b7898d6de9222e4c4a7b7564cd50d8585"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Radiocarbon dates are generally presented with a range of one "
+                },
+                {
+                    "entity": "enwiki:Standard%20deviation",
+                    "entity_name": "Standard deviation",
+                    "link_section": null,
+                    "text": "standard deviation"
+                },
+                {
+                    "text": " (usually represented by the Greek letter sigma as 1\u03c3) on either side of the mean. However, a date range of 1\u03c3 represents only 68% confidence level, so the true age of the object being measured may lie outside the range of dates quoted. This was demonstrated in 1970 by an experiment run by the British Museum radiocarbon laboratory, in which weekly measurements were taken on the same sample for six months. The results varied widely (though consistently with a "
+                },
+                {
+                    "entity": "enwiki:Normal%20distribution",
+                    "entity_name": "Normal distribution",
+                    "link_section": null,
+                    "text": "normal distribution"
+                },
+                {
+                    "text": " of errors in the measurements), and included multiple date ranges (of 1\u03c3 confidence) that did not overlap with each other. The measurements included one with a range from about 4250 to about 4390 years ago, and another with a range from about 4520 to about 4690."
+                }
+            ],
+            "para_id": "3ab826e11e168af0aa32663d247cd31d7beb2f85"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Over the next thirty years many calibration curves were published using a variety of methods and statistical approaches. These were superseded by the INTCAL series of curves, beginning with INTCAL98, published in 1998, and updated in 2004, 2009, and 2013. The improvements to these curves are based on new data gathered from tree rings, "
+                },
+                {
+                    "entity": "enwiki:Varve",
+                    "entity_name": "Varve",
+                    "link_section": null,
+                    "text": "varve"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Coral",
+                    "entity_name": "Coral",
+                    "link_section": null,
+                    "text": "coral"
+                },
+                {
+                    "text": ", plant "
+                },
+                {
+                    "entity": "enwiki:Macrofossil",
+                    "entity_name": "Macrofossil",
+                    "link_section": null,
+                    "text": "macrofossil"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Speleothem",
+                    "entity_name": "Speleothem",
+                    "link_section": null,
+                    "text": "speleothems"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Foraminifera",
+                    "entity_name": "Foraminifera",
+                    "link_section": null,
+                    "text": "foraminifera"
+                },
+                {
+                    "text": ".  The INTCAL13 data includes separate curves for the northern and southern hemispheres, as they differ systematically because of the hemisphere effect; there is also a separate marine calibration curve. For a set of samples with a known sequence and separation in time such as a sequence of tree rings, the samples' radiocarbon ages form a small subset of the calibration curve. The resulting curve can then be matched to the actual calibration curve by identifying where, in the range suggested by the radiocarbon dates, the wiggles in the calibration curve best match the wiggles in the curve of sample dates. This \"wiggle-matching\" technique can lead to more precise dating than is possible with individual radiocarbon dates.  Wiggle-matching can be used in places where there is a plateau on the calibration curve, and hence can provide a much more accurate date than the intercept or probability methods are able to produce.  The technique is not restricted to tree rings; for example, a stratified "
+                },
+                {
+                    "entity": "enwiki:Tephra",
+                    "entity_name": "Tephra",
+                    "link_section": null,
+                    "text": "tephra"
+                },
+                {
+                    "text": " sequence in New Zealand, known to predate human colonization of the islands, has been dated to 1314 AD \u00b1 12 years by wiggle-matching. The wiggles also mean that reading a date from a calibration curve can give more than one answer: this occurs when the curve wiggles up and down enough that the radiocarbon age intercepts the curve in more than one place, which may lead to a radiocarbon result being reported as two separate age ranges, corresponding to the two parts of the curve that the radiocarbon age intercepted."
+                }
+            ],
+            "para_id": "91c919b463226d74134f5bb8919ff68dd43c36ed"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the early years of using the technique, it was understood that it depended on the atmospheric / ratio having remained the same over the preceding few thousand years. To verify the accuracy of the method, several artefacts that were datable by other techniques were tested; the results of the testing were in reasonable agreement with the true ages of the objects. Over time, however, discrepancies began to appear between the known chronology for the oldest Egyptian dynasties and the radiocarbon dates of Egyptian artefacts. Neither the pre-existing Egyptian chronology nor the new radiocarbon dating method could be assumed to be accurate, but a third possibility was that the / ratio had changed over time.  The question was resolved by the "
+                },
+                {
+                    "entity": "enwiki:Dendrochronology",
+                    "entity_name": "Dendrochronology",
+                    "link_section": null,
+                    "text": "study of tree rings"
+                },
+                {
+                    "text": ": comparison of overlapping series of tree rings allowed the construction of a continuous sequence of tree-ring data that spanned 8,000 years.  (Since that time the tree-ring data series has been extended to 13,900 years.)  In the 1960s, "
+                },
+                {
+                    "entity": "enwiki:Hans%20Suess",
+                    "entity_name": "Hans Suess",
+                    "link_section": null,
+                    "text": "Hans Suess"
+                },
+                {
+                    "text": " was able to use the tree-ring sequence to show that the dates derived from radiocarbon were consistent with the dates assigned by Egyptologists.  This was possible because although annual plants, such as corn, have a / ratio that reflects the atmospheric ratio at the time they were growing, trees only add material to their outermost tree ring in any given year, while the inner tree rings don't get their  replenished and instead start losing  through decay.  Hence each ring preserves a record of the atmospheric / ratio of the year it grew in.  Carbon-dating the wood from the tree rings themselves provides the check needed on the atmospheric / ratio: with a sample of known date, and a measurement of the value of N (the number of atoms of  remaining in the sample), the carbon-dating equation allows the calculation of N \u2013 the number of atoms of  in the sample at the time the tree ring was formed \u2013 and hence the / ratio in the atmosphere at that time. Equipped with the results of carbon-dating the tree rings, it became possible to construct calibration curves designed to correct the errors caused by the variation over time in the / ratio. These curves are described in more detail "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": "Calibration",
+                    "text": "below"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "b14a6ef0bde9bd86380447ab23c2a3a34b30207e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "For example, \"cal 1220\u20131281 AD (1\u03c3)\" means a calibrated date for which the true date lies between 1220 AD and 1281 AD, with the confidence level given as 1\u03c3, or one standard deviation. Calibrated dates can also be expressed as BP instead of using BC and AD. The curve used to calibrate the results should be the latest available INTCAL curve. Calibrated dates should also identify any programs, such as OxCal, used to perform the calibration.  In addition, an article in Radiocarbon in 2014 about radiocarbon date reporting conventions recommends that information should be provided about sample treatment, including the sample material, pretreatment methods, and quality control measurements; that the citation to the software used for calibration should specify the version number and any options or models used; and that the calibrated date should be given with the associated probabilities for each range."
+                }
+            ],
+            "para_id": "99b0d8337dc117dd9192edcc06cbe7a3b0a5b2f8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When several radiocarbon dates are obtained for samples which are known or suspected to be from the same object, it may be possible to combine the measurements to get a more accurate date. Unless the samples are definitely of the same age (for example, if they were both physically taken from a single item) a statistical test must be applied to determine if the dates do derive from the same object. This is done by calculating a combined error term for the radiocarbon dates for the samples in question, and then calculating a pooled mean age. It is then possible to apply a "
+                },
+                {
+                    "entity": "enwiki:Student's%20t-test",
+                    "entity_name": "Student's t-test",
+                    "link_section": null,
+                    "text": "T test"
+                },
+                {
+                    "text": " to determine if the samples have the same true mean. Once this is done the error for the pooled mean age can be calculated, giving a final answer of a single date and range, with a narrower probability distribution (i.e., greater accuracy) as a result of the combined measurements."
+                }
+            ],
+            "para_id": "b024df3f6aaeb065551357d0a8b13ef16b19b219"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Variations in the calibration curve can lead to very different resulting calendar year ranges for samples with different radiocarbon ages.  The graph to the right shows the part of the INTCAL13 calibration curve from 1000 BP to 1400 BP, a range in which there are significant departures from a linear relationship between radiocarbon age and calendar age.  In places where the calibration curve is steep, and does not change direction, as in example t in blue on the graph to the right, the resulting calendar year range is quite narrow.  Where the curve varies significantly both up and down, a single radiocarbon date range may produce two or more separate calendar year ranges.  Example t, in red on the graph, shows this situation: a radiocarbon age range of about 1260 BP to 1280 BP converts to three separate ranges between about 1190 BP and 1260 BP.  A third possibility is that the curve is flat for some range of calendar dates; in this case, illustrated by t, in green on the graph, a range of about 30 radiocarbon years, from 1180 BP to 1210 BP, results in a calendar year range of about a century, from 1080 BP to 1180 BP."
+                }
+            ],
+            "para_id": "fc89d0016384309b6013be2bb7e0f642624d325a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Andrew Millard says that this plateau is named after the "
+                },
+                {
+                    "entity": "enwiki:Hallstatt%20culture",
+                    "entity_name": "Hallstatt culture",
+                    "link_section": null,
+                    "text": "Hallstatt culture"
+                },
+                {
+                    "text": " period in central Europe with which it coincides.   Millard also explains that "
+                },
+                {
+                    "entity": "enwiki:Wiggle%20matching",
+                    "entity_name": "Wiggle matching",
+                    "link_section": null,
+                    "text": "wiggle matching"
+                },
+                {
+                    "text": " is a term which has wide acceptance in the radiocarbon community, and involves taking a series of radiocarbon dates where the prior knowledge about the true calendar dates of the samples can be expressed as known differences in age between those samples, or occasionally as differences in age with some small uncertainty. The series of radiocarbon dates can then be matched to the calibration curve to provide a relatively precise estimate of age. When the results are plotted on a graph the `wiggles' in the sample sequence of radiocarbon dates match the 'wiggles' in the calibration curve - hence the name."
+                }
+            ],
+            "para_id": "03f053fb76db9ce79b32f62ca84742b75a232b54"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Radiocarbon is a scientific journal devoted to the topic of "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": ". It was founded in 1959 as a supplement to the "
+                },
+                {
+                    "entity": "enwiki:American%20Journal%20of%20Science",
+                    "entity_name": "American Journal of Science",
+                    "link_section": null,
+                    "text": "American Journal of Science"
+                },
+                {
+                    "text": ", and is an important source of data and information about radiocarbon dating.  It publishes many radiocarbon results, and since 1979 it has published the proceedings of the international conferences on radiocarbon dating."
+                }
+            ],
+            "para_id": "ac3405551ed3082d55e79372e2a3d47050d6c39c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1978, the radiocarbon laboratory operated by the Department of Geology at the University of Miami dated samples from a core collected by E. A. Shinn in 1977 from the Bimini Road. In 1979, Calvert and others reported dates of 2780\u00b170  yr BP (UM-1359), 3500\u00b180  yr BP (UM-1360), and 3350\u00b190  yr BP (UM-1361) from whole-rock samples; a date of 3510\u00b170  yr BP (UM-1362), from shells extracted from the beachrock core; and dates of 2770\u00b180  yr BP (UM-1364) and 2840\u00b170  yr BP (UM-1365) from carbonate cementing the beachrock core. These dates are temporally consistent in that the shells composing the beachrock core from the Bimini Road dated older than the cement holding them together as beachrock. These dates can be interpreted as indicating that the shells composing the Bimini Road are, uncorrected for temporal and environmental variations in radiocarbon, about 3,500 years old. Because of time-averaging and other taphonomic factors, a random collection of shells likely would yield a radiocarbon date that is a few hundred years earlier than when the final accumulation of shells, which were cemented to form beachrock, actually occurred. The radiocarbon dates from the cement demonstrate that the beachrock composing the Bimini Road formed about 2,800 radiocarbon years ago by the cementation of pre-existing sediments that accumulated about 1,300 years earlier. Compared to the dates from the shells and the cement, it appears that the whole-rock dates reflect samples containing varying proportions of shell and cement without any significant contamination by younger radiocarbon. Both these dates and interpretation are consistent with the detailed research by Davaud and Strasser that concluded that the layer of beachrock composing the Bimini Road formed beneath the surface of North Bimini Island and was only exposed by coastal erosion about 1,900 to 2,000 years ago."
+                }
+            ],
+            "para_id": "d9fad64e1d5788c4a6357b0f280fdd27898f33f6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "For a set of samples with a known sequence and separation in time such as a sequence of tree rings, the samples' radiocarbon ages form a small subset of the calibration curve. The resulting curve can then be matched to the actual calibration curve by identifying where, in the range suggested by the radiocarbon dates, the wiggles in the calibration curve best match the wiggles in the curve of sample dates. This \"wiggle-matching\" technique can lead to more precise dating than is possible with individual radiocarbon dates.  Since the data points on the calibration curve are five years or more apart, and since at least five points are required for a match, there must be at least a 25-year span of tree ring (or similar) data for this match to be possible. Wiggle-matching can be used in places where there is a plateau on the calibration curve, and hence can provide a much more accurate date than the intercept or probability methods are able to produce.  The technique is not restricted to tree rings; for example, a stratified "
+                },
+                {
+                    "entity": "enwiki:Tephra",
+                    "entity_name": "Tephra",
+                    "link_section": null,
+                    "text": "tephra"
+                },
+                {
+                    "text": " sequence in New Zealand, known to predate human colonization of the islands, has been dated to 1314 AD \u00b1 12 years by wiggle-matching."
+                }
+            ],
+            "para_id": "202204867c3f07b057d2a1b5b2094c480559acd3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Proponents of the Bimini Road being a manmade feature argue that these radiocarbon dates are invalid because they were obtained entirely from whole-rock samples and subject to contamination from younger carbon. The background data reported by Calvert and others concerning the radiocarbon dates from the Bimini Road demonstrate that not all of these dates come entirely from whole-rock samples. That the dates from the shells and the clearly younger cement holding them together as beachrock are temporally consistent argues against any signification alteration of their radiocarbon content. In addition, other studies using radiocarbon dating to study sea level and the age of sediment and beachrock within the Bahamas have not reported any significant problems with contamination by younger radiocarbon. In their detailed research, Davaud and Strasser accepted the radiocarbon dates obtained from the beachrock composing the Bimini Road from the radiocarbon laboratory at the University of Miami as valid indicators of its age."
+                }
+            ],
+            "para_id": "1b544ad8b37f382143e56eae756490055ad2a237"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "There were different types of dating used at Gogo Falls.  They found small samples of charcoal which were sent to the "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Oxford",
+                    "entity_name": "University of Oxford",
+                    "link_section": null,
+                    "text": "University of Oxford"
+                },
+                {
+                    "text": " to be dated using "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " techniques.  However, the samples of charcoal found were less than 30g, which meant the dates were only average dates because the samples were smaller than what was needed to obtain an exact date.  The samples were not able to give exact dates because they could have come from the levels above or below the level that was being dated.  Even though the samples had minor problems for obtaining dates, they were the best option for dates in those levels.  However, there were items that were dated using this method that did support the understanding of the site.  The dates found did not always match the "
+                },
+                {
+                    "entity": "enwiki:Stratigraphy",
+                    "entity_name": "Stratigraphy",
+                    "link_section": null,
+                    "text": "stratigraphy"
+                },
+                {
+                    "text": " but the dates themselves were not statistically different. The other technique used to date items in Gogo Falls was "
+                },
+                {
+                    "text": " obsidian hydration"
+                },
+                {
+                    "text": ".  For the excavations in 1983, J.W. Michele performed the obsidian hydration dating at MOHLAB.  There were also problems with this kind of dating because rates of hydration are not always constant enough to date correctly.  The date of an item could change based on how much sunlight that it receives and the chemical composition that is in its environment.  Some dates of samples that were found did not match because there was a 1500-year gap between the two and some of the other dates were older than the ones that were found in deeper layers.  However, there were other dates that showed stratigraphic consistency because there were layers in the trenches that showed the deeper levels were older than the ones above it. The dates that were attained from the excavations date to about 2000 BP and range between the years of 1510-990 BC and AD 4 and AD 410. "
+                }
+            ],
+            "para_id": "c85fee15d80d3afbcacd15df676c43838cca78ef"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Pe\u0219tera cu Oase is subject to ongoing investigation. The on-site findings from the 2005 campaign are currently cross-examined at the Romanian \"Emil Racovi\u021b\u0103\" Institute of Speleology, "
+                },
+                {
+                    "entity": "enwiki:Australian%20National%20University",
+                    "entity_name": "Australian National University",
+                    "link_section": null,
+                    "text": "Australian National University"
+                },
+                {
+                    "text": ", ("
+                },
+                {
+                    "entity": "enwiki:Electron%20paramagnetic%20resonance",
+                    "entity_name": "Electron paramagnetic resonance",
+                    "link_section": null,
+                    "text": "electron spin resonance"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Uranium-thorium%20dating",
+                    "entity_name": "Uranium-thorium dating",
+                    "link_section": null,
+                    "text": "uranium-series dating"
+                },
+                {
+                    "text": " on 21 bone/tooth samples and 29 associated sediment samples), "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Bristol",
+                    "entity_name": "University of Bristol",
+                    "link_section": null,
+                    "text": "University of Bristol"
+                },
+                {
+                    "text": ", (uranium-series analysis on 22 bone samples), "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Bergen",
+                    "entity_name": "University of Bergen",
+                    "link_section": null,
+                    "text": "University of Bergen"
+                },
+                {
+                    "text": ", (uranium-series dating on 7 samples), "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Oxford",
+                    "entity_name": "University of Oxford",
+                    "link_section": null,
+                    "text": "University of Oxford"
+                },
+                {
+                    "text": " ("
+                },
+                {
+                    "entity": "enwiki:Accelerator%20mass%20spectrometry",
+                    "entity_name": "Accelerator mass spectrometry",
+                    "link_section": null,
+                    "text": "AMS"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Carbon-14",
+                    "entity_name": "Carbon-14",
+                    "link_section": null,
+                    "text": "radiocarbon"
+                },
+                {
+                    "text": " dating on 8 bone/tooth samples), "
+                },
+                {
+                    "entity": "enwiki:Max%20Planck%20Society",
+                    "entity_name": "Max Planck Society",
+                    "link_section": null,
+                    "text": "Max Planck Institute"
+                },
+                {
+                    "text": " ("
+                },
+                {
+                    "entity": "enwiki:Isotope%20analysis",
+                    "entity_name": "Isotope analysis",
+                    "link_section": null,
+                    "text": "stable isotope analysis"
+                },
+                {
+                    "text": " and ancient "
+                },
+                {
+                    "entity": "enwiki:DNA",
+                    "entity_name": "DNA",
+                    "link_section": null,
+                    "text": "DNA"
+                },
+                {
+                    "text": " on 37 bone/tooth samples), "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Vienna",
+                    "entity_name": "University of Vienna",
+                    "link_section": null,
+                    "text": "University of Vienna"
+                },
+                {
+                    "text": " (AMS radiocarbon dating on 25 bone/tooth samples)."
+                }
+            ],
+            "para_id": "36e99da80857fba50d356e8e7bb1990f9130f4be"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "By the early 1990s \u201cchronometric hygiene\u201d radiocarbon dating aka, high-precision radiocarbon dating approach of samples also started to be employed causing further reconsideration of old orthodoxies. Using chronometric hygiene, previous samples from all around Hawai'i were retested. On the lowest calibration of testing the retested samples returned dates of between 1100\u20131200 AD, with some samples from Kaua'i going back to around 1000 AD."
+                }
+            ],
+            "para_id": "9286060d95421e5d381e22622acbd69c8f8c56c9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In December 2010 Professor "
+                },
+                {
+                    "entity": "enwiki:A.J.%20Timothy%20Jull",
+                    "entity_name": "A.J. Timothy Jull",
+                    "link_section": null,
+                    "text": "Timothy Jull"
+                },
+                {
+                    "text": ", a member of the original 1988 radiocarbon-dating team and editor of the peer-reviewed journal Radiocarbon, coauthored an article in that journal with Rachel A Freer-Waters. They examined a portion of the radiocarbon sample that was left over from the section used by the University of Arizona in 1988 for the carbon dating exercise, and were assisted by the director of the Gloria F Ross Center for Tapestry Studies. They viewed the fragment using a low magnification (~30\u00d7) stereomicroscope, as well as under high magnification (320\u00d7) viewed through both transmitted light and polarized light, and then with epifluorescence microscopy. They found \"only low levels of contamination by a few cotton fibers\" and no evidence that the samples actually used for measurements in the C14 dating processes were dyed, treated, or otherwise manipulated. They concluded that the radiocarbon dating had been performed on a sample of the original shroud material."
+                }
+            ],
+            "para_id": "74444a4de23b201e4103cba9d16d7a92555e0442"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Carbon-14",
+                    "entity_name": "Carbon-14",
+                    "link_section": null,
+                    "text": "Radiocarbon"
+                },
+                {
+                    "text": " samples from the site determines the age of artifacts and human activity. "
+                },
+                {
+                    "entity": "enwiki:Johann%20Carl%20Vogel",
+                    "entity_name": "Johann Carl Vogel",
+                    "link_section": null,
+                    "text": "J.C. Vogel"
+                },
+                {
+                    "text": " of the Natuurkundig Laboratorium dated three samples, a piece of wood and grass layerfrom a hut or wind-break dates back to 1710 BCE, a charcoal sample dates back to 1730 BCE, and twigs dates back around 2835 BCE. Radiocarbon dates human activity in the area between 2750 and 2340 BCE. Matopo Hill sites have yield samples that revealed how long hunter-gatherers lived in the area. The "
+                },
+                {
+                    "entity": "enwiki:Wilton%20culture",
+                    "entity_name": "Wilton culture",
+                    "link_section": null,
+                    "text": "lower Wilton"
+                },
+                {
+                    "text": " at Amadzimba cave gave a reading of 2250 BCE, however the Pomongwe "
+                },
+                {
+                    "entity": "enwiki:Later%20Stone%20Age",
+                    "entity_name": "Later Stone Age",
+                    "link_section": null,
+                    "text": "Late Stone Age"
+                },
+                {
+                    "text": " dates show earlier activity. Dates from Dombozanga cave, 730 CE, Magabengberg, 941 CE, and Lusu, 186 BCE, confirms that Late Stone Age people continued to flourish as late as the earlier centuries of the "
+                },
+                {
+                    "entity": "enwiki:Iron%20Age",
+                    "entity_name": "Iron Age",
+                    "link_section": null,
+                    "text": "Iron Age"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "9b162dfd23cf3978358087e6203211f8d49d9d12"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Recent radiocarbon dating of Clovis sites has yielded ages of 11.1k to 10.7k C years BP (13k to 12.6k cal years BP), somewhat later than dates derived from older techniques.  The re-evaluation of earlier radiocarbon dates led to the conclusion that no fewer than 11 of the 22 Clovis sites with radiocarbon dates are \"problematic\" and should be disregarded, including the "
+                },
+                {
+                    "entity": "enwiki:Type%20site",
+                    "entity_name": "Type site",
+                    "link_section": null,
+                    "text": "type site"
+                },
+                {
+                    "text": " in Clovis, New Mexico. Numerical dating of Clovis sites has allowed comparison of Clovis dates with dates of other archaeosites throughout the Americas, and of the opening of the ice-free corridor.  Both lead to significant challenges to the Clovis First theory.  The Monte Verde site of Southern Chile has been dated at 14.8k cal years BP.  The Paisley Cave site in eastern Oregon yielded a C date of 12.4k years  (14.5k cal years) BP, on a coprolite with human DNA and C dates of 11.3k-11k (13.2k-12.9k cal years) BP on horizons containing western stemmed points. Artifact horizons with non-Clovis lithic assemblages and pre-Clovis ages occur in eastern North America, although the maximum ages tend to be poorly constrained."
+                }
+            ],
+            "para_id": "4c4577ebb17a1f3729b5bce8b6886c0e6ea7fba1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Today the Blytt-Sernander sequence has been substantiated by a wide variety of scientific dating methods, mainly "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon"
+                },
+                {
+                    "text": " dates obtained from peat. Earlier radiocarbon dates were often left uncalibrated; that is, they were derived by assuming a constant concentration of atmospheric radiocarbon. In fact the atmospheric radiocarbon concentration has varied over time and thus radiocarbon dates need to be "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "calibrated"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "99c3eab962e485c84871d781ca76bcc1a14149fa"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Various radiometric dates have been obtained for the Ouki paleolake from tufa, wood and fossils of "
+                },
+                {
+                    "entity": "enwiki:Bulimulidae",
+                    "entity_name": "Bulimulidae",
+                    "link_section": null,
+                    "text": "Bulimulidae"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Littoridina",
+                    "entity_name": "Littoridina",
+                    "link_section": null,
+                    "text": "Littoridina"
+                },
+                {
+                    "text": ", mostly within the basin of Lake Poopo. There is noticeable disagreement between "
+                },
+                {
+                    "entity": "enwiki:Radiometry",
+                    "entity_name": "Radiometry",
+                    "link_section": null,
+                    "text": "radiometric"
+                },
+                {
+                    "text": " dates obtained by "
+                },
+                {
+                    "entity": "enwiki:Uranium-thorium%20dating",
+                    "entity_name": "Uranium-thorium dating",
+                    "link_section": null,
+                    "text": "uranium-thorium dating"
+                },
+                {
+                    "text": " and dates obtained by "
+                },
+                {
+                    "entity": "enwiki:Carbon-14",
+                    "entity_name": "Carbon-14",
+                    "link_section": null,
+                    "text": "radiocarbon"
+                },
+                {
+                    "text": " dating. The former yield ages ranging between 120,000 and 98,000 years ago. The latter produce ages between 45,200 and 28,200 years ago. Radiocarbon dates of such old samples can easily suffer from contamination by modern carbon, creating spuriously young ages. The uranium-thorium dates range between 96,740 \u00b15,560 and 125,990 \u00b1 9,580 years ago. The exact lake level history is poorly known, but between 115,000 and 100,000 years ago the water was higher than . Some lake level changes coincide with cold periods in the "
+                },
+                {
+                    "entity": "enwiki:Atlantic%20Ocean",
+                    "entity_name": "Atlantic Ocean",
+                    "link_section": null,
+                    "text": "North Atlantic"
+                },
+                {
+                    "text": ". Alternatively, if radiocarbon dates of 44,609 \u00b1 927 to 33,422 \u00b1 1937 are attributed to Ouki, sediments in the Uyuni basin attributed to Lake Minchin would instead belong to Ouki."
+                }
+            ],
+            "para_id": "6a40a0005de796f1429dc4704d481283e5ae3096"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Interpretations of the age of the Bonneville landslide have evolved as more investigators have studied it and as more modern dating techniques have become available. Early work based on "
+                },
+                {
+                    "entity": "enwiki:Dendrochronology",
+                    "entity_name": "Dendrochronology",
+                    "link_section": null,
+                    "text": "dendrochronology"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating"
+                },
+                {
+                    "text": " suggested the landslide occurred between 1060 and 1180 or between 1250 and 1280. The year 1100 A.D. has often been cited as the date of the Bonneville landslide. More recent work using radiocarbon dating and "
+                },
+                {
+                    "entity": "enwiki:Lichenometry",
+                    "entity_name": "Lichenometry",
+                    "link_section": null,
+                    "text": "lichenometry"
+                },
+                {
+                    "text": " has suggested dates between 1500 and 1760 or between 1670 and 1760. These younger radiocarbon ages permitted a possible link to the "
+                },
+                {
+                    "entity": "enwiki:1700%20Cascadia%20earthquake",
+                    "entity_name": "1700 Cascadia earthquake",
+                    "link_section": null,
+                    "text": "1700 Cascadia earthquake"
+                },
+                {
+                    "text": ". However, more recent investigations using radiocarbon dating and dendrochronology show the landslide occurred around 1450, more than two centuries before the great earthquake."
+                }
+            ],
+            "para_id": "8fda764723078609ffde8061240c3ae91885ac59"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Absolute "
+                },
+                {
+                    "entity": "enwiki:Chronological%20dating",
+                    "entity_name": "Chronological dating",
+                    "link_section": "Dating methods in archaeology",
+                    "text": "dating"
+                },
+                {
+                    "text": " in Shanga was achieved through "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon testing"
+                },
+                {
+                    "text": " and imported pottery. Both methods of dating present dates ranging from the 8th to 15th centuries. A total of thirteen radiocarbon dates have been processed in the site. The radiocarbon dates demonstrate that Shanga was occupied sometime between the 8th and 15th centuries. Horton points out that Shanga pottery dating has been extensively examined by archaeologists "
+                },
+                {
+                    "entity": "enwiki:Neville%20Chittick",
+                    "entity_name": "Neville Chittick",
+                    "link_section": null,
+                    "text": "Neville Chittick"
+                },
+                {
+                    "text": ", James Kirkman and Richard Wilding."
+                }
+            ],
+            "para_id": "761c31b4632748bf593c965ed86e733bfbb7e5fa"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In cases where multiple radiocarbon dates have been determined from a single core, radiocarbon dates are typically consistent in terms of their "
+                },
+                {
+                    "entity": "enwiki:Stratigraphy",
+                    "entity_name": "Stratigraphy",
+                    "link_section": null,
+                    "text": "stratigraphic"
+                },
+                {
+                    "text": " position within a core and accumulation rates calculated from them only are rarely anomalous. Given the nature of radiocarbon dating, such discordant dates occasionally occur even in undisturbed deposits, when multiple samples were dated. The occasional discordant dates by themselves are meaningless as an indicator of disturbance. The intact internal stratigraphy of the bay sediments, as indicated by paleosols and pollen zones, e.g. Big Bay refutes such arguments."
+                }
+            ],
+            "para_id": "35a3e2428d7896345818b84f39b8c55231cdbe35"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The New Testament books appear to have been completed within the 1st century. The original manuscripts of the New Testament books have not survived. The "
+                },
+                {
+                    "entity": "enwiki:Autograph",
+                    "entity_name": "Autograph",
+                    "link_section": null,
+                    "text": "autograph"
+                },
+                {
+                    "text": "s were lost or destroyed a long time ago. What survives are copies of the original. Generally speaking, these copies were made centuries after the originals from other copies rather than from the autograph. "
+                },
+                {
+                    "entity": "enwiki:Palaeography",
+                    "entity_name": "Palaeography",
+                    "link_section": null,
+                    "text": "Paleography"
+                },
+                {
+                    "text": ", a science of dating manuscripts by typological analysis of their scripts, is the most precise and objective means known for determining the age of a manuscript. Script groups belong typologically to their generation; and changes can be noted with great accuracy over relatively short periods of time. Dating of manuscript material by a "
+                },
+                {
+                    "entity": "enwiki:Radiocarbon%20dating",
+                    "entity_name": "Radiocarbon dating",
+                    "link_section": null,
+                    "text": "radiocarbon dating test"
+                },
+                {
+                    "text": " requires that a small part of the material be destroyed in the process; it is less accurate than dating from paleography. Both radiocarbon and paleographical dating only give a range of possible dates, and it is still debated just how narrow this range might be. Dates established by radiocarbon dating can present a range of 10 to over 100 years. Similarly, dates established by paleography can present a range of 25 to over 125 years."
+                }
+            ],
+            "para_id": "6750339b5b56ec91a3dcfadfd53ed0a845dda854"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1948, following the establishment of a nuclear sciences team at the DSIR, Rafter was sent to the United States to train in "
+                },
+                {
+                    "entity": "enwiki:Radiochemistry",
+                    "entity_name": "Radiochemistry",
+                    "link_section": null,
+                    "text": "radiochemistry"
+                },
+                {
+                    "text": " and to visit nuclear establishments in the United States, "
+                },
+                {
+                    "entity": "enwiki:Canada",
+                    "entity_name": "Canada",
+                    "link_section": null,
+                    "text": "Canada"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:England",
+                    "entity_name": "England",
+                    "link_section": null,
+                    "text": "England"
+                },
+                {
+                    "text": ". On Rafter's return, he began to work with the new technique of radiocarbon dating, which dates organic material by comparing the ratio of radiocarbon atoms ("
+                },
+                {
+                    "entity": "enwiki:Carbon-14",
+                    "entity_name": "Carbon-14",
+                    "link_section": null,
+                    "text": "carbon-14"
+                },
+                {
+                    "text": ") to regular "
+                },
+                {
+                    "entity": "enwiki:Carbon",
+                    "entity_name": "Carbon",
+                    "link_section": null,
+                    "text": "carbon atom"
+                },
+                {
+                    "text": "s ("
+                },
+                {
+                    "entity": "enwiki:Carbon-12",
+                    "entity_name": "Carbon-12",
+                    "link_section": null,
+                    "text": "carbon-12"
+                },
+                {
+                    "text": ") with established radiocarbon: carbon ratios from the past. Rafter first used the method to date "
+                },
+                {
+                    "entity": "enwiki:Moa",
+                    "entity_name": "Moa",
+                    "link_section": null,
+                    "text": "moa"
+                },
+                {
+                    "text": " bones and ash showers from volcanos on the "
+                },
+                {
+                    "entity": "enwiki:North%20Island",
+                    "entity_name": "North Island",
+                    "link_section": null,
+                    "text": "North Island of New Zealand"
+                },
+                {
+                    "text": ". After difficulties with the process published by Willard Libby, radiocarbon dating\u2019s American pioneer, Rafter worked with DSIR physicist Gordon Fergusson and their team to perfect a new and reliable method of radiocarbon dating using "
+                },
+                {
+                    "entity": "enwiki:Carbon%20dioxide",
+                    "entity_name": "Carbon dioxide",
+                    "link_section": null,
+                    "text": "carbon dioxide"
+                },
+                {
+                    "text": " gas rather than solid carbon."
+                }
+            ],
+            "para_id": "ae12241fd83518677267fa0db28d9f7329931920"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Background",
+            "heading_id": "enwiki:Radiocarbon%20dating/Background"
+        },
+        {
+            "heading": "Dating considerations",
+            "heading_id": "enwiki:Radiocarbon%20dating/Dating%20considerations"
+        },
+        {
+            "heading": "Samples",
+            "heading_id": "enwiki:Radiocarbon%20dating/Samples"
+        },
+        {
+            "heading": "Measurement and results",
+            "heading_id": "enwiki:Radiocarbon%20dating/Measurement%20and%20results"
+        },
+        {
+            "heading": "Use in archaeology",
+            "heading_id": "enwiki:Radiocarbon%20dating/Use%20in%20archaeology"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Radiocarbon%20dating",
+    "title": "Radiocarbon dating"
+}

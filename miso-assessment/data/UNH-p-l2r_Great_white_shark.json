@@ -1,0 +1,3912 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "419eb8aa51e8c49a140b64042812358853135c21",
+            "rank": 1,
+            "rank_score": 0.89949246583016,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 2,
+            "rank_score": 0.8428078719471275,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 3,
+            "rank_score": 0.8408965693089716,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 4,
+            "rank_score": 0.834144425840553,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 5,
+            "rank_score": 0.8308037152914439,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "96adf8e127b9375c293491690debb5febaa60657",
+            "rank": 6,
+            "rank_score": 0.8277258350275897,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "d4e7a080eb8b4cc2e8e7f3bf8b6ace392a9c16c4",
+            "rank": 7,
+            "rank_score": 0.8247051672850026,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 8,
+            "rank_score": 0.8098013541866753,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "3287990ef4d534c2afc3c1adf8f323d27cd37283",
+            "rank": 9,
+            "rank_score": 0.796558802957256,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "04f0e6cce5ad0edde33aebaf95090e44d57799b3",
+            "rank": 10,
+            "rank_score": 0.7889068971966724,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 11,
+            "rank_score": 0.7885426280503376,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 12,
+            "rank_score": 0.7757051579877322,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "4dd5c74a06c78e5cdb909f5059bc1754a26ca038",
+            "rank": 13,
+            "rank_score": 0.7717251114315166,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 14,
+            "rank_score": 0.7699579120272656,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 15,
+            "rank_score": 0.7568106972866779,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "f08d7c16a8ad4617b366dedc452bdb7e4872f07b",
+            "rank": 16,
+            "rank_score": 0.756321424148074,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "a3b22e3cfb5bc3ca9bb1e70e4e63e62677817184",
+            "rank": 17,
+            "rank_score": 0.7504767159912604,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 18,
+            "rank_score": 0.7424052825767053,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 19,
+            "rank_score": 0.7394681572984309,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb",
+            "rank": 20,
+            "rank_score": 0.7382919253317625,
+            "section_path": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 1,
+            "rank_score": 0.9064450893342073,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 2,
+            "rank_score": 0.8687091689195998,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 3,
+            "rank_score": 0.8682890548551173,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 4,
+            "rank_score": 0.8651028847931481,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "57cad1a78ff6761ee830fd45ea056679ff067a08",
+            "rank": 5,
+            "rank_score": 0.8468474266387949,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 6,
+            "rank_score": 0.8356056788994981,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "4e9f3d7f4d91ddaf61c51685bd7cf34c3dd12ef7",
+            "rank": 7,
+            "rank_score": 0.832965580165196,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "f8f3f320901b77d57cebf356cf3ad4db31918fe4",
+            "rank": 8,
+            "rank_score": 0.8178190233189494,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 9,
+            "rank_score": 0.8077885671166748,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 10,
+            "rank_score": 0.806814547719529,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 11,
+            "rank_score": 0.7949773848866265,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 12,
+            "rank_score": 0.7920124238714139,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "f08d7c16a8ad4617b366dedc452bdb7e4872f07b",
+            "rank": 13,
+            "rank_score": 0.790517830074932,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "c7ba4adde06090359ba7aa559446cdb0ef3002e5",
+            "rank": 14,
+            "rank_score": 0.7847981281732088,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "bc3856a79b9d995b1cd1545a6917d2cf245cca6e",
+            "rank": 15,
+            "rank_score": 0.7839735238319867,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "98e6708e5b6ea2ab68bd972a55e93dce3c6c8b01",
+            "rank": 16,
+            "rank_score": 0.783931524289341,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 17,
+            "rank_score": 0.7838592093250754,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "bc7e5a80338c8e6643ab598d156ce556bf8cd683",
+            "rank": 18,
+            "rank_score": 0.7824914304916697,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "70171252540300960fac48c1f62a2a99f6f3d8ad",
+            "rank": 19,
+            "rank_score": 0.7744587390981985,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 20,
+            "rank_score": 0.774041256761853,
+            "section_path": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 1,
+            "rank_score": 0.9156747251930011,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 2,
+            "rank_score": 0.883515177469075,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 3,
+            "rank_score": 0.8707118222106764,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "f10ec92776100bbf2dbc76eec6c4c83b57cf259f",
+            "rank": 4,
+            "rank_score": 0.8244609846096354,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 5,
+            "rank_score": 0.8208595074189259,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 6,
+            "rank_score": 0.8188042400376105,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 7,
+            "rank_score": 0.8177005935532233,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "75622c3672ea66af9645291fb82bbd5ee9c04aee",
+            "rank": 8,
+            "rank_score": 0.7850510009427598,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 9,
+            "rank_score": 0.7847608957435857,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 10,
+            "rank_score": 0.7547779303271263,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 11,
+            "rank_score": 0.7545092826694363,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 12,
+            "rank_score": 0.7455877832581022,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 13,
+            "rank_score": 0.7270400295764292,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "29f45d82d554b6d30fa6f6c57be735b790b33278",
+            "rank": 14,
+            "rank_score": 0.7246983203812624,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb",
+            "rank": 15,
+            "rank_score": 0.7246892415198145,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "b8b2cb47e561953ac0dcd19ad6c8523f7f444e5a",
+            "rank": 16,
+            "rank_score": 0.7230934475219349,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "7b132d55ee38169293dffe36505dcf8e0e5af14c",
+            "rank": 17,
+            "rank_score": 0.7186481778860268,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "15a74185407faac661f55ebec7b6c923db6f6153",
+            "rank": 18,
+            "rank_score": 0.7184494038429128,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "ef0072860442a72114f8bef852974f5aca1d8d80",
+            "rank": 19,
+            "rank_score": 0.718258095386427,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "2166fa6a3f0db6884ef7b6a31711b1df2b201757",
+            "rank": 20,
+            "rank_score": 0.7181082551452845,
+            "section_path": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 1,
+            "rank_score": 0.9033575960144786,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 2,
+            "rank_score": 0.8852829114010412,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 3,
+            "rank_score": 0.8812451518072866,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "d4e7a080eb8b4cc2e8e7f3bf8b6ace392a9c16c4",
+            "rank": 4,
+            "rank_score": 0.8765552985865046,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 5,
+            "rank_score": 0.8763526221181939,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 6,
+            "rank_score": 0.8487067147381503,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 7,
+            "rank_score": 0.8197755425511389,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 8,
+            "rank_score": 0.8156344463783105,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 9,
+            "rank_score": 0.8066356962573583,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 10,
+            "rank_score": 0.7977943002354666,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 11,
+            "rank_score": 0.7903053714408454,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 12,
+            "rank_score": 0.7885710152250146,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "bc7e5a80338c8e6643ab598d156ce556bf8cd683",
+            "rank": 13,
+            "rank_score": 0.7814857128419467,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb",
+            "rank": 14,
+            "rank_score": 0.7788788013142675,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "dda7afe88e857c7f951e8756d8a09d7f59a02343",
+            "rank": 15,
+            "rank_score": 0.7745422711169065,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "70171252540300960fac48c1f62a2a99f6f3d8ad",
+            "rank": 16,
+            "rank_score": 0.7708591310397861,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "e76d7491d9bb4394cc1f8f80cb5a6af939cb53c3",
+            "rank": 17,
+            "rank_score": 0.7702613158921493,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "28ad9438b1a2cc0bde6f58a3e752b79fc0ccf485",
+            "rank": 18,
+            "rank_score": 0.7595879710709696,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "f29ef0fa7f19954c1299ba06987e3896eb4db2dd",
+            "rank": 19,
+            "rank_score": 0.7578977606092226,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "aee469bb49c0d8d1bde5c7682b2823091e7f7ca1",
+            "rank": 20,
+            "rank_score": 0.7554315827028163,
+            "section_path": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 1,
+            "rank_score": 0.9111883386524032,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 2,
+            "rank_score": 0.8912922558463785,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 3,
+            "rank_score": 0.873771456079694,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 4,
+            "rank_score": 0.8730365131425963,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 5,
+            "rank_score": 0.8714286097276521,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 6,
+            "rank_score": 0.848712889649054,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb",
+            "rank": 7,
+            "rank_score": 0.8447369984941506,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "31395e1bba020a69b9d17e9f5469b8f41bf7934e",
+            "rank": 8,
+            "rank_score": 0.8402469273568247,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "a92d38bdfa0627e40ab66b5d5f633bdbd402ecf6",
+            "rank": 9,
+            "rank_score": 0.828853606129024,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 10,
+            "rank_score": 0.8225069361304455,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 11,
+            "rank_score": 0.8161777514019979,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "e94a4baf9f29a81d295218a7aeffc4b97cde6faa",
+            "rank": 12,
+            "rank_score": 0.8105548371159157,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "6b8ece7ca85e7b882d8be44bfda01c0383eb6432",
+            "rank": 13,
+            "rank_score": 0.8102258132444894,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "d03433f66e3b84525f4310168701aed838372bfe",
+            "rank": 14,
+            "rank_score": 0.8099442324806228,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "de3f6b70768c3367b55066f54b5f0798902e409c",
+            "rank": 15,
+            "rank_score": 0.8001251126385843,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 16,
+            "rank_score": 0.795615951734314,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 17,
+            "rank_score": 0.7923329024311365,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 18,
+            "rank_score": 0.7916425828312916,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "07cfb178f9f3e38d4286996e6d4b39fffa1c3bb2",
+            "rank": 19,
+            "rank_score": 0.7914700820208019,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "bc7e5a80338c8e6643ab598d156ce556bf8cd683",
+            "rank": 20,
+            "rank_score": 0.7889167490773066,
+            "section_path": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        },
+        {
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1",
+            "rank": 1,
+            "rank_score": 0.9441179286082761,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9",
+            "rank": 2,
+            "rank_score": 0.8892683433799908,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48",
+            "rank": 3,
+            "rank_score": 0.8717344386153721,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb",
+            "rank": 4,
+            "rank_score": 0.8668302978338085,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d",
+            "rank": 5,
+            "rank_score": 0.8516673555003355,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7",
+            "rank": 6,
+            "rank_score": 0.8436696421545045,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "dda7afe88e857c7f951e8756d8a09d7f59a02343",
+            "rank": 7,
+            "rank_score": 0.825661876285785,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb",
+            "rank": 8,
+            "rank_score": 0.8215653000499512,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47",
+            "rank": 9,
+            "rank_score": 0.8207987429437591,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "e76d7491d9bb4394cc1f8f80cb5a6af939cb53c3",
+            "rank": 10,
+            "rank_score": 0.8149451031076327,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "70171252540300960fac48c1f62a2a99f6f3d8ad",
+            "rank": 11,
+            "rank_score": 0.8057022095988559,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea",
+            "rank": 12,
+            "rank_score": 0.805646433171624,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98",
+            "rank": 13,
+            "rank_score": 0.797201104836123,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f",
+            "rank": 14,
+            "rank_score": 0.7969973558645973,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1",
+            "rank": 15,
+            "rank_score": 0.788910775020027,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "bc7e5a80338c8e6643ab598d156ce556bf8cd683",
+            "rank": 16,
+            "rank_score": 0.7738993581169178,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "f29ef0fa7f19954c1299ba06987e3896eb4db2dd",
+            "rank": 17,
+            "rank_score": 0.7594171111486228,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "df555d172e82f8611840d9463e3a1b70b638d864",
+            "rank": 18,
+            "rank_score": 0.7553594810072652,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "8c2fa32258a0071ad7353cc2a3e9f63c82dd4ad2",
+            "rank": 19,
+            "rank_score": 0.7551604783823287,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "para_id": "aee469bb49c0d8d1bde5c7682b2823091e7f7ca1",
+            "rank": 20,
+            "rank_score": 0.7551003414052927,
+            "section_path": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "The national conservation status of the great white shark is reflected by all Australian states under their respective laws, granting the species full protection throughout Australia regardless of jurisdiction. Many states had prohibited the killing or possession of great white sharks prior to national legislation coming into effect. The great white shark is further listed as Threatened in "
+                },
+                {
+                    "entity": "enwiki:Victoria%20(Australia)",
+                    "entity_name": "Victoria (Australia)",
+                    "link_section": null,
+                    "text": "Victoria"
+                },
+                {
+                    "text": " under the Flora and Fauna Guarantee Act, and as rare or likely to become extinct under Schedule 5 of the Wildlife Conservation Act in "
+                },
+                {
+                    "entity": "enwiki:Western%20Australia",
+                    "entity_name": "Western Australia",
+                    "link_section": null,
+                    "text": "Western Australia"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "419eb8aa51e8c49a140b64042812358853135c21"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The great white shark came into existence during the mid-"
+                },
+                {
+                    "entity": "enwiki:Miocene",
+                    "entity_name": "Miocene",
+                    "link_section": null,
+                    "text": "Miocene"
+                },
+                {
+                    "text": " epoch. The earliest known fossils of the great white shark are about 16 million years old. However, the "
+                },
+                {
+                    "entity": "enwiki:Phylogenetic%20tree",
+                    "entity_name": "Phylogenetic tree",
+                    "link_section": null,
+                    "text": "phylogeny"
+                },
+                {
+                    "text": " of the great white is still in dispute. The original hypothesis for the great white's origins is that it shares a common ancestor with a "
+                },
+                {
+                    "entity": "enwiki:Prehistory",
+                    "entity_name": "Prehistory",
+                    "link_section": null,
+                    "text": "prehistoric"
+                },
+                {
+                    "text": " shark, such as the "
+                },
+                {
+                    "entity": "enwiki:Megalodon",
+                    "entity_name": "Megalodon",
+                    "link_section": null,
+                    "text": "C. megalodon"
+                },
+                {
+                    "text": ". C. megalodon had teeth that were superficially not too dissimilar with those of great white sharks, but its teeth were far larger. Although cartilaginous skeletons do not fossilize, C. megalodon is estimated to have been considerably larger than the great white shark, estimated at up to  and . Similarities among the physical remains and the extreme size of both the great white and C. megalodon led many scientists to believe these sharks were closely related, and the name Carcharodon megalodon was applied to the latter. However, a new hypothesis proposes that the C. megalodon and the great white are distant relatives (albeit sharing the family "
+                },
+                {
+                    "entity": "enwiki:Lamnidae",
+                    "entity_name": "Lamnidae",
+                    "link_section": null,
+                    "text": "Lamnidae"
+                },
+                {
+                    "text": "). The great white is also more closely related to an ancient "
+                },
+                {
+                    "entity": "enwiki:Isurus",
+                    "entity_name": "Isurus",
+                    "link_section": null,
+                    "text": "mako shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Isurus%20hastalis",
+                    "entity_name": "Isurus hastalis",
+                    "link_section": null,
+                    "text": "Isurus hastalis"
+                },
+                {
+                    "text": ", than to the C. megalodon, a theory that seems to be supported with the discovery of a complete set of jaws with 222 teeth and 45 vertebrae of the extinct "
+                },
+                {
+                    "entity": "enwiki:Transitional%20fossil",
+                    "entity_name": "Transitional fossil",
+                    "link_section": null,
+                    "text": "transitional species"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Carcharodon%20hubbelli",
+                    "entity_name": "Carcharodon hubbelli",
+                    "link_section": null,
+                    "text": "Carcharodon hubbelli"
+                },
+                {
+                    "text": " in 1988 and published on 14 November 2012. In addition, the new hypothesis assigns C. megalodon to the genus Carcharocles, which also comprises the other megatoothed sharks; "
+                },
+                {
+                    "entity": "enwiki:Otodus",
+                    "entity_name": "Otodus",
+                    "link_section": null,
+                    "text": "Otodus"
+                },
+                {
+                    "text": " obliquus is the ancient representative of the extinct Carcharocles lineage."
+                }
+            ],
+            "para_id": "962a4c117f0e8b51f8e00cb4e0270812721ed2b9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "While the males return annually, the females return only every other year, often with fresh, deep bites around their heads. The seasonal shark population at the Farallones is unclear, with estimates from thirty to one hundred. The Farallones are unique in the size of the great whites that are attracted. The average length of a full-grown great white shark is 4 to 4.8 metres (13.3 to 15.8 ft), with a weight of 680 to 1,100 kilograms (1,500 to 2,450 lbs), females generally being larger than males. Farallon great whites range between the \"smaller\" males at  to the females, which generally range between  to . The largest accurately measured great white shark was a female caught in August 1988 at Prince Edward Island off the North Atlantic coast and measured . A killer whale was recorded killing a great white near the Farallones in 1997. Over the decades of study, many of the individual white sharks visiting the Farallones have been nicknamed, often based off their scars and appearances, such as Gouge, The Hunchback, The Jester, and Stumpy. Stumpy, an 18-foot female great white, in particular was well known for her appearance in the BBC documentary \"Great White Shark\" narrated by "
+                },
+                {
+                    "entity": "enwiki:David%20Attenborough",
+                    "entity_name": "David Attenborough",
+                    "link_section": null,
+                    "text": "David Attenborough"
+                },
+                {
+                    "text": " and stock footage of her attacks on decoys is often utilized in more recent documentaries, and another example, Tom Johnson, a 16-foot male white shark that was featured in an episode of the 2012 season of "
+                },
+                {
+                    "entity": "enwiki:Shark%20Week",
+                    "entity_name": "Shark Week",
+                    "link_section": null,
+                    "text": "Shark Week"
+                },
+                {
+                    "text": " called \"Great White Highway\" is believed to be the oldest living white shark so far documented returning to the Farallones, estimated at around 25\u201330 years old."
+                }
+            ],
+            "para_id": "050a39ec70b06b8ce93ff727e3cb93e2ea3094a1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Several unconfirmed reports of great white sharks caught in modern times with have been estimated to be more than  long, but these claims have received some criticism. However, J. E. Randall believed that great white shark may have exceeded  in length. A great white shark was captured near "
+                },
+                {
+                    "entity": "enwiki:Kangaroo%20Island",
+                    "entity_name": "Kangaroo Island",
+                    "link_section": null,
+                    "text": "Kangaroo Island"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Australia",
+                    "entity_name": "Australia",
+                    "link_section": null,
+                    "text": "Australia"
+                },
+                {
+                    "text": " on 1 April 1987. This shark was estimated to be more than  long by Peter Resiley, and has been designated as KANGA. Another great white shark was caught in "
+                },
+                {
+                    "entity": "enwiki:Malta",
+                    "entity_name": "Malta",
+                    "link_section": null,
+                    "text": "Malta"
+                },
+                {
+                    "text": " by Alfredo Cutajar on 16 April 1987. This shark was also estimated to be around  long by John Abela and has been designated as MALTA. However, Cappo drew criticism because he used shark size estimation methods proposed by J. E. Randall to suggest that the KANGA specimen was  long. In a similar fashion, I. K. Fergusson also used shark size estimation methods proposed by J. E. Randall to suggest that the MALTA specimen was  long. However, photographic evidence suggested that these specimens were larger than the size estimations yielded through Randall's methods. Thus, a team of scientists\u2014H. F. Mollet, G. M. Cailliet, A. P. Klimley, D. A. Ebert, A. D. Testi, and "
+                },
+                {
+                    "entity": "enwiki:Leonard%20Compagno",
+                    "entity_name": "Leonard Compagno",
+                    "link_section": null,
+                    "text": "L. J. V. Compagno"
+                },
+                {
+                    "text": "\u2014reviewed the cases of the KANGA and MALTA specimens in 1996 to resolve the dispute by conducting a comprehensive "
+                },
+                {
+                    "entity": "enwiki:Morphometrics",
+                    "entity_name": "Morphometrics",
+                    "link_section": null,
+                    "text": "morphometric"
+                },
+                {
+                    "text": " analysis of the remains of these sharks and re-examination of photographic evidence in an attempt to validate the original size estimations and their findings were consistent with them. The findings indicated that estimations by P. Resiley and J. Abela are reasonable and could not be ruled out. A particularly large female great white nicknamed \"Deep Blue\", estimated measuring at  was filmed off Guadalupe during shooting for the 2014 episode of "
+                },
+                {
+                    "entity": "enwiki:Shark%20Week",
+                    "entity_name": "Shark Week",
+                    "link_section": null,
+                    "text": "Shark Week"
+                },
+                {
+                    "text": " \"Jaws Strikes Back\". Deep Blue would also later gain significant attention when she was filmed interacting with researcher Mauricio Hoyas Pallida in a viral video that Mauricio posted on "
+                },
+                {
+                    "entity": "enwiki:Facebook",
+                    "entity_name": "Facebook",
+                    "link_section": null,
+                    "text": "Facebook"
+                },
+                {
+                    "text": " on 11 June 2015. A particularly infamous great white shark, supposedly of record proportions, once patrolled the area that comprises "
+                },
+                {
+                    "entity": "enwiki:False%20Bay",
+                    "entity_name": "False Bay",
+                    "link_section": null,
+                    "text": "False Bay"
+                },
+                {
+                    "text": ", South Africa, was said to be well over  during the early 1980s. This shark, known locally as the \"Submarine\", had a legendary reputation that was supposedly well founded. Though rumors have stated this shark was exaggerated in size or non-existent altogether, witness accounts by the then young Craig Anthony Ferreira, a notable shark expert in South Africa, and his father indicate an unusually large animal of considerable size and power (though it remains uncertain just how massive the shark was as it escaped capture each time it was hooked). Ferreira describes the four encounters with the giant shark he participated in with great detail in his book \"Great White Sharks On Their Best Behavior\"."
+                }
+            ],
+            "para_id": "c05d8813d152326159855c6822aed11a5ee5c0eb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The great white shark (Carcharodon carcharias), also known as the great white, white pointer, white shark, or white death, is a species of large "
+                },
+                {
+                    "entity": "enwiki:Lamniformes",
+                    "entity_name": "Lamniformes",
+                    "link_section": null,
+                    "text": "lamniform"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Shark",
+                    "entity_name": "Shark",
+                    "link_section": null,
+                    "text": "shark"
+                },
+                {
+                    "text": " which can be found in the coastal surface waters of all the major oceans. The great white shark is notable for its size, with mature female individuals growing up to  in length and  in weight. However most are smaller, males measuring  and females  on average. According to a 2014 study the lifespan of great white sharks is estimated to be as long as 70 years or more, well above older estimates, making it one of the longest lived cartilaginous fish currently known. According to the same study, male great white sharks take 26 years to reach sexual maturity, while the females take 33 years to be ready to produce offspring. Great white sharks can accelerate to over  for short bursts."
+                }
+            ],
+            "para_id": "3b5ef795a56ef648c1a4c56ed50efc394f6b9b48"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "To more successfully hunt fast and agile prey such as sea lions, the great white has adapted to maintain a body temperature warmer than the surrounding water. One of these adaptations is a \""
+                },
+                {
+                    "entity": "enwiki:Rete%20mirabile",
+                    "entity_name": "Rete mirabile",
+                    "link_section": null,
+                    "text": "rete mirabile"
+                },
+                {
+                    "text": "\" (Latin for \"wonderful net\"). This close web-like structure of veins and arteries, located along each lateral side of the shark, conserves heat by warming the cooler arterial blood with the venous blood that has been warmed by the working muscles. This keeps certain parts of the body (particularly the stomach) at temperatures up to 14 \u00b0C (25 \u00b0F) above that of the surrounding water, while the heart and gills remain at sea temperature. When conserving energy the core body temperature can drop to match the surroundings. A great white shark's success in raising its "
+                },
+                {
+                    "text": "core temperature"
+                },
+                {
+                    "text": " is an example of "
+                },
+                {
+                    "entity": "enwiki:Gigantothermy",
+                    "entity_name": "Gigantothermy",
+                    "link_section": null,
+                    "text": "gigantothermy"
+                },
+                {
+                    "text": ". Therefore, the great white shark can be considered an "
+                },
+                {
+                    "entity": "enwiki:Endothermic%20process",
+                    "entity_name": "Endothermic process",
+                    "link_section": null,
+                    "text": "endothermic"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Poikilotherm",
+                    "entity_name": "Poikilotherm",
+                    "link_section": null,
+                    "text": "poikilotherm"
+                },
+                {
+                    "text": " because its body temperature is not constant but is internally regulated. Great whites also rely on the fat and oils stored within their livers for long-distance migrations across nutrient-poor areas of the oceans. Studies by Stanford University and the Monterey Bay Aquarium published on 17 July 2013 revealed that In addition to controlling the sharks' buoyancy, the liver of great whites is essential in migration patterns. Sharks that sink faster during drift dives were revealed to use up their internal stores of energy quicker than those which sink in a dive at more leisurely rates."
+                }
+            ],
+            "para_id": "96adf8e127b9375c293491690debb5febaa60657"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Clinton A. J. Duffy (born c.1966) is a "
+                },
+                {
+                    "entity": "enwiki:New%20Zealand",
+                    "entity_name": "New Zealand",
+                    "link_section": null,
+                    "text": "New Zealand"
+                },
+                {
+                    "text": " marine scientist, who works in the Marine Conservation Unit of the "
+                },
+                {
+                    "entity": "enwiki:Department%20of%20Conservation%20(New%20Zealand)",
+                    "entity_name": "Department of Conservation (New Zealand)",
+                    "link_section": null,
+                    "text": "Department of Conservation"
+                },
+                {
+                    "text": ". Duffy is a shark expert, whose work  includes the "
+                },
+                {
+                    "entity": "enwiki:Taxonomy%20(biology)",
+                    "entity_name": "Taxonomy (biology)",
+                    "link_section": null,
+                    "text": "taxonomy"
+                },
+                {
+                    "text": " and conservation status of New Zealand\u2019s deepwater "
+                },
+                {
+                    "entity": "enwiki:Squaliformes",
+                    "entity_name": "Squaliformes",
+                    "link_section": null,
+                    "text": "dogfishes"
+                },
+                {
+                    "text": ", attaching "
+                },
+                {
+                    "entity": "enwiki:GPS%20wildlife%20tracking",
+                    "entity_name": "GPS wildlife tracking",
+                    "link_section": null,
+                    "text": "GPS wildlife tracking"
+                },
+                {
+                    "text": " devices to great white sharks, and surveying "
+                },
+                {
+                    "entity": "enwiki:Basking%20shark",
+                    "entity_name": "Basking shark",
+                    "link_section": null,
+                    "text": "basking shark"
+                },
+                {
+                    "text": "s."
+                }
+            ],
+            "para_id": "d4e7a080eb8b4cc2e8e7f3bf8b6ace392a9c16c4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Interspecific competition between the great white shark and the "
+                },
+                {
+                    "entity": "enwiki:Killer%20whale",
+                    "entity_name": "Killer whale",
+                    "link_section": null,
+                    "text": "orca"
+                },
+                {
+                    "text": " is probable in regions where dietary preferences of both species may overlap. An incident was documented on 4 October 1997, in the "
+                },
+                {
+                    "entity": "enwiki:Farallon%20Islands",
+                    "entity_name": "Farallon Islands",
+                    "link_section": null,
+                    "text": "Farallon Islands"
+                },
+                {
+                    "text": " off "
+                },
+                {
+                    "entity": "enwiki:California",
+                    "entity_name": "California",
+                    "link_section": null,
+                    "text": "California"
+                },
+                {
+                    "text": " in the United States. An estimated  female orca immobilized an estimated  great white shark. The orca held the shark upside down to induce "
+                },
+                {
+                    "entity": "enwiki:Apparent%20death",
+                    "entity_name": "Apparent death",
+                    "link_section": "Tonic immobility",
+                    "text": "tonic immobility"
+                },
+                {
+                    "text": " and kept the shark still for fifteen minutes, causing it to suffocate. The orca then proceeded to eat the dead shark's liver. It is believed that the scent of the slain shark's carcass caused all the great whites in the region to flee, forfeiting an opportunity for a great seasonal feed. Another similar attack apparently occurred there in 2000, but its outcome is not clear. After both attacks, the local population of about 100 great whites vanished. Following the 2000 incident, a great white with a satellite tag was found to have immediately submerged to a depth of  and swum to "
+                },
+                {
+                    "entity": "enwiki:Hawaii",
+                    "entity_name": "Hawaii",
+                    "link_section": null,
+                    "text": "Hawaii"
+                },
+                {
+                    "text": ". In 2015, a pod of orcas was recorded to have killed a great white shark off South Australia."
+                }
+            ],
+            "para_id": "865f69011103006b10bda8760d7d6df5c9768cd7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Fox's life since the attack has involved consulting and coordinating film crews and arranging and guiding "
+                },
+                {
+                    "entity": "enwiki:Ecotourism",
+                    "entity_name": "Ecotourism",
+                    "link_section": null,
+                    "text": "ecotourism"
+                },
+                {
+                    "text": " adventure trips and expeditions specializing in great white sharks and other marine creatures. He also travels the world giving talks to people about his experiences with sharks and the need for conservation efforts to continue. His talks and films on the great white shark have educated swimmers and divers to the realistic potential of a shark attack. He delivers a firm message that \"sharks are not all that bad, we have very few confrontations with them and we should look after all our fishes especially the great white\". He positions it as an important \"keystone predator\" directly controlling the diversity and abundance of other species in the great web of life."
+                }
+            ],
+            "para_id": "3287990ef4d534c2afc3c1adf8f323d27cd37283"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Rutzen regularly delivers marine conservation and scientific talks to promote the preservation of the Great White Shark internationally.  He often shares his views on responsible shark management, conservation and the threats to the ocean, as well as the findings of his scientific field research on the great white shark."
+                }
+            ],
+            "para_id": "04f0e6cce5ad0edde33aebaf95090e44d57799b3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Seven "
+                },
+                {
+                    "entity": "enwiki:Tulane%20University",
+                    "entity_name": "Tulane University",
+                    "link_section": null,
+                    "text": "Tulane University"
+                },
+                {
+                    "text": " undergraduates \u2013 Sara, Nick, Beth, Malik, Maya, Blake and Gordon \u2013 drive to Sara's family vacation home on a private lake. There, Sara encounters her old boyfriend, Dennis, and his friend Red. Nick, Blake, Malik and Maya go wake-boarding when a shark attacks Malik. He is able to swim back to shore \u2013 missing his right arm. When Nick swims into the lake to retrieve Malik's arm, he is pursued by the shark, barely making it to shore. Being a pre-med student, he stabilizes Malik, and they all take him to the hospital. Blood from Malik's wound attracts a shark that attacks the boat. Maya (Malik's girlfriend who he was about to propose to) is knocked into the water and eaten. The shark damages the steering column of the boat, causing it to crash in front of the boathouse. Sara, Nick and Malik make it to shore. Dennis and Red arrive and agree to take Beth and Gordon to the mainland. During the boat trip, Dennis reveals that he and Red put the sharks in the lake and feed college students to them. Dennis forces Gordon into the water by shooting him; he swims to a "
+                },
+                {
+                    "entity": "enwiki:Mangrove",
+                    "entity_name": "Mangrove",
+                    "link_section": null,
+                    "text": "mangrove"
+                },
+                {
+                    "text": " tree but is devoured by a "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "bull shark"
+                },
+                {
+                    "text": ". Red and Dennis force Beth to strip down and feed her to "
+                },
+                {
+                    "entity": "enwiki:Cookiecutter%20shark",
+                    "entity_name": "Cookiecutter shark",
+                    "link_section": null,
+                    "text": "cookiecutter shark"
+                },
+                {
+                    "text": "s. Malik arms himself with a harpoon and ventures into the water to kill the shark that killed Maya. His wound attracts a "
+                },
+                {
+                    "entity": "enwiki:Hammerhead%20shark",
+                    "entity_name": "Hammerhead shark",
+                    "link_section": null,
+                    "text": "hammerhead shark"
+                },
+                {
+                    "text": "; he kills it but is further wounded. Nick and Blake pull the shark to shore, and Nick finds a camera attached to its belly. Blake decides to take Malik to the mainland on a jet ski. When they are pursued by sharks, Malik sacrifices himself and later Blake is killed by a "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": ". Sheriff Sabin visits Sara and Nick and gives them soup, which makes Nick and Sara's dog, who has also eaten the soup, pass out. Sara hears Dennis and Red speaking from Sabin's radio, describing Beth's death. Dennis and Red then appear and take Sara to their boat, while Sabin prepares to dunk Nick into the lake, where "
+                },
+                {
+                    "entity": "enwiki:Sand%20tiger%20shark",
+                    "entity_name": "Sand tiger shark",
+                    "link_section": null,
+                    "text": "sand tiger shark"
+                },
+                {
+                    "text": "s wait. Sabin reveals that he, Dennis and Red have been inspired by the "
+                },
+                {
+                    "entity": "enwiki:Discovery%20Channel",
+                    "entity_name": "Discovery Channel",
+                    "link_section": null,
+                    "text": "Discovery Channel"
+                },
+                {
+                    "text": "'s "
+                },
+                {
+                    "entity": "enwiki:Shark%20Week",
+                    "entity_name": "Shark Week",
+                    "link_section": null,
+                    "text": "Shark Week"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Faces%20of%20Death",
+                    "entity_name": "Faces of Death",
+                    "link_section": null,
+                    "text": "Faces of Death"
+                },
+                {
+                    "text": " videos to film people being eaten by sharks. Nick is able to break free and ignite a can of gas. Badly burned, Sabin plunges into the lake and is eaten by a sand shark. Dennis reveals the reason why he is bitter at Sara: three years ago, while they were dating Sara had to go off to college and she and Dennis had a farewell swim at their favorite diving spot. The day is ruined when Sara almost drowns and Dennis, who is angry with her for having to leave him, refuses to help her. As revenge she runs him over with a jet ski, damaging half his face. Red throws her dog into the water and soon after Dennis calls up Carl, the man from the bait shop, telling him to release another great white shark, Dennis and Red lower her into the lake in a shark cage. As Dennis is about to release her, Nick arrives and takes Red hostage. After a scuffle during which Dennis kills Red in order to catch Nick offguard, Nick shoves Dennis into the water and tries to set Sara free but Dennis appears and tries strangling him. Nick escapes as a great white shark devours Dennis. Nick kills the shark and frees Sara. Nick, Sara, and Sara's dog swim to the boat, having survived. A distance away, a great white shark breaches, signifying that sharks remain in the lake."
+                }
+            ],
+            "para_id": "7413e0da194e0e1eb8c71c34fe6ddaf67fa3525d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Opponents to the policy claim that baiting and culling sharks (particularly the great white shark, which is a federally protected species) to be inhumane, environmentally irresponsible, and ineffective at deterring shark attacks. Environmental concerns include the bycatch of other marine species, drowning of undersize sharks caught on the hooks and the impact on globally declining shark populations, particularly the great white shark, which is listed on the "
+                },
+                {
+                    "entity": "enwiki:IUCN%20Red%20List",
+                    "entity_name": "IUCN Red List",
+                    "link_section": null,
+                    "text": "IUCN Red List"
+                },
+                {
+                    "text": " as \"vulnerable\". The IUCN lists global threats to great white sharks to include targeted commercial and sports fisheries, "
+                },
+                {
+                    "entity": "enwiki:Shark%20net",
+                    "entity_name": "Shark net",
+                    "link_section": null,
+                    "text": "protective beach meshing"
+                },
+                {
+                    "text": ", and \"media-fanned campaigns to kill Great White Sharks after a biting incident occurs\". Some people against the policy also believe drum lines have the potential to attract sharks to popular beaches."
+                }
+            ],
+            "para_id": "2c683777fb1f0ac443e07df59afc70c6c6747f47"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Neptune Islands Conservation Park is a "
+                },
+                {
+                    "entity": "enwiki:Protected%20area",
+                    "entity_name": "Protected area",
+                    "link_section": null,
+                    "text": "protected area"
+                },
+                {
+                    "text": " occupying most of the "
+                },
+                {
+                    "entity": "enwiki:Neptune%20Islands",
+                    "entity_name": "Neptune Islands",
+                    "link_section": null,
+                    "text": "Neptune Islands"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:South%20Australia",
+                    "entity_name": "South Australia",
+                    "link_section": null,
+                    "text": "South Australia"
+                },
+                {
+                    "text": " about  south-south east of "
+                },
+                {
+                    "entity": "enwiki:Port%20Lincoln",
+                    "entity_name": "Port Lincoln",
+                    "link_section": null,
+                    "text": "Port Lincoln"
+                },
+                {
+                    "text": ".  It was established in 1967 principally to protect a "
+                },
+                {
+                    "entity": "enwiki:Arctocephalus%20forsteri",
+                    "entity_name": "Arctocephalus forsteri",
+                    "link_section": null,
+                    "text": "New Zealand fur seal"
+                },
+                {
+                    "text": " breeding colony.  The conservation park  was subsequently expanded to include the adjoining waters in order to control and manage "
+                },
+                {
+                    "entity": "enwiki:Chumming",
+                    "entity_name": "Chumming",
+                    "link_section": null,
+                    "text": "berleying"
+                },
+                {
+                    "text": " activities used to attract "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": "s.  As of 2002, the conservation park is the only place in "
+                },
+                {
+                    "entity": "enwiki:Australia",
+                    "entity_name": "Australia",
+                    "link_section": null,
+                    "text": "Australia"
+                },
+                {
+                    "text": " where "
+                },
+                {
+                    "entity": "enwiki:Shark%20tourism",
+                    "entity_name": "Shark tourism",
+                    "link_section": null,
+                    "text": "shark cage diving"
+                },
+                {
+                    "text": " to view great white sharks is legally permitted."
+                }
+            ],
+            "para_id": "4dd5c74a06c78e5cdb909f5059bc1754a26ca038"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Johnson was part of the first South African team to successfully attach a satellite transmitters to a great white shark on 24 July 2001.Johnson has tagged Great White Sharks for research purposes. His major scientific discoveries have been the satellite tracking of Nicole (a 3.6m great white shark) on a return migration from South Africa to Australia and back, and documenting the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "Great White Shark"
+                },
+                {
+                    "text": " hunting "
+                },
+                {
+                    "entity": "enwiki:Brown%20fur%20seal",
+                    "entity_name": "Brown fur seal",
+                    "link_section": null,
+                    "text": "Cape fur seal"
+                },
+                {
+                    "text": " at night time, a previously unknown behavior. Between 2001 and 2005 Johnson conducted research on the controversial practice of chumming great white shark for tourism, often called cage diving, where he discovered evidence of conditioning, however he did not link this to increased numbers of attacks on human beings. In January 2008 he led a pilot study to Ponto Do Ora ("
+                },
+                {
+                    "entity": "enwiki:Mozambique",
+                    "entity_name": "Mozambique",
+                    "link_section": null,
+                    "text": "Mozambique"
+                },
+                {
+                    "text": ") on the "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "Zambezi shark"
+                },
+                {
+                    "text": ", also known as the "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "Bull shark"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "d9f5789b8b775c9cd1a6dd5e6cc52da5354a94ea"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Stephan Swanson came to prominence as a marine researcher when he successfully placed the satellite transmitter on the famous "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "Great white shark"
+                },
+                {
+                    "text": " Nicole, the first "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": " ever to be tracked on a 20,000 kilometer migration from "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South Africa"
+                },
+                {
+                    "text": " to "
+                },
+                {
+                    "entity": "enwiki:Australia",
+                    "entity_name": "Australia",
+                    "link_section": null,
+                    "text": "Australia"
+                },
+                {
+                    "text": " and back. Due to his ability to handle large marine predators, such as the great white shark, he was contracted as an expedition biologist to travel to "
+                },
+                {
+                    "entity": "enwiki:Guadeloupe",
+                    "entity_name": "Guadeloupe",
+                    "link_section": null,
+                    "text": "Guadeloupe"
+                },
+                {
+                    "text": " and place satellite transmitters on the dorsal fins of Great Whites. His historical capture and release of a 5m long, 1800 kilogram great white shark is documented in the "
+                },
+                {
+                    "entity": "enwiki:National%20Geographic%20(magazine)",
+                    "entity_name": "National Geographic (magazine)",
+                    "link_section": null,
+                    "text": "National Geographic"
+                },
+                {
+                    "text": " Marine Special \"Ultimate Shark\"."
+                }
+            ],
+            "para_id": "7b41849ef3ec90ec0a36529c9240341e83c9bc98"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:International%20Union%20for%20Conservation%20of%20Nature",
+                    "entity_name": "International Union for Conservation of Nature",
+                    "link_section": null,
+                    "text": "IUCN"
+                },
+                {
+                    "text": " notes that very little is known about the actual status of the great white shark, but as it appears uncommon compared to other widely distributed species, it is considered "
+                },
+                {
+                    "entity": "enwiki:Vulnerable%20species",
+                    "entity_name": "Vulnerable species",
+                    "link_section": null,
+                    "text": "vulnerable"
+                },
+                {
+                    "text": ". It is included in "
+                },
+                {
+                    "entity": "enwiki:CITES",
+                    "entity_name": "CITES",
+                    "link_section": "Appendix_II",
+                    "text": "Appendix II"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:CITES",
+                    "entity_name": "CITES",
+                    "link_section": null,
+                    "text": "CITES"
+                },
+                {
+                    "text": ", meaning that international trade in the species requires a permit. As of March 2010, it has also been included in Annex I of the "
+                },
+                {
+                    "entity": "enwiki:Convention%20on%20the%20Conservation%20of%20Migratory%20Species%20of%20Wild%20Animals",
+                    "entity_name": "Convention on the Conservation of Migratory Species of Wild Animals",
+                    "link_section": null,
+                    "text": "CMS"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Memorandum%20of%20Understanding%20on%20the%20Conservation%20of%20Migratory%20Sharks",
+                    "entity_name": "Memorandum of Understanding on the Conservation of Migratory Sharks",
+                    "link_section": null,
+                    "text": "Migratory Sharks MoU"
+                },
+                {
+                    "text": ", which strives for increased international understanding and coordination for the protection of certain migratory sharks. A February 2010 study by "
+                },
+                {
+                    "entity": "enwiki:Barbara%20Block",
+                    "entity_name": "Barbara Block",
+                    "link_section": null,
+                    "text": "Barbara Block"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:Stanford%20University",
+                    "entity_name": "Stanford University",
+                    "link_section": null,
+                    "text": "Stanford University"
+                },
+                {
+                    "text": " estimated the world population of great white sharks to be lower than 3,500 individuals, making the species more vulnerable to extinction than the "
+                },
+                {
+                    "entity": "enwiki:Tiger",
+                    "entity_name": "Tiger",
+                    "link_section": null,
+                    "text": "tiger"
+                },
+                {
+                    "text": ", whose population is in the same range. According to another study from 2014 by "
+                },
+                {
+                    "entity": "enwiki:George%20H.%20Burgess",
+                    "entity_name": "George H. Burgess",
+                    "link_section": null,
+                    "text": "George H. Burgess"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Florida%20Museum%20of%20Natural%20History",
+                    "entity_name": "Florida Museum of Natural History",
+                    "link_section": null,
+                    "text": "Florida Museum of Natural History"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Florida",
+                    "entity_name": "University of Florida",
+                    "link_section": null,
+                    "text": "University of Florida"
+                },
+                {
+                    "text": ", there are about 2000 great white sharks near the California coast, which is 10 times higher than the previous estimate of 219 by "
+                },
+                {
+                    "entity": "enwiki:Barbara%20Block",
+                    "entity_name": "Barbara Block",
+                    "link_section": null,
+                    "text": "Barbara Block"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "f08d7c16a8ad4617b366dedc452bdb7e4872f07b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Despite his status as one of the city's most powerful criminals, the Great White Shark remains in Arkham, directing his empire from within his cell and using his imprisoned condition as a perfect "
+                },
+                {
+                    "entity": "enwiki:Alibi",
+                    "entity_name": "Alibi",
+                    "link_section": null,
+                    "text": "alibi"
+                },
+                {
+                    "text": ". He most recently appeared in "
+                },
+                {
+                    "entity": "enwiki:Detective%20Comics",
+                    "entity_name": "Detective Comics",
+                    "link_section": null,
+                    "text": "Detective Comics"
+                },
+                {
+                    "text": " #832, when Batman apprehends another villain who calls himself the Shark, a former member of the \""
+                },
+                {
+                    "entity": "enwiki:Terrible%20Trio",
+                    "entity_name": "Terrible Trio",
+                    "link_section": null,
+                    "text": "Terrible Trio"
+                },
+                {
+                    "text": ".\" When the Shark is sent to Arkham, the Great White Shark apparently plans to punish him for using the name that White had claimed for himself."
+                }
+            ],
+            "para_id": "a3b22e3cfb5bc3ca9bb1e70e4e63e62677817184"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "This shark's behavior and social structure is not well understood. In South Africa, white sharks have a "
+                },
+                {
+                    "entity": "enwiki:Dominance%20hierarchy",
+                    "entity_name": "Dominance hierarchy",
+                    "link_section": null,
+                    "text": "dominance hierarchy"
+                },
+                {
+                    "text": " depending on the size, sex and squatter's rights: Females dominate males, larger sharks dominate smaller sharks, and residents dominate newcomers. When hunting, great whites tend to separate and resolve conflicts with rituals and displays. White sharks rarely resort to combat although some individuals have been found with bite marks that match those of other white sharks. This suggests that when a great white approaches too closely to another, they react with a warning bite. Another possibility is that white sharks bite to show their dominance."
+                }
+            ],
+            "para_id": "046918e8ecdf8a758654fdecc4f29286a4dda13f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "These sharks are possibly the ancestors of the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "Great White Shark"
+                },
+                {
+                    "text": " (Carcharodon carcharias) and "
+                },
+                {
+                    "entity": "enwiki:Megalodon",
+                    "entity_name": "Megalodon",
+                    "link_section": null,
+                    "text": "Megalodon"
+                },
+                {
+                    "text": " (Carcharodon megalodon), as both these species have tooth serrations very similar to the serrations of Palaeocarcharodon. On the contrary Palaeocarcharodon has two cusps at the base of the main tooth, while the teeth of "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "Great White Shark"
+                },
+                {
+                    "text": "  and "
+                },
+                {
+                    "entity": "enwiki:Megalodon",
+                    "entity_name": "Megalodon",
+                    "link_section": null,
+                    "text": "Megalodon"
+                },
+                {
+                    "text": " lack said small points.  Currently, Paleocarcharodon is viewed as a \"failed prototype\" of the great white shark, that descended from "
+                },
+                {
+                    "entity": "enwiki:Cretolamna",
+                    "entity_name": "Cretolamna",
+                    "link_section": null,
+                    "text": "Cretolamna"
+                },
+                {
+                    "text": " and achieved its similarities to the great white shark (also a distant descendant of Cretolamna) as a result of "
+                },
+                {
+                    "entity": "enwiki:Convergent%20evolution",
+                    "entity_name": "Convergent evolution",
+                    "link_section": null,
+                    "text": "convergent evolution"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "de19b4009f36938133a29057a8936dda030842a1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Two-Headed "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "Great White Shark"
+                },
+                {
+                    "text": " appeared in the 2012 movie "
+                },
+                {
+                    "entity": "enwiki:2-Headed%20Shark%20Attack",
+                    "entity_name": "2-Headed Shark Attack",
+                    "link_section": null,
+                    "text": "2-Headed Shark Attack"
+                },
+                {
+                    "text": ". It is a naturally mutated great white shark with two heads that lived to its adult stage estimated around 40 feet in length. The Two-Headed Great White Shark feeds on the likes of "
+                },
+                {
+                    "entity": "enwiki:Giant%20squid",
+                    "entity_name": "Giant squid",
+                    "link_section": null,
+                    "text": "giant squid"
+                },
+                {
+                    "text": "s and "
+                },
+                {
+                    "entity": "enwiki:Megamouth%20shark",
+                    "entity_name": "Megamouth shark",
+                    "link_section": null,
+                    "text": "megamouths"
+                },
+                {
+                    "text": ". It also possesses great strength as it used its body to sink an atoll on a coral reef and survived a dynamite sized explosion that took off its left head. This shark is noted to not only have twice the sensory power of a normal great white, but also can maneuver in waters as shallow as four feet deep and presumably has an extremely high metabolism as it consumed twenty-one humans within the course of several hours."
+                }
+            ],
+            "para_id": "2697d2ee286249517bbd22f2dcfe540ac35d92fb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Shark species include the "
+                },
+                {
+                    "entity": "enwiki:Caribbean%20reef%20shark",
+                    "entity_name": "Caribbean reef shark",
+                    "link_section": null,
+                    "text": "Caribbean reef shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Lemon%20shark",
+                    "entity_name": "Lemon shark",
+                    "link_section": null,
+                    "text": "lemon shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "bull shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "tiger shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Hammerhead%20shark",
+                    "entity_name": "Hammerhead shark",
+                    "link_section": null,
+                    "text": "hammerhead shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Silky%20shark",
+                    "entity_name": "Silky shark",
+                    "link_section": null,
+                    "text": "silky shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Nurse%20shark",
+                    "entity_name": "Nurse shark",
+                    "link_section": null,
+                    "text": "nurse shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Blacktip%20shark",
+                    "entity_name": "Blacktip shark",
+                    "link_section": null,
+                    "text": "blacktip shark"
+                },
+                {
+                    "text": ", and the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": ". There are many areas of large tropical fish populations, including by "
+                },
+                {
+                    "entity": "enwiki:Waterlemon%20Cay",
+                    "entity_name": "Waterlemon Cay",
+                    "link_section": null,
+                    "text": "Waterlemon Cay"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Leinster%20Bay,%20U.S.%20Virgin%20Islands",
+                    "entity_name": "Leinster Bay, U.S. Virgin Islands",
+                    "link_section": null,
+                    "text": "Leinster Bay"
+                },
+                {
+                    "text": ", which provides habitat for "
+                },
+                {
+                    "entity": "enwiki:Sergeant%20major%20(fish)",
+                    "entity_name": "Sergeant major (fish)",
+                    "link_section": null,
+                    "text": "sergeant major"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Chromis%20cyanea",
+                    "entity_name": "Chromis cyanea",
+                    "link_section": null,
+                    "text": "blue chromis"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Parrotfish",
+                    "entity_name": "Parrotfish",
+                    "link_section": null,
+                    "text": "parrotfish"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Balistes%20vetula",
+                    "entity_name": "Balistes vetula",
+                    "link_section": null,
+                    "text": "queen triggerfish"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Queen%20angelfish",
+                    "entity_name": "Queen angelfish",
+                    "link_section": null,
+                    "text": "queen angelfish"
+                },
+                {
+                    "text": ". Another island visited for its tropical fish- and bird life is "
+                },
+                {
+                    "entity": "enwiki:Buck%20Island%20Reef%20National%20Monument",
+                    "entity_name": "Buck Island Reef National Monument",
+                    "link_section": null,
+                    "text": "Buck Island"
+                },
+                {
+                    "text": ", a 19015-acre marine protected district, which offers great diversity of coral. "
+                }
+            ],
+            "para_id": "57cad1a78ff6761ee830fd45ea056679ff067a08"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2005, he appeared in a "
+                },
+                {
+                    "entity": "enwiki:Shark%20Week",
+                    "entity_name": "Shark Week",
+                    "link_section": null,
+                    "text": "Shark Week"
+                },
+                {
+                    "text": " documentary \"Shark Hunter: Chasing the Great White\" which was narrated by actor "
+                },
+                {
+                    "entity": "enwiki:Roy%20Scheider",
+                    "entity_name": "Roy Scheider",
+                    "link_section": null,
+                    "text": "Roy Scheider"
+                },
+                {
+                    "text": " who played Martin Brody in "
+                },
+                {
+                    "entity": "enwiki:Jaws%20(film)",
+                    "entity_name": "Jaws (film)",
+                    "link_section": null,
+                    "text": "Jaws"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Jaws%202",
+                    "entity_name": "Jaws 2",
+                    "link_section": null,
+                    "text": "Jaws II"
+                },
+                {
+                    "text": ". The special told of Frank's early career, how he became the inspiration for Quint, his world record capture, and how he turned from shark hunter to shark conservationist. Frank also joined "
+                },
+                {
+                    "entity": "enwiki:Chris%20Fallows",
+                    "entity_name": "Chris Fallows",
+                    "link_section": null,
+                    "text": "Chris Fallows"
+                },
+                {
+                    "text": " and other Shark conservationists in viewing great whites in their natural habitat. In one such viewing of the breaching Great Whites (made famous in the \""
+                },
+                {
+                    "entity": "enwiki:Air%20Jaws",
+                    "entity_name": "Air Jaws",
+                    "link_section": null,
+                    "text": "Air Jaws"
+                },
+                {
+                    "text": "\" series of specials) along with Chris Fallows, during which Chris brought out a seal decoy he had humorously named \"Frank\" after Mundus (a hat like the ones Mundus usually wore was even added to it) and they used it to fool them into breaching."
+                }
+            ],
+            "para_id": "4e9f3d7f4d91ddaf61c51685bd7cf34c3dd12ef7"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Shark",
+                    "entity_name": "Shark",
+                    "link_section": null,
+                    "text": "Shark"
+                },
+                {
+                    "text": "s inhabit all the coastal waters and estuarine habitats of Australia's coast. There are 166 species, including 30 species of "
+                },
+                {
+                    "entity": "enwiki:Requiem%20shark",
+                    "entity_name": "Requiem shark",
+                    "link_section": null,
+                    "text": "requiem shark"
+                },
+                {
+                    "text": ", 32 of "
+                },
+                {
+                    "entity": "enwiki:Catshark",
+                    "entity_name": "Catshark",
+                    "link_section": null,
+                    "text": "catshark"
+                },
+                {
+                    "text": ", six of "
+                },
+                {
+                    "entity": "enwiki:Wobbegong",
+                    "entity_name": "Wobbegong",
+                    "link_section": null,
+                    "text": "wobbegong shark"
+                },
+                {
+                    "text": ", and 40 of "
+                },
+                {
+                    "entity": "enwiki:Squalidae",
+                    "entity_name": "Squalidae",
+                    "link_section": null,
+                    "text": "dogfish shark"
+                },
+                {
+                    "text": ". There are three species from the family "
+                },
+                {
+                    "entity": "enwiki:Bullhead%20shark",
+                    "entity_name": "Bullhead shark",
+                    "link_section": null,
+                    "text": "Heterodontidae"
+                },
+                {
+                    "text": ": the "
+                },
+                {
+                    "entity": "enwiki:Port%20Jackson%20shark",
+                    "entity_name": "Port Jackson shark",
+                    "link_section": null,
+                    "text": "Port Jackson shark"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "entity": "enwiki:Zebra%20bullhead%20shark",
+                    "entity_name": "Zebra bullhead shark",
+                    "link_section": null,
+                    "text": "zebra bullhead shark"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Crested%20bullhead%20shark",
+                    "entity_name": "Crested bullhead shark",
+                    "link_section": null,
+                    "text": "crested bullhead shark"
+                },
+                {
+                    "text": ". In 2004, there were 12 unprovoked "
+                },
+                {
+                    "entity": "enwiki:Shark%20attack",
+                    "entity_name": "Shark attack",
+                    "link_section": null,
+                    "text": "shark attacks in Australia"
+                },
+                {
+                    "text": ", of which two were fatal. Only 3 species of shark pose a significant threat to humans: the "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "bull shark"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "tiger shark"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": ". Some popular beaches in Queensland and "
+                },
+                {
+                    "entity": "enwiki:New%20South%20Wales",
+                    "entity_name": "New South Wales",
+                    "link_section": null,
+                    "text": "New South Wales"
+                },
+                {
+                    "text": " are protected by "
+                },
+                {
+                    "entity": "enwiki:Shark%20net",
+                    "entity_name": "Shark net",
+                    "link_section": null,
+                    "text": "shark net"
+                },
+                {
+                    "text": "ting, a method that has reduced the population of both dangerous and harmless shark species through accidental entanglement. The overfishing of sharks has also significantly reduced shark numbers in Australian waters, and several species are now endangered. A "
+                },
+                {
+                    "entity": "enwiki:Megamouth%20shark",
+                    "entity_name": "Megamouth shark",
+                    "link_section": null,
+                    "text": "megamouth shark"
+                },
+                {
+                    "text": " was found on a "
+                },
+                {
+                    "entity": "enwiki:Perth",
+                    "entity_name": "Perth",
+                    "link_section": null,
+                    "text": "Perth"
+                },
+                {
+                    "text": " beach in 1988; very little is known about this species, but this discovery may indicate the presence of the species in Australian coastal waters."
+                }
+            ],
+            "para_id": "f8f3f320901b77d57cebf356cf3ad4db31918fe4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Since bull sharks often dwell in very shallow waters, are found in many types of habitats, and have virtually no tolerance for provocation, they may be more dangerous to humans than any other species of shark, and along with the "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "Tiger shark"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": ", are among the three shark species most likely to bite humans."
+                }
+            ],
+            "para_id": "c7ba4adde06090359ba7aa559446cdb0ef3002e5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The White Shark Caf\u00e9 is a remote mid-"
+                },
+                {
+                    "entity": "enwiki:Pacific%20Ocean",
+                    "entity_name": "Pacific Ocean",
+                    "link_section": null,
+                    "text": "Pacific Ocean"
+                },
+                {
+                    "text": " area noted as a winter and spring habitat of otherwise coastal "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": "s."
+                }
+            ],
+            "para_id": "bc3856a79b9d995b1cd1545a6917d2cf245cca6e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Virtually every type of medium to large-sized oceanic animal sharing the habitat of the cookiecutter shark is open to attack: bite scars have been found on "
+                },
+                {
+                    "entity": "enwiki:Cetacea",
+                    "entity_name": "Cetacea",
+                    "link_section": null,
+                    "text": "cetacean"
+                },
+                {
+                    "text": "s (including "
+                },
+                {
+                    "entity": "enwiki:Porpoise",
+                    "entity_name": "Porpoise",
+                    "link_section": null,
+                    "text": "porpoise"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Dolphin",
+                    "entity_name": "Dolphin",
+                    "link_section": null,
+                    "text": "dolphin"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Beaked%20whale",
+                    "entity_name": "Beaked whale",
+                    "link_section": null,
+                    "text": "beaked whale"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Sperm%20whale",
+                    "entity_name": "Sperm whale",
+                    "link_section": null,
+                    "text": "sperm whale"
+                },
+                {
+                    "text": "s, and "
+                },
+                {
+                    "entity": "enwiki:Baleen%20whale",
+                    "entity_name": "Baleen whale",
+                    "link_section": null,
+                    "text": "baleen whale"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Pinniped",
+                    "entity_name": "Pinniped",
+                    "link_section": null,
+                    "text": "pinniped"
+                },
+                {
+                    "text": "s (including "
+                },
+                {
+                    "entity": "enwiki:Fur%20seal",
+                    "entity_name": "Fur seal",
+                    "link_section": null,
+                    "text": "fur seal"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Leopard%20seal",
+                    "entity_name": "Leopard seal",
+                    "link_section": null,
+                    "text": "leopard seal"
+                },
+                {
+                    "text": "s, and "
+                },
+                {
+                    "entity": "enwiki:Elephant%20seal",
+                    "entity_name": "Elephant seal",
+                    "link_section": null,
+                    "text": "elephant seal"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Dugong",
+                    "entity_name": "Dugong",
+                    "link_section": null,
+                    "text": "dugong"
+                },
+                {
+                    "text": "s, sharks (including "
+                },
+                {
+                    "entity": "enwiki:Blue%20shark",
+                    "entity_name": "Blue shark",
+                    "link_section": null,
+                    "text": "blue shark"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Goblin%20shark",
+                    "entity_name": "Goblin shark",
+                    "link_section": null,
+                    "text": "goblin shark"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Basking%20shark",
+                    "entity_name": "Basking shark",
+                    "link_section": null,
+                    "text": "basking shark"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Megamouth%20shark",
+                    "entity_name": "Megamouth shark",
+                    "link_section": null,
+                    "text": "megamouth shark"
+                },
+                {
+                    "text": "s and "
+                },
+                {
+                    "entity": "enwiki:Smalltooth%20sand%20tiger",
+                    "entity_name": "Smalltooth sand tiger",
+                    "link_section": null,
+                    "text": "smalltooth sand tiger shark"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Stingray",
+                    "entity_name": "Stingray",
+                    "link_section": null,
+                    "text": "stingray"
+                },
+                {
+                    "text": "s (including "
+                },
+                {
+                    "entity": "enwiki:Deepwater%20stingray",
+                    "entity_name": "Deepwater stingray",
+                    "link_section": null,
+                    "text": "deepwater stingray"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Pelagic%20stingray",
+                    "entity_name": "Pelagic stingray",
+                    "link_section": null,
+                    "text": "pelagic stingray"
+                },
+                {
+                    "text": "s and "
+                },
+                {
+                    "entity": "enwiki:Sixgill%20stingray",
+                    "entity_name": "Sixgill stingray",
+                    "link_section": null,
+                    "text": "sixgill stingray"
+                },
+                {
+                    "text": "s), and "
+                },
+                {
+                    "entity": "enwiki:Osteichthyes",
+                    "entity_name": "Osteichthyes",
+                    "link_section": null,
+                    "text": "bony fish"
+                },
+                {
+                    "text": "es (including "
+                },
+                {
+                    "entity": "enwiki:Billfish",
+                    "entity_name": "Billfish",
+                    "link_section": null,
+                    "text": "billfish"
+                },
+                {
+                    "text": "es, "
+                },
+                {
+                    "entity": "enwiki:Tuna",
+                    "entity_name": "Tuna",
+                    "link_section": null,
+                    "text": "tuna"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Coryphaena",
+                    "entity_name": "Coryphaena",
+                    "link_section": null,
+                    "text": "dolphinfish"
+                },
+                {
+                    "text": "es, "
+                },
+                {
+                    "entity": "enwiki:Carangidae",
+                    "entity_name": "Carangidae",
+                    "link_section": null,
+                    "text": "jacks"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Escolar",
+                    "entity_name": "Escolar",
+                    "link_section": null,
+                    "text": "escolar"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Opah",
+                    "entity_name": "Opah",
+                    "link_section": null,
+                    "text": "opah"
+                },
+                {
+                    "text": "s, and "
+                },
+                {
+                    "entity": "enwiki:Pomfret",
+                    "entity_name": "Pomfret",
+                    "link_section": null,
+                    "text": "pomfret"
+                },
+                {
+                    "text": "s). The cookiecutter shark also regularly hunts and eats entire "
+                },
+                {
+                    "entity": "enwiki:Squid",
+                    "entity_name": "Squid",
+                    "link_section": null,
+                    "text": "squid"
+                },
+                {
+                    "text": " with a "
+                },
+                {
+                    "entity": "enwiki:Mantle%20(mollusc)",
+                    "entity_name": "Mantle (mollusc)",
+                    "link_section": null,
+                    "text": "mantle"
+                },
+                {
+                    "text": " length of , comparable in size to the shark itself, as well as "
+                },
+                {
+                    "entity": "enwiki:Gonostomatidae",
+                    "entity_name": "Gonostomatidae",
+                    "link_section": null,
+                    "text": "bristlemouth"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Copepod",
+                    "entity_name": "Copepod",
+                    "link_section": null,
+                    "text": "copepod"
+                },
+                {
+                    "text": "s, and other prey of more modest dimensions."
+                }
+            ],
+            "para_id": "98e6708e5b6ea2ab68bd972a55e93dce3c6c8b01"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Carcharocles  proponents point out that the great white shark is closely related to the ancient shark "
+                },
+                {
+                    "entity": "enwiki:Isurus%20hastalis",
+                    "entity_name": "Isurus hastalis",
+                    "link_section": null,
+                    "text": "Isurus hastalis"
+                },
+                {
+                    "text": ", the \"broad tooth "
+                },
+                {
+                    "entity": "enwiki:Isurus",
+                    "entity_name": "Isurus",
+                    "link_section": null,
+                    "text": "mako"
+                },
+                {
+                    "text": "\", rather than to C. megalodon. One reason cited by paleontologist Chuck Ciampaglio is that the dental "
+                },
+                {
+                    "entity": "enwiki:Morphometrics",
+                    "entity_name": "Morphometrics",
+                    "link_section": null,
+                    "text": "morphometrics"
+                },
+                {
+                    "text": " (variations and changes in the physical form of objects) of I. hastalis and C. carcharias are remarkably similar. Another reason cited is that C. megalodon teeth have much finer serrations than C. carcharias teeth. Further evidence linking the great white shark more closely to ancient mako sharks, rather than to C. megalodon, was provided in 2009 \u2013 the fossilized remains of a form of the great white shark about 4 million years old were excavated from southwestern "
+                },
+                {
+                    "entity": "enwiki:Peru",
+                    "entity_name": "Peru",
+                    "link_section": null,
+                    "text": "Peru"
+                },
+                {
+                    "text": " in 1988. These remains demonstrate a likely shared ancestor of modern "
+                },
+                {
+                    "entity": "enwiki:Isurus",
+                    "entity_name": "Isurus",
+                    "link_section": null,
+                    "text": "mako"
+                },
+                {
+                    "text": " and great white sharks."
+                }
+            ],
+            "para_id": "bc7e5a80338c8e6643ab598d156ce556bf8cd683"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Modern sharks began to appear about 100 million years ago. Fossil "
+                },
+                {
+                    "entity": "enwiki:Lamniformes",
+                    "entity_name": "Lamniformes",
+                    "link_section": null,
+                    "text": "mackerel shark"
+                },
+                {
+                    "text": " teeth date to the "
+                },
+                {
+                    "entity": "enwiki:Early%20Cretaceous",
+                    "entity_name": "Early Cretaceous",
+                    "link_section": null,
+                    "text": "Early Cretaceous"
+                },
+                {
+                    "text": ". One of the most recently evolved families is the hammerhead shark (family Sphyrnidae), which emerged in the "
+                },
+                {
+                    "entity": "enwiki:Eocene",
+                    "entity_name": "Eocene",
+                    "link_section": null,
+                    "text": "Eocene"
+                },
+                {
+                    "text": ". The oldest white shark teeth date from 60 to 66 million years ago, around the time of the "
+                },
+                {
+                    "entity": "enwiki:Cretaceous%E2%80%93Paleogene%20extinction%20event",
+                    "entity_name": "Cretaceous\u2013Paleogene extinction event",
+                    "link_section": null,
+                    "text": "extinction of the dinosaurs"
+                },
+                {
+                    "text": ". In early white shark evolution there are at least two lineages: one lineage is of white sharks with coarsely "
+                },
+                {
+                    "entity": "enwiki:Shark%20tooth",
+                    "entity_name": "Shark tooth",
+                    "link_section": null,
+                    "text": "serrated"
+                },
+                {
+                    "text": " teeth and it probably gave rise to the modern great white shark, and another lineage is of white sharks with finely serrated teeth. These sharks attained gigantic proportions and include the extinct megatoothed shark, "
+                },
+                {
+                    "entity": "enwiki:Megalodon",
+                    "entity_name": "Megalodon",
+                    "link_section": null,
+                    "text": "C. megalodon"
+                },
+                {
+                    "text": ". Like most extinct sharks, C. megalodon is also primarily known from its fossil teeth and  vertebrae. This giant shark reached a total length (TL) of more than . C. megalodon may have approached a maxima of  in total length and  in mass. Paleontological evidence suggests that this shark was an active predator of large "
+                },
+                {
+                    "entity": "enwiki:Cetacea",
+                    "entity_name": "Cetacea",
+                    "link_section": null,
+                    "text": "cetaceans"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "70171252540300960fac48c1f62a2a99f6f3d8ad"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "After some initial apprehension, sharks appeared to view Troy as another shark.  They stayed about  away from it, the length of an adult shark, and rolled their eyes, puffed their gills, and changed directions in response to it.  These behaviors were observed only in the presence of the shark, not with free divers.  Based on the behavior, Cousteau said it appeared Troy was accepted as a dominant female by other great white sharks, but added that he was hesitant to say the behavior proved the sharks saw the submarine as a shark."
+                }
+            ],
+            "para_id": "f10ec92776100bbf2dbc76eec6c4c83b57cf259f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to a recent study, "
+                },
+                {
+                    "entity": "enwiki:California",
+                    "entity_name": "California",
+                    "link_section": null,
+                    "text": "California"
+                },
+                {
+                    "text": " great whites have migrated to an area between "
+                },
+                {
+                    "entity": "enwiki:Baja%20California%20Peninsula",
+                    "entity_name": "Baja California Peninsula",
+                    "link_section": null,
+                    "text": "Baja California Peninsula"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Hawaii",
+                    "entity_name": "Hawaii",
+                    "link_section": null,
+                    "text": "Hawaii"
+                },
+                {
+                    "text": " known as the "
+                },
+                {
+                    "entity": "enwiki:White%20Shark%20Caf%C3%A9",
+                    "entity_name": "White Shark Caf\u00e9",
+                    "link_section": null,
+                    "text": "White Shark Caf\u00e9"
+                },
+                {
+                    "text": " to spend at least 100 days before migrating back to Baja. On the journey out, they swim slowly and dive down to around . After they arrive, they change behavior and do short dives to about  for up to ten minutes. Another white shark that was tagged off of the South African coast swam to the southern coast of Australia and back within the year. A similar study tracked a different great white shark from South Africa swimming to Australia's northwestern coast and back, a journey of  in under nine months.These observations argue against traditional theories that white sharks are coastal territorial predators, and open up the possibility of interaction between shark populations that were previously thought to have been discrete. The reasons for their migration and what they do at their destination is still unknown. Possibilities include seasonal feeding or mating."
+                }
+            ],
+            "para_id": "75622c3672ea66af9645291fb82bbd5ee9c04aee"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In July 2016, shark researchers from the Neuroecology Group at "
+                },
+                {
+                    "entity": "enwiki:University%20of%20Western%20Australia",
+                    "entity_name": "University of Western Australia",
+                    "link_section": null,
+                    "text": "The University of Western Australia"
+                },
+                {
+                    "text": " had published a research into the effectiveness of the Shark Shield shark deterrent on "
+                },
+                {
+                    "entity": "enwiki:PLOS%20ONE",
+                    "entity_name": "PLOS ONE",
+                    "link_section": null,
+                    "text": "PLOS ONE"
+                },
+                {
+                    "text": " \"How Close is too Close? The Effect of a Non-Lethal Electric Shark Deterrent on White Shark Behaviour\". The research team was funded by the Western Australian Government and included UWA Oceans Institute Director Professor Shaun Collin, Associate Professor Nathan Hart and Dr Ryan Kempster. Using a modified stereo-camera system, the research quantified behavioral interactions between "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "white sharks"
+                },
+                {
+                    "text": " (Carcharodon carcharias) and a baited target in the presence of a commercially available, personal electric shark deterrent (Shark Shield Freedom7). The stereo-camera system enabled an assessment of the behavioral responses of C.carcharias when encountering a non-lethal electric field many times stronger than what they would naturally experience. Upon their first observed encounter, all C. carcharias were repelled at a mean (\u00b1 std. error) proximity of 131 (\u00b1 10.3) cm, which corresponded to a mean voltage gradient of 9.7 (\u00b1 0.9) V/m. With each subsequent encounter, their proximity decreased by an average of 11.6 cm, which corresponded to an increase in tolerance to the electric field by an average of 2.6 (\u00b1 0.5) V/m per encounter. Despite the increase in tolerance, sharks continued to be deterred from interacting for the duration of each trial in the presence of an active Shark Shield. Furthermore, the findings provide no support to the theory that electric deterrents attract sharks. The results of this study provide quantitative evidence of the effectiveness of a non-lethal electric shark deterrent, its influence on the behaviour of C.carcharias, and an accurate method for testing other shark deterrent technologies."
+                }
+            ],
+            "para_id": "29f45d82d554b6d30fa6f6c57be735b790b33278"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Some large shark species, such as the "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "tiger shark"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "entity": "enwiki:Dusky%20shark",
+                    "entity_name": "Dusky shark",
+                    "link_section": null,
+                    "text": "dusky shark"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "bull shark"
+                },
+                {
+                    "text": ", prey on the bottlenose dolphin, especially calves. The bottlenose dolphin is capable of defending itself by charging the predator; dolphin 'mobbing' behavior of sharks can occasionally prove fatal for the shark. Targeting a single adult dolphin can be dangerous for a shark of similar size. "
+                },
+                {
+                    "entity": "enwiki:Killer%20whale",
+                    "entity_name": "Killer whale",
+                    "link_section": null,
+                    "text": "Killer whale"
+                },
+                {
+                    "text": " populations in New Zealand and Peru have been observed preying on bottlenose dolphins, but this seems rare, and other orcas may swim with dolphins. Swimming in pods allows dolphins to better defend themselves against predators. Bottlenose dolphins either use complex evasive strategies to outswim their predators, or mobbing techniques to batter the predator to death or force it to flee."
+                }
+            ],
+            "para_id": "b8b2cb47e561953ac0dcd19ad6c8523f7f444e5a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Sharks appeared to view Troy as another shark.  They stayed about  away from it, the length of an adult shark, and rolled their eyes, puffed their gills, and changed directions in response to it.  These behaviors were observed only in the presence of the submarine, not with free divers, although Cousteau said he was hesitant to say it proved the sharks saw Troy as a shark.  Cousteau called the experience of being surrounded by up to five great white sharks at once a \"humbling experience. They're like 747s underwater ... but they are so graceful and so deceivingly calm, and very sure of themselves.\""
+                }
+            ],
+            "para_id": "7b132d55ee38169293dffe36505dcf8e0e5af14c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A 2007 study from the "
+                },
+                {
+                    "entity": "enwiki:University%20of%20New%20South%20Wales",
+                    "entity_name": "University of New South Wales",
+                    "link_section": null,
+                    "text": "University of New South Wales"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Sydney",
+                    "entity_name": "Sydney",
+                    "link_section": null,
+                    "text": "Sydney"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Australia",
+                    "entity_name": "Australia",
+                    "link_section": null,
+                    "text": "Australia"
+                },
+                {
+                    "text": ", used "
+                },
+                {
+                    "entity": "enwiki:CT%20scan",
+                    "entity_name": "CT scan",
+                    "link_section": null,
+                    "text": "CT"
+                },
+                {
+                    "text": " scans of a shark's skull and computer models to measure the shark's maximum bite force. The study reveals the forces and behaviors its skull is adapted to handle and resolves competing theories about its feeding behavior. In 2008, a team of scientists led by Stephen Wroe conducted an experiment to determine the great white shark's jaw power and findings indicated that a specimen massing  could exert a bite force of ."
+                }
+            ],
+            "para_id": "15a74185407faac661f55ebec7b6c923db6f6153"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A "
+                },
+                {
+                    "entity": "enwiki:Cetacean%20surfacing%20behaviour",
+                    "entity_name": "Cetacean surfacing behaviour",
+                    "link_section": null,
+                    "text": "breach"
+                },
+                {
+                    "text": " is the result of a high speed approach to the surface with the resulting momentum taking the shark partially or completely clear of the water. This is a hunting technique employed by great white sharks whilst hunting seals. This technique is often used on cape fur seals at "
+                },
+                {
+                    "entity": "enwiki:Seal%20Island,%20South%20Africa",
+                    "entity_name": "Seal Island, South Africa",
+                    "link_section": null,
+                    "text": "Seal Island"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:False%20Bay",
+                    "entity_name": "False Bay",
+                    "link_section": null,
+                    "text": "False Bay, South Africa"
+                },
+                {
+                    "text": ". Because the behavior is unpredictable, it is very hard to document. It was first photographed by "
+                },
+                {
+                    "entity": "enwiki:Chris%20Fallows",
+                    "entity_name": "Chris Fallows",
+                    "link_section": null,
+                    "text": "Chris Fallows"
+                },
+                {
+                    "text": " and Rob Lawrence who developed the technique of towing a slow-moving seal decoy to trick the sharks to breach. Between April and September, scientists may observe around 600 breaches. The seals swim on the surface and the great white sharks launch their predatory attack from the deeper water below. They can reach speeds of up to  and can at times launch themselves more than  into the air. Just under half of observed breach attacks are successful. In 2011, a  long shark jumped onto a seven-person "
+                },
+                {
+                    "entity": "enwiki:Research%20vessel",
+                    "entity_name": "Research vessel",
+                    "link_section": null,
+                    "text": "research vessel"
+                },
+                {
+                    "text": " off Seal Island in Mossel Bay. The crew were undertaking a "
+                },
+                {
+                    "entity": "enwiki:Population%20biology",
+                    "entity_name": "Population biology",
+                    "link_section": null,
+                    "text": "population study"
+                },
+                {
+                    "text": " using sardines as bait, and the incident was judged not to be an attack on the boat but an accident."
+                }
+            ],
+            "para_id": "ef0072860442a72114f8bef852974f5aca1d8d80"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The great white shark is one of only a few sharks known to regularly lift its head above the sea surface to gaze at other objects such as prey. This is known as "
+                },
+                {
+                    "entity": "enwiki:Cetacean%20surfacing%20behaviour",
+                    "entity_name": "Cetacean surfacing behaviour",
+                    "link_section": "Spyhopping",
+                    "text": "spy-hopping"
+                },
+                {
+                    "text": ". This behavior has also been seen in at least one group of "
+                },
+                {
+                    "entity": "enwiki:Blacktip%20reef%20shark",
+                    "entity_name": "Blacktip reef shark",
+                    "link_section": null,
+                    "text": "blacktip reef shark"
+                },
+                {
+                    "text": "s, but this might be learned from interaction with humans (it is theorized that the shark may also be able to smell better this way because smell travels through air faster than through water). White sharks are generally very curious animals, display intelligence and may also turn to socializing if the situation demands it. At Seal Island, white sharks have been observed arriving and departing in stable \"clans\" of two to six individuals on a yearly basis. Whether clan members are related is unknown but they get along peacefully enough. In fact, the social structure of a clan is probably most aptly compared to that of a wolf pack; in that each member has a clearly established rank and each clan has an alpha leader. When members of different clans meet, they establish social rank nonviolently through any of a variety of interactions."
+                }
+            ],
+            "para_id": "2166fa6a3f0db6884ef7b6a31711b1df2b201757"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The great white shark has a robust, large, conical snout. The upper and lower "
+                },
+                {
+                    "entity": "enwiki:Lobe%20(anatomy)",
+                    "entity_name": "Lobe (anatomy)",
+                    "link_section": null,
+                    "text": "lobes"
+                },
+                {
+                    "text": " on the tail fin are approximately the same size which is similar to some "
+                },
+                {
+                    "entity": "enwiki:Lamniformes",
+                    "entity_name": "Lamniformes",
+                    "link_section": null,
+                    "text": "mackerel shark"
+                },
+                {
+                    "text": "s. A great white displays "
+                },
+                {
+                    "entity": "enwiki:Countershading",
+                    "entity_name": "Countershading",
+                    "link_section": null,
+                    "text": "countershading"
+                },
+                {
+                    "text": ", by having a white underside and a grey dorsal area (sometimes in a brown or blue shade) that gives an overall mottled appearance. The coloration makes it difficult for prey to spot the shark because it breaks up the shark's outline when seen from the side. From above, the darker shade blends with the sea and from below it exposes a minimal silhouette against the sunlight. Great white sharks, like many other sharks, have rows of "
+                },
+                {
+                    "entity": "enwiki:Shark%20tooth",
+                    "entity_name": "Shark tooth",
+                    "link_section": null,
+                    "text": "serrated teeth"
+                },
+                {
+                    "text": " behind the main ones, ready to replace any that break off. When the shark bites, it shakes its head side-to-side, helping the teeth saw off large chunks of flesh."
+                }
+            ],
+            "para_id": "dda7afe88e857c7f951e8756d8a09d7f59a02343"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "White sharks also attack dolphins and porpoises from above, behind or below to avoid being detected by their "
+                },
+                {
+                    "entity": "enwiki:Animal%20echolocation",
+                    "entity_name": "Animal echolocation",
+                    "link_section": "Toothed whales",
+                    "text": "echolocation"
+                },
+                {
+                    "text": ". Targeted species include "
+                },
+                {
+                    "entity": "enwiki:Dusky%20dolphin",
+                    "entity_name": "Dusky dolphin",
+                    "link_section": null,
+                    "text": "dusky dolphin"
+                },
+                {
+                    "text": "s (Lagenorhynchus obscurus), "
+                },
+                {
+                    "entity": "enwiki:Risso's%20dolphin",
+                    "entity_name": "Risso's dolphin",
+                    "link_section": null,
+                    "text": "Risso's dolphin"
+                },
+                {
+                    "text": "s (Grampus griseus), "
+                },
+                {
+                    "entity": "enwiki:Bottlenose%20dolphin",
+                    "entity_name": "Bottlenose dolphin",
+                    "link_section": null,
+                    "text": "bottlenose dolphin"
+                },
+                {
+                    "text": "s (Tursiops ssp.), "
+                },
+                {
+                    "entity": "enwiki:Humpback%20dolphin",
+                    "entity_name": "Humpback dolphin",
+                    "link_section": null,
+                    "text": "Humpback dolphin"
+                },
+                {
+                    "text": "s (Sousa ssp.), "
+                },
+                {
+                    "entity": "enwiki:Harbour%20porpoise",
+                    "entity_name": "Harbour porpoise",
+                    "link_section": null,
+                    "text": "harbour porpoise"
+                },
+                {
+                    "text": "s (Phocoena phocoena), and "
+                },
+                {
+                    "entity": "enwiki:Dall's%20porpoise",
+                    "entity_name": "Dall's porpoise",
+                    "link_section": null,
+                    "text": "Dall's porpoise"
+                },
+                {
+                    "text": "s (Phocoenoides dalli). Groups of dolphins have occasionally been observed defending themselves from sharks with mobbing behaviour. White shark predation on other species of small cetacean has also been observed. In August 1989, a  juvenile male "
+                },
+                {
+                    "entity": "enwiki:Pygmy%20sperm%20whale",
+                    "entity_name": "Pygmy sperm whale",
+                    "link_section": null,
+                    "text": "pygmy sperm whale"
+                },
+                {
+                    "text": " (Kogia breviceps) was found stranded in central California with a bite mark on its caudal peduncle from a great white shark. In addition, white sharks attack and prey upon "
+                },
+                {
+                    "entity": "enwiki:Beaked%20whale",
+                    "entity_name": "Beaked whale",
+                    "link_section": null,
+                    "text": "beaked whale"
+                },
+                {
+                    "text": "s. Cases where an adult "
+                },
+                {
+                    "entity": "enwiki:Stejneger's%20beaked%20whale",
+                    "entity_name": "Stejneger's beaked whale",
+                    "link_section": null,
+                    "text": "Stejneger's beaked whale"
+                },
+                {
+                    "text": " (Mesoplodon stejnegeri), with a mean mass of around , and a juvenile "
+                },
+                {
+                    "entity": "enwiki:Cuvier's%20beaked%20whale",
+                    "entity_name": "Cuvier's beaked whale",
+                    "link_section": null,
+                    "text": "Cuvier's beaked whale"
+                },
+                {
+                    "text": " (Ziphius cavirostris), an individual estimated at , were hunted and killed by great white sharks have also been observed. When hunting sea turtles, they appear to simply bite through the carapace around a flipper, immobilizing the turtle. The heaviest species of bony fish, the "
+                },
+                {
+                    "entity": "enwiki:Ocean%20sunfish",
+                    "entity_name": "Ocean sunfish",
+                    "link_section": null,
+                    "text": "oceanic sunfish"
+                },
+                {
+                    "text": " (Mola mola), has been found in great white shark stomachs."
+                }
+            ],
+            "para_id": "e76d7491d9bb4394cc1f8f80cb5a6af939cb53c3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In great white sharks, "
+                },
+                {
+                    "entity": "enwiki:Sexual%20dimorphism",
+                    "entity_name": "Sexual dimorphism",
+                    "link_section": null,
+                    "text": "sexual dimorphism"
+                },
+                {
+                    "text": " is present, and females are generally larger than males. Male great whites on average measure  long, while females at . Adults of this species weigh  on average, however mature females can have an average mass of . The largest females have been verified up to  in length and an estimated  in weight, perhaps up to . The maximum size is subject to debate because some reports are rough estimations or speculations performed under questionable circumstances. Among living "
+                },
+                {
+                    "entity": "enwiki:Chondrichthyes",
+                    "entity_name": "Chondrichthyes",
+                    "link_section": null,
+                    "text": "cartilaginous fish"
+                },
+                {
+                    "text": ", only the "
+                },
+                {
+                    "entity": "enwiki:Whale%20shark",
+                    "entity_name": "Whale shark",
+                    "link_section": null,
+                    "text": "whale shark"
+                },
+                {
+                    "text": " (Rhincodon typus), the "
+                },
+                {
+                    "entity": "enwiki:Basking%20shark",
+                    "entity_name": "Basking shark",
+                    "link_section": null,
+                    "text": "basking shark"
+                },
+                {
+                    "text": " (Cetorhinus maximus) and the "
+                },
+                {
+                    "entity": "enwiki:Giant%20oceanic%20manta%20ray",
+                    "entity_name": "Giant oceanic manta ray",
+                    "link_section": null,
+                    "text": "giant manta ray"
+                },
+                {
+                    "text": " (Manta birostris), in that order, average larger and heavier. These three species are generally quite docile in disposition and given to passively "
+                },
+                {
+                    "entity": "enwiki:Filter%20feeder",
+                    "entity_name": "Filter feeder",
+                    "link_section": null,
+                    "text": "filter-feeding"
+                },
+                {
+                    "text": " on very small organisms. This makes the great white shark the largest extant macropredatory fish. Great whites sharks are at around  when born, and grow about  each year."
+                }
+            ],
+            "para_id": "28ad9438b1a2cc0bde6f58a3e752b79fc0ccf485"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Fox is regarded as a world authority on the great white shark and has a great reputation as an expedition leader and "
+                },
+                {
+                    "entity": "enwiki:Film%20producer",
+                    "entity_name": "Film producer",
+                    "link_section": null,
+                    "text": "producer"
+                },
+                {
+                    "text": " of shark documentaries. He has been involved in some way with most great white shark films made in the 20th century. He has hosted expeditions for over 100 major feature and documentary films with film makers and shark researchers from 16 different countries. "
+                },
+                {
+                    "entity": "enwiki:Walt%20Disney%20Studios%20(division)",
+                    "entity_name": "Walt Disney Studios (division)",
+                    "link_section": null,
+                    "text": "Disney"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Universal%20Studios",
+                    "entity_name": "Universal Studios",
+                    "link_section": null,
+                    "text": "Universal"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:IMAX",
+                    "entity_name": "IMAX",
+                    "link_section": null,
+                    "text": "IMAX"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Jacques%20Cousteau",
+                    "entity_name": "Jacques Cousteau",
+                    "link_section": null,
+                    "text": "Cousteau Society"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:National%20Geographic%20(U.S.%20TV%20channel)",
+                    "entity_name": "National Geographic (U.S. TV channel)",
+                    "link_section": null,
+                    "text": "National Geographic"
+                },
+                {
+                    "text": " have enlisted his help and have filmed and studied the great white shark from his cages."
+                }
+            ],
+            "para_id": "f29ef0fa7f19954c1299ba06987e3896eb4db2dd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A number of very large unconfirmed great white shark specimens have been recorded. For decades, many "
+                },
+                {
+                    "entity": "enwiki:Ichthyology",
+                    "entity_name": "Ichthyology",
+                    "link_section": null,
+                    "text": "ichthyological"
+                },
+                {
+                    "text": " works, as well as the "
+                },
+                {
+                    "entity": "enwiki:Guinness%20World%20Records",
+                    "entity_name": "Guinness World Records",
+                    "link_section": null,
+                    "text": "Guinness Book of World Records"
+                },
+                {
+                    "text": ", listed two great white sharks as the largest individuals: In the 1870s, a  great white captured in "
+                },
+                {
+                    "entity": "enwiki:Southern%20Australia",
+                    "entity_name": "Southern Australia",
+                    "link_section": null,
+                    "text": "southern Australia"
+                },
+                {
+                    "text": "n waters, near "
+                },
+                {
+                    "entity": "enwiki:Port%20Fairy",
+                    "entity_name": "Port Fairy",
+                    "link_section": null,
+                    "text": "Port Fairy"
+                },
+                {
+                    "text": ", and an  shark trapped in a "
+                },
+                {
+                    "entity": "enwiki:Herring",
+                    "entity_name": "Herring",
+                    "link_section": null,
+                    "text": "herring"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Fishing%20weir",
+                    "entity_name": "Fishing weir",
+                    "link_section": null,
+                    "text": "weir"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:New%20Brunswick",
+                    "entity_name": "New Brunswick",
+                    "link_section": null,
+                    "text": "New Brunswick"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Canada",
+                    "entity_name": "Canada",
+                    "link_section": null,
+                    "text": "Canada"
+                },
+                {
+                    "text": ", in the 1930s. However these measurements are not scientific and researchers have questioned the reliability of these measurements for a long time, noting they were much larger than any other accurately reported sighting. Later studies proved these theories correct. This New Brunswick shark may have been a misidentified "
+                },
+                {
+                    "entity": "enwiki:Basking%20shark",
+                    "entity_name": "Basking shark",
+                    "link_section": null,
+                    "text": "basking shark"
+                },
+                {
+                    "text": ", as the two have similar body shapes. The question of the Port Fairy shark was settled in the 1970s when J. E. Randall examined the shark's jaws and \"found that the Port Fairy shark was of the order of 5 m (17 ft) in length and suggested that a mistake had been made in the original record, in 1870, of the shark's length\". These wrong measurements would make the alleged shark more than five times heavier than it really was."
+                }
+            ],
+            "para_id": "aee469bb49c0d8d1bde5c7682b2823091e7f7ca1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The bestselling novel "
+                },
+                {
+                    "entity": "enwiki:Jaws%20(novel)",
+                    "entity_name": "Jaws (novel)",
+                    "link_section": null,
+                    "text": "Jaws"
+                },
+                {
+                    "text": " by "
+                },
+                {
+                    "entity": "enwiki:Peter%20Benchley",
+                    "entity_name": "Peter Benchley",
+                    "link_section": null,
+                    "text": "Peter Benchley"
+                },
+                {
+                    "text": " and the subsequent "
+                },
+                {
+                    "entity": "enwiki:Jaws%20(film)",
+                    "entity_name": "Jaws (film)",
+                    "link_section": null,
+                    "text": "blockbuster film"
+                },
+                {
+                    "text": " by "
+                },
+                {
+                    "entity": "enwiki:Steven%20Spielberg",
+                    "entity_name": "Steven Spielberg",
+                    "link_section": null,
+                    "text": "Steven Spielberg"
+                },
+                {
+                    "text": " depicted the great white shark as a \"ferocious "
+                },
+                {
+                    "entity": "enwiki:Man-eater",
+                    "entity_name": "Man-eater",
+                    "link_section": null,
+                    "text": "man eater"
+                },
+                {
+                    "text": "\". Humans are not the preferred prey of the great white shark, but, nevertheless, the great white is responsible for the largest number of reported and identified fatal unprovoked "
+                },
+                {
+                    "entity": "enwiki:Shark%20attack",
+                    "entity_name": "Shark attack",
+                    "link_section": null,
+                    "text": "shark attacks on humans"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "31395e1bba020a69b9d17e9f5469b8f41bf7934e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Ciampaglio asserted that dental similarities between C. megalodon and the great white are superficial with noticeable "
+                },
+                {
+                    "entity": "enwiki:Morphometrics",
+                    "entity_name": "Morphometrics",
+                    "link_section": null,
+                    "text": "morphometric"
+                },
+                {
+                    "text": " differences between them, and that these findings are sufficient to warrant a separate genus. However, some Carcharodon proponents (i.e., M. D. Gottfried, and R. E. Fordyce) provided more arguments for a close relationship between the megatooth and the great white. With respect to the recent controversy regarding fossil "
+                },
+                {
+                    "entity": "enwiki:Lamnidae",
+                    "entity_name": "Lamnidae",
+                    "link_section": null,
+                    "text": "lamnid shark"
+                },
+                {
+                    "text": " relationships, overall morphology \u2013 particularly the internal calcification patterns \u2013 of the great white shark vertebral centra have been compared to well-preserved fossil centra from the megatooth, including C. megalodon and C. angustidens. The morphological similarity of these comparisons supports a close relationship of the giant fossil megatooth species to extant whites."
+                }
+            ],
+            "para_id": "a92d38bdfa0627e40ab66b5d5f633bdbd402ecf6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "More than any documented bite incident, "
+                },
+                {
+                    "entity": "enwiki:Peter%20Benchley",
+                    "entity_name": "Peter Benchley",
+                    "link_section": null,
+                    "text": "Peter Benchley"
+                },
+                {
+                    "text": "'s best-selling novel "
+                },
+                {
+                    "entity": "enwiki:Jaws%20(novel)",
+                    "entity_name": "Jaws (novel)",
+                    "link_section": null,
+                    "text": "Jaws"
+                },
+                {
+                    "text": " and the subsequent "
+                },
+                {
+                    "entity": "enwiki:Jaws%20(film)",
+                    "entity_name": "Jaws (film)",
+                    "link_section": null,
+                    "text": "1975 film adaptation"
+                },
+                {
+                    "text": " directed by "
+                },
+                {
+                    "entity": "enwiki:Steven%20Spielberg",
+                    "entity_name": "Steven Spielberg",
+                    "link_section": null,
+                    "text": "Steven Spielberg"
+                },
+                {
+                    "text": " provided the great white shark with the image of being a \""
+                },
+                {
+                    "entity": "enwiki:Man-eater",
+                    "entity_name": "Man-eater",
+                    "link_section": null,
+                    "text": "man eater"
+                },
+                {
+                    "text": "\" in the public mind. While great white sharks have killed humans in at least 74 documented unprovoked bite incidents, they typically do not target them: for example, in the "
+                },
+                {
+                    "entity": "enwiki:Mediterranean%20Sea",
+                    "entity_name": "Mediterranean Sea",
+                    "link_section": null,
+                    "text": "Mediterranean Sea"
+                },
+                {
+                    "text": " there have been 31 confirmed bite incidents against humans in the last two centuries, most of which were non-fatal. Many of the incidents seemed to be \"test-bites\". Great white sharks also test-bite "
+                },
+                {
+                    "entity": "enwiki:Buoy",
+                    "entity_name": "Buoy",
+                    "link_section": null,
+                    "text": "buoy"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Flotsam,%20jetsam,%20lagan,%20and%20derelict",
+                    "entity_name": "Flotsam, jetsam, lagan, and derelict",
+                    "link_section": null,
+                    "text": "flotsam"
+                },
+                {
+                    "text": ", and other unfamiliar objects, and they might grab a human or a "
+                },
+                {
+                    "entity": "enwiki:Surfboard",
+                    "entity_name": "Surfboard",
+                    "link_section": null,
+                    "text": "surfboard"
+                },
+                {
+                    "text": " to identify what it is."
+                }
+            ],
+            "para_id": "e94a4baf9f29a81d295218a7aeffc4b97cde6faa"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2002, paleontologist Kenshu Shimada of "
+                },
+                {
+                    "entity": "enwiki:DePaul%20University",
+                    "entity_name": "DePaul University",
+                    "link_section": null,
+                    "text": "DePaul University"
+                },
+                {
+                    "text": " proposed a linear relationship between tooth crown height and total length in great white sharks after conducting anatomical analysis of several specimens. This relationship is expressed as: total length in centimetres = a + bx, where a is a constant, b is the slope of the line and x is the crown height of tooth in millimetres. This relationship allowed any tooth to be used for the estimate. The crown height was measured as maximum vertical enameloid height on the labial side. Shimada pointed out that previously proposed methods were based on weaker evaluation of dental homology, and that the growth rate between the crown and root is not "
+                },
+                {
+                    "entity": "enwiki:Isometry",
+                    "entity_name": "Isometry",
+                    "link_section": null,
+                    "text": "isometric"
+                },
+                {
+                    "text": ", which he considered in his model. Furthermore, this relationship could be used to predict the total length of sharks that are morphologically similar to the great white shark, such as C. megalodon. Using this model, the upper anterior tooth (with maximum height of ) possessed by Gottfried and colleagues corresponded to a total length of . In 2010, shark researchers Catalina Pimiento, Dana J. Ehret, Bruce J. MacFadden and Gordon Hubbell estimated the total length of C. megalodon on the basis of Shimada's method. Among the specimens found in the Gatun Formation of Panama, specimen number 237956 yielded a total length of . Later on, shark researchers (including Pimiento, Ehret and MacFadden) revisited the Gatun Formation and recovered additional specimens. Specimen number 257579 yielded a total length of  on the basis of Shimada's method."
+                }
+            ],
+            "para_id": "6b8ece7ca85e7b882d8be44bfda01c0383eb6432"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Although sharks rarely bite humans, the tiger shark is reported to be responsible for a large percentage of fatal shark bite incidents, and is sometimes regarded as one of the most dangerous shark species. They often visit shallow reefs, harbors, and canals, creating the potential for encounter with humans. The tiger shark also dwells in river mouths and other runoff-rich water. While the tiger shark is considered to be one of the sharks most dangerous to humans, its bite rate is low. It is second on the list of number of recorded bites on humans, with the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": " being first. On average, three to four shark bites occur per year in Hawaii, but they are rarely fatal. This bite rate is very low considering thousands of people swim, surf, and dive in Hawaiian waters every day. Human interactions with tiger sharks in Hawaiian waters have been shown to increase between September and November, when tiger shark females are believed to migrate to the islands to give birth."
+                }
+            ],
+            "para_id": "d03433f66e3b84525f4310168701aed838372bfe"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The great white shark has no known natural predators other than the "
+                },
+                {
+                    "entity": "enwiki:Killer%20whale",
+                    "entity_name": "Killer whale",
+                    "link_section": null,
+                    "text": "killer whale"
+                },
+                {
+                    "text": ". The great white shark is arguably the world's largest known extant macropredatory fish, and is one of the primary predators of "
+                },
+                {
+                    "entity": "enwiki:Marine%20mammal",
+                    "entity_name": "Marine mammal",
+                    "link_section": null,
+                    "text": "marine mammal"
+                },
+                {
+                    "text": "s. It is also known to prey upon a variety of other marine animals, including "
+                },
+                {
+                    "entity": "enwiki:Fish",
+                    "entity_name": "Fish",
+                    "link_section": null,
+                    "text": "fish"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Seabird",
+                    "entity_name": "Seabird",
+                    "link_section": null,
+                    "text": "seabird"
+                },
+                {
+                    "text": "s. It is the only known surviving "
+                },
+                {
+                    "entity": "enwiki:Species",
+                    "entity_name": "Species",
+                    "link_section": null,
+                    "text": "species"
+                },
+                {
+                    "text": " of its "
+                },
+                {
+                    "entity": "enwiki:Genus",
+                    "entity_name": "Genus",
+                    "link_section": null,
+                    "text": "genus"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Carcharodon",
+                    "entity_name": "Carcharodon",
+                    "link_section": null,
+                    "text": "Carcharodon"
+                },
+                {
+                    "text": ", and is ranked first in having the most recorded shark bite incidents on humans. The "
+                },
+                {
+                    "entity": "enwiki:International%20Union%20for%20Conservation%20of%20Nature",
+                    "entity_name": "International Union for Conservation of Nature",
+                    "link_section": null,
+                    "text": "IUCN"
+                },
+                {
+                    "text": " list the great white shark as a "
+                },
+                {
+                    "entity": "enwiki:Vulnerable%20species",
+                    "entity_name": "Vulnerable species",
+                    "link_section": null,
+                    "text": "vulnerable species"
+                },
+                {
+                    "text": ", while it is included in "
+                },
+                {
+                    "entity": "enwiki:CITES",
+                    "entity_name": "CITES",
+                    "link_section": "Appendix_II",
+                    "text": "Appendix II"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:CITES",
+                    "entity_name": "CITES",
+                    "link_section": null,
+                    "text": "CITES"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "de3f6b70768c3367b55066f54b5f0798902e409c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Contrary to popular belief, only a few sharks are dangerous to humans. Of more than 568 "
+                },
+                {
+                    "entity": "enwiki:List%20of%20sharks",
+                    "entity_name": "List of sharks",
+                    "link_section": null,
+                    "text": "shark species"
+                },
+                {
+                    "text": ", only four have been involved in a significant number of fatal unprovoked attacks on humans: the "
+                },
+                {
+                    "entity": "enwiki:Great%20white%20shark",
+                    "entity_name": "Great white shark",
+                    "link_section": null,
+                    "text": "great white shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "tiger shark"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Bull%20shark",
+                    "entity_name": "Bull shark",
+                    "link_section": null,
+                    "text": "bull shark"
+                },
+                {
+                    "text": ", and the "
+                },
+                {
+                    "entity": "enwiki:Oceanic%20whitetip%20shark",
+                    "entity_name": "Oceanic whitetip shark",
+                    "link_section": null,
+                    "text": "oceanic whitetip shark"
+                },
+                {
+                    "text": ". These sharks, being large, powerful predators, may sometimes attack and kill humans; however, they have all been filmed in open water by unprotected divers."
+                }
+            ],
+            "para_id": "07cfb178f9f3e38d4286996e6d4b39fffa1c3bb2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Great white sharks are "
+                },
+                {
+                    "entity": "enwiki:Carnivore",
+                    "entity_name": "Carnivore",
+                    "link_section": null,
+                    "text": "carnivorous"
+                },
+                {
+                    "text": " and prey upon "
+                },
+                {
+                    "entity": "enwiki:Fish",
+                    "entity_name": "Fish",
+                    "link_section": null,
+                    "text": "fish"
+                },
+                {
+                    "text": " (e.g. "
+                },
+                {
+                    "entity": "enwiki:Tuna",
+                    "entity_name": "Tuna",
+                    "link_section": null,
+                    "text": "tuna"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Batoidea",
+                    "entity_name": "Batoidea",
+                    "link_section": null,
+                    "text": "rays"
+                },
+                {
+                    "text": ", other "
+                },
+                {
+                    "entity": "enwiki:Shark",
+                    "entity_name": "Shark",
+                    "link_section": null,
+                    "text": "shark"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Cetacea",
+                    "entity_name": "Cetacea",
+                    "link_section": null,
+                    "text": "cetaceans"
+                },
+                {
+                    "text": " (i.e., "
+                },
+                {
+                    "entity": "enwiki:Dolphin",
+                    "entity_name": "Dolphin",
+                    "link_section": null,
+                    "text": "dolphin"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Porpoise",
+                    "entity_name": "Porpoise",
+                    "link_section": null,
+                    "text": "porpoise"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Whale",
+                    "entity_name": "Whale",
+                    "link_section": null,
+                    "text": "whale"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Pinniped",
+                    "entity_name": "Pinniped",
+                    "link_section": null,
+                    "text": "pinniped"
+                },
+                {
+                    "text": "s (e.g. "
+                },
+                {
+                    "entity": "enwiki:Earless%20seal",
+                    "entity_name": "Earless seal",
+                    "link_section": null,
+                    "text": "seals"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Fur%20seal",
+                    "entity_name": "Fur seal",
+                    "link_section": null,
+                    "text": "fur seal"
+                },
+                {
+                    "text": "s, and "
+                },
+                {
+                    "entity": "enwiki:Sea%20lion",
+                    "entity_name": "Sea lion",
+                    "link_section": null,
+                    "text": "sea lion"
+                },
+                {
+                    "text": "s), "
+                },
+                {
+                    "entity": "enwiki:Sea%20turtle",
+                    "entity_name": "Sea turtle",
+                    "link_section": null,
+                    "text": "sea turtle"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Sea%20otter",
+                    "entity_name": "Sea otter",
+                    "link_section": null,
+                    "text": "sea otter"
+                },
+                {
+                    "text": "s (Enhydra lutris) and "
+                },
+                {
+                    "entity": "enwiki:Seabird",
+                    "entity_name": "Seabird",
+                    "link_section": null,
+                    "text": "seabirds"
+                },
+                {
+                    "text": ". Great whites have also been known to eat objects that they are unable to digest. Juvenile white sharks predominantly prey on fish including other elasmobranchs, as their jaws are not strong enough to withstand the forces required to attack larger prey such as pinnipeds and cetaceans until they reach a length of  or more, at which point their jaw cartilage mineralizes enough to withstand the impact of biting into larger prey species. Upon approaching a length of nearly , great white sharks begin to target predominately "
+                },
+                {
+                    "entity": "enwiki:Marine%20mammal",
+                    "entity_name": "Marine mammal",
+                    "link_section": null,
+                    "text": "marine mammal"
+                },
+                {
+                    "text": "s for food, though individual sharks seem to specialize in different types of prey depending on their preferences. They seem to be highly opportunistic. These sharks prefer prey with a high content of energy-rich fat. Shark expert Peter Klimley used a rod-and-reel rig and trolled carcasses of a seal, a pig, and a sheep from his boat in the South "
+                },
+                {
+                    "entity": "enwiki:Farallon%20Islands",
+                    "entity_name": "Farallon Islands",
+                    "link_section": null,
+                    "text": "Farallons"
+                },
+                {
+                    "text": ". The sharks attacked all three baits but rejected the sheep carcass."
+                }
+            ],
+            "para_id": "df555d172e82f8611840d9463e3a1b70b638d864"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One contender in maximum size among the predatory sharks is the "
+                },
+                {
+                    "entity": "enwiki:Tiger%20shark",
+                    "entity_name": "Tiger shark",
+                    "link_section": null,
+                    "text": "tiger shark"
+                },
+                {
+                    "text": " (Galeocerdo cuvier). While tiger sharks which are typically both a few feet smaller and have a leaner, less heavy body structure than white sharks, have been confirmed to reach at least  in the length, an unverified specimen was reported to have measured  in length and weighed , more than two times heavier than the largest confirmed specimen at . Some other macropredatory sharks such as the "
+                },
+                {
+                    "entity": "enwiki:Greenland%20shark",
+                    "entity_name": "Greenland shark",
+                    "link_section": null,
+                    "text": "Greenland shark"
+                },
+                {
+                    "text": " (Somniosus microcephalus) and the "
+                },
+                {
+                    "entity": "enwiki:Pacific%20sleeper%20shark",
+                    "entity_name": "Pacific sleeper shark",
+                    "link_section": null,
+                    "text": "Pacific sleeper shark"
+                },
+                {
+                    "text": " (S. pacificus) are also reported to rival these sharks in length (but probably weigh a bit less since they are more slender in build than a great white) in exceptional cases. The question of maximum weight is complicated by the unresolved question of whether or not to include the shark's stomach contents when weighing the shark. With a single bite a great white can take in up to  of flesh, and can also consume several hundred kilograms of food."
+                }
+            ],
+            "para_id": "8c2fa32258a0071ad7353cc2a3e9f63c82dd4ad2"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Taxonomy",
+            "heading_id": "enwiki:Great%20white%20shark/Taxonomy"
+        },
+        {
+            "heading": "Distribution and habitat",
+            "heading_id": "enwiki:Great%20white%20shark/Distribution%20and%20habitat"
+        },
+        {
+            "heading": "Anatomy and appearance",
+            "heading_id": "enwiki:Great%20white%20shark/Anatomy%20and%20appearance"
+        },
+        {
+            "heading": "Ecology and behavior",
+            "heading_id": "enwiki:Great%20white%20shark/Ecology%20and%20behavior"
+        },
+        {
+            "heading": "Conservation status",
+            "heading_id": "enwiki:Great%20white%20shark/Conservation%20status"
+        },
+        {
+            "heading": "Relationship with humans",
+            "heading_id": "enwiki:Great%20white%20shark/Relationship%20with%20humans"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Great%20white%20shark",
+    "title": "Great white shark"
+}

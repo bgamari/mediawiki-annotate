@@ -1,0 +1,20 @@
+{
+  "title": "Food Distribution",
+  "run_id": "TREMA-UNH",
+  "squid" : "tqa:tmp",
+  "query_facets" : [ {"heading_id":"H1", "heading":"Conflicts Over Food"}
+                  , {"heading_id":"H2", "heading":"Food Distribution"}
+                  ,{"heading_id":"H3", "heading":"Food Shortages"}
+                  ,{"heading_id":"H4", "heading": "Air Scarcity"}
+                  ,{"heading_id":"H5", "heading": "Effects of Changing Diets"}
+                  , {"heading_id":"H6", "heading":"Diets"}],
+
+  "paragraphs" : [
+    {"para_id": "001001",
+    "para_body": [{"text": "Some other passage"}]
+    },
+    {"para_id": "0e9e8ba03621ff7b47a49c4826b1e983cc6bac0f",
+    "para_body": [{"text":"The acute shortage of water resources give water a decisive role in the regional conflicts arose in the course of history of Balochistan. Therefore, in Balochistan, the possession of water resources is more important than ownership of land itself. Hence afterward a complex system for the collection, channeling and distribution of water were developed in Balochistan. Similarly, the distribution and unbiased flow of water to different stockholders also necessitate the importance of different societal classes in Balochistan in general and particularly in Makoran. For instance, sarrishta (literally, head of the chain) is responsible for administration of channel. He normally owns the largest water quota. Under sarrishta, there are several heads of owners issadar who also possessed larger water quotas. The social hierarchy within Baloch society of Makoran depends upon the possession of largest quotas of water. The role of sarrishta in some cases hierarchical and passing from generations within the family and he must have the knowledge of the criteria of unbiased distribution of water among different issadar." }]
+    }
+  ]
+}

@@ -1,0 +1,3045 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "065c9f73ab39e758050ee74dad75a365940c695f",
+            "rank": 1,
+            "rank_score": 0.8685448899582005,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "ec1bd94e6dae2ecd30a41e3222d6ea351da954cb",
+            "rank": 2,
+            "rank_score": 0.850001413133793,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "7d51bd4211f593fd8f0a0997659997b6fa272ab7",
+            "rank": 3,
+            "rank_score": 0.8377785427968121,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "b21a5e13402f13c4d502286833f7c5e145544c04",
+            "rank": 4,
+            "rank_score": 0.8337026002089689,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "be79dd0ac779bf342727812e9b63247b768109ee",
+            "rank": 5,
+            "rank_score": 0.8268166883382998,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "30550202425a6c791271f57e67fb783cd5886265",
+            "rank": 6,
+            "rank_score": 0.8191668284571672,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "318aba2ac04e88cbbbb086bcc8bde8e3ec2c5306",
+            "rank": 7,
+            "rank_score": 0.8182558351536419,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "d36fe6fb20ce8104cb0d2f33fb1c8ae140c082f2",
+            "rank": 8,
+            "rank_score": 0.8107735848487655,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "971b97ed2dd8854379cdbde9140a7c41f872f68b",
+            "rank": 9,
+            "rank_score": 0.8055822556876189,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "d4f42009fc961a86e3dd999acdc8bf7ed69c8859",
+            "rank": 10,
+            "rank_score": 0.8020708523658023,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "fc38319ec3ac054b445e67bd783fd083e63a1988",
+            "rank": 11,
+            "rank_score": 0.8014805797237202,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "cf38b7cb4bb76f5bafc31a05d066e54bba1487f3",
+            "rank": 12,
+            "rank_score": 0.7977306559954488,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "0590fc1299e214463c6898ea3d96ef4bcf5fe494",
+            "rank": 13,
+            "rank_score": 0.7887523752253677,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "88f858c0e84c34cc64346b6bfc215c20db982900",
+            "rank": 14,
+            "rank_score": 0.7757861527747396,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "b68808f14c6fa8753ea84c479bc7f5dba992a58e",
+            "rank": 15,
+            "rank_score": 0.7545422077544619,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "d1dd2a1a4ff2a233ed624802ae1239c9608216eb",
+            "rank": 16,
+            "rank_score": 0.7522159740647982,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "d0c60d73d4484823514cce04de4b15d907ab6c53",
+            "rank": 17,
+            "rank_score": 0.7475419528608018,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "57ce788b24ced2b808e4ab2002463d0cf3de11ba",
+            "rank": 18,
+            "rank_score": 0.7456066025992905,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "5d614b3230ec42b7f81ea5a6b7bfbd358568b355",
+            "rank": 19,
+            "rank_score": 0.7452130951046236,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "eac3c452a6a3bffc9e94fa647acbb84b9733d44c",
+            "rank": 20,
+            "rank_score": 0.7330262851449344,
+            "section_path": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 1,
+            "rank_score": 0.9519625378814929,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 2,
+            "rank_score": 0.9063442729363607,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 3,
+            "rank_score": 0.8856612506553916,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 4,
+            "rank_score": 0.8843701799294671,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 5,
+            "rank_score": 0.8611098728057965,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 6,
+            "rank_score": 0.8514124169962392,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 7,
+            "rank_score": 0.8458239311665403,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 8,
+            "rank_score": 0.8448634243934166,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf",
+            "rank": 9,
+            "rank_score": 0.8427413247063302,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 10,
+            "rank_score": 0.841282402682709,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649",
+            "rank": 11,
+            "rank_score": 0.8313685483696456,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f",
+            "rank": 12,
+            "rank_score": 0.8284114053313847,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 13,
+            "rank_score": 0.8267959825735556,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 14,
+            "rank_score": 0.8257762184139068,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869",
+            "rank": 15,
+            "rank_score": 0.8249405504948046,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e",
+            "rank": 16,
+            "rank_score": 0.8239397404060084,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7",
+            "rank": 17,
+            "rank_score": 0.8225819571782345,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3",
+            "rank": 18,
+            "rank_score": 0.8225800402741164,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "2c6640abe1be720b53013ed3029ed6324e60ed94",
+            "rank": 19,
+            "rank_score": 0.8186080580595743,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "1ebe29bf36be4f394f4c155747360192c9615038",
+            "rank": 20,
+            "rank_score": 0.8160333392478751,
+            "section_path": "enwiki:Gunshot%20wound/Research"
+        },
+        {
+            "para_id": "14ea6caeddfea9a8dfb952b63eab85481074a6f6",
+            "rank": 1,
+            "rank_score": 0.9377255686715995,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 2,
+            "rank_score": 0.9198832354997475,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 3,
+            "rank_score": 0.9064206983050246,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 4,
+            "rank_score": 0.8734835749918854,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "e099b3b4fe4b62e8c31965cf5bf27715df2fda40",
+            "rank": 5,
+            "rank_score": 0.8652602907030603,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 6,
+            "rank_score": 0.8515374899998163,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "6167e14f043bd76c9dc2f34eadcd49d729f6d0ba",
+            "rank": 7,
+            "rank_score": 0.8499332159703856,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 8,
+            "rank_score": 0.8496657525398577,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "68a8543c901bbbd130ca92747167d92e2d5ba098",
+            "rank": 9,
+            "rank_score": 0.8426292220359692,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 10,
+            "rank_score": 0.8419882284447237,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "46716c505c50606055f03c74b0c20076bd1ce0ee",
+            "rank": 11,
+            "rank_score": 0.8370950004436897,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 12,
+            "rank_score": 0.8337674749729347,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 13,
+            "rank_score": 0.8322856046247566,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "2cdb0d54e3fb1eff6e35272b59a4ad64de783fbf",
+            "rank": 14,
+            "rank_score": 0.8288818493555612,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "6ea743e02cc408878a4cd509115883761300279a",
+            "rank": 15,
+            "rank_score": 0.8286086059905816,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 16,
+            "rank_score": 0.8225423661936055,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 17,
+            "rank_score": 0.8225059496345117,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "0329af7e576c4912f13683d58bcf2f1263a3478f",
+            "rank": 18,
+            "rank_score": 0.8206475174238633,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "7736971ca0e6ebfc01f4fc973de7d2f7d5ebe8c9",
+            "rank": 19,
+            "rank_score": 0.8191387490318668,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 20,
+            "rank_score": 0.8177397605498676,
+            "section_path": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 1,
+            "rank_score": 0.8787494747650375,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 2,
+            "rank_score": 0.8352293217422404,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 3,
+            "rank_score": 0.8188448444621068,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 4,
+            "rank_score": 0.8178212246452756,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 5,
+            "rank_score": 0.7934082928816271,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 6,
+            "rank_score": 0.7827769050709761,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 7,
+            "rank_score": 0.7823600473981174,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 8,
+            "rank_score": 0.7818082034084932,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf",
+            "rank": 9,
+            "rank_score": 0.7780735840265078,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 10,
+            "rank_score": 0.7770025490561709,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 11,
+            "rank_score": 0.766462203260079,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649",
+            "rank": 12,
+            "rank_score": 0.7647444371603055,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f",
+            "rank": 13,
+            "rank_score": 0.7622908883671898,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e",
+            "rank": 14,
+            "rank_score": 0.7607085724673964,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869",
+            "rank": 15,
+            "rank_score": 0.7599189106343726,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7",
+            "rank": 16,
+            "rank_score": 0.7595125847715102,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 17,
+            "rank_score": 0.7583478763114072,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3",
+            "rank": 18,
+            "rank_score": 0.7573995767107908,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "1ebe29bf36be4f394f4c155747360192c9615038",
+            "rank": 19,
+            "rank_score": 0.7550780398935288,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "2c6640abe1be720b53013ed3029ed6324e60ed94",
+            "rank": 20,
+            "rank_score": 0.7529818403329929,
+            "section_path": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "para_id": "2cea5f4754ac11fe1a796c9de06bfb2331a28fd3",
+            "rank": 1,
+            "rank_score": 0.9222850224328643,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "c1a8b63f81b658f1d597a487937c159c67ef330f",
+            "rank": 2,
+            "rank_score": 0.8994663744818022,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "0917ca74e156c20db6a20a80cbe248b0e3c615d5",
+            "rank": 3,
+            "rank_score": 0.8781982934600657,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 4,
+            "rank_score": 0.8525540194259403,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "1e63cdfc2048d1c46f16917c069d2bddbbefe2bd",
+            "rank": 5,
+            "rank_score": 0.8433993602717057,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3",
+            "rank": 6,
+            "rank_score": 0.8392756334169306,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 7,
+            "rank_score": 0.8318498857346885,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "69d31e72efd095746e75ffea456c5989ebdfec4b",
+            "rank": 8,
+            "rank_score": 0.8266892675783972,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 9,
+            "rank_score": 0.8266474789418721,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 10,
+            "rank_score": 0.807545884324142,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 11,
+            "rank_score": 0.8002212204132464,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 12,
+            "rank_score": 0.7931644432296461,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "5483127e4965f714b1ae7f3ccfa63171ea9bee8e",
+            "rank": 13,
+            "rank_score": 0.7902261601383834,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 14,
+            "rank_score": 0.778096565089871,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "d90e3006d8fa01b572098f3949c4275282b7ff73",
+            "rank": 15,
+            "rank_score": 0.7751052326435215,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 16,
+            "rank_score": 0.7722613911886997,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 17,
+            "rank_score": 0.7678020399015675,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "01aa5994d26524d5dc6dbefbe5c52026e44506c5",
+            "rank": 18,
+            "rank_score": 0.7636545525641684,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "5b6cdcd48b4995d208f9489685f39f2316e26ce7",
+            "rank": 19,
+            "rank_score": 0.7622485395512784,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 20,
+            "rank_score": 0.7613235692821607,
+            "section_path": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 1,
+            "rank_score": 0.9449979070900196,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 2,
+            "rank_score": 0.8984483866779286,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 3,
+            "rank_score": 0.8812125839182938,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 4,
+            "rank_score": 0.8806384069067225,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "801b96ef719b4ce216b28632d1650ccf213ca0ef",
+            "rank": 5,
+            "rank_score": 0.8650311494784124,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 6,
+            "rank_score": 0.8570652989068304,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 7,
+            "rank_score": 0.8439013953392309,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 8,
+            "rank_score": 0.8411044599847559,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 9,
+            "rank_score": 0.839526638095514,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 10,
+            "rank_score": 0.8360581983466211,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf",
+            "rank": 11,
+            "rank_score": 0.835082427841811,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649",
+            "rank": 12,
+            "rank_score": 0.827530443918774,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 13,
+            "rank_score": 0.821556917053873,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869",
+            "rank": 14,
+            "rank_score": 0.8188505920876767,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f",
+            "rank": 15,
+            "rank_score": 0.818372925788846,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e",
+            "rank": 16,
+            "rank_score": 0.8181991823013259,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 17,
+            "rank_score": 0.813267599524394,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7",
+            "rank": 18,
+            "rank_score": 0.8114761337822132,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "128c217979c1a66c883ec0be8aa1bea268081335",
+            "rank": 19,
+            "rank_score": 0.8098103593297942,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "2c6640abe1be720b53013ed3029ed6324e60ed94",
+            "rank": 20,
+            "rank_score": 0.8095514083705722,
+            "section_path": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 1,
+            "rank_score": 0.9384907564710883,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 2,
+            "rank_score": 0.9053965543531717,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 3,
+            "rank_score": 0.8932760124647183,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 4,
+            "rank_score": 0.8809564160279393,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 5,
+            "rank_score": 0.8687671341206409,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 6,
+            "rank_score": 0.8686158773087097,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 7,
+            "rank_score": 0.8525960593340156,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 8,
+            "rank_score": 0.8416309166918117,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 9,
+            "rank_score": 0.84065449145598,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf",
+            "rank": 10,
+            "rank_score": 0.8345680008085634,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 11,
+            "rank_score": 0.8328676925531175,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649",
+            "rank": 12,
+            "rank_score": 0.8237335303288421,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 13,
+            "rank_score": 0.8230933482566447,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "14ea6caeddfea9a8dfb952b63eab85481074a6f6",
+            "rank": 14,
+            "rank_score": 0.821943595710215,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869",
+            "rank": 15,
+            "rank_score": 0.8195865293124277,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e",
+            "rank": 16,
+            "rank_score": 0.8189064055300102,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f",
+            "rank": 17,
+            "rank_score": 0.8178685854473257,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7",
+            "rank": 18,
+            "rank_score": 0.8128160160442213,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "91e363afd61e991797d3cdd6c49d27c44c848afc",
+            "rank": 19,
+            "rank_score": 0.8102508682773492,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3",
+            "rank": 20,
+            "rank_score": 0.8081468356612016,
+            "section_path": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350",
+            "rank": 1,
+            "rank_score": 0.9523613933370196,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b",
+            "rank": 2,
+            "rank_score": 0.9076980291242485,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb",
+            "rank": 3,
+            "rank_score": 0.8875635932441883,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367",
+            "rank": 4,
+            "rank_score": 0.8866699340973991,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241",
+            "rank": 5,
+            "rank_score": 0.8630638935832805,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1",
+            "rank": 6,
+            "rank_score": 0.8532417069252716,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe",
+            "rank": 7,
+            "rank_score": 0.8476916343733669,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0",
+            "rank": 8,
+            "rank_score": 0.8466023347521628,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf",
+            "rank": 9,
+            "rank_score": 0.8442344368865686,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0",
+            "rank": 10,
+            "rank_score": 0.8431214531859694,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649",
+            "rank": 11,
+            "rank_score": 0.8331014800126026,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f",
+            "rank": 12,
+            "rank_score": 0.829185195750255,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff",
+            "rank": 13,
+            "rank_score": 0.8283947605122697,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869",
+            "rank": 14,
+            "rank_score": 0.8264974271478017,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c",
+            "rank": 15,
+            "rank_score": 0.8259132156521034,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e",
+            "rank": 16,
+            "rank_score": 0.8253762013543399,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7",
+            "rank": 17,
+            "rank_score": 0.8238117749595563,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3",
+            "rank": 18,
+            "rank_score": 0.8232554825944116,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "2c6640abe1be720b53013ed3029ed6324e60ed94",
+            "rank": 19,
+            "rank_score": 0.8193648597286818,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "para_id": "1ebe29bf36be4f394f4c155747360192c9615038",
+            "rank": 20,
+            "rank_score": 0.8166232964739841,
+            "section_path": "enwiki:Gunshot%20wound/History"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "A gunshot is the discharge of a "
+                },
+                {
+                    "entity": "enwiki:Firearm",
+                    "entity_name": "Firearm",
+                    "link_section": null,
+                    "text": "firearm"
+                },
+                {
+                    "text": ", producing a mechanical "
+                },
+                {
+                    "entity": "enwiki:Sound%20effect",
+                    "entity_name": "Sound effect",
+                    "link_section": null,
+                    "text": "sound effect"
+                },
+                {
+                    "text": " and a chemical "
+                },
+                {
+                    "entity": "enwiki:Gunshot%20residue",
+                    "entity_name": "Gunshot residue",
+                    "link_section": null,
+                    "text": "gunshot residue"
+                },
+                {
+                    "text": ". The term can also refer to a "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wound"
+                },
+                {
+                    "text": " caused by such a discharge. Multiple discharges of a firearm or firearms are referred to as gunfire. The word can connote either the sound of a gun firing, the projectiles that were fired, or both.  For example, the statement \"gunfire came from the next street\" could either mean the sound of discharge, or it could mean the bullets themselves.  It is better to be a bit more specific while writing however. \"The sound of gunfire\" or \"we came under gunfire\" would be more descriptive and prevent confusion.  In the latter phrase, in particular, \"fire\" is more commonly used (i.e. \"under fire\"), as both words hold the same general meaning within the proper context."
+                }
+            ],
+            "para_id": "065c9f73ab39e758050ee74dad75a365940c695f"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Hieronymus%20Brunschwig",
+                    "entity_name": "Hieronymus Brunschwig",
+                    "link_section": null,
+                    "text": "Hieronymus Brunschwig"
+                },
+                {
+                    "text": " argued that infection of gunshot wounds was a result of poisoning by "
+                },
+                {
+                    "entity": "enwiki:Gunpowder",
+                    "entity_name": "Gunpowder",
+                    "link_section": null,
+                    "text": "gunpowder"
+                },
+                {
+                    "text": ", which provided the rationale for "
+                },
+                {
+                    "entity": "enwiki:Cauterization",
+                    "entity_name": "Cauterization",
+                    "link_section": null,
+                    "text": "cauterizing"
+                },
+                {
+                    "text": " wounds. "
+                },
+                {
+                    "entity": "enwiki:Ambroise%20Par%C3%A9",
+                    "entity_name": "Ambroise Par\u00e9",
+                    "link_section": null,
+                    "text": "Ambroise Par\u00e9"
+                },
+                {
+                    "text": " wrote in his 1545 book, The Method of Curing Wounds Caused by Arquebus and Firearms, that wounds should be sealed rather than cauterized. "
+                },
+                {
+                    "entity": "enwiki:John%20Hunter%20(surgeon)",
+                    "entity_name": "John Hunter (surgeon)",
+                    "link_section": null,
+                    "text": "John Hunter"
+                },
+                {
+                    "text": " argued that infection was not caused by poisoning."
+                }
+            ],
+            "para_id": "ec1bd94e6dae2ecd30a41e3222d6ea351da954cb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A contact shot is defined as a "
+                },
+                {
+                    "entity": "enwiki:Gunshot",
+                    "entity_name": "Gunshot",
+                    "link_section": null,
+                    "text": "gunshot"
+                },
+                {
+                    "text": " wound incurred while the "
+                },
+                {
+                    "entity": "enwiki:Muzzle%20(firearms)",
+                    "entity_name": "Muzzle (firearms)",
+                    "link_section": null,
+                    "text": "muzzle"
+                },
+                {
+                    "text": " of the "
+                },
+                {
+                    "entity": "enwiki:Firearm",
+                    "entity_name": "Firearm",
+                    "link_section": null,
+                    "text": "firearm"
+                },
+                {
+                    "text": " is in direct contact with the body at the moment of discharge. Contact shots are often the result of close range gunfight, "
+                },
+                {
+                    "entity": "enwiki:Suicide",
+                    "entity_name": "Suicide",
+                    "link_section": null,
+                    "text": "suicide"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Capital%20punishment",
+                    "entity_name": "Capital punishment",
+                    "link_section": null,
+                    "text": "execution"
+                },
+                {
+                    "text": ". Some  "
+                },
+                {
+                    "entity": "enwiki:Slaughterhouse",
+                    "entity_name": "Slaughterhouse",
+                    "link_section": null,
+                    "text": "slaughterhouse"
+                },
+                {
+                    "text": "s use contact shots with firearms to stun or kill "
+                },
+                {
+                    "entity": "enwiki:Livestock",
+                    "entity_name": "Livestock",
+                    "link_section": null,
+                    "text": "livestock"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "7d51bd4211f593fd8f0a0997659997b6fa272ab7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The likelihood that a death will result is significantly increased when either the victim or the attacker has a firearm. For example, the mortality rate for gunshot wounds to the "
+                },
+                {
+                    "entity": "enwiki:Heart",
+                    "entity_name": "Heart",
+                    "link_section": null,
+                    "text": "heart"
+                },
+                {
+                    "text": " is 84%, compared to 30% for people who sustain stab wounds to the heart. "
+                }
+            ],
+            "para_id": "b21a5e13402f13c4d502286833f7c5e145544c04"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The first of major casualties occurred on the "
+                },
+                {
+                    "entity": "enwiki:Act%20Zluky",
+                    "entity_name": "Act Zluky",
+                    "link_section": "Day of Unity of Ukraine",
+                    "text": "Day of Unity of Ukraine"
+                },
+                {
+                    "text": ", 22 January 2014. Four people permanently lost their vision, and one man died by falling from a colonnade. The circumstances of his death are unclear. At least five more people were confirmed dead during the clashes on 22 January, four people perished from gunshot wounds. Medics confirmed bullet wounds to be from firearms such as a "
+                },
+                {
+                    "entity": "enwiki:Dragunov%20sniper%20rifle",
+                    "entity_name": "Dragunov sniper rifle",
+                    "link_section": null,
+                    "text": "Dragunov sniper rifle"
+                },
+                {
+                    "text": " (7.62mm) and possibly a "
+                },
+                {
+                    "entity": "enwiki:Makarov%20pistol",
+                    "entity_name": "Makarov pistol",
+                    "link_section": null,
+                    "text": "Makarov handgun"
+                },
+                {
+                    "text": " (9mm) in the deaths of Nihoyan and Zhyznevskyi. There are photos of "
+                },
+                {
+                    "entity": "enwiki:Berkut%20(special%20police%20force)",
+                    "entity_name": "Berkut (special police force)",
+                    "link_section": null,
+                    "text": "Berkut"
+                },
+                {
+                    "text": " utilising shotguns (such as the "
+                },
+                {
+                    "entity": "enwiki:RPC%20Fort",
+                    "entity_name": "RPC Fort",
+                    "link_section": null,
+                    "text": "RPC Fort"
+                },
+                {
+                    "text": "), and reporters verified the presence of shotgun casings littering the ground. Ukrainian "
+                },
+                {
+                    "entity": "enwiki:Prosecutor%20General%20of%20Ukraine",
+                    "entity_name": "Prosecutor General of Ukraine",
+                    "link_section": null,
+                    "text": "Prosecutor General's Office"
+                },
+                {
+                    "text": " confirmed two deaths from gunshot wounds in Kyiv protests. \"We are pursuing several lines of inquiry into these murders, including [that they may have been committed] by Berkut (special police unit) officers,\" Vitali Sakal, first deputy chief of the Ukrainian Interior Ministry's Main Investigative Directorate told a press conference in Kyiv on Friday...It was established that the weapons and cartridges that were used to commit these killings are hunting cartridges. Such is the conclusion of forensic experts. Most likely, it was a smoothbore firearm. I want to stress that the cartridges which were used to commit the murders were not used by, and are not in use of, the police. They have no such cartridges,\" said first deputy chief of the Ukrainian Interior Ministry's Main Investigative Directorate. The MVS has not ruled out that Berkut officers committed the killings."
+                }
+            ],
+            "para_id": "be79dd0ac779bf342727812e9b63247b768109ee"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Shots were fired as the mob pillaged hardware stores in the "
+                },
+                {
+                    "entity": "enwiki:Central%20business%20district",
+                    "entity_name": "Central business district",
+                    "link_section": null,
+                    "text": "business district"
+                },
+                {
+                    "text": " and entered "
+                },
+                {
+                    "entity": "enwiki:Pawnbroker",
+                    "entity_name": "Pawnbroker",
+                    "link_section": null,
+                    "text": "pawnshop"
+                },
+                {
+                    "text": "s, seeking firearms. Police records showed that more than 1,000 revolvers and "
+                },
+                {
+                    "entity": "enwiki:Shotgun",
+                    "entity_name": "Shotgun",
+                    "link_section": null,
+                    "text": "shotgun"
+                },
+                {
+                    "text": "s were stolen that night. The mob shot at any policeman; seven officers received gunshot wounds, although none of the wounds were serious."
+                }
+            ],
+            "para_id": "30550202425a6c791271f57e67fb783cd5886265"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Aquash's future assassination was supposedly rooted in the mistaken belief that Aquash was a government informant. "
+                },
+                {
+                    "entity": "enwiki:Arlo%20Looking%20Cloud",
+                    "entity_name": "Arlo Looking Cloud",
+                    "link_section": null,
+                    "text": "Looking Cloud"
+                },
+                {
+                    "text": ", along with "
+                },
+                {
+                    "entity": "enwiki:Theda%20Nelson%20Clarke",
+                    "entity_name": "Theda Nelson Clarke",
+                    "link_section": null,
+                    "text": "Theda Nelson Clarke"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:John%20Graham%20(Canadian%20activist)",
+                    "entity_name": "John Graham (Canadian activist)",
+                    "link_section": null,
+                    "text": "John 'John Boy Patton' Graham"
+                },
+                {
+                    "text": ", force Aquash into the back of a car and drive her to a remote part of the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": ". Clarke drove from "
+                },
+                {
+                    "entity": "enwiki:Denver",
+                    "entity_name": "Denver",
+                    "link_section": null,
+                    "text": "Denver"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Colorado",
+                    "entity_name": "Colorado",
+                    "link_section": null,
+                    "text": "Colorado"
+                },
+                {
+                    "text": " to the scene of the shooting on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " in her red Pinto. Aquash is shot execution style in the back of the head and left to die. Her body was discovered on 24 February 1976 on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " at the bottom of a ravine located in close proximity to an isolated highway. Aquash was revealed to have been executed using a gun, as the autopsy showed that the muzzle of the gun had been pressed into the back of her neck. The coroner's report indicated that in addition to the fatal gunshot wound, "
+                },
+                {
+                    "entity": "enwiki:Hypothermia",
+                    "entity_name": "Hypothermia",
+                    "link_section": null,
+                    "text": "exposure"
+                },
+                {
+                    "text": " contributed to the death of Aquash. Aquash's body was found nearly 2 months later on 24 February 1976 on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " at the bottom of a ravine located in close proximity to an isolated highway. Aquash was revealed to have been murdered with a firearm, as the autopsy showed that the muzzle of the gun had been pressed into the back of her neck. The coroner's report indicated that in addition to the fatal gunshot wound, "
+                },
+                {
+                    "entity": "enwiki:Hypothermia",
+                    "entity_name": "Hypothermia",
+                    "link_section": null,
+                    "text": "exposure"
+                },
+                {
+                    "text": " caused the death of Aquash, as her body was frozen by the time it was discovered."
+                }
+            ],
+            "para_id": "318aba2ac04e88cbbbb086bcc8bde8e3ec2c5306"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On 12 December 1975, Aquash was then forcefully moved to the "
+                },
+                {
+                    "entity": "enwiki:Rosebud%20Indian%20Reservation",
+                    "entity_name": "Rosebud Indian Reservation",
+                    "link_section": null,
+                    "text": "Rosebud Indian Reservation"
+                },
+                {
+                    "text": " where AIM supporters refuse to house her. "
+                },
+                {
+                    "entity": "enwiki:Arlo%20Looking%20Cloud",
+                    "entity_name": "Arlo Looking Cloud",
+                    "link_section": null,
+                    "text": "Looking Cloud"
+                },
+                {
+                    "text": " later testified that Nelson-Clarke was given orders to have Anna Mae eliminated. Looking Cloud, along with Theda Nelson Clarke and "
+                },
+                {
+                    "entity": "enwiki:John%20Graham%20(Canadian%20activist)",
+                    "entity_name": "John Graham (Canadian activist)",
+                    "link_section": null,
+                    "text": "John 'John Boy Patton' Graham"
+                },
+                {
+                    "text": ", forced Aquash into the back of a car and drove her to a remote part of the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": ". Clarke drove from "
+                },
+                {
+                    "entity": "enwiki:Denver",
+                    "entity_name": "Denver",
+                    "link_section": null,
+                    "text": "Denver"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Colorado",
+                    "entity_name": "Colorado",
+                    "link_section": null,
+                    "text": "Colorado"
+                },
+                {
+                    "text": " to the scene of the shooting on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " in her red Pinto. Aquash was shot execution style in the back of the head and left to die. Her body was discovered on 24 February 1976 on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " at the bottom of a ravine located in close proximity to an isolated highway. Aquash was revealed to have been executed using a gun, as the autopsy showed that the muzzle of the gun had been pressed into the back of her neck. The coroner's report indicated that in addition to the fatal gunshot wound, "
+                },
+                {
+                    "entity": "enwiki:Hypothermia",
+                    "entity_name": "Hypothermia",
+                    "link_section": null,
+                    "text": "exposure"
+                },
+                {
+                    "text": " contributed to the death of Aquash. Aquash's body was found nearly 2 months later on 24 February 1976 on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " at the bottom of a ravine located in close proximity to an isolated highway. Aquash was revealed to have been murdered with a firearm, as the autopsy showed that the muzzle of the gun had been pressed into the back of her neck. The coroner's report indicated that in addition to the fatal gunshot wound, "
+                },
+                {
+                    "entity": "enwiki:Hypothermia",
+                    "entity_name": "Hypothermia",
+                    "link_section": null,
+                    "text": "exposure"
+                },
+                {
+                    "text": " caused the death of Aquash, as her body was frozen by the time it was discovered."
+                }
+            ],
+            "para_id": "d36fe6fb20ce8104cb0d2f33fb1c8ae140c082f2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Stippling may also refer to the circular pattern of dots created around a gunshot wound when a firearm is discharged in very close proximity to the skin."
+                }
+            ],
+            "para_id": "971b97ed2dd8854379cdbde9140a7c41f872f68b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On 4 October 2009 Horde zla again made headlines during the infamous "
+                },
+                {
+                    "entity": "enwiki:2009%20NK%20%C5%A0iroki%20Brijeg%E2%80%93FK%20Sarajevo%20football%20riots",
+                    "entity_name": "2009 NK \u0160iroki Brijeg\u2013FK Sarajevo football riots",
+                    "link_section": null,
+                    "text": "\u0160iroki Brijeg Football Riots"
+                },
+                {
+                    "text": " which are considered the worst example of "
+                },
+                {
+                    "entity": "enwiki:Hooliganism",
+                    "entity_name": "Hooliganism",
+                    "link_section": null,
+                    "text": "football violence"
+                },
+                {
+                    "text": " in the history of Bosnia and Herzegovina. The riots resulted in the death of Horde zla member Vedran Pulji\u0107 from gunshot wounds, with over 40 other participants of the mayhem sustaining serious injuries, including four nonfatal gunshot wounds.  The riots started with confrontations between members of Horde zla and the hometown Ultras, "
+                },
+                {
+                    "entity": "enwiki:%C5%A0kripari",
+                    "entity_name": "\u0160kripari",
+                    "link_section": null,
+                    "text": "\u0160kripari"
+                },
+                {
+                    "text": ", which subsequently spilled out over the majority of the town. Horde zla burned cars, nearly blew up a gas station and demolished shops while \u0160kripari and residents of \u0160iroki Brijeg stoned visiting fan's buses and shot at them with firearms. Horde Zla also claim multiple counts of severe police brutality which led to the death of Horde zla member Vedran Pulji\u0107 from police inflicted gunshot wounds. There are conflicting reports about who started the violence. Horde zla accused local residents and police of mistreatment on their way to the match, saying that the incident was planned by local politicians and that their buses were separated and parked too far from the stadium which left them open to stoning and attacks. They also claim that initially there were only 30 local policemen present, and they did nothing to prevent the violence.  Local police and residents said Horde Zla fans were the first to attack. A local policeman, Oliver Knezovi\u0107, accused of murdering Pulji\u0107, fled to Zagreb, Croatia from where he could not be extradited to the authorities of Bosnia and Herzegovina, as there is no agreement on this issue between the two countries."
+                }
+            ],
+            "para_id": "d4f42009fc961a86e3dd999acdc8bf7ed69c8859"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One officer exclaimed, \"He's got a gun! Gun!\" One of the officers yelled, \"If you fucking move, I swear to God!\" Then Salamoni was heard on the video saying, \"Lake, he's going for the gun!\" One of the officers aimed his gun at Sterling's body, then three gunshots were heard. The camera panned away just before the camera panned back and three more gunshots were heard. The police officer sitting on Sterling's chest was not in the picture and the other officer who drew the gun, was about  away. His gun was pointed on Sterling, who had a gunshot wound in his chest. According to witness Abdullah Muflahi, the officers then retrieved a firearm from Sterling's pocket. The officers then radioed for "
+                },
+                {
+                    "entity": "enwiki:Emergency%20medical%20services",
+                    "entity_name": "Emergency medical services",
+                    "link_section": null,
+                    "text": "Emergency Medical Services"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "fc38319ec3ac054b445e67bd783fd083e63a1988"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to government figures, over 120 people were injured in the unrest, most of them UDD demonstrators. At least 1 UDD protester was injured from gunshot wounds sustained during the military's attack in Din Daeng, although the Army claimed the wound was not caused by their standard firearm. The UDD claimed that at least 6 demonstrators were killed in the unrest and their bodies hauled away by the military, although the Army rejected the claim. The dead bodies of 2 UDD protesters were found floating in the "
+                },
+                {
+                    "entity": "enwiki:Chao%20Phraya%20River",
+                    "entity_name": "Chao Phraya River",
+                    "link_section": null,
+                    "text": "Chao Phraya River"
+                },
+                {
+                    "text": ", their hands tied behind their backs and their bodies badly beaten, although police had yet to conclude whether their murders were politically motivated. Despite the claims, Army chief Anupong Paochinda swore on his life that no lives were lost as a result of his security operations."
+                }
+            ],
+            "para_id": "cf38b7cb4bb76f5bafc31a05d066e54bba1487f3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to government figures, over 120 people were injured in the unrest, most of them UDD demonstrators. At least one UDD protester injured from gunshot wounds sustained during the military's attack in Din Daeng, although the Army claimed the wound was not caused by their standard firearm. The UDD claimed that at least 6 demonstrators were killed in the unrest and their bodies hauled away by the military, although the Army rejected the claim. The dead bodies of 2 UDD protesters were found floating in the "
+                },
+                {
+                    "entity": "enwiki:Chao%20Phraya%20River",
+                    "entity_name": "Chao Phraya River",
+                    "link_section": null,
+                    "text": "Chao Phraya River"
+                },
+                {
+                    "text": ", their hands tied behind their backs and their bodies badly beaten, although police had yet to conclude whether their murders were politically motivated. On 11 September 2009, The House-appointed committee in charge of investigating the unrest has completed its report saying no death inflicted by crowd control."
+                }
+            ],
+            "para_id": "0590fc1299e214463c6898ea3d96ef4bcf5fe494"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1873, Kerr accidentally discharged his firearm while hunting, receiving a gunshot wound. An infection quickly spread and he died at the house of the Mayor of Peoria on October 31, 1873. He was buried at "
+                },
+                {
+                    "entity": "enwiki:Springdale%20Cemetery",
+                    "entity_name": "Springdale Cemetery",
+                    "link_section": null,
+                    "text": "Springdale Cemetery"
+                },
+                {
+                    "text": " in Peoria."
+                }
+            ],
+            "para_id": "88f858c0e84c34cc64346b6bfc215c20db982900"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Seeing Arnaud felled by gunfire, Magruder, who was wearing body armor, stepped back and drew her sidearm. However, before she could return fire, Logan then shot six bullets at her, one of which struck her in the head, mortally wounding her. Logan then went over to Arnaud and, while standing over his body, shot him four more times, injuring his liver and inducing severe internal bleeding. Arnaud would die from severe gunshot-induced blood loss at the scene, but the mortally wounded Magruder was able to call for assistance over her radio at 9:34 p.m. Logan's father, who was in the house's master bedroom, had heard the gunshots, and thinking that the deputies had shot him, went over to see what had happened. Instead, he saw Logan leaving the house with a firearm in hand, and saw that the two deputies had been shot. Logan's father then called 9-1-1 via telephone at 9:39 p.m. to report the shooting to authorities. Emergency medical technicians arrived and removed Arnaud and Magruder were removed from the house via stretchers, with Magruder being airlifted via medical helicopter to the Prince George's Hospital Center, with "
+                },
+                {
+                    "entity": "enwiki:Cardiopulmonary%20resuscitation",
+                    "entity_name": "Cardiopulmonary resuscitation",
+                    "link_section": null,
+                    "text": "CPR"
+                },
+                {
+                    "text": " being applied on her while en route. However, she would be pronounced dead at the hospital before midnight."
+                }
+            ],
+            "para_id": "b68808f14c6fa8753ea84c479bc7f5dba992a58e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the early morning hours of December 9, 2007, 24-year-old Matthew J. Murray opened fire at the "
+                },
+                {
+                    "entity": "enwiki:Youth%20With%20A%20Mission",
+                    "entity_name": "Youth With A Mission",
+                    "link_section": null,
+                    "text": "Youth With A Mission"
+                },
+                {
+                    "text": " training center in "
+                },
+                {
+                    "entity": "enwiki:Arvada,%20Colorado",
+                    "entity_name": "Arvada, Colorado",
+                    "link_section": null,
+                    "text": "Arvada, Colorado"
+                },
+                {
+                    "text": ", with a pistol, killing two and wounding two others before escaping. Later that afternoon, he attacked the "
+                },
+                {
+                    "entity": "enwiki:New%20Life%20Church%20(Colorado%20Springs,%20Colorado)",
+                    "entity_name": "New Life Church (Colorado Springs, Colorado)",
+                    "link_section": null,
+                    "text": "New Life Church"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Colorado%20Springs,%20Colorado",
+                    "entity_name": "Colorado Springs, Colorado",
+                    "link_section": null,
+                    "text": "Colorado Springs, Colorado"
+                },
+                {
+                    "text": ", with a number of firearms, killing two more people and injuring three before being shot by Jeanne Assam, a member of the church's safety team, who had been carrying a licensed firearm. Murray subsequently died from a gunshot to the head, which was inflicted either by himself or by Assam."
+                }
+            ],
+            "para_id": "d1dd2a1a4ff2a233ed624802ae1239c9608216eb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Aquash was then forcefully moved to the "
+                },
+                {
+                    "entity": "enwiki:Rosebud%20Indian%20Reservation",
+                    "entity_name": "Rosebud Indian Reservation",
+                    "link_section": null,
+                    "text": "Rosebud Indian Reservation"
+                },
+                {
+                    "text": " where AIM supporters refuse to house her. "
+                },
+                {
+                    "entity": "enwiki:Arlo%20Looking%20Cloud",
+                    "entity_name": "Arlo Looking Cloud",
+                    "link_section": null,
+                    "text": "Looking Cloud"
+                },
+                {
+                    "text": ", along with "
+                },
+                {
+                    "entity": "enwiki:Theda%20Nelson%20Clarke",
+                    "entity_name": "Theda Nelson Clarke",
+                    "link_section": null,
+                    "text": "Theda Nelson Clarke"
+                },
+                {
+                    "text": " and Graham, force Aquash into the back of a car and drive her to a remote part of the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": ", where Aquash is shot execution style in the back of the head and left to die. Her body was locate nearly two months later on 24 February 1976 on the "
+                },
+                {
+                    "entity": "enwiki:Pine%20Ridge%20Indian%20Reservation",
+                    "entity_name": "Pine Ridge Indian Reservation",
+                    "link_section": null,
+                    "text": "Pine Ridge Indian Reservation"
+                },
+                {
+                    "text": " at the bottom of a ravine located in close proximity to an isolated highway. Aquash was revealed to have been murdered with a firearm, as the autopsy showed that the muzzle of the gun had been pressed into the back of her neck. The coroner's report indicated that in addition to the fatal gunshot wound, "
+                },
+                {
+                    "entity": "enwiki:Hypothermia",
+                    "entity_name": "Hypothermia",
+                    "link_section": null,
+                    "text": "exposure"
+                },
+                {
+                    "text": " caused the death of Aquash, as her body was frozen by the time it was discovered."
+                }
+            ],
+            "para_id": "d0c60d73d4484823514cce04de4b15d907ab6c53"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Ballistic trauma, or gunshot wound (GSW), is a form of "
+                },
+                {
+                    "entity": "enwiki:Major%20trauma",
+                    "entity_name": "Major trauma",
+                    "link_section": null,
+                    "text": "physical trauma"
+                },
+                {
+                    "text": " sustained from the discharge of "
+                },
+                {
+                    "entity": "enwiki:Weapon",
+                    "entity_name": "Weapon",
+                    "link_section": null,
+                    "text": "arms"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Ammunition",
+                    "entity_name": "Ammunition",
+                    "link_section": null,
+                    "text": "munitions"
+                },
+                {
+                    "text": ". The most common forms of ballistic trauma stem from "
+                },
+                {
+                    "entity": "enwiki:Firearm",
+                    "entity_name": "Firearm",
+                    "link_section": null,
+                    "text": "firearm"
+                },
+                {
+                    "text": "s used in armed conflicts, civilian sporting, recreational pursuits and criminal activity. Ballistic trauma can be fatal or cause long-term consequences."
+                }
+            ],
+            "para_id": "57ce788b24ced2b808e4ab2002463d0cf3de11ba"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In "
+                },
+                {
+                    "entity": "enwiki:Canada",
+                    "entity_name": "Canada",
+                    "link_section": null,
+                    "text": "Canada"
+                },
+                {
+                    "text": ", hanging is the most common method of suicide, and in the U.S., hanging is the second most common method, after self-inflicted "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wounds"
+                },
+                {
+                    "text": ". In the United Kingdom, where firearms are less easily available, in 2001 hanging was the most common method among men and the second most commonplace among women (after poisoning)."
+                }
+            ],
+            "para_id": "5d614b3230ec42b7f81ea5a6b7bfbd358568b355"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On December 1, 2010, a 26-year-old unemployed security guard attempted a firearm robbery at 15th and Madison, shooting another 26-year-old man at least twice in an attempt to rob the victim of his "
+                },
+                {
+                    "entity": "enwiki:IPhone",
+                    "entity_name": "IPhone",
+                    "link_section": null,
+                    "text": "iPhone"
+                },
+                {
+                    "text": " before fleeing.  The victim was rushed to Highland Hospital and survived his gunshot wounds.  The shooter was apprehended by police and booked into jail on suspicion of attempted murder and attempted robbery."
+                }
+            ],
+            "para_id": "eac3c452a6a3bffc9e94fa647acbb84b9733d44c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Officials released the causes of death for the slain victims. Patricia Flick was killed by gunshot wounds to her right forearm and face, also suffering from an incision wound to her head; Aaron Flick was killed by gunshot wounds to his right hand and head along with stab wounds to his arm and head; and Nina Flick died from twelve stab wounds to her head and an incision wound to the back of her neck. Patricia Hill was slashed in the left forearm and fatally shot in the head, near her right eye, while Joanne Hill died after being shot in the face and having her throat slashed. Nicole Hill suffered a gunshot wound to her hand and two fatal ones to the face."
+                }
+            ],
+            "para_id": "736f77590b454aabe0bef79a19deeae73c5d2350"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2012 Rafi Walden, deputy director of the Tel Hashomer hospital and board member of "
+                },
+                {
+                    "entity": "enwiki:Physicians%20for%20Human%20Rights",
+                    "entity_name": "Physicians for Human Rights",
+                    "link_section": null,
+                    "text": "Physicians for Human Rights"
+                },
+                {
+                    "text": ", wrote in Haaretz that he had examined Jamal's 50-page medical file, and that the injuries from the 2000 shooting were \"completely different wounds\" from the 1994 injuries. Walden listed \"a gunshot wound in the right wrist, a shattered forearm bone, multiple fragment wounds in a palm, gunshot wounds in the right thigh, a fractured pelvis, an exit wound in the buttocks, a tear in the main nerve of the right thigh, tears in the main groin arteries and veins, and two gunshot wounds in the left lower leg.\""
+                }
+            ],
+            "para_id": "94c40e03ab33c997d012b41c7a6c3c0c7dea270b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "At almost the same time, in "
+                },
+                {
+                    "entity": "enwiki:Tombstone,%20Arizona",
+                    "entity_name": "Tombstone, Arizona",
+                    "link_section": null,
+                    "text": "Tombstone"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Arizona%20Territory",
+                    "entity_name": "Arizona Territory",
+                    "link_section": null,
+                    "text": "Arizona Territory"
+                },
+                {
+                    "text": ", on 13 July 1881, "
+                },
+                {
+                    "entity": "enwiki:George%20E.%20Goodfellow",
+                    "entity_name": "George E. Goodfellow",
+                    "link_section": null,
+                    "text": "George E. Goodfellow"
+                },
+                {
+                    "text": " performed the first "
+                },
+                {
+                    "entity": "enwiki:Laparotomy",
+                    "entity_name": "Laparotomy",
+                    "link_section": null,
+                    "text": "laparotomy"
+                },
+                {
+                    "text": " to treat an abdominal gunshot wound. Goodfellow pioneered the use of sterile techniques in treating gunshot wounds, washing the patient's wound and his hands with lye soap or whisky. He became America's leading authority on gunshot wounds and is credited as the United States' first civilian "
+                },
+                {
+                    "entity": "enwiki:Trauma%20surgery",
+                    "entity_name": "Trauma surgery",
+                    "link_section": null,
+                    "text": "trauma surgeon"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "b56f6b6b1f230070e658feeb2ad7790a3c0085bb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Los%20Angeles%20County%20Department%20of%20Medical%20Examiner-Coroner",
+                    "entity_name": "Los Angeles County Department of Medical Examiner-Coroner",
+                    "link_section": null,
+                    "text": "Los Angeles County Coroner's Office"
+                },
+                {
+                    "text": " released the causes of death on June 12. Samir Zawahri was shot multiple times, and Christopher Zawahri was shot once in the chest. The school groundskeeper died of gunshot wounds to the neck and face; his daughter, a student at the college, died of a gunshot wound to the head. The woman who was collecting cans outside the library died after being shot in the abdomen and chest. Zawahri died of multiple gunshot wounds."
+                }
+            ],
+            "para_id": "6a22aec170d5281ce89508ec436e4877adb41367"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dr. George Emory Goodfellow (December 23, 1855 \u2013 December 7, 1910) was a physician and naturalist in the American "
+                },
+                {
+                    "entity": "enwiki:American%20frontier",
+                    "entity_name": "American frontier",
+                    "link_section": null,
+                    "text": "Old West"
+                },
+                {
+                    "text": " who developed a reputation as the United States' foremost expert in treating bullet wounds. As a physician in Tombstone, Arizona Territory, he treated many "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wounds"
+                },
+                {
+                    "text": " to both lawmen and outlaws.  He performed the first recorded "
+                },
+                {
+                    "entity": "enwiki:Laparotomy",
+                    "entity_name": "Laparotomy",
+                    "link_section": null,
+                    "text": "laparotomy"
+                },
+                {
+                    "text": " for treating an abdominal gunshot wound and was the first surgeon to perform a "
+                },
+                {
+                    "entity": "enwiki:Perineum",
+                    "entity_name": "Perineum",
+                    "link_section": null,
+                    "text": "perineal"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Prostatectomy",
+                    "entity_name": "Prostatectomy",
+                    "link_section": null,
+                    "text": "prostatectomy"
+                },
+                {
+                    "text": " to remove an enlarged "
+                },
+                {
+                    "entity": "enwiki:Prostate",
+                    "entity_name": "Prostate",
+                    "link_section": null,
+                    "text": "prostate"
+                },
+                {
+                    "text": ". He pioneered the use of spinal anesthesia and sterile techniques in treating gunshot wounds and is regarded as the first civilian trauma surgeon."
+                }
+            ],
+            "para_id": "293e5d2a2940f58accfccbead3f0c5e522252241"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dr. "
+                },
+                {
+                    "entity": "enwiki:Vincent%20Di%20Maio",
+                    "entity_name": "Vincent Di Maio",
+                    "link_section": null,
+                    "text": "Vincent Di Maio"
+                },
+                {
+                    "text": ", a "
+                },
+                {
+                    "entity": "enwiki:Forensic%20pathology",
+                    "entity_name": "Forensic pathology",
+                    "link_section": null,
+                    "text": "forensic pathologist"
+                },
+                {
+                    "text": " and gunshot wound expert, testified that Martin's gunshot wound was consistent with Zimmerman's story that Martin was on top of him and leaning over him when he was shot. The gunshot evidence indicated that Martin's clothing was from two to four inches from his body when he was shot, Di Maio said, \"If you lean over someone, you notice the clothing tends to fall away from the chest, if instead you're lying on your back and someone shoots you, the clothing is going to be against your chest.\" Di Maio said he had examined photographs and the "
+                },
+                {
+                    "entity": "enwiki:Autopsy",
+                    "entity_name": "Autopsy",
+                    "link_section": null,
+                    "text": "autopsy"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Toxicology",
+                    "entity_name": "Toxicology",
+                    "link_section": null,
+                    "text": "toxicology"
+                },
+                {
+                    "text": " reports and concluded that the evidence was consistent with Zimmerman's statements to police. Di Maio testified the path of the bullet ran from Martin's left side through part of his heart and into a portion of the right lung. Di Maio stated, \"The medical evidence...is consistent with his [Zimmerman's] statement.\" Di Maio also testified that Zimmerman had at least six injuries from the struggle: two head lacerations, two wounds to his temples and wounds on his nose and forehead. Di Maio said those injuries were consistent with Zimmerman having his head banged into a sidewalk, and that such injuries can be dangerous. Di Maio stated it's possible to receive trauma without visible wounds, testifying that, \"You can get severe trauma to the head without external injuries, actually.\" Di Maio said Zimmerman's nose may have been fractured, which was consistent with Zimmerman being punched in the nose."
+                }
+            ],
+            "para_id": "ccd29560fc301d2c8f86f7cd84f76c89673231c1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Goodfellow pioneered the use of sterile techniques in treating gunshot wounds, washing the patient's wound and his hands with lye soap or whisky. He became America's leading authority on gunshot wounds and was widely recognized for his skill as a surgeon."
+                }
+            ],
+            "para_id": "2e6d6b5c654bb771e9698cffa7efde0bb11aedfe"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Gunshot wounds, which are higher energy than stab wounds, are usually more damaging than the latter. Gunshot wounds that penetrate the "
+                },
+                {
+                    "entity": "enwiki:Peritoneum",
+                    "entity_name": "Peritoneum",
+                    "link_section": null,
+                    "text": "peritoneum"
+                },
+                {
+                    "text": " result in significant damage to major intra-abdominal structures in some 90 percent of cases."
+                }
+            ],
+            "para_id": "3427c8711990d1baca41c641c4266c4ed0588fc0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The autopsy noted the absence of "
+                },
+                {
+                    "entity": "enwiki:Stippling",
+                    "entity_name": "Stippling",
+                    "link_section": null,
+                    "text": "stippling"
+                },
+                {
+                    "text": ", powder burns around a wound which indicate that a shot was fired at a relatively short range. Dr. Michael Graham, the  medical examiner, notes that gunshot wounds within an inch of the body do not always cause stippling. Microscopic examination of tissue taken from the thumb wound detected the presence of a foreign material consistent with the material which is ejected from a gun while firing. The gunshot wound to the top of Brown's head was consistent with Brown either falling forward or being in a lunging position; the shot was instantly fatal."
+                }
+            ],
+            "para_id": "0e649e04255f656b71719e7c9f8a01ea4a9375cf"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Brown-S\u00e9quard syndrome may be caused by a spinal cord "
+                },
+                {
+                    "entity": "enwiki:Neoplasm",
+                    "entity_name": "Neoplasm",
+                    "link_section": null,
+                    "text": "tumour"
+                },
+                {
+                    "text": ", trauma [such as a gunshot wound or puncture wound to the cervical (neck) or thoracic spine (back)], ischemia (obstruction of a blood vessel), or infectious or "
+                },
+                {
+                    "entity": "enwiki:Inflammation",
+                    "entity_name": "Inflammation",
+                    "link_section": null,
+                    "text": "inflammatory"
+                },
+                {
+                    "text": " diseases such as "
+                },
+                {
+                    "entity": "enwiki:Tuberculosis",
+                    "entity_name": "Tuberculosis",
+                    "link_section": null,
+                    "text": "tuberculosis"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Multiple%20sclerosis",
+                    "entity_name": "Multiple sclerosis",
+                    "link_section": null,
+                    "text": "multiple sclerosis"
+                },
+                {
+                    "text": ". In its pure form, it is rarely seen. The most common cause is penetrating trauma such as a gunshot wound or stab wound to the spinal cord. "
+                },
+                {
+                    "entity": "enwiki:Decompression%20sickness",
+                    "entity_name": "Decompression sickness",
+                    "link_section": null,
+                    "text": "Decompression sickness"
+                },
+                {
+                    "text": " may also be a cause of Brown-S\u00e9quard syndrome."
+                }
+            ],
+            "para_id": "7227fa9a994cf22fda714542a3800a7b4f031be0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Talovi\u0107 then approached a group of three people: 15-year-old Kirsten Hinckley (whose mother was the injured Carolyn Tuft), 24-year-old Brad Frantz, and 29-year-old Teresa Ellis. All three of them were lying on the floor in the southern front of the store. Talovi\u0107 fired from his shotgun, hitting all three people; Frantz died of a gunshot wound to the forehead, while Hinckley suffered a wound to the torso and Ellis suffered wounds to the right arm, torso, and leg. He then left the store briefly to reload, during which Carolyn Tuft crawled towards her injured daughter. Talovi\u0107 returned, shooting Tuft, Hinckley, and Ellis again; Hinckley and Ellis both died of gunshot wounds to the head, while Tuft survived a wound to the back."
+                }
+            ],
+            "para_id": "91f52770a6e6b0e231cf80907d8c5cc264d3f649"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Four of the victims were shot once, twice, or three times; one was shot four times; two were shot five times; and the eighth suffered a total of nine gunshot wounds. Death certificates released on May 28 clarified that six of the eight victims were shot in the head only; the other two, Christopher Rhoden Sr. and Dana Rhoden, were also shot in the head, but Christopher also suffered gunshot wounds to the torso and limbs, and Dana was also shot in the neck. Bruising was also found on some of the bodies, indicating the victims were beaten as well. Some of the victims were found shot in their beds. From the number of gunshot wounds on the victims' bodies, an estimated total of 32 shots were fired during the killings. The offices of the county coroner and the "
+                },
+                {
+                    "entity": "enwiki:Ohio%20Attorney%20General",
+                    "entity_name": "Ohio Attorney General",
+                    "link_section": null,
+                    "text": "Ohio Attorney General"
+                },
+                {
+                    "text": " announced that the full final autopsy reports will not be released to the public, citing security concerns. However, amidst lawsuits by media outlets, the coroner's office released heavily redacted versions of the final reports on September 23."
+                }
+            ],
+            "para_id": "3e40321246ec8e1850ab940180de88972d171c8f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "As a rule, all gunshot wounds are considered "
+                },
+                {
+                    "entity": "enwiki:Medical%20emergency",
+                    "entity_name": "Medical emergency",
+                    "link_section": null,
+                    "text": "medical emergencies"
+                },
+                {
+                    "text": " that require immediate treatment. Hospitals are generally required to report all gunshot wounds to police."
+                }
+            ],
+            "para_id": "98fe74dbd2e2504cde98e955a267cd7baf1a3aff"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On January 13, 1945, American forces secured the areas where the killings occurred.  The bodies were recovered on January 14 and January 15, 1945, with the cold weather preserving the evidence and keeping the bodies and their wounds mostly intact. The autopsies revealed that at least twenty of the victims had suffered fatal "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wound"
+                },
+                {
+                    "text": "s to the head, inflicted at very close range. These were in addition to wounds made by automatic weapons. Another 20 showed evidence of small-calibre gunshot wounds to the head without powder-burn residue; 10 had fatal crushing or blunt-trauma injuries, most likely from rifle butts. Some bodies showed only one wound, in the temple or behind the ear. Most of the bodies were found in a very small area, suggesting the victims had been gathered together just before they were killed."
+                }
+            ],
+            "para_id": "5f1b66cdd73ea1a7fee4d1f623413485f6ab777c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Until the 1880s, the standard practice for treating a gunshot wound called for physicians to insert their "
+                },
+                {
+                    "entity": "enwiki:Asepsis",
+                    "entity_name": "Asepsis",
+                    "link_section": null,
+                    "text": "unsterilized"
+                },
+                {
+                    "text": " fingers into the wound to probe and locate the path of the bullet. Surgically opening abdominal cavities to repair gunshot wounds, "
+                },
+                {
+                    "entity": "enwiki:Germ%20theory%20of%20disease",
+                    "entity_name": "Germ theory of disease",
+                    "link_section": null,
+                    "text": "germ theory"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Joseph%20Lister,%201st%20Baron%20Lister",
+                    "entity_name": "Joseph Lister, 1st Baron Lister",
+                    "link_section": null,
+                    "text": "Joseph Lister"
+                },
+                {
+                    "text": "'s technique for antiseptic surgery using diluted "
+                },
+                {
+                    "entity": "enwiki:Phenol",
+                    "entity_name": "Phenol",
+                    "link_section": null,
+                    "text": "carbolic acid"
+                },
+                {
+                    "text": ", first demonstrated in 1865, had not yet been accepted as standard practice. For example, sixteen doctors attended to President "
+                },
+                {
+                    "entity": "enwiki:James%20A.%20Garfield",
+                    "entity_name": "James A. Garfield",
+                    "link_section": null,
+                    "text": "James A. Garfield"
+                },
+                {
+                    "text": " after he was shot, and most probed the wound with their fingers or dirty instruments. Historians agree that massive infection was a significant factor in "
+                },
+                {
+                    "entity": "enwiki:Assassination%20of%20James%20A.%20Garfield",
+                    "entity_name": "Assassination of James A. Garfield",
+                    "link_section": "Garfield.27s suffering and death",
+                    "text": "Garfield's death"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "6966ec61fd1f987ed6e2660af994ace825f19869"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Half an hour later, German radio broadcast the news of the rescue, to which the Stammheim inmates could be listening on their radios. In the course of the night, Baader was found dead with a gunshot wound in the back of his head and Ensslin was found hanged in her cell; Raspe died in the hospital the next day from a gunshot wound to the head. "
+                },
+                {
+                    "entity": "enwiki:Irmgard%20M%C3%B6ller",
+                    "entity_name": "Irmgard M\u00f6ller",
+                    "link_section": null,
+                    "text": "Irmgard M\u00f6ller"
+                },
+                {
+                    "text": ", who had several stab wounds in the chest, survived and was released from prison in 1994."
+                }
+            ],
+            "para_id": "866669052fff365c771e05328b9ccf33047a0a1e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The medical reports  declare that the death of Richard Pearson was due to haemorrhage and shock caused by gunshot wounds to the left shoulder, right groin, right buttock, left lower leg and to the back; the most serious being the wound to the right groin. In the case of Abraham Pearson, death was declared to be the result of shock from gunshot wounds to the left cheek, left shoulder, left thigh, lower third of left leg and through the abdomen."
+                }
+            ],
+            "para_id": "357525c719a1ad651e215068ecc038e48a9f05c7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Kennedy's personal physician, "
+                },
+                {
+                    "entity": "enwiki:Rear%20admiral",
+                    "entity_name": "Rear admiral",
+                    "link_section": null,
+                    "text": "Rear Admiral"
+                },
+                {
+                    "text": " George Gregory Burkley, signed a "
+                },
+                {
+                    "entity": "enwiki:Death%20certificate",
+                    "entity_name": "Death certificate",
+                    "link_section": null,
+                    "text": "death certificate"
+                },
+                {
+                    "text": " on November 23 and noted the "
+                },
+                {
+                    "entity": "enwiki:Cause%20of%20death",
+                    "entity_name": "Cause of death",
+                    "link_section": null,
+                    "text": "cause of death"
+                },
+                {
+                    "text": " as \"Gunshot wound, skull\". Buckley described the head wound as \"shattering in type causing a fragmentation of the skull and evulsion of three particles of the skull at time of the impact, with resulting maceration of the right hemisphere of the brain. He also noted \"a second wound occurred in the posterior back at about the level of the "
+                },
+                {
+                    "entity": "enwiki:Thoracic%20vertebrae",
+                    "entity_name": "Thoracic vertebrae",
+                    "link_section": "Third thoracic vertebra",
+                    "text": "third thoracic vertebra"
+                },
+                {
+                    "text": "\". A second certificate of death, signed on December 6 by Theron Ward, a "
+                },
+                {
+                    "entity": "enwiki:Justice%20of%20the%20peace",
+                    "entity_name": "Justice of the peace",
+                    "link_section": null,
+                    "text": "Justice of the Peace"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Dallas%20County,%20Texas",
+                    "entity_name": "Dallas County, Texas",
+                    "link_section": null,
+                    "text": "Dallas County"
+                },
+                {
+                    "text": ", stated that Kennedy \"came to his death as a result of two gunshot wounds (1) near the center of the body and just above the right shoulder, and (2) 1 inch to the right center of the back of the head.\""
+                }
+            ],
+            "para_id": "d49f6f70c675be5f1f0a162eeb9ae32504f4afb3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The coroner of Park County, Sharon Morris, confirmed that the body of Morrison (which had four bullet wounds, three non-fatal from police and one fatal shot from his own gun) was still in the second-floor classroom as of 6:00 p.m. An autopsy report later revealed that Morrison suffered two gunshot wounds to the head (including the fatal one fired from his gun), two additional in the right shoulder, and a graze wound to his right hand, while Emily Keyes died of a single gunshot wound to the right side of her head. District officials stated that both the high school and Fitzsimmons Middle School would be closed for September 28 and September 29; a counseling center set up at a local church would open at 7:00 a.m. for students."
+                }
+            ],
+            "para_id": "2c6640abe1be720b53013ed3029ed6324e60ed94"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Noakes and Pierce were found over 100 miles away, near "
+                },
+                {
+                    "entity": "enwiki:Altoona,%20Pennsylvania",
+                    "entity_name": "Altoona, Pennsylvania",
+                    "link_section": null,
+                    "text": "Altoona, Pennsylvania"
+                },
+                {
+                    "text": " the day after discovery of the girls' bodies. Pierce had a gunshot wound to the heart and another to the head. Noakes had a single gunshot wound to the head."
+                }
+            ],
+            "para_id": "1ebe29bf36be4f394f4c155747360192c9615038"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Common causes of death following gunshot injury include "
+                },
+                {
+                    "entity": "enwiki:Exsanguination",
+                    "entity_name": "Exsanguination",
+                    "link_section": null,
+                    "text": "exsanguination"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Hypoxia%20(medical)",
+                    "entity_name": "Hypoxia (medical)",
+                    "link_section": null,
+                    "text": "hypoxia"
+                },
+                {
+                    "text": " caused by "
+                },
+                {
+                    "entity": "enwiki:Pneumothorax",
+                    "entity_name": "Pneumothorax",
+                    "link_section": null,
+                    "text": "pneumothorax"
+                },
+                {
+                    "text": ", catastrophic injury to the heart and larger blood vessels, and damage to the brain or central nervous system. Additionally, gunshot wounds typically involve a large degree of nearby tissue disruption and destruction due to the physical effects of the projectile. Non-fatal gunshot wounds frequently have severe and long-lasting effects, typically some form of major "
+                },
+                {
+                    "entity": "enwiki:Disfigurement",
+                    "entity_name": "Disfigurement",
+                    "link_section": null,
+                    "text": "disfigurement"
+                },
+                {
+                    "text": " and/or permanent "
+                },
+                {
+                    "entity": "enwiki:Disability",
+                    "entity_name": "Disability",
+                    "link_section": null,
+                    "text": "disability"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "14ea6caeddfea9a8dfb952b63eab85481074a6f6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A number of questionable physical findings were reported by investigators and others:  No fingerprints were recovered from the gun, nor were the muzzle discharge burns typically associated with a self-inflicted gunshot wound.  No gunpowder residue was found on Reeves' hands. (Some sources contend that it may not have been looked for, as gunshot residue testing was not routinely performed in 1959.)  The bullet that killed Reeves was recovered from the bedroom ceiling, and the spent shell casing was found under his body.  While there was no sign of forced entry, two additional bullets were discovered embedded in the bedroom floor.  All three bullets had been fired from the weapon found at his feet (though all witnesses agreed they heard only one gunshot).  Despite the unanswered questions, Reeves' death was officially ruled a suicide, based on witness statements, physical evidence at the scene, and the autopsy report.  "
+                }
+            ],
+            "para_id": "e099b3b4fe4b62e8c31965cf5bf27715df2fda40"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "At Steven Bixby's trial, testimony by "
+                },
+                {
+                    "entity": "enwiki:Forensic%20pathology",
+                    "entity_name": "Forensic pathology",
+                    "link_section": null,
+                    "text": "forensic pathologist"
+                },
+                {
+                    "text": " Dr. Brett Woodard, who performed the autopsies on the slain officers, gave the jury physical descriptions of the wounds sustained by Wilson and Ouzts. Jurors also viewed the dried, but still blood-stained shirts of the two officers, along with other of their personal effects they carried that day.  Woodard described how the bullets entered each of the men, explained the damage they created while inside the body and determined each gunshot as the cause of death.  Both men were killed by a \u201crifle-type\u201d weapon.  \u201cThere was an entry wound in the (right) back and an exit wound in the front near a left shirt pocket,\u201d Woodard said of Ouzts\u2019 wound. \u201cThere was also a reopened wound related to recent "
+                },
+                {
+                    "entity": "enwiki:Coronary%20artery%20bypass%20surgery",
+                    "entity_name": "Coronary artery bypass surgery",
+                    "link_section": null,
+                    "text": "cardiac bypass surgery"
+                },
+                {
+                    "text": ", marked by an incision. That incision gave way under the pressure of the bullet.\u201d"
+                }
+            ],
+            "para_id": "6167e14f043bd76c9dc2f34eadcd49d729f6d0ba"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Activities deemed punishable by the Provisional IRA (often described as \"anti-social activities\"), included collaboration with the RUC and/or British Army i.e. "
+                },
+                {
+                    "entity": "enwiki:Informant",
+                    "entity_name": "Informant",
+                    "link_section": null,
+                    "text": "informing"
+                },
+                {
+                    "text": ", drug dealing, criminal activity outside of the Provisional IRA, "
+                },
+                {
+                    "entity": "enwiki:Joyride%20(crime)",
+                    "entity_name": "Joyride (crime)",
+                    "link_section": null,
+                    "text": "joy riding"
+                },
+                {
+                    "text": ", spreading of dissent, and any other activities which might either damage the Provisional IRA or interests of the community as defined by the Provisional IRA. For the most part, the list of activities deemed punishable by the Provisional IRA coincided with those deemed punishable by the community at large. Punishments ranged in severity from verbal warnings to physical attacks, through to wounding by gunshot, progressing to forcing the suspect to flee Ireland for their lives and death. This process was often described as \""
+                },
+                {
+                    "entity": "enwiki:Kangaroo%20court",
+                    "entity_name": "Kangaroo court",
+                    "link_section": null,
+                    "text": "summary justice"
+                },
+                {
+                    "text": "\" by the political establishment and media. In the majority of cases the Provisional IRA claimed that there had been a full investigation and that guilt had been established before their sentence was carried out. The process, which was widely known of in nationalist communities, worked on a sliding scale of severity \u2013 in the case of a petty thief a warning to stop may initially be issued, escalating to a physical attack known as a \"punishment beating\" usually with baseball bats or similar tools. If the behaviour continued then a more serious physical assault known as a \""
+                },
+                {
+                    "entity": "enwiki:Kneecapping",
+                    "entity_name": "Kneecapping",
+                    "link_section": null,
+                    "text": "knee-capping"
+                },
+                {
+                    "text": "\" (gunshot wounds to limbs, hands, joints) would occur. The final level would be a threat of death against the suspect if they did not leave the island of Ireland, and if this order was not adhered to, death. The IMC has noted that the Provisional IRA has repeatedly come under pressure from nationalist community members since its cessation of violence to resume such policing but has resisted such requests."
+                }
+            ],
+            "para_id": "68a8543c901bbbd130ca92747167d92e2d5ba098"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A shell fragment would often introduce debris, making it more likely that the wound would become infected. These factors meant a soldier was three times more likely to die from a shell wound to the chest than from a gunshot wound. The blast from shell explosions could also kill by "
+                },
+                {
+                    "entity": "enwiki:Concussion",
+                    "entity_name": "Concussion",
+                    "link_section": null,
+                    "text": "concussion"
+                },
+                {
+                    "text": ". In addition to the physical effects of shell fire, there was the psychological damage. Men who had to endure prolonged bombardment would often suffer debilitating "
+                },
+                {
+                    "entity": "enwiki:Shell%20shock",
+                    "entity_name": "Shell shock",
+                    "link_section": null,
+                    "text": "shell shock"
+                },
+                {
+                    "text": ", a condition not well understood at the time."
+                }
+            ],
+            "para_id": "46716c505c50606055f03c74b0c20076bd1ce0ee"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the U.S. People v Huey Newton (1970) 8 CA3d 359 holds that unconsciousness, when not self-induced say, as by voluntary intoxication, is a complete defence to a criminal act even though the defendant's acts seem very goal-oriented.  The medical evidence was that \"[a] gunshot wound which penetrates in a body cavity, the abdominal cavity or the thoracic cavity is very likely to produce a profound reflex shock reaction, that is quite different from a gunshot wound which penetrates only skin and muscle and it is not at all uncommon for a person shot in the abdomen to lose consciousness and go into this reflex shock condition for short periods of time up to half an hour or so.\" But the reflexive activity or unconsciousness need not cause physical collapse: it can exist where the subject physically acts in fact, but is not at the time conscious of acting (cf some European continental jurisdictions classify conduct resulting from automatism under the rubric of unconsciousness). In R. v. Cogdon (1950) unreported but noted in Morris, Somnambulistic Homicide: Ghosts, Spiders and North Koreans (1951) 5 Res Judicatae 29,  the defendant struck her daughter on the head with an axe while sleepwalking and dreaming about North Koreans. Her movements were not voluntary, so she was acquitted. This interpretation of automatism is consistent with Lord Denning's dicta in Bratty v Attorney-General for Northern Ireland (1963) AC 386, at 409:"
+                }
+            ],
+            "para_id": "2cdb0d54e3fb1eff6e35272b59a4ad64de783fbf"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Love objects are degraded in trauma films, but in Fight Club, degradation does not last to the film's conclusion. Gandal notes the separation, \"[T]he abusive (and self-abusive) man and the degraded (and self-abusive) woman actually get together in the end\u2014something seemingly unthinkable in a trauma film.\" Fight Clubs ending has characteristics of slumming dramas' and trauma films' endings. Like the \"wholesome\" heroes, the nameless narrator ascends from \"bohemian depths\", but like in trauma films, the narrator is not \"physically unscathed\", suffering a gunshot wound through his cheek. Despite the protagonist and the love object getting together at the end, the film remains hostile to sentimentality through the display of the gunshot wound and a spliced frame of a penis, one of Tyler Durden's hostile acts during the film."
+                }
+            ],
+            "para_id": "6ea743e02cc408878a4cd509115883761300279a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On January 8, 2011 Congresswoman "
+                },
+                {
+                    "entity": "enwiki:Gabrielle%20Giffords",
+                    "entity_name": "Gabrielle Giffords",
+                    "link_section": null,
+                    "text": "Gabrielle Giffords"
+                },
+                {
+                    "text": " was shot in an assignation attempt. Giffords had been critically wounded having suffered a single gunshot wound to the head. She and several others who were wounded were promptly evacuated by helicopter to this facility. Giffords underwent emergency surgery to save her life and many attribute Giffords survival to the swift actions of the university's doctors. After her condition improved, doctors deemed her safe to travel so that she could begin speech, physical, and occupational therapy. Giffords was flown by plane to Houston's Memorial Hermann Medical Center on January 21, 2011 to continue therapy."
+                }
+            ],
+            "para_id": "0329af7e576c4912f13683d58bcf2f1263a3478f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Prostitution abolitionists also object to the high rates of violence against women in the sex industry. Studies of women in prostitution show an extremely high level of violence is perpetrated against prostituted women.  Figures vary across studies.  One representative study showed 82% of respondents had been physically assaulted since entering prostitution, 55% of those by johns.  Additionally, 80% had been physically threatened while in prostitution, 83% of those with a weapon.  8% reported physical attacks by pimps and johns of a nature that resulted in serious injury, for example gunshot wounds and knife wounds.  68% reported having been raped since entering prostitution, 48% more than five times and 46% reporting rapes committed by johns.  Finally, 49% reported pornography was made of them while they were in prostitution and 32% had been upset by an attempt to make them do what johns had seen in pornography. Women in indoor and outdoor prostitution both report high levels of violence and constant need for vigilance and fear.  Many brothels have installed panic buttons because of the ongoing threat of violence indoors."
+                }
+            ],
+            "para_id": "7736971ca0e6ebfc01f4fc973de7d2f7d5ebe8c9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Holmes' observations on gunshot wounds re-awakened his interest in cerebellar disease; this culminated in his classical analysis of the symptoms of cerebellar lesions which were published in his "
+                },
+                {
+                    "entity": "enwiki:Croonian%20Lecture",
+                    "entity_name": "Croonian Lecture",
+                    "link_section": null,
+                    "text": "Croonian Lectures"
+                },
+                {
+                    "text": " to the "
+                },
+                {
+                    "entity": "enwiki:Royal%20College%20of%20Physicians",
+                    "entity_name": "Royal College of Physicians",
+                    "link_section": null,
+                    "text": "Royal College of Physicians"
+                },
+                {
+                    "text": " in 1922, where he added more cases of gunshot wounds to his 1st World War experience as well as patients with cerebellar tumours."
+                }
+            ],
+            "para_id": "2cea5f4754ac11fe1a796c9de06bfb2331a28fd3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A focal traumatic injury results from direct mechanical forces (such as occur when the head strikes a windshield in a "
+                },
+                {
+                    "entity": "enwiki:Traffic%20collision",
+                    "entity_name": "Traffic collision",
+                    "link_section": null,
+                    "text": "vehicle accident"
+                },
+                {
+                    "text": ") and is usually associated with brain tissue damage visible to the naked eye.  A common cause of focal injury is "
+                },
+                {
+                    "entity": "enwiki:Penetrating%20head%20injury",
+                    "entity_name": "Penetrating head injury",
+                    "link_section": null,
+                    "text": "penetrating head injury"
+                },
+                {
+                    "text": ", in which the skull is perforated, as frequently occurs in auto accidents, blows, and "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wound"
+                },
+                {
+                    "text": "s. Focal injuries typically have symptoms that are related to the damaged area of the brain. Stroke can produce focal damage that is associated with signs and symptoms that correspond to the part of the brain that was damaged.  For example, if a speech center of the brain such as "
+                },
+                {
+                    "entity": "enwiki:Broca's%20area",
+                    "entity_name": "Broca's area",
+                    "link_section": null,
+                    "text": "Broca's area"
+                },
+                {
+                    "text": " is damaged, problems with speech are common."
+                }
+            ],
+            "para_id": "c1a8b63f81b658f1d597a487937c159c67ef330f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On July 4, two days after the President was shot, a miner outside Tombstone was shot with a 32-caliber Colt revolver in the abdomen. Goodfellow was able to treat the man nine days later, on July 13, 1881, when he performed the first "
+                },
+                {
+                    "entity": "enwiki:Laparotomy",
+                    "entity_name": "Laparotomy",
+                    "link_section": null,
+                    "text": "laparotomy"
+                },
+                {
+                    "text": " to treat a bullet wound. Goodfellow noted that the abdomen showed symptoms of a serious infection, including "
+                },
+                {
+                    "entity": "enwiki:Tympanites",
+                    "entity_name": "Tympanites",
+                    "link_section": null,
+                    "text": "distension from gas"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Swelling%20(medical)",
+                    "entity_name": "Swelling (medical)",
+                    "link_section": null,
+                    "text": "tumefaction"
+                },
+                {
+                    "text": ",redness and tenderness. The man's intestines were covered with a large amount of \"purulent stinking lymph.\" The patient "
+                },
+                {
+                    "entity": "enwiki:Small%20intestine",
+                    "entity_name": "Small intestine",
+                    "link_section": null,
+                    "text": "small"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Large%20intestine",
+                    "entity_name": "Large intestine",
+                    "link_section": null,
+                    "text": "large intestine"
+                },
+                {
+                    "text": " were perforated by six holes, wounds very similar to President Garfield's injury.  Goodfellow followed Lister's recommended procedure for sterilizing everything: his hands, instruments, sponges, and the area around the wound. He successfully repaired the miner's wounds and the miner, unlike the President, survived. A laparotomy is still the standard procedure for treating abdominal gunshot wounds today."
+                }
+            ],
+            "para_id": "0917ca74e156c20db6a20a80cbe248b0e3c615d5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Claire is rushed to the hospital when the gunshot wound infection becomes serious, a symptom of having previous powers that kept her immune system from acquiring antibodies making it appear as though she'd had a gunshot wound for far longer. Preoccupied with exacting revenge on Elle and Sylar, Noah Bennet leaves his wife to deal with hospital staff and police questioning. Sylar and Elle are unaware of Noah as they had just made love, when Elle sees a red dot appear across Sylar's forehead and they are able to escape the house, with Elle being shot in the leg. They make it to a storage warehouse, where they decide to do everything together, now that their powers are gone, but when they see Bennet on the monitor, Sylar shoves Elle into an elevator shaft to save her. At the same time that Claire dies in the hospital of septic shock, Noah slits Sylar's throat. "
+                }
+            ],
+            "para_id": "1e63cdfc2048d1c46f16917c069d2bddbbefe2bd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The first "
+                },
+                {
+                    "entity": "enwiki:Therapy",
+                    "entity_name": "Therapy",
+                    "link_section": null,
+                    "text": "medical response"
+                },
+                {
+                    "text": " to sexual assault is identifying serious or "
+                },
+                {
+                    "entity": "enwiki:Disease",
+                    "entity_name": "Disease",
+                    "link_section": "Morbidity",
+                    "text": "life-threatening"
+                },
+                {
+                    "text": " injuries. An "
+                },
+                {
+                    "entity": "enwiki:Physical%20examination",
+                    "entity_name": "Physical examination",
+                    "link_section": null,
+                    "text": "initial examination"
+                },
+                {
+                    "text": " is performed by "
+                },
+                {
+                    "entity": "enwiki:Emergency%20department",
+                    "entity_name": "Emergency department",
+                    "link_section": null,
+                    "text": "emergency room"
+                },
+                {
+                    "text": " staff. The health care provider, often trained specifically to treat rape and sexual assault patients, examines the victim and looks for "
+                },
+                {
+                    "entity": "enwiki:Sign",
+                    "entity_name": "Sign",
+                    "link_section": null,
+                    "text": "sign"
+                },
+                {
+                    "text": "s and "
+                },
+                {
+                    "entity": "enwiki:Symptom",
+                    "entity_name": "Symptom",
+                    "link_section": null,
+                    "text": "symptoms"
+                },
+                {
+                    "text": " of internal injuries and notes if the victim has experienced "
+                },
+                {
+                    "entity": "enwiki:Unconsciousness",
+                    "entity_name": "Unconsciousness",
+                    "link_section": null,
+                    "text": "unconsciousness"
+                },
+                {
+                    "text": " during or after the rape or sexual assault. The examiner notes the presence of broken bones, pregnancy, "
+                },
+                {
+                    "entity": "enwiki:Animal%20bite",
+                    "entity_name": "Animal bite",
+                    "link_section": null,
+                    "text": "bites"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Swelling%20(medical)",
+                    "entity_name": "Swelling (medical)",
+                    "link_section": null,
+                    "text": "swelling"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Bruise",
+                    "entity_name": "Bruise",
+                    "link_section": null,
+                    "text": "bruising"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Wound",
+                    "entity_name": "Wound",
+                    "link_section": "Open",
+                    "text": "laceration"
+                },
+                {
+                    "text": "s and scratches. In more "
+                },
+                {
+                    "entity": "enwiki:Violence",
+                    "entity_name": "Violence",
+                    "link_section": null,
+                    "text": "violent"
+                },
+                {
+                    "text": " cases, the victim may need to have "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wounds"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Stab%20wound",
+                    "entity_name": "Stab wound",
+                    "link_section": null,
+                    "text": "stab wound"
+                },
+                {
+                    "text": "s treated. Staff that are trained to treat rape and sexual assault victims are careful to obtain full and explicit "
+                },
+                {
+                    "entity": "enwiki:Informed%20consent",
+                    "entity_name": "Informed consent",
+                    "link_section": null,
+                    "text": "consent"
+                },
+                {
+                    "text": " for every part of the "
+                },
+                {
+                    "entity": "enwiki:Physical%20examination",
+                    "entity_name": "Physical examination",
+                    "link_section": null,
+                    "text": "physical examination"
+                },
+                {
+                    "text": " acknowledging that the "
+                },
+                {
+                    "entity": "enwiki:Major%20trauma",
+                    "entity_name": "Major trauma",
+                    "link_section": null,
+                    "text": "traumatic event"
+                },
+                {
+                    "text": " needs to be handled "
+                },
+                {
+                    "entity": "enwiki:Sensory%20processing",
+                    "entity_name": "Sensory processing",
+                    "link_section": null,
+                    "text": "sensitively"
+                },
+                {
+                    "text": " and to allow the patient to regain a full sense of "
+                },
+                {
+                    "entity": "enwiki:Power%20and%20control%20in%20abusive%20relationships",
+                    "entity_name": "Power and control in abusive relationships",
+                    "link_section": null,
+                    "text": "control"
+                },
+                {
+                    "text": " over the procedures. It is during the physical examination that the treatment team begins to "
+                },
+                {
+                    "entity": "enwiki:Documentation",
+                    "entity_name": "Documentation",
+                    "link_section": null,
+                    "text": "document"
+                },
+                {
+                    "text": " the injuries and other information that can be used to identify and "
+                },
+                {
+                    "entity": "enwiki:Prosecutor",
+                    "entity_name": "Prosecutor",
+                    "link_section": null,
+                    "text": "prosecute"
+                },
+                {
+                    "text": " the perpetrator. Such "
+                },
+                {
+                    "entity": "enwiki:Evidence",
+                    "entity_name": "Evidence",
+                    "link_section": null,
+                    "text": "evidence"
+                },
+                {
+                    "text": "-gathering is only done with the complete consent of the patient or the "
+                },
+                {
+                    "entity": "enwiki:Caregiver",
+                    "entity_name": "Caregiver",
+                    "link_section": null,
+                    "text": "caregiver"
+                },
+                {
+                    "text": "s of the patient. At this point in the treatment, experienced "
+                },
+                {
+                    "entity": "enwiki:Counsel",
+                    "entity_name": "Counsel",
+                    "link_section": null,
+                    "text": "social support staff"
+                },
+                {
+                    "text": " are made available to the patient and family."
+                }
+            ],
+            "para_id": "69d31e72efd095746e75ffea456c5989ebdfec4b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When it comes to types of trauma, medical and psychological traumatology go hand in hand. Types of trauma include car accidents, gunshot wounds, concussions, PTSD from incidents, etc. Medical traumas are repaired with surgeries, however they can still cause psychological trauma and other stress factors.  For example, a teenager in a car accident who broke their wrist needed extensive surgery to save their arm. It is possible for that child to get anxiety when driving in a car post accident. PTSD can be diagnosed after a person experiences one or more intense and traumatic events and react with fear with complaints from three categorical symptoms lasting one month or longer. These categories are: re-experiencing the traumatic event, avoiding anything associated with the trauma, and increased symptoms of increased psychological arousal (Bellis, M.D. p. 555). "
+                }
+            ],
+            "para_id": "5483127e4965f714b1ae7f3ccfa63171ea9bee8e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Ren\u00e9 Orta Salgado was last seen talking to people at a local bar late Friday and early Saturday morning. Orta's family first reported him missing Saturday, 12 May 2012, and the search began after noon. The next day, Orta's corpse was found at 4 p.m. stuffed in his gray Nissan Murano car trunk on Del Hueso street, in the Buena Vista neighborhood of Cuernavaca. His corpse showed signs from beatings, stab wounds, as well as signs being choked to death, but no  gunshot wounds. The vehicle in which his body was found also showed no signs of bullet wounds or struggle. No message was found near the killing, which is a typical sign of a drug-related crime. The official cause of death was from stabbing, asphyxia, and strangulation."
+                }
+            ],
+            "para_id": "d90e3006d8fa01b572098f3949c4275282b7ff73"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Abdominal trauma is divided into blunt and penetrating types.  While "
+                },
+                {
+                    "entity": "enwiki:Penetrating%20trauma",
+                    "entity_name": "Penetrating trauma",
+                    "link_section": "Abdomen",
+                    "text": "penetrating abdominal trauma"
+                },
+                {
+                    "text": " (PAT) is usually diagnosed based on clinical signs, diagnosis of blunt abdominal trauma is more likely to be delayed or altogether missed because clinical signs are less obvious.  Blunt injuries predominate in rural areas, while penetrating ones are more frequent in urban settings.  Penetrating trauma is further subdivided into "
+                },
+                {
+                    "entity": "enwiki:Stabbing",
+                    "entity_name": "Stabbing",
+                    "link_section": null,
+                    "text": "stab wounds"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Ballistic%20trauma",
+                    "entity_name": "Ballistic trauma",
+                    "link_section": null,
+                    "text": "gunshot wound"
+                },
+                {
+                    "text": "s, which require different methods of treatment."
+                }
+            ],
+            "para_id": "01aa5994d26524d5dc6dbefbe5c52026e44506c5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Brachial plexus injuries can occur as a result of shoulder trauma, tumours, or inflammation. The rare "
+                },
+                {
+                    "entity": "enwiki:Parsonage%E2%80%93Turner%20syndrome",
+                    "entity_name": "Parsonage\u2013Turner syndrome",
+                    "link_section": null,
+                    "text": "Parsonage-Turner Syndrome"
+                },
+                {
+                    "text": " causes brachial plexus inflammation without obvious injury, but with nevertheless disabling symptoms. But in general, brachial plexus injury can be classified as either "
+                },
+                {
+                    "entity": "enwiki:Major%20trauma",
+                    "entity_name": "Major trauma",
+                    "link_section": null,
+                    "text": "traumatic"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Obstetrics",
+                    "entity_name": "Obstetrics",
+                    "link_section": null,
+                    "text": "obstetric"
+                },
+                {
+                    "text": ". Obstetric injuries may occur from mechanical injury involving "
+                },
+                {
+                    "entity": "enwiki:Shoulder%20dystocia",
+                    "entity_name": "Shoulder dystocia",
+                    "link_section": null,
+                    "text": "shoulder dystocia"
+                },
+                {
+                    "text": " during difficult "
+                },
+                {
+                    "entity": "enwiki:Childbirth",
+                    "entity_name": "Childbirth",
+                    "link_section": "Mechanical fetal injury",
+                    "text": "childbirth"
+                },
+                {
+                    "text": ". Traumatic injury may arise from several causes. \"The brachial plexus may be injured by falls from a height on to the side of the head and shoulder, whereby the nerves of the plexus are violently stretched....The brachial plexus may also be injured by direct violence or gunshot wounds, by violent traction on the arm, or by efforts at reducing a dislocation of the shoulder joint\"."
+                }
+            ],
+            "para_id": "5b6cdcd48b4995d208f9489685f39f2316e26ce7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Though he was wounded and bleeding from three gunshot wounds to his left arm, Hartnett managed to stop the car, get out, and give chase. He was able to fire off three gunshots, shooting the attacker in the buttocks before radioing for help. The suspect was arrested a block away by other responding officers."
+                }
+            ],
+            "para_id": "801b96ef719b4ce216b28632d1650ccf213ca0ef"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Shortly after the first 9-1-1 call had been made, a young woman named Lydia Flores drove into the parking lot. Stopping at the food pickup window, Flores noticed shattered windows and the sound of gunfire, before \"looking up and there he was, just shooting\". Flores reversed her car until she crashed into a fence; she hid with her two-year-old daughter until the shooting ended. Three 11-year-old boys rode their bikes into the west parking lot to purchase soft drinks. Hearing a member of the public yell something unintelligible from across the street, all three hesitated, before Huberty shot the three boys with his shotgun and Uzi. Joshua Coleman fell to the ground critically wounded in the back, arm, and leg; he later recalled looking toward his two friends, Omar Alonso Hernandez and David Flores Delgado, noting that Hernandez was on the ground with multiple gunshot wounds to his back and started vomiting; Delgado had received several gunshot wounds to his head and died. Coleman survived; Hernandez and Delgado both died at the scene. Huberty noted an elderly couple, Miguel Victoria Ulloa (74) and Aida Velazquez Victoria (69), walking toward the entrance. As Miguel reached to open the door for his wife, Huberty fired his shotgun, killing Aida with a gunshot to the face and wounding Miguel. An uninjured survivor, Oscar Mondragon, later reported that he had seen Miguel cradling his wife in his arms and wiping blood from her face. Miguel shouted curses at Huberty, who approached and killed him with a shot to the head."
+                }
+            ],
+            "para_id": "128c217979c1a66c883ec0be8aa1bea268081335"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to Boston Police Commissioner Ed Davis, and Watertown Police Chief Deveau, Tsarnaev was shooting from inside the boat at police, \"exchanging fire for an hour.\" After he was captured, Tsarnaev was found not to have any weapons. He was taken into custody at 8:42 pm and transported to "
+                },
+                {
+                    "entity": "enwiki:Beth%20Israel%20Deaconess%20Medical%20Center",
+                    "entity_name": "Beth Israel Deaconess Medical Center",
+                    "link_section": null,
+                    "text": "Beth Israel Deaconess Medical Center"
+                },
+                {
+                    "text": ", where he was listed in "
+                },
+                {
+                    "entity": "enwiki:Medical%20state",
+                    "entity_name": "Medical state",
+                    "link_section": "Serious",
+                    "text": "critical condition"
+                },
+                {
+                    "text": " with multiple gunshot wounds to the head, neck, legs and hand. Initial reports that the neck wound was from a self-inflicted gunshot from a possible suicide attempt were later contradicted by the revelation that he was unarmed at the time of capture and a description of the neck wound by SWAT team members that the neck wound was a slicing injury, possibly caused by shrapnel from an explosion."
+                }
+            ],
+            "para_id": "91e363afd61e991797d3cdd6c49d27c44c848afc"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Signs and symptoms",
+            "heading_id": "enwiki:Gunshot%20wound/Signs%20and%20symptoms"
+        },
+        {
+            "heading": "Classification",
+            "heading_id": "enwiki:Gunshot%20wound/Classification"
+        },
+        {
+            "heading": "Physics",
+            "heading_id": "enwiki:Gunshot%20wound/Physics"
+        },
+        {
+            "heading": "Firearm",
+            "heading_id": "enwiki:Gunshot%20wound/Firearm"
+        },
+        {
+            "heading": "Management",
+            "heading_id": "enwiki:Gunshot%20wound/Management"
+        },
+        {
+            "heading": "Epidemiology",
+            "heading_id": "enwiki:Gunshot%20wound/Epidemiology"
+        },
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Gunshot%20wound/History"
+        },
+        {
+            "heading": "Research",
+            "heading_id": "enwiki:Gunshot%20wound/Research"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Gunshot%20wound",
+    "title": "Gunshot wound"
+}

@@ -1,0 +1,3440 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2",
+            "rank": 1,
+            "rank_score": 0.9487565095245951,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "e1f7340d73a481ee3ccdd1fe810d1c55e1290be7",
+            "rank": 2,
+            "rank_score": 0.940622472464818,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "6ca23e0c22841134b95d444b4bf726431da8b873",
+            "rank": 3,
+            "rank_score": 0.7830918312132965,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "b9d8f804993fbe85ced717831146ef9351267b1b",
+            "rank": 4,
+            "rank_score": 0.7634145680777383,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "7de782422d385c187c3a6e2f5264b7b28281fcd6",
+            "rank": 5,
+            "rank_score": 0.7612340463917562,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "085e38c473049982aedc89d413deee4b4b5c1675",
+            "rank": 6,
+            "rank_score": 0.7581602230477297,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "fccad3560a78bafdfb6be5227b1a2402afffd1dd",
+            "rank": 7,
+            "rank_score": 0.7545016849340868,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "9ac2f1090c2d98deb076cb92ca937b55a00cf0f5",
+            "rank": 8,
+            "rank_score": 0.7194615444217245,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 9,
+            "rank_score": 0.7019469638465524,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "1a59222e085d92ba6d5223ec0bf2620efefccd58",
+            "rank": 10,
+            "rank_score": 0.6987570669583246,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b",
+            "rank": 11,
+            "rank_score": 0.6923667802412325,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6",
+            "rank": 12,
+            "rank_score": 0.6866331085077891,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 13,
+            "rank_score": 0.6863141594386479,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "32f667659a88d3645e4b2390df50f7c2ebf7b331",
+            "rank": 14,
+            "rank_score": 0.6774743495193927,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "63c9908397c0252f72af1c6c68d515eccbf53a9c",
+            "rank": 15,
+            "rank_score": 0.6721606330461367,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "c232479d5f5d5734fc3ee3225c9e161867e041de",
+            "rank": 16,
+            "rank_score": 0.671504222416355,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "c8e55be936825de653a398ab692339efeb4cc0d0",
+            "rank": 17,
+            "rank_score": 0.6709718193297401,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "ab328776a154247c7d545ba77500ace9dc1acaa6",
+            "rank": 18,
+            "rank_score": 0.6699910636581701,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "6a08519532935753d4c5e7217aeb01742a6d1fa2",
+            "rank": 19,
+            "rank_score": 0.6664991031226507,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "5c168367a0b4f1ac1f704c255734406f8f941ba6",
+            "rank": 20,
+            "rank_score": 0.6640292571896032,
+            "section_path": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "para_id": "7b19a77ac502efaecb5b7bf84ae1362acdcdaa67",
+            "rank": 1,
+            "rank_score": 0.9355999453581645,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "674561bd320e3bcaa2ad6aef30c51ffbbcc8859e",
+            "rank": 2,
+            "rank_score": 0.9181116631136845,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 3,
+            "rank_score": 0.80742818815885,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 4,
+            "rank_score": 0.7998125918642969,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "c8e55be936825de653a398ab692339efeb4cc0d0",
+            "rank": 5,
+            "rank_score": 0.7993394708644131,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "ab328776a154247c7d545ba77500ace9dc1acaa6",
+            "rank": 6,
+            "rank_score": 0.7980180866878577,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6",
+            "rank": 7,
+            "rank_score": 0.7949103882815376,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "63c9908397c0252f72af1c6c68d515eccbf53a9c",
+            "rank": 8,
+            "rank_score": 0.7917980976228995,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b",
+            "rank": 9,
+            "rank_score": 0.7916010642100364,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "32f667659a88d3645e4b2390df50f7c2ebf7b331",
+            "rank": 10,
+            "rank_score": 0.7913772603030365,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2",
+            "rank": 11,
+            "rank_score": 0.7856395427733232,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "e1f7340d73a481ee3ccdd1fe810d1c55e1290be7",
+            "rank": 12,
+            "rank_score": 0.7845629356068283,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "687c3c8c9270440ec3f651fc41816af2bb64d8c4",
+            "rank": 13,
+            "rank_score": 0.7820008717130853,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "c232479d5f5d5734fc3ee3225c9e161867e041de",
+            "rank": 14,
+            "rank_score": 0.7818249459035338,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "5c168367a0b4f1ac1f704c255734406f8f941ba6",
+            "rank": 15,
+            "rank_score": 0.7796782367194263,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "627f266f86e7af03e77b57c7782b5cac7797d49b",
+            "rank": 16,
+            "rank_score": 0.778237324170546,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "a61b0df28c5c67ffb2268ead8d87c24c56df6797",
+            "rank": 17,
+            "rank_score": 0.7755726410164157,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "50830563f1e17ea18c58503c7cdb41046b530b91",
+            "rank": 18,
+            "rank_score": 0.7704175268486508,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "0c93af67781f9de45596c9eee1ab0e175ff4b1b6",
+            "rank": 19,
+            "rank_score": 0.7685155339621441,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "4bcc0f28c428591838941e6f23ce06b10704df05",
+            "rank": 20,
+            "rank_score": 0.7642270529388094,
+            "section_path": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 1,
+            "rank_score": 0.9593822695145509,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "40ba017ab1312aceed032d25355e9b707f1f7208",
+            "rank": 2,
+            "rank_score": 0.8835004822238811,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "f9d935d6f651566d0e24aa70dad69b54884bfe09",
+            "rank": 3,
+            "rank_score": 0.8824832652119988,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "2826c43c5ab66363f1cc78b653926bce5dbd3702",
+            "rank": 4,
+            "rank_score": 0.8761278081253852,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "3ddad2972fdf9d3991f098b1f3b1e58762f1879d",
+            "rank": 5,
+            "rank_score": 0.8593547880952646,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "89f5b9ce7e0087fec10cb7801add94038e31d1d8",
+            "rank": 6,
+            "rank_score": 0.8498676552868512,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "35ef848a66d6d5d1590c8cc19328ab79d1faf775",
+            "rank": 7,
+            "rank_score": 0.8335561936970342,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "8283a6091ae0800c1b081d96c73ee108a58f6047",
+            "rank": 8,
+            "rank_score": 0.8166709366839598,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "438d502de9b0b5639910a61af22157dbc66f1855",
+            "rank": 9,
+            "rank_score": 0.8022134205723007,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "c3f8eecbe95719927968e47363ad363a8466b733",
+            "rank": 10,
+            "rank_score": 0.75162150693653,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "54452a7fda5bed2fd4254dd3cc01547bc73a342f",
+            "rank": 11,
+            "rank_score": 0.7433345155619052,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "b36708eda68460cda07043d61db8fa087b6aa886",
+            "rank": 12,
+            "rank_score": 0.6441038115871143,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b",
+            "rank": 13,
+            "rank_score": 0.6405937347295851,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6",
+            "rank": 14,
+            "rank_score": 0.631290930835033,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2",
+            "rank": 15,
+            "rank_score": 0.6276647606760312,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "c232479d5f5d5734fc3ee3225c9e161867e041de",
+            "rank": 16,
+            "rank_score": 0.6255256322460192,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "63c9908397c0252f72af1c6c68d515eccbf53a9c",
+            "rank": 17,
+            "rank_score": 0.6250246004945209,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 18,
+            "rank_score": 0.6234151783506268,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "e1f7340d73a481ee3ccdd1fe810d1c55e1290be7",
+            "rank": 19,
+            "rank_score": 0.620069846314263,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "32f667659a88d3645e4b2390df50f7c2ebf7b331",
+            "rank": 20,
+            "rank_score": 0.6178636540549673,
+            "section_path": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "para_id": "a307bebeff8d10cc621cbef0b44e67102207258f",
+            "rank": 1,
+            "rank_score": 0.9854122040319455,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "f3ad5908b7b117b93a09008602b2dd2ac7413f7d",
+            "rank": 2,
+            "rank_score": 0.980579455783529,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "28e9d35af08aa4900110de2a2fb1fcb059142f94",
+            "rank": 3,
+            "rank_score": 0.7294588045909014,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "62998be06b2567dfd5cf994a6095f4ad3d9148a3",
+            "rank": 4,
+            "rank_score": 0.705145687285382,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "0817ea0ab3410f46968d021a44bca3a91aa8accb",
+            "rank": 5,
+            "rank_score": 0.7025944772452277,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "fccad3560a78bafdfb6be5227b1a2402afffd1dd",
+            "rank": 6,
+            "rank_score": 0.6567456271577892,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "e9ce032d6470af7e87b9e83592ea331fd25b0008",
+            "rank": 7,
+            "rank_score": 0.6449347173802342,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "dd550b61c16bf201fe2b79ad0395681b4521d425",
+            "rank": 8,
+            "rank_score": 0.636561324215436,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "ac7b5fcfa1da543a60dd462bbed11a3c0df81732",
+            "rank": 9,
+            "rank_score": 0.621598059307421,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "7537b8e373f8ef016a7f088fa17415480a2bf82b",
+            "rank": 10,
+            "rank_score": 0.6213636346662657,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "e884ab76c6f12e72aaa1a12c6a67c3b8ef0741c9",
+            "rank": 11,
+            "rank_score": 0.6188577782752931,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "aab6bdced0fcc45de4f51d476ab7b81bb6184d35",
+            "rank": 12,
+            "rank_score": 0.6152907124373077,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "0dd426bfa9657291a462ccd47ad261fe7ea57ce3",
+            "rank": 13,
+            "rank_score": 0.6055551815936842,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 14,
+            "rank_score": 0.602269672227816,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "c1300653ba6ea56423a81243a3efd17ebf3e8b07",
+            "rank": 15,
+            "rank_score": 0.6005853208861702,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "bdffc78806376bd99cac4f344ab9342616a0af9b",
+            "rank": 16,
+            "rank_score": 0.5952041582857407,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 17,
+            "rank_score": 0.5933961912798943,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b",
+            "rank": 18,
+            "rank_score": 0.5895922635638642,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6",
+            "rank": 19,
+            "rank_score": 0.5882429730877579,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2",
+            "rank": 20,
+            "rank_score": 0.5871361431698375,
+            "section_path": "enwiki:Huguenots/Apology%20and%20honours"
+        },
+        {
+            "para_id": "a61b0df28c5c67ffb2268ead8d87c24c56df6797",
+            "rank": 1,
+            "rank_score": 0.9817713914589556,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 2,
+            "rank_score": 0.9264527270766266,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "ff7d123fb3f424a6cb0673e3a341b3f30623171a",
+            "rank": 3,
+            "rank_score": 0.8987471052803913,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "9c76d2f6f282e54063d25529d6150b49e7f0041e",
+            "rank": 4,
+            "rank_score": 0.8623977573594369,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "c58d4808abd65684526b6392caba21aa50545ec0",
+            "rank": 5,
+            "rank_score": 0.8568067481856864,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "84ba87db21ff09facb860673f7a8646ba0f7a259",
+            "rank": 6,
+            "rank_score": 0.8565965480278277,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "da1299c688901050e4e9fd6d48ca5470968137f6",
+            "rank": 7,
+            "rank_score": 0.8525140849642961,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "5287112d0a46b5af6df9a199d678782fe5b7212c",
+            "rank": 8,
+            "rank_score": 0.8472323894696054,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "9b34092d83159b20d33364831f365742df083a2f",
+            "rank": 9,
+            "rank_score": 0.8252735056833371,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "dc4894301ea8f71d12590693518fcb0e700e2b29",
+            "rank": 10,
+            "rank_score": 0.8242687397347048,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "c0d301b4a2e58aaf8e1286cc2de6f30036bea410",
+            "rank": 11,
+            "rank_score": 0.8176860150038612,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "b174a793a571e21d66aa6d6441a19a3fa54edf73",
+            "rank": 12,
+            "rank_score": 0.815262410301007,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "e8d8921af4e37b83e35347cfe025f7e087f4824d",
+            "rank": 13,
+            "rank_score": 0.8072439582173738,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "6d5b6c52a6b01a3db4fc4e1f126809db87cc0341",
+            "rank": 14,
+            "rank_score": 0.8068384675771985,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "abf1c0138401d6758c5a0c3568e0d51c1a10bb3e",
+            "rank": 15,
+            "rank_score": 0.8058065062533009,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "de373219295cd354091c63bff3df29c21ab23af6",
+            "rank": 16,
+            "rank_score": 0.7942378341850846,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 17,
+            "rank_score": 0.7926905094659731,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "5e6fb8f2ca3f89c65efb8d74f9442385b4a165bf",
+            "rank": 18,
+            "rank_score": 0.7913689020866668,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "e5b665f96d1d40cfc2dafcaf89bbe94f0a6ce01d",
+            "rank": 19,
+            "rank_score": 0.7862933010888035,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "81029a815239870a19a132265359ab966e30b6f2",
+            "rank": 20,
+            "rank_score": 0.7846655412335329,
+            "section_path": "enwiki:Huguenots/History"
+        },
+        {
+            "para_id": "f328ef669a98a227fac4577949db344ef31d76ac",
+            "rank": 1,
+            "rank_score": 0.9150056454165005,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420",
+            "rank": 2,
+            "rank_score": 0.8247788005434531,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "63c9908397c0252f72af1c6c68d515eccbf53a9c",
+            "rank": 3,
+            "rank_score": 0.8216221802263199,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343",
+            "rank": 4,
+            "rank_score": 0.8180644696362032,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b",
+            "rank": 5,
+            "rank_score": 0.8093468539075439,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "32f667659a88d3645e4b2390df50f7c2ebf7b331",
+            "rank": 6,
+            "rank_score": 0.8088693264502749,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "687c3c8c9270440ec3f651fc41816af2bb64d8c4",
+            "rank": 7,
+            "rank_score": 0.8047148013756751,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "c8e55be936825de653a398ab692339efeb4cc0d0",
+            "rank": 8,
+            "rank_score": 0.8045888418794984,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6",
+            "rank": 9,
+            "rank_score": 0.8041464674085184,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "c232479d5f5d5734fc3ee3225c9e161867e041de",
+            "rank": 10,
+            "rank_score": 0.8034896294317764,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "ab328776a154247c7d545ba77500ace9dc1acaa6",
+            "rank": 11,
+            "rank_score": 0.8032277840692131,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2",
+            "rank": 12,
+            "rank_score": 0.8030989814748007,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "e1f7340d73a481ee3ccdd1fe810d1c55e1290be7",
+            "rank": 13,
+            "rank_score": 0.8024709122852843,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "50830563f1e17ea18c58503c7cdb41046b530b91",
+            "rank": 14,
+            "rank_score": 0.7961927794512013,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "5c168367a0b4f1ac1f704c255734406f8f941ba6",
+            "rank": 15,
+            "rank_score": 0.7950544910141193,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "a61b0df28c5c67ffb2268ead8d87c24c56df6797",
+            "rank": 16,
+            "rank_score": 0.7928883491390528,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "0c93af67781f9de45596c9eee1ab0e175ff4b1b6",
+            "rank": 17,
+            "rank_score": 0.7853113390241561,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "627f266f86e7af03e77b57c7782b5cac7797d49b",
+            "rank": 18,
+            "rank_score": 0.7847701664094959,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "4bcc0f28c428591838941e6f23ce06b10704df05",
+            "rank": 19,
+            "rank_score": 0.7811475038148946,
+            "section_path": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "para_id": "e3901a3a3d0f1f1a0f80c37ffa7461e83546b2a3",
+            "rank": 20,
+            "rank_score": 0.7807493975903319,
+            "section_path": "enwiki:Huguenots/Demographics"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "It is sometimes asserted that the cross appeared for the first time during the "
+                },
+                {
+                    "entity": "enwiki:French%20Wars%20of%20Religion",
+                    "entity_name": "French Wars of Religion",
+                    "link_section": null,
+                    "text": "Huguenot Wars"
+                },
+                {
+                    "text": " (1562-1598) in the South of France.  Bertrand Van Ruymbeke asserts instead that the Huguenot cross stands out as \"the most revealing\" of symbolic signs of latter-day Huguenot solidarity: \"Although a Huguenot cross was indeed designed in N\u00eemes in the 1680s, never was it in France the symbole de reconnaissance it later became for the descendants of the Huguenot refugees in the last third of the nineteenth century\"  Van Ruymbeke identifies the late 19th-century Huguenot revival as sharing characteristics with two of historian "
+                },
+                {
+                    "entity": "enwiki:Eric%20Hobsbawm",
+                    "entity_name": "Eric Hobsbawm",
+                    "link_section": null,
+                    "text": "Eric Hobsbawm"
+                },
+                {
+                    "text": "'s three categories of \"invented traditions\":  A. \"those establishing or symbolizing social cohesion or the membership of groups, real or artificial communities\", and B. \"those whose main purpose [is] socialization, the inculcation of beliefs, value systems and conventions of behavior.\""
+                }
+            ],
+            "para_id": "20ef7d2993d77876ef22bef997b8dcb966d944d2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20cross",
+                    "entity_name": "Huguenot cross",
+                    "link_section": null,
+                    "text": "Huguenot cross"
+                },
+                {
+                    "text": " is the distinctive emblem of the Huguenots (croix huguenote). It is now an official symbol of the \u00c9glise des Protestants r\u00e9form\u00e9s (French Protestant church). Huguenot descendants sometimes display this symbol as a sign of reconnaissance (recognition) between them."
+                }
+            ],
+            "para_id": "e1f7340d73a481ee3ccdd1fe810d1c55e1290be7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A bill for a Huguenot-Walloon half dollar was introduced in the House of Representatives on January 15, 1923 by Pennsylvania Congressman "
+                },
+                {
+                    "entity": "enwiki:Fred%20Benjamin%20Gernerd",
+                    "entity_name": "Fred Benjamin Gernerd",
+                    "link_section": null,
+                    "text": "Fred Gernerd"
+                },
+                {
+                    "text": ", who was of Huguenot descent. It received a hearing before the House Committee on Coinage, Weights, and Measures on February 7, with Indiana Representative "
+                },
+                {
+                    "entity": "enwiki:Albert%20Henry%20Vestal",
+                    "entity_name": "Albert Henry Vestal",
+                    "link_section": null,
+                    "text": "Albert Vestal"
+                },
+                {
+                    "text": ", a Republican, presiding. Congressman Gernerd, of Huguenot descent, told the committee that there were plans  to have local celebrations in 1924 to celebrate the 300th anniversary of the Huguenot voyage in cities where people of that heritage lived. Gernerd stated that while the sale of half dollars would raise money towards the observance, it was not intended as a serious fundraiser, but as a symbol of the occasion. He reminded the committee that the 300th anniversary of the voyage of the "
+                },
+                {
+                    "entity": "enwiki:Mayflower",
+                    "entity_name": "Mayflower",
+                    "link_section": null,
+                    "text": "Mayflower"
+                },
+                {
+                    "text": " had "
+                },
+                {
+                    "entity": "enwiki:Pilgrim%20Tercentenary%20half%20dollar",
+                    "entity_name": "Pilgrim Tercentenary half dollar",
+                    "link_section": null,
+                    "text": "seen a half dollar issued"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "6ca23e0c22841134b95d444b4bf726431da8b873"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Until recently, the "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20cross",
+                    "entity_name": "Huguenot cross",
+                    "link_section": null,
+                    "text": "Huguenot cross"
+                },
+                {
+                    "text": " was not an official symbol of the Reformed Church of France. Rather it has served as a sign of popular recognition. The official logo of the former reformed churches was the \""
+                },
+                {
+                    "entity": "enwiki:Burning%20bush",
+                    "entity_name": "Burning bush",
+                    "link_section": null,
+                    "text": "burning bush"
+                },
+                {
+                    "text": "\". A new logo of the Reformed Church of France was adopted, a stylised representation of the burning bush with the Huguenot cross as an insert and the Latin phrase Flagror Non Consumor (I am burned, I am not consumed) taken from  \"...and he looked, and, behold, the bush burned with fire, and the bush was not consumed.\""
+                }
+            ],
+            "para_id": "b9d8f804993fbe85ced717831146ef9351267b1b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The symbolism of the Huguenot cross is particularly rich."
+                }
+            ],
+            "para_id": "7de782422d385c187c3a6e2f5264b7b28281fcd6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " cross is a "
+                },
+                {
+                    "entity": "enwiki:Christianity",
+                    "entity_name": "Christianity",
+                    "link_section": null,
+                    "text": "Christian"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Religion",
+                    "entity_name": "Religion",
+                    "link_section": null,
+                    "text": "religious"
+                },
+                {
+                    "text": " symbol originating in "
+                },
+                {
+                    "entity": "enwiki:France",
+                    "entity_name": "France",
+                    "link_section": null,
+                    "text": "France"
+                },
+                {
+                    "text": " and is one of the more recognisable and popular symbols of the "
+                },
+                {
+                    "entity": "enwiki:Evangelicalism",
+                    "entity_name": "Evangelicalism",
+                    "link_section": null,
+                    "text": "evangelical"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Calvinism",
+                    "entity_name": "Calvinism",
+                    "link_section": null,
+                    "text": "reformed"
+                },
+                {
+                    "text": " faith. It is commonly found today as a piece of jewelry (in gold or silver) or engraved on buildings connected with the Reformed Church in France. It also formed part of the official "
+                },
+                {
+                    "entity": "enwiki:Logo",
+                    "entity_name": "Logo",
+                    "link_section": null,
+                    "text": "logo"
+                },
+                {
+                    "text": " of the "
+                },
+                {
+                    "entity": "enwiki:Reformed%20Church%20of%20France",
+                    "entity_name": "Reformed Church of France",
+                    "link_section": null,
+                    "text": "Reformed Church in France"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "085e38c473049982aedc89d413deee4b4b5c1675"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Though the king's mistress "
+                },
+                {
+                    "entity": "enwiki:Diane%20de%20Poitiers",
+                    "entity_name": "Diane de Poitiers",
+                    "link_section": null,
+                    "text": "Diane de Poitiers"
+                },
+                {
+                    "text": " was made baronne of Chalencon and of Privas, and in 1566 the barony was divided between her two daughters, the elder retaining the honour of Privas, in the "
+                },
+                {
+                    "entity": "enwiki:French%20Wars%20of%20Religion",
+                    "entity_name": "French Wars of Religion",
+                    "link_section": null,
+                    "text": "French Wars of Religion"
+                },
+                {
+                    "text": " Privas remained a major centre of "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": ", called the \"Rampart of Reform\", and the \"Geneva of the country\", a symbol of resistance to the Catholic monarchy. The seigneurie was sold to Jacques de Chambaud, a head of the Protestants, who became the first Huguenot seigneur of Privas."
+                }
+            ],
+            "para_id": "fccad3560a78bafdfb6be5227b1a2402afffd1dd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The burning bush has been a popular symbol among "
+                },
+                {
+                    "entity": "enwiki:Calvinism",
+                    "entity_name": "Calvinism",
+                    "link_section": null,
+                    "text": "Reformed"
+                },
+                {
+                    "text": " churches since it was first adopted by the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " ("
+                },
+                {
+                    "entity": "enwiki:France",
+                    "entity_name": "France",
+                    "link_section": null,
+                    "text": "French"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Calvinism",
+                    "entity_name": "Calvinism",
+                    "link_section": null,
+                    "text": "Calvinists"
+                },
+                {
+                    "text": ") in 1583 during its 12th National "
+                },
+                {
+                    "entity": "enwiki:Synod",
+                    "entity_name": "Synod",
+                    "link_section": null,
+                    "text": "Synod"
+                },
+                {
+                    "text": ". The French motto Flagror non consumor - I am burned but not consumed - suggests the symbol was understood of the suffering church that nevertheless lives. However, given the fire is a sign of God's presence, he who is a consuming fire (Hebrews 12:29) the miracle appears to point to a greater miracle: God in grace is with his covenant people and so they are not consumed."
+                }
+            ],
+            "para_id": "9ac2f1090c2d98deb076cb92ca937b55a00cf0f5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dowriche published her 2,400-line poem The French Historie in 1589. The poem is a fictionalized retelling of the "
+                },
+                {
+                    "entity": "enwiki:French%20Wars%20of%20Religion",
+                    "entity_name": "French Wars of Religion",
+                    "link_section": null,
+                    "text": "French Wars of Religion"
+                },
+                {
+                    "text": ", a bloody conflict primarily occurring between Catholics and Huguenots from 1562 to 1598. "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " were French Protestants who harshly criticized the Catholic Church. They were widely persecuted in France, which led to a mass exodus of Huguenots to other countries. Dowriche recalls the persecution of Huguenots with tales of Huguenot martyrs. By poetically describing the Huguenots\u2019 resistance in the face of Catholic persecution, Dowriche endeavored to inspire English Protestants to rebel against Catholicism."
+                }
+            ],
+            "para_id": "0938ab8b2326e0e42ddfc7344001098045ffd420"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The symbolism of the arms is straightforward. The "
+                },
+                {
+                    "entity": "enwiki:Lion",
+                    "entity_name": "Lion",
+                    "link_section": null,
+                    "text": "lion"
+                },
+                {
+                    "text": " is a "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South African"
+                },
+                {
+                    "text": " animal, and also appears in the arms of the two "
+                },
+                {
+                    "entity": "enwiki:Colonialism",
+                    "entity_name": "Colonialism",
+                    "link_section": null,
+                    "text": "colonial power"
+                },
+                {
+                    "text": "s which ruled at the Cape, "
+                },
+                {
+                    "entity": "enwiki:Netherlands",
+                    "entity_name": "Netherlands",
+                    "link_section": null,
+                    "text": "Netherlands"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Great%20Britain",
+                    "entity_name": "Great Britain",
+                    "link_section": null,
+                    "text": "Great Britain"
+                },
+                {
+                    "text": ". The rings were taken from the arms of the founder of the colony, "
+                },
+                {
+                    "entity": "enwiki:Jan%20van%20Riebeeck",
+                    "entity_name": "Jan van Riebeeck",
+                    "link_section": null,
+                    "text": "Jan van Riebeeck"
+                },
+                {
+                    "text": ". The "
+                },
+                {
+                    "entity": "enwiki:Fleur-de-lis",
+                    "entity_name": "Fleur-de-lis",
+                    "link_section": null,
+                    "text": "fleur-de-lis"
+                },
+                {
+                    "text": " represent the contribution of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " to the early history of the country. The crest is the "
+                },
+                {
+                    "text": "Lady of Good Hope"
+                },
+                {
+                    "text": ", grasping an anchor, first introduced as a symbol of the colony in 1715. The supporters, a gnu ("
+                },
+                {
+                    "entity": "enwiki:Wildebeest",
+                    "entity_name": "Wildebeest",
+                    "link_section": null,
+                    "text": "wildebeest"
+                },
+                {
+                    "text": ") and an "
+                },
+                {
+                    "entity": "enwiki:Oryx",
+                    "entity_name": "Oryx",
+                    "link_section": null,
+                    "text": "oryx"
+                },
+                {
+                    "text": " (gemsbok), are two typical South African animals.  The motto, \"Spes Bona\" simply means \"Good Hope\"."
+                }
+            ],
+            "para_id": "1a59222e085d92ba6d5223ec0bf2620efefccd58"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On 31 December 1687 a group of Huguenots set sail from France as the first of the large scale emigration of Huguenots to the Cape of Good Hope, which took place during 1688 and 1689. In total some 180 Huguenots from France, and 18 Walloons from the present-day Belgium, eventually settled at the Cape of Good Hope. A notable example of this is the emigration of Huguenots from "
+                },
+                {
+                    "entity": "enwiki:La%20Motte-d'Aigues",
+                    "entity_name": "La Motte-d'Aigues",
+                    "link_section": null,
+                    "text": "La Motte d'Aigues"
+                },
+                {
+                    "text": " in Provence, France. After this large scale emigration, individual Huguenot immigrant families arrived at the Cape of Good Hope as late as the first quarter of the 18th century, and the state-subsidised emigration of Huguenots was stopped in 1706."
+                }
+            ],
+            "para_id": "f89f60e33e0a54248be0252815bcff29e5d7e52b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Huguenot rebellions, sometimes called the Rohan Wars after the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " leader "
+                },
+                {
+                    "entity": "enwiki:Henri,%20Duke%20of%20Rohan",
+                    "entity_name": "Henri, Duke of Rohan",
+                    "link_section": null,
+                    "text": "Henri de Rohan"
+                },
+                {
+                    "text": ", were an event of the 1620s in which "
+                },
+                {
+                    "entity": "enwiki:French%20people",
+                    "entity_name": "French people",
+                    "link_section": null,
+                    "text": "French"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Protestantism",
+                    "entity_name": "Protestantism",
+                    "link_section": null,
+                    "text": "Protestant"
+                },
+                {
+                    "text": "s (Huguenots), mainly located in southwestern France, revolted against royal authority. The uprising occurred a decade following the death of "
+                },
+                {
+                    "entity": "enwiki:Henry%20IV%20of%20France",
+                    "entity_name": "Henry IV of France",
+                    "link_section": null,
+                    "text": "Henry IV"
+                },
+                {
+                    "text": ", who, himself originally a Huguenot before converting to "
+                },
+                {
+                    "entity": "enwiki:Catholicism",
+                    "entity_name": "Catholicism",
+                    "link_section": null,
+                    "text": "Catholicism"
+                },
+                {
+                    "text": ", had protected Protestants through the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Nantes",
+                    "entity_name": "Edict of Nantes",
+                    "link_section": null,
+                    "text": "Edict of Nantes"
+                },
+                {
+                    "text": ". His successor "
+                },
+                {
+                    "entity": "enwiki:Louis%20XIII%20of%20France",
+                    "entity_name": "Louis XIII of France",
+                    "link_section": null,
+                    "text": "Louis XIII"
+                },
+                {
+                    "text": ", under the regency of his Italian Catholic mother "
+                },
+                {
+                    "entity": "enwiki:Marie%20de'%20Medici",
+                    "entity_name": "Marie de' Medici",
+                    "link_section": null,
+                    "text": "Marie de' Medici"
+                },
+                {
+                    "text": ", became more intolerant of Protestantism. The Huguenots tried to respond by defending themselves, establishing independent political and military structures, establishing diplomatic contacts with foreign powers, and openly revolting against central power. The Huguenot rebellions came after two decades of internal peace under Henry IV, following the intermittent "
+                },
+                {
+                    "entity": "enwiki:French%20Wars%20of%20Religion",
+                    "entity_name": "French Wars of Religion",
+                    "link_section": null,
+                    "text": "French Wars of Religion"
+                },
+                {
+                    "text": " of 1562\u201398."
+                }
+            ],
+            "para_id": "44ec65579719bd1a9588f9781ca16c1307ad15d6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Huguenot College has its origins in three "
+                },
+                {
+                    "entity": "enwiki:Educational%20institution",
+                    "entity_name": "Educational institution",
+                    "link_section": null,
+                    "text": "educational institution"
+                },
+                {
+                    "text": "s which previously existed in "
+                },
+                {
+                    "entity": "enwiki:Wellington,%20Western%20Cape",
+                    "entity_name": "Wellington, Western Cape",
+                    "link_section": null,
+                    "text": "Wellington"
+                },
+                {
+                    "text": ", namely the "
+                },
+                {
+                    "text": "Huguenot Seminary"
+                },
+                {
+                    "text": ", the "
+                },
+                {
+                    "text": "Huguenot University College"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "text": "Friedenheim"
+                },
+                {
+                    "text": ". The Huguenot Seminary was established in 1874 through the efforts of the well-known Dr "
+                },
+                {
+                    "entity": "enwiki:Andrew%20Murray%20(minister)",
+                    "entity_name": "Andrew Murray (minister)",
+                    "link_section": null,
+                    "text": "Andrew Murray"
+                },
+                {
+                    "text": ". The Huguenot University College developed from the Huguenot Seminary, and was a constituent college of the "
+                },
+                {
+                    "entity": "enwiki:University%20of%20South%20Africa",
+                    "entity_name": "University of South Africa",
+                    "link_section": null,
+                    "text": "University of South Africa"
+                },
+                {
+                    "text": " up to the end of 1950, when this University College had to close."
+                }
+            ],
+            "para_id": "387fe2c45162318ee9b68d42e6d35569eda39343"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Although usually Huguenots are lumped into one group, there were actually two types of Huguenots that emerged. Since the Huguenots had political and religious goals, it was commonplace to refer to the Calvinists as \"Huguenots of religion\" and those who opposed the monarchy as \"Huguenots of the state\", who were mostly nobles. "
+                }
+            ],
+            "para_id": "32f667659a88d3645e4b2390df50f7c2ebf7b331"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Some Huguenots fought in the Low Countries alongside the Dutch against Spain during the first years of the "
+                },
+                {
+                    "entity": "enwiki:Dutch%20Revolt",
+                    "entity_name": "Dutch Revolt",
+                    "link_section": null,
+                    "text": "Dutch Revolt"
+                },
+                {
+                    "text": " (1568\u20131609). The Dutch Republic rapidly became a destination for Huguenot exiles. Early ties were already visible in the \"Apologie\" of "
+                },
+                {
+                    "entity": "enwiki:William%20the%20Silent",
+                    "entity_name": "William the Silent",
+                    "link_section": null,
+                    "text": "William the Silent"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Historical%20revision%20of%20the%20Inquisition",
+                    "entity_name": "Historical revision of the Inquisition",
+                    "link_section": null,
+                    "text": "condemning the Spanish Inquisition"
+                },
+                {
+                    "text": ", which was written by his court minister, the Huguenot Pierre L'Oyseleur, lord of Villiers. "
+                },
+                {
+                    "entity": "enwiki:Louise%20de%20Coligny",
+                    "entity_name": "Louise de Coligny",
+                    "link_section": null,
+                    "text": "Louise de Coligny"
+                },
+                {
+                    "text": ", daughter of the murdered Huguenot leader "
+                },
+                {
+                    "entity": "enwiki:Gaspard%20II%20de%20Coligny",
+                    "entity_name": "Gaspard II de Coligny",
+                    "link_section": null,
+                    "text": "Gaspard de Coligny"
+                },
+                {
+                    "text": ", married William the Silent, leader of the Dutch (Calvinist) revolt against Spanish (Catholic) rule. As both spoke French in daily life, their court church in the "
+                },
+                {
+                    "entity": "enwiki:Museum%20Het%20Prinsenhof",
+                    "entity_name": "Museum Het Prinsenhof",
+                    "link_section": null,
+                    "text": "Prinsenhof"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Delft",
+                    "entity_name": "Delft",
+                    "link_section": null,
+                    "text": "Delft"
+                },
+                {
+                    "text": " held services in French. The practice has continued to the present day. The Prinsenhof is one of the 14 active "
+                },
+                {
+                    "entity": "enwiki:Walloons",
+                    "entity_name": "Walloons",
+                    "link_section": null,
+                    "text": "Walloon"
+                },
+                {
+                    "text": " churches of the "
+                },
+                {
+                    "entity": "enwiki:Dutch%20Reformed%20Church",
+                    "entity_name": "Dutch Reformed Church",
+                    "link_section": null,
+                    "text": "Dutch Reformed Church"
+                },
+                {
+                    "text": ". The ties between Huguenots and the Dutch Republic's military and political leadership, the "
+                },
+                {
+                    "entity": "enwiki:House%20of%20Orange-Nassau",
+                    "entity_name": "House of Orange-Nassau",
+                    "link_section": null,
+                    "text": "House of Orange-Nassau"
+                },
+                {
+                    "text": ", which existed since the early days of the Dutch Revolt, helped support the many early settlements of Huguenots in the Dutch Republic's colonies. They settled at the "
+                },
+                {
+                    "entity": "enwiki:Cape%20of%20Good%20Hope",
+                    "entity_name": "Cape of Good Hope",
+                    "link_section": null,
+                    "text": "Cape of Good Hope"
+                },
+                {
+                    "text": " in South Africa and "
+                },
+                {
+                    "entity": "enwiki:New%20Netherland",
+                    "entity_name": "New Netherland",
+                    "link_section": null,
+                    "text": "New Netherland"
+                },
+                {
+                    "text": " in North America."
+                }
+            ],
+            "para_id": "63c9908397c0252f72af1c6c68d515eccbf53a9c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Many Huguenots and their descendants prospered. "
+                },
+                {
+                    "entity": "enwiki:Henri%20Basnage%20de%20Beauval",
+                    "entity_name": "Henri Basnage de Beauval",
+                    "link_section": null,
+                    "text": "Henri Basnage de Beauval"
+                },
+                {
+                    "text": " fled France and settled in the Netherlands, where he became an influential writer and historian. "
+                },
+                {
+                    "entity": "enwiki:Abel%20Boyer",
+                    "entity_name": "Abel Boyer",
+                    "link_section": null,
+                    "text": "Abel Boyer"
+                },
+                {
+                    "text": ", another noted writer, settled in London and became a tutor to the "
+                },
+                {
+                    "entity": "enwiki:British%20royal%20family",
+                    "entity_name": "British royal family",
+                    "link_section": null,
+                    "text": "British Royal Family"
+                },
+                {
+                    "text": ". "
+                },
+                {
+                    "entity": "enwiki:Henry%20Fourdrinier",
+                    "entity_name": "Henry Fourdrinier",
+                    "link_section": null,
+                    "text": "Henry Fourdrinier"
+                },
+                {
+                    "text": ", the descendant of Huguenot settlers in England, founded the modern paper industry. Augustin "
+                },
+                {
+                    "entity": "enwiki:Courtaulds",
+                    "entity_name": "Courtaulds",
+                    "link_section": null,
+                    "text": "Courtauld"
+                },
+                {
+                    "text": " fled to England, settling in Essex and established a dynasty that founded the British silk industry. Noted Swiss mathematician "
+                },
+                {
+                    "entity": "enwiki:Gabriel%20Cramer",
+                    "entity_name": "Gabriel Cramer",
+                    "link_section": null,
+                    "text": "Gabriel Cramer"
+                },
+                {
+                    "text": " was born in Geneva to Huguenot refugees. Sir "
+                },
+                {
+                    "entity": "enwiki:John%20Houblon",
+                    "entity_name": "John Houblon",
+                    "link_section": null,
+                    "text": "John Houblon"
+                },
+                {
+                    "text": ", the first Governor of the "
+                },
+                {
+                    "entity": "enwiki:Bank%20of%20England",
+                    "entity_name": "Bank of England",
+                    "link_section": null,
+                    "text": "Bank of England"
+                },
+                {
+                    "text": ", was born into a Huguenot family in London. "
+                },
+                {
+                    "entity": "enwiki:Isaac%20Barr%C3%A9",
+                    "entity_name": "Isaac Barr\u00e9",
+                    "link_section": null,
+                    "text": "Isaac Barr\u00e9"
+                },
+                {
+                    "text": ", the son of Huguenot settlers in Ireland, became an influential British soldier and politician. Gustav and Peter Carl Faberg\u00e9, the descendants of Huguenot refugees, founded the world-famous "
+                },
+                {
+                    "entity": "enwiki:House%20of%20Faberg%C3%A9",
+                    "entity_name": "House of Faberg\u00e9",
+                    "link_section": null,
+                    "text": "Faberg\u00e9"
+                },
+                {
+                    "text": " company in Russia, maker of the famous Faberge eggs."
+                }
+            ],
+            "para_id": "c232479d5f5d5734fc3ee3225c9e161867e041de"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "#REDIRECT[[Huguenot rebellions#Second Huguenot rebellion (1625)|Huguenot rebellions#Second Huguenot rebellion]]"
+                }
+            ],
+            "para_id": "c8e55be936825de653a398ab692339efeb4cc0d0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "#REDIRECT[[Huguenot rebellions#Third Huguenot rebellion (1627\u201328)|Huguenot rebellions#Third Huguenot rebellion]]"
+                }
+            ],
+            "para_id": "ab328776a154247c7d545ba77500ace9dc1acaa6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A number of French Huguenots settled in Wales, in the upper "
+                },
+                {
+                    "entity": "enwiki:Rhymney",
+                    "entity_name": "Rhymney",
+                    "link_section": null,
+                    "text": "Rhymney"
+                },
+                {
+                    "text": " valley of the current "
+                },
+                {
+                    "entity": "enwiki:Caerphilly%20County%20Borough",
+                    "entity_name": "Caerphilly County Borough",
+                    "link_section": null,
+                    "text": "Caerphilly County Borough"
+                },
+                {
+                    "text": ". The community they created there is still known as Fleur de Lys (the symbol of France), an unusual French village name in the heart of the valleys of Wales. Nearby villages are "
+                },
+                {
+                    "entity": "enwiki:Hengoed",
+                    "entity_name": "Hengoed",
+                    "link_section": null,
+                    "text": "Hengoed"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Ystrad%20Mynach",
+                    "entity_name": "Ystrad Mynach",
+                    "link_section": null,
+                    "text": "Ystrad Mynach"
+                },
+                {
+                    "text": ". Apart from the French village name and that of the local rugby team, "
+                },
+                {
+                    "entity": "enwiki:Fleur%20De%20Lys%20RFC",
+                    "entity_name": "Fleur De Lys RFC",
+                    "link_section": null,
+                    "text": "Fleur De Lys RFC"
+                },
+                {
+                    "text": ", little remains of the French heritage."
+                }
+            ],
+            "para_id": "6a08519532935753d4c5e7217aeb01742a6d1fa2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Long after the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Fontainebleau",
+                    "entity_name": "Edict of Fontainebleau",
+                    "link_section": null,
+                    "text": "revocation"
+                },
+                {
+                    "text": " of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Nantes",
+                    "entity_name": "Edict of Nantes",
+                    "link_section": null,
+                    "text": "Edict of Nantes"
+                },
+                {
+                    "text": ", the Huguenot Cross came into general use amongst 19th-century Huguenot descendants in countries where Huguenot refugees settled, as identification with the French Huguenot ancestry, as much as confirmation of the wearer's faith."
+                }
+            ],
+            "para_id": "5c168367a0b4f1ac1f704c255734406f8f941ba6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "There are many hypotheses about the etymology of the term Melungeon.  One plausible explanation favored by linguists and many researchers on the topic, and found in several dictionaries, is that the name derives from the "
+                },
+                {
+                    "entity": "enwiki:French%20language",
+                    "entity_name": "French language",
+                    "link_section": null,
+                    "text": "French"
+                },
+                {
+                    "text": " m\u00e9lange, or mixture. As there were "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "French Huguenot"
+                },
+                {
+                    "text": " immigrants in Virginia from 1700, their language could have contributed a term."
+                }
+            ],
+            "para_id": "7b19a77ac502efaecb5b7bf84ae1362acdcdaa67"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The French Meaning of the name comes from the common French place name Laval, from Old French val 'valley'. This is also a Huguenot name (with the same etymology), taken to England by Etienne-Abel Laval, a minister of the French church in Castle Street, London, around 1730.French: habitational name from Lavelle in Puy-de-D\u00f4me or various other, smaller places so named"
+                }
+            ],
+            "para_id": "674561bd320e3bcaa2ad6aef30c51ffbbcc8859e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One of the most prominent Huguenot refugees in the Netherlands was "
+                },
+                {
+                    "entity": "enwiki:Pierre%20Bayle",
+                    "entity_name": "Pierre Bayle",
+                    "link_section": null,
+                    "text": "Pierre Bayle"
+                },
+                {
+                    "text": ". He started teaching in "
+                },
+                {
+                    "entity": "enwiki:Rotterdam",
+                    "entity_name": "Rotterdam",
+                    "link_section": null,
+                    "text": "Rotterdam"
+                },
+                {
+                    "text": ", where he finished writing and publishing his multi-volume masterpiece, "
+                },
+                {
+                    "entity": "enwiki:Dictionnaire%20Historique%20et%20Critique",
+                    "entity_name": "Dictionnaire Historique et Critique",
+                    "link_section": null,
+                    "text": "Historical and Critical Dictionary"
+                },
+                {
+                    "text": ". It became one of the 100 foundational texts of the US "
+                },
+                {
+                    "entity": "enwiki:Library%20of%20Congress",
+                    "entity_name": "Library of Congress",
+                    "link_section": null,
+                    "text": "Library of Congress"
+                },
+                {
+                    "text": ". Some Huguenot descendants in the Netherlands may be noted by French family names, although they typically use Dutch given names. Due to the Huguenots' early ties with the leadership of the Dutch Revolt and their own participation, some of the Dutch "
+                },
+                {
+                    "entity": "enwiki:List%20of%20Dutch%20patrician%20families",
+                    "entity_name": "List of Dutch patrician families",
+                    "link_section": null,
+                    "text": "patriciate"
+                },
+                {
+                    "text": " are of part-Huguenot descent. Some Huguenot families have kept alive various traditions, such as the celebration and feast of their patron "
+                },
+                {
+                    "entity": "enwiki:Saint%20Nicholas",
+                    "entity_name": "Saint Nicholas",
+                    "link_section": null,
+                    "text": "Saint Nicolas"
+                },
+                {
+                    "text": ", similar to the Dutch "
+                },
+                {
+                    "entity": "enwiki:Saint%20Nicholas",
+                    "entity_name": "Saint Nicholas",
+                    "link_section": null,
+                    "text": "Sint Nicolaas"
+                },
+                {
+                    "text": " ("
+                },
+                {
+                    "entity": "enwiki:Sinterklaas",
+                    "entity_name": "Sinterklaas",
+                    "link_section": null,
+                    "text": "Sinterklaas"
+                },
+                {
+                    "text": ") feast."
+                }
+            ],
+            "para_id": "687c3c8c9270440ec3f651fc41816af2bb64d8c4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The redition was the final chapter of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20rebellions",
+                    "entity_name": "Huguenot rebellions",
+                    "link_section": null,
+                    "text": "Huguenot rebellions"
+                },
+                {
+                    "text": ", as the remnants of Huguenot power in southern France surrendered to the king. After the sieges of "
+                },
+                {
+                    "entity": "enwiki:Siege%20of%20Privas",
+                    "entity_name": "Siege of Privas",
+                    "link_section": null,
+                    "text": "Privas"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Siege%20of%20Al%C3%A8s",
+                    "entity_name": "Siege of Al\u00e8s",
+                    "link_section": null,
+                    "text": "Al\u00e8s"
+                },
+                {
+                    "text": ", the remaining Huguenot cities rapidly fell, and finally "
+                },
+                {
+                    "entity": "enwiki:Montauban",
+                    "entity_name": "Montauban",
+                    "link_section": null,
+                    "text": "Montauban"
+                },
+                {
+                    "text": " surrendered without resistance. This was one of the last events in the repression of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20rebellions",
+                    "entity_name": "Huguenot rebellions",
+                    "link_section": null,
+                    "text": "Huguenot rebellions"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:France",
+                    "entity_name": "France",
+                    "link_section": null,
+                    "text": "France"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "627f266f86e7af03e77b57c7782b5cac7797d49b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The objectives of the Huguenot Society of America were to perpetuate the memory and to foster and promote the principles and virtues of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s; to commemorate publicly at stated times the principal events in the history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s; and to collect and preserve all existing documents, monuments, etc., relating to the genealogy or history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s of America.  Membership was extended to descendants of families which emigrated to America or to other countries prior to the promulgation of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20toleration",
+                    "entity_name": "Edict of toleration",
+                    "link_section": null,
+                    "text": "Edict of Toleration"
+                },
+                {
+                    "text": ", November 28, 1787, as well as to writers who had made the history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s a special subject of study."
+                }
+            ],
+            "para_id": "a61b0df28c5c67ffb2268ead8d87c24c56df6797"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "English and Dutch colonies of pre-Revolutionary America attracted large numbers of French "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " fleeing religious persecution in France. In the Dutch colony of "
+                },
+                {
+                    "entity": "enwiki:New%20Netherland",
+                    "entity_name": "New Netherland",
+                    "link_section": null,
+                    "text": "New Netherland"
+                },
+                {
+                    "text": " that later became New York, northern New Jersey, and western "
+                },
+                {
+                    "entity": "enwiki:Connecticut",
+                    "entity_name": "Connecticut",
+                    "link_section": null,
+                    "text": "Connecticut"
+                },
+                {
+                    "text": ", these French Huguenots, nearly identical in religion to the "
+                },
+                {
+                    "entity": "enwiki:Dutch%20Reformed%20Church",
+                    "entity_name": "Dutch Reformed Church",
+                    "link_section": null,
+                    "text": "Dutch Reformed Church"
+                },
+                {
+                    "text": ", assimilated almost completely into the Dutch community. However, large it may have been at one time, it has lost all identity of its French origin, often with the translation of names (examples: de la Montagne > Vandenberg by translation; de Vaux > DeVos or Devoe by phonetic respelling). Huguenots appeared in all of the English colonies and likewise assimilated. Even though this mass settlement approached the size of the settlement of the French settlement of Quebec, it has assimilated into the English-speaking mainstream to a much greater extent than other French colonial groups and has left few traces of cultural influence. "
+                },
+                {
+                    "entity": "enwiki:New%20Rochelle,%20New%20York",
+                    "entity_name": "New Rochelle, New York",
+                    "link_section": null,
+                    "text": "New Rochelle, New York"
+                },
+                {
+                    "text": " is named after "
+                },
+                {
+                    "entity": "enwiki:La%20Rochelle",
+                    "entity_name": "La Rochelle",
+                    "link_section": null,
+                    "text": "La Rochelle"
+                },
+                {
+                    "text": ", France, one of the sources of Huguenot emigration to the Dutch colony; and "
+                },
+                {
+                    "entity": "enwiki:New%20Paltz%20(village),%20New%20York",
+                    "entity_name": "New Paltz (village), New York",
+                    "link_section": null,
+                    "text": "New Paltz, New York"
+                },
+                {
+                    "text": ", is one of the few non-urban settlements of Huguenots that did not undergo massive recycling of buildings in the usual redevelopment of such older, larger cities as New York City or New Rochelle."
+                }
+            ],
+            "para_id": "50830563f1e17ea18c58503c7cdb41046b530b91"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1979, Huguenot High School became the Huguenot building within the Jefferson-Huguenot-Wythe High School. Jefferson-Huguenot-Wythe was created by Richmond Public Schools because of declining enrollment and the continued loss of revenue for education. It resulted in combining Thomas Jefferson, Huguenot, and George Wythe into one unique school in three widely separated facilities. This change was implemented to reduce expenses and to create a learning environment which would meet the needs of all students. The plan was difficult to administer and suffered from transportation logistics."
+                }
+            ],
+            "para_id": "0c93af67781f9de45596c9eee1ab0e175ff4b1b6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "See also: Huguenots of Spitalfields a registered charity promoting public understanding of the Huguenot heritage and culture in Spitalfields, the City of London and beyond. They arrange tours, talks, events and schools programmes to raise the Huguenot profile in Spitalfields and to raise funds for a permanent memorial to the Huguenots."
+                }
+            ],
+            "para_id": "4bcc0f28c428591838941e6f23ce06b10704df05"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Huguenots, who were French Calvinists who faced suppression in France, began to settle in other areas in the sixteenth century, founding such failed colonies as "
+                },
+                {
+                    "entity": "enwiki:Fort%20Caroline",
+                    "entity_name": "Fort Caroline",
+                    "link_section": null,
+                    "text": "Fort Caroline"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Florida",
+                    "entity_name": "Florida",
+                    "link_section": null,
+                    "text": "Florida"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Charlesfort-Santa%20Elena%20Site",
+                    "entity_name": "Charlesfort-Santa Elena Site",
+                    "link_section": null,
+                    "text": "Charlesfort"
+                },
+                {
+                    "text": " in modern South Carolina, as well as settling in established areas, such as South Africa, "
+                },
+                {
+                    "entity": "enwiki:Early%20modern%20Britain",
+                    "entity_name": "Early modern Britain",
+                    "link_section": null,
+                    "text": "Britain"
+                },
+                {
+                    "text": ", and existing colonies such as "
+                },
+                {
+                    "entity": "enwiki:New%20Netherland",
+                    "entity_name": "New Netherland",
+                    "link_section": null,
+                    "text": "New Netherlands"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Colony%20of%20Virginia",
+                    "entity_name": "Colony of Virginia",
+                    "link_section": null,
+                    "text": "Virginia"
+                },
+                {
+                    "text": ".  In 1598, King "
+                },
+                {
+                    "entity": "enwiki:Henry%20IV%20of%20France",
+                    "entity_name": "Henry IV of France",
+                    "link_section": null,
+                    "text": "Henry IV of France"
+                },
+                {
+                    "text": " issued the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Nantes",
+                    "entity_name": "Edict of Nantes",
+                    "link_section": null,
+                    "text": "Edict of Nantes"
+                },
+                {
+                    "text": ", granting certain rights and protections to the Huguenots.  This edict was revoked by "
+                },
+                {
+                    "entity": "enwiki:Louis%20XIV%20of%20France",
+                    "entity_name": "Louis XIV of France",
+                    "link_section": null,
+                    "text": "Louis XIV"
+                },
+                {
+                    "text": " in 1685, prompting a mass exodus of Huguenots from France."
+                }
+            ],
+            "para_id": "40ba017ab1312aceed032d25355e9b707f1f7208"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The exodus of Huguenots from France created a "
+                },
+                {
+                    "entity": "enwiki:Human%20capital%20flight",
+                    "entity_name": "Human capital flight",
+                    "link_section": null,
+                    "text": "brain drain"
+                },
+                {
+                    "text": ", as many Huguenots had occupied important places in society. The kingdom did not fully recover for years. The French crown's refusal to allow non-Catholics to settle in "
+                },
+                {
+                    "entity": "enwiki:New%20France",
+                    "entity_name": "New France",
+                    "link_section": null,
+                    "text": "New France"
+                },
+                {
+                    "text": " may help to explain that colony's slow rate of population growth compared to that of the neighbouring British colonies, which opened settlement to religious dissenters. By the time of the "
+                },
+                {
+                    "entity": "enwiki:French%20and%20Indian%20War",
+                    "entity_name": "French and Indian War",
+                    "link_section": null,
+                    "text": "French and Indian War"
+                },
+                {
+                    "text": " (the North American front of the "
+                },
+                {
+                    "entity": "enwiki:Seven%20Years'%20War",
+                    "entity_name": "Seven Years' War",
+                    "link_section": null,
+                    "text": "Seven Years' War"
+                },
+                {
+                    "text": "), a sizeable population of Huguenot descent lived in the British colonies, and many participated in the British defeat of New France in 1759\u201360."
+                }
+            ],
+            "para_id": "f9d935d6f651566d0e24aa70dad69b54884bfe09"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The exodus of Huguenots from France created a brain drain, as Huguenots accounted for a disproportionate number of "
+                },
+                {
+                    "entity": "enwiki:Entrepreneurship",
+                    "entity_name": "Entrepreneurship",
+                    "link_section": null,
+                    "text": "entrepreneurial"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Artisan",
+                    "entity_name": "Artisan",
+                    "link_section": null,
+                    "text": "artisan"
+                },
+                {
+                    "text": ", and technical occupations in the country. The loss of this technical expertise was a blow from which the kingdom did not fully recover for many years."
+                }
+            ],
+            "para_id": "2826c43c5ab66363f1cc78b653926bce5dbd3702"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "After this, Huguenots (with estimates ranging from 200,000 to 1,000,000) fled to surrounding Protestant countries: England, the Netherlands, Switzerland, Norway, Denmark, and "
+                },
+                {
+                    "entity": "enwiki:Prussia",
+                    "entity_name": "Prussia",
+                    "link_section": null,
+                    "text": "Prussia"
+                },
+                {
+                    "text": " \u2013 whose Calvinist Great Elector "
+                },
+                {
+                    "entity": "enwiki:Frederick%20William,%20Elector%20of%20Brandenburg",
+                    "entity_name": "Frederick William, Elector of Brandenburg",
+                    "link_section": null,
+                    "text": "Frederick William"
+                },
+                {
+                    "text": " welcomed them to help rebuild his war-ravaged and underpopulated country.  Following this exodus, Huguenots remained in large numbers in only one region of France: the rugged "
+                },
+                {
+                    "entity": "enwiki:C%C3%A9vennes",
+                    "entity_name": "C\u00e9vennes",
+                    "link_section": null,
+                    "text": "C\u00e9vennes"
+                },
+                {
+                    "text": " region in the south.  In the early 18th century, a regional group known as the "
+                },
+                {
+                    "entity": "enwiki:Camisard",
+                    "entity_name": "Camisard",
+                    "link_section": null,
+                    "text": "Camisard"
+                },
+                {
+                    "text": "s who were "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " rioted against the Catholic Church in the region, burning churches and killing clergy.  It took French troops years to hunt down and destroy all the bands of Camisards, between 1702 and 1709."
+                }
+            ],
+            "para_id": "3ddad2972fdf9d3991f098b1f3b1e58762f1879d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "French Huguenot descendants were also included in the exodus of frontier farmers that was called the Great Trek."
+                }
+            ],
+            "para_id": "89f5b9ce7e0087fec10cb7801add94038e31d1d8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Born in 1820, he was the eldest son of a local magistrate, William Wright Luard J.P., D.L. of Witham Lodge, "
+                },
+                {
+                    "entity": "enwiki:Witham",
+                    "entity_name": "Witham",
+                    "link_section": null,
+                    "text": "Witham"
+                },
+                {
+                    "text": ", Essex (formerly of "
+                },
+                {
+                    "entity": "enwiki:Hatfield%20Peverel%20Priory",
+                    "entity_name": "Hatfield Peverel Priory",
+                    "link_section": null,
+                    "text": "Hatfield Peverel Priory"
+                },
+                {
+                    "text": ") and Anne Garnham, only child of Thomas Garnham of Felsham Hall, Suffolk. The Luards were a prominent family of Protestant "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " merchants who had fled to England in the late 17th century as part of the mass exodus of Huguenots from France to England that followed the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Fontainebleau",
+                    "entity_name": "Edict of Fontainebleau",
+                    "link_section": null,
+                    "text": "1685 revocation"
+                },
+                {
+                    "text": " of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Nantes",
+                    "entity_name": "Edict of Nantes",
+                    "link_section": null,
+                    "text": "Edict of Nantes"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "35ef848a66d6d5d1590c8cc19328ab79d1faf775"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The town's founding in 1687 goes back to the prosecution of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s in "
+                },
+                {
+                    "entity": "enwiki:France",
+                    "entity_name": "France",
+                    "link_section": null,
+                    "text": "France"
+                },
+                {
+                    "text": ", where millions of them fled their country. Part of this exodus was granted asylum by "
+                },
+                {
+                    "entity": "enwiki:Landgrave",
+                    "entity_name": "Landgrave",
+                    "link_section": null,
+                    "text": "Landgrave"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Frederick%20II,%20Landgrave%20of%20Hesse-Homburg",
+                    "entity_name": "Frederick II, Landgrave of Hesse-Homburg",
+                    "link_section": null,
+                    "text": "Friedrich II"
+                },
+                {
+                    "text": " with the words \"Lieber will ich mein Silberger\u00e4t verkaufen, als diesen armen Leuten die Aufnahme versagen\" (\"I would rather sell my silverware than deny these poor people asylum.\"). The Huguenots then founded Friedrichsdorf, gratefully naming it after the Landgrave. They brought "
+                },
+                {
+                    "entity": "enwiki:Flannel",
+                    "entity_name": "Flannel",
+                    "link_section": null,
+                    "text": "flannel"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Stocking",
+                    "entity_name": "Stocking",
+                    "link_section": null,
+                    "text": "stocking"
+                },
+                {
+                    "text": "s with them from France, which spread quickly."
+                }
+            ],
+            "para_id": "8283a6091ae0800c1b081d96c73ee108a58f6047"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Most French Huguenots were either unable or unwilling to emigrate to avoid forced conversion to Catholicism. As a result, more than three-quarters of the Protestant population accepted the change in faith; some 500,000 fled in exodus."
+                }
+            ],
+            "para_id": "438d502de9b0b5639910a61af22157dbc66f1855"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Voortrekkers ("
+                },
+                {
+                    "entity": "enwiki:Afrikaans",
+                    "entity_name": "Afrikaans",
+                    "link_section": null,
+                    "text": "Afrikaans"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Dutch%20language",
+                    "entity_name": "Dutch language",
+                    "link_section": null,
+                    "text": "Dutch"
+                },
+                {
+                    "text": " for pioneers, literally \"fore-pullers\", \"those in front who pull\", \"fore-trekkers\") mainly consisted of "
+                },
+                {
+                    "entity": "enwiki:Trekboer",
+                    "entity_name": "Trekboer",
+                    "link_section": null,
+                    "text": "Trekboer"
+                },
+                {
+                    "text": " pastoralists and "
+                },
+                {
+                    "entity": "enwiki:Cape%20Dutch",
+                    "entity_name": "Cape Dutch",
+                    "link_section": null,
+                    "text": "Cape Dutch"
+                },
+                {
+                    "text": " citizens from the Eastern frontier of the "
+                },
+                {
+                    "entity": "enwiki:Cape%20Colony",
+                    "entity_name": "Cape Colony",
+                    "link_section": null,
+                    "text": "Cape Colony"
+                },
+                {
+                    "text": " who during the 1830s and 1840s left the "
+                },
+                {
+                    "entity": "enwiki:United%20Kingdom",
+                    "entity_name": "United Kingdom",
+                    "link_section": null,
+                    "text": "British"
+                },
+                {
+                    "text": " controlled Cape; moving into the interior of what is now "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South Africa"
+                },
+                {
+                    "text": " in what is known as the Great Trek. The "
+                },
+                {
+                    "entity": "enwiki:Great%20Trek",
+                    "entity_name": "Great Trek",
+                    "link_section": null,
+                    "text": "Great Trek"
+                },
+                {
+                    "text": " consisted of a number of mass movements under a number of different leaders. The Voortrekkers (and the "
+                },
+                {
+                    "entity": "enwiki:Cape%20Dutch",
+                    "entity_name": "Cape Dutch",
+                    "link_section": null,
+                    "text": "Cape Dutch"
+                },
+                {
+                    "text": ") are the direct ancestors of the "
+                },
+                {
+                    "entity": "enwiki:Afrikaners",
+                    "entity_name": "Afrikaners",
+                    "link_section": null,
+                    "text": "Afrikaners"
+                },
+                {
+                    "text": " of modern day "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South Africa"
+                },
+                {
+                    "text": ". French Huguenot descendants were also included in the exodus of frontier farmers that was called the Great Trek."
+                }
+            ],
+            "para_id": "c3f8eecbe95719927968e47363ad363a8466b733"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "White settlement in "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South Africa"
+                },
+                {
+                    "text": " may be traced to the 1652 arrival of the "
+                },
+                {
+                    "entity": "enwiki:Dutch%20East%20India%20Company",
+                    "entity_name": "Dutch East India Company",
+                    "link_section": null,
+                    "text": "Dutch East India Company"
+                },
+                {
+                    "text": " at the "
+                },
+                {
+                    "entity": "enwiki:Cape%20of%20Good%20Hope",
+                    "entity_name": "Cape of Good Hope",
+                    "link_section": null,
+                    "text": "Cape of Good Hope"
+                },
+                {
+                    "text": ", seeking to establish a refreshment station. The Company had its headquarters in "
+                },
+                {
+                    "entity": "enwiki:Amsterdam",
+                    "entity_name": "Amsterdam",
+                    "link_section": null,
+                    "text": "Amsterdam"
+                },
+                {
+                    "text": " and it was there that it recruited and equipped voyages for the Orient. Most of its Dutch employees were Protestant Calvinists; they were supplemented by Lutheran Germans and Scandinavians, as well as a large exodus of French "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " refugees fleeing persecution at home. Among their Afrikaner descendants, individual religious communities such as the Doppers became known for establishing their own doctrine in rifts with the "
+                },
+                {
+                    "entity": "enwiki:Dutch%20Reformed%20Church%20in%20South%20Africa%20(NGK)",
+                    "entity_name": "Dutch Reformed Church in South Africa (NGK)",
+                    "link_section": null,
+                    "text": "Nederduitse Gereformeerde Kerk"
+                },
+                {
+                    "text": " ("
+                },
+                {
+                    "entity": "enwiki:Dutch%20Reformed%20Church",
+                    "entity_name": "Dutch Reformed Church",
+                    "link_section": null,
+                    "text": "Dutch Reformed Church"
+                },
+                {
+                    "text": "), leading to the formation of the separatist "
+                },
+                {
+                    "entity": "enwiki:Reformed%20Churches%20in%20South%20Africa",
+                    "entity_name": "Reformed Churches in South Africa",
+                    "link_section": null,
+                    "text": "Gereformeerde Kerk"
+                },
+                {
+                    "text": " in the late nineteenth century."
+                }
+            ],
+            "para_id": "54452a7fda5bed2fd4254dd3cc01547bc73a342f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "At Ratisbon in 1684 France had been in a position to impose its will on Europe; however, after 1685 its dominant military and diplomatic position began to deteriorate. One of the main factors for this diminution was Louis XIV's revocation of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Nantes",
+                    "entity_name": "Edict of Nantes",
+                    "link_section": null,
+                    "text": "Edict of Nantes"
+                },
+                {
+                    "text": " and the subsequent dispersal of France's "
+                },
+                {
+                    "entity": "enwiki:Protestantism",
+                    "entity_name": "Protestantism",
+                    "link_section": null,
+                    "text": "Protestant"
+                },
+                {
+                    "text": " community. As many as 200,000 "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s fled to England, the Dutch Republic, Switzerland, and Germany, spreading tales of "
+                },
+                {
+                    "entity": "enwiki:Dragonnades",
+                    "entity_name": "Dragonnades",
+                    "link_section": null,
+                    "text": "brutality"
+                },
+                {
+                    "text": " at the hands of the monarch of "
+                },
+                {
+                    "entity": "enwiki:Palace%20of%20Versailles",
+                    "entity_name": "Palace of Versailles",
+                    "link_section": null,
+                    "text": "Versailles"
+                },
+                {
+                    "text": ". The direct effect on France of the loss of this community is debatable, but the flight helped destroy the pro-French group in the Dutch Republic, not only because of their Protestant affiliations, but with the exodus of Huguenot merchants and the harassment of Dutch merchants living in France, it also greatly affected Franco-Dutch trade. The persecution had another effect on Dutch public opinion \u2013 the conduct of the Catholic King of France made them look more anxiously at "
+                },
+                {
+                    "entity": "enwiki:James%20II%20of%20England",
+                    "entity_name": "James II of England",
+                    "link_section": null,
+                    "text": "James II"
+                },
+                {
+                    "text": ", now the Catholic King of England. Many in "
+                },
+                {
+                    "entity": "enwiki:The%20Hague",
+                    "entity_name": "The Hague",
+                    "link_section": null,
+                    "text": "The Hague"
+                },
+                {
+                    "text": " believed James II was closer to his cousin Louis XIV than to his son-in-law and nephew William, thus engendering suspicion, and in turn hostility, between the two states. Louis's seemingly endless territorial claims, coupled with his Protestant persecution, enabled William of Orange and his party to gain the ascendancy in the Republic and finally lay the groundwork for his long-sought alliance against France."
+                }
+            ],
+            "para_id": "b36708eda68460cda07043d61db8fa087b6aa886"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In October 1985, to commemorate the tricentenary of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Fontainebleau",
+                    "entity_name": "Edict of Fontainebleau",
+                    "link_section": null,
+                    "text": "Revocation of the Edict of Nantes"
+                },
+                {
+                    "text": ", President "
+                },
+                {
+                    "entity": "enwiki:Fran%C3%A7ois%20Mitterrand",
+                    "entity_name": "Fran\u00e7ois Mitterrand",
+                    "link_section": null,
+                    "text": "Fran\u00e7ois Mitterrand"
+                },
+                {
+                    "text": " of France announced a formal apology to the descendants of Huguenots around the world. At the same time, the government released a special postage stamp in their honour reading \"France is the home of the Huguenots\" (Accueil des Huguenots)."
+                }
+            ],
+            "para_id": "a307bebeff8d10cc621cbef0b44e67102207258f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In October 1985, to commemorate the tricentenary of the "
+                },
+                {
+                    "entity": "enwiki:Edict%20of%20Fontainebleau",
+                    "entity_name": "Edict of Fontainebleau",
+                    "link_section": null,
+                    "text": "Revocation of the Edict of Nantes"
+                },
+                {
+                    "text": ", Mitterrand gave a formal apology to the descendants of "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s around the world.  At the same time, a special postage stamp was released in their honour. The stamp states that France is the home of the Huguenots (\"Accueil des Huguenots\"). Hence their rights were finally recognised."
+                }
+            ],
+            "para_id": "f3ad5908b7b117b93a09008602b2dd2ac7413f7d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In October 1985, "
+                },
+                {
+                    "entity": "enwiki:President%20of%20France",
+                    "entity_name": "President of France",
+                    "link_section": null,
+                    "text": "French President"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Fran%C3%A7ois%20Mitterrand",
+                    "entity_name": "Fran\u00e7ois Mitterrand",
+                    "link_section": null,
+                    "text": "Francois Mitterrand"
+                },
+                {
+                    "text": " issued a public apology to the descendants of Huguenots around the world."
+                }
+            ],
+            "para_id": "28e9d35af08aa4900110de2a2fb1fcb059142f94"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1700 several hundred French Huguenots migrated from England to the colony of Virginia, where the English Crown had promised them land grants in "
+                },
+                {
+                    "entity": "enwiki:Lower%20Norfolk%20County,%20Virginia",
+                    "entity_name": "Lower Norfolk County, Virginia",
+                    "link_section": null,
+                    "text": "Lower Norfolk County"
+                },
+                {
+                    "text": ". When they arrived, colonial authorities offered them instead land 20 miles above the falls of the James River, at the abandoned "
+                },
+                {
+                    "entity": "enwiki:Monacan%20people",
+                    "entity_name": "Monacan people",
+                    "link_section": null,
+                    "text": "Monacan"
+                },
+                {
+                    "text": " village known as "
+                },
+                {
+                    "text": "Manakin Town"
+                },
+                {
+                    "text": ", now in "
+                },
+                {
+                    "entity": "enwiki:Powhatan%20County,%20Virginia",
+                    "entity_name": "Powhatan County, Virginia",
+                    "link_section": null,
+                    "text": "Powhatan County"
+                },
+                {
+                    "text": ". Some settlers landed in present-day "
+                },
+                {
+                    "entity": "enwiki:Chesterfield%20County,%20Virginia",
+                    "entity_name": "Chesterfield County, Virginia",
+                    "link_section": null,
+                    "text": "Chesterfield County"
+                },
+                {
+                    "text": ". On 12 May 1705, the "
+                },
+                {
+                    "entity": "enwiki:Virginia%20General%20Assembly",
+                    "entity_name": "Virginia General Assembly",
+                    "link_section": null,
+                    "text": "Virginia General Assembly"
+                },
+                {
+                    "text": " passed an act to naturalise the 148 Huguenots still resident at Manakintown. Of the original 390 settlers in the isolated settlement, many had died; others lived outside town on farms in the English style; and others moved to different areas. Gradually they intermarried with their English neighbours. Through the 18th and 19th centuries, descendants of the French migrated west into the Piedmont, and across the "
+                },
+                {
+                    "entity": "enwiki:Appalachian%20Mountains",
+                    "entity_name": "Appalachian Mountains",
+                    "link_section": null,
+                    "text": "Appalachian Mountains"
+                },
+                {
+                    "text": " into the West of what became Kentucky, Tennessee, Missouri, and other states. In the Manakintown area, the "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20Memorial%20Bridge",
+                    "entity_name": "Huguenot Memorial Bridge",
+                    "link_section": null,
+                    "text": "Huguenot Memorial Bridge"
+                },
+                {
+                    "text": " across the "
+                },
+                {
+                    "entity": "enwiki:James%20River",
+                    "entity_name": "James River",
+                    "link_section": null,
+                    "text": "James River"
+                },
+                {
+                    "text": " and Huguenot Road were named in their honour, as were many local features, including several schools, including "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20High%20School",
+                    "entity_name": "Huguenot High School",
+                    "link_section": null,
+                    "text": "Huguenot High School"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "62998be06b2567dfd5cf994a6095f4ad3d9148a3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Jean Daill\u00e9 ( Dallaeus) (1594\u20131670) was a French Huguenot minister and Biblical commentator. He is mentioned in "
+                },
+                {
+                    "entity": "enwiki:James%20Aitken%20Wylie",
+                    "entity_name": "James Aitken Wylie",
+                    "link_section": null,
+                    "text": "James Aitken Wylie"
+                },
+                {
+                    "text": "'s History of Protestantism as author of an Apology for the French Reformed Churches."
+                }
+            ],
+            "para_id": "0817ea0ab3410f46968d021a44bca3a91aa8accb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "France Antarctique (formerly also spelled France antartique) was a French colony south of the Equator, in Rio de Janeiro, Brazil, which existed between 1555 and 1567, and had control over the coast from Rio de Janeiro to Cabo Frio. The colony quickly became a haven for the Huguenots, and was ultimately destroyed by the Portuguese in 1567.On November 1, 1555, French vice-admiral Nicolas Durand de Villegaignon (1510\u20131575), a Catholic knight of the Order of Malta, who later would help the Huguenots to find a refuge against persecution, led a small fleet of two ships and 600 soldiers and colonists, and took possession of the small island of Serigipe in the Guanabara Bay, in front of present-day Rio de Janeiro, where they built a fort named Fort Coligny. The fort was named in honor of Gaspard de Coligny (then a Catholic statesman, that about a year later would become a Huguenot), an admiral who supported the expedition and would use the colony in order to protect his co-religionists.To the still largely undeveloped mainland village, Villegaignon gave the name of Henriville, in honour of Henry II, the King of France, who also knew of and approved the expedition, and had provided the fleet for the trip. Villegaignon secured his position by making an alliance with the Tamoio and Tupinamb\u00e1 Indians of the region, who were fighting the Portuguese."
+                }
+            ],
+            "para_id": "e9ce032d6470af7e87b9e83592ea331fd25b0008"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Chodowiecki, though speaking only French and German (due to his offices in the Huguenot French community in Berlin he often spoke French), many times also declared his Polish allegiance and had his son Isaac Heinrich, born in Berlin, painted as a very young child with a Polish outfit and haircut. After "
+                },
+                {
+                    "entity": "enwiki:Partitions%20of%20Poland",
+                    "entity_name": "Partitions of Poland",
+                    "link_section": null,
+                    "text": "Partitions of Poland"
+                },
+                {
+                    "text": " Chodowiecki wrote to Gr\u00e4fin Solms-Laubach: \"From father's side I'm Polish, a descendant of a brave nation which will soon vanish\". In a letter to "
+                },
+                {
+                    "text": "J\u00f3zef \u0141\u0119cki"
+                },
+                {
+                    "text": ", the Polish astronomer, he wrote: \"I consider it an honour to be a genuine Pole, even though I am now living in Germany\". Because of his mother's and his wife's Huguenot descent he was very close to the Huguenots of Berlin. Nearly all his life and career was spent in Germany, writing in German and living in Berlin from the age of almost 17.One of his most popular books is \"Journey from Berlin to Danzig\" (, 1773) with many illustrations. He purchased a horse rather than going by stage coach. This was his first return after 30 years absence and he went specifically to see his elderly mother and sisters in Danzig again. He made only one more trip to Danzig afterwards, to his mother's funeral. He describes and illustrates towns and people in Pomerania and Prussia on the way."
+                }
+            ],
+            "para_id": "dd550b61c16bf201fe2b79ad0395681b4521d425"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In June 2013 The Stamp Collector won the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " Society of Canada Award, presented by the "
+                },
+                {
+                    "entity": "enwiki:Ontario",
+                    "entity_name": "Ontario",
+                    "link_section": null,
+                    "text": "Ontario"
+                },
+                {
+                    "text": " Historical Society, honouring the book for bringing \u201cpublic awareness to the principles of freedom of conscience and "
+                },
+                {
+                    "entity": "enwiki:Freedom%20of%20thought",
+                    "entity_name": "Freedom of thought",
+                    "link_section": null,
+                    "text": "freedom of thought"
+                },
+                {
+                    "text": ".\u201d"
+                }
+            ],
+            "para_id": "ac7b5fcfa1da543a60dd462bbed11a3c0df81732"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1765, Perry married Lydia Ann Lacroy (or De La Croix), who was of a family of "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": ". The street in which his foundry stood was named in her honour Lydia Ann Street."
+                }
+            ],
+            "para_id": "7537b8e373f8ef016a7f088fa17415480a2bf82b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Williams was born in "
+                },
+                {
+                    "entity": "enwiki:New%20Westminster",
+                    "entity_name": "New Westminster",
+                    "link_section": null,
+                    "text": "New Westminster"
+                },
+                {
+                    "text": " in Canada in 1882, emigrating to South African with her parents at the age of 11. She matriculated at "
+                },
+                {
+                    "entity": "enwiki:St%20Mary's%20School,%20Waverley",
+                    "entity_name": "St Mary's School, Waverley",
+                    "link_section": null,
+                    "text": "St Mary's School, Waverley"
+                },
+                {
+                    "text": " in Johannesburg \u2013 gaining first place in the entire country. From St Mary's she proceeded, to "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20College",
+                    "entity_name": "Huguenot College",
+                    "link_section": null,
+                    "text": "Huguenot College"
+                },
+                {
+                    "text": " in Wellington, where she completed her BA Honours degree in Classics in 1901. From Huguenot she went to "
+                },
+                {
+                    "entity": "enwiki:Newnham%20College,%20Cambridge",
+                    "entity_name": "Newnham College, Cambridge",
+                    "link_section": null,
+                    "text": "Newnham College, Cambridge"
+                },
+                {
+                    "text": ", completing the Classical Tripos in 1906. She stayed on at Cambridge for another year on a Marion Kennedy Scholarship, where she completed research towards her monograph, Six Essays on the Platonic Theory of Knowledge as Expounded in the Latter Dialogues and Reviewed by Aristotle (Cambridge University Press, 1908)."
+                }
+            ],
+            "para_id": "e884ab76c6f12e72aaa1a12c6a67c3b8ef0741c9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Glozier has written works on expatriate soldier groups of French "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " and Scottish extraction. As Official Historian of the "
+                },
+                {
+                    "entity": "enwiki:Australian%20Air%20Force%20Cadets",
+                    "entity_name": "Australian Air Force Cadets",
+                    "link_section": null,
+                    "text": "Australian Air Force Cadets"
+                },
+                {
+                    "text": " he is currently preparing for publication a history of Australian Air Force cadets, 1941-2016, for the 75th anniversary diamond jubilee of the AAFC. He is also slowly compiling a volume of biographical reference relating to French refugee soldiers serving in armies across Europe circa 1685\u20131713. The project grew out of his earlier"
+                },
+                {
+                    "entity": "enwiki:Prosopography",
+                    "entity_name": "Prosopography",
+                    "link_section": null,
+                    "text": "prosopographical"
+                },
+                {
+                    "text": " research into the Huguenot military support lent to "
+                },
+                {
+                    "entity": "enwiki:William%20III%20of%20England",
+                    "entity_name": "William III of England",
+                    "link_section": null,
+                    "text": "William of Orange"
+                },
+                {
+                    "text": " during the Glorious Revolution of 1688. This is the subject of his monograph, published by Sussex Academic Press in 2002. A second book, Scottish Soldiers in France in the Reign of the Sun King: Nursery for Men of Honour History of Warfare: 24 (Brill Academic Publishers), based on his doctoral thesis, appeared in 2004. "
+                }
+            ],
+            "para_id": "aab6bdced0fcc45de4f51d476ab7b81bb6184d35"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "France was saved from English domination through the deliverance of Orl\u00e9ans by "
+                },
+                {
+                    "entity": "enwiki:Joan%20of%20Arc",
+                    "entity_name": "Joan of Arc",
+                    "link_section": null,
+                    "text": "Joan of Arc"
+                },
+                {
+                    "text": " (8 May 1429). On 21 July 1455, her rehabilitation was publicly proclaimed at Orl\u00e9ans in a solemn procession, and before her death in November 1458, Isabel Rom\u00e9e, the mother of Joan of Arc, saw a monument erected in honour of her daughter, at "
+                },
+                {
+                    "text": "Tournelles"
+                },
+                {
+                    "text": ", near the Orl\u00e9ans bridge. The monument, destroyed by the Huguenots in 1567, was set up again in 1569 when the Catholics were once more masters of the city. Until 1792, and again from 1802 to 1830, finally from 1842 to the present day, a great religious feast, celebrated 8 May of every year at Orl\u00e9ans in honour of Joan of Arc, attracted multitudes."
+                }
+            ],
+            "para_id": "0dd426bfa9657291a462ccd47ad261fe7ea57ce3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Henry de Ponthieu (14 February 1731 \u2013 10 December 1808) was a London merchant of "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": " ancestry who collected fish and plant specimens from the "
+                },
+                {
+                    "entity": "enwiki:West%20Indies",
+                    "entity_name": "West Indies",
+                    "link_section": null,
+                    "text": "West Indies"
+                },
+                {
+                    "text": " for botanist "
+                },
+                {
+                    "entity": "enwiki:Joseph%20Banks",
+                    "entity_name": "Joseph Banks",
+                    "link_section": null,
+                    "text": "Joseph Banks"
+                },
+                {
+                    "text": ". The orchid genus "
+                },
+                {
+                    "entity": "enwiki:Ponthieva",
+                    "entity_name": "Ponthieva",
+                    "link_section": null,
+                    "text": "Ponthieva"
+                },
+                {
+                    "text": " was named by botanist "
+                },
+                {
+                    "entity": "enwiki:Robert%20Brown%20(Scottish%20botanist%20from%20Montrose)",
+                    "entity_name": "Robert Brown (Scottish botanist from Montrose)",
+                    "link_section": null,
+                    "text": "Robert Brown"
+                },
+                {
+                    "text": " in his honour."
+                }
+            ],
+            "para_id": "c1300653ba6ea56423a81243a3efd17ebf3e8b07"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "After his death he was buried in Lod\u00e8ve Cathedral and honoured as a saint. His body, which had been preserved intact, was burned by the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenots"
+                },
+                {
+                    "text": " in 1572, and only a few particles of his remains were saved. He is the second patron of the Diocese of Lod\u00e8ve, and his feast falls on 13 February."
+                }
+            ],
+            "para_id": "bdffc78806376bd99cac4f344ab9342616a0af9b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Located in the Roosa House, the Library and Archives at Historic Huguenot Street is a research facility devoted primarily to the history and genealogy of the Huguenot and Dutch Settlers of the Hudson Valley.  It also functions as a general repository for local history, regardless of ethnicity or religious persuasion. The collections consist of family genealogies, church, cemetery and bible records, wills and deeds, census records, genealogical periodicals, county histories, and publications relating to Huguenot ancestry.  Genealogists, local historians, and other interested parties can access the collections by appointment.  The colorful paint replicates the original colors of the house in 1891."
+                }
+            ],
+            "para_id": "ff7d123fb3f424a6cb0673e3a341b3f30623171a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "His work on the Huguenots appeared in three parts, entitled respectively History of the Rise of the Huguenots of France (2 vols, 1879), The Huguenots and Henry of Navarre (2 vols, 1886), and The Huguenots and the Revocation of the Edict of Nantes (2 vols, 1895), is described by the "
+                },
+                {
+                    "entity": "enwiki:Encyclop%C3%A6dia%20Britannica%20Eleventh%20Edition",
+                    "entity_name": "Encyclop\u00e6dia Britannica Eleventh Edition",
+                    "link_section": null,
+                    "text": "1911 Encyclop\u00e6dia Britannica"
+                },
+                {
+                    "text": " as being \"characterized by painstaking thoroughness, by a judicial temper, and by scholarship of a high order\"."
+                }
+            ],
+            "para_id": "9c76d2f6f282e54063d25529d6150b49e7f0041e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The museum presents education programs e.g. history of the Huguenots, Fynbos, Khoisan, Architecture and Genealogy / Families.  Guided tours of the museum for visitors are also available.  The annual Huguenot Festival presented by the Huguenot Society in conjunction with the museum takes place in the last weekend of October.  During the festival the museum also host an exhibition of roses."
+                }
+            ],
+            "para_id": "c58d4808abd65684526b6392caba21aa50545ec0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The museum displays cover two major topics.  In the main building the history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "French Huguenots"
+                },
+                {
+                    "text": " is discussed in detail.  Topics include: Why they came, who brought them, where they settled and a list of surnames of Huguenot origin.  Displays in the annex convey the history of the town of "
+                },
+                {
+                    "entity": "enwiki:Franschhoek",
+                    "entity_name": "Franschhoek",
+                    "link_section": null,
+                    "text": "Franschhoek"
+                },
+                {
+                    "text": ", and have a broader scope.  Topics in this building include: Fynbos, Khoisan history and the local fruit industry."
+                }
+            ],
+            "para_id": "84ba87db21ff09facb860673f7a8646ba0f7a259"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Huguenot Memorial Museum portrays the history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "French Huguenots"
+                },
+                {
+                    "text": " who came to "
+                },
+                {
+                    "entity": "enwiki:South%20Africa",
+                    "entity_name": "South Africa",
+                    "link_section": null,
+                    "text": "South Africa"
+                },
+                {
+                    "text": " at the end of the seventeenth century. This is depicted in the museum.  Displays are housed in the main building, and continue in the annex.  The museum also has a shop, and is adjacent to the "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20Monument",
+                    "entity_name": "Huguenot Monument",
+                    "link_section": null,
+                    "text": "Huguenot Monument"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "da1299c688901050e4e9fd6d48ca5470968137f6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The French Historie opens with a fictional exchange between an Englishman and a Huguenot refugee from France. Their exchange acts as a frame for the narrative of the poem, a common device in Elizabethan writing. The plight of the Huguenots in The French Historie echoes the stories of suffering and redemption of the Israelites in the Old Testament. Dowriche\u2019s allusions to both contemporary and biblical texts are evidence that she was well read, an unusual trait for the majority of English women at this time."
+                }
+            ],
+            "para_id": "5287112d0a46b5af6df9a199d678782fe5b7212c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In "
+                },
+                {
+                    "entity": "enwiki:Bad%20Karlshafen",
+                    "entity_name": "Bad Karlshafen",
+                    "link_section": null,
+                    "text": "Bad Karlshafen"
+                },
+                {
+                    "text": ", Hessen, Germany is the Huguenot Museum and Huguenot archive. The collection includes family histories, a library, and a picture archive."
+                }
+            ],
+            "para_id": "9b34092d83159b20d33364831f365742df083a2f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The renowned history of the Huguenot College is reflected in the architectural environment of the institution. The Huguenot College has been situated in Wellington since the previous century and is accommodated in valuable and scenic buildings in an atmosphere very similar to both the "
+                },
+                {
+                    "entity": "enwiki:Microclimate",
+                    "entity_name": "Microclimate",
+                    "link_section": null,
+                    "text": "micro-climate"
+                },
+                {
+                    "text": " and historical environment of other university towns such as "
+                },
+                {
+                    "entity": "enwiki:Potchefstroom",
+                    "entity_name": "Potchefstroom",
+                    "link_section": null,
+                    "text": "Potchefstroom"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Stellenbosch",
+                    "entity_name": "Stellenbosch",
+                    "link_section": null,
+                    "text": "Stellenbosch"
+                },
+                {
+                    "text": ". The Huguenot College endeavours to preserve this environment and character for generations to come."
+                }
+            ],
+            "para_id": "dc4894301ea8f71d12590693518fcb0e700e2b29"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A version of this complex hypothesis is promoted by O.I.A. Roche, who writes in his book, The Days of the Upright, A History of the Huguenots (1965), that \"Huguenot\" is:"
+                }
+            ],
+            "para_id": "c0d301b4a2e58aaf8e1286cc2de6f30036bea410"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Matthew is a co\u2013founder of the Huguenot Society of Australia (begun in 2002) and a Fellow of the Huguenot Society of Great Britain and Ireland. He was made a Fellow of the Royal Historical Society in 2009. He was appointed Official Historian of the Australian Air Force Cadets organization in 2013.Matthew is an Honorary Associate of the Medieval and Early Modern Studies Centre (University of Sydney), President of the Sydney Society for Scottish History, and a History Master at Sydney Grammar School."
+                }
+            ],
+            "para_id": "b174a793a571e21d66aa6d6441a19a3fa54edf73"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A large "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20Monument",
+                    "entity_name": "Huguenot Monument",
+                    "link_section": null,
+                    "text": "monument"
+                },
+                {
+                    "text": " to commemorate the arrival of the Huguenots in South Africa was inaugurated on 17 April 1948 at "
+                },
+                {
+                    "entity": "enwiki:Franschhoek",
+                    "entity_name": "Franschhoek",
+                    "link_section": null,
+                    "text": "Franschhoek"
+                },
+                {
+                    "text": ". A museum dedicated to the Huguenot history in South Africa is located adjacent to the monument."
+                }
+            ],
+            "para_id": "e8d8921af4e37b83e35347cfe025f7e087f4824d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When the new hospital in Hackney opened in 1865 the "
+                },
+                {
+                    "entity": "enwiki:Building%20(magazine)",
+                    "entity_name": "Building (magazine)",
+                    "link_section": null,
+                    "text": "Builder"
+                },
+                {
+                    "text": " claimed it had been modelled on the "
+                },
+                {
+                    "entity": "enwiki:Ch%C3%A2teau%20de%20Chambord",
+                    "entity_name": "Ch\u00e2teau de Chambord",
+                    "link_section": null,
+                    "text": "Ch\u00e2teau de Chambord"
+                },
+                {
+                    "text": ". The architect, "
+                },
+                {
+                    "entity": "enwiki:Robert%20Lewis%20Roumieu",
+                    "entity_name": "Robert Lewis Roumieu",
+                    "link_section": null,
+                    "text": "Robert Lewis Roumieu"
+                },
+                {
+                    "text": ", who had generously waived his fee for his drawings, was for a while the hospital's treasurer.  Besides being a hospital for its sixty inmates, with state-of-the-art equipment, it also consolidated a revival of interest in Huguenot history and achievement and became a repository for Huguenot records and items with a Huguenot tradition."
+                }
+            ],
+            "para_id": "6d5b6c52a6b01a3db4fc4e1f126809db87cc0341"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In The French Historie, Dowriche characterizes the targeted murders of Huguenots as the work of Satan. Satan appears in the text to influence Catherine de Medici and others to commit atrocities. Dowriche sympathetically portrays Huguenot scholars and preachers who were martyred for their religious beliefs. Ultimately, the French narrator calls on Queen Elizabeth to defend Protestants in England."
+                }
+            ],
+            "para_id": "abf1c0138401d6758c5a0c3568e0d51c1a10bb3e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20Memorial%20Museum",
+                    "entity_name": "Huguenot Memorial Museum",
+                    "link_section": null,
+                    "text": "Huguenot Memorial Museum"
+                },
+                {
+                    "text": " neighbouring the monument elaborates on the history of the French Huguenots who settled in the Cape, and especially in the Franschhoek "
+                },
+                {
+                    "entity": "enwiki:Valley",
+                    "entity_name": "Valley",
+                    "link_section": null,
+                    "text": "Valley"
+                },
+                {
+                    "text": ".  On exhibition are the various tools they used to make wine, clothes they wore and the culture and desire for a better life that they brought with them."
+                }
+            ],
+            "para_id": "de373219295cd354091c63bff3df29c21ab23af6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Vine Hall was a founding member of the "
+                },
+                {
+                    "text": "Huguenot Society of Australia"
+                },
+                {
+                    "text": " established in 2003. His last published work was The Happy Huguenots - Parts 1, 2 & 3, a family history which was Highly Commended when entered in the Alexander Henderson Award for 2006."
+                }
+            ],
+            "para_id": "5e6fb8f2ca3f89c65efb8d74f9442385b4a165bf"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "During the "
+                },
+                {
+                    "entity": "enwiki:American%20Civil%20War",
+                    "entity_name": "American Civil War",
+                    "link_section": null,
+                    "text": "American Civil War"
+                },
+                {
+                    "text": " of 1861 to 1865, he served as a Presbyterian chaplain in the "
+                },
+                {
+                    "entity": "enwiki:Confederate%20States%20Army",
+                    "entity_name": "Confederate States Army",
+                    "link_section": null,
+                    "text": "Confederate States Army"
+                },
+                {
+                    "text": ". He then returned to preaching in Virginia after the war. In 1869, he also wrote The Huguenots, or Reformed French Church, a history of the "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": ", descendants of the "
+                },
+                {
+                    "entity": "enwiki:Reformed%20Church%20of%20France",
+                    "entity_name": "Reformed Church of France",
+                    "link_section": null,
+                    "text": "Reformed Church of France"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "e5b665f96d1d40cfc2dafcaf89bbe94f0a6ce01d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Wilhelmsdorf was established by "
+                },
+                {
+                    "entity": "enwiki:Huguenot",
+                    "entity_name": "Huguenot",
+                    "link_section": null,
+                    "text": "Huguenot"
+                },
+                {
+                    "text": "s. The village was named after the sovereign ruler "
+                },
+                {
+                    "entity": "enwiki:George%20William,%20Margrave%20of%20Brandenburg-Bayreuth",
+                    "entity_name": "George William, Margrave of Brandenburg-Bayreuth",
+                    "link_section": null,
+                    "text": "George William, Margrave of Brandenburg-Bayreuth"
+                },
+                {
+                    "text": ", who refuged them. The Huguenot tradition is still a part of the village history. Sermons in the local Lutheran church were held in French until around 1900."
+                }
+            ],
+            "para_id": "81029a815239870a19a132265359ab966e30b6f2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The issue of demographic strength and geographical spread of the Reformed tradition in France has been covered in a variety of sources. Most of them usually agree that the Huguenot population reached as many as 10% of the total population, or roughly 2 million people on the eve of the St. Bartholomew's Day massacre in 1572."
+                }
+            ],
+            "para_id": "f328ef669a98a227fac4577949db344ef31d76ac"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "For over 150 years, Huguenots were allowed to hold their services in Lady Chapel in "
+                },
+                {
+                    "entity": "enwiki:St%20Patrick's%20Cathedral,%20Dublin",
+                    "entity_name": "St Patrick's Cathedral, Dublin",
+                    "link_section": null,
+                    "text": "St. Patrick's Cathedral"
+                },
+                {
+                    "text": ". A "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20cemetery,%20Dublin",
+                    "entity_name": "Huguenot cemetery, Dublin",
+                    "link_section": null,
+                    "text": "Huguenot cemetery"
+                },
+                {
+                    "text": " is located in the centre of Dublin, off St. Stephen's Green. Prior to its establishment, Huguenots used the "
+                },
+                {
+                    "entity": "enwiki:The%20Cabbage%20Garden,%20Dublin",
+                    "entity_name": "The Cabbage Garden, Dublin",
+                    "link_section": null,
+                    "text": "Cabbage Garden"
+                },
+                {
+                    "text": " near the Cathedral. Another "
+                },
+                {
+                    "entity": "enwiki:Huguenot%20Cemetery,%20Cork",
+                    "entity_name": "Huguenot Cemetery, Cork",
+                    "link_section": null,
+                    "text": "Huguenot Cemetery"
+                },
+                {
+                    "text": " is located off French Church street in Cork."
+                }
+            ],
+            "para_id": "e3901a3a3d0f1f1a0f80c37ffa7461e83546b2a3"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Etymology",
+            "heading_id": "enwiki:Huguenots/Etymology"
+        },
+        {
+            "heading": "Demographics",
+            "heading_id": "enwiki:Huguenots/Demographics"
+        },
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Huguenots/History"
+        },
+        {
+            "heading": "Exodus",
+            "heading_id": "enwiki:Huguenots/Exodus"
+        },
+        {
+            "heading": "Symbol",
+            "heading_id": "enwiki:Huguenots/Symbol"
+        },
+        {
+            "heading": "Apology and honours",
+            "heading_id": "enwiki:Huguenots/Apology%20and%20honours"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Huguenots",
+    "title": "Huguenots"
+}

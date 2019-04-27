@@ -1,0 +1,2647 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 1,
+            "rank_score": 0.9212163645023678,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 2,
+            "rank_score": 0.9176338896856127,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 3,
+            "rank_score": 0.9162696059243578,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 4,
+            "rank_score": 0.9119360507389656,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 5,
+            "rank_score": 0.9058909073092625,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b",
+            "rank": 6,
+            "rank_score": 0.8976516257404867,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 7,
+            "rank_score": 0.8970335003957968,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 8,
+            "rank_score": 0.8950094030427592,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 9,
+            "rank_score": 0.8879602683497134,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 10,
+            "rank_score": 0.8776328991585343,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 11,
+            "rank_score": 0.8748883613084966,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "ef48ad5868e2a6319f83ff9c03784603dfca5c0a",
+            "rank": 12,
+            "rank_score": 0.8743328625197816,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "5c843cf58232203b3c379f279dd28792718910fc",
+            "rank": 13,
+            "rank_score": 0.8722894422499272,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7",
+            "rank": 14,
+            "rank_score": 0.8657986519196391,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 15,
+            "rank_score": 0.8651528978762015,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "026d73839864e6502b9883203aa3325b0ea57c23",
+            "rank": 16,
+            "rank_score": 0.8648906625118459,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "abd0dd52e574dbdcf424dd2d2babcd585548f73c",
+            "rank": 17,
+            "rank_score": 0.8609864206306048,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "9e1563bc48b169a89f29b5fb2aa50dd7f5995ba6",
+            "rank": 18,
+            "rank_score": 0.8609558157114476,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "68ff09b2549aff192863309caf6735ef5480dd47",
+            "rank": 19,
+            "rank_score": 0.8599362082477834,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 20,
+            "rank_score": 0.8544065188383789,
+            "section_path": "enwiki:Blockchain/Working"
+        },
+        {
+            "para_id": "6a99ea434e21768e86356ea9fc19ae48bcd50858",
+            "rank": 1,
+            "rank_score": 0.9087693934922698,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "e179b545e197846261a29a0e95dc41e636768068",
+            "rank": 2,
+            "rank_score": 0.8994270253726543,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 3,
+            "rank_score": 0.8398972101671673,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 4,
+            "rank_score": 0.834962674819236,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 5,
+            "rank_score": 0.8319105711942103,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 6,
+            "rank_score": 0.8295063756163294,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "42fd191499cd13423359a0cde597d464435dc0f8",
+            "rank": 7,
+            "rank_score": 0.8137085535297024,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 8,
+            "rank_score": 0.8115937632427122,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 9,
+            "rank_score": 0.8109407941925855,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "3fb629ea54b7a746dd6a330e3c064e1a1fdc73a0",
+            "rank": 10,
+            "rank_score": 0.8074311766829834,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 11,
+            "rank_score": 0.8066019530200962,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 12,
+            "rank_score": 0.8016938854621583,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 13,
+            "rank_score": 0.788552339231214,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 14,
+            "rank_score": 0.7831146817540219,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "51dd71b631bbfa169f128c4c15761db1f3efbd0a",
+            "rank": 15,
+            "rank_score": 0.7824701249999143,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 16,
+            "rank_score": 0.7756641165274075,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b",
+            "rank": 17,
+            "rank_score": 0.7745101021210739,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7",
+            "rank": 18,
+            "rank_score": 0.77425165475293,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "e08f1f6a877e333a0084f45ea3aacd7409f1b7f9",
+            "rank": 19,
+            "rank_score": 0.7741260704133937,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 20,
+            "rank_score": 0.7721669343420468,
+            "section_path": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "para_id": "ef48ad5868e2a6319f83ff9c03784603dfca5c0a",
+            "rank": 1,
+            "rank_score": 0.9164497737375126,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 2,
+            "rank_score": 0.9142589199699921,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 3,
+            "rank_score": 0.8659949401736872,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "f3c40603006477117d1a96eb937612c4ce02da51",
+            "rank": 4,
+            "rank_score": 0.8637247027650348,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 5,
+            "rank_score": 0.8618245445918683,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "e179b545e197846261a29a0e95dc41e636768068",
+            "rank": 6,
+            "rank_score": 0.8571747017025892,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 7,
+            "rank_score": 0.8563908627178488,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 8,
+            "rank_score": 0.8534779916402792,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 9,
+            "rank_score": 0.8452643816108881,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 10,
+            "rank_score": 0.8429453903899645,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "2ab2f7c1ad8562fc8c982cf01180000097d9bf82",
+            "rank": 11,
+            "rank_score": 0.837408512665827,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 12,
+            "rank_score": 0.8320635313300062,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 13,
+            "rank_score": 0.8218613405640498,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 14,
+            "rank_score": 0.8204592731314542,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "10bd8b59bd7912f5f070f5b849ab6bab85265d06",
+            "rank": 15,
+            "rank_score": 0.8125393756508821,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 16,
+            "rank_score": 0.8075064869198344,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 17,
+            "rank_score": 0.8067954534873472,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7",
+            "rank": 18,
+            "rank_score": 0.8032013970107365,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "e08f1f6a877e333a0084f45ea3aacd7409f1b7f9",
+            "rank": 19,
+            "rank_score": 0.8027420295168703,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "abd0dd52e574dbdcf424dd2d2babcd585548f73c",
+            "rank": 20,
+            "rank_score": 0.8006151762929207,
+            "section_path": "enwiki:Blockchain/Structure"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 1,
+            "rank_score": 0.9343145114439031,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b",
+            "rank": 2,
+            "rank_score": 0.8832761912873227,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "18b528b9627a2522b9d41acccd866350c8480787",
+            "rank": 3,
+            "rank_score": 0.878983085508592,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 4,
+            "rank_score": 0.8547017897079715,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 5,
+            "rank_score": 0.8493190620361685,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "b85203ba8c5d1c72c3b2c0b91644aa9e95ea5d6f",
+            "rank": 6,
+            "rank_score": 0.8486424320392323,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 7,
+            "rank_score": 0.8420975514416079,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "e179b545e197846261a29a0e95dc41e636768068",
+            "rank": 8,
+            "rank_score": 0.840580899633719,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 9,
+            "rank_score": 0.8370816075640473,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "f8e05de184295f4b956ee77519267d4f46a0464e",
+            "rank": 10,
+            "rank_score": 0.8367218198854752,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 11,
+            "rank_score": 0.8332411794776777,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 12,
+            "rank_score": 0.8274614957113323,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 13,
+            "rank_score": 0.8167965858392525,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 14,
+            "rank_score": 0.8159913902910376,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 15,
+            "rank_score": 0.8036041492502713,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 16,
+            "rank_score": 0.8024888795218299,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "e08f1f6a877e333a0084f45ea3aacd7409f1b7f9",
+            "rank": 17,
+            "rank_score": 0.7993912165932401,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 18,
+            "rank_score": 0.7978371141591651,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7",
+            "rank": 19,
+            "rank_score": 0.792478553436502,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "abd0dd52e574dbdcf424dd2d2babcd585548f73c",
+            "rank": 20,
+            "rank_score": 0.7908526071366934,
+            "section_path": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 1,
+            "rank_score": 0.9414294295955872,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 2,
+            "rank_score": 0.9047225010557511,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 3,
+            "rank_score": 0.9021796972174025,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 4,
+            "rank_score": 0.8970056040728587,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 5,
+            "rank_score": 0.8968430201423323,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 6,
+            "rank_score": 0.8830159925262989,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 7,
+            "rank_score": 0.8798674700032916,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 8,
+            "rank_score": 0.8678106701934072,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 9,
+            "rank_score": 0.8662857088823175,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "bcfc226103bff6ad0cd3310ae8e1c7cfd39b755e",
+            "rank": 10,
+            "rank_score": 0.8596484823514189,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 11,
+            "rank_score": 0.8567097812043667,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "e08f1f6a877e333a0084f45ea3aacd7409f1b7f9",
+            "rank": 12,
+            "rank_score": 0.8452856694500791,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "9e1563bc48b169a89f29b5fb2aa50dd7f5995ba6",
+            "rank": 13,
+            "rank_score": 0.8445202213682597,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 14,
+            "rank_score": 0.8418425727059216,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b",
+            "rank": 15,
+            "rank_score": 0.8397240158356513,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "93ae1810cb00bd8c45970590639c8d270e1d657e",
+            "rank": 16,
+            "rank_score": 0.8263875156098871,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "7bdc83924b3ad3c609431ddde94121fcffba06cc",
+            "rank": 17,
+            "rank_score": 0.8237369905085541,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "e179b545e197846261a29a0e95dc41e636768068",
+            "rank": 18,
+            "rank_score": 0.8229246962022216,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "ef48ad5868e2a6319f83ff9c03784603dfca5c0a",
+            "rank": 19,
+            "rank_score": 0.8192722698583972,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 20,
+            "rank_score": 0.8188857678931322,
+            "section_path": "enwiki:Blockchain/Uses"
+        },
+        {
+            "para_id": "68ff09b2549aff192863309caf6735ef5480dd47",
+            "rank": 1,
+            "rank_score": 0.905132440319139,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5",
+            "rank": 2,
+            "rank_score": 0.885218279535125,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4",
+            "rank": 3,
+            "rank_score": 0.8815455847230775,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff",
+            "rank": 4,
+            "rank_score": 0.8769513087790622,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11",
+            "rank": 5,
+            "rank_score": 0.8726175936574174,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0",
+            "rank": 6,
+            "rank_score": 0.8654632206340493,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae",
+            "rank": 7,
+            "rank_score": 0.856753355035861,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9",
+            "rank": 8,
+            "rank_score": 0.8564963889228135,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944",
+            "rank": 9,
+            "rank_score": 0.8537874466775266,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "ef48ad5868e2a6319f83ff9c03784603dfca5c0a",
+            "rank": 10,
+            "rank_score": 0.840518892656999,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516",
+            "rank": 11,
+            "rank_score": 0.8390090560764696,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e",
+            "rank": 12,
+            "rank_score": 0.8358138257894387,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7",
+            "rank": 13,
+            "rank_score": 0.8274348996343256,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984",
+            "rank": 14,
+            "rank_score": 0.8251379157668134,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "abd0dd52e574dbdcf424dd2d2babcd585548f73c",
+            "rank": 15,
+            "rank_score": 0.8234199198928983,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "9e1563bc48b169a89f29b5fb2aa50dd7f5995ba6",
+            "rank": 16,
+            "rank_score": 0.823173774222606,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b",
+            "rank": 17,
+            "rank_score": 0.8206038914438323,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22",
+            "rank": 18,
+            "rank_score": 0.8167717472215578,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "7460e7029de8660b15b8cabbd63a1e2484103058",
+            "rank": 19,
+            "rank_score": 0.8162382811902115,
+            "section_path": "enwiki:Blockchain/History"
+        },
+        {
+            "para_id": "1d9bea020fef9e436915c6a30f2a8f4051c44e24",
+            "rank": 20,
+            "rank_score": 0.8141512163897396,
+            "section_path": "enwiki:Blockchain/History"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "The blockchain is a public "
+                },
+                {
+                    "entity": "enwiki:Ledger",
+                    "entity_name": "Ledger",
+                    "link_section": null,
+                    "text": "ledger"
+                },
+                {
+                    "text": " that records bitcoin transactions. A novel solution accomplishes this without any trusted central authority: maintenance of the blockchain is performed by a "
+                },
+                {
+                    "entity": "enwiki:Computer%20network",
+                    "entity_name": "Computer network",
+                    "link_section": null,
+                    "text": "network"
+                },
+                {
+                    "text": " of communicating "
+                },
+                {
+                    "entity": "enwiki:Node%20(networking)",
+                    "entity_name": "Node (networking)",
+                    "link_section": null,
+                    "text": "nodes"
+                },
+                {
+                    "text": " running bitcoin software. Transactions of the form payer X sends Y bitcoins to payee Z are "
+                },
+                {
+                    "entity": "enwiki:Broadcasting%20(networking)",
+                    "entity_name": "Broadcasting (networking)",
+                    "link_section": null,
+                    "text": "broadcast"
+                },
+                {
+                    "text": " to this network using readily available software applications. Network nodes can validate transactions, add them to their copy of the ledger, and then broadcast these ledger additions to other nodes. The blockchain is a "
+                },
+                {
+                    "entity": "enwiki:Distributed%20database",
+                    "entity_name": "Distributed database",
+                    "link_section": null,
+                    "text": "distributed database"
+                },
+                {
+                    "text": " \u2013 to achieve independent verification of the chain of ownership of any and every bitcoin (amount), each network node stores its own copy of the blockchain. Approximately six times per hour, a new group of accepted transactions, a block, is created, added to the blockchain, and quickly published to all nodes. This allows bitcoin software to determine when a particular bitcoin amount has been spent, which is necessary in order to prevent "
+                },
+                {
+                    "entity": "enwiki:Double-spending",
+                    "entity_name": "Double-spending",
+                    "link_section": null,
+                    "text": "double-spending"
+                },
+                {
+                    "text": " in an environment without central oversight. Whereas a conventional ledger records the transfers of actual "
+                },
+                {
+                    "entity": "enwiki:Banknote",
+                    "entity_name": "Banknote",
+                    "link_section": null,
+                    "text": "bills"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Promissory%20note",
+                    "entity_name": "Promissory note",
+                    "link_section": null,
+                    "text": "promissory note"
+                },
+                {
+                    "text": "s that exist apart from it, the blockchain is the only place that bitcoins can be said to exist in the form of unspent outputs of transactions."
+                }
+            ],
+            "para_id": "915f9cea84f0a91c3b88f65e7c4b00efc3f93bd5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": " is a public "
+                },
+                {
+                    "entity": "enwiki:Ledger",
+                    "entity_name": "Ledger",
+                    "link_section": null,
+                    "text": "ledger"
+                },
+                {
+                    "text": " that records transactions. A novel solution accomplishes this without any trusted central authority: maintenance of the blockchain is performed by a "
+                },
+                {
+                    "entity": "enwiki:Computer%20network",
+                    "entity_name": "Computer network",
+                    "link_section": null,
+                    "text": "network"
+                },
+                {
+                    "text": " of communicating "
+                },
+                {
+                    "entity": "enwiki:Node%20(networking)",
+                    "entity_name": "Node (networking)",
+                    "link_section": null,
+                    "text": "nodes"
+                },
+                {
+                    "text": " running the software. Transactions of the form payer X sends Y bitcoins to payee Z are "
+                },
+                {
+                    "entity": "enwiki:Broadcasting%20(networking)",
+                    "entity_name": "Broadcasting (networking)",
+                    "link_section": null,
+                    "text": "broadcast"
+                },
+                {
+                    "text": " to this network using readily available software applications. Network nodes can validate transactions, add them to their copy of the ledger, and then broadcast these ledger additions to other nodes. The blockchain is a "
+                },
+                {
+                    "entity": "enwiki:Distributed%20database",
+                    "entity_name": "Distributed database",
+                    "link_section": null,
+                    "text": "distributed database"
+                },
+                {
+                    "text": "; to achieve independent verification of the chain of ownership of any and every bitcoin (amount), each network node stores its own copy of the blockchain. Approximately sixty times per hour, a new group of accepted transactions, a block, is created, added to the blockchain, and quickly published to all nodes. This allows shadowcash software to determine when a particular amount has been spent, which is necessary in order to prevent "
+                },
+                {
+                    "entity": "enwiki:Double-spending",
+                    "entity_name": "Double-spending",
+                    "link_section": null,
+                    "text": "double-spending"
+                },
+                {
+                    "text": " in an environment without central oversight. Whereas a conventional ledger records the transfers of actual "
+                },
+                {
+                    "entity": "enwiki:Banknote",
+                    "entity_name": "Banknote",
+                    "link_section": null,
+                    "text": "bills"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Promissory%20note",
+                    "entity_name": "Promissory note",
+                    "link_section": null,
+                    "text": "promissory note"
+                },
+                {
+                    "text": "s that exist apart from it, the blockchain is the only place that shadowcash can be said to exist in the form of unspent outputs of transactions."
+                }
+            ],
+            "para_id": "6d5aa18f7f5a4afc4e95e37d7b851619d3e894e4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Nikolai Hampton pointed out in "
+                },
+                {
+                    "entity": "enwiki:Computerworld",
+                    "entity_name": "Computerworld",
+                    "link_section": null,
+                    "text": "Computerworld"
+                },
+                {
+                    "text": " that \"There is also no need for a \u201851 percent\u2019 attack on a private blockchain, as the private blockchain (most likely) already controls 100 percent of all block creation resources. If you could attack or damage the blockchain creation tools on a private corporate server, you could effectively control 100 percent of their network and alter transactions however you wished.\" This has a set of particularly profound adverse implications during a "
+                },
+                {
+                    "entity": "enwiki:Financial%20crisis",
+                    "entity_name": "Financial crisis",
+                    "link_section": null,
+                    "text": "financial crises"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Debt%20crisis",
+                    "entity_name": "Debt crisis",
+                    "link_section": null,
+                    "text": "debt crises"
+                },
+                {
+                    "text": " like the "
+                },
+                {
+                    "entity": "enwiki:Financial%20crisis%20of%202007%E2%80%932008",
+                    "entity_name": "Financial crisis of 2007\u20132008",
+                    "link_section": null,
+                    "text": "financial crisis of 2007\u201308"
+                },
+                {
+                    "text": ", where politically powerful actors may make decisions that favor some groups at the expense of others. and that \"The bitcoin blockchain is protected by the massive group mining effort. It's unlikely that any private blockchain will try to protect records using gigawatts of computing power \u2014 it's time consuming and expensive.\" She also said \"Within a private blockchain there is also no \u2018race\u2019; there's no incentive to use more power or discover blocks faster than competitors. This means that many in-house blockchain solutions will be nothing more than cumbersome databases.\""
+                }
+            ],
+            "para_id": "6227ab03aa8e86405369e2bd8edb933a5dc223ff"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Blockstack is the first implementation of a decentralized "
+                },
+                {
+                    "entity": "enwiki:Domain%20Name%20System",
+                    "entity_name": "Domain Name System",
+                    "link_section": null,
+                    "text": "DNS"
+                },
+                {
+                    "text": " system on top of the "
+                },
+                {
+                    "entity": "enwiki:Bitcoin",
+                    "entity_name": "Bitcoin",
+                    "link_section": null,
+                    "text": "Bitcoin"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": ". It combines DNS functionality with "
+                },
+                {
+                    "entity": "enwiki:Public%20key%20infrastructure",
+                    "entity_name": "Public key infrastructure",
+                    "link_section": null,
+                    "text": "public key infrastructure"
+                },
+                {
+                    "text": " and is primarily meant to be used by new blockchain applications. Blockstack is being developed by a group of engineers and researchers coming from both industry and academia and is released as open-source. Other systems like "
+                },
+                {
+                    "entity": "enwiki:Namecoin",
+                    "entity_name": "Namecoin",
+                    "link_section": null,
+                    "text": "Namecoin"
+                },
+                {
+                    "text": " have implemented decentralized DNS using blockchains earlier by using blockchains other than Bitcoin. Blockstack became operational on the Bitcoin blockchain in September 2015. As of March 2016, Blockstack is the largest non-financial system using the Bitcoin blockchain by transaction volume."
+                }
+            ],
+            "para_id": "07c5522ff0235293c5462ffad49eb2be7926ae11"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Blockchain is a secured way of online transaction. A blockchain is a decentralized digital ledger that records transactions on thousands of computers globally in such a way that the registered transactions cannot be altered retrospectively. They are "
+                },
+                {
+                    "entity": "enwiki:Authentication",
+                    "entity_name": "Authentication",
+                    "link_section": null,
+                    "text": "authenticated"
+                },
+                {
+                    "text": " by mass "
+                },
+                {
+                    "entity": "enwiki:Collaboration",
+                    "entity_name": "Collaboration",
+                    "link_section": null,
+                    "text": "collaboration"
+                },
+                {
+                    "text": " powered by "
+                },
+                {
+                    "entity": "enwiki:Collective",
+                    "entity_name": "Collective",
+                    "link_section": null,
+                    "text": "collective"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Self-interest",
+                    "entity_name": "Self-interest",
+                    "link_section": null,
+                    "text": "self-interest"
+                },
+                {
+                    "text": "s. The result is a "
+                },
+                {
+                    "entity": "enwiki:Robustness%20(computer%20science)",
+                    "entity_name": "Robustness (computer science)",
+                    "link_section": null,
+                    "text": "robust"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Workflow",
+                    "entity_name": "Workflow",
+                    "link_section": null,
+                    "text": "workflow"
+                },
+                {
+                    "text": " where participants' "
+                },
+                {
+                    "entity": "enwiki:Uncertainty",
+                    "entity_name": "Uncertainty",
+                    "link_section": null,
+                    "text": "uncertainty"
+                },
+                {
+                    "text": " regarding data security is marginal. The use of a blockchain removes the characteristic of infinite "
+                },
+                {
+                    "entity": "enwiki:Reproduction%20(economics)",
+                    "entity_name": "Reproduction (economics)",
+                    "link_section": null,
+                    "text": "reproducibility"
+                },
+                {
+                    "text": " from a digital asset. It confirms that each unit of digital cash was spent only once, solving the long-standing problem of "
+                },
+                {
+                    "entity": "enwiki:Double-spending",
+                    "entity_name": "Double-spending",
+                    "link_section": null,
+                    "text": "double spending"
+                },
+                {
+                    "text": ".  Blockchains have been described as a "
+                },
+                {
+                    "entity": "enwiki:Value%20(economics)",
+                    "entity_name": "Value (economics)",
+                    "link_section": null,
+                    "text": "value"
+                },
+                {
+                    "text": "-exchange "
+                },
+                {
+                    "entity": "enwiki:Cryptographic%20protocol",
+                    "entity_name": "Cryptographic protocol",
+                    "link_section": null,
+                    "text": "protocol"
+                },
+                {
+                    "text": ".  This exchange of value can be completed more quickly, safely and cheaper with a blockchain.  A blockchain can assign "
+                },
+                {
+                    "entity": "enwiki:Title%20(property)",
+                    "entity_name": "Title (property)",
+                    "link_section": null,
+                    "text": "title"
+                },
+                {
+                    "text": " rights because it provides a record that compels "
+                },
+                {
+                    "entity": "enwiki:Offer%20and%20acceptance",
+                    "entity_name": "Offer and acceptance",
+                    "link_section": null,
+                    "text": "offer and acceptance"
+                },
+                {
+                    "text": ". From the technical point of view a blockchain is a "
+                },
+                {
+                    "entity": "enwiki:Hash%20chain",
+                    "entity_name": "Hash chain",
+                    "link_section": null,
+                    "text": "hashchain"
+                },
+                {
+                    "text": " inside another hashchain."
+                }
+            ],
+            "para_id": "41a19ad85af970722448d46a4fb6ed1a5477cae0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2016, the central securities depository of the Russian Federation ("
+                },
+                {
+                    "entity": "enwiki:National%20Settlement%20Depository%20(Russia)",
+                    "entity_name": "National Settlement Depository (Russia)",
+                    "link_section": null,
+                    "text": "NSD"
+                },
+                {
+                    "text": ") announced a pilot project based on blockchain technology. Various regulatory bodies in the music industry have started testing models that use blockchain technology for royalty collection and management of copyrights around the world. IBM opened a blockchain innovation research centre in Singapore in July 2016. A working group for the "
+                },
+                {
+                    "entity": "enwiki:World%20Economic%20Forum",
+                    "entity_name": "World Economic Forum",
+                    "link_section": null,
+                    "text": "World Economic Forum"
+                },
+                {
+                    "text": " met in November 2016 to discuss the development of "
+                },
+                {
+                    "entity": "enwiki:Multistakeholder%20governance%20model",
+                    "entity_name": "Multistakeholder governance model",
+                    "link_section": null,
+                    "text": "governance models"
+                },
+                {
+                    "text": " related to blockchain.  According to "
+                },
+                {
+                    "entity": "enwiki:Accenture",
+                    "entity_name": "Accenture",
+                    "link_section": null,
+                    "text": "Accenture"
+                },
+                {
+                    "text": " an application of the "
+                },
+                {
+                    "entity": "enwiki:Diffusion%20of%20innovations",
+                    "entity_name": "Diffusion of innovations",
+                    "link_section": null,
+                    "text": "diffusion of innovations"
+                },
+                {
+                    "text": " theory suggests that in 2016 blockchains attained a 13.5% adoption rate within financial services, therefore reaching the "
+                },
+                {
+                    "entity": "enwiki:Early%20adopter",
+                    "entity_name": "Early adopter",
+                    "link_section": null,
+                    "text": "early adopter"
+                },
+                {
+                    "text": "s phase. In 2016, industry trade groups joined to create the Global Blockchain Forum, an initiative of the "
+                },
+                {
+                    "entity": "enwiki:Chamber%20of%20Digital%20Commerce",
+                    "entity_name": "Chamber of Digital Commerce",
+                    "link_section": null,
+                    "text": "Chamber of Digital Commerce"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "ee94aad18f97b2318636af09447b1c8d05b9ff0b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "By storing data across its network, the blockchain eliminates the risks that come with data being held centrally.  Decentralised blockchains may use "
+                },
+                {
+                    "entity": "enwiki:Ad%20hoc",
+                    "entity_name": "Ad hoc",
+                    "link_section": null,
+                    "text": "ad-hoc"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Message%20passing",
+                    "entity_name": "Message passing",
+                    "link_section": null,
+                    "text": "message passing"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Distributed%20networking",
+                    "entity_name": "Distributed networking",
+                    "link_section": null,
+                    "text": "distributed networking"
+                },
+                {
+                    "text": ". Its network lacks centralized points of vulnerability that computer hackers can exploit or any central point of "
+                },
+                {
+                    "entity": "enwiki:Failure",
+                    "entity_name": "Failure",
+                    "link_section": null,
+                    "text": "failure"
+                },
+                {
+                    "text": ". Blockchain security methods include the use of "
+                },
+                {
+                    "entity": "enwiki:Public-key%20cryptography",
+                    "entity_name": "Public-key cryptography",
+                    "link_section": null,
+                    "text": "public-key cryptography"
+                },
+                {
+                    "text": ". A public key (a long, randomly-generated string of numbers) is an address on the blockchain. Bitcoins sent across the network are recorded as belonging to that address. A private key is like a password that gives its owner access to their digital assets or otherwise interact with the various capabilities that blockchains now support. Data stored on the blockchain is generally considered incorruptible."
+                }
+            ],
+            "para_id": "a96824c160af669e5a875c0ec742edd3741d7fa9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One of the most important developments in the blockchain industry has been development of sidechains operating on a 2-way peg system. A sidechain is also blockchain that runs and operates akin to the main Blockchain network. The basic function of a sidechain is to amplify the functionality of the main blockchain by allowing a friction free transaction network back and forth the main blockchain."
+                }
+            ],
+            "para_id": "8607d4e6bce2b289e03c5d823db77d6978f7fcae"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A blockchain database consists of two kinds of records: transactions and blocks. Blocks hold batches of valid "
+                },
+                {
+                    "entity": "enwiki:Transaction%20processing",
+                    "entity_name": "Transaction processing",
+                    "link_section": null,
+                    "text": "transactions"
+                },
+                {
+                    "text": " that are hashed and encoded into a "
+                },
+                {
+                    "entity": "enwiki:Merkle%20tree",
+                    "entity_name": "Merkle tree",
+                    "link_section": null,
+                    "text": "Merkle tree"
+                },
+                {
+                    "text": ". Each block includes the "
+                },
+                {
+                    "entity": "enwiki:Hash%20function",
+                    "entity_name": "Hash function",
+                    "link_section": null,
+                    "text": "hash"
+                },
+                {
+                    "text": " of the prior block in the blockchain, linking the two. Variants of this format were used previously, for example in "
+                },
+                {
+                    "entity": "enwiki:Git",
+                    "entity_name": "Git",
+                    "link_section": null,
+                    "text": "Git"
+                },
+                {
+                    "text": ", and it is not by itself sufficient to qualify as a blockchain.  The linked blocks form a chain. This "
+                },
+                {
+                    "entity": "enwiki:Iteration",
+                    "entity_name": "Iteration",
+                    "link_section": null,
+                    "text": "iterative"
+                },
+                {
+                    "text": " process confirms the integrity of the previous block, all the way back to the original genesis block.  Some blockchains create a new block as rapidly as every five seconds.  As blockchains age they are said to grow in height.  Blocks are structured by division into "
+                },
+                {
+                    "entity": "enwiki:Layered%20security",
+                    "entity_name": "Layered security",
+                    "link_section": null,
+                    "text": "layers"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "6aef8afd57d2479cca5e19197ffa34a754237944"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Major "
+                },
+                {
+                    "entity": "enwiki:Application%20software",
+                    "entity_name": "Application software",
+                    "link_section": null,
+                    "text": "applications"
+                },
+                {
+                    "text": " of blockchain include "
+                },
+                {
+                    "entity": "enwiki:Cryptocurrency",
+                    "entity_name": "Cryptocurrency",
+                    "link_section": null,
+                    "text": "cryptocurrencies"
+                },
+                {
+                    "text": "\u2014including bitcoin, "
+                },
+                {
+                    "entity": "enwiki:BlackCoin",
+                    "entity_name": "BlackCoin",
+                    "link_section": null,
+                    "text": "BlackCoin"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Dash%20(cryptocurrency)",
+                    "entity_name": "Dash (cryptocurrency)",
+                    "link_section": null,
+                    "text": "Dash"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Nxt",
+                    "entity_name": "Nxt",
+                    "link_section": null,
+                    "text": "Nxt"
+                },
+                {
+                    "text": "\u2014and blockchain platforms\u2014Factom as a distributed registry, Gems for decentralized messaging, MaidSafe for decentralized applications, Storj for a distributed cloud, and Tezos for decentralized voting. Frameworks and trials such as the one at the Sweden Land Registry aim to demonstrate the effectiveness of the blockchain at speeding land sale deals. The Republic of Georgia is piloting a blockchain-based property registry. The Ethical and Fair Creators Association uses blockchain to help startups protect their authentic ideas."
+                }
+            ],
+            "para_id": "d698685ab1afafa3079c3984db54a81d9eb25516"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "New distribution methods for the "
+                },
+                {
+                    "entity": "enwiki:Insurance",
+                    "entity_name": "Insurance",
+                    "link_section": null,
+                    "text": "insurance"
+                },
+                {
+                    "text": " industry such as "
+                },
+                {
+                    "entity": "enwiki:Peer-to-peer%20insurance",
+                    "entity_name": "Peer-to-peer insurance",
+                    "link_section": null,
+                    "text": "peer-to-peer insurance"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Parametric%20insurance",
+                    "entity_name": "Parametric insurance",
+                    "link_section": null,
+                    "text": "parametric insurance"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Microinsurance",
+                    "entity_name": "Microinsurance",
+                    "link_section": null,
+                    "text": "microinsurance"
+                },
+                {
+                    "text": " following the adoption of blockchain. Banks are interested in this technology because it has potential to speed up "
+                },
+                {
+                    "entity": "enwiki:Back%20office",
+                    "entity_name": "Back office",
+                    "link_section": null,
+                    "text": "back office"
+                },
+                {
+                    "text": " settlement systems. The "
+                },
+                {
+                    "entity": "enwiki:Sharing%20economy",
+                    "entity_name": "Sharing economy",
+                    "link_section": null,
+                    "text": "sharing economy"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Internet%20of%20things",
+                    "entity_name": "Internet of things",
+                    "link_section": null,
+                    "text": "IoT"
+                },
+                {
+                    "text": " are also set to benefit from blockchains because they involve many collaborating peers.  "
+                },
+                {
+                    "entity": "enwiki:Electronic%20voting",
+                    "entity_name": "Electronic voting",
+                    "link_section": "Online voting",
+                    "text": "Online voting"
+                },
+                {
+                    "text": " is another application of the blockchain.  Blockchains are being used to develop information systems for "
+                },
+                {
+                    "entity": "enwiki:Medical%20record",
+                    "entity_name": "Medical record",
+                    "link_section": null,
+                    "text": "medical record"
+                },
+                {
+                    "text": "s which increases "
+                },
+                {
+                    "entity": "enwiki:Interoperability",
+                    "entity_name": "Interoperability",
+                    "link_section": null,
+                    "text": "interoperability"
+                },
+                {
+                    "text": ". In theory legacy "
+                },
+                {
+                    "entity": "enwiki:Disparate%20system",
+                    "entity_name": "Disparate system",
+                    "link_section": null,
+                    "text": "disparate system"
+                },
+                {
+                    "text": "s can be completely replaced with blockchains. Blockchains are being developed for "
+                },
+                {
+                    "entity": "enwiki:Data%20storage",
+                    "entity_name": "Data storage",
+                    "link_section": null,
+                    "text": "data storage"
+                },
+                {
+                    "text": ", publishing texts and identifying the origin of "
+                },
+                {
+                    "entity": "enwiki:Digital%20art",
+                    "entity_name": "Digital art",
+                    "link_section": null,
+                    "text": "digital art"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "985d6b6c2d755ab2a55b4fab1d3c0de07322a28e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Proponents of permissioned or private chains argue that the term \"blockchain\" may be applied to any data structure that batches data into time-stamped blocks. These blockchains serve as a distributed version of "
+                },
+                {
+                    "entity": "enwiki:Multiversion%20concurrency%20control",
+                    "entity_name": "Multiversion concurrency control",
+                    "link_section": null,
+                    "text": "multiversion concurrency control"
+                },
+                {
+                    "text": " (MVCC) in databases. Just as MVCC prevents two transactions from concurrently modifying a single object in a database, blockchains prevent two transactions from spending the same single output in a blockchain."
+                }
+            ],
+            "para_id": "ef48ad5868e2a6319f83ff9c03784603dfca5c0a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In early 2014, Lubin was "
+                },
+                {
+                    "entity": "enwiki:Chief%20operating%20officer",
+                    "entity_name": "Chief operating officer",
+                    "link_section": null,
+                    "text": "Chief Operating Officer"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:Ethereum",
+                    "entity_name": "Ethereum",
+                    "link_section": null,
+                    "text": "Ethereum Switzerland GmbH"
+                },
+                {
+                    "text": " (EthSuisse), a company working to extend the capabilities of the type of "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain database"
+                },
+                {
+                    "text": " first popularized by "
+                },
+                {
+                    "entity": "enwiki:Bitcoin",
+                    "entity_name": "Bitcoin",
+                    "link_section": null,
+                    "text": "Bitcoin"
+                },
+                {
+                    "text": ", and extend the capabilities of the blockchain to store "
+                },
+                {
+                    "entity": "enwiki:Executable",
+                    "entity_name": "Executable",
+                    "link_section": null,
+                    "text": "programs"
+                },
+                {
+                    "text": " in addition to "
+                },
+                {
+                    "entity": "enwiki:Data",
+                    "entity_name": "Data",
+                    "link_section": null,
+                    "text": "data"
+                },
+                {
+                    "text": ", as well as facilitate, verify, or enforce the negotiation or performance of "
+                },
+                {
+                    "entity": "enwiki:Smart%20contract",
+                    "entity_name": "Smart contract",
+                    "link_section": null,
+                    "text": "smart contract"
+                },
+                {
+                    "text": "s. The new generation of distributed crypto-secure databases with smart contract functionality has been referred to as \""
+                },
+                {
+                    "text": "Blockchain 2.0"
+                },
+                {
+                    "text": "\""
+                }
+            ],
+            "para_id": "5c843cf58232203b3c379f279dd28792718910fc"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "RChain is a turing-complete blockchain, based on "
+                },
+                {
+                    "entity": "enwiki:Proof-of-stake",
+                    "entity_name": "Proof-of-stake",
+                    "link_section": null,
+                    "text": "Proof-of-Stake"
+                },
+                {
+                    "text": " consensus. In contrast to preceding blockchain designs, computation in RChain blockchain is designed to be concurrent and sharded, allowing the parallel execution of processes and concurrent computation. \u201cSharded\u201d refers to the subdivision of the blockchain into composable parts, which interlock to a unified whole, but do not need to be computed all at once (as it is the case with the classical blockchain). \u201cConcurrent\u201d means that this subdivision enables different processes to run in parallel without interfering with each other."
+                }
+            ],
+            "para_id": "0889f6ed98cf7e237de5aa146de3926f730e0be7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Bitnation was launched July 14, 2014 by Susanne Tarkowski Tempelhof, who was shortly thereafter joined by "
+                },
+                {
+                    "entity": "enwiki:Rick%20Falkvinge",
+                    "entity_name": "Rick Falkvinge",
+                    "link_section": null,
+                    "text": "Rick Falkvinge"
+                },
+                {
+                    "text": ", the founder of the first Pirate Party. On October 5, Bitnation did the first Blockchain Marriage, on October 10, it released its White Paper, then the first Blockchain World Citizenship together with Chris Ellis from World Crypto News (WCN), and in April 2015 it created the first land titles and the first birth certificate on the Blockchain. In November 2015, "
+                },
+                {
+                    "entity": "enwiki:Estonia",
+                    "entity_name": "Estonia",
+                    "link_section": null,
+                    "text": "Estonia"
+                },
+                {
+                    "text": " announced its cooperation with Bitnation to create a blockchain based public notary solution allowing anyone from the world to digitally notarize documents on the Blockchain. Bitnation also organized the world's first blockchain marriage"
+                }
+            ],
+            "para_id": "34cb9c1b872af2a4fef01029e1537dd835e9d984"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One critic has expressed the opinion that the "
+                },
+                {
+                    "entity": "enwiki:Ethereum",
+                    "entity_name": "Ethereum",
+                    "link_section": null,
+                    "text": "Ethereum"
+                },
+                {
+                    "text": " platform is impractical for use in the calculation of outcomes because it allows for \"parasite contracts\" which steal the work done by contributors without compensating them properly.  The Augur team pointed out that this vulnerability is not unique to Ethereum: any blockchain-based system can execute such a \"parasite\" attack on another blockchain simply by incorporating "
+                },
+                {
+                    "entity": "enwiki:Merkle%20tree",
+                    "entity_name": "Merkle tree",
+                    "link_section": null,
+                    "text": "Merkle proofs"
+                },
+                {
+                    "text": " of the host blockchain into its own chain.  Ethereum-based oracles are expected to be resilient to parasite attacks, as they cannot be attacked by Ethereum-based parasite contracts; Ethereum contracts do not have access to raw blockchain data."
+                }
+            ],
+            "para_id": "026d73839864e6502b9883203aa3325b0ea57c23"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When a blockchain does not want to put the bear down to numerous third parties, they administer another blockchain its premises and regard it as sidechain. This sidechain follows a protocol drawn out by solidarity.These sidechains are made to comprehend the "
+                },
+                {
+                    "entity": "enwiki:Consensus%20decision-making",
+                    "entity_name": "Consensus decision-making",
+                    "link_section": null,
+                    "text": "consensus"
+                },
+                {
+                    "text": " system of main blockchain and can thus are able to autonomously release tokens when given proof of a lock transaction in the main blockchain."
+                }
+            ],
+            "para_id": "abd0dd52e574dbdcf424dd2d2babcd585548f73c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Permissioned blockchains are emerging as open source protocols where openness and collaboration are encouraged. These will always have the ability to restrict who can participate in the consensus processes as well as who can transact. These private blockchains lack "
+                },
+                {
+                    "entity": "enwiki:Transparency%20(behavior)",
+                    "entity_name": "Transparency (behavior)",
+                    "link_section": null,
+                    "text": "transparency"
+                },
+                {
+                    "text": ". They do not rely on anonymous miners to validate transactions nor do they benefit from the "
+                },
+                {
+                    "entity": "enwiki:Network%20effect",
+                    "entity_name": "Network effect",
+                    "link_section": null,
+                    "text": "network effect"
+                },
+                {
+                    "text": ".  Miners are vetted. The "
+                },
+                {
+                    "entity": "enwiki:The%20New%20York%20Times",
+                    "entity_name": "The New York Times",
+                    "link_section": null,
+                    "text": "New York Times"
+                },
+                {
+                    "text": " notes that many corporations are using blockchain networks \"with private blockchains, independent of the public system.\""
+                }
+            ],
+            "para_id": "9e1563bc48b169a89f29b5fb2aa50dd7f5995ba6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Sometimes separate blocks can be validated concurrently, creating a temporary fork. In addition to a secure hash based history, any blockchain has a specified algorithm for scoring different versions of the history so that one with a higher value can be selected over others.  Blocks which are not selected for inclusion in the chain are called orphan blocks.  Peers supporting the database don't have exactly the same version of the history at all times, rather they keep the highest scoring version of the database that they currently know of. Whenever a peer receives a higher scoring version (usually the old version with a single new block added) they extend or overwrite their own database and retransmit the improvement to their peers. There is never an absolute guarantee that any particular entry will remain in the best version of the history forever, but because blockchains are typically built to add the score of new blocks onto old blocks and there are incentives to only work on extending with new blocks rather than overwriting old blocks, the probability of an entry becoming superseded goes down exponentially as more blocks are built on top of it, eventually becoming very low. For example, in a blockchain using the "
+                },
+                {
+                    "entity": "enwiki:Proof-of-work%20system",
+                    "entity_name": "Proof-of-work system",
+                    "link_section": null,
+                    "text": "proof-of-work system"
+                },
+                {
+                    "text": ", the chain with the most cumulative proof-of-work is always considered the valid one by the network.  In practice there are a number of methods that can demonstrate a sufficient level of "
+                },
+                {
+                    "entity": "enwiki:Computation",
+                    "entity_name": "Computation",
+                    "link_section": null,
+                    "text": "computation"
+                },
+                {
+                    "text": ". Within a blockchain the computation is carried out redundantly rather than in the traditional segregated and "
+                },
+                {
+                    "entity": "enwiki:Parallel%20computing",
+                    "entity_name": "Parallel computing",
+                    "link_section": null,
+                    "text": "parallel"
+                },
+                {
+                    "text": " manner."
+                }
+            ],
+            "para_id": "68ff09b2549aff192863309caf6735ef5480dd47"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The software validates the entire "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": ", which includes all Bitcoin transactions ever.  This "
+                },
+                {
+                    "entity": "enwiki:Distributed%20ledger",
+                    "entity_name": "Distributed ledger",
+                    "link_section": null,
+                    "text": "distributed ledger"
+                },
+                {
+                    "text": " which has reached more than 80 gigabytes in size must be downloaded or synchronised before full participation of the client may occur. A "
+                },
+                {
+                    "entity": "enwiki:Command-line%20interface",
+                    "entity_name": "Command-line interface",
+                    "link_section": null,
+                    "text": "command line"
+                },
+                {
+                    "text": "-based "
+                },
+                {
+                    "entity": "enwiki:Daemon%20(computing)",
+                    "entity_name": "Daemon (computing)",
+                    "link_section": null,
+                    "text": "daemon"
+                },
+                {
+                    "text": " with a "
+                },
+                {
+                    "entity": "enwiki:JSON-RPC",
+                    "entity_name": "JSON-RPC",
+                    "link_section": null,
+                    "text": "JSON-RPC"
+                },
+                {
+                    "text": " interface, bitcoind, is bundled with Bitcoin Core. It provides access to testnet, a global testing environment that imitates the bitcoin main network or Mainnet.  It uses an alternative blockchain where real bitcoin are not used and the blockchain cannot be adversely affected. Regtest or Regression Test Mode creates a private blockchain which is used as a local testing environment.  bitcoin-cli is the third program included.  It allows users to send "
+                },
+                {
+                    "entity": "enwiki:Remote%20procedure%20call",
+                    "entity_name": "Remote procedure call",
+                    "link_section": null,
+                    "text": "RPC"
+                },
+                {
+                    "text": " commands to bitcoind."
+                }
+            ],
+            "para_id": "674df302dfdb839f082ddc1024345c229cffeb22"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Blockchains can be thought of as an automatically "
+                },
+                {
+                    "entity": "enwiki:Notary",
+                    "entity_name": "Notary",
+                    "link_section": null,
+                    "text": "notarised"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Ledger",
+                    "entity_name": "Ledger",
+                    "link_section": null,
+                    "text": "ledger"
+                },
+                {
+                    "text": ". They alleviate the need for a "
+                },
+                {
+                    "entity": "enwiki:Trust%20service%20provider",
+                    "entity_name": "Trust service provider",
+                    "link_section": null,
+                    "text": "trust service provider"
+                },
+                {
+                    "text": " and are predicted to result in less "
+                },
+                {
+                    "entity": "enwiki:Capital%20(economics)",
+                    "entity_name": "Capital (economics)",
+                    "link_section": null,
+                    "text": "capital"
+                },
+                {
+                    "text": " being tied up in disputes.  Blockchains have the potential to reduce "
+                },
+                {
+                    "entity": "enwiki:Systemic%20risk",
+                    "entity_name": "Systemic risk",
+                    "link_section": null,
+                    "text": "systemic risk"
+                },
+                {
+                    "text": " and financial "
+                },
+                {
+                    "entity": "enwiki:Fraud",
+                    "entity_name": "Fraud",
+                    "link_section": null,
+                    "text": "fraud"
+                },
+                {
+                    "text": ".  They automate processes which were previously time-consuming and done manually such as the "
+                },
+                {
+                    "entity": "enwiki:Incorporation%20(business)",
+                    "entity_name": "Incorporation (business)",
+                    "link_section": null,
+                    "text": "incorporation"
+                },
+                {
+                    "text": " of businesses. In theory, it would be possible to collect taxes, conduct conveyancing and provide risk management with blockchains."
+                }
+            ],
+            "para_id": "6a99ea434e21768e86356ea9fc19ae48bcd50858"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "While there is potential to transform business "
+                },
+                {
+                    "entity": "enwiki:Operating%20model",
+                    "entity_name": "Operating model",
+                    "link_section": null,
+                    "text": "operating model"
+                },
+                {
+                    "text": "s there are few operational products maturing from "
+                },
+                {
+                    "entity": "enwiki:Proof%20of%20concept",
+                    "entity_name": "Proof of concept",
+                    "link_section": null,
+                    "text": "proof of concept"
+                },
+                {
+                    "text": ". The use of blockchains promises to be able to bring significant efficiencies to global "
+                },
+                {
+                    "entity": "enwiki:Supply%20chain",
+                    "entity_name": "Supply chain",
+                    "link_section": null,
+                    "text": "supply chain"
+                },
+                {
+                    "text": "s although many observers remain skeptical. Some analysts, such as Steve Wilson from Constellation Research believe the technology has been "
+                },
+                {
+                    "entity": "enwiki:Media%20circus",
+                    "entity_name": "Media circus",
+                    "link_section": null,
+                    "text": "hyped"
+                },
+                {
+                    "text": " with unrealistic claims. In order to mitigate "
+                },
+                {
+                    "entity": "enwiki:Risk%20management",
+                    "entity_name": "Risk management",
+                    "link_section": null,
+                    "text": "risk"
+                },
+                {
+                    "text": " businesses are reluctant to place blockchain at the core of the business structure. Blockchains are a technology that may be integrated into multiple areas. It is a "
+                },
+                {
+                    "entity": "enwiki:Disruptive%20innovation",
+                    "entity_name": "Disruptive innovation",
+                    "link_section": null,
+                    "text": "disruptive innovation"
+                },
+                {
+                    "text": " because it allows businesses to use to new methods of processing digital transactions. Examples include a payment system and "
+                },
+                {
+                    "entity": "enwiki:Digital%20currency",
+                    "entity_name": "Digital currency",
+                    "link_section": null,
+                    "text": "digital currency"
+                },
+                {
+                    "text": ", facilitating "
+                },
+                {
+                    "entity": "enwiki:Crowdfunding",
+                    "entity_name": "Crowdfunding",
+                    "link_section": null,
+                    "text": "crowdsales"
+                },
+                {
+                    "text": ", or implementing "
+                },
+                {
+                    "entity": "enwiki:Prediction%20market",
+                    "entity_name": "Prediction market",
+                    "link_section": null,
+                    "text": "prediction market"
+                },
+                {
+                    "text": "s and generic "
+                },
+                {
+                    "entity": "enwiki:Governance",
+                    "entity_name": "Governance",
+                    "link_section": null,
+                    "text": "governance"
+                },
+                {
+                    "text": " tools. Blockchains are expected to disrupt the "
+                },
+                {
+                    "entity": "enwiki:Cloud%20computing",
+                    "entity_name": "Cloud computing",
+                    "link_section": null,
+                    "text": "cloud computing"
+                },
+                {
+                    "text": " industry although practical technical issues remain as obstacles."
+                }
+            ],
+            "para_id": "e179b545e197846261a29a0e95dc41e636768068"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Another kind of crowdfunding is to raise funds for a project where a digital or software-based value token is offered as a reward to funders. Value tokens are "
+                },
+                {
+                    "entity": "enwiki:Endogeny%20(biology)",
+                    "entity_name": "Endogeny (biology)",
+                    "link_section": null,
+                    "text": "endogenous"
+                },
+                {
+                    "text": "ly created by particular open decentralized networks that and are used to "
+                },
+                {
+                    "entity": "enwiki:Incentive",
+                    "entity_name": "Incentive",
+                    "link_section": null,
+                    "text": "incentivize"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Peer-to-peer",
+                    "entity_name": "Peer-to-peer",
+                    "link_section": null,
+                    "text": "client computers"
+                },
+                {
+                    "text": " of the network to expend scarce computer resources on maintaining the protocol network.  These value tokens may or may not exist at the time of the crowdsale, and may require substantial development effort and eventual software release before the token is live and establishes a market value.  Although funds may be raised simply for the value token itself, funds raised on "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": "-based crowdfunding can also represent "
+                },
+                {
+                    "entity": "enwiki:Equity%20(finance)",
+                    "entity_name": "Equity (finance)",
+                    "link_section": null,
+                    "text": "equity"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Bond%20(finance)",
+                    "entity_name": "Bond (finance)",
+                    "link_section": null,
+                    "text": "bonds"
+                },
+                {
+                    "text": ", or even \""
+                },
+                {
+                    "entity": "enwiki:Market%20maker",
+                    "entity_name": "Market maker",
+                    "link_section": null,
+                    "text": "market-maker seats"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:Governance",
+                    "entity_name": "Governance",
+                    "link_section": null,
+                    "text": "governance"
+                },
+                {
+                    "text": "\" for the entity being funded. Examples of such crowdsales are "
+                },
+                {
+                    "entity": "enwiki:Augur%20(software)",
+                    "entity_name": "Augur (software)",
+                    "link_section": null,
+                    "text": "Augur"
+                },
+                {
+                    "text": " decentralized, distributed "
+                },
+                {
+                    "entity": "enwiki:Prediction%20market",
+                    "entity_name": "Prediction market",
+                    "link_section": null,
+                    "text": "prediction market"
+                },
+                {
+                    "text": " software which raised  from more than 3500 participants; "
+                },
+                {
+                    "entity": "enwiki:Ethereum",
+                    "entity_name": "Ethereum",
+                    "link_section": null,
+                    "text": "Ethereum"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "text": "blockchain"
+                },
+                {
+                    "text": "; Digix/DigixDAO;and \""
+                },
+                {
+                    "entity": "enwiki:The%20DAO%20(organization)",
+                    "entity_name": "The DAO (organization)",
+                    "link_section": null,
+                    "text": "The DAO"
+                },
+                {
+                    "text": ".\""
+                }
+            ],
+            "para_id": "42fd191499cd13423359a0cde597d464435dc0f8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Since 2012, decentralized platforms for prediction markets have been in development. These platforms utilize "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": " technology and "
+                },
+                {
+                    "entity": "enwiki:Cryptocurrency",
+                    "entity_name": "Cryptocurrency",
+                    "link_section": null,
+                    "text": "cryptocurrencies"
+                },
+                {
+                    "text": " to provide various advantages over centralized markets, but also more challenges for regulators. One such example is open-source software "
+                },
+                {
+                    "entity": "enwiki:Augur%20(software)",
+                    "entity_name": "Augur (software)",
+                    "link_section": null,
+                    "text": "Augur"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "3fb629ea54b7a746dd6a330e3c064e1a1fdc73a0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Augur is a fully "
+                },
+                {
+                    "entity": "enwiki:Open-source%20software",
+                    "entity_name": "Open-source software",
+                    "link_section": null,
+                    "text": "open-source"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Decentralization",
+                    "entity_name": "Decentralization",
+                    "link_section": null,
+                    "text": "decentralized"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Prediction%20market",
+                    "entity_name": "Prediction market",
+                    "link_section": null,
+                    "text": "prediction market"
+                },
+                {
+                    "text": " platform built on "
+                },
+                {
+                    "entity": "enwiki:Ethereum",
+                    "entity_name": "Ethereum",
+                    "link_section": null,
+                    "text": "Ethereum"
+                },
+                {
+                    "text": ", a "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": " technology that allows for the execution of "
+                },
+                {
+                    "entity": "enwiki:Smart%20contract",
+                    "entity_name": "Smart contract",
+                    "link_section": null,
+                    "text": "smart contract"
+                },
+                {
+                    "text": "s. "
+                },
+                {
+                    "entity": "enwiki:JavaScript",
+                    "entity_name": "JavaScript",
+                    "link_section": null,
+                    "text": "JavaScript"
+                },
+                {
+                    "text": " is also used for a browser-based "
+                },
+                {
+                    "entity": "enwiki:Graphical%20user%20interface",
+                    "entity_name": "Graphical user interface",
+                    "link_section": null,
+                    "text": "GUI"
+                },
+                {
+                    "text": " supplementing the "
+                },
+                {
+                    "entity": "enwiki:Command-line%20interface",
+                    "entity_name": "Command-line interface",
+                    "link_section": null,
+                    "text": "command line"
+                },
+                {
+                    "text": ". Notable supporters of the project include "
+                },
+                {
+                    "entity": "enwiki:Intrade",
+                    "entity_name": "Intrade",
+                    "link_section": null,
+                    "text": "Intrade"
+                },
+                {
+                    "text": " co-founder Ron Bernstein, the "
+                },
+                {
+                    "entity": "enwiki:Thiel%20Foundation",
+                    "entity_name": "Thiel Foundation",
+                    "link_section": null,
+                    "text": "Thiel Foundation"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Vitalik%20Buterin",
+                    "entity_name": "Vitalik Buterin",
+                    "link_section": null,
+                    "text": "Vitalik Buterin"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "51dd71b631bbfa169f128c4c15761db1f3efbd0a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The first blockchain was then conceptualised by "
+                },
+                {
+                    "entity": "enwiki:Satoshi%20Nakamoto",
+                    "entity_name": "Satoshi Nakamoto",
+                    "link_section": null,
+                    "text": "Satoshi Nakamoto"
+                },
+                {
+                    "text": " in 2008 and implemented the following year as a core component of the digital currency "
+                },
+                {
+                    "entity": "enwiki:Bitcoin",
+                    "entity_name": "Bitcoin",
+                    "link_section": null,
+                    "text": "bitcoin"
+                },
+                {
+                    "text": ", where it serves as the public "
+                },
+                {
+                    "entity": "enwiki:Ledger",
+                    "entity_name": "Ledger",
+                    "link_section": null,
+                    "text": "ledger"
+                },
+                {
+                    "text": " for all transactions. Through the use of a "
+                },
+                {
+                    "entity": "enwiki:Peer-to-peer",
+                    "entity_name": "Peer-to-peer",
+                    "link_section": null,
+                    "text": "peer-to-peer"
+                },
+                {
+                    "text": " network and a distributed timestamping server a blockchain database is managed autonomously. The invention of the blockchain for bitcoin made it the first digital currency to solve the "
+                },
+                {
+                    "entity": "enwiki:Double-spending",
+                    "entity_name": "Double-spending",
+                    "link_section": null,
+                    "text": "double spending"
+                },
+                {
+                    "text": " problem. The bitcoin design has been the inspiration for other applications."
+                }
+            ],
+            "para_id": "e08f1f6a877e333a0084f45ea3aacd7409f1b7f9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Decentralized autonomous organizations have been seen by some as difficult to describe.  Nevertheless, the conceptual essence of a decentralized autonomous organization has been typified as the ability of blockchain technology to provide a secure digital "
+                },
+                {
+                    "entity": "enwiki:Ledger",
+                    "entity_name": "Ledger",
+                    "link_section": null,
+                    "text": "ledger"
+                },
+                {
+                    "text": " that tracks financial interactions across the internet, hardened against forgery by "
+                },
+                {
+                    "entity": "enwiki:Trusted%20timestamping",
+                    "entity_name": "Trusted timestamping",
+                    "link_section": null,
+                    "text": "trusted timestamp"
+                },
+                {
+                    "text": "ing and by dissemination of a "
+                },
+                {
+                    "entity": "enwiki:Distributed%20database",
+                    "entity_name": "Distributed database",
+                    "link_section": null,
+                    "text": "distributed database"
+                },
+                {
+                    "text": ". This approach eliminates the need to involve a bilaterally accepted "
+                },
+                {
+                    "entity": "enwiki:Trusted%20third%20party",
+                    "entity_name": "Trusted third party",
+                    "link_section": null,
+                    "text": "trusted third party"
+                },
+                {
+                    "text": " in a financial transaction, thus simplifying the sequence. The costs of a blockchain enabled transaction and of making available the associated data may be substantially lessened by the elimination of both the trusted third party and of the need for repetitious recording of contract exchanges in different records: for example, the blockchain data could in principle, if regulatory structures permitted, replace public documents such as "
+                },
+                {
+                    "entity": "enwiki:Deed",
+                    "entity_name": "Deed",
+                    "link_section": null,
+                    "text": "deed"
+                },
+                {
+                    "text": "s and "
+                },
+                {
+                    "entity": "enwiki:Title%20(property)",
+                    "entity_name": "Title (property)",
+                    "link_section": null,
+                    "text": "title"
+                },
+                {
+                    "text": "s. In theory, a blockchain approach allows multiple "
+                },
+                {
+                    "entity": "enwiki:Cloud%20computing",
+                    "entity_name": "Cloud computing",
+                    "link_section": null,
+                    "text": "cloud computing"
+                },
+                {
+                    "text": " users to enter a loosely coupled "
+                },
+                {
+                    "entity": "enwiki:Peer-to-peer",
+                    "entity_name": "Peer-to-peer",
+                    "link_section": null,
+                    "text": "peer-to-peer"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Smart%20contract",
+                    "entity_name": "Smart contract",
+                    "link_section": null,
+                    "text": "smart contract"
+                },
+                {
+                    "text": " collaboration."
+                }
+            ],
+            "para_id": "f3c40603006477117d1a96eb937612c4ce02da51"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A "
+                },
+                {
+                    "entity": "enwiki:Peer-to-peer",
+                    "entity_name": "Peer-to-peer",
+                    "link_section": null,
+                    "text": "peer-to-peer"
+                },
+                {
+                    "text": " network is required as well as "
+                },
+                {
+                    "entity": "enwiki:Consensus%20decision-making",
+                    "entity_name": "Consensus decision-making",
+                    "link_section": null,
+                    "text": "consensus"
+                },
+                {
+                    "text": " algorithms to ensure replication across nodes is undertaken.  One distributed ledger design is through implementation of a public or private "
+                },
+                {
+                    "entity": "enwiki:Blockchain%20(database)",
+                    "entity_name": "Blockchain (database)",
+                    "link_section": null,
+                    "text": "blockchain"
+                },
+                {
+                    "text": " system.  But all distributed ledgers do not have to necessarily employ a chain of blocks to successfully provide secure and valid achievement of distributed consensus, a Blockchain is only one type of data structure considered to be a distributed ledger."
+                }
+            ],
+            "para_id": "2ab2f7c1ad8562fc8c982cf01180000097d9bf82"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "ShadowCash was built on a fork of "
+                },
+                {
+                    "entity": "enwiki:Bitcoin",
+                    "entity_name": "Bitcoin",
+                    "link_section": null,
+                    "text": "bitcoin"
+                },
+                {
+                    "text": " thus inheriting its structure of blockchain, transaction handling and all other components. The public currency named shadowcash has exactly the same technical structure and properties as the bitcoin currency. Sending and receiving SDC is not anonymous and the trail is not obfuscated."
+                }
+            ],
+            "para_id": "10bd8b59bd7912f5f070f5b849ab6bab85265d06"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "John Domingue (born ca 1961) is a British academic, Professor at and Director of the Knowledge Media Institute at the "
+                },
+                {
+                    "entity": "enwiki:Open%20University",
+                    "entity_name": "Open University",
+                    "link_section": null,
+                    "text": "Open University"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:Milton%20Keynes",
+                    "entity_name": "Milton Keynes",
+                    "link_section": null,
+                    "text": "Milton Keynes"
+                },
+                {
+                    "text": "., and researcher in the Semantic Web, Linked Data, Services, Blockchain and Education."
+                }
+            ],
+            "para_id": "18b528b9627a2522b9d41acccd866350c8480787"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In August 2016 a research team at the "
+                },
+                {
+                    "entity": "enwiki:Ludwig%20Maximilian%20University%20of%20Munich",
+                    "entity_name": "Ludwig Maximilian University of Munich",
+                    "link_section": null,
+                    "text": "University of Munich"
+                },
+                {
+                    "text": " published a research document about how blockchains may disrupt industries. They analyzed the "
+                },
+                {
+                    "entity": "enwiki:Venture%20capital%20financing",
+                    "entity_name": "Venture capital financing",
+                    "link_section": null,
+                    "text": "venture funding"
+                },
+                {
+                    "text": " that went into blockchain ventures. Their research shows that $1.55 Billion went into "
+                },
+                {
+                    "entity": "enwiki:Startup%20company",
+                    "entity_name": "Startup company",
+                    "link_section": null,
+                    "text": "startups"
+                },
+                {
+                    "text": " with an industry focus on finance and insurance, information and communication, and professional services. High startup density was found in the USA, UK and Canada."
+                }
+            ],
+            "para_id": "b85203ba8c5d1c72c3b2c0b91644aa9e95ea5d6f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "CoinDesk is a global media, research, and events platform that was acquired by Digital Currency Group in 2016. The company is best known for its balanced coverage of blockchain\u2019s most relevant daily news, its commonly cited Bitcoin Price Index and data tools, and its tutorials and research products, including the quarterly \u201cState of Bitcoin\u201d report. CoinDesk also hosts a large industry conference on digital currencies and blockchain technologies titled Consensus, which was last hosted in May 2016 in New York City, and hosted over 1,500 attendees."
+                }
+            ],
+            "para_id": "f8e05de184295f4b956ee77519267d4f46a0464e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The blockchain format was first used for "
+                },
+                {
+                    "entity": "enwiki:Bitcoin",
+                    "entity_name": "Bitcoin",
+                    "link_section": null,
+                    "text": "bitcoin"
+                },
+                {
+                    "text": ", as a solution to the problem of making a database both secure and not requiring a trusted administrator. The words block and chain were used separately in Satoshi Nakamoto's original paper in October 2008, and when the term moved into wider use it was originally block chain, before becoming a single word, blockchain, by 2016.  In August 2014, the bitcoin blockchain file size reached 20 "
+                },
+                {
+                    "entity": "enwiki:Gigabyte",
+                    "entity_name": "Gigabyte",
+                    "link_section": null,
+                    "text": "gigabyte"
+                },
+                {
+                    "text": "s in size."
+                }
+            ],
+            "para_id": "bcfc226103bff6ad0cd3310ae8e1c7cfd39b755e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Lisk aims to be the first (successful) of its kind as a modular cryptocurrency. The idea is that every Blockchain App is on its own sidechain, separate from the main blockchain.  This should help with scalability issues that many cryptocurrencies were facing, such as bitcoin.  The sidechain is secured by a group of 101 master nodes elected by the app's owner, and operate using the same Delegated-proof-of-stake (DPoS) consensus mechanism as the parent Lisk network.  The Blockchain Apps are written using NodeJS/JavaScript on the backend and CSS3/HTML5/JavaScript for the frontend."
+                }
+            ],
+            "para_id": "93ae1810cb00bd8c45970590639c8d270e1d657e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Blockchain technology can be used to create a permanent, public, transparent ledger system for compiling data on sales, storing rights data by authenticating "
+                },
+                {
+                    "entity": "enwiki:Copyright%20registration",
+                    "entity_name": "Copyright registration",
+                    "link_section": null,
+                    "text": "copyright registration"
+                },
+                {
+                    "text": ", and tracking digital use and payments to content creators, such as musicians. "
+                },
+                {
+                    "entity": "enwiki:Imogen%20Heap",
+                    "entity_name": "Imogen Heap",
+                    "link_section": null,
+                    "text": "Imogen Heap"
+                },
+                {
+                    "text": "'s Mycelia service allowing managers to use a blockchain for tracking high-value parts moving through a "
+                },
+                {
+                    "entity": "enwiki:Supply%20chain",
+                    "entity_name": "Supply chain",
+                    "link_section": null,
+                    "text": "supply chain"
+                },
+                {
+                    "text": " was launched as a concept in July 2016. Everledger, \"building systems to record the movement of diamonds from mines to jewelry stores\", is one of the inaugural clients of IBM's blockchain-based tracking service."
+                }
+            ],
+            "para_id": "7bdc83924b3ad3c609431ddde94121fcffba06cc"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Open blockchains are more "
+                },
+                {
+                    "entity": "enwiki:Usability",
+                    "entity_name": "Usability",
+                    "link_section": null,
+                    "text": "user friendly"
+                },
+                {
+                    "text": " compared to some traditional ownership records, which while open to the public still require physical access to view. Since all early blockchains were permissionless, controversy has arisen over whether permissioned databases of chained blocks of data should even be considered blockchains. An issue in this ongoing debate is whether a private system with verifiers tasked and authorized (permissioned) by a central authority should be considered a blockchain."
+                }
+            ],
+            "para_id": "7460e7029de8660b15b8cabbd63a1e2484103058"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In recent years Cuomo has been providing direction on IBM's strategy and product capabilities related to emerging technology areas including blockchain, mobile and cloud computing.  Today, Cuomo is leading the IBM Blockchain initiative; including collaboration with the Linux HyperLedger Project, bringing blockchain to the cloud and helping users apply blockchain to their industry."
+                }
+            ],
+            "para_id": "1d9bea020fef9e436915c6a30f2a8f4051c44e24"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Blockchain/History"
+        },
+        {
+            "heading": "Structure",
+            "heading_id": "enwiki:Blockchain/Structure"
+        },
+        {
+            "heading": "Uses",
+            "heading_id": "enwiki:Blockchain/Uses"
+        },
+        {
+            "heading": "Academic research",
+            "heading_id": "enwiki:Blockchain/Academic%20research"
+        },
+        {
+            "heading": "Predictions",
+            "heading_id": "enwiki:Blockchain/Predictions"
+        },
+        {
+            "heading": "Working",
+            "heading_id": "enwiki:Blockchain/Working"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Blockchain",
+    "title": "Blockchain"
+}

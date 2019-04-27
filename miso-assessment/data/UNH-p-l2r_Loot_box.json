@@ -1,0 +1,3761 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 1,
+            "rank_score": 0.9335736321595851,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 2,
+            "rank_score": 0.9133088872633748,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 3,
+            "rank_score": 0.8450830473974359,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "15dec0b663a8bed3e7ea9461888b65b29373037b",
+            "rank": 4,
+            "rank_score": 0.8446473498267664,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 5,
+            "rank_score": 0.822916627862097,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 6,
+            "rank_score": 0.8056977755714622,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 7,
+            "rank_score": 0.8018586761339385,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a",
+            "rank": 8,
+            "rank_score": 0.7977525332218324,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 9,
+            "rank_score": 0.7791542736143571,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "fcc719a19f91d79d7b7d4b4ec697630fe9dff82e",
+            "rank": 10,
+            "rank_score": 0.7630954226657637,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d",
+            "rank": 11,
+            "rank_score": 0.7630458683615621,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212",
+            "rank": 12,
+            "rank_score": 0.7524950615786805,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096",
+            "rank": 13,
+            "rank_score": 0.7324200931776133,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003",
+            "rank": 14,
+            "rank_score": 0.720266234212011,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "e42356b4078fc011124a33b08fd5521ca7110368",
+            "rank": 15,
+            "rank_score": 0.7195414360768874,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "3ae20239338bd8b887f4573f5a79f5e9c1ddf294",
+            "rank": 16,
+            "rank_score": 0.7188990762832935,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "3bf0627fdf306fd24714611be90464fcd37fd7f0",
+            "rank": 17,
+            "rank_score": 0.7175038092568246,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "dc920c80c676ca47c3f0fe46b522e57698467c35",
+            "rank": 18,
+            "rank_score": 0.7150001390532054,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "fe2a09964d7085d217955f140c56b8c87db9f6a7",
+            "rank": 19,
+            "rank_score": 0.7148819738854453,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "bd2374ae3d0e2c4abb00283ad1a6480e70ddb125",
+            "rank": 20,
+            "rank_score": 0.712964374737628,
+            "section_path": "enwiki:Loot%20box/History"
+        },
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 1,
+            "rank_score": 0.9663136839579416,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 2,
+            "rank_score": 0.9429743617856297,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 3,
+            "rank_score": 0.8764754662326817,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 4,
+            "rank_score": 0.8508294416188116,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a",
+            "rank": 5,
+            "rank_score": 0.8302160683901186,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 6,
+            "rank_score": 0.8263556144730531,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 7,
+            "rank_score": 0.8258032299204094,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 8,
+            "rank_score": 0.8035338702547814,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "fcc719a19f91d79d7b7d4b4ec697630fe9dff82e",
+            "rank": 9,
+            "rank_score": 0.793761892932118,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "61bca8de37a5a3ae564000787ddaa00fa3944b15",
+            "rank": 10,
+            "rank_score": 0.7887662766001313,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "d6d324175d9dafab4fece6dc43a5bc8baadab882",
+            "rank": 11,
+            "rank_score": 0.7792574540102228,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d",
+            "rank": 12,
+            "rank_score": 0.778161321285666,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212",
+            "rank": 13,
+            "rank_score": 0.7740496886944661,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096",
+            "rank": 14,
+            "rank_score": 0.752874191624305,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "3bf0627fdf306fd24714611be90464fcd37fd7f0",
+            "rank": 15,
+            "rank_score": 0.7476833676594984,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "3ae20239338bd8b887f4573f5a79f5e9c1ddf294",
+            "rank": 16,
+            "rank_score": 0.7428481002316688,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "dc920c80c676ca47c3f0fe46b522e57698467c35",
+            "rank": 17,
+            "rank_score": 0.7413058096139896,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003",
+            "rank": 18,
+            "rank_score": 0.741066320401881,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "e42356b4078fc011124a33b08fd5521ca7110368",
+            "rank": 19,
+            "rank_score": 0.7398578544719465,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "bd2374ae3d0e2c4abb00283ad1a6480e70ddb125",
+            "rank": 20,
+            "rank_score": 0.7359546974841694,
+            "section_path": "enwiki:Loot%20box/Impact"
+        },
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 1,
+            "rank_score": 0.938081530230888,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "1ffb155ef93cb3c0343b2cac4c04276714a532cb",
+            "rank": 2,
+            "rank_score": 0.9046268273410405,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 3,
+            "rank_score": 0.9003303458944933,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 4,
+            "rank_score": 0.8502055088505059,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 5,
+            "rank_score": 0.8287283815862065,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "16f251ddc143cdb5bff16affc569a73b565c1be9",
+            "rank": 6,
+            "rank_score": 0.8145777222774537,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 7,
+            "rank_score": 0.8091059500252527,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 8,
+            "rank_score": 0.8027509001766926,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "a534a7e2cb702cf7b7632ff4c90faf1cf6865d18",
+            "rank": 9,
+            "rank_score": 0.7903900074440782,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 10,
+            "rank_score": 0.7857929477388907,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a",
+            "rank": 11,
+            "rank_score": 0.7840556711150405,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212",
+            "rank": 12,
+            "rank_score": 0.7644450389223942,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "b0a07fcffb6d4ca7b9e911981124a526dc75ddf9",
+            "rank": 13,
+            "rank_score": 0.7643605287866,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "7372aad67f41ea105efb76a3fed5b867f692e1f4",
+            "rank": 14,
+            "rank_score": 0.7592564094112493,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "ecee73d6a91dbba5eb04f807c151b4c7fff590c8",
+            "rank": 15,
+            "rank_score": 0.7520251334327546,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d",
+            "rank": 16,
+            "rank_score": 0.7420244835460786,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096",
+            "rank": 17,
+            "rank_score": 0.7395452443668026,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003",
+            "rank": 18,
+            "rank_score": 0.7286042564411068,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "14ce73a9fb123a1a2628c27c1fc7d8d2d8b13a7f",
+            "rank": 19,
+            "rank_score": 0.7280947551675016,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "9ace6fa4d95f9723cba98b392e8f81e72505df42",
+            "rank": 20,
+            "rank_score": 0.7250915253508934,
+            "section_path": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "para_id": "5dd90f76b73e265c96b9888474e3539713678a79",
+            "rank": 1,
+            "rank_score": 0.8149594557034854,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "609d3a459f93bcafff3f870671b8e3a32f2f7cc0",
+            "rank": 2,
+            "rank_score": 0.8132994521709557,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 3,
+            "rank_score": 0.7996479259888203,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "2072048b20b1592fb5b238b11a429e13ce39a685",
+            "rank": 4,
+            "rank_score": 0.7621779392785152,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 5,
+            "rank_score": 0.7599196958334016,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "7b5563cdce9a14a582e454e01883bf1eaf24d502",
+            "rank": 6,
+            "rank_score": 0.7514605810385505,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "15ba41245fc2a9d7f0b7656cf545d95c840c54af",
+            "rank": 7,
+            "rank_score": 0.7296689274308795,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 8,
+            "rank_score": 0.7255776900792702,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 9,
+            "rank_score": 0.7224458090830552,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "cc904cfc8b0fd8301b6eb7e5e32a564a97611986",
+            "rank": 10,
+            "rank_score": 0.7219275751925968,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "5ce0d9340eac73bef88e2bc5ae89d80d5af56302",
+            "rank": 11,
+            "rank_score": 0.7123841331701594,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "a534a7e2cb702cf7b7632ff4c90faf1cf6865d18",
+            "rank": 12,
+            "rank_score": 0.7075031913169982,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 13,
+            "rank_score": 0.7001328692409932,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 14,
+            "rank_score": 0.7000097181120171,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "5b8de43b35747a28629a925839cbd8b7fc71347d",
+            "rank": 15,
+            "rank_score": 0.6960150765108335,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "7372aad67f41ea105efb76a3fed5b867f692e1f4",
+            "rank": 16,
+            "rank_score": 0.6904583765473075,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "f6c2093ef8e9268444066a499f49ed921a4f660d",
+            "rank": 17,
+            "rank_score": 0.6854952169007842,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 18,
+            "rank_score": 0.6848744682763114,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "3917fd718a83e499a1edc262fc01e2b11429c8c5",
+            "rank": 19,
+            "rank_score": 0.6806202805941305,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "4f9c5f682da11de4dbd00ee1f893b0f96b166a29",
+            "rank": 20,
+            "rank_score": 0.6761494095392264,
+            "section_path": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 1,
+            "rank_score": 0.9475317354921173,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 2,
+            "rank_score": 0.9215218579429951,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212",
+            "rank": 3,
+            "rank_score": 0.9205016492817868,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 4,
+            "rank_score": 0.8579146255593898,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 5,
+            "rank_score": 0.8294294261888691,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a",
+            "rank": 6,
+            "rank_score": 0.8195890763943319,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 7,
+            "rank_score": 0.8098276928710925,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 8,
+            "rank_score": 0.8088608160328313,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "d1f7a0caaf3c1c0dd15329ea41175e1123123580",
+            "rank": 9,
+            "rank_score": 0.7947960272395052,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 10,
+            "rank_score": 0.789703260878974,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d",
+            "rank": 11,
+            "rank_score": 0.7596852072615081,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "32d4e56a8add41d66922d415fab819f56dc89f48",
+            "rank": 12,
+            "rank_score": 0.7541404716475201,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "919237e1c316f57b01996d7ac790154b42212e28",
+            "rank": 13,
+            "rank_score": 0.7524836628338049,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096",
+            "rank": 14,
+            "rank_score": 0.7410244716664128,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "3bf0627fdf306fd24714611be90464fcd37fd7f0",
+            "rank": 15,
+            "rank_score": 0.7329321998135524,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "dc920c80c676ca47c3f0fe46b522e57698467c35",
+            "rank": 16,
+            "rank_score": 0.7322575852053423,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "bd2374ae3d0e2c4abb00283ad1a6480e70ddb125",
+            "rank": 17,
+            "rank_score": 0.7310588349962139,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "e42356b4078fc011124a33b08fd5521ca7110368",
+            "rank": 18,
+            "rank_score": 0.7297468605152208,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003",
+            "rank": 19,
+            "rank_score": 0.7282356445501521,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "fe2a09964d7085d217955f140c56b8c87db9f6a7",
+            "rank": 20,
+            "rank_score": 0.7254902404675369,
+            "section_path": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8",
+            "rank": 1,
+            "rank_score": 0.9602228260359329,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9",
+            "rank": 2,
+            "rank_score": 0.9424713551004316,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3",
+            "rank": 3,
+            "rank_score": 0.8701729151974325,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111",
+            "rank": 4,
+            "rank_score": 0.8449466707672777,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a",
+            "rank": 5,
+            "rank_score": 0.8313371955411111,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842",
+            "rank": 6,
+            "rank_score": 0.8287845764440103,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d",
+            "rank": 7,
+            "rank_score": 0.8241067684212888,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "dc920c80c676ca47c3f0fe46b522e57698467c35",
+            "rank": 8,
+            "rank_score": 0.8074410600489688,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18",
+            "rank": 9,
+            "rank_score": 0.7991658421682906,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "fcc719a19f91d79d7b7d4b4ec697630fe9dff82e",
+            "rank": 10,
+            "rank_score": 0.7906872113886687,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d",
+            "rank": 11,
+            "rank_score": 0.7891252531306415,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212",
+            "rank": 12,
+            "rank_score": 0.7749300934242485,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096",
+            "rank": 13,
+            "rank_score": 0.7532762463892296,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "3bf0627fdf306fd24714611be90464fcd37fd7f0",
+            "rank": 14,
+            "rank_score": 0.7421378416696431,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "3ae20239338bd8b887f4573f5a79f5e9c1ddf294",
+            "rank": 15,
+            "rank_score": 0.7417000951662666,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003",
+            "rank": 16,
+            "rank_score": 0.7401423494068609,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "e42356b4078fc011124a33b08fd5521ca7110368",
+            "rank": 17,
+            "rank_score": 0.7383100706673398,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "fe2a09964d7085d217955f140c56b8c87db9f6a7",
+            "rank": 18,
+            "rank_score": 0.7339839031870475,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "73a07fd72af40d2acf4afa7ceb06243046dd95ca",
+            "rank": 19,
+            "rank_score": 0.7329851010957296,
+            "section_path": "enwiki:Loot%20box/Design"
+        },
+        {
+            "para_id": "bd2374ae3d0e2c4abb00283ad1a6480e70ddb125",
+            "rank": 20,
+            "rank_score": 0.732926046285854,
+            "section_path": "enwiki:Loot%20box/Design"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "LootCrate also operates a Loot Anime box with "
+                },
+                {
+                    "entity": "enwiki:Anime",
+                    "entity_name": "Anime",
+                    "link_section": null,
+                    "text": "Anime"
+                },
+                {
+                    "text": " related items. In January 2016 Loot Crate announced a Loot Gaming subscription option with boxes containing "
+                },
+                {
+                    "entity": "enwiki:Video%20game",
+                    "entity_name": "Video game",
+                    "link_section": null,
+                    "text": "video game"
+                },
+                {
+                    "text": " related content. The company says that the gaming themed boxes will likely lead to more game-specific cases like the ones for Mass Effect and Fallout 4."
+                }
+            ],
+            "para_id": "567c75e0217655b976e20d9f83d804f77471f0f8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Winning matches earns the player experience towards experience levels in the meta-game. The player earns a loot box every experience level, which contain a random assortment of character skins, emotes, speech lines, and other cosmetic items for each character without specific game-changing effects. Players can also purchase loot boxes with real-world money. Blizzard has provided free post-release content for the game, such as new levels and characters. Blizzard has also introduced limited-time seasonal events, offering new cosmetic items in loot boxes, themed levels, and gameplay modes."
+                }
+            ],
+            "para_id": "16b82b598fa4a3123ff952bc676c027bff9963e9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Many "
+                },
+                {
+                    "entity": "enwiki:Startup%20company",
+                    "entity_name": "Startup company",
+                    "link_section": null,
+                    "text": "start-up companies"
+                },
+                {
+                    "text": " have begun to cater to geeks, gamers and pop culture fans. "
+                },
+                {
+                    "entity": "enwiki:San%20Diego%20Comic-Con",
+                    "entity_name": "San Diego Comic-Con",
+                    "link_section": null,
+                    "text": "San Diego Comic-Con International"
+                },
+                {
+                    "text": ", a pop culture and comic book convention, alone saw 130,000 attendees in 2015. "
+                },
+                {
+                    "entity": "enwiki:Loot%20Crate",
+                    "entity_name": "Loot Crate",
+                    "link_section": null,
+                    "text": "Loot Crate"
+                },
+                {
+                    "text": ", an American-based company launched in July 2012, with the idea of delivering \u201ccomic con in a box\u201d. The company now offers different subscription boxes that cater to different genres, including pop culture, gaming and "
+                },
+                {
+                    "entity": "enwiki:Anime",
+                    "entity_name": "Anime",
+                    "link_section": null,
+                    "text": "anime"
+                },
+                {
+                    "text": ". Loot Crate surpassed 200,000 active subscribers as of 2014. Other subscription services in the space include Indie Box, which provides digital games along with collectors gear, Hero Box, which provides superhero swag, and FanMail, which provides pop culture items to women."
+                }
+            ],
+            "para_id": "882b6b42b7d1207c192e38665f644f42f85984c3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The true history of the cave's modern discovery, the role of foreigners in the discovery, and the looting of the caves has been concealed by Honduran officials.A wealth of information can be found at the well developed visitors center and museum near the entrance to the Talgua Cave. Visitors will note when visiting the cave that only a politically correct selective history is given on what has taken place at the cave, and while Desiderio Reyes and Jorge Y\u00e1nez are prominently mentioned, there is no mention of the fact that foreigners - Timothy Berg and Greg Cabe - were among the four principle discoverers of the ossuary. Another fact that is not revealed is that the two native discoverers of the ossuary supposedly destructively removed, and attempted to sell, a large number of artifacts from the cave, including many of the skulls that eventually made it famous. Jorge and Desiderio are now employed by the Honduran government protecting the very treasures that they brutally destroyed by hacking hundreds of 3,000-year-old skulls, bones, and ceramics out of their lime-stone tombs, plundering and destroying the amazing evidence of the history of natives in Honduras. It was only through the efforts of foreigners, such as Timothy Berg, and Greg Cabe (U. S. Peace Corps volunteers), that the ossuary was brought to the attention of the Honduran Anthropological Institute, and foreign archaeologists (USA), which eventually stopped the plundering of the caves by their other discoverers. Timothy Berg, and Greg Cabe, along with the assistance of those they contacted, are the true saviors of what remains in the Talgua ossuary. An account of the discovery and the anthropological significance written by JAMES E. BRADY, a professor of anthropology at George Washington University, and codirector of the Talgua Cave Project can be found at http://www.calstatela.edu/academic/anthro/harvest.htmNone of the facts about the foreigner's part in the discovery of the ossuary, nor the later destructive looting of the ossuary by the two Honduran's credited with its discovery were known by any of the 4 cave guides interviewed in April 2008, or the 6 interviewed in October 2010, nor were there any mention of these facts in the museum or visitor's center near the cave entrance.Verifiability:The fact is that no mention of foreigners were among the cave discovery party is to be found in any form at the Talgua Cave site visitor center or museum.  No mention of any looting or artifacts except for the bones exists in the visitor center or museum.Verbal confirmation from the American cave discoverers and their dramatic efforts to protect the caves from looting.  The fact is that Desiderio Reyes and Jorge Y\u00e1nez personally contacted many foreigners, and locals with dozens of skulls, boxes of bones, and ceramics requesting assistance in selling and exporting these artifacts.  Photographs of these artifacts in the hands of Desiderio Reyes, Jorge Y\u00e1nez, and friends selling them in Catacamas, Olancho exist before the study of the caves began.  Living memory of those of us who lived the events, explored the site before official protection and saw the destruction and looting by Yanez and Reyes first hand are hereby documented on these pages."
+                }
+            ],
+            "para_id": "15dec0b663a8bed3e7ea9461888b65b29373037b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "They stop at "
+                },
+                {
+                    "entity": "enwiki:Beta%20Lyrae",
+                    "entity_name": "Beta Lyrae",
+                    "link_section": null,
+                    "text": "Beta Lyrae"
+                },
+                {
+                    "text": " to sight-see where they unexpectedly discover, by deep-radar, another stasis box. However, the box is a trap by "
+                },
+                {
+                    "entity": "enwiki:Kzin",
+                    "entity_name": "Kzin",
+                    "link_section": null,
+                    "text": "Kzin"
+                },
+                {
+                    "text": "ti pirates. The rogue Kzinti are using a dummy stasis box to lure ships that they detect to be in possession of stasis boxes. The Kzinti capture the crew and open the looted stasis box, which is revealed to be a "
+                },
+                {
+                    "entity": "enwiki:Tnuctip",
+                    "entity_name": "Tnuctip",
+                    "link_section": null,
+                    "text": "Tnuctip"
+                },
+                {
+                    "text": "un stasis box, not Thrintun. Stasis boxes (which are rare) often contain advanced technological products of immense military value. The Kzinti hope to use the contents of the box to develop weapons technology that will allow them to wage "
+                },
+                {
+                    "entity": "enwiki:Man-Kzin%20Wars",
+                    "entity_name": "Man-Kzin Wars",
+                    "link_section": null,
+                    "text": "wars"
+                },
+                {
+                    "text": " of conquest."
+                }
+            ],
+            "para_id": "c06e920f552d22a531f6b46f1c40a79e2cdde111"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the desert, Woody Woodpecker, riding a horse, is gaily strumming a guitar and singing a song of loot long lost. Only he has the map of its location. Woody enters the ghost town of Paradise, dismounts and studies the map. \"X\" marks the spot in the Snake-Eye Saloon, where the loot is hidden under the floor. Unbeknown to Woody, foul villain Dapper Denver Dooley, hiding in a barrel behind him, sees the map over his shoulder. Woody enters the saloon, closely followed by Dooley. Woody locates the \"X\" spot and finds a strongbox. Dooley grabs and opens the box, and he has his nose caught in a mousetrap. Woody recaptures the box and runs with it, only to lose it to Dooley again when Woody runs into a closed door. The box changes hands many times as Woody and Dooley, in a battle of wits and trickery, fight for its possession. Finally, Woody gains permanent possession of the box when Dooley, on a small wooden horse with a large rocket attached to its pole, is shot into space as both Woody and the horse give the famous Woody laugh."
+                }
+            ],
+            "para_id": "5bf2a543dad91068d5421ca4c1ee17f2f9870842"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Battle Box was later occupied by Japanese forces during the "
+                },
+                {
+                    "entity": "enwiki:Japanese%20occupation%20of%20Singapore",
+                    "entity_name": "Japanese occupation of Singapore",
+                    "link_section": null,
+                    "text": "Japanese Occupation of Singapore"
+                },
+                {
+                    "text": " and used for communications right up to the time of the Japanese surrender. At the conclusion of the Second World War, the Battle Box complex itself appears to have been looted in the aftermath of the Japanese surrender. Upon re-entry to the complex in 1988, evidence of a number of excavations were observed, presumably attempts to find loot that may have been concealed by the Japanese."
+                }
+            ],
+            "para_id": "741509a0e1be595bddc42fa8a419a0c0e0dfb59d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Traditionally, after defeating an enemy, players must move to the corpse to retrieve any loot reward from it.  Because combat in Rohan is intended to be on horseback, and because it is incredibly inconvenient to swing the war-steed around just to loot a corpse, Riders of Rohan introduced the concept of Remote Looting.  Instead of having to travel back to a defeated enemy's corpse, loot rewards are automatically placed into the Remote Loot panel.  An alert is then displayed to the player which, when clicked, will open the Remote Loot panel.  This panel will hold a maximum of 50 items for 1 hour (in game time, not real time).  If any subsequent items are added before 1 hour has expired, the oldest items will be purged first.  If the player waits more than an hour, items that have been in Remote Loot for that hour will be purged.  Each item has its own timer.  Once the Remote Loot panel is opened, the player can opt to retrieve the loot or discard it.  Loot rewards discarded from the Remote Loot panel are irretrievable.  Players are not able to place items from their inventory back into Remote Loot.  Stacks of items will be placed into Remote Loot, but subsequent items of the same type will not stack with each other; they count as separate items.  For example, if a player is awarded 3 Athelas Potions, the whole stack of 3 will be placed into Remote Loot as 1 item.  If the player is later awarded 2 more Athelas Potions, the new stack of 2 will not stack onto the existing stack of 3.  The stack of 2 will occupy a separate item slot in Remote Loot, until the player retrieves the items.  The new looting rules were initially only implemented in Rohan, but due to positive player feedback were expanded to the rest of the game world in an update later that year."
+                }
+            ],
+            "para_id": "512cc4f4b6e307b374f31f1bca2517e7e254ea1a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Loot Crate is a "
+                },
+                {
+                    "entity": "enwiki:Subscription%20boxes",
+                    "entity_name": "Subscription boxes",
+                    "link_section": null,
+                    "text": "subscription box"
+                },
+                {
+                    "text": " service established in 2012 which provides monthly boxes of geek and gaming related merchandise."
+                }
+            ],
+            "para_id": "ad1f9f8fdd22b96963ba884f7bb10a0222453c18"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Players gain experience following a match towards a metagame experience level based on several factors such as whether they won or lost, how effective they used their character's main powers, being awarded gold, silver, or bronze medals for their team across six categories such as most time spent on the objectives, and beating past personal records in these categories; this experience is only gained when playing on the game's matchmaking modes and not in custom games. On gaining an experience level, the player can earn a loot box, each which contains four random cosmetic items for individual heroes, including victory poses, paint sprays, alternate skins (costumes), emotes and voice lines. Such items are given out based on their rarity level, which range from Common through Legendary. They may also earn in-game currency called \"credits\" which can be used to purchase specific cosmetic items directly, with their cost based on the item's rarity. Items associated with limited-time events cannot be purchased in this manner. Other items can only be acquired by completing in-game "
+                },
+                {
+                    "entity": "enwiki:Achievement%20(video%20gaming)",
+                    "entity_name": "Achievement (video gaming)",
+                    "link_section": null,
+                    "text": "achievements"
+                },
+                {
+                    "text": ". Duplicate items are rewarded with in-game currency. Players also have the option to buy loot boxes with real-world money through "
+                },
+                {
+                    "entity": "enwiki:Microtransaction",
+                    "entity_name": "Microtransaction",
+                    "link_section": null,
+                    "text": "microtransaction"
+                },
+                {
+                    "text": "s."
+                }
+            ],
+            "para_id": "fcc719a19f91d79d7b7d4b4ec697630fe9dff82e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Players are awarded score multipliers and money when "
+                },
+                {
+                    "entity": "enwiki:Zombie",
+                    "entity_name": "Zombie",
+                    "link_section": null,
+                    "text": "zombie"
+                },
+                {
+                    "text": "s are killed. Money is used to purchase and upgrade weapons at checkpoints, and multipliers to grant better scores. Each time players are hit, they lose multipliers and health. Players fight their way through ten levels, using weapon shops that allow weapon upgrading and armor swapping. Throughout the levels, players can find boxes that hold ammunition, multipliers, money, or armor pieces, and also loot cars trunks for money. If a car is blown up before being looted, though, the loot is lost. At times the players are trapped in areas where they must survive until they have accomplished a certain goal (e.g. wait for an elevator while fighting zombies or kill all zombies in the area). Armor sets influence strength, endurance and agility."
+                }
+            ],
+            "para_id": "e8afbb00a86fc701ae6cf63c80cfaa8fb5da003d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2011, his first release was "
+                },
+                {
+                    "entity": "enwiki:Haunted%20%E2%80%93%203D",
+                    "entity_name": "Haunted \u2013 3D",
+                    "link_section": null,
+                    "text": "Haunted - 3D"
+                },
+                {
+                    "text": " which was the first Indian stereo-scopic 3D horror film. The film went on to become a huge critical as well as commercial success, and was Chakraborty's first hit. In his next and latest release, "
+                },
+                {
+                    "entity": "enwiki:Loot%20(2011%20film)",
+                    "entity_name": "Loot (2011 film)",
+                    "link_section": null,
+                    "text": "Loot"
+                },
+                {
+                    "text": ", he plays a boy-next-door, who has been taken to Pattaya to rob a house, although him and his crime-partners ("
+                },
+                {
+                    "entity": "enwiki:Govinda",
+                    "entity_name": "Govinda",
+                    "link_section": null,
+                    "text": "Govinda"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Suniel%20Shetty",
+                    "entity_name": "Suniel Shetty",
+                    "link_section": null,
+                    "text": "Suniel Shetty"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Javed%20Jaffrey",
+                    "entity_name": "Javed Jaffrey",
+                    "link_section": null,
+                    "text": "Jaaved Jaffrey"
+                },
+                {
+                    "text": ") end up looting the wrong house. Loot received mixed to negative reviews from most critics, and was a box office flop. He has also done "
+                },
+                {
+                    "entity": "enwiki:Enemmy",
+                    "entity_name": "Enemmy",
+                    "link_section": null,
+                    "text": "Enemmy"
+                },
+                {
+                    "text": " with his father Mithun Chakraborty and Sunil Shetty ."
+                }
+            ],
+            "para_id": "0a6617fd6951f4d4163cf1240e977571068cc212"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The announcement of lowered prices sparked looting in multiple cities across Venezuela. Of the multiple cities where looting occurred, dozens of people were seen running from a Daka store in "
+                },
+                {
+                    "entity": "enwiki:Valencia",
+                    "entity_name": "Valencia",
+                    "link_section": null,
+                    "text": "Valencia"
+                },
+                {
+                    "text": " with flat-screen TVs and boxes. In the Carabobo municipality of Caracas, doors were ripped off of the Daka store and its windows were broken. Looters were also seen breaking into warehouses to take goods."
+                }
+            ],
+            "para_id": "5003e961602816c3e437a25f0ba47b81a758c096"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Los Angeles police arrested Scott and charged him with forgery and fraud for the looting of his wife\u2019s bank accounts after they visited Evelyn's safe deposit boxes and found only envelopes filled with sand, as Leonard had withdrawn large sums from Evelyn's safe deposit boxes and deposited those funds in his own accounts."
+                }
+            ],
+            "para_id": "fb52b7b87137e97c2a3c74e8b0fa4e33772ab003"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In June 2016, it was announced that Sanrio has partnered with Loot Crate, Inc on a bi-monthly box."
+                }
+            ],
+            "para_id": "e42356b4078fc011124a33b08fd5521ca7110368"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "On Sunday afternoon, rumour spread that Lalita Sardar, a Hindu housewife from Chakdaha village had made another blasphemous remark about "
+                },
+                {
+                    "entity": "enwiki:Muhammad",
+                    "entity_name": "Muhammad",
+                    "link_section": null,
+                    "text": "Muhammad"
+                },
+                {
+                    "text": ". People began to gather in the Sardar residence. In the evening, Firoz Kabir Kajal, the president of Nazimganj Bazar Committee arrived at their house along local Union Parishad members. They began to pressurize Lalita to publicly apologize for her blasphemous remarks. During this meeting about two hundred youths from nearby villages gathered near their house and threatened to kick the family and send them to India. At around 7 PM thousands of teenagers and youths were called to the spot from the different villages of Kaliganj Upazila. The outsiders gathered around the houses of the minority Hindus and began to pelt stones and brick bats in their houses.  The Hindu men, women and children fearing for their lives, began to run towards safety.  The attackers then broke open their houses and looted their valuables, including jewelry, garments, land deeds and other valuable documents. They also snatched the jewelry box from Lalita Sardar. After securing the loot in safe havens, the miscreants doused the houses in petrol and set them on fire. The houses of 10 Hindu families were looted and set on fire. The loot and arson took place in the presence of the police. The fire brigade was blocked from entering into the area until the houses were completely burnt. The District Magistrate, District Superintendent of Police, the Additional D.I.G. (Khulna Range) and RAB officers arrived at night and tried to bring things under control."
+                }
+            ],
+            "para_id": "3ae20239338bd8b887f4573f5a79f5e9c1ddf294"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "To advance in the game, the player must collect "
+                },
+                {
+                    "entity": "enwiki:Experience%20point",
+                    "entity_name": "Experience point",
+                    "link_section": null,
+                    "text": "experience point"
+                },
+                {
+                    "text": "s to gain levels and items that boost the stats of the character. The "
+                },
+                {
+                    "entity": "enwiki:Mob%20(video%20gaming)",
+                    "entity_name": "Mob (video gaming)",
+                    "link_section": null,
+                    "text": "monsters"
+                },
+                {
+                    "text": " that inhabit the game world can be attacked using melee attacks or skills. Once a monster is killed, the killing player gains experience points and the monster leaves behind a loot box which may contain Noahs (in-game currency) and other items. The drop box is only accessible to the player or party that did the most damage to the monster. However, in case of "
+                },
+                {
+                    "entity": "enwiki:Kill%20stealing",
+                    "entity_name": "Kill stealing",
+                    "link_section": null,
+                    "text": "kill stealing"
+                },
+                {
+                    "text": ", the experience is divided according to the amount of damage done."
+                }
+            ],
+            "para_id": "3bf0627fdf306fd24714611be90464fcd37fd7f0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In addition to the tapping mechanism, players in a group are expected to share the loot reward granted by a defeated enemy.  The first player in a group to loot a corpse generally is awarded its entire contents, and unless specific rules are set up in-game, no one else in the group gets any of the loot reward.  When rules are set up, players can \"roll\" for a random number between 1 and 100 for each item; highest roll wins the item.  Players can decide the level of value at which items are shared vs. the ones that are automatically given to the first player to loot the corpse.  Even when all loot is designated to be shared via random chance, only one player can win a given loot reward.  If players are not in a group, the first player (or group) to tap an enemy will be awarded the loot reward, and anyone who assists will not receive any reward."
+                }
+            ],
+            "para_id": "dc920c80c676ca47c3f0fe46b522e57698467c35"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "PNM was included in the May 2013 "
+                },
+                {
+                    "entity": "enwiki:Loot%20Crate",
+                    "entity_name": "Loot Crate",
+                    "link_section": null,
+                    "text": "Loot Crate"
+                },
+                {
+                    "text": ", a subscription box service, which featured the theme 'Equip'."
+                }
+            ],
+            "para_id": "fe2a09964d7085d217955f140c56b8c87db9f6a7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Chapali Height had a decent opening at the box office. It collected around 50 lakhs on the first day. Unofficial figures confirms the collection of 70 lakhs on second day. But the movie ended up being the second biggest hit of the year behind Nischal Basnet's LOOT. It's net collection at the Box Office is approx. 3.5 Crores (35 Million Rupees)."
+                }
+            ],
+            "para_id": "bd2374ae3d0e2c4abb00283ad1a6480e70ddb125"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Darling also developed a method to prioritize preservation activities that she included in the manual. She created a grid containing four boxes to help determine which actions should be given the highest priority. Actions that have high impact and are easy to put into practice are put into Box 1; actions that are easy to put into practice but have little impact are put into Box 2; actions that have high impact but are hard to do are put into Box 3; and actions that are hard to do and have little impact are put into Box 4. According to Darling, the highest priority should be given to the actions in Box 1 since they have the highest impact and can be easily done. The actions in Box 3 should be accomplished because of their high impact. The actions in Box 2 and Box 4 could be eliminated since they both would have little impact.<ref>Ogden, Sherelyn. \"Considerations for Prioritizing.\" Preservation Leaflets. 2007."
+                }
+            ],
+            "para_id": "61bca8de37a5a3ae564000787ddaa00fa3944b15"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "After its second landfall, additional floods occurred in several towns, and in "
+                },
+                {
+                    "entity": "enwiki:Sinaloa",
+                    "entity_name": "Sinaloa",
+                    "link_section": null,
+                    "text": "Sinaloa"
+                },
+                {
+                    "text": " over 100,000 people were rendered homeless and four people died. As a result of Manuel's impacts, 107 municipalities were declared disaster regions. Damage in Sinaloa totaled MXN$500 million (US$37.9 million). The "
+                },
+                {
+                    "entity": "enwiki:Mexican%20Army",
+                    "entity_name": "Mexican Army",
+                    "link_section": null,
+                    "text": "Mexican Army"
+                },
+                {
+                    "text": " was dispatched in several locations to aid in post-tropical cyclone relief operations. Following the storm, looting in heavily impacted areas became commonplace, and as such government forces were also dispatched to prevent further looting. Overall, 123 people lost their lives in Mexico while damage exceeded MXN$55 billion (US$4.2 billion)."
+                }
+            ],
+            "para_id": "d6d324175d9dafab4fece6dc43a5bc8baadab882"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Ottoman%20Empire",
+                    "entity_name": "Ottoman Empire",
+                    "link_section": null,
+                    "text": "Ottoman Law"
+                },
+                {
+                    "text": " of 1884 could be considered the first instance that archaeological material from the region was deemed important enough to pass legislation to ensure its safe keeping. The Ottoman Law of 1884 was made in response to the increase of foreign interest in the area and the looting of archaeological material from the Empire. Its main purpose was for regulating the trafficking of antiquities.  \tThe 1884 Law established national ownership over all artifacts in the Ottoman Empire and sought to regulate scientific access to antiquities and sites. Under this law, all artifacts discovered during excavation were the property of the National Museum in "
+                },
+                {
+                    "entity": "enwiki:Constantinople",
+                    "entity_name": "Constantinople",
+                    "link_section": null,
+                    "text": "Constantinople"
+                },
+                {
+                    "text": " and were sent there.While the law can be seen as the first step towards regulation, it can also be seen as "
+                },
+                {
+                    "entity": "enwiki:Imperialism",
+                    "entity_name": "Imperialism",
+                    "link_section": null,
+                    "text": "imperialism"
+                },
+                {
+                    "text": " since the Ottoman Empire's desired to gain material from its territories rather than for the preservation of the archaeological legacy. By controlling archaeological goods and taxing the antiquities, the government effectively regulated European access to heritage."
+                }
+            ],
+            "para_id": "1ffb155ef93cb3c0343b2cac4c04276714a532cb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the United States, professional MMA is overseen by the Association of Boxing Commissions.  According to the Associations of Boxing Commissions, professional MMA competitions are allowed in all states. Alaska has no boxing or athletic commission. Montana has a state athletic commission although it doesn't regulate MMA. However, MMA is legal in both states. West Virginia became the 44th state to regulate mixed martial arts on March 24, 2011. On March 8, 2012, Wyoming became the 45th state to regulate MMA. On May 4, 2012, it was announced that Vermont had become the 46th state to regulate MMA. Legislation allowing MMA in Connecticut came into effect on October 1, 2013, making it the 47th state to regulate the sport. On March 22, 2016, the New York State Assembly voted to lift the State's 1997 ban on MMA and on April 14, 2016 Governor Cuomo signed the bill legalizing and regulating the sport into law."
+                }
+            ],
+            "para_id": "16f251ddc143cdb5bff16affc569a73b565c1be9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "However, in 1940 amendments to the regulations created two capital offences: \"forcing safeguards\" (breaking through roadblocks etc.) under regulation 1B, and looting under regulation 38A. A third new capital offence, called treachery, was created soon afterwards by the "
+                },
+                {
+                    "entity": "enwiki:Treachery%20Act%201940",
+                    "entity_name": "Treachery Act 1940",
+                    "link_section": null,
+                    "text": "Treachery Act 1940"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "a534a7e2cb702cf7b7632ff4c90faf1cf6865d18"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The incident prompted Mexican legislators to draft legislation \"that would increase fines and jail time for vandalism and looting of monuments and archaeological sites.\""
+                }
+            ],
+            "para_id": "b0a07fcffb6d4ca7b9e911981124a526dc75ddf9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to one member of parliament, the nation has lacked any and all regulations to \"combat frauds and malfeasance among the senior government officials,\" especially among government procurement officials within the ministry of finance and economic planning. In a 2013 article, Nyol Gaar Nguen wrote that \"[o]utright thieves and looting of public funds in a broad day light by the enforcer or man in charge always reigns\" in South Sudan. The degree of corruption and mismanagement revealed in the Auditor General's report for 2005 and 2006 reportedly \"brought some MPs in South Sudan's National Legislative Assembly to tears.\" A 2012 report stated that more than $4 billion in government funds had been stolen since the advent of self-rule in 2005."
+                }
+            ],
+            "para_id": "7372aad67f41ea105efb76a3fed5b867f692e1f4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A coalition of smaller charities in California have complained about Goodwill's support for legislation encouraging greater regulation of donation boxes, calling the efforts an \u201cattempt to corner the clothing donation market and make more money.\u201d Local Goodwills have argued that donation boxes divert money from the community and contribute to blight, and have pushed for state legislation that requires owners of a donation box to clearly display information about whether it is a for-profit or nonprofit organization."
+                }
+            ],
+            "para_id": "ecee73d6a91dbba5eb04f807c151b4c7fff590c8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1948, the state of Israel was declared and kept in place most of the legislation enacted during the British Mandate period. This did not necessarily mean that Israel valued the "
+                },
+                {
+                    "entity": "enwiki:Law%20of%20the%20United%20Kingdom",
+                    "entity_name": "Law of the United Kingdom",
+                    "link_section": null,
+                    "text": "British legal system"
+                },
+                {
+                    "text": ", but Israeli leaders needed a legal framework to aid in nation building. In this time of civil unrest, looting was on the rise and there were reports of military looting of archaeological sites and museums. This led to the establishment of an Antiquities Unit in July 1948 that's purpose was the oversight of archaeological heritage."
+                }
+            ],
+            "para_id": "14ce73a9fb123a1a2628c27c1fc7d8d2d8b13a7f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Until its destruction by Bulgarian regulators and the looting of its assets, Corpbank was arguably the most innovative and entrepreneurial bank in the Balkans."
+                }
+            ],
+            "para_id": "9ace6fa4d95f9723cba98b392e8f81e72505df42"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In addition to Bandura's work, psychologists Muraven, Tice, and Baumeister conducted a study for self control as a limited resource. They suggested there were three competing models to self-regulation: self-regulation as a strength, knowledge structure, and a skill. In the strength model, they indicated it is possible self-regulation could be considered a strength because it requires willpower and thus is a limited resource. Failure to self-regulate could then be explained by depletion of this resource. For self-regulation as a knowledge structure, they theorized it involves a certain amount of knowledge to exert self control, so as with any learned technique, failure to self-regulate could be explained by insufficient knowledge. Lastly, the model involving self-regulation as a skill referred to self-regulation being built up over time and unable to be diminished; therefore, failure to exert would be explained by a lack of skill. They found that self-regulation as a strength is the most feasible model due to studies that have suggested self-regulation is a limited resource."
+                }
+            ],
+            "para_id": "5dd90f76b73e265c96b9888474e3539713678a79"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When our belongingness needs are not met, Wilkowski and colleagues (2009) suggest that self-regulation is used to fulfill one\u2019s need to belong. Self-regulation is defined as the process of regulating oneself, or changing one\u2019s behavior, to manage short-term desires according to the "
+                },
+                {
+                    "entity": "enwiki:Self-regulation%20theory",
+                    "entity_name": "Self-regulation theory",
+                    "link_section": null,
+                    "text": "self-regulation theory"
+                },
+                {
+                    "text": ". Self-regulation can occur in many different ways. One of these ways uses other individual\u2019s gaze(s) as a reference to understand how attention should be divided. This effect is especially seen within individuals that have low levels of self-esteem. Interpersonal acceptance is not met in individuals with low self-esteem, which prompts them to self-regulate by looking to others for guidance with regards to where to focus attention. Belongingness contributes to this level of self-esteem. Baumeister, Dewall, Ciarocco, and Twenge (2005) found that when people are socially excluded from a group, self-regulation is less likely to be than those who have a heightened sense of belonging. For example, participants were told that the other people in the study did not want to work with them and as a consequence they would have to complete a task on their own. Later, those participants were offered a plate of cookies. The participants that were told that nobody in the group wanted to work with them took more cookies than those who were not told given this information, which provides evidence that a lack of belongingness inhibits people\u2019s ability to self-regulate. Self-regulation includes impulse control and allows one to manage short-term impulses and have a heightened sense of belongingness within an "
+                },
+                {
+                    "entity": "enwiki:Ingroups%20and%20outgroups",
+                    "entity_name": "Ingroups and outgroups",
+                    "link_section": null,
+                    "text": "ingroup"
+                },
+                {
+                    "text": ". An ingroup is a social group in which a person psychologically defines themselves as being a member of that specific group. By being a part of this group, one has a better ability to self-regulate. "
+                }
+            ],
+            "para_id": "609d3a459f93bcafff3f870671b8e3a32f2f7cc0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "As a widely studied theory, SRL was also greatly impacted by the well-known social psychologist "
+                },
+                {
+                    "entity": "enwiki:Roy%20Baumeister",
+                    "entity_name": "Roy Baumeister",
+                    "link_section": null,
+                    "text": "Roy Baumeister"
+                },
+                {
+                    "text": ". He described the ability to self-regulate as limited in capacity, and through this he coined the term "
+                },
+                {
+                    "entity": "enwiki:Ego%20depletion",
+                    "entity_name": "Ego depletion",
+                    "link_section": null,
+                    "text": "ego depletion"
+                },
+                {
+                    "text": ". The four components of self-regulation theory described by Roy Baumeister are standards of desirable behavior, motivation to meet standards, monitoring of situations and thoughts that precede breaking standards, and willpower, or the internal strength to control urges. In Baumeister's paper titled Self-Regulation Failure: An Overview, he express that self-regulation is complex and multifaceted. Baumeister lays out his \u201cthree ingredients\u201d of self-regulation as a case for self-regulation failure. The first involves standards; without specific ideals for standards, there may be conflicting dilemmas that will cease self-regulation. The second ingredient is monitoring, in that if it is not performed, individuals can lose control of success and attentiveness to behaviors. For example, individuals who undermine their competence to fulfill a task may not even attempt to reach that goal. The third is a somewhat more complex, and states that when a current state or behavior is falling short to reach a goal or standard, a certain cognitive process will be triggered to accommodate this. Self-regulation is a process that may be under regulated, mis-regulated, or neglected, and because of this it can be viewed as a strength in the brain. Baumeister concludes his work with the theory that an individual must be able to work through immediate situations by considering long-term implications as well as having a structured sense of relaxation and a healthy sense of impulse control."
+                }
+            ],
+            "para_id": "2072048b20b1592fb5b238b11a429e13ce39a685"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2015, author Robert Sberna "
+                },
+                {
+                    "entity": "enwiki:Self-publishing",
+                    "entity_name": "Self-publishing",
+                    "link_section": null,
+                    "text": "self-published"
+                },
+                {
+                    "text": " the book The Mystery of the Lufthansa Airlines Heist with collaborator Dominick Cicale, a former member of the "
+                },
+                {
+                    "entity": "enwiki:Bonanno%20crime%20family",
+                    "entity_name": "Bonanno crime family",
+                    "link_section": null,
+                    "text": "Bonanno crime family"
+                },
+                {
+                    "text": ". According to Cicale, between $2 million and $4 million of the Lufthansa loot was stashed in a safe deposit box by Jimmy Burke. The keys were given to his daughters, Cathy and Robin. Cicale reported that Cathy Burke's husband Anthony \"Bruno\" Indelicato, a Bonanno capo, gained access to the box with Vincent Basciano, also a Bonanno capo. Cicale said that Basciano spent $250,000 of the money on a movie that was never produced. The remainder was lost at casinos by Basciano."
+                }
+            ],
+            "para_id": "7b5563cdce9a14a582e454e01883bf1eaf24d502"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "By the end of 1850 the British rule was established in Chota Nagpur region. From ages tribals have their own traditional autonomous self-governance rule of \"Parha System\" and they were almost free from any outside interference.  But this autonomous self - governance rule was disturbed and destroyed by the regulations imposed by "
+                },
+                {
+                    "entity": "enwiki:British%20Raj",
+                    "entity_name": "British Raj",
+                    "link_section": null,
+                    "text": "British Raj"
+                },
+                {
+                    "text": ". Now tribals had to pay revenue(malgujari) on their own land which they had been prepared and cultivated for centuries. They were alienated from their land in the hands of "
+                },
+                {
+                    "entity": "enwiki:Zamindar",
+                    "entity_name": "Zamindar",
+                    "link_section": null,
+                    "text": "zamindars"
+                },
+                {
+                    "text": " and Britishers, when they failed to pay land revenue. In their own land they were forced to live like a farm labourers. The middlemen like money lenders(sahukars) and zamindars didn't miss any single chance to loot common people. There also existed the major problem of rural indebtness. Poor people had to lose their land when they were unable to repay loans taken from village moneylenders. Many times these debts were inherited from the past and increased with the passage of time. The plight of a common man was very miserable."
+                }
+            ],
+            "para_id": "15ba41245fc2a9d7f0b7656cf545d95c840c54af"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Baumeister also researched self-regulation. He coined the term "
+                },
+                {
+                    "entity": "enwiki:Ego%20depletion",
+                    "entity_name": "Ego depletion",
+                    "link_section": null,
+                    "text": "Ego depletion"
+                },
+                {
+                    "text": " to describe the evidence that humans' ability to self-regulate is limited, and after using it there is less ability (or energy) to self-regulate. Ego depletion has a general effect, such that exerting self-control in one area will use up energy for further regulation in other areas of life. Further research by Baumeister and colleagues has led to the development of the Strength Model of self-control, which likens this ego depletion to the tiredness that comes from physically exerting a muscle. A corollary to this analogy, supported by his research, is that self-control can be strengthened over time, much like a muscle. The energy used up is more than metaphorical, however; his research has found a strong link between ego depletion and depletion of blood glucose levels. Baumeister also edited two academic books on self-regulation, Losing Control and Handbook of Self-Regulation, and has devoted numerous experiments and journal papers to the topic."
+                }
+            ],
+            "para_id": "cc904cfc8b0fd8301b6eb7e5e32a564a97611986"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Council of Wyrms boxed set provides all the rules and background material necessary for staging adventures with "
+                },
+                {
+                    "entity": "enwiki:Dragon%20(Dungeons%20&%20Dragons)",
+                    "entity_name": "Dragon (Dungeons & Dragons)",
+                    "link_section": null,
+                    "text": "dragon"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Player%20character",
+                    "entity_name": "Player character",
+                    "link_section": null,
+                    "text": "PCs"
+                },
+                {
+                    "text": ". The dragon's color substitutes for "
+                },
+                {
+                    "entity": "enwiki:List%20of%20character%20races%20in%20Dungeons%20&%20Dragons",
+                    "entity_name": "List of character races in Dungeons & Dragons",
+                    "link_section": null,
+                    "text": "race"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Character%20class%20(Dungeons%20&%20Dragons)",
+                    "entity_name": "Character class (Dungeons & Dragons)",
+                    "link_section": null,
+                    "text": "class"
+                },
+                {
+                    "text": ", with the addition of proficiencies (such as Chanting, Looting, Religion) and a character kit (including Dragon-Mage, Dragon-Priest, Dragon-Psionicist). Players also may experiment with half-dragon PCs, spawned from the union of polymorphed dragons and their demihuman vassals. The adventures of this setting occur in the Io's Blood Isles, a string of islands in a self-contained world."
+                }
+            ],
+            "para_id": "5ce0d9340eac73bef88e2bc5ae89d80d5af56302"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Calm, Alert, and Learning: Classroom Strategies for Self-Regulation is a practical guide for educators (and parents) about the recent research into self-regulation, explaining the crucial difference between self-regulation and self-control. Whereas the latter refers to the effort required to inhibit impulses, the former addresses the causes of those impulses in the first place. The book takes the reader through the five principal domains of self-regulation (physical, emotion, cognitive, social and prosocial) and how stresses unique to each of these domains impact all of the others, creating a multiplier effect. All too often, this results in problems with attention, emotion regulation, or behaviour that are mistakenly seen as due to poor self-control or lack of effort when, in fact, they are the result of a heightened stress load. The reader is presented with practical methods of reducing the respective stresses in a classroom context."
+                }
+            ],
+            "para_id": "5b8de43b35747a28629a925839cbd8b7fc71347d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to Iran-Nejad and Chissom, there are three sources of self-regulated learning: active/executive, dynamic, and interest-creating discovery model (1992). Active/executive self-regulation is regulated by the person and is intentional, deliberate, conscious, voluntary, and strategic. The individual is aware and effortful in using self-regulation strategies. Under this source of SRL, learning happens best in a habitual mode of functioning. Dynamic self-regulation is also known as unintentional learning because it is regulated by internal subsystems other than the \u201ccentral executive.\u201d"
+                }
+            ],
+            "para_id": "f6c2093ef8e9268444066a499f49ed921a4f660d"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Sadistic%20personality%20disorder",
+                    "entity_name": "Sadistic personality disorder",
+                    "link_section": null,
+                    "text": "Sadistic personality disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sadomasochism",
+                    "entity_name": "Sadomasochism",
+                    "link_section": null,
+                    "text": "Sadomasochism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Safety%20in%20numbers",
+                    "entity_name": "Safety in numbers",
+                    "link_section": null,
+                    "text": "Safety in numbers"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sander%20illusion",
+                    "entity_name": "Sander illusion",
+                    "link_section": null,
+                    "text": "Sander illusion"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Wisdom",
+                    "entity_name": "Wisdom",
+                    "link_section": "Sapience",
+                    "text": "Sapience"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Scale%20(social%20sciences)",
+                    "entity_name": "Scale (social sciences)",
+                    "link_section": null,
+                    "text": "Scale (social sciences)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schadenfreude",
+                    "entity_name": "Schadenfreude",
+                    "link_section": null,
+                    "text": "Schadenfreude"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Reinforcement",
+                    "entity_name": "Reinforcement",
+                    "link_section": "Schedules",
+                    "text": "Schedules of reinforcement"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schema%20(psychology)",
+                    "entity_name": "Schema (psychology)",
+                    "link_section": null,
+                    "text": "Schema (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizoaffective%20disorder",
+                    "entity_name": "Schizoaffective disorder",
+                    "link_section": null,
+                    "text": "Schizoaffective disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizoid%20personality%20disorder",
+                    "entity_name": "Schizoid personality disorder",
+                    "link_section": null,
+                    "text": "Schizoid personality disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizophrenia",
+                    "entity_name": "Schizophrenia",
+                    "link_section": null,
+                    "text": "Schizophrenia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizophrenics%20Anonymous",
+                    "entity_name": "Schizophrenics Anonymous",
+                    "link_section": null,
+                    "text": "Schizophrenics Anonymous"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizophreniform%20disorder",
+                    "entity_name": "Schizophreniform disorder",
+                    "link_section": null,
+                    "text": "Schizophreniform disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Schizotypal%20personality%20disorder",
+                    "entity_name": "Schizotypal personality disorder",
+                    "link_section": null,
+                    "text": "Schizotypal personality disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:SAT",
+                    "entity_name": "SAT",
+                    "link_section": null,
+                    "text": "Scholastic Aptitude Test"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:School%20refusal",
+                    "entity_name": "School refusal",
+                    "link_section": null,
+                    "text": "School phobia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:School%20refusal",
+                    "entity_name": "School refusal",
+                    "link_section": null,
+                    "text": "School refusal"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Science%20and%20Consciousness%20Review",
+                    "entity_name": "Science and Consciousness Review",
+                    "link_section": null,
+                    "text": "Science and Consciousness Review"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Scientific%20control",
+                    "entity_name": "Scientific control",
+                    "link_section": null,
+                    "text": "Scientific control"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Seasonal%20affective%20disorder",
+                    "entity_name": "Seasonal affective disorder",
+                    "link_section": null,
+                    "text": "Seasonal affective disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Primary%20and%20secondary%20gain",
+                    "entity_name": "Primary and secondary gain",
+                    "link_section": null,
+                    "text": "Secondary gain"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Comfort%20object",
+                    "entity_name": "Comfort object",
+                    "link_section": null,
+                    "text": "Security blanket"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Selective%20abstraction",
+                    "entity_name": "Selective abstraction",
+                    "link_section": null,
+                    "text": "Selective abstraction"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Selective%20exposure%20theory",
+                    "entity_name": "Selective exposure theory",
+                    "link_section": null,
+                    "text": "Selective distortion"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-actualization",
+                    "entity_name": "Self-actualization",
+                    "link_section": null,
+                    "text": "Self-actualization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-awareness",
+                    "entity_name": "Self-awareness",
+                    "link_section": null,
+                    "text": "Self-awareness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-concept",
+                    "entity_name": "Self-concept",
+                    "link_section": null,
+                    "text": "Self-concept"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-consciousness",
+                    "entity_name": "Self-consciousness",
+                    "link_section": null,
+                    "text": "Self-consciousness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-criticism",
+                    "entity_name": "Self-criticism",
+                    "link_section": null,
+                    "text": "Self-criticism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-deception",
+                    "entity_name": "Self-deception",
+                    "link_section": null,
+                    "text": "Self-deception"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-defeating%20personality%20disorder",
+                    "entity_name": "Self-defeating personality disorder",
+                    "link_section": null,
+                    "text": "Self-defeating personality disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-determination%20theory",
+                    "entity_name": "Self-determination theory",
+                    "link_section": null,
+                    "text": "Self-determination theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-disclosure",
+                    "entity_name": "Self-disclosure",
+                    "link_section": null,
+                    "text": "Self-disclosure"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-efficacy",
+                    "entity_name": "Self-efficacy",
+                    "link_section": null,
+                    "text": "Self-efficacy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-esteem",
+                    "entity_name": "Self-esteem",
+                    "link_section": null,
+                    "text": "Self-esteem"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-esteem%20functions",
+                    "entity_name": "Self-esteem functions",
+                    "link_section": null,
+                    "text": "Self-esteem functions"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-help",
+                    "entity_name": "Self-help",
+                    "link_section": null,
+                    "text": "Self-help"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-harm",
+                    "entity_name": "Self-harm",
+                    "link_section": null,
+                    "text": "Self-injury"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-knowledge%20(psychology)",
+                    "entity_name": "Self-knowledge (psychology)",
+                    "link_section": null,
+                    "text": "Self-knowledge"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-hatred",
+                    "entity_name": "Self-hatred",
+                    "link_section": null,
+                    "text": "Self-loathing"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-monitoring",
+                    "entity_name": "Self-monitoring",
+                    "link_section": null,
+                    "text": "Self-monitoring"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-parenting",
+                    "entity_name": "Self-parenting",
+                    "link_section": null,
+                    "text": "Self-parenting"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-perception%20theory",
+                    "entity_name": "Self-perception theory",
+                    "link_section": null,
+                    "text": "Self-perception theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-pity",
+                    "entity_name": "Self-pity",
+                    "link_section": null,
+                    "text": "Self-pity"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-harm",
+                    "entity_name": "Self-harm",
+                    "link_section": null,
+                    "text": "Self-punishment"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-realization",
+                    "entity_name": "Self-realization",
+                    "link_section": null,
+                    "text": "Self-realization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-regulated%20learning",
+                    "entity_name": "Self-regulated learning",
+                    "link_section": null,
+                    "text": "Self-regulated learning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self%20in%20Jungian%20psychology",
+                    "entity_name": "Self in Jungian psychology",
+                    "link_section": null,
+                    "text": "Self (Jung)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Psychology%20of%20self",
+                    "entity_name": "Psychology of self",
+                    "link_section": null,
+                    "text": "Self (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-actualization",
+                    "entity_name": "Self-actualization",
+                    "link_section": null,
+                    "text": "Self actualization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-control",
+                    "entity_name": "Self-control",
+                    "link_section": null,
+                    "text": "Self control"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-efficacy",
+                    "entity_name": "Self-efficacy",
+                    "link_section": null,
+                    "text": "Self efficacy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-esteem",
+                    "entity_name": "Self-esteem",
+                    "link_section": null,
+                    "text": "Self-esteem"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-handicapping",
+                    "entity_name": "Self-handicapping",
+                    "link_section": null,
+                    "text": "Self handicapping"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-propaganda",
+                    "entity_name": "Self-propaganda",
+                    "link_section": null,
+                    "text": "Self propaganda"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self%20psychology",
+                    "entity_name": "Self psychology",
+                    "link_section": null,
+                    "text": "Self psychology"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Self-serving%20bias",
+                    "entity_name": "Self-serving bias",
+                    "link_section": null,
+                    "text": "Self serving bias"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Selfishness",
+                    "entity_name": "Selfishness",
+                    "link_section": null,
+                    "text": "Selfishness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Semantic%20dementia",
+                    "entity_name": "Semantic dementia",
+                    "link_section": null,
+                    "text": "Semantic dementia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Semantic%20dyslexia",
+                    "entity_name": "Semantic dyslexia",
+                    "link_section": null,
+                    "text": "Semantic dyslexia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Semantic%20memory",
+                    "entity_name": "Semantic memory",
+                    "link_section": null,
+                    "text": "Semantic memory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Semantics",
+                    "entity_name": "Semantics",
+                    "link_section": null,
+                    "text": "Semantics"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Dementia",
+                    "entity_name": "Dementia",
+                    "link_section": null,
+                    "text": "Senile dementia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Senile%20plaques",
+                    "entity_name": "Senile plaques",
+                    "link_section": null,
+                    "text": "Senile plaques"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensation%20(psychology)",
+                    "entity_name": "Sensation (psychology)",
+                    "link_section": null,
+                    "text": "Sensation (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Time%20perception",
+                    "entity_name": "Time perception",
+                    "link_section": null,
+                    "text": "Sense of time"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20processing",
+                    "entity_name": "Sensory processing",
+                    "link_section": null,
+                    "text": "Sensitivity (human)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Neural%20adaptation",
+                    "entity_name": "Neural adaptation",
+                    "link_section": null,
+                    "text": "Sensory adaptation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20gating",
+                    "entity_name": "Sensory gating",
+                    "link_section": null,
+                    "text": "Sensory gating"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20memory",
+                    "entity_name": "Sensory memory",
+                    "link_section": null,
+                    "text": "Sensory memory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20neuroscience",
+                    "entity_name": "Sensory neuroscience",
+                    "link_section": null,
+                    "text": "Sensory neuroscience"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20preconditioning",
+                    "entity_name": "Sensory preconditioning",
+                    "link_section": null,
+                    "text": "Sensory preconditioning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sensory%20threshold",
+                    "entity_name": "Sensory threshold",
+                    "link_section": null,
+                    "text": "Sensory threshold"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sentience",
+                    "entity_name": "Sentience",
+                    "link_section": null,
+                    "text": "Sentience"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Separation%20anxiety%20disorder",
+                    "entity_name": "Separation anxiety disorder",
+                    "link_section": null,
+                    "text": "Separation anxiety disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Serial%20position%20effect",
+                    "entity_name": "Serial position effect",
+                    "link_section": null,
+                    "text": "Serial position effect"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Serial%20sevens",
+                    "entity_name": "Serial sevens",
+                    "link_section": null,
+                    "text": "Serial sevens"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sex%20reassignment%20surgery",
+                    "entity_name": "Sex reassignment surgery",
+                    "link_section": null,
+                    "text": "Sex-reassignment surgery"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20arousal%20disorder",
+                    "entity_name": "Sexual arousal disorder",
+                    "link_section": null,
+                    "text": "Sexual arousal disorders"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20arousal",
+                    "entity_name": "Sexual arousal",
+                    "link_section": null,
+                    "text": "Sexual arousal"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Hypoactive%20sexual%20desire%20disorder",
+                    "entity_name": "Hypoactive sexual desire disorder",
+                    "link_section": null,
+                    "text": "Sexual aversion disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20desire",
+                    "entity_name": "Sexual desire",
+                    "link_section": null,
+                    "text": "Sexual desire"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Paraphilia",
+                    "entity_name": "Paraphilia",
+                    "link_section": null,
+                    "text": "Sexual deviation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20dysfunction",
+                    "entity_name": "Sexual dysfunction",
+                    "link_section": null,
+                    "text": "Sexual disorders"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20dysfunction",
+                    "entity_name": "Sexual dysfunction",
+                    "link_section": null,
+                    "text": "Sexual dysfunction"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20fetishism",
+                    "entity_name": "Sexual fetishism",
+                    "link_section": null,
+                    "text": "Sexual fetishism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:BDSM",
+                    "entity_name": "BDSM",
+                    "link_section": null,
+                    "text": "Sexual masochism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20orientation",
+                    "entity_name": "Sexual orientation",
+                    "link_section": null,
+                    "text": "Sexual orientation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Human%20sexual%20response%20cycle",
+                    "entity_name": "Human sexual response cycle",
+                    "link_section": null,
+                    "text": "Sexual response cycle"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sexual%20sadism%20disorder",
+                    "entity_name": "Sexual sadism disorder",
+                    "link_section": null,
+                    "text": "Sexual sadism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Human%20sexuality",
+                    "entity_name": "Human sexuality",
+                    "link_section": null,
+                    "text": "human sexuality"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shadow%20(psychology)",
+                    "entity_name": "Shadow (psychology)",
+                    "link_section": null,
+                    "text": "Shadow (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shame",
+                    "entity_name": "Shame",
+                    "link_section": null,
+                    "text": "Shame"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shaping%20(psychology)",
+                    "entity_name": "Shaping (psychology)",
+                    "link_section": null,
+                    "text": "Shaping (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shell%20shock",
+                    "entity_name": "Shell shock",
+                    "link_section": null,
+                    "text": "Shell shock"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shock%20value",
+                    "entity_name": "Shock value",
+                    "link_section": null,
+                    "text": "Shock value"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Short-term%20memory",
+                    "entity_name": "Short-term memory",
+                    "link_section": null,
+                    "text": "Short term memory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Shyness",
+                    "entity_name": "Shyness",
+                    "link_section": null,
+                    "text": "Shyness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sibling",
+                    "entity_name": "Sibling",
+                    "link_section": null,
+                    "text": "Sibling"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Siege%20mentality",
+                    "entity_name": "Siege mentality",
+                    "link_section": null,
+                    "text": "Siege mentality"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sigmund%20Freud%20Archives",
+                    "entity_name": "Sigmund Freud Archives",
+                    "link_section": null,
+                    "text": "Sigmund Freud Archives"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Silva%20Method",
+                    "entity_name": "Silva Method",
+                    "link_section": null,
+                    "text": "Silva Method"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Similarity%20(psychology)",
+                    "entity_name": "Similarity (psychology)",
+                    "link_section": null,
+                    "text": "Similarity (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Simon%20effect",
+                    "entity_name": "Simon effect",
+                    "link_section": null,
+                    "text": "Simon effect"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Simplicity%20theory",
+                    "entity_name": "Simplicity theory",
+                    "link_section": null,
+                    "text": "Simplicity theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Artificial%20consciousness",
+                    "entity_name": "Artificial consciousness",
+                    "link_section": null,
+                    "text": "Simulated consciousness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Simulated%20pregnancy",
+                    "entity_name": "Simulated pregnancy",
+                    "link_section": null,
+                    "text": "Simulated pregnancy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Simulation%20heuristic",
+                    "entity_name": "Simulation heuristic",
+                    "link_section": null,
+                    "text": "Simulation heuristic"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Anorexia%20nervosa",
+                    "entity_name": "Anorexia nervosa",
+                    "link_section": null,
+                    "text": "Sitophobia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Situation%20awareness",
+                    "entity_name": "Situation awareness",
+                    "link_section": null,
+                    "text": "Situational awareness"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Six%20Thinking%20Hats",
+                    "entity_name": "Six Thinking Hats",
+                    "link_section": null,
+                    "text": "Six Thinking Hats"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Size%E2%80%93weight%20illusion",
+                    "entity_name": "Size\u2013weight illusion",
+                    "link_section": null,
+                    "text": "Size-weight illusion"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Operant%20conditioning%20chamber",
+                    "entity_name": "Operant conditioning chamber",
+                    "link_section": null,
+                    "text": "Skinner box"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sleep-learning",
+                    "entity_name": "Sleep-learning",
+                    "link_section": null,
+                    "text": "Sleep-learning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sluggish%20cognitive%20tempo",
+                    "entity_name": "Sluggish cognitive tempo",
+                    "link_section": null,
+                    "text": "Sluggish cognitive tempo"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sluggish%20schizophrenia",
+                    "entity_name": "Sluggish schizophrenia",
+                    "link_section": null,
+                    "text": "Sluggishly progressing schizophrenia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Smart%20mob",
+                    "entity_name": "Smart mob",
+                    "link_section": null,
+                    "text": "Smart mob"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20anxiety",
+                    "entity_name": "Social anxiety",
+                    "link_section": null,
+                    "text": "Social anxiety"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20anxiety%20disorder",
+                    "entity_name": "Social anxiety disorder",
+                    "link_section": null,
+                    "text": "Social anxiety disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20cognition",
+                    "entity_name": "Social cognition",
+                    "link_section": null,
+                    "text": "Social cognition"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20desirability%20bias",
+                    "entity_name": "Social desirability bias",
+                    "link_section": null,
+                    "text": "Social desirability"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20disruption",
+                    "entity_name": "Social disruption",
+                    "link_section": null,
+                    "text": "Social disruption"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20distance",
+                    "entity_name": "Social distance",
+                    "link_section": null,
+                    "text": "Social distance"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Bogardus%20social%20distance%20scale",
+                    "entity_name": "Bogardus social distance scale",
+                    "link_section": null,
+                    "text": "Social distance scale"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20facilitation",
+                    "entity_name": "Social facilitation",
+                    "link_section": null,
+                    "text": "Social facilitation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20group",
+                    "entity_name": "Social group",
+                    "link_section": null,
+                    "text": "Social group"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20influence",
+                    "entity_name": "Social influence",
+                    "link_section": null,
+                    "text": "Social influence"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20inhibition",
+                    "entity_name": "Social inhibition",
+                    "link_section": null,
+                    "text": "Social inhibition"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20relation",
+                    "entity_name": "Social relation",
+                    "link_section": null,
+                    "text": "Social interaction"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20learning%20theory",
+                    "entity_name": "Social learning theory",
+                    "link_section": null,
+                    "text": "Social learning theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20loafing",
+                    "entity_name": "Social loafing",
+                    "link_section": null,
+                    "text": "Social loafing"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20neuroscience",
+                    "entity_name": "Social neuroscience",
+                    "link_section": null,
+                    "text": "Social neuroscience"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Norm%20(social)",
+                    "entity_name": "Norm (social)",
+                    "link_section": null,
+                    "text": "Social norm"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20proof",
+                    "entity_name": "Social proof",
+                    "link_section": null,
+                    "text": "Social proof"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20psychology",
+                    "entity_name": "Social psychology",
+                    "link_section": null,
+                    "text": "Social psychology (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20psychology%20(sociology)",
+                    "entity_name": "Social psychology (sociology)",
+                    "link_section": null,
+                    "text": "Social psychology (sociology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20rejection",
+                    "entity_name": "Social rejection",
+                    "link_section": null,
+                    "text": "Social rejection"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Interpersonal%20and%20social%20rhythm%20therapy",
+                    "entity_name": "Interpersonal and social rhythm therapy",
+                    "link_section": null,
+                    "text": "Social rhythm therapy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Role",
+                    "entity_name": "Role",
+                    "link_section": null,
+                    "text": "Social role"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20skills",
+                    "entity_name": "Social skills",
+                    "link_section": null,
+                    "text": "Social skills"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20statistics",
+                    "entity_name": "Social statistics",
+                    "link_section": null,
+                    "text": "Social statistics"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20status",
+                    "entity_name": "Social status",
+                    "link_section": null,
+                    "text": "Social status"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20stigma",
+                    "entity_name": "Social stigma",
+                    "link_section": null,
+                    "text": "Social stigma"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Social%20support",
+                    "entity_name": "Social support",
+                    "link_section": null,
+                    "text": "Social support"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Socialization",
+                    "entity_name": "Socialization",
+                    "link_section": null,
+                    "text": "Socialization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Society%20of%20Mind",
+                    "entity_name": "Society of Mind",
+                    "link_section": null,
+                    "text": "Society of Mind theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Socioeconomic%20status",
+                    "entity_name": "Socioeconomic status",
+                    "link_section": null,
+                    "text": "Socioeconomic status"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sociometry",
+                    "entity_name": "Sociometry",
+                    "link_section": null,
+                    "text": "Sociometry"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Socionics",
+                    "entity_name": "Socionics",
+                    "link_section": null,
+                    "text": "Socionics"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sociosexual%20orientation",
+                    "entity_name": "Sociosexual orientation",
+                    "link_section": null,
+                    "text": "Sociosexual orientation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sodomy",
+                    "entity_name": "Sodomy",
+                    "link_section": null,
+                    "text": "Sodomy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Solitary%20confinement",
+                    "entity_name": "Solitary confinement",
+                    "link_section": null,
+                    "text": "Solitary confinement"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Soma%20(drink)",
+                    "entity_name": "Soma (drink)",
+                    "link_section": null,
+                    "text": "Soma"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Somatization%20disorder",
+                    "entity_name": "Somatization disorder",
+                    "link_section": null,
+                    "text": "Somatization disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Somatic%20symptom%20disorder",
+                    "entity_name": "Somatic symptom disorder",
+                    "link_section": null,
+                    "text": "Somatoform disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Psychiatric%20somatotherapy",
+                    "entity_name": "Psychiatric somatotherapy",
+                    "link_section": null,
+                    "text": "Somatotherapy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Somatotype%20and%20constitutional%20psychology",
+                    "entity_name": "Somatotype and constitutional psychology",
+                    "link_section": null,
+                    "text": "Somatotype and constitutional psychology"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Spatial%20empathy",
+                    "entity_name": "Spatial empathy",
+                    "link_section": null,
+                    "text": "Spatial empathy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Spatial%20memory",
+                    "entity_name": "Spatial memory",
+                    "link_section": null,
+                    "text": "Spatial memory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Spatial%E2%80%93temporal%20reasoning",
+                    "entity_name": "Spatial\u2013temporal reasoning",
+                    "link_section": null,
+                    "text": "Spatial-temporal reasoning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Speaker%20recognition",
+                    "entity_name": "Speaker recognition",
+                    "link_section": null,
+                    "text": "Speaker recognition"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Specific%20phobia",
+                    "entity_name": "Specific phobia",
+                    "link_section": null,
+                    "text": "Specific phobia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Specific%20social%20phobia",
+                    "entity_name": "Specific social phobia",
+                    "link_section": null,
+                    "text": "Specific social phobia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Speech%20act",
+                    "entity_name": "Speech act",
+                    "link_section": null,
+                    "text": "Speech act"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Speech%20perception",
+                    "entity_name": "Speech perception",
+                    "link_section": null,
+                    "text": "Speech perception"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Speed%20reading",
+                    "entity_name": "Speed reading",
+                    "link_section": null,
+                    "text": "Speed reading"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Don%20Edward%20Beck",
+                    "entity_name": "Don Edward Beck",
+                    "link_section": null,
+                    "text": "Spiral dynamics"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Splitting%20(psychology)",
+                    "entity_name": "Splitting (psychology)",
+                    "link_section": null,
+                    "text": "splitting (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Spontaneous%20recovery",
+                    "entity_name": "Spontaneous recovery",
+                    "link_section": null,
+                    "text": "Spontaneous recovery"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sport%20psychology",
+                    "entity_name": "Sport psychology",
+                    "link_section": null,
+                    "text": "Sport psychology"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stage%20fright",
+                    "entity_name": "Stage fright",
+                    "link_section": null,
+                    "text": "Stage fright"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stage%20theory",
+                    "entity_name": "Stage theory",
+                    "link_section": null,
+                    "text": "Stage theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:James%20W.%20Fowler",
+                    "entity_name": "James W. Fowler",
+                    "link_section": null,
+                    "text": "Stages of faith development"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stanford%E2%80%93Binet%20Intelligence%20Scales",
+                    "entity_name": "Stanford\u2013Binet Intelligence Scales",
+                    "link_section": null,
+                    "text": "Stanford-Binet"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:State-dependent%20memory",
+                    "entity_name": "State-dependent memory",
+                    "link_section": null,
+                    "text": "State-dependent learning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:State-dependent%20memory",
+                    "entity_name": "State-dependent memory",
+                    "link_section": null,
+                    "text": "State-dependent memory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Gateway%20drug%20theory",
+                    "entity_name": "Gateway drug theory",
+                    "link_section": null,
+                    "text": "Steppingstone theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stereotype",
+                    "entity_name": "Stereotype",
+                    "link_section": null,
+                    "text": "Stereotypes"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stereotypic%20movement%20disorder",
+                    "entity_name": "Stereotypic movement disorder",
+                    "link_section": null,
+                    "text": "Stereotypic movement disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stigmatic-eligibilic%20paraphilia",
+                    "entity_name": "Stigmatic-eligibilic paraphilia",
+                    "link_section": null,
+                    "text": "Stigmatic/eligibilic paraphilia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stimming",
+                    "entity_name": "Stimming",
+                    "link_section": null,
+                    "text": "Stimming"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Conditioned%20taste%20aversion",
+                    "entity_name": "Conditioned taste aversion",
+                    "link_section": "Stimulus generalization",
+                    "text": "Stimulus generalization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stir%20crazy%20(condition)",
+                    "entity_name": "Stir crazy (condition)",
+                    "link_section": null,
+                    "text": "Stir crazy (condition)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stockholm%20syndrome",
+                    "entity_name": "Stockholm syndrome",
+                    "link_section": null,
+                    "text": "Stockholm syndrome"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Storage%20(memory)",
+                    "entity_name": "Storage (memory)",
+                    "link_section": null,
+                    "text": "Storage (memory)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Strategic%20planning",
+                    "entity_name": "Strategic planning",
+                    "link_section": null,
+                    "text": "Strategic planning"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stream%20of%20consciousness%20(psychology)",
+                    "entity_name": "Stream of consciousness (psychology)",
+                    "link_section": null,
+                    "text": "Stream of consciousness (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stress%20(biology)",
+                    "entity_name": "Stress (biology)",
+                    "link_section": null,
+                    "text": "Stress (medicine)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stress%20management",
+                    "entity_name": "Stress management",
+                    "link_section": null,
+                    "text": "Stress management"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Stressor",
+                    "entity_name": "Stressor",
+                    "link_section": null,
+                    "text": "Stressor"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Structural%20communication",
+                    "entity_name": "Structural communication",
+                    "link_section": null,
+                    "text": "Structural communication"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Structural%20ritualization%20theory",
+                    "entity_name": "Structural ritualization theory",
+                    "link_section": null,
+                    "text": "Structural ritualization theory"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Structuralism",
+                    "entity_name": "Structuralism",
+                    "link_section": null,
+                    "text": "Structuralism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Structure%20and%20agency",
+                    "entity_name": "Structure and agency",
+                    "link_section": null,
+                    "text": "Structure-agency debate"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Structured%20interview",
+                    "entity_name": "Structured interview",
+                    "link_section": null,
+                    "text": "Structured interview"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Study%20skills",
+                    "entity_name": "Study skills",
+                    "link_section": null,
+                    "text": "Study Skills"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Subjective%20character%20of%20experience",
+                    "entity_name": "Subjective character of experience",
+                    "link_section": null,
+                    "text": "Subjective reality"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sublimation%20(psychology)",
+                    "entity_name": "Sublimation (psychology)",
+                    "link_section": null,
+                    "text": "Sublimation (psychology)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Subliminal%20stimuli",
+                    "entity_name": "Subliminal stimuli",
+                    "link_section": null,
+                    "text": "Subliminal advertising"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Subliminal%20stimuli",
+                    "entity_name": "Subliminal stimuli",
+                    "link_section": null,
+                    "text": "Subliminal perception"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Dominance%20and%20submission",
+                    "entity_name": "Dominance and submission",
+                    "link_section": null,
+                    "text": "Submission"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance-related%20disorder",
+                    "entity_name": "Substance-related disorder",
+                    "link_section": null,
+                    "text": "Substance-related disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance%20abuse",
+                    "entity_name": "Substance abuse",
+                    "link_section": null,
+                    "text": "Substance abuse"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance%20Abuse%20and%20Mental%20Health%20Services%20Administration",
+                    "entity_name": "Substance Abuse and Mental Health Services Administration",
+                    "link_section": null,
+                    "text": "Substance Abuse and Mental Health Services Administration"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance%20dependence",
+                    "entity_name": "Substance dependence",
+                    "link_section": null,
+                    "text": "Substance dependence"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance%20intoxication",
+                    "entity_name": "Substance intoxication",
+                    "link_section": null,
+                    "text": "Substance intoxication"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Substance-related%20disorder",
+                    "entity_name": "Substance-related disorder",
+                    "link_section": null,
+                    "text": "Substance-related disorder"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Subvocalization",
+                    "entity_name": "Subvocalization",
+                    "link_section": null,
+                    "text": "Subvocalization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suffering",
+                    "entity_name": "Suffering",
+                    "link_section": null,
+                    "text": "Suffering"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suicidal%20ideation",
+                    "entity_name": "Suicidal ideation",
+                    "link_section": null,
+                    "text": "Suicidal ideation"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suicide",
+                    "entity_name": "Suicide",
+                    "link_section": null,
+                    "text": "Suicide"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suicide%20prevention",
+                    "entity_name": "Suicide prevention",
+                    "link_section": null,
+                    "text": "Suicide treatment"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suicide%20watch",
+                    "entity_name": "Suicide watch",
+                    "link_section": null,
+                    "text": "Suicide watch"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Suicidology",
+                    "entity_name": "Suicidology",
+                    "link_section": null,
+                    "text": "Suicidology"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Id,%20ego%20and%20super-ego",
+                    "entity_name": "Id, ego and super-ego",
+                    "link_section": "Super-ego",
+                    "text": "Superego"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Superficial%20charm",
+                    "entity_name": "Superficial charm",
+                    "link_section": null,
+                    "text": "Superficial charm"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Superiority%20complex",
+                    "entity_name": "Superiority complex",
+                    "link_section": null,
+                    "text": "Superiority complex"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Superman%20complex",
+                    "entity_name": "Superman complex",
+                    "link_section": null,
+                    "text": "Superman complex"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Superordinate%20goals",
+                    "entity_name": "Superordinate goals",
+                    "link_section": null,
+                    "text": "Superordinate goals"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Surprise%20(emotion)",
+                    "entity_name": "Surprise (emotion)",
+                    "link_section": null,
+                    "text": "Surprise (emotion)"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Swept-plane%20display",
+                    "entity_name": "Swept-plane display",
+                    "link_section": null,
+                    "text": "Swept-plane display"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sycophancy",
+                    "entity_name": "Sycophancy",
+                    "link_section": null,
+                    "text": "Sycophancy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Syllogism",
+                    "entity_name": "Syllogism",
+                    "link_section": null,
+                    "text": "Syllogism"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sylvia%20Plath%20effect",
+                    "entity_name": "Sylvia Plath effect",
+                    "link_section": null,
+                    "text": "Sylvia Plath effect"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Symbolic%20power",
+                    "entity_name": "Symbolic power",
+                    "link_section": null,
+                    "text": "Symbolic violence"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sympathy",
+                    "entity_name": "Sympathy",
+                    "link_section": null,
+                    "text": "Sympathy"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Sympathetic%20nervous%20system",
+                    "entity_name": "Sympathetic nervous system",
+                    "link_section": null,
+                    "text": "Sympathetic nervous system"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Synesthesia",
+                    "entity_name": "Synesthesia",
+                    "link_section": null,
+                    "text": "Synesthesia"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Synectics",
+                    "entity_name": "Synectics",
+                    "link_section": null,
+                    "text": "Synectics"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Systematic%20desensitization",
+                    "entity_name": "Systematic desensitization",
+                    "link_section": null,
+                    "text": "Systematic desensitization"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Systems%20psychology",
+                    "entity_name": "Systems psychology",
+                    "link_section": null,
+                    "text": "Systems psychology"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "text": "Systems intelligence"
+                },
+                {
+                    "text": " -"
+                },
+                {
+                    "entity": "enwiki:Systems%20thinking",
+                    "entity_name": "Systems thinking",
+                    "link_section": null,
+                    "text": "Systems thinking"
+                }
+            ],
+            "para_id": "3917fd718a83e499a1edc262fc01e2b11429c8c5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Self-regulation is a sub-category of reinforcement contingency theories. Self-regulation theories emphasize the role of self-implemented reinforcers and environment-dependent reinforcers. These self-implemented reinforcers may explain why some individuals who experience an external loss develop depression and others do not. Self-regulation begins with a self-evaluation in which the person recalls past performances and monitors their actions, followed by a reward or punishment. Individuals with depression may have unrealistic expectations for themselves, resulting in extreme self-punishment, or alternatively, may not engage in self-regulatory behaviors, depending completely on external sources of reinforcement. In either circumstance, the individual limits their experiences of positive enforcers, leading to a preoccupancy with negative feelings and depression."
+                }
+            ],
+            "para_id": "4f9c5f682da11de4dbd00ee1f893b0f96b166a29"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Nischal Basnet is an actor and director of "
+                },
+                {
+                    "entity": "enwiki:Nepal",
+                    "entity_name": "Nepal",
+                    "link_section": null,
+                    "text": "Nepal"
+                },
+                {
+                    "text": "i "
+                },
+                {
+                    "entity": "enwiki:Film",
+                    "entity_name": "Film",
+                    "link_section": null,
+                    "text": "films"
+                },
+                {
+                    "text": ". "
+                },
+                {
+                    "entity": "enwiki:Loot%20(2012%20film)",
+                    "entity_name": "Loot (2012 film)",
+                    "link_section": null,
+                    "text": "Loot"
+                },
+                {
+                    "text": ", directed by him in 2012, garnered positive reviews from film critics and topped the box office. He has also acted in and produced the hit 2013 film "
+                },
+                {
+                    "entity": "enwiki:Kabaddi%20(2013%20film)",
+                    "entity_name": "Kabaddi (2013 film)",
+                    "link_section": null,
+                    "text": "Kabaddi"
+                },
+                {
+                    "text": " and produced it 2015 sequel "
+                },
+                {
+                    "entity": "enwiki:Kabaddi%20Kabaddi",
+                    "entity_name": "Kabaddi Kabaddi",
+                    "link_section": null,
+                    "text": "Kabaddi Kabaddi"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "d1f7a0caaf3c1c0dd15329ea41175e1123123580"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Favier was accused of selling a confiscated collection of porcelain to "
+                },
+                {
+                    "entity": "enwiki:Herbert%20G.%20Squiers",
+                    "entity_name": "Herbert G. Squiers",
+                    "link_section": null,
+                    "text": "Herbert G. Squiers"
+                },
+                {
+                    "text": " (1859\u20131911), First Secretary of the American Legation, and a member of Favier's congregation. Jasper Whiting, War Correspondent for the Westminster Gazette, wrote that \"the best collection of loot obtained belonged to Lady MacDonald, the wife of the British minister, while the second-best belonged to the First Secretary of the American Legation.\" Investigative journalist "
+                },
+                {
+                    "entity": "enwiki:Sterling%20Seagrave",
+                    "entity_name": "Sterling Seagrave",
+                    "link_section": null,
+                    "text": "Sterling Seagrave"
+                },
+                {
+                    "text": " asserts that \"great fortunes were made by those like Herbert Squiers, who knew where to find the richest pickings and chose his loot as a "
+                },
+                {
+                    "entity": "enwiki:Connoisseur",
+                    "entity_name": "Connoisseur",
+                    "link_section": null,
+                    "text": "connoisseur"
+                },
+                {
+                    "text": ".\" Squiers left Beijing on 2 September 1901 \"with what was reported to be several railway cars filled with Chinese art\", which Squiers indicated was to be donated to the "
+                },
+                {
+                    "entity": "enwiki:Metropolitan%20Museum%20of%20Art",
+                    "entity_name": "Metropolitan Museum of Art",
+                    "link_section": null,
+                    "text": "Metropolitan Museum of Art"
+                },
+                {
+                    "text": " in New York city. Among those critical of the origins of Squiers' donation to the Metropolitan Museum was the New Outlook magazine, which claimed the \"collection of fine Chinese porcelain [was] known to have been looted from palaces in Peking.\" In response to criticism that this collection was the result of looting, both the New York Metropolitan Museum of Art and the U.S. State department officials were sceptical that this was a large collection of loot. His collection was on loan to the "
+                },
+                {
+                    "entity": "enwiki:Smithsonian%20Institution",
+                    "entity_name": "Smithsonian Institution",
+                    "link_section": null,
+                    "text": "United States National Museum"
+                },
+                {
+                    "text": " (better known as "
+                },
+                {
+                    "entity": "enwiki:Smithsonian%20Institution",
+                    "entity_name": "Smithsonian Institution",
+                    "link_section": null,
+                    "text": "The Smithsonian Institution"
+                },
+                {
+                    "text": ") in Washington, D.C. from 1907 to 1908. After his death, his collection was sold at auction in New York in April 1912, and realised over $48,000. In 2003, Squiers was still being criticised. Sandy English wrote:"
+                }
+            ],
+            "para_id": "32d4e56a8add41d66922d415fab819f56dc89f48"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Squiers left Beijing on 2 September 1901 \"with what was reported to be several railway cars filled with Chinese art,\" which Squiers indicated was to be donated to the "
+                },
+                {
+                    "entity": "enwiki:Metropolitan%20Museum%20of%20Art",
+                    "entity_name": "Metropolitan Museum of Art",
+                    "link_section": null,
+                    "text": "Metropolitan Museum of Art"
+                },
+                {
+                    "text": " in New York city. Among those critical of the origins of Squiers' donation to the Metropolitan Museum was the New Outlook magazine, which claimed the \"collection of fine Chinese porcelain [was] known to have been looted from palaces in Peking,\" and Life magazine: \"The coyness of the Metropolitan Museum's attitude towards looted treasures of Chinese art affords matter for contemplation.\" In response to criticism that this collection was the result of looting, both the New York Metropolitan Museum of Art and the U.S. State department officials were sceptical of accusations that this was a large collection of loot. His collection was on loan to the "
+                },
+                {
+                    "entity": "enwiki:Smithsonian%20Institution",
+                    "entity_name": "Smithsonian Institution",
+                    "link_section": null,
+                    "text": "United States National Museum"
+                },
+                {
+                    "text": " (better known as "
+                },
+                {
+                    "entity": "enwiki:Smithsonian%20Institution",
+                    "entity_name": "Smithsonian Institution",
+                    "link_section": null,
+                    "text": "The Smithsonian Institution"
+                },
+                {
+                    "text": ") in Washington D.C. from 1907 to 1908. After his death, his collection was sold at auction in New York in April 1912, and realised over $48,000. In 2003, Squiers was still being criticised. Sandy English wrote:"
+                }
+            ],
+            "para_id": "919237e1c316f57b01996d7ac790154b42212e28"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Deepak gets hired as driver for a security bureau with a monthly pay of 15,000 Rs. Deepak's senior realizes that he is far too innocent and does various favours for him in order to gain his trust to loot the security agency. Deepak is extremely against the theft when the senior first mentions it. Then the senior blackmails him saying that a previously stolen box is currently kept in Deepak's house. Feeling cornered , Deepak agrees to the risky plan of stealing the keys for this box when suddenly they are both robbed again and the senior is killed. Meanwhile Rakhi loses her job tragically. Deepak finds the box stolen by his senior in his house and comes up with a plan to ensure Rakhi and Mahi's safe return to their village."
+                }
+            ],
+            "para_id": "73a07fd72af40d2acf4afa7ceb06243046dd95ca"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Design",
+            "heading_id": "enwiki:Loot%20box/Design"
+        },
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Loot%20box/History"
+        },
+        {
+            "heading": "Criticism",
+            "heading_id": "enwiki:Loot%20box/Criticism"
+        },
+        {
+            "heading": "Regulation and legislation",
+            "heading_id": "enwiki:Loot%20box/Regulation%20and%20legislation"
+        },
+        {
+            "heading": "Self-regulation",
+            "heading_id": "enwiki:Loot%20box/Self-regulation"
+        },
+        {
+            "heading": "Impact",
+            "heading_id": "enwiki:Loot%20box/Impact"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Loot%20box",
+    "title": "Loot box"
+}

@@ -1,0 +1,3110 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 1,
+            "rank_score": 0.9642037513682924,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 2,
+            "rank_score": 0.9223599669030734,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 3,
+            "rank_score": 0.9212273480087602,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 4,
+            "rank_score": 0.908942208033738,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 5,
+            "rank_score": 0.8810879632117743,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 6,
+            "rank_score": 0.8782953204742425,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 7,
+            "rank_score": 0.8636631948577576,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "5277d2f93cbb0708f3810b373731cba5b97f9d4c",
+            "rank": 8,
+            "rank_score": 0.8584828759131305,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 9,
+            "rank_score": 0.8545277258966109,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 10,
+            "rank_score": 0.8440303684106167,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 11,
+            "rank_score": 0.8429310102623842,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 12,
+            "rank_score": 0.8281394433700797,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 13,
+            "rank_score": 0.8177760086170331,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 14,
+            "rank_score": 0.8173636136757958,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 15,
+            "rank_score": 0.8066024949884747,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 16,
+            "rank_score": 0.786999957377655,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 17,
+            "rank_score": 0.7840569505177275,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 18,
+            "rank_score": 0.7722127888313717,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "d64e9e7ef78514e12b2489022d2f2ff00d22dac2",
+            "rank": 19,
+            "rank_score": 0.7714838649182443,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "6500d764ecaa9375203beb48d0e606adfda106ff",
+            "rank": 20,
+            "rank_score": 0.770076588010459,
+            "section_path": "enwiki:Eggnog/History"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 1,
+            "rank_score": 0.9659377246673595,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 2,
+            "rank_score": 0.9464581876533522,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 3,
+            "rank_score": 0.9139976721983367,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 4,
+            "rank_score": 0.8849255864714194,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 5,
+            "rank_score": 0.8837558325166449,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 6,
+            "rank_score": 0.874780955071017,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 7,
+            "rank_score": 0.8470880039978493,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 8,
+            "rank_score": 0.8196013981352321,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 9,
+            "rank_score": 0.808229039640048,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "bcd45439e0b46a991eca0d3f2d7e76415461ec97",
+            "rank": 10,
+            "rank_score": 0.7861347709913384,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 11,
+            "rank_score": 0.7807171911241563,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "29cec86eb2c1bb081a07fff17b7480f3794c186d",
+            "rank": 12,
+            "rank_score": 0.7771914102685169,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 13,
+            "rank_score": 0.7731690942915932,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 14,
+            "rank_score": 0.7728753633866638,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 15,
+            "rank_score": 0.7697243240460785,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 16,
+            "rank_score": 0.7567560864018068,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "3e2ce59984af4d14e4701d03ee8782f8d7133412",
+            "rank": 17,
+            "rank_score": 0.7522558802953595,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 18,
+            "rank_score": 0.7444615770960239,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 19,
+            "rank_score": 0.7422671727755618,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 20,
+            "rank_score": 0.7360904436527318,
+            "section_path": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 1,
+            "rank_score": 0.9404672454788578,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 2,
+            "rank_score": 0.9052472749273164,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 3,
+            "rank_score": 0.8954263592644102,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 4,
+            "rank_score": 0.8888747999106511,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 5,
+            "rank_score": 0.8613834392706874,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 6,
+            "rank_score": 0.8455291378892844,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 7,
+            "rank_score": 0.8357487619335369,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 8,
+            "rank_score": 0.8261672899003623,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 9,
+            "rank_score": 0.8219539511098376,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 10,
+            "rank_score": 0.8182911470899921,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 11,
+            "rank_score": 0.8023735103752683,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 12,
+            "rank_score": 0.8014709821647491,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "a2751dd8086cfcb8eba0f515c3730e8c2e24daa6",
+            "rank": 13,
+            "rank_score": 0.8005781770301929,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 14,
+            "rank_score": 0.7855177759110946,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 15,
+            "rank_score": 0.7724033314607218,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 16,
+            "rank_score": 0.771662196435546,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 17,
+            "rank_score": 0.7698941193978016,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "36dafe331f4e1fbecee37228a96fa604c8fe1dbb",
+            "rank": 18,
+            "rank_score": 0.759034373654912,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 19,
+            "rank_score": 0.7582901823528931,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "5277d2f93cbb0708f3810b373731cba5b97f9d4c",
+            "rank": 20,
+            "rank_score": 0.7566177601698609,
+            "section_path": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 1,
+            "rank_score": 0.9388440835153073,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 2,
+            "rank_score": 0.9073533570310409,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 3,
+            "rank_score": 0.9024708047544853,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 4,
+            "rank_score": 0.8905886178166585,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "3756b8c9ea6c31d122387dca4ffea3e1261f8472",
+            "rank": 5,
+            "rank_score": 0.8819962734234463,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 6,
+            "rank_score": 0.8609060429613821,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 7,
+            "rank_score": 0.8471760152574563,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 8,
+            "rank_score": 0.8389159514408546,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 9,
+            "rank_score": 0.8324496069797025,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 10,
+            "rank_score": 0.8266666640774336,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 11,
+            "rank_score": 0.8188407992471803,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 12,
+            "rank_score": 0.807331207385652,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 13,
+            "rank_score": 0.8037233831176461,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 14,
+            "rank_score": 0.788245051770266,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "35a6e375f0bec1474c46bde1abf7e5d6aef8d9c1",
+            "rank": 15,
+            "rank_score": 0.7864018285741321,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 16,
+            "rank_score": 0.7780514274041711,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 17,
+            "rank_score": 0.7770303565456406,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 18,
+            "rank_score": 0.7730812545866201,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "36dafe331f4e1fbecee37228a96fa604c8fe1dbb",
+            "rank": 19,
+            "rank_score": 0.7636713612870225,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 20,
+            "rank_score": 0.7635733187811741,
+            "section_path": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 1,
+            "rank_score": 0.9616565302294913,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 2,
+            "rank_score": 0.9212821155270114,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 3,
+            "rank_score": 0.9203606594004101,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 4,
+            "rank_score": 0.9069805512048301,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 5,
+            "rank_score": 0.877883857932058,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 6,
+            "rank_score": 0.8632445901782564,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 7,
+            "rank_score": 0.8538640164497115,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 8,
+            "rank_score": 0.8426501617168098,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 9,
+            "rank_score": 0.8407659747172842,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 10,
+            "rank_score": 0.8306685269937374,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 11,
+            "rank_score": 0.8167297451021528,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 12,
+            "rank_score": 0.8157191038373921,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 13,
+            "rank_score": 0.8053299879597015,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 14,
+            "rank_score": 0.7952908192501013,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 15,
+            "rank_score": 0.7868822692127659,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 16,
+            "rank_score": 0.7837966603707353,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 17,
+            "rank_score": 0.7735468513702299,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "36dafe331f4e1fbecee37228a96fa604c8fe1dbb",
+            "rank": 18,
+            "rank_score": 0.7717267532320573,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "5277d2f93cbb0708f3810b373731cba5b97f9d4c",
+            "rank": 19,
+            "rank_score": 0.7710729793275989,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "6500d764ecaa9375203beb48d0e606adfda106ff",
+            "rank": 20,
+            "rank_score": 0.7698390045110767,
+            "section_path": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 1,
+            "rank_score": 0.9854122040319455,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "3ded4f4a6cab80f2f7c24ffcfbb31477898f5ec9",
+            "rank": 2,
+            "rank_score": 0.8228937096099667,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "afdb5922e8cf74b0b88ba5e783c93614bf2ec015",
+            "rank": 3,
+            "rank_score": 0.8120898871317074,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "8a06f07c1778436cef591e5faadc57b07d4014ab",
+            "rank": 4,
+            "rank_score": 0.8063349088621501,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "03625c3b5e7efe9a47f821ed977e09429ca3e6a7",
+            "rank": 5,
+            "rank_score": 0.8055117427242241,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "be07b0bff0877255d551bb165a1883110e65ee1c",
+            "rank": 6,
+            "rank_score": 0.7998749466862737,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 7,
+            "rank_score": 0.7776287615939061,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 8,
+            "rank_score": 0.7642223748117248,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "dc71563eb68303d87947529e6614b3b0ca39145d",
+            "rank": 9,
+            "rank_score": 0.7585893966287346,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 10,
+            "rank_score": 0.7302791888586514,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "1a33a40736fcb89fd3b5a188b9ff6594c87f9a75",
+            "rank": 11,
+            "rank_score": 0.7222154294412888,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 12,
+            "rank_score": 0.6928454141741848,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 13,
+            "rank_score": 0.6868107594682943,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 14,
+            "rank_score": 0.6817415604272075,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 15,
+            "rank_score": 0.6795312832126111,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 16,
+            "rank_score": 0.6649198291156497,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 17,
+            "rank_score": 0.656112270781273,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 18,
+            "rank_score": 0.6340721816585649,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 19,
+            "rank_score": 0.6335268603948585,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 20,
+            "rank_score": 0.629393114089992,
+            "section_path": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 1,
+            "rank_score": 0.9678628465511445,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 2,
+            "rank_score": 0.9306614585752689,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 3,
+            "rank_score": 0.9211008801244037,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 4,
+            "rank_score": 0.9153914093849206,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 5,
+            "rank_score": 0.8877317985990165,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 6,
+            "rank_score": 0.8693076633254738,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 7,
+            "rank_score": 0.8595822804000719,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 8,
+            "rank_score": 0.8500369036077329,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 9,
+            "rank_score": 0.8462582222891527,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 10,
+            "rank_score": 0.8358018513157474,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "3756b8c9ea6c31d122387dca4ffea3e1261f8472",
+            "rank": 11,
+            "rank_score": 0.8291374187917053,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 12,
+            "rank_score": 0.825864450105902,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 13,
+            "rank_score": 0.8245294675564425,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 14,
+            "rank_score": 0.8081704471681125,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c",
+            "rank": 15,
+            "rank_score": 0.79839946898819,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "67f1db1adfb812c5b233e176f2cc5890a824b55a",
+            "rank": 16,
+            "rank_score": 0.7949837931702137,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52",
+            "rank": 17,
+            "rank_score": 0.7945104138204518,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48",
+            "rank": 18,
+            "rank_score": 0.7926181385801894,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f",
+            "rank": 19,
+            "rank_score": 0.7814424546962135,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "5277d2f93cbb0708f3810b373731cba5b97f9d4c",
+            "rank": 20,
+            "rank_score": 0.7786832040243189,
+            "section_path": "enwiki:Eggnog/Cited%20books"
+        },
+        {
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d",
+            "rank": 1,
+            "rank_score": 0.9777290386905397,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9",
+            "rank": 2,
+            "rank_score": 0.9315306422182541,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "b6426967860ec4365c48c8af9a3aff7cc787e600",
+            "rank": 3,
+            "rank_score": 0.8663257429779202,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "2255274e34c0199b23f1f287b052e62f72675859",
+            "rank": 4,
+            "rank_score": 0.8288487591092577,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "03625c3b5e7efe9a47f821ed977e09429ca3e6a7",
+            "rank": 5,
+            "rank_score": 0.8259980614361011,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "69d8cff9723e88afcfb861b814bd4b32fe35c8e7",
+            "rank": 6,
+            "rank_score": 0.7946620552253518,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd",
+            "rank": 7,
+            "rank_score": 0.7678460133130935,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9",
+            "rank": 8,
+            "rank_score": 0.7532966450986267,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36",
+            "rank": 9,
+            "rank_score": 0.7440160762421013,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f",
+            "rank": 10,
+            "rank_score": 0.726521972986121,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae",
+            "rank": 11,
+            "rank_score": 0.721553203756542,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc",
+            "rank": 12,
+            "rank_score": 0.703195868420157,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5",
+            "rank": 13,
+            "rank_score": 0.67929265105994,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "4272cfb4499771b32dd632ea2cbd450a9dd62ebe",
+            "rank": 14,
+            "rank_score": 0.6753885778402765,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e",
+            "rank": 15,
+            "rank_score": 0.6643644205695076,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "f5b3200de1c8fef27866dce442dcad3b31e2883f",
+            "rank": 16,
+            "rank_score": 0.6607313873006819,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd",
+            "rank": 17,
+            "rank_score": 0.6598487461198643,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "e69696be0021137ece3edaef3e7bb2c4950fcf23",
+            "rank": 18,
+            "rank_score": 0.648503594119904,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849",
+            "rank": 19,
+            "rank_score": 0.6455261511262317,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754",
+            "rank": 20,
+            "rank_score": 0.6444642619899901,
+            "section_path": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "Eggnog is traditionally consumed throughout "
+                },
+                {
+                    "entity": "enwiki:Canada",
+                    "entity_name": "Canada",
+                    "link_section": null,
+                    "text": "Canada"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:United%20States",
+                    "entity_name": "United States",
+                    "link_section": null,
+                    "text": "United States"
+                },
+                {
+                    "text": " at "
+                },
+                {
+                    "entity": "enwiki:Christmas",
+                    "entity_name": "Christmas",
+                    "link_section": null,
+                    "text": "Christmas"
+                },
+                {
+                    "text": " every year, often from "
+                },
+                {
+                    "entity": "enwiki:Thanksgiving%20(United%20States)",
+                    "entity_name": "Thanksgiving (United States)",
+                    "link_section": null,
+                    "text": "American Thanksgiving"
+                },
+                {
+                    "text": " through the end of the Christmas season. A variety called "
+                },
+                {
+                    "entity": "enwiki:Ponche%20crema",
+                    "entity_name": "Ponche crema",
+                    "link_section": null,
+                    "text": "Ponche Crema"
+                },
+                {
+                    "text": " has been made and consumed in "
+                },
+                {
+                    "entity": "enwiki:Venezuela",
+                    "entity_name": "Venezuela",
+                    "link_section": null,
+                    "text": "Venezuela"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Trinidad",
+                    "entity_name": "Trinidad",
+                    "link_section": null,
+                    "text": "Trinidad"
+                },
+                {
+                    "text": " since the 1900s, also in the Christmas season. During this period commercially prepared eggnog is sold in grocery stores in these countries. Eggnog is also often homemade. Distilled spirits are sometimes added to both commercially prepared eggnog and homemade eggnog. Eggnog or eggnog flavoring may also be used in other "
+                },
+                {
+                    "entity": "enwiki:Drink",
+                    "entity_name": "Drink",
+                    "link_section": null,
+                    "text": "drink"
+                },
+                {
+                    "text": "s, such as "
+                },
+                {
+                    "entity": "enwiki:Coffee",
+                    "entity_name": "Coffee",
+                    "link_section": null,
+                    "text": "coffee"
+                },
+                {
+                    "text": " (e.g. an \"eggnog latte\" "
+                },
+                {
+                    "entity": "enwiki:Espresso",
+                    "entity_name": "Espresso",
+                    "link_section": null,
+                    "text": "espresso"
+                },
+                {
+                    "text": " drink) and "
+                },
+                {
+                    "entity": "enwiki:Tea",
+                    "entity_name": "Tea",
+                    "link_section": null,
+                    "text": "tea"
+                },
+                {
+                    "text": ", or to "
+                },
+                {
+                    "entity": "enwiki:Dessert",
+                    "entity_name": "Dessert",
+                    "link_section": null,
+                    "text": "dessert"
+                },
+                {
+                    "text": " foods such as egg-"
+                },
+                {
+                    "entity": "enwiki:Custard",
+                    "entity_name": "Custard",
+                    "link_section": null,
+                    "text": "custard"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Pudding",
+                    "entity_name": "Pudding",
+                    "link_section": null,
+                    "text": "pudding"
+                },
+                {
+                    "text": "s or eggnog-flavored "
+                },
+                {
+                    "entity": "enwiki:Ice%20cream",
+                    "entity_name": "Ice cream",
+                    "link_section": null,
+                    "text": "ice cream"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "45f4822af5c0285172edccd89c61ef364bd702bd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Eggnog \"...seems to have been popular on both sides of the Atlantic at that time.  In the American South, eggnog is made with "
+                },
+                {
+                    "entity": "enwiki:Bourbon%20whiskey",
+                    "entity_name": "Bourbon whiskey",
+                    "link_section": null,
+                    "text": "bourbon"
+                },
+                {
+                    "text": ". Eggnog is called \"coquito\" in Puerto Rico, where rum and fresh coconut juice or coconut milk are used in its preparation. Mexican eggnog, also known as \"rompope\", was developed in Santa Clara. It differs from regular eggnog in its use of Mexican cinnamon and rum or grain alcohol.  In Peru, eggnog is called \"biblia con pisco\", and it is made with a Peruvian pomace brandy called pisco.\""
+                }
+            ],
+            "para_id": "771333a4ee503199516fea88d013ff4824f81c36"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Traditional eggnog is made of milk or cream, sugar, raw eggs, an alcoholic spirit, and "
+                },
+                {
+                    "entity": "enwiki:Spice",
+                    "entity_name": "Spice",
+                    "link_section": null,
+                    "text": "spice"
+                },
+                {
+                    "text": "s, often vanilla or "
+                },
+                {
+                    "entity": "enwiki:Nutmeg",
+                    "entity_name": "Nutmeg",
+                    "link_section": null,
+                    "text": "nutmeg"
+                },
+                {
+                    "text": ". In some recipes, "
+                },
+                {
+                    "entity": "enwiki:Vanilla",
+                    "entity_name": "Vanilla",
+                    "link_section": null,
+                    "text": "vanilla"
+                },
+                {
+                    "text": " flavour is added. Some modern commercial eggnogs add "
+                },
+                {
+                    "entity": "enwiki:Gelatin",
+                    "entity_name": "Gelatin",
+                    "link_section": null,
+                    "text": "gelatin"
+                },
+                {
+                    "text": " and other thickeners, with less egg and cream. There are variations in ingredients, and toppings may be added, such as grated nutmeg or ground cinnamon. Eggnog can be made commercially, as well as at home. Ready-made eggnog versions are seasonally available with different spirits, or without alcohol, to be drunk as bought or used as \"mixes\" with all the ingredients except the liquor, to be added as desired. Traditional eggnog has a significant fat content, due to the use of cream, and a high sugar content; low-fat and sugar-free formulations are available using "
+                },
+                {
+                    "entity": "enwiki:Milk",
+                    "entity_name": "Milk",
+                    "link_section": "Varieties and brands",
+                    "text": "skimmed or low fat milk"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "172e93195e7e1c0c145730b4a8cb6512ba871b7d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Most homemade eggnog recipes have historically included raw eggs. While the alcohol added to many homemade eggnogs is a "
+                },
+                {
+                    "entity": "enwiki:Bactericide",
+                    "entity_name": "Bactericide",
+                    "link_section": null,
+                    "text": "bactericide"
+                },
+                {
+                    "text": ", eggnog freshly made from raw eggs that are infected with "
+                },
+                {
+                    "entity": "enwiki:Salmonella",
+                    "entity_name": "Salmonella",
+                    "link_section": null,
+                    "text": "salmonella"
+                },
+                {
+                    "text": " and not heated can cause "
+                },
+                {
+                    "entity": "enwiki:Foodborne%20illness",
+                    "entity_name": "Foodborne illness",
+                    "link_section": null,
+                    "text": "food poisoning"
+                },
+                {
+                    "text": ". In 1982 most of the residents and staff of a nursing home in the U.S. became ill with "
+                },
+                {
+                    "entity": "enwiki:Salmonellosis",
+                    "entity_name": "Salmonellosis",
+                    "link_section": null,
+                    "text": "salmonellosis"
+                },
+                {
+                    "text": ", and four died. The cause was almost certainly an eggnog made on the spur of the moment, with some cases caused in a secondary outbreak caused by food being handled later by people with contaminated hands. A later publication of the "
+                },
+                {
+                    "entity": "enwiki:Food%20and%20Drug%20Administration",
+                    "entity_name": "Food and Drug Administration",
+                    "link_section": null,
+                    "text": "U.S. Food and Drug Administration"
+                },
+                {
+                    "text": " (FDA) stated that the alcohol in eggnog is not sufficient to sterilize contaminated eggs. Using commercial pasteurized eggs or heating the milk-egg mixture sufficiently can make the drink safe; one recipe calls for heating the mixture gently, without boiling, until it thickens enough to \"coat the back of a spoon.\""
+                }
+            ],
+            "para_id": "b79f32ac6be661dcea2ee769491665341adc152f"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Time%20(magazine)",
+                    "entity_name": "Time (magazine)",
+                    "link_section": null,
+                    "text": "TIME"
+                },
+                {
+                    "text": " magazine states that individuals should be aware of the alcohol content of eggnog, from a responsible drinking perspective. CNN states that some 19th century American eggnog recipes called for significant amounts of alcohol; one recipe \"calls for three dozen eggs, half a gallon of domestic brandy, and another half-pint of French brandy.\" The high alcohol content of \"...colonial eggnog inevitably led to problems. In 19th-century Baltimore, it was a custom for young men of the town to go from house to house on New Year\u2019s Day, toasting their hosts in eggnog along the way. The challenge: to finish one\u2019s rounds still standing.\""
+                }
+            ],
+            "para_id": "8b06283a1195d9849f9c3613b61d9e25f54990dc"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The history of non-dairy eggnogs goes back to at least 1899 when Almeda Lambert, in her Guide for Nut Cookery, gave a recipe for \"Egg Nog\" made using coconut cream, eggs, and sugar. In 1973, Eunice Farmilant, in The Natural Foods Sweet-Tooth Cookbook, gave a more modernnon-dairy eggnog recipe using 3 eggs separated, 2 tablespoons of barley malt extract or "
+                },
+                {
+                    "entity": "enwiki:Amazake",
+                    "entity_name": "Amazake",
+                    "link_section": null,
+                    "text": "Amasake"
+                },
+                {
+                    "text": " syrup, 4 cups of chilled soy milk, 1 teaspoon of "
+                },
+                {
+                    "entity": "enwiki:Vanilla%20extract",
+                    "entity_name": "Vanilla extract",
+                    "link_section": null,
+                    "text": "vanilla extract"
+                },
+                {
+                    "text": ", and nutmeg, (p. 138-39)"
+                }
+            ],
+            "para_id": "c199e407d118fb948d03c955e218d75e305fad52"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "German eggnog, called \"biersuppe\", is made with beer. \"Eierpunsch is a German version of eggnog made with white wine\", eggs, sugar, cloves, tea, lemon or lime juice and cinnamon. Another recipe dating from 1904 calls for eggs, lemon juice, sugar, white wine, water and rum. In Iceland, eggnog \"...is served hot as a dessert.\""
+                }
+            ],
+            "para_id": "a3a23cddb9597cc80fad9a2b9d68cc28d68676e9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Educational programs focus on history and are geared toward children and adults. The museum hosts lectures, special celebrations, summer camps, and open houses. New exhibits and displays are changed out often, giving fresh interpretations of the home. Christmas time is especially celebrated with special events and Eggnog Thursdays when the public is invited to enjoy eggnog and the McFaddin-recipe tea-cakes before touring the first floor of the house in the December evenings."
+                }
+            ],
+            "para_id": "5277d2f93cbb0708f3810b373731cba5b97f9d4c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "For concerns about the safety of selling products made from raw eggs and milk, the U.S. FDA has changed or altered the definition of eggnog a number of times towards artificial replacements for the large number of eggs traditionally used. FDA regulations (as of January 2015) require eggnog to contain at least 1% egg yolk solids and at least 8.25% milk solids. Some recipes for homemade eggnog call for egg yolks to be cooked with milk into a "
+                },
+                {
+                    "entity": "enwiki:Custard",
+                    "entity_name": "Custard",
+                    "link_section": null,
+                    "text": "custard"
+                },
+                {
+                    "text": " to avoid potential hazards from raw eggs."
+                }
+            ],
+            "para_id": "94b31c913185e6368871fa3b62654d88a54da0a5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Dutch "
+                },
+                {
+                    "entity": "enwiki:Advocaat",
+                    "entity_name": "Advocaat",
+                    "link_section": null,
+                    "text": "advocaat"
+                },
+                {
+                    "text": " with around 20% alcohol, long sold in bottles, is essentially an eggnog. Under current U.S. law, commercial products sold as eggnog are permitted to contain milk, sugar, "
+                },
+                {
+                    "entity": "enwiki:Modified%20milk%20ingredients",
+                    "entity_name": "Modified milk ingredients",
+                    "link_section": null,
+                    "text": "modified milk ingredients"
+                },
+                {
+                    "text": ", glucose-fructose, water, "
+                },
+                {
+                    "entity": "enwiki:Carrageenan",
+                    "entity_name": "Carrageenan",
+                    "link_section": null,
+                    "text": "carrageenan"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Guar%20gum",
+                    "entity_name": "Guar gum",
+                    "link_section": null,
+                    "text": "guar gum"
+                },
+                {
+                    "text": ", natural and artificial "
+                },
+                {
+                    "entity": "enwiki:Flavor",
+                    "entity_name": "Flavor",
+                    "link_section": null,
+                    "text": "flavoring"
+                },
+                {
+                    "text": "s, spices, "
+                },
+                {
+                    "entity": "enwiki:Monoglyceride",
+                    "entity_name": "Monoglyceride",
+                    "link_section": null,
+                    "text": "monoglycerides"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Food%20coloring",
+                    "entity_name": "Food coloring",
+                    "link_section": null,
+                    "text": "colorings"
+                },
+                {
+                    "text": ". Ingredients vary significantly between variants. Alcohol used in different national and regional versions of eggnog include "
+                },
+                {
+                    "entity": "enwiki:Brandy",
+                    "entity_name": "Brandy",
+                    "link_section": null,
+                    "text": "brandy"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Cognac",
+                    "entity_name": "Cognac",
+                    "link_section": null,
+                    "text": "cognac"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Bourbon%20whiskey",
+                    "entity_name": "Bourbon whiskey",
+                    "link_section": null,
+                    "text": "bourbon"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Whisky",
+                    "entity_name": "Whisky",
+                    "link_section": null,
+                    "text": "whiskey"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Sherry",
+                    "entity_name": "Sherry",
+                    "link_section": null,
+                    "text": "sherry"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Ethanol",
+                    "entity_name": "Ethanol",
+                    "link_section": null,
+                    "text": "grain alcohol"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "9ead9c2bfd51ce1c909bbb9d1b6e5e993f0fd8c9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "However, aged alcoholic eggnog becomes sterilized even if made with contaminated eggs. Aging alcoholic eggnog\u2014sometimes for as long as a year\u2014has been said to improve its flavor significantly, and also destroys pathogens. The "
+                },
+                {
+                    "entity": "enwiki:Rockefeller%20University",
+                    "entity_name": "Rockefeller University",
+                    "link_section": null,
+                    "text": "Rockefeller University"
+                },
+                {
+                    "text": " Laboratory of Bacterial Pathogenesis and Immunology carried out an experiment in 2010 where "
+                },
+                {
+                    "entity": "enwiki:Salmonella",
+                    "entity_name": "Salmonella",
+                    "link_section": null,
+                    "text": "salmonella"
+                },
+                {
+                    "text": " was added to a strong eggnog which was refrigerated and stored; the beverage still had dangerous levels of salmonella a week later, but it was all gone within three weeks. A concentration of at least 20% of alcohol (about the same amounts of alcoholic spirits and milk or cream), and refrigeration are recommended for safety."
+                }
+            ],
+            "para_id": "158b7834d57902e904fe4922321b5057a6b3802e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The most notable case of alcohol problems associated with the drink was the "
+                },
+                {
+                    "entity": "enwiki:Eggnog%20Riot",
+                    "entity_name": "Eggnog Riot",
+                    "link_section": null,
+                    "text": "Eggnog Riot"
+                },
+                {
+                    "text": " at the "
+                },
+                {
+                    "entity": "enwiki:United%20States%20Military%20Academy",
+                    "entity_name": "United States Military Academy",
+                    "link_section": null,
+                    "text": "United States Military Academy"
+                },
+                {
+                    "text": " in "
+                },
+                {
+                    "entity": "enwiki:West%20Point,%20New%20York",
+                    "entity_name": "West Point, New York",
+                    "link_section": null,
+                    "text": "West Point, New York"
+                },
+                {
+                    "text": ", on 23\u201325 December 1826. Alcohol possession at the academy was prohibited, along with "
+                },
+                {
+                    "entity": "enwiki:Alcohol%20intoxication",
+                    "entity_name": "Alcohol intoxication",
+                    "link_section": null,
+                    "text": "drunkenness"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Substance%20intoxication",
+                    "entity_name": "Substance intoxication",
+                    "link_section": null,
+                    "text": "intoxication"
+                },
+                {
+                    "text": ", both of which could lead to "
+                },
+                {
+                    "entity": "enwiki:Expulsion%20(education)",
+                    "entity_name": "Expulsion (education)",
+                    "link_section": null,
+                    "text": "expulsion"
+                },
+                {
+                    "text": ". By 1826, concern had been raised that drinking was starting to get out of hand among the 260 cadets at the academy. The cadets were informed that, due to the alcohol prohibition on the site, their Christmas eggnog would be alcohol-free, prompting the decision by cadets to smuggle liquor into the academy. Gallons of "
+                },
+                {
+                    "entity": "enwiki:Whisky",
+                    "entity_name": "Whisky",
+                    "link_section": null,
+                    "text": "whiskey"
+                },
+                {
+                    "text": " were smuggled into the barracks to make eggnog for a Christmas Day party. This led to \"...a drunken free-for-all. Windows, furniture, and crockery were smashed; banisters were torn from walls, fights broke out. One eggnog-addled cadet tried, but failed, to shoot his commanding officer.\" The incident resulted in the "
+                },
+                {
+                    "entity": "enwiki:Court-martial",
+                    "entity_name": "Court-martial",
+                    "link_section": null,
+                    "text": "court-martial"
+                },
+                {
+                    "text": "ing of twenty cadets and one enlisted soldier. Neither the young "
+                },
+                {
+                    "entity": "enwiki:Jefferson%20Davis",
+                    "entity_name": "Jefferson Davis",
+                    "link_section": null,
+                    "text": "Jefferson Davis"
+                },
+                {
+                    "text": " nor "
+                },
+                {
+                    "entity": "enwiki:Robert%20E.%20Lee",
+                    "entity_name": "Robert E. Lee",
+                    "link_section": null,
+                    "text": "Robert E. Lee"
+                },
+                {
+                    "text": ", who were in attendance, was found guilty of any offences or expelled."
+                }
+            ],
+            "para_id": "9a39fb46661550c643a20fbe3602b949da7466bd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Anna Brun noticed Marie taking white powder from her malachite box and stirring it into the eggnog. When asked, Marie said it was \"orange-blossom sugar\". But Anna's suspicions were aroused when she noticed a few white flakes floating on the surface of the eggnog after the patient took a few sips. She showed the glass to Dr. Mass\u00e9nat; he tasted the eggnog and experienced a burning sensation, but attributed the flakes to some ceiling plaster that may have fallen in the glass. Anna was not convinced; she put the rest of the eggnog in a cupboard and kept a close eye on Marie. She saw Marie stir more white powder into some soup for Charles. Again, Charles felt violently ill after a few sips. Anna took the cup of soup away and mustered enough courage to tell Charles's relatives of her suspicions."
+                }
+            ],
+            "para_id": "d0cb1246711f7d6640e90080667fc0214f390849"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Eggnog Latte: It is a Starbucks Christmas classic. Made with Real eggnog, mixed with a bit of milk, espresso, and topped with nutmeg on top. Also served in the United Kingdom, Canada and Ireland.  It was first introduced in 1986."
+                }
+            ],
+            "para_id": "b3aefba47a5d18008f2e19d996647d70086d5eae"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The large number of small dairy farms in America in the early 19th century made milk, cream, and eggnog more accessible to the American public.  "
+                },
+                {
+                    "entity": "enwiki:George%20Washington",
+                    "entity_name": "George Washington",
+                    "link_section": null,
+                    "text": "George Washington"
+                },
+                {
+                    "text": " drank eggnog that contained not only "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": ", but also significant amounts of "
+                },
+                {
+                    "entity": "enwiki:Sherry",
+                    "entity_name": "Sherry",
+                    "link_section": null,
+                    "text": "sherry"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Brandy",
+                    "entity_name": "Brandy",
+                    "link_section": null,
+                    "text": "brandy"
+                },
+                {
+                    "text": ", and whiskey."
+                }
+            ],
+            "para_id": "da7c304131420a1c7a740a8af40ab545837c5754"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The day before admission to hospital, the proportion of carbohydrate in the diet may be decreased and the patient begins fasting after his or her evening meal. On admission, only calorie- and caffeine-free fluids are allowed until dinner, which consists of \""
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": "\" restricted to one-third of the typical calories for a meal. The following breakfast and lunch are similar, and on the second day, the \"eggnog\" dinner is increased to two-thirds of a typical meal's caloric content. By the third day, dinner contains the full calorie quota and is a standard ketogenic meal (not \"eggnog\"). After a ketogenic breakfast on the fourth day, the patient is discharged. Where possible, the patient's current medicines are changed to carbohydrate-free formulations."
+                }
+            ],
+            "para_id": "ea85496d51b85c65d7f056ec1d433fcd4ca5e17c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The eggNOG database is a database of biological information hosted by the "
+                },
+                {
+                    "entity": "enwiki:European%20Molecular%20Biology%20Laboratory",
+                    "entity_name": "European Molecular Biology Laboratory",
+                    "link_section": null,
+                    "text": "EMBL"
+                },
+                {
+                    "text": ". It is based on the original idea of COGs (clusters of orthologous groups) and expands that idea to non-supervised "
+                },
+                {
+                    "entity": "enwiki:Homology%20(biology)",
+                    "entity_name": "Homology (biology)",
+                    "link_section": "Orthology",
+                    "text": "ortholog"
+                },
+                {
+                    "text": "ous groups constructed from  numerous organisms. The database was created in 2007 and updated to version 4.5 in 2015. eggNOG stands for "
+                }
+            ],
+            "para_id": "e7f93021a613eb6ca76d5819bb848d37c36b7f48"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 1981, Grain Country of Los Angeles, California, introduced Grain Nog, the earliest non-dairy and vegan eggnog. Based on amazake (a traditional Japanese fermented rice beverage) and containing no eggs, it was available in plain, strawberry, and carob flavors. Also in 1981, Redwood Valley Soyfoods Unlimited (California) introduced \"Soynog\", the earliest known soy-based non-dairy and vegan eggnog based on soy milk and "
+                },
+                {
+                    "entity": "enwiki:Tofu",
+                    "entity_name": "Tofu",
+                    "link_section": null,
+                    "text": "tofu"
+                },
+                {
+                    "text": " (added for thickness). It was renamed Lite Nog in 1982 and Tofu Nog in 1985."
+                }
+            ],
+            "para_id": "6c4ddf4c6153bd1f39b84d45024f1c7e3177588f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The first example of the term \"eggnog\" was in 1775, when Maryland clergyman and philologist Jonathan Boucher wrote a poem about the drink which was not published until 30 years after his death: \"Fog-drams i' th' morn, or (better still) egg-nogg, / At night hot-suppings, and at mid-day, grogg, / My palate can regale...\" The first printed use of the term was in 1788 in the New-Jersey Journal of March 26, which referred to a young man drinking a glass of eggnog."
+                }
+            ],
+            "para_id": "d64e9e7ef78514e12b2489022d2f2ff00d22dac2"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A yet another variation, \"egg milk punch\", is actually "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "6500d764ecaa9375203beb48d0e606adfda106ff"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In Britain, the drink was popular mainly among the aristocracy. Milk, eggs, and "
+                },
+                {
+                    "entity": "enwiki:Sherry",
+                    "entity_name": "Sherry",
+                    "link_section": null,
+                    "text": "sherry"
+                },
+                {
+                    "text": " were foods of the wealthy, so eggnog was often used in "
+                },
+                {
+                    "entity": "enwiki:Toast",
+                    "entity_name": "Toast",
+                    "link_section": null,
+                    "text": "toast"
+                },
+                {
+                    "text": "s to prosperity and good health.\" Those who could get milk and eggs mixed it with "
+                },
+                {
+                    "entity": "enwiki:Brandy",
+                    "entity_name": "Brandy",
+                    "link_section": null,
+                    "text": "brandy"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Madeira%20wine",
+                    "entity_name": "Madeira wine",
+                    "link_section": null,
+                    "text": "Madeira"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Sherry",
+                    "entity_name": "Sherry",
+                    "link_section": null,
+                    "text": "sherry"
+                },
+                {
+                    "text": " to make a drink similar to modern alcoholic egg nog. The drink is described in the 1932 novel "
+                },
+                {
+                    "entity": "enwiki:Cold%20Comfort%20Farm",
+                    "entity_name": "Cold Comfort Farm",
+                    "link_section": null,
+                    "text": "Cold Comfort Farm"
+                },
+                {
+                    "text": " (chapter 21) as a Hell's Angel, made with an egg, two ounces of brandy, a teaspoonful of cream, and some chips of ice, where it is served as breakfast."
+                }
+            ],
+            "para_id": "bcd45439e0b46a991eca0d3f2d7e76415461ec97"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to the U.S. Department of Agriculture, in-shell pasteurized eggs may be used safely without cooking. For example, they may safely be consumed raw (as in raw cookie dough or "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": ") or in undercooked forms (such as a sunny-side up egg).  Many food service and health care providers use these eggs to prevent cross-contamination in their kitchens."
+                }
+            ],
+            "para_id": "29cec86eb2c1bb081a07fff17b7480f3794c186d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "When the term \"milkshake\" was first used in print in 1885, milkshakes were an alcoholic "
+                },
+                {
+                    "entity": "enwiki:Whisky",
+                    "entity_name": "Whisky",
+                    "link_section": null,
+                    "text": "whiskey"
+                },
+                {
+                    "text": " drink that has been described as a \"sturdy, healthful "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": " type of drink, with eggs, whiskey, etc., served as a tonic as well as a treat\". However, by 1900, the term referred to \"wholesome drinks made with "
+                },
+                {
+                    "entity": "enwiki:Chocolate",
+                    "entity_name": "Chocolate",
+                    "link_section": null,
+                    "text": "chocolate"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Strawberry",
+                    "entity_name": "Strawberry",
+                    "link_section": null,
+                    "text": "strawberry"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Vanilla",
+                    "entity_name": "Vanilla",
+                    "link_section": null,
+                    "text": "vanilla"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Syrup",
+                    "entity_name": "Syrup",
+                    "link_section": null,
+                    "text": "syrup"
+                },
+                {
+                    "text": "s.\" By the \"early 1900s people were asking for the new treat, often with ice cream.\" By the 1930s, milkshakes were a popular drink at "
+                },
+                {
+                    "entity": "enwiki:Soda%20shop",
+                    "entity_name": "Soda shop",
+                    "link_section": null,
+                    "text": "malt shop"
+                },
+                {
+                    "text": "s, which were the \"typical "
+                },
+                {
+                    "entity": "enwiki:Soda%20fountain",
+                    "entity_name": "Soda fountain",
+                    "link_section": null,
+                    "text": "soda fountain"
+                },
+                {
+                    "text": " of the period ... used by students as a meeting place or hangout.\""
+                }
+            ],
+            "para_id": "3e2ce59984af4d14e4701d03ee8782f8d7133412"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Thom Jurek of "
+                },
+                {
+                    "entity": "enwiki:AllMusic",
+                    "entity_name": "AllMusic",
+                    "link_section": null,
+                    "text": "Allmusic"
+                },
+                {
+                    "text": " gave a two-star review, calling it \"an obvious, cloying exercise in marketing\" and saying that it \"holds little artistic merit.\" "
+                },
+                {
+                    "entity": "enwiki:Paste%20(magazine)",
+                    "entity_name": "Paste (magazine)",
+                    "link_section": null,
+                    "text": "Paste"
+                },
+                {
+                    "text": " critic Cory Albertson similarly said, \"Gold and Green\u2019s schizophrenic tone seems tailored for mass consumption by country radio and the soccer-mom set, but most other listeners will need far more eggnog to stomach such uninspired holiday cheer.\" Matt Bjorke reviewed it positively on Roughstock, saying, \"City of Silver Dreams\" could actually find itself a seminal holiday song like "
+                },
+                {
+                    "entity": "enwiki:Joni%20Mitchell",
+                    "entity_name": "Joni Mitchell",
+                    "link_section": null,
+                    "text": "Joni Mitchell\u2019s"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:River%20(Joni%20Mitchell%20song)",
+                    "entity_name": "River (Joni Mitchell song)",
+                    "link_section": null,
+                    "text": "\"River\""
+                },
+                {
+                    "text": " as it tells a wonderfully soft and melodic story of New York City and the beauty of a new romance within the context of Christmas.\"  The song was co-written with Lisa Carver and "
+                },
+                {
+                    "entity": "enwiki:Ellis%20Paul",
+                    "entity_name": "Ellis Paul",
+                    "link_section": null,
+                    "text": "Ellis Paul"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "a2751dd8086cfcb8eba0f515c3730e8c2e24daa6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Joseph arranged for Davis to get an appointment and attend the "
+                },
+                {
+                    "entity": "enwiki:United%20States%20Military%20Academy",
+                    "entity_name": "United States Military Academy",
+                    "link_section": null,
+                    "text": "United States Military Academy"
+                },
+                {
+                    "text": " (West Point) starting in late 1824. While there, he was placed under house arrest for his role in the "
+                },
+                {
+                    "entity": "enwiki:Eggnog%20Riot",
+                    "entity_name": "Eggnog Riot",
+                    "link_section": null,
+                    "text": "Eggnog Riot"
+                },
+                {
+                    "text": " during Christmas 1826. Cadets smuggled whiskey into the academy to make eggnog, and more than one-third of the cadets were involved in the incident. In June 1828, Davis graduated 23rd in a class of 33."
+                }
+            ],
+            "para_id": "36dafe331f4e1fbecee37228a96fa604c8fe1dbb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the book The Eggnog Chronicles, one fictional character is introduced as \"the youngest violinist to win the Irving M. Klein String Competition.\" "
+                }
+            ],
+            "para_id": "3756b8c9ea6c31d122387dca4ffea3e1261f8472"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Some of the song's lyrics are used as an "
+                },
+                {
+                    "entity": "enwiki:Epigraph%20(literature)",
+                    "entity_name": "Epigraph (literature)",
+                    "link_section": null,
+                    "text": "epigraph"
+                },
+                {
+                    "text": " in the 2001 Celebrate the States series volume on North Carolina and in the 1983 reference book America the Quotable.  News providers have used \"Carolina in My Mind\" as a title for stories about the state's politics, economy, and outdoor activities.  The song's geographical association also appears in fiction, including in "
+                },
+                {
+                    "text": "Carly Alexander"
+                },
+                {
+                    "text": "'s 2004 novel The Eggnog Chronicles and North Carolinian "
+                },
+                {
+                    "entity": "enwiki:Sharyn%20McCrumb",
+                    "entity_name": "Sharyn McCrumb",
+                    "link_section": null,
+                    "text": "Sharyn McCrumb"
+                },
+                {
+                    "text": "'s 2006 novel St. Dale."
+                }
+            ],
+            "para_id": "35a6e375f0bec1474c46bde1abf7e5d6aef8d9c1"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Under British colonial rule the wine in le sang du caribou was replaced with whisky (which travelled better). This was then mixed with goat's milk and flavoured with nutmeg and cinnamon to produce an Anglicized version called \""
+                },
+                {
+                    "entity": "enwiki:Moose%20Milk%20(cocktail)",
+                    "entity_name": "Moose Milk (cocktail)",
+                    "link_section": null,
+                    "text": "Moose Milk"
+                },
+                {
+                    "text": "\". Today's versions of Moose Milk, in addition to whisky (or rum) and spices may use a combination of eggnog and ice cream, as well as other alcoholic supplements. The exact recipes used by specific groups may be jealously guarded secrets.q.v. "
+                },
+                {
+                    "entity": "enwiki:Lev%C3%A9e%20(event)",
+                    "entity_name": "Lev\u00e9e (event)",
+                    "link_section": "External links",
+                    "text": "External links"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "3ded4f4a6cab80f2f7c24ffcfbb31477898f5ec9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Eggnog may have developed from "
+                },
+                {
+                    "entity": "enwiki:Posset",
+                    "entity_name": "Posset",
+                    "link_section": null,
+                    "text": "posset"
+                },
+                {
+                    "text": ", a "
+                },
+                {
+                    "entity": "enwiki:Middle%20Ages",
+                    "entity_name": "Middle Ages",
+                    "link_section": null,
+                    "text": "medieval"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Europe",
+                    "entity_name": "Europe",
+                    "link_section": null,
+                    "text": "Europe"
+                },
+                {
+                    "text": "an beverage made with hot milk that was curdled with "
+                },
+                {
+                    "entity": "enwiki:Wine",
+                    "entity_name": "Wine",
+                    "link_section": null,
+                    "text": "wine"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Ale",
+                    "entity_name": "Ale",
+                    "link_section": null,
+                    "text": "ale"
+                },
+                {
+                    "text": " and flavoured with spices. In the Middle Ages, posset was used as a cold and flu remedy. Posset was popular from medieval times to the 19th century. Eggs were added to some posset recipes; according to "
+                },
+                {
+                    "entity": "enwiki:Time%20(magazine)",
+                    "entity_name": "Time (magazine)",
+                    "link_section": null,
+                    "text": "TIME"
+                },
+                {
+                    "text": " magazine, by the \"...13th century, monks were known to drink a posset with eggs and figs.\""
+                }
+            ],
+            "para_id": "afdb5922e8cf74b0b88ba5e783c93614bf2ec015"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Pi\u00f1a Colada with Zhumir - a pre-mixed "
+                },
+                {
+                    "entity": "enwiki:Pi%C3%B1a%20colada",
+                    "entity_name": "Pi\u00f1a colada",
+                    "link_section": null,
+                    "text": "Pina Colada"
+                },
+                {
+                    "text": ", 30 proof.<br>Tacao with Zhumir - a "
+                },
+                {
+                    "entity": "enwiki:Chocolate",
+                    "entity_name": "Chocolate",
+                    "link_section": null,
+                    "text": "chocolate"
+                },
+                {
+                    "text": " cream liqueur, 30 proof.<br>"
+                },
+                {
+                    "entity": "enwiki:Rompope",
+                    "entity_name": "Rompope",
+                    "link_section": null,
+                    "text": "Rompope"
+                },
+                {
+                    "text": " with Zhumir - a "
+                },
+                {
+                    "entity": "enwiki:Cinnamon",
+                    "entity_name": "Cinnamon",
+                    "link_section": null,
+                    "text": "cinnamon"
+                },
+                {
+                    "text": " and egg cream liqueur of flavour similar to eggnog, 32 proof."
+                }
+            ],
+            "para_id": "8a06f07c1778436cef591e5faadc57b07d4014ab"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Rompope is an "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": "-like drink made with "
+                },
+                {
+                    "entity": "enwiki:Egg%20as%20food",
+                    "entity_name": "Egg as food",
+                    "link_section": null,
+                    "text": "eggs"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Milk",
+                    "entity_name": "Milk",
+                    "link_section": null,
+                    "text": "milk"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Vanilla",
+                    "entity_name": "Vanilla",
+                    "link_section": null,
+                    "text": "vanilla flavouring"
+                },
+                {
+                    "text": ". The "
+                },
+                {
+                    "entity": "enwiki:Yolk",
+                    "entity_name": "Yolk",
+                    "link_section": null,
+                    "text": "egg yolk"
+                },
+                {
+                    "text": "s impart a yellow hue to the emulsified beverage. It is a traditional drink known as such in "
+                },
+                {
+                    "entity": "enwiki:Costa%20Rica",
+                    "entity_name": "Costa Rica",
+                    "link_section": null,
+                    "text": "Costa Rica"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Nicaragua",
+                    "entity_name": "Nicaragua",
+                    "link_section": null,
+                    "text": "Nicaragua"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:El%20Salvador",
+                    "entity_name": "El Salvador",
+                    "link_section": null,
+                    "text": "El Salvador"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Belize",
+                    "entity_name": "Belize",
+                    "link_section": null,
+                    "text": "Belize"
+                },
+                {
+                    "text": " and particularly in "
+                },
+                {
+                    "entity": "enwiki:Mexico",
+                    "entity_name": "Mexico",
+                    "link_section": null,
+                    "text": "Mexico"
+                },
+                {
+                    "text": ", where, it is believed to have been originally made in the "
+                },
+                {
+                    "entity": "enwiki:Convent",
+                    "entity_name": "Convent",
+                    "link_section": null,
+                    "text": "convent"
+                },
+                {
+                    "text": "s of the city of "
+                },
+                {
+                    "entity": "enwiki:Puebla%20City",
+                    "entity_name": "Puebla City",
+                    "link_section": null,
+                    "text": "Puebla"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Mexico",
+                    "entity_name": "Mexico",
+                    "link_section": null,
+                    "text": "Mexico"
+                },
+                {
+                    "text": ". The word rompope is a derivation of the word rompon, which is used to describe the Spanish version of eggnog that came to Mexico. The Spanish version utilizes "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": " as its main ingredient, hence the root of both words rom-pon and rom-pope, but in Central America, "
+                },
+                {
+                    "entity": "enwiki:Guatemala",
+                    "entity_name": "Guatemala",
+                    "link_section": null,
+                    "text": "Guatemala"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Honduras",
+                    "entity_name": "Honduras",
+                    "link_section": null,
+                    "text": "Honduras"
+                },
+                {
+                    "text": " and El Salvador, there is also a similar beverage known as "
+                },
+                {
+                    "text": "rompopo"
+                },
+                {
+                    "text": ". For example, "
+                },
+                {
+                    "entity": "enwiki:Salcaj%C3%A1",
+                    "entity_name": "Salcaj\u00e1",
+                    "link_section": null,
+                    "text": "Salcaja"
+                },
+                {
+                    "text": ", in Guatemala offers one known version of this rompopo drink and in "
+                },
+                {
+                    "entity": "enwiki:South%20America",
+                    "entity_name": "South America",
+                    "link_section": null,
+                    "text": "South America"
+                },
+                {
+                    "text": ", the country of "
+                },
+                {
+                    "entity": "enwiki:Chile",
+                    "entity_name": "Chile",
+                    "link_section": null,
+                    "text": "Chile"
+                },
+                {
+                    "text": " has among its most popular drinks rompon and "
+                },
+                {
+                    "entity": "enwiki:Cola%20de%20mono",
+                    "entity_name": "Cola de mono",
+                    "link_section": null,
+                    "text": "cola de mono"
+                },
+                {
+                    "text": " or monkey\u2019s tail, the latter containing "
+                },
+                {
+                    "entity": "enwiki:Coffee",
+                    "entity_name": "Coffee",
+                    "link_section": null,
+                    "text": "coffee"
+                },
+                {
+                    "text": " making it dark instead of yellow, but also containing the other ingredients commonly found in rompope."
+                }
+            ],
+            "para_id": "03625c3b5e7efe9a47f821ed977e09429ca3e6a7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "This can be poured as a sauce over cakes or fruits. Alternatively, it can be eaten as a dessert on its own, for example in \u00cele flottante (\""
+                },
+                {
+                    "entity": "enwiki:Floating%20island%20(dessert)",
+                    "entity_name": "Floating island (dessert)",
+                    "link_section": null,
+                    "text": "floating island"
+                },
+                {
+                    "text": "\"): the cream is poured into a bowl with a piece of "
+                },
+                {
+                    "entity": "enwiki:Meringue",
+                    "entity_name": "Meringue",
+                    "link_section": null,
+                    "text": "meringue"
+                },
+                {
+                    "text": " (blancs en neige) floated on top along with "
+                },
+                {
+                    "entity": "enwiki:Praline",
+                    "entity_name": "Praline",
+                    "link_section": null,
+                    "text": "praline"
+                },
+                {
+                    "text": ". It can also be used as a base for desserts such as "
+                },
+                {
+                    "entity": "enwiki:Ice%20cream",
+                    "entity_name": "Ice cream",
+                    "link_section": null,
+                    "text": "ice cream"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Cr%C3%A8me%20br%C3%BBl%C3%A9e",
+                    "entity_name": "Cr\u00e8me br\u00fbl\u00e9e",
+                    "link_section": null,
+                    "text": "cr\u00e8me br\u00fbl\u00e9e"
+                },
+                {
+                    "text": ". It has a mild taste but a rich, and thick vanilla flavour. However, the ice cream base is much thicker and has various flavourings. The American Amish call the sauce English pouring sauce. In the "
+                },
+                {
+                    "entity": "enwiki:Southern%20United%20States",
+                    "entity_name": "Southern United States",
+                    "link_section": null,
+                    "text": "American South"
+                },
+                {
+                    "text": " it is known as \"boiled custard\", and it can be served like "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": " during the "
+                },
+                {
+                    "entity": "enwiki:Christmas%20and%20holiday%20season",
+                    "entity_name": "Christmas and holiday season",
+                    "link_section": null,
+                    "text": "Christmas season"
+                },
+                {
+                    "text": ". "
+                }
+            ],
+            "para_id": "be07b0bff0877255d551bb165a1883110e65ee1c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Kogel mogel, gogl-mogl, gogel-mogel, gogol-mogol (), gogli-mogli, or gogle-mogle () is an "
+                },
+                {
+                    "entity": "enwiki:Egg%20as%20food",
+                    "entity_name": "Egg as food",
+                    "link_section": null,
+                    "text": "egg"
+                },
+                {
+                    "text": "-based homemade "
+                },
+                {
+                    "entity": "enwiki:Dessert",
+                    "entity_name": "Dessert",
+                    "link_section": null,
+                    "text": "dessert"
+                },
+                {
+                    "text": " popular in "
+                },
+                {
+                    "entity": "enwiki:Central%20European%20cuisine",
+                    "entity_name": "Central European cuisine",
+                    "link_section": null,
+                    "text": "Central"
+                },
+                {
+                    "text": " and  "
+                },
+                {
+                    "entity": "enwiki:Eastern%20European%20cuisine",
+                    "entity_name": "Eastern European cuisine",
+                    "link_section": null,
+                    "text": "Eastern"
+                },
+                {
+                    "text": " Europe, as well as in "
+                },
+                {
+                    "entity": "enwiki:List%20of%20dishes%20from%20the%20Caucasus",
+                    "entity_name": "List of dishes from the Caucasus",
+                    "link_section": null,
+                    "text": "Caucasus"
+                },
+                {
+                    "text": ". It is made from "
+                },
+                {
+                    "entity": "enwiki:Yolk",
+                    "entity_name": "Yolk",
+                    "link_section": null,
+                    "text": "egg yolk"
+                },
+                {
+                    "text": "s, "
+                },
+                {
+                    "entity": "enwiki:Sugar",
+                    "entity_name": "Sugar",
+                    "link_section": null,
+                    "text": "sugar"
+                },
+                {
+                    "text": ", and flavourings such as "
+                },
+                {
+                    "entity": "enwiki:Honey",
+                    "entity_name": "Honey",
+                    "link_section": null,
+                    "text": "honey"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Vanilla",
+                    "entity_name": "Vanilla",
+                    "link_section": null,
+                    "text": "vanilla"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Chocolate",
+                    "entity_name": "Chocolate",
+                    "link_section": null,
+                    "text": "cocoa"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": ", similar to "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": ". In its classic form it is served slightly chilled or at room temperature. Served warm or hot, it is considered a "
+                },
+                {
+                    "entity": "enwiki:Traditional%20medicine",
+                    "entity_name": "Traditional medicine",
+                    "link_section": "Home remedies",
+                    "text": "home remedy"
+                },
+                {
+                    "text": " for sore throats. As a home remedy it could be of "
+                },
+                {
+                    "entity": "enwiki:Russians",
+                    "entity_name": "Russians",
+                    "link_section": null,
+                    "text": "Russian"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Yiddishkeit",
+                    "entity_name": "Yiddishkeit",
+                    "link_section": null,
+                    "text": "Yiddish"
+                },
+                {
+                    "text": " origin. Variations include milk, honey and "
+                },
+                {
+                    "entity": "enwiki:Soft%20drink",
+                    "entity_name": "Soft drink",
+                    "link_section": null,
+                    "text": "soda"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "dc71563eb68303d87947529e6614b3b0ca39145d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Christmas and Old Year's Night (New Year) is the most celebrated time for Guyanese for food and festivities. Advance preparation is part of the exciting pre-preparation for Christmas celebrations. It starts with the preparation and soaking of fruits and rum or wine for Black Cake weeks or sometimes months ahead to intensify the flavour. Local drinks such as ginger beer, "
+                },
+                {
+                    "entity": "enwiki:Mauby",
+                    "entity_name": "Mauby",
+                    "link_section": null,
+                    "text": "mauby"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Sorrel",
+                    "entity_name": "Sorrel",
+                    "link_section": null,
+                    "text": "sorrel"
+                },
+                {
+                    "text": " are fermented and require a sitting (pre-preparation) period prior to making. Ginger beer is the Christmas drink of choice, similar to the popularity of "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": " in North America. Some dishes certain to be served are "
+                },
+                {
+                    "entity": "enwiki:Guyanese%20pepperpot",
+                    "entity_name": "Guyanese pepperpot",
+                    "link_section": null,
+                    "text": "Guyana pepperpot"
+                },
+                {
+                    "text": ", garlic pork, "
+                },
+                {
+                    "entity": "enwiki:Rum%20cake",
+                    "entity_name": "Rum cake",
+                    "link_section": null,
+                    "text": "black cake"
+                },
+                {
+                    "text": ", sponge cake and home-made bread. Some of the local drinks and food require advance preparation."
+                }
+            ],
+            "para_id": "1a33a40736fcb89fd3b5a188b9ff6594c87f9a75"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The drink's name is a reference to Egan's book, Life in London, or The Day and Night Scenes of Jerry Hawthorn Esq. and his Elegant Friend Corinthian Tom (1821), and the subsequent stage play "
+                },
+                {
+                    "entity": "enwiki:Tom%20and%20Jerry,%20or%20Life%20in%20London",
+                    "entity_name": "Tom and Jerry, or Life in London",
+                    "link_section": null,
+                    "text": "Tom and Jerry, or Life in London"
+                },
+                {
+                    "text": " (also 1821). To publicize the book and the play, Egan introduced a variation of eggnog by adding  of brandy, calling it a \"Tom and Jerry\". The additional fortification helped popularize the drink."
+                }
+            ],
+            "para_id": "67f1db1adfb812c5b233e176f2cc5890a824b55a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Ponche crema is a "
+                },
+                {
+                    "entity": "enwiki:Venezuela",
+                    "entity_name": "Venezuela",
+                    "link_section": null,
+                    "text": "Venezuelan"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Trinidadians",
+                    "entity_name": "Trinidadians",
+                    "link_section": null,
+                    "text": "Trinidadian"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Cream",
+                    "entity_name": "Cream",
+                    "link_section": null,
+                    "text": "cream"
+                },
+                {
+                    "text": "-based "
+                },
+                {
+                    "entity": "enwiki:Liqueur",
+                    "entity_name": "Liqueur",
+                    "link_section": null,
+                    "text": "liqueur"
+                },
+                {
+                    "text": ". Recipes vary depending on the region, but main ingredients typically include "
+                },
+                {
+                    "entity": "enwiki:Milk",
+                    "entity_name": "Milk",
+                    "link_section": null,
+                    "text": "milk"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Egg%20as%20food",
+                    "entity_name": "Egg as food",
+                    "link_section": null,
+                    "text": "eggs"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Sugar",
+                    "entity_name": "Sugar",
+                    "link_section": null,
+                    "text": "sugar"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": ", and other minor ingredients such as "
+                },
+                {
+                    "entity": "enwiki:Vanilla",
+                    "entity_name": "Vanilla",
+                    "link_section": null,
+                    "text": "vanilla"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Nutmeg",
+                    "entity_name": "Nutmeg",
+                    "link_section": null,
+                    "text": "nutmeg"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Cinnamon",
+                    "entity_name": "Cinnamon",
+                    "link_section": null,
+                    "text": "cinnamon"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Lemon",
+                    "entity_name": "Lemon",
+                    "link_section": null,
+                    "text": "lemon"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Peel%20(fruit)",
+                    "entity_name": "Peel (fruit)",
+                    "link_section": null,
+                    "text": "rind"
+                },
+                {
+                    "text": ". A variant type is prepared with concentrated liquid coffee or "
+                },
+                {
+                    "entity": "enwiki:Instant%20coffee",
+                    "entity_name": "Instant coffee",
+                    "link_section": null,
+                    "text": "instant coffee"
+                },
+                {
+                    "text": " powder. However, most references to the ponche crema name aim at a traditional commercial product, available since 1900, whose recipe and manufacturing process are kept secret. Ponche crema is a beverage traditionally served in Venezuela and "
+                },
+                {
+                    "entity": "enwiki:Trinidad%20and%20Tobago",
+                    "entity_name": "Trinidad and Tobago",
+                    "link_section": null,
+                    "text": "Trinidad and Tobago"
+                },
+                {
+                    "text": " during Christmas time, much as "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": " is in the United States. It is usually served cold, in small cups, either as an "
+                },
+                {
+                    "entity": "enwiki:Ap%C3%A9ritif%20and%20digestif",
+                    "entity_name": "Ap\u00e9ritif and digestif",
+                    "link_section": null,
+                    "text": "aperitif"
+                },
+                {
+                    "text": " or a "
+                },
+                {
+                    "entity": "enwiki:Ap%C3%A9ritif%20and%20digestif",
+                    "entity_name": "Ap\u00e9ritif and digestif",
+                    "link_section": null,
+                    "text": "pousse-caf\u00e9"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "b6426967860ec4365c48c8af9a3aff7cc787e600"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The origins, "
+                },
+                {
+                    "entity": "enwiki:Etymology",
+                    "entity_name": "Etymology",
+                    "link_section": null,
+                    "text": "etymology"
+                },
+                {
+                    "text": ", and the ingredients used to make the original eggnog drink are debated.According to the Oxford English Dictionary, nog was \"a kind of strong beer brewed in "
+                },
+                {
+                    "entity": "enwiki:East%20Anglia",
+                    "entity_name": "East Anglia",
+                    "link_section": null,
+                    "text": "East Anglia"
+                },
+                {
+                    "text": "\". Alternatively, nog may stem from "
+                },
+                {
+                    "entity": "enwiki:Noggin%20(cup)",
+                    "entity_name": "Noggin (cup)",
+                    "link_section": null,
+                    "text": "noggin"
+                },
+                {
+                    "text": ", a "
+                },
+                {
+                    "entity": "enwiki:Middle%20English",
+                    "entity_name": "Middle English",
+                    "link_section": null,
+                    "text": "Middle English"
+                },
+                {
+                    "text": " term for a small, carved wooden mug used to serve alcohol. However, the British drink was also called an "
+                },
+                {
+                    "entity": "enwiki:Flip%20(cocktail)",
+                    "entity_name": "Flip (cocktail)",
+                    "link_section": null,
+                    "text": "Egg Flip"
+                },
+                {
+                    "text": ", from the practice of \"flipping\" (rapidly pouring) the mixture between two pitchers to mix it. One dictionary lists the word as being an Americanism invented in 1765-75. "
+                },
+                {
+                    "entity": "enwiki:Babson%20College",
+                    "entity_name": "Babson College",
+                    "link_section": null,
+                    "text": "Babson College"
+                },
+                {
+                    "text": " professor Frederick Douglass Opie \"...wrote that the term is a combination of two colonial slang words \u2014 rum was referred to as "
+                },
+                {
+                    "entity": "enwiki:Grog",
+                    "entity_name": "Grog",
+                    "link_section": null,
+                    "text": "grog"
+                },
+                {
+                    "text": " and bartenders served it in small wooden mugs called noggins. The drink first became known as egg-n-grog and later as eggnog.\" Ben Zimmer, executive editor for vocabulary.com disputes the \"egg-n-grog\" theory as lacking proof; Zimmer states that the term \"nog\" may be related to the \"...Scottish term nugg or nugged ale, meaning \"ale warmed with a hot poker.\""
+                }
+            ],
+            "para_id": "2255274e34c0199b23f1f287b052e62f72675859"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In traditional "
+                },
+                {
+                    "entity": "enwiki:European%20cuisine",
+                    "entity_name": "European cuisine",
+                    "link_section": null,
+                    "text": "European cuisine"
+                },
+                {
+                    "text": ", nutmeg and mace are used especially in "
+                },
+                {
+                    "entity": "enwiki:Potato",
+                    "entity_name": "Potato",
+                    "link_section": null,
+                    "text": "potato"
+                },
+                {
+                    "text": " dishes and in processed meat products; they are also used in soups, sauces, and baked goods.  It is also commonly used in "
+                },
+                {
+                    "entity": "enwiki:Rice%20pudding",
+                    "entity_name": "Rice pudding",
+                    "link_section": null,
+                    "text": "rice pudding"
+                },
+                {
+                    "text": ". In "
+                },
+                {
+                    "entity": "enwiki:Dutch%20cuisine",
+                    "entity_name": "Dutch cuisine",
+                    "link_section": null,
+                    "text": "Dutch cuisine"
+                },
+                {
+                    "text": ", nutmeg is added to vegetables such as Brussels sprouts, cauliflower, and string beans. Nutmeg is a traditional ingredient in "
+                },
+                {
+                    "text": "mulled cider"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Mulled%20wine",
+                    "entity_name": "Mulled wine",
+                    "link_section": null,
+                    "text": "mulled wine"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Eggnog",
+                    "entity_name": "Eggnog",
+                    "link_section": null,
+                    "text": "eggnog"
+                },
+                {
+                    "text": ".  In Scotland, mace and nutmeg are usually both ingredients in "
+                },
+                {
+                    "entity": "enwiki:Haggis",
+                    "entity_name": "Haggis",
+                    "link_section": null,
+                    "text": "haggis"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "69d8cff9723e88afcfb861b814bd4b32fe35c8e7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Eggnog was likely named for the egg nog served to stockmen at this place."
+                }
+            ],
+            "para_id": "4272cfb4499771b32dd632ea2cbd450a9dd62ebe"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "\""
+                },
+                {
+                    "entity": "enwiki:Tom%20and%20Jerry%20(mixed%20drink)",
+                    "entity_name": "Tom and Jerry (mixed drink)",
+                    "link_section": null,
+                    "text": "Tom and Jerry"
+                },
+                {
+                    "text": " is a form of hot eggnog [cocktail] that was once popular.\" The Tom and Jerry was invented by British journalist "
+                },
+                {
+                    "entity": "enwiki:Pierce%20Egan",
+                    "entity_name": "Pierce Egan",
+                    "link_section": null,
+                    "text": "Pierce Egan"
+                },
+                {
+                    "text": " in the 1820s, using "
+                },
+                {
+                    "entity": "enwiki:Brandy",
+                    "entity_name": "Brandy",
+                    "link_section": null,
+                    "text": "brandy"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Rum",
+                    "entity_name": "Rum",
+                    "link_section": null,
+                    "text": "rum"
+                },
+                {
+                    "text": " added to eggnog and served hot, usually in a mug or a bowl. The drink features prominently in "
+                },
+                {
+                    "entity": "enwiki:Damon%20Runyon",
+                    "entity_name": "Damon Runyon",
+                    "link_section": null,
+                    "text": "Damon Runyon"
+                },
+                {
+                    "text": "'s 1932 short story \"Dancing Dan's Christmas\". It is mentioned briefly in "
+                },
+                {
+                    "entity": "enwiki:Harry%20Stewart",
+                    "entity_name": "Harry Stewart",
+                    "link_section": null,
+                    "text": "Yogi Yorgesson"
+                },
+                {
+                    "text": "'s 1949 novelty song \"I Yust Go Nuts at Christmas\" and characters drink Tom and Jerrys in the 1940 film "
+                },
+                {
+                    "entity": "enwiki:Beyond%20Tomorrow%20(film)",
+                    "entity_name": "Beyond Tomorrow (film)",
+                    "link_section": null,
+                    "text": "Beyond Tomorrow"
+                },
+                {
+                    "text": " and the 1941 film "
+                },
+                {
+                    "entity": "enwiki:The%20Great%20Mr.%20Nobody",
+                    "entity_name": "The Great Mr. Nobody",
+                    "link_section": null,
+                    "text": "The Great Mr. Nobody"
+                },
+                {
+                    "text": ". It is also mentioned in the 1960 film "
+                },
+                {
+                    "entity": "enwiki:The%20Apartment",
+                    "entity_name": "The Apartment",
+                    "link_section": null,
+                    "text": "The Apartment"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "f5b3200de1c8fef27866dce442dcad3b31e2883f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In "
+                },
+                {
+                    "entity": "enwiki:Honduras",
+                    "entity_name": "Honduras",
+                    "link_section": null,
+                    "text": "Honduras"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Tamale",
+                    "entity_name": "Tamale",
+                    "link_section": null,
+                    "text": "tamale"
+                },
+                {
+                    "text": "s are traditionally eaten on Christmas Eve evening. "
+                },
+                {
+                    "entity": "enwiki:Turkey%20(bird)",
+                    "entity_name": "Turkey (bird)",
+                    "link_section": null,
+                    "text": "Turkey"
+                },
+                {
+                    "text": " has become popular in the last few years.The traditional Honduran Christmas dinner is served around midnight on the 24th of December.The meal consists of tamales, roast pork leg, accompanied by \"torrejas,\" for dessert and eggnog. The tamales are made of maize dough filled with chicken or pork, chunks of potato and carrot, chickpeas, and whole green olives. They are wrapped in banana leaves and steamed to perfection. The pork leg may be fresh or smoked and is usually roasted all day long. The skin of the pork is left on during roasting resulting in a delicacy known as \"chicharron,\" a treat rivaled for at many a Honduran family table. The traditional recipe for seasoning the Christmas pork leg has often been passed down in a given family through generations. Turkey has become quite popular as well in recent years due to strong US/Honduran familial ties. \"Torrejas,\" the Honduran Christmas dessert is made of a French toast like bread that is soaked in dark syrup made from \"rapadura,\" blocks of very dark sugar. The syrup is seasoned with whole cloves and whole cinnamon. After dinner the meal is topped off with Honduran style eggnog known as \"rompopo.\""
+                }
+            ],
+            "para_id": "e69696be0021137ece3edaef3e7bb2c4950fcf23"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Terminology",
+            "heading_id": "enwiki:Eggnog/Terminology"
+        },
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Eggnog/History"
+        },
+        {
+            "heading": "Ingredients and serving style",
+            "heading_id": "enwiki:Eggnog/Ingredients%20and%20serving%20style"
+        },
+        {
+            "heading": "Use as flavouring",
+            "heading_id": "enwiki:Eggnog/Use%20as%20flavouring"
+        },
+        {
+            "heading": "Health and safety",
+            "heading_id": "enwiki:Eggnog/Health%20and%20safety"
+        },
+        {
+            "heading": "Reception and consumption",
+            "heading_id": "enwiki:Eggnog/Reception%20and%20consumption"
+        },
+        {
+            "heading": "In fiction",
+            "heading_id": "enwiki:Eggnog/In%20fiction"
+        },
+        {
+            "heading": "Cited books",
+            "heading_id": "enwiki:Eggnog/Cited%20books"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Eggnog",
+    "title": "Eggnog"
+}

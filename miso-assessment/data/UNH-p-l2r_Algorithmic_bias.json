@@ -1,0 +1,2146 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9022864107870501,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 2,
+            "rank_score": 0.8630760867732372,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 3,
+            "rank_score": 0.8580617128287102,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "e5ff43a5123f096a076baa2c67b165879149d259",
+            "rank": 4,
+            "rank_score": 0.8565065873657582,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 5,
+            "rank_score": 0.8419555747352416,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 6,
+            "rank_score": 0.7914491087875521,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 7,
+            "rank_score": 0.7384652426078709,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 8,
+            "rank_score": 0.7307870027520564,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 9,
+            "rank_score": 0.7182646302453669,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 10,
+            "rank_score": 0.7144328602271989,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 11,
+            "rank_score": 0.7114511107102242,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 12,
+            "rank_score": 0.6996345982260506,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 13,
+            "rank_score": 0.6983433177641215,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 14,
+            "rank_score": 0.693920876344533,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 15,
+            "rank_score": 0.6929510691982226,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "ddba241d8b822e9398893e72d2c201dad33c14ba",
+            "rank": 16,
+            "rank_score": 0.6887462633388237,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e",
+            "rank": 17,
+            "rank_score": 0.6877208809645711,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099",
+            "rank": 18,
+            "rank_score": 0.6876128285301195,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "eaccfead640741d9816233260317df1711e15718",
+            "rank": 19,
+            "rank_score": 0.6874596265500508,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 20,
+            "rank_score": 0.6866058104181828,
+            "section_path": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9502909605481902,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 2,
+            "rank_score": 0.9046922040477667,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 3,
+            "rank_score": 0.8865367836588556,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 4,
+            "rank_score": 0.8660376072386996,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 5,
+            "rank_score": 0.8283247799797739,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "e5ff43a5123f096a076baa2c67b165879149d259",
+            "rank": 6,
+            "rank_score": 0.7899890905011175,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "1848d98e624dc94997616f808dae58934f597688",
+            "rank": 7,
+            "rank_score": 0.7891353875382354,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "035a17fa2b7ce98904722708a8ab9eb767465af7",
+            "rank": 8,
+            "rank_score": 0.7691571725049371,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 9,
+            "rank_score": 0.7665072347633562,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "7d9519f026b33c4399d9ae4472d6bf7b57ca035f",
+            "rank": 10,
+            "rank_score": 0.765396859758908,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "0828dbaf41b0f719a066ca6b7640e326e23627cd",
+            "rank": 11,
+            "rank_score": 0.7596821146662533,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 12,
+            "rank_score": 0.7546437618689745,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 13,
+            "rank_score": 0.7480040986456207,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 14,
+            "rank_score": 0.743244643226183,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 15,
+            "rank_score": 0.7357040064079474,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 16,
+            "rank_score": 0.732646475456716,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 17,
+            "rank_score": 0.730051119562497,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 18,
+            "rank_score": 0.7254846366443151,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 19,
+            "rank_score": 0.7247165323993237,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "fc816c3221ce220dea0714f660ea5c3bdc1de869",
+            "rank": 20,
+            "rank_score": 0.7234859368413095,
+            "section_path": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9502909605481902,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 2,
+            "rank_score": 0.9290193629739021,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 3,
+            "rank_score": 0.8936634278527618,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 4,
+            "rank_score": 0.8678396084422075,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 5,
+            "rank_score": 0.8352608425709602,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "41cc866c24f978b0d30e02898408ad2749421ea9",
+            "rank": 6,
+            "rank_score": 0.8203960341669199,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 7,
+            "rank_score": 0.7832640436800888,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 8,
+            "rank_score": 0.7779239634321615,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "4cbe4c7fe9343ff3337d2ce5679e728e7c511a38",
+            "rank": 9,
+            "rank_score": 0.766100204120701,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "b368b4240469d772b4b28344b6b01087536995c4",
+            "rank": 10,
+            "rank_score": 0.7635467885508502,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "7861e46971f3123edfe7e99db4e4deb64ea6339d",
+            "rank": 11,
+            "rank_score": 0.7614525121210935,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 12,
+            "rank_score": 0.758742185935754,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 13,
+            "rank_score": 0.7488714896454285,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 14,
+            "rank_score": 0.7487590087157169,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 15,
+            "rank_score": 0.7450060239982061,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "eaccfead640741d9816233260317df1711e15718",
+            "rank": 16,
+            "rank_score": 0.7430249027935854,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "75578fa9e96303bf9efc7cfb4c2e7c3b69aff8be",
+            "rank": 17,
+            "rank_score": 0.7419748474752916,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 18,
+            "rank_score": 0.7379869571212851,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "83cab71bd9742de01e4ae7a3acd4086a9dd43d5c",
+            "rank": 19,
+            "rank_score": 0.736310583740839,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099",
+            "rank": 20,
+            "rank_score": 0.7359113746669701,
+            "section_path": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9854122040319455,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "e5ff43a5123f096a076baa2c67b165879149d259",
+            "rank": 2,
+            "rank_score": 0.8385880886893856,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 3,
+            "rank_score": 0.8244622930736318,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 4,
+            "rank_score": 0.8185307311735556,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "72c8968b3d885d707efba8c6d49f217358f5ee39",
+            "rank": 5,
+            "rank_score": 0.815019198488422,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 6,
+            "rank_score": 0.8082929714068141,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 7,
+            "rank_score": 0.8011758018179445,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 8,
+            "rank_score": 0.7949332733592551,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "9c1b976c120142926f1618a812b56b8e76ea0a1d",
+            "rank": 9,
+            "rank_score": 0.7841548101913118,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 10,
+            "rank_score": 0.7820439166946129,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "9f660526ccf3523076fb86761cfad5ed2bf875e4",
+            "rank": 11,
+            "rank_score": 0.763510411855905,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 12,
+            "rank_score": 0.7591888285631275,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "3b2a7d701806d0e3541ecb5f4e199fe9b0cac2fa",
+            "rank": 13,
+            "rank_score": 0.7306615560674672,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "b11a94cedcfc45103d9606760b2e4e3376e49464",
+            "rank": 14,
+            "rank_score": 0.7261305286280398,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "035a17fa2b7ce98904722708a8ab9eb767465af7",
+            "rank": 15,
+            "rank_score": 0.7250030963770684,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "37f66d38f16de57b2d774bd10b3989f2677c5daa",
+            "rank": 16,
+            "rank_score": 0.7199334252916036,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "ded24fd234c5852063021f933ff643b899fbf984",
+            "rank": 17,
+            "rank_score": 0.7187826087360691,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "af6db9dff857cdf9af5a05f3aee3bf596079b982",
+            "rank": 18,
+            "rank_score": 0.7046310293110507,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 19,
+            "rank_score": 0.6999516360391261,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 20,
+            "rank_score": 0.6925071743448121,
+            "section_path": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 1,
+            "rank_score": 0.970828337888743,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 2,
+            "rank_score": 0.8887738647036731,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 3,
+            "rank_score": 0.8685850414120914,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 4,
+            "rank_score": 0.8544152281900327,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 5,
+            "rank_score": 0.8488823711070088,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "d09e5964e9ceac12690d7b93684b272ca4cafa2b",
+            "rank": 6,
+            "rank_score": 0.7985603811671463,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 7,
+            "rank_score": 0.7833267135797323,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "3c23b8c1dc89220f95ba4c2822af7544b3f59d35",
+            "rank": 8,
+            "rank_score": 0.7646435453316346,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "04e16d3ad8f95b5e9a8e4f3d3b20c387da0210c5",
+            "rank": 9,
+            "rank_score": 0.7574314096828733,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "ee1b70aaea4fdc873e7a24562820bea860dabb88",
+            "rank": 10,
+            "rank_score": 0.7502696351990379,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 11,
+            "rank_score": 0.7323409941221581,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 12,
+            "rank_score": 0.7281157921015564,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "e5ff43a5123f096a076baa2c67b165879149d259",
+            "rank": 13,
+            "rank_score": 0.7236311041731267,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 14,
+            "rank_score": 0.7098683545739723,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 15,
+            "rank_score": 0.7058701732276327,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 16,
+            "rank_score": 0.6878364717019626,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 17,
+            "rank_score": 0.6825607197194623,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e",
+            "rank": 18,
+            "rank_score": 0.6808139180410152,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "ddba241d8b822e9398893e72d2c201dad33c14ba",
+            "rank": 19,
+            "rank_score": 0.6789389042105451,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 20,
+            "rank_score": 0.678667888821812,
+            "section_path": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9495254249903995,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 2,
+            "rank_score": 0.9017915775413325,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 3,
+            "rank_score": 0.8967926892187164,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 4,
+            "rank_score": 0.8806562078540577,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 5,
+            "rank_score": 0.8368960098047638,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 6,
+            "rank_score": 0.7704667956141004,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 7,
+            "rank_score": 0.76384766013137,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "19c5db43e690e232878225837c247c3c1dea4678",
+            "rank": 8,
+            "rank_score": 0.7620804176575133,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 9,
+            "rank_score": 0.7587851719318833,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "7d9519f026b33c4399d9ae4472d6bf7b57ca035f",
+            "rank": 10,
+            "rank_score": 0.7555486878442179,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 11,
+            "rank_score": 0.7504994955174608,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 12,
+            "rank_score": 0.7499713108190897,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 13,
+            "rank_score": 0.7345711697037605,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 14,
+            "rank_score": 0.7311857066743328,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 15,
+            "rank_score": 0.7255970006867328,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e",
+            "rank": 16,
+            "rank_score": 0.7241656613514167,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 17,
+            "rank_score": 0.7226344385501746,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099",
+            "rank": 18,
+            "rank_score": 0.721268455627764,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "7939b8fb8f3514f48b4e8282032cd4d6b005b30b",
+            "rank": 19,
+            "rank_score": 0.7201589551608932,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 20,
+            "rank_score": 0.7200517293257844,
+            "section_path": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9490275762442997,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 2,
+            "rank_score": 0.8974184344012595,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 3,
+            "rank_score": 0.89660940525329,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 4,
+            "rank_score": 0.8727199705611104,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 5,
+            "rank_score": 0.8234847296148831,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 6,
+            "rank_score": 0.7797834655708312,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 7,
+            "rank_score": 0.7597554674758453,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 8,
+            "rank_score": 0.7586485836352508,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 9,
+            "rank_score": 0.7458014434274631,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 10,
+            "rank_score": 0.7456935090805281,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 11,
+            "rank_score": 0.7304967031906019,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 12,
+            "rank_score": 0.7279734285512203,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e",
+            "rank": 13,
+            "rank_score": 0.7276025224591356,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 14,
+            "rank_score": 0.7274979509309052,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "7939b8fb8f3514f48b4e8282032cd4d6b005b30b",
+            "rank": 15,
+            "rank_score": 0.727021917372592,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 16,
+            "rank_score": 0.7184504296507825,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "ddba241d8b822e9398893e72d2c201dad33c14ba",
+            "rank": 17,
+            "rank_score": 0.7179216015923424,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 18,
+            "rank_score": 0.7164218173040355,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099",
+            "rank": 19,
+            "rank_score": 0.7152141799330844,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "eaccfead640741d9816233260317df1711e15718",
+            "rank": 20,
+            "rank_score": 0.7149208491934804,
+            "section_path": "enwiki:Algorithmic%20bias/Regulation"
+        },
+        {
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93",
+            "rank": 1,
+            "rank_score": 0.9499473341062912,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d",
+            "rank": 2,
+            "rank_score": 0.8967305548281959,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc",
+            "rank": 3,
+            "rank_score": 0.8966245338804906,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf",
+            "rank": 4,
+            "rank_score": 0.872074754139542,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698",
+            "rank": 5,
+            "rank_score": 0.823394186230576,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e",
+            "rank": 6,
+            "rank_score": 0.7812297043378799,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c",
+            "rank": 7,
+            "rank_score": 0.7590778206472099,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d",
+            "rank": 8,
+            "rank_score": 0.7587100738699233,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4",
+            "rank": 9,
+            "rank_score": 0.7476196952456304,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0",
+            "rank": 10,
+            "rank_score": 0.7472188919659987,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8",
+            "rank": 11,
+            "rank_score": 0.7298193094617944,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e",
+            "rank": 12,
+            "rank_score": 0.7288211713152283,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655",
+            "rank": 13,
+            "rank_score": 0.7280040987198682,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "7939b8fb8f3514f48b4e8282032cd4d6b005b30b",
+            "rank": 14,
+            "rank_score": 0.7279384063608951,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f",
+            "rank": 15,
+            "rank_score": 0.7265625331171617,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122",
+            "rank": 16,
+            "rank_score": 0.7191971898612637,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "ddba241d8b822e9398893e72d2c201dad33c14ba",
+            "rank": 17,
+            "rank_score": 0.7176303602642078,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099",
+            "rank": 18,
+            "rank_score": 0.7168775290126276,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15",
+            "rank": 19,
+            "rank_score": 0.716085434293462,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "para_id": "eaccfead640741d9816233260317df1711e15718",
+            "rank": 20,
+            "rank_score": 0.713987609346242,
+            "section_path": "enwiki:Algorithmic%20bias/History"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": " if it predicts different output values when trained on different training sets.  The prediction error of a learned classifier is related to the sum of the bias and the variance of the learning algorithm.  Generally, there is a tradeoff between bias and variance.  A learning algorithm with low bias must be \"flexible\" so that it can fit the data well.  But if the learning algorithm is too flexible, it will fit each training data set differently, and hence have high variance.  A key aspect of many supervised learning methods is that they are able to adjust this tradeoff between bias and variance (either automatically or by providing a bias/variance parameter that the user can adjust)."
+                }
+            ],
+            "para_id": "fb3af35af94f9876db293728426d730591e34f93"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Although most learning algorithms have a static bias, some algorithms are designed to shift their bias as they acquire more data. This does not avoid bias, since the bias shifting process itself must have a bias."
+                }
+            ],
+            "para_id": "ee64909c01c0576a4aaa943718802e261f0f9dfc"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Second issue is the amount of training data available relative to the complexity of the \"true\" function (classifier or regression function).  If the true function is simple, then an \"inflexible\" learning algorithm with high bias and low variance will be able to learn it from a small amount of data.  But if the true function is highly complex (e.g., because it involves complex interactions among many different input features and behaves differently in different parts of the input space), then the function will only be learnable from a very large amount of training data and using a \"flexible\" learning algorithm with low bias and high variance.  Good learning algorithms therefore automatically adjust the bias/variance tradeoff based on the amount of data available and the apparent complexity of the function to be learned."
+                }
+            ],
+            "para_id": "32e2408a6aa6ca4e224f2a10aa75b7b9fbec7e7d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "This third class method is drastically different from the previous two algorithms listed. The most striking aspect is that it requires a different definition of what it means to be a void. Instead of the general notion that a void is a region of space with a low cosmic mean density; a hole in the distribution of galaxies, it defines voids to be regions in which matter is escaping; which corresponds to the Dark Energy equation of state, w. Void centers are then considered to be the maximal source of the displacement field denoted as S. The purpose for this change in definitions was presented by Lavaux and Wandelt in 2009 as a way to yield cosmic voids such that exact analytical calculations can be made on their dynamical and geometrical properties. This allows DIVA to heavily explore the ellipticity of voids and how they evolve in the large-scale structure, subsequently leading to the classification of three distinct types of voids. These three morphological classes are True voids, Pancake voids, and Filament voids.  Another notable quality is that even though DIVA also contains selection function bias just as first class methods do, DIVA is devised such that this bias can be precisely calibrated, leading to much more reliable results. Multiple shortfalls of this Lagrangian-Eulerian hybrid approach exist. One example is that the resulting voids from this method are intrinsically different than those found by other methods, which makes an all-data points inclusive comparison between results of differing algorithms very difficult."
+                }
+            ],
+            "para_id": "e5ff43a5123f096a076baa2c67b165879149d259"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Inductive bias occurs within the field of "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "machine learning"
+                },
+                {
+                    "text": ". In machine learning one seeks to develop "
+                },
+                {
+                    "entity": "enwiki:Algorithm",
+                    "entity_name": "Algorithm",
+                    "link_section": null,
+                    "text": "algorithm"
+                },
+                {
+                    "text": "s that are able to learn to anticipate a particular output. To accomplish this, the learning algorithm is given training cases that show the expected connection. Then the learner is tested with new examples.  Without further assumptions, this problem cannot be solved exactly as unknown situations may not be predictable. The inductive bias of the learning algorithm is the set of assumptions that the learner uses to predict outputs given inputs that it has not encountered. It may bias the learner towards the correct solution, the incorrect, or be correct some of the time. A classical example of an inductive bias is "
+                },
+                {
+                    "entity": "enwiki:Occam's%20razor",
+                    "entity_name": "Occam's razor",
+                    "link_section": null,
+                    "text": "Occam's Razor"
+                },
+                {
+                    "text": ", which assumes that the simplest consistent hypothesis is the best."
+                }
+            ],
+            "para_id": "34c8edd95e7cc657bfb68a07adaef6505f7628bf"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Flexibility is very important because each learning algorithm is based on a set of assumptions about the data, its "
+                },
+                {
+                    "entity": "enwiki:Inductive%20bias",
+                    "entity_name": "Inductive bias",
+                    "link_section": null,
+                    "text": "inductive bias"
+                },
+                {
+                    "text": ". This means that it will only learn well if the bias matches the data in the learning problem. A learning algorithm may perform very well on one learning problem, but very badly on the next. From a non-expert point of view, this poses strong restrictions on the use of "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "machine learning"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Data%20mining",
+                    "entity_name": "Data mining",
+                    "link_section": null,
+                    "text": "data mining"
+                },
+                {
+                    "text": " techniques, since the relationship between the learning problem (often some kind of "
+                },
+                {
+                    "entity": "enwiki:Database",
+                    "entity_name": "Database",
+                    "link_section": null,
+                    "text": "database"
+                },
+                {
+                    "text": ") and the effectiveness of different learning algorithms is not yet understood."
+                }
+            ],
+            "para_id": "a67b00282aa0b9afd6fc055b0f7c5147fba6c698"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Whereas the answer returned by a "
+                },
+                {
+                    "entity": "enwiki:Deterministic%20algorithm",
+                    "entity_name": "Deterministic algorithm",
+                    "link_section": null,
+                    "text": "deterministic algorithm"
+                },
+                {
+                    "text": " is always expected to be correct, this is not the case for Monte Carlo algorithms. For "
+                },
+                {
+                    "entity": "enwiki:Decision%20problem",
+                    "entity_name": "Decision problem",
+                    "link_section": null,
+                    "text": "decision problem"
+                },
+                {
+                    "text": "s, these algorithms are generally classified as either false-biased or true-biased. A false-biased Monte Carlo algorithm is always correct when it returns false; a true-biased algorithm is always correct when it returns true. While this describes algorithms with one-sided errors, others might have no bias; these are said to have two-sided errors. The answer they provide (either true or false) will be incorrect, or correct, with some bounded probability."
+                }
+            ],
+            "para_id": "110b9c1139ee0d757c5a1b4e4c2c3b5a33a40f0e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The inductive bias (also known as learning bias) of a "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "learning algorithm"
+                },
+                {
+                    "text": " is the set of assumptions that the learner uses to predict outputs given inputs that it has not encountered."
+                }
+            ],
+            "para_id": "59f1aa8d0000ba8df360456482cdb69ccff7bb2d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The bias\u2013variance decomposition is a way of analyzing a learning algorithm's "
+                },
+                {
+                    "entity": "enwiki:Expected%20value",
+                    "entity_name": "Expected value",
+                    "link_section": null,
+                    "text": "expected"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Generalization%20error",
+                    "entity_name": "Generalization error",
+                    "link_section": null,
+                    "text": "generalization error"
+                },
+                {
+                    "text": " with respect to a particular problem as a sum of three terms, the bias, variance, and a quantity called the irreducible error, resulting from noise in the problem itself."
+                }
+            ],
+            "para_id": "4c66e78bb7cf4cba2abb815817fad8a956135f0c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Supervised learning is the "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "machine learning"
+                },
+                {
+                    "text": " task of inferring a function from labeled training data. The "
+                },
+                {
+                    "text": "training data"
+                },
+                {
+                    "text": " consist of a set of training examples.  In supervised learning, each example is a pair consisting of an input object (typically a vector) and a desired output value (also called the supervisory signal).  A supervised learning algorithm analyzes the training data and produces an inferred function, which can be used for mapping new examples. An optimal scenario will allow for the algorithm to correctly determine the class labels for unseen instances. This requires the learning algorithm to generalize from the training data to unseen situations in a \"reasonable\" way (see "
+                },
+                {
+                    "entity": "enwiki:Inductive%20bias",
+                    "entity_name": "Inductive bias",
+                    "link_section": null,
+                    "text": "inductive bias"
+                },
+                {
+                    "text": ")."
+                }
+            ],
+            "para_id": "7bea62a471f4eb13f84cb9cd73508a6ea7af4be0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A third issue is the dimensionality of the input space.  If the input feature vectors have very high dimension, the learning problem can be difficult even if the true function only depends on a small number of those features.  This is because the many \"extra\" dimensions can confuse the learning algorithm and cause it to have high variance.  Hence, high input dimensionality typically requires tuning the classifier to have low variance and high bias.  In practice, if the engineer can manually remove irrelevant features from the input data, this is likely to improve the accuracy of the learned function.  In addition, there are many algorithms for "
+                },
+                {
+                    "entity": "enwiki:Feature%20selection",
+                    "entity_name": "Feature selection",
+                    "link_section": null,
+                    "text": "feature selection"
+                },
+                {
+                    "text": " that seek to identify the relevant features and discard the irrelevant ones.  This is an instance of the more general strategy of "
+                },
+                {
+                    "entity": "enwiki:Dimensionality%20reduction",
+                    "entity_name": "Dimensionality reduction",
+                    "link_section": null,
+                    "text": "dimensionality reduction"
+                },
+                {
+                    "text": ", which seeks to map the input data into a lower-dimensional space prior to running the supervised learning algorithm."
+                }
+            ],
+            "para_id": "83cdf207bede6829cd6edb211f3859eac81c4be4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "From 1950 to 1996, all the publications on particle filters, genetic algorithms, including the pruning and resample Monte Carlo methods introduced in computational physics and molecular chemistry, present natural and heuristic-like algorithms applied to different situations without a single proof of their consistency, nor a discussion on the bias of the estimates and on genealogical and ancestral tree based algorithms."
+                }
+            ],
+            "para_id": "1716b53dfd3f06f74e749d35dd1cb0519a71a655"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Dimensionality%20reduction",
+                    "entity_name": "Dimensionality reduction",
+                    "link_section": null,
+                    "text": "Dimensionality reduction"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Feature%20selection",
+                    "entity_name": "Feature selection",
+                    "link_section": null,
+                    "text": "feature selection"
+                },
+                {
+                    "text": " can decrease variance by simplifying models. Similarly, a larger training set tends to decrease variance. Adding features (predictors) tends to decrease bias, at the expense of introducing additional variance. Learning algorithms typically have some tunable parameters that control bias and variance, e.g.:"
+                }
+            ],
+            "para_id": "7dc301c3722fbd2d1913e8eef6c85d78a628b2d8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Applications of retrievability include detecting "
+                },
+                {
+                    "entity": "enwiki:Web%20search%20engine",
+                    "entity_name": "Web search engine",
+                    "link_section": "Search engine bias",
+                    "text": "search engine bias"
+                },
+                {
+                    "text": ", measuring algorithmic bias, evaluating the influence of search technology, tuning information retrieval systems and evaluating the quality of documents in a "
+                },
+                {
+                    "entity": "enwiki:Text%20corpus",
+                    "entity_name": "Text corpus",
+                    "link_section": null,
+                    "text": "collection"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "c5fe068019622c5100243fe22fad524a1da14b5f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A second approach to coping with bias is to reduce it after generation  (in software or hardware). Even if the above hardware bias reduction steps have been taken, the bit-stream should still be assumed to contain bias and correlation. There are several techniques for reducing bias and correlation, often called \""
+                },
+                {
+                    "entity": "enwiki:Decorrelation",
+                    "entity_name": "Decorrelation",
+                    "link_section": null,
+                    "text": "whitening"
+                },
+                {
+                    "text": "\" algorithms, by analogy with the related problem of producing white noise from a correlated signal.There is another way, the dynamic-statics test, which makes a statics randomness check in each random number block dynamically.  This can be done usably in a short time, 1 gigabyte per second or more.In this method, if one block shall be determined as a doubtful one, the block is disregarded and canceled.This method is requested in the draft of ANSI(X9F1)."
+                }
+            ],
+            "para_id": "2d6a8a1989b27ee98da2b93721a8563acd68fe15"
+        },
+        {
+            "para_body": [
+                {
+                    "text": " is large, the learning algorithm will have high bias and low variance.  The value of "
+                }
+            ],
+            "para_id": "ddba241d8b822e9398893e72d2c201dad33c14ba"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The computational analysis of machine learning algorithms and their performance is a branch of "
+                },
+                {
+                    "entity": "enwiki:Theoretical%20computer%20science",
+                    "entity_name": "Theoretical computer science",
+                    "link_section": null,
+                    "text": "theoretical computer science"
+                },
+                {
+                    "text": " known as "
+                },
+                {
+                    "entity": "enwiki:Computational%20learning%20theory",
+                    "entity_name": "Computational learning theory",
+                    "link_section": null,
+                    "text": "computational learning theory"
+                },
+                {
+                    "text": ". Because training sets are finite and the future is uncertain, learning theory usually does not yield guarantees of the performance of algorithms. Instead, probabilistic bounds on the performance are quite common. The "
+                },
+                {
+                    "entity": "enwiki:Bias%E2%80%93variance%20tradeoff",
+                    "entity_name": "Bias\u2013variance tradeoff",
+                    "link_section": null,
+                    "text": "bias\u2013variance decomposition"
+                },
+                {
+                    "text": " is one way to quantify generalization "
+                },
+                {
+                    "entity": "enwiki:Errors%20and%20residuals",
+                    "entity_name": "Errors and residuals",
+                    "link_section": null,
+                    "text": "error"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "9cbb71ecdb8daae47e123e5bd96bd0cecd76fc6e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": " represents some "
+                },
+                {
+                    "entity": "enwiki:Model%20of%20computation",
+                    "entity_name": "Model of computation",
+                    "link_section": null,
+                    "text": "model of computation"
+                },
+                {
+                    "text": " or some set of "
+                },
+                {
+                    "entity": "enwiki:Algorithm",
+                    "entity_name": "Algorithm",
+                    "link_section": null,
+                    "text": "algorithm"
+                },
+                {
+                    "text": "s, and one is interested in designing a pseudorandom generator with small seed length and bias, and such that the output of the generator can be computed by the same sort of algorithm."
+                }
+            ],
+            "para_id": "41b709ee6cce358d6cf650cebfb5f4ba84683099"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The ApEn algorithm counts each sequence as matching itself to avoid the occurrence of ln(0) in the calculations. This step might cause bias of ApEn and this bias causes ApEn to have two poor properties in practice: "
+                }
+            ],
+            "para_id": "eaccfead640741d9816233260317df1711e15718"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The bias\u2013variance tradeoff is a central problem in supervised learning. Ideally, one wants to "
+                },
+                {
+                    "entity": "enwiki:Model%20selection",
+                    "entity_name": "Model selection",
+                    "link_section": null,
+                    "text": "choose a model"
+                },
+                {
+                    "text": " that both accurately captures the regularities in its training data, but also "
+                },
+                {
+                    "entity": "enwiki:Generalization",
+                    "entity_name": "Generalization",
+                    "link_section": null,
+                    "text": "generalizes"
+                },
+                {
+                    "text": " well to unseen data. Unfortunately, it is typically impossible to do both simultaneously. High-variance learning methods may be able to represent their training set well, but are at risk of overfitting to noisy or unrepresentative training data. In contrast, algorithms with high bias typically produce simpler models that don't tend to overfit, but may underfit their training data, failing to capture important regularities."
+                }
+            ],
+            "para_id": "4e5d06b42e57e93ebbbb5bf397d92a8a3919e122"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "SLAM will always use several different types of sensors, and the powers and limits of various sensor types have been a major driver of new algorithms. Statistical independence is the mandatory requirement to cope with metric bias and with noise in measures.   Different types of sensors give rise to different SLAM algorithms whose assumptions are which are most appropriate to the sensors.  At one extreme, laser scans or visual features provide details of a great many points within an area, sometimes rendering SLAM inference unnecessary because shapes in these point clouds can be easily and unambiguously aligned at each step via "
+                },
+                {
+                    "entity": "enwiki:Image%20registration",
+                    "entity_name": "Image registration",
+                    "link_section": null,
+                    "text": "image registration"
+                },
+                {
+                    "text": ".  At the opposite extreme, "
+                },
+                {
+                    "entity": "enwiki:Tactile%20sensor",
+                    "entity_name": "Tactile sensor",
+                    "link_section": null,
+                    "text": "tactile sensor"
+                },
+                {
+                    "text": "s are extremely sparse as they contain only information about points very close to the agent, so they require strong prior models to compensate in purely tactile SLAM.   Most practical SLAM tasks fall somewhere between these visual and tactile extremes."
+                }
+            ],
+            "para_id": "1848d98e624dc94997616f808dae58934f597688"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "From 1950 to 1996, all the publications on "
+                },
+                {
+                    "entity": "enwiki:Particle%20filter",
+                    "entity_name": "Particle filter",
+                    "link_section": null,
+                    "text": "Sequential Monte Carlo"
+                },
+                {
+                    "text": " methodologies including the pruning and resample Monte Carlo methods introduced in computational physics and molecular chemistry, present natural and heuristic-like algorithms applied to different situations without a single proof of their consistency, nor a discussion on the bias of the estimates and on genealogical and ancestral tree based algorithms. The mathematical foundations and the first rigorous analysis of these particle algorithms are due to Pierre Del Moral in 1996. Branching type particle methodologies with varying population sizes were also developed in the end of the 1990s by Dan Crisan, Jessica Gaines and Terry Lyons, and by Dan Crisan, Pierre Del Moral and Terry Lyons. Further developments in this field were developed in 2000 by P. Del Moral, A. Guionnet and L. Miclo."
+                }
+            ],
+            "para_id": "035a17fa2b7ce98904722708a8ab9eb767465af7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "There are a few challenges when it comes to working with gaps. When working with popular algorithms there seems to be little theoretical basis for the form of the gap penalty functions. Consequently, for any alignment situation  gap placement must be empirically determined. Also, pairwise alignment gap penalties, such as the affine gap penalty, are often implemented independent of the amino acid types in the inserted or deleted fragment or at the broken ends, despite evidence that specific residue types are preferred in gap regions. Finally, alignment of sequences implies alignment of the corresponding structures, but the relationships between structural features of gaps in proteins and their corresponding sequences are only imperfectly known. Because of this incorporating structural information into gap penalties is difficult to do. Some algorithms use predicted or actual structural information to bias the placement of gaps. However, only a minority of sequences have known structures, and most alignment problems involve sequences of unknown secondary and tertiary structure."
+                }
+            ],
+            "para_id": "7d9519f026b33c4399d9ae4472d6bf7b57ca035f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In "
+                },
+                {
+                    "entity": "enwiki:Supervised%20learning",
+                    "entity_name": "Supervised learning",
+                    "link_section": null,
+                    "text": "(supervised) machine learning"
+                },
+                {
+                    "text": ", specifically when learning from data, there are situations when the data values cannot be modeled. This may arise if there are random fluctuations or measurement errors in the data which are not modeled, and can be appropriately called stochastic noise; or, when the phenomenon being modeled (or learned) is too complex, and so the data contains this added complexity that is not modeled.  This added complexity in the data has been called deterministic noise. Though these two types of noise arise from different causes, their adverse effect on learning is similar. The overfitting occurs because the model attempts to fit the (stochastic or deterministic) noise (that part of the data that it cannot model) at the expense of fitting that part of the data which it can model. When either type of noise is present, it is usually advisable to "
+                },
+                {
+                    "entity": "enwiki:Regularization%20(mathematics)",
+                    "entity_name": "Regularization (mathematics)",
+                    "link_section": null,
+                    "text": "regularize"
+                },
+                {
+                    "text": " the learning algorithm to prevent "
+                },
+                {
+                    "entity": "enwiki:Overfitting",
+                    "entity_name": "Overfitting",
+                    "link_section": null,
+                    "text": "overfitting"
+                },
+                {
+                    "text": " the model to the data and getting inferior performance. Regularization typically results in a lower variance model at the expense of "
+                },
+                {
+                    "entity": "enwiki:Supervised%20learning",
+                    "entity_name": "Supervised learning",
+                    "link_section": "Bias-variance tradeoff",
+                    "text": "bias"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "0828dbaf41b0f719a066ca6b7640e326e23627cd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A fourth issue is the degree of noise in the desired output values (the supervisory "
+                },
+                {
+                    "entity": "enwiki:Dependent%20and%20independent%20variables",
+                    "entity_name": "Dependent and independent variables",
+                    "link_section": null,
+                    "text": "target variable"
+                },
+                {
+                    "text": "s).  If the desired output values are often incorrect (because of human error or sensor errors), then the learning algorithm should not attempt to find a function that exactly matches the training examples.  Attempting to fit the data too carefully leads to "
+                },
+                {
+                    "entity": "enwiki:Overfitting",
+                    "entity_name": "Overfitting",
+                    "link_section": null,
+                    "text": "overfitting"
+                },
+                {
+                    "text": ".  You can overfit even when there are no measurement errors (stochastic noise) if the function you are trying to learn is too complex for your learning model. In such a situation that part of the target function that cannot be modeled \"corrupts\" your training data - this phenomenon has been called "
+                },
+                {
+                    "entity": "enwiki:Deterministic%20noise",
+                    "entity_name": "Deterministic noise",
+                    "link_section": null,
+                    "text": "deterministic noise"
+                },
+                {
+                    "text": ". When either type of noise is present, it is better to go with a higher bias, lower variance estimator."
+                }
+            ],
+            "para_id": "fc816c3221ce220dea0714f660ea5c3bdc1de869"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The second group argues against Hyman's point, saying that response bias has a significant effect, and that researchers need to take steps to reduce response bias in order to conduct sound research. They argue that the impact of response bias is a "
+                },
+                {
+                    "entity": "enwiki:Observational%20error",
+                    "entity_name": "Observational error",
+                    "link_section": "Systematic_versus_random_error",
+                    "text": "systematic error"
+                },
+                {
+                    "text": " inherent to this type of research and that it needs to be addressed in order for studies to be able to produce accurate results. In psychology, there are many studies exploring the impact of response bias in multiple different settings and with many different "
+                },
+                {
+                    "entity": "enwiki:Variable%20and%20attribute%20(research)",
+                    "entity_name": "Variable and attribute (research)",
+                    "link_section": null,
+                    "text": "variables"
+                },
+                {
+                    "text": ". For example, some studies have found effects of response bias in the reporting of "
+                },
+                {
+                    "entity": "enwiki:Major%20depressive%20disorder",
+                    "entity_name": "Major depressive disorder",
+                    "link_section": null,
+                    "text": "depression"
+                },
+                {
+                    "text": " in elderly patients. Other researchers have found that there are serious issues when responses to a given survey or questionnaire have responses that may seem desirable or undesirable to report, and that a person's responses to certain questions can be biased by their "
+                },
+                {
+                    "entity": "enwiki:Culture",
+                    "entity_name": "Culture",
+                    "link_section": null,
+                    "text": "culture"
+                },
+                {
+                    "text": ". Additionally, there is support for the idea that simply being part of an "
+                },
+                {
+                    "entity": "enwiki:Experiment",
+                    "entity_name": "Experiment",
+                    "link_section": null,
+                    "text": "experiment"
+                },
+                {
+                    "text": " can have dramatic effects on how participants act, thus biasing anything that they may do in a research or experimental setting when it comes to self-report. One of the most influential findings was a study which found that social desirability bias, a type of response bias, can account for as much as 10\u201370% of the "
+                },
+                {
+                    "entity": "enwiki:Variance",
+                    "entity_name": "Variance",
+                    "link_section": null,
+                    "text": "variance"
+                },
+                {
+                    "text": " in participant response. Essentially, because of several findings that illustrate the dramatic effects response bias has on the outcomes of self-report research, this side supports the idea that steps need to be taken to mitigate the effects of response bias to maintain the accuracy of research."
+                }
+            ],
+            "para_id": "41cc866c24f978b0d30e02898408ad2749421ea9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Gilbert et al. originally coined the term \"immune neglect\" (or \"immune bias\") to describe a function of the "
+                },
+                {
+                    "entity": "enwiki:Affective%20forecasting",
+                    "entity_name": "Affective forecasting",
+                    "link_section": "In psychology",
+                    "text": "psychological immune system"
+                },
+                {
+                    "text": ". Immune neglect refers to forecasters' unawareness of their tendency to adapt to and cope with negative events. Unconsciously the body will identify a stressful event and try to cope with the event or try to avoid it. Bolger & Zuckerman found that coping strategies vary between individuals and are influenced by their personalities They assumed that since people generally do not take their coping strategies into account when they predict future events, that people with better coping strategies should have a bigger impact bias, or a greater difference between their predicted and actual outcome.  For example, asking someone who is afraid of clowns how going to a circus would feel may result in an overestimation of fear because the anticipation of such fear causes the body to begin coping with the negative event. Hoerger et al. examined this further by studying college students\u2019 emotions for football games. They found that students who generally coped with their emotions instead of avoiding them would have a greater impact bias when predicting how they\u2019d feel if their team lost the game. They found that those with better coping strategies recovered more quickly. Since the participants did not think about their coping strategies when making predictions, those who actually coped had a greater impact bias. Those who avoided their emotions, felt very closely to what they predicted they would. In other words, students who were able to deal with their emotions were able to recover from their feelings. The students were unaware that their body was actually coping with the stress and this process made them feel better than not dealing with the stress. Hoerger ran another study on immune neglect after this, which studied both daters' and non-daters' forecasts about Valentine\u2019s Day, and how they would feel in the days that followed. Hoerger found that different coping strategies would cause people to have different emotions in the days following Valentine\u2019s Day, but participants\u2019 predicted emotions would all be similar. This shows that most people do not realize the impact that coping can have on their feelings following an emotional event. He also found that, not only did immune neglect create a bias for negative events, but also for positive ones. This shows that people continually make inaccurate forecasts because they do not take into account their ability to cope & overcome emotional events. Hoerger proposed that coping styles and cognitive processes are associated  with  actual  emotional  reactions to life events."
+                }
+            ],
+            "para_id": "4cbe4c7fe9343ff3337d2ce5679e728e7c511a38"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The first group supports Hyman's belief that although response bias exists, it often has minimal effect on participant response, and no large steps need to be taken to mitigate it. These researchers hold that although there is significant literature identifying response bias as influencing the responses of study participants, these studies do not in fact provide "
+                },
+                {
+                    "entity": "enwiki:Empirical%20evidence",
+                    "entity_name": "Empirical evidence",
+                    "link_section": null,
+                    "text": "empirical evidence"
+                },
+                {
+                    "text": " that this is the case. They subscribe to the idea that the effects of this bias wash out with large enough samples, and that it is not a systematic problem in "
+                },
+                {
+                    "entity": "enwiki:Mental%20health",
+                    "entity_name": "Mental health",
+                    "link_section": null,
+                    "text": "mental health"
+                },
+                {
+                    "text": " research. These studies also call into question earlier research that investigated response bias on basis of their "
+                },
+                {
+                    "entity": "enwiki:List%20of%20psychological%20research%20methods",
+                    "entity_name": "List of psychological research methods",
+                    "link_section": null,
+                    "text": "research methodologies"
+                },
+                {
+                    "text": ". For example, they mention that many of the studies had very small "
+                },
+                {
+                    "entity": "enwiki:Sample%20(statistics)",
+                    "entity_name": "Sample (statistics)",
+                    "link_section": null,
+                    "text": "sample sizes"
+                },
+                {
+                    "text": ", or that in studies looking at "
+                },
+                {
+                    "entity": "enwiki:Social%20desirability%20bias",
+                    "entity_name": "Social desirability bias",
+                    "link_section": null,
+                    "text": "social desirability"
+                },
+                {
+                    "text": ", a subtype of response bias, the researchers had no way to "
+                },
+                {
+                    "entity": "enwiki:Quantification%20(science)",
+                    "entity_name": "Quantification (science)",
+                    "link_section": null,
+                    "text": "quantify"
+                },
+                {
+                    "text": " the desirability of the statements used in the study. Additionally, some have argued that what researchers may believe to be artifacts of response bias, such as differences in responding between men and women, may in fact be actual differences between the two groups. Several other studies also found evidence that response bias is not as big of a problem as it seems. The first found that when comparing the responses of participants, with and without controls for response bias, their answers to the surveys were not "
+                },
+                {
+                    "entity": "enwiki:Statistical%20significance",
+                    "entity_name": "Statistical significance",
+                    "link_section": null,
+                    "text": "different"
+                },
+                {
+                    "text": ". Two other studies found that although the bias may be present, the effects are extremely small, having little to no impact towards dramatically changing or altering the responses of participants. "
+                }
+            ],
+            "para_id": "b368b4240469d772b4b28344b6b01087536995c4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The impact bias is a broad term and covers a multitude of more specific errors. Proposed causes of impact bias include mechanisms like "
+                },
+                {
+                    "entity": "enwiki:Affective%20forecasting",
+                    "entity_name": "Affective forecasting",
+                    "link_section": "Immune neglect",
+                    "text": "immune neglect"
+                },
+                {
+                    "text": ",  "
+                },
+                {
+                    "entity": "enwiki:Affective%20forecasting",
+                    "entity_name": "Affective forecasting",
+                    "link_section": "Focalism",
+                    "text": "focalism"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Affective%20forecasting",
+                    "entity_name": "Affective forecasting",
+                    "link_section": "Misconstruals",
+                    "text": "misconstruals"
+                },
+                {
+                    "text": ". The pervasiveness of impact bias in affective forecasts is of particular concern to "
+                },
+                {
+                    "entity": "enwiki:Health%20care",
+                    "entity_name": "Health care",
+                    "link_section": null,
+                    "text": "healthcare"
+                },
+                {
+                    "text": " specialists, in that it affects both patients' expectations of future medical events as well as patient-provider relationships. (See "
+                },
+                {
+                    "text": "health"
+                },
+                {
+                    "text": ".)"
+                }
+            ],
+            "para_id": "7861e46971f3123edfe7e99db4e4deb64ea6339d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Awareness of response bias has been present in "
+                },
+                {
+                    "entity": "enwiki:Psychology",
+                    "entity_name": "Psychology",
+                    "link_section": null,
+                    "text": "psychology"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Sociology",
+                    "entity_name": "Sociology",
+                    "link_section": null,
+                    "text": "sociology"
+                },
+                {
+                    "text": " literature for some time because self-reporting features significantly in those fields of research. However, researchers were initially unwilling to admit the degree to which they impact, and potentially invalidate research utilizing these types of measures. Some researchers believed that the biases present in a group of subjects cancel out when the group is large enough. This would mean that the impact of response bias is random noise, which washes out if enough participants are included in the study. However, at the time this argument was proposed, effective methodological tools that could test it were not available. Once newer methodologies were developed, researchers began to investigate the impact of response bias. From this renewed research, two opposing sides arose."
+                }
+            ],
+            "para_id": "75578fa9e96303bf9efc7cfb4c2e7c3b69aff8be"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The bias blind spot is the "
+                },
+                {
+                    "entity": "enwiki:Cognitive%20bias",
+                    "entity_name": "Cognitive bias",
+                    "link_section": null,
+                    "text": "cognitive bias"
+                },
+                {
+                    "text": " of recognizing the impact of biases on the judgement of others, while failing to see the impact of biases on one's own judgment. The term was created by Emily Pronin, a social psychologist from "
+                },
+                {
+                    "entity": "enwiki:Princeton%20University",
+                    "entity_name": "Princeton University",
+                    "link_section": null,
+                    "text": "Princeton University"
+                },
+                {
+                    "text": "'s "
+                },
+                {
+                    "entity": "enwiki:Princeton%20University%20Department%20of%20Psychology",
+                    "entity_name": "Princeton University Department of Psychology",
+                    "link_section": null,
+                    "text": "Department of Psychology"
+                },
+                {
+                    "text": ", with colleagues Daniel Lin and "
+                },
+                {
+                    "entity": "enwiki:Lee%20Ross",
+                    "entity_name": "Lee Ross",
+                    "link_section": null,
+                    "text": "Lee Ross"
+                },
+                {
+                    "text": ". The bias blind spot is named after the visual "
+                },
+                {
+                    "entity": "enwiki:Blind%20spot%20(vision)",
+                    "entity_name": "Blind spot (vision)",
+                    "link_section": null,
+                    "text": "blind spot"
+                },
+                {
+                    "text": ". Most people appear to exhibit the bias blind spot. In a sample of more than 600 residents of the United States, more than 85% believed they were less biased than the average American. Only one participant believed that he or she was more biased than the average American. People do vary with regard to the extent to which they exhibit the bias blind spot. It appears to be a stable individual difference that is measurable (for a scale, see Scopelliti et al. 2015)."
+                }
+            ],
+            "para_id": "83cab71bd9742de01e4ae7a3acd4086a9dd43d5c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Multiple kernel learning refers to a set of machine learning methods that use a predefined set of "
+                },
+                {
+                    "entity": "enwiki:Kernel%20method",
+                    "entity_name": "Kernel method",
+                    "link_section": null,
+                    "text": "kernels"
+                },
+                {
+                    "text": " and learn an optimal linear or non-linear combination of kernels as part of the algorithm. Reasons to use multiple kernel learning include a) the ability to select for an optimal kernel and parameters from a larger set of kernels, reducing bias due to kernel selection while allowing for more automated machine learning methods, and b) combining data from different sources (e.g. sound and images from a video) that have different notions of similarity and thus require different kernels. Instead of creating a new kernel, multiple kernel algorithms can be used to combine kernels already established for each individual data source."
+                }
+            ],
+            "para_id": "72c8968b3d885d707efba8c6d49f217358f5ee39"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Independent metadynamics simulations (replicas) can be coupled together to improve usability and parallel performance. There are several such methods proposed: the multiple walker MTD, the parallel tempering MTD, the bias-exchange MTD, and the collective-variable tempering MTD. The last three are similar to the "
+                },
+                {
+                    "entity": "enwiki:Parallel%20tempering",
+                    "entity_name": "Parallel tempering",
+                    "link_section": null,
+                    "text": "parallel tempering"
+                },
+                {
+                    "text": " method and use replica exchanges to improve sampling. Typically, the "
+                },
+                {
+                    "entity": "enwiki:Metropolis%E2%80%93Hastings%20algorithm",
+                    "entity_name": "Metropolis\u2013Hastings algorithm",
+                    "link_section": null,
+                    "text": "Metropolis\u2013Hastings"
+                },
+                {
+                    "text": " algorithm is used for replica exchanges, but the "
+                },
+                {
+                    "text": "infinite swapping"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "text": "Suwa-Todo"
+                },
+                {
+                    "text": " algorithms give better replica exchange rates."
+                }
+            ],
+            "para_id": "9c1b976c120142926f1618a812b56b8e76ea0a1d"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:Interior%20point%20method",
+                    "entity_name": "Interior point method",
+                    "link_section": null,
+                    "text": "Barrier method"
+                },
+                {
+                    "text": "s constitute an alternative class of algorithms for constrained optimization.  These methods also add a penalty-like term to the objective function, but in this case the iterates are forced to remain interior to the feasible domain and the barrier is in place to bias the iterates to remain away from the boundary of the feasible region."
+                }
+            ],
+            "para_id": "9f660526ccf3523076fb86761cfad5ed2bf875e4"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Various methods exist for filtering data in variant calling experiments, in order to remove sources of error/bias. This can involve the removal of suspicious reads before performing alignment and/or filtering of the list of variants returned by the variant calling algorithm."
+                }
+            ],
+            "para_id": "3b2a7d701806d0e3541ecb5f4e199fe9b0cac2fa"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The sampling bias of Kashtan et al.  provided great impetus for designing better algorithms for the NM discovery problem. Although Kashtan et al. tried to settle this drawback by means of a weighting scheme, this method imposed an undesired overhead on the running time as well a more complicated implementation. This tool is one of the most useful ones, as it supports visual options and also is an efficient algorithm with respect to time. But, it has a limitation on motif size as it does not allow searching for motifs of size 9 or higher because of the way the tool is implemented."
+                }
+            ],
+            "para_id": "b11a94cedcfc45103d9606760b2e4e3376e49464"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Region growing approach is a method of detecting neighboring pixels with similarities. A seed point is required for such method to start. Two elements are needed for this technique to work: similarity and spatial proximity. A neighboring pixel to the seed pixel with similar intensity is likely to be the same type and will be added to the growing region. One disadvantage of this technique is that it requires manual selection of seed point, which introduces bias and inconsistency in the algorithm. This technique is also being used in optic disc identification."
+                }
+            ],
+            "para_id": "37f66d38f16de57b2d774bd10b3989f2677c5daa"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The analysis of distributions is fundamental in "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "machine learning"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Statistics",
+                    "entity_name": "Statistics",
+                    "link_section": null,
+                    "text": "statistics"
+                },
+                {
+                    "text": ",  and many algorithms in these fields rely on information theoretic approaches such as "
+                },
+                {
+                    "entity": "enwiki:Entropy",
+                    "entity_name": "Entropy",
+                    "link_section": null,
+                    "text": "entropy"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Mutual%20information",
+                    "entity_name": "Mutual information",
+                    "link_section": null,
+                    "text": "mutual information"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Kullback%E2%80%93Leibler%20divergence",
+                    "entity_name": "Kullback\u2013Leibler divergence",
+                    "link_section": null,
+                    "text": "Kullback\u2013Leibler divergence"
+                },
+                {
+                    "text": ".  However, to estimate these quantities, one must first either perform density estimation, or employ sophisticated space-partitioning/bias-correction strategies which are typically infeasible for high-dimensional data.  Commonly, methods for modeling complex distributions rely on parametric assumptions that may be unfounded or computationally challenging (e.g. "
+                },
+                {
+                    "entity": "enwiki:Mixture%20model",
+                    "entity_name": "Mixture model",
+                    "link_section": "Gaussian mixture model",
+                    "text": "Gaussian mixture models"
+                },
+                {
+                    "text": "), while nonparametric methods like "
+                },
+                {
+                    "entity": "enwiki:Kernel%20density%20estimation",
+                    "entity_name": "Kernel density estimation",
+                    "link_section": null,
+                    "text": "kernel density estimation"
+                },
+                {
+                    "text": " (Note: the smoothing kernels in this context have a different interpretation than the kernels discussed here) or "
+                },
+                {
+                    "entity": "enwiki:Characteristic%20function%20(probability%20theory)",
+                    "entity_name": "Characteristic function (probability theory)",
+                    "link_section": null,
+                    "text": "characteristic function"
+                },
+                {
+                    "text": " representation (via the "
+                },
+                {
+                    "entity": "enwiki:Fourier%20transform",
+                    "entity_name": "Fourier transform",
+                    "link_section": null,
+                    "text": "Fourier transform"
+                },
+                {
+                    "text": " of the distribution) break down in high-dimensional settings."
+                }
+            ],
+            "para_id": "ded24fd234c5852063021f933ff643b899fbf984"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Traditional instruments provided only the measurement of single events or event pairs. The introduction of the improved statistical tool of overlapping measurements by J.J. Snyder allowed for much improved resolution in frequency readouts, breaking the traditional digits/time-base balance. While such methods is useful for their intended purpose, using such smoothed measurements for Allan variance calculations would give a false impression of high resolution, but for longer \u03c4 the effect is gradually removed and the lower \u03c4 region of the measurement has biased values. This bias is providing lower values than it should, so it is an overoptimistic (assuming that low numbers is what one wishes) bias reducing the usability of the measurement rather than improving it. Such smart algorithms can usually be disabled or otherwise circumvented by using time-stamp mode which is much preferred if available."
+                }
+            ],
+            "para_id": "af6db9dff857cdf9af5a05f3aee3bf596079b982"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In "
+                },
+                {
+                    "entity": "enwiki:Machine%20learning",
+                    "entity_name": "Machine learning",
+                    "link_section": null,
+                    "text": "machine learning"
+                },
+                {
+                    "text": ", one aims to construct algorithms that are able to learn to predict a certain target output. To achieve this, the learning algorithm is presented some training examples that demonstrate the intended relation of input and output values. Then the learner is supposed to approximate the correct output, even for examples that have not been shown during training.  Without any additional assumptions, this problem cannot be solved exactly since unseen situations might have an arbitrary output value. The kind of necessary assumptions about the nature of the target function are subsumed in the phrase inductive bias."
+                }
+            ],
+            "para_id": "d09e5964e9ceac12690d7b93684b272ca4cafa2b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Boosting is a "
+                },
+                {
+                    "entity": "enwiki:Ensemble%20learning",
+                    "entity_name": "Ensemble learning",
+                    "link_section": null,
+                    "text": "machine learning ensemble"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Metaheuristic",
+                    "entity_name": "Metaheuristic",
+                    "link_section": null,
+                    "text": "meta-algorithm"
+                },
+                {
+                    "text": " for primarily reducing "
+                },
+                {
+                    "entity": "enwiki:Supervised%20learning",
+                    "entity_name": "Supervised learning",
+                    "link_section": "Bias-variance tradeoff",
+                    "text": "bias"
+                },
+                {
+                    "text": ", and also variance in "
+                },
+                {
+                    "entity": "enwiki:Supervised%20learning",
+                    "entity_name": "Supervised learning",
+                    "link_section": null,
+                    "text": "supervised learning"
+                },
+                {
+                    "text": ", and a family of machine learning algorithms which convert weak learners to strong ones. Boosting is based on the question posed by "
+                },
+                {
+                    "entity": "enwiki:Michael%20Kearns%20(computer%20scientist)",
+                    "entity_name": "Michael Kearns (computer scientist)",
+                    "link_section": null,
+                    "text": "Kearns"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Leslie%20Valiant",
+                    "entity_name": "Leslie Valiant",
+                    "link_section": null,
+                    "text": "Valiant"
+                },
+                {
+                    "text": " (1988, 1989): Can a set of weak learners create a single strong learner? A weak learner is defined to be a classifier which is only slightly correlated with the true classification (it can label examples better than random guessing). In contrast, a strong learner is a classifier that is arbitrarily well-correlated with the true classification."
+                }
+            ],
+            "para_id": "3c23b8c1dc89220f95ba4c2822af7544b3f59d35"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A classical example of an inductive bias is "
+                },
+                {
+                    "entity": "enwiki:Occam's%20razor",
+                    "entity_name": "Occam's razor",
+                    "link_section": null,
+                    "text": "Occam's razor"
+                },
+                {
+                    "text": ", assuming that the simplest consistent hypothesis about the target function is actually the best. Here consistent means that the hypothesis of the learner yields correct outputs for all of the examples that have been given to the algorithm."
+                }
+            ],
+            "para_id": "04e16d3ad8f95b5e9a8e4f3d3b20c387da0210c5"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Algorithmic determinism of news has not been without controversy. For example, Facebook recently came under fire for censoring the \u201cNapalm girl\u201d photo of Phan Th\u1ecb Kim Phuc (they blamed the algorithm), it conducted an emotional contagion experiment on users without their knowledge, and it has been accused of liberal bias"
+                }
+            ],
+            "para_id": "ee1b70aaea4fdc873e7a24562820bea860dabb88"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Multiple Biometric Grand Challenge is based on previous challenges directed by Dr. P. Jonathon Phillips.  Specifically the Facial Recognition Grand Challenge (FRGC) and the Iris Challenge Evaluation (ICE 2005).  The programmatic process of a Challenge Problem is as follows.  The Challenge Team designs the protocols, challenge problems, prepares challenge infrastructure, and composes the necessary data sets.  Organizations then sign licenses to receive the data and begin to develop technology (mostly computer algorithms) in an attempt to solve the various challenges laid out by the Challenge Team.  To advance and inform the various participants and interested parties the Team hosts workshops.  The first workshop gives an overview of the challenge and introduces the first set of challenge problems (typically referred to as Version 1).  The data sets are then released to participating organizations who develop their algorithms and submit self reported results back to the Challenge Team in the form of similarity matrices.  The Team analyzes these results and then hosts another workshop.  At the 2nd Workshop the Challenge Team reports the results from Challenge Version 1 and releases the Challenge Version 2.  The cycle is repeated, finishing with a final workshop.  At this stage the Participants are requested to submit not their self reported results, but the actual executables (or SDKs) to their algorithms.  The Challenge Team then runs these algorithms through a battery of tests on large sequestered datasets.  This phase ultimately determines the performance levels of the participant\u2019s algorithms.  A final report is issued by the Team which is used by Industries and Governments to determine the actual state of the art in a given field and to provide participating organizations a basis for showing their performance within that field."
+                }
+            ],
+            "para_id": "19c5db43e690e232878225837c247c3c1dea4678"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The general control algorithm for LFC was developed by N. Cohn in 1971.  The algorithm involves defining the term \"area control error\" (ACE), which is the sum of the net tie-line power error and the product of the frequency error with a frequency bias constant.  When the area control error is reduced to zero, the control algorithm has returned the frequency and tie-line power errors to zero."
+                }
+            ],
+            "para_id": "7939b8fb8f3514f48b4e8282032cd4d6b005b30b"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "Definitions",
+            "heading_id": "enwiki:Algorithmic%20bias/Definitions"
+        },
+        {
+            "heading": "Methods",
+            "heading_id": "enwiki:Algorithmic%20bias/Methods"
+        },
+        {
+            "heading": "History",
+            "heading_id": "enwiki:Algorithmic%20bias/History"
+        },
+        {
+            "heading": "Types",
+            "heading_id": "enwiki:Algorithmic%20bias/Types"
+        },
+        {
+            "heading": "Examples",
+            "heading_id": "enwiki:Algorithmic%20bias/Examples"
+        },
+        {
+            "heading": "Impact",
+            "heading_id": "enwiki:Algorithmic%20bias/Impact"
+        },
+        {
+            "heading": "Challenges",
+            "heading_id": "enwiki:Algorithmic%20bias/Challenges"
+        },
+        {
+            "heading": "Regulation",
+            "heading_id": "enwiki:Algorithmic%20bias/Regulation"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Algorithmic%20bias",
+    "title": "Algorithmic bias"
+}

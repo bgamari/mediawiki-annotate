@@ -1,0 +1,3302 @@
+{
+    "paragraph_origins": [
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 1,
+            "rank_score": 0.9427868269609456,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 2,
+            "rank_score": 0.8499680755432233,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 3,
+            "rank_score": 0.8262799643889936,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 4,
+            "rank_score": 0.8182739841650661,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f",
+            "rank": 5,
+            "rank_score": 0.8104625894228052,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 6,
+            "rank_score": 0.8035639576698859,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3",
+            "rank": 7,
+            "rank_score": 0.7920602531483402,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71",
+            "rank": 8,
+            "rank_score": 0.7842320119193236,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6",
+            "rank": 9,
+            "rank_score": 0.7814322649270178,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb",
+            "rank": 10,
+            "rank_score": 0.7765305906957027,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7",
+            "rank": 11,
+            "rank_score": 0.7599620850758596,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "33bf72d5baa6fbd63681f7f9ef9df62da59fe6cb",
+            "rank": 12,
+            "rank_score": 0.7451543557545305,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714",
+            "rank": 13,
+            "rank_score": 0.7398927309049765,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "fea3db3de824a4d80bd661c1884f24f58f248606",
+            "rank": 14,
+            "rank_score": 0.6901236402182458,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "ea9930af3b8e2b7697a7804d3faa626a9c8bc3e9",
+            "rank": 15,
+            "rank_score": 0.6893421425732235,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "f903daa33f65a54d005184dd615901915ff53a79",
+            "rank": 16,
+            "rank_score": 0.6861792692779448,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "bbad54e48ff86875df38cfb1a326273e45e4e048",
+            "rank": 17,
+            "rank_score": 0.6805615474650808,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "09d72d3804520c8ec0117c7b5abfd9b10b48d382",
+            "rank": 18,
+            "rank_score": 0.6771572908679038,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "4e737df49b0bb37c835a5708355eea4889ef3bd8",
+            "rank": 19,
+            "rank_score": 0.674103488806035,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "6d6d0f487fd8080b06c6f38fc3230db64104b5ec",
+            "rank": 20,
+            "rank_score": 0.6739485246672636,
+            "section_path": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "para_id": "6738e416ebe2a80401a65378997cae246a92923b",
+            "rank": 1,
+            "rank_score": 0.9308653398057236,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "ca0a10e06721e83f0ba85f50909bd96b696a4e4c",
+            "rank": 2,
+            "rank_score": 0.9161751882885031,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "0ec220df60cd219858c94314d378c5a2c3961684",
+            "rank": 3,
+            "rank_score": 0.907526372989819,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "b9f3216cc3e19665a895780717ca1c962b6ee98c",
+            "rank": 4,
+            "rank_score": 0.870139358885487,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "248ffbb6a7173941db0483b86ff2482deda41559",
+            "rank": 5,
+            "rank_score": 0.8576059101985363,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 6,
+            "rank_score": 0.8478688640612297,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "2ebcf6a7bf00565cead7f5c752c9cf7f94de5b91",
+            "rank": 7,
+            "rank_score": 0.830959731585116,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "9b0580e974ed0cfbbd55a49492a1cd30b441004c",
+            "rank": 8,
+            "rank_score": 0.818300087050436,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 9,
+            "rank_score": 0.8105138915122936,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 10,
+            "rank_score": 0.7825384915294498,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 11,
+            "rank_score": 0.7780064255803345,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3",
+            "rank": 12,
+            "rank_score": 0.7762034230398616,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "79765ad4a2bab2ab3cbab9c99707e3c56d57522a",
+            "rank": 13,
+            "rank_score": 0.7729395497260241,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f",
+            "rank": 14,
+            "rank_score": 0.7726379452000293,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "f3ffdd58d85f33cb8a3b1332c0e897e3c6961a5a",
+            "rank": 15,
+            "rank_score": 0.7660505578747425,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 16,
+            "rank_score": 0.7639816750094192,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71",
+            "rank": 17,
+            "rank_score": 0.7627831743190998,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb",
+            "rank": 18,
+            "rank_score": 0.7431974968576718,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714",
+            "rank": 19,
+            "rank_score": 0.7373237075168847,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6",
+            "rank": 20,
+            "rank_score": 0.7337042737976301,
+            "section_path": "enwiki:Opioid%20epidemic/Countermeasures"
+        },
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 1,
+            "rank_score": 0.906771154599741,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "4e737df49b0bb37c835a5708355eea4889ef3bd8",
+            "rank": 2,
+            "rank_score": 0.899498113775501,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "ee023c8009adc1dc2cf7659ddcd66e085146c3dd",
+            "rank": 3,
+            "rank_score": 0.8940435491451559,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "6d6effad8af27cd8f38c365c387d2cbdfb862373",
+            "rank": 4,
+            "rank_score": 0.8395228535039343,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "41655a787078542207d1f4f3bbd47ff296757fc3",
+            "rank": 5,
+            "rank_score": 0.8131236436586673,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "44ccdebc45778c3885836b183ea8e940dc2fb165",
+            "rank": 6,
+            "rank_score": 0.80882016137693,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 7,
+            "rank_score": 0.7965930699619241,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "8ff1cf6d53911216f2400d996dc18acf1a5f620a",
+            "rank": 8,
+            "rank_score": 0.7932790130908305,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "c6db7c79d16bfcd4be051abc46947cda23b00412",
+            "rank": 9,
+            "rank_score": 0.7845791773212627,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "f8b629e5326b42c78968e32ec29fccbe0fabde6c",
+            "rank": 10,
+            "rank_score": 0.7838612500616462,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "c8784d5b0b79c2640b74abb4628ec8787b9928f6",
+            "rank": 11,
+            "rank_score": 0.7814706999707599,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7",
+            "rank": 12,
+            "rank_score": 0.7766955553332919,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "6a16779bec82ebc56d6e225b693d6a86f03df46d",
+            "rank": 13,
+            "rank_score": 0.7634987706278973,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 14,
+            "rank_score": 0.7621960665645633,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "0d2c5cc1212e1ab59ef215fe2c29ef3723def6d0",
+            "rank": 15,
+            "rank_score": 0.757200748607452,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 16,
+            "rank_score": 0.7552281097689244,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "d9d6b53b17d8d2e36c20ef6d0863651b85a03038",
+            "rank": 17,
+            "rank_score": 0.7548217205679204,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "b74596a94ac579ca24fc2689babb3b4477eeb128",
+            "rank": 18,
+            "rank_score": 0.7536216797637275,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 19,
+            "rank_score": 0.7535757070355783,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "7c0eb4eef6cb13260bb6cf4ee7eed9737f79d2c9",
+            "rank": 20,
+            "rank_score": 0.7530301073268176,
+            "section_path": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 1,
+            "rank_score": 0.9416809426396631,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "875e10a22af610cbb8378c4978e93069c2ab863e",
+            "rank": 2,
+            "rank_score": 0.8821178825859904,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 3,
+            "rank_score": 0.8493296536812163,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 4,
+            "rank_score": 0.8218489344117571,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 5,
+            "rank_score": 0.8207751644007627,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f",
+            "rank": 6,
+            "rank_score": 0.8079629594571955,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 7,
+            "rank_score": 0.8030834369410201,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3",
+            "rank": 8,
+            "rank_score": 0.7932835181619042,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71",
+            "rank": 9,
+            "rank_score": 0.7834567336096405,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb",
+            "rank": 10,
+            "rank_score": 0.780151088198971,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6",
+            "rank": 11,
+            "rank_score": 0.7796677560038496,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "e6dc8dc9ec4fa3099364f4af93c6e96407e7e94a",
+            "rank": 12,
+            "rank_score": 0.7706410397224466,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7",
+            "rank": 13,
+            "rank_score": 0.7608763097613611,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "33bf72d5baa6fbd63681f7f9ef9df62da59fe6cb",
+            "rank": 14,
+            "rank_score": 0.7484525737915316,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714",
+            "rank": 15,
+            "rank_score": 0.7417096046986494,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "d696c5b03f7744bce375c43bb66c9cb4de0a75af",
+            "rank": 16,
+            "rank_score": 0.7174760580823588,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "a2393d15279e6caeb1df070a7eac28e6b2abf6b3",
+            "rank": 17,
+            "rank_score": 0.7018237156445597,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "874333629a451f86c272c5a30d1f0a3750d48f5e",
+            "rank": 18,
+            "rank_score": 0.6864040248432678,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "09d72d3804520c8ec0117c7b5abfd9b10b48d382",
+            "rank": 19,
+            "rank_score": 0.6863328165182498,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "4e737df49b0bb37c835a5708355eea4889ef3bd8",
+            "rank": 20,
+            "rank_score": 0.6820590228878771,
+            "section_path": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 1,
+            "rank_score": 0.9355544510367924,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 2,
+            "rank_score": 0.9246619422260545,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3",
+            "rank": 3,
+            "rank_score": 0.8586201269050827,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 4,
+            "rank_score": 0.8325530013517085,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 5,
+            "rank_score": 0.8001529510760622,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f",
+            "rank": 6,
+            "rank_score": 0.7882716247407855,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 7,
+            "rank_score": 0.7820323770261457,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71",
+            "rank": 8,
+            "rank_score": 0.7637984372529897,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb",
+            "rank": 9,
+            "rank_score": 0.7627961782697834,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6",
+            "rank": 10,
+            "rank_score": 0.7611155622390687,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "09d72d3804520c8ec0117c7b5abfd9b10b48d382",
+            "rank": 11,
+            "rank_score": 0.745030600815042,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "8ff1cf6d53911216f2400d996dc18acf1a5f620a",
+            "rank": 12,
+            "rank_score": 0.7442086321039316,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7",
+            "rank": 13,
+            "rank_score": 0.7409585185027969,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714",
+            "rank": 14,
+            "rank_score": 0.7266070497820716,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "33bf72d5baa6fbd63681f7f9ef9df62da59fe6cb",
+            "rank": 15,
+            "rank_score": 0.7261989193940341,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "ce07b472cd331839e0925bd5994006d255831767",
+            "rank": 16,
+            "rank_score": 0.7170642567434957,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "6d6d0f487fd8080b06c6f38fc3230db64104b5ec",
+            "rank": 17,
+            "rank_score": 0.7149238479901995,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "65783b5cddf19a4fe4d0ace293be5455f57b2854",
+            "rank": 18,
+            "rank_score": 0.70761107729188,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "18750ad84e57a629538aa61eb7411391cde33230",
+            "rank": 19,
+            "rank_score": 0.6930959307060893,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "a6e17bd59164f935ac5f651b9982b96834c46ae2",
+            "rank": 20,
+            "rank_score": 0.6832946494500378,
+            "section_path": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123",
+            "rank": 1,
+            "rank_score": 0.9417427313255355,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779",
+            "rank": 2,
+            "rank_score": 0.9102131918824703,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3",
+            "rank": 3,
+            "rank_score": 0.8495614254992452,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815",
+            "rank": 4,
+            "rank_score": 0.8180760512984541,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f",
+            "rank": 5,
+            "rank_score": 0.810321012048657,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707",
+            "rank": 6,
+            "rank_score": 0.803242320680074,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3",
+            "rank": 7,
+            "rank_score": 0.7915827130563475,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71",
+            "rank": 8,
+            "rank_score": 0.7839867381814818,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6",
+            "rank": 9,
+            "rank_score": 0.7807980400304595,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb",
+            "rank": 10,
+            "rank_score": 0.7764988080263688,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7",
+            "rank": 11,
+            "rank_score": 0.7593283024735038,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "33bf72d5baa6fbd63681f7f9ef9df62da59fe6cb",
+            "rank": 12,
+            "rank_score": 0.7448890534663358,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714",
+            "rank": 13,
+            "rank_score": 0.7396090233975058,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "fea3db3de824a4d80bd661c1884f24f58f248606",
+            "rank": 14,
+            "rank_score": 0.6901834925168163,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "ea9930af3b8e2b7697a7804d3faa626a9c8bc3e9",
+            "rank": 15,
+            "rank_score": 0.6888799502175076,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "f903daa33f65a54d005184dd615901915ff53a79",
+            "rank": 16,
+            "rank_score": 0.685508181252266,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "874333629a451f86c272c5a30d1f0a3750d48f5e",
+            "rank": 17,
+            "rank_score": 0.683341622906104,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "bbad54e48ff86875df38cfb1a326273e45e4e048",
+            "rank": 18,
+            "rank_score": 0.6800441022583805,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "09d72d3804520c8ec0117c7b5abfd9b10b48d382",
+            "rank": 19,
+            "rank_score": 0.6761589489621415,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "para_id": "4e737df49b0bb37c835a5708355eea4889ef3bd8",
+            "rank": 20,
+            "rank_score": 0.6738792261893719,
+            "section_path": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        }
+    ],
+    "paragraphs": [
+        {
+            "para_body": [
+                {
+                    "text": "Over the past few years the plague of heroin addiction overdoses in East Boston has increased and are continuing to increase. The overdose deaths showed that this neighborhood is not immune to the growing epidemic. Governor Charlie Baker signed landmark legislation into law to address the deadly opioid and heroin epidemic plaguing neighborhoods like Eastie and the state. This law is supposed to strengthen prescribing laws and increase education for students and doctors. It's the first law in the nation to limit an opioid prescription to a 7-day supply for a first time adult prescriptions and a 7-day limit on every opiate prescription for minors, with certain exceptions. Other provisions from the Governor\u2019s recommendations include a requirement that information on opiate-use and misuse be disseminated at annual head injury safety programs for high school athletes, requirements for doctors to check the Prescription Monitoring Program (PMP) database before writing a prescription for a Schedule 2 or Schedule 3 narcotic and continuing education requirements for prescribers\u2014ranging from training on effective pain management to the risks of abuse and addiction associated with opioid medications. While this isn't the end on the opioid crisis, it is a step against the fight against addiction."
+                }
+            ],
+            "para_id": "9d4c7fbf85381dcd98196fb81cdfe68c1ed70123"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In March 2014, in an effort to address the "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " epidemic, Kasich signed legislation (passed unanimously in both chambers of the state legislature) expanding the availability of "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": ", a lifesaving antidote to "
+                },
+                {
+                    "entity": "enwiki:Opioid%20overdose",
+                    "entity_name": "Opioid overdose",
+                    "link_section": null,
+                    "text": "opioid overdose"
+                },
+                {
+                    "text": "s; the measure allowed friends and family members of addicts to obtain access to naloxone and for "
+                },
+                {
+                    "entity": "enwiki:First%20responder",
+                    "entity_name": "First responder",
+                    "link_section": null,
+                    "text": "first responder"
+                },
+                {
+                    "text": "s to carry naloxone. In July 2015, Kasich signed legislation further expanding the availability of naloxone, making it available without a prescription."
+                }
+            ],
+            "para_id": "7e90c24a8af3d841c0fb7a9f3ae59abcaec2f5f3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Oxycontin (1996) normalized the mass consumption of pain pills in the US and heavily contributed to the current opioid epidemic, by far the worst drug epidemic in US history.  To help facilitate large sales of the drug, Purdue lied to the FDA and Prescribers about how addictive it was.  Today in the US, the #1 cause of accidental death is overdose from legal drug-mostly from opiates like oxycontin.  Using his fortune from pharmaceuticals he became a generous donor to charitable causes across the world."
+                }
+            ],
+            "para_id": "c5c90d913e01b4b3867f309556ed2e6e30eff779"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "PILR's 2016 Symposium, entitled Virginia's Opioid Epidemic: Treatment and Policy in the 21st Century, will take a sharp focus on Virginia's attempts to control, treat, and prevent the opioid epidemic that has recently hit both the state and the nation. The keynote speakers include Virginia Attorney General Mark Herring, Dr. James C. May, Henrico County Commonwealth's Attorney Shannon Taylor, Winchester Public Defender Timothy S. Coyne, Director of Constituent & Legislative Affairs for the Office of the Attorney General Brittany Anderson, and former WDVA United States Attorney and Chair of the Hunton & Williams White Collar Defense Group Timothy J. Heaphy. Past authors include experienced practitioners, esteemed legal professors, and insightful advocates working to change the world around them both regionally and nationally. "
+                }
+            ],
+            "para_id": "b1f8d8dbc4e96fe9de3b097a601da3768ac47815"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A forum on the heroin and opioid epidemic in New England was hosted by the NEC in November 2015. The forum included several US senators as well as the governors of New Hampshire and Massachusetts."
+                }
+            ],
+            "para_id": "9bbb71283947601883ee8b622b6077b342a6a80f"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The 2013 documentary film Reach for Me: Fighting to End the American Drug Overdose Epidemic interviews people involved in naloxone programs aiming to make naloxone available to opioid users and people with "
+                },
+                {
+                    "entity": "enwiki:Chronic%20pain",
+                    "entity_name": "Chronic pain",
+                    "link_section": null,
+                    "text": "chronic pain"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "59813e5ef9acdb0fd077ccd8d01649723b430707"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Lopez has been a leader in the fight against the opioid epidemic, sponsoring Laree's Law, which holds drug dealers accountable for the deaths caused by the sale of opioids and other narcotics. Lopez has also been vocal about Albany's culture of corruption, and has called on fellow lawmakers to strip the pensions of "
+                },
+                {
+                    "entity": "enwiki:Sheldon%20Silver",
+                    "entity_name": "Sheldon Silver",
+                    "link_section": null,
+                    "text": "Sheldon Silver"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Dean%20Skelos",
+                    "entity_name": "Dean Skelos",
+                    "link_section": null,
+                    "text": "Dean Skelos"
+                },
+                {
+                    "text": ", who were convicted of corruption charges. Lopez has spent almost his entire career in public service, and rejects the influence of special interests and lobbyists in Albany."
+                }
+            ],
+            "para_id": "c00c3527f560db38f9f8a44fd259248b6757bdb3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2016, "
+                },
+                {
+                    "entity": "enwiki:Kevin%20D.%20Williamson",
+                    "entity_name": "Kevin D. Williamson",
+                    "link_section": null,
+                    "text": "Kevin D. Williamson"
+                },
+                {
+                    "text": ", writing in the "
+                },
+                {
+                    "entity": "enwiki:National%20Review",
+                    "entity_name": "National Review",
+                    "link_section": null,
+                    "text": "National Review"
+                },
+                {
+                    "text": " criticized small towns such as Garbutt; he wrote that such \"dysfunctional, downscale communities ... deserve to die.\" "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": null,
+                    "text": "Opioid dependency"
+                },
+                {
+                    "text": " is allegedly epidemic in Garbutt."
+                }
+            ],
+            "para_id": "9c7caca26eabbe26efd349b334e2c2cfb89e3d71"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Ayotte was one of four senators, two Republicans and two Democrats, who introduced the Comprehensive Addiction and Recovery Act, federal legislation to support local solutions and implement a comprehensive federal strategy to tackle the heroin and prescription opioid abuse epidemic. The bill is structured around prevention, treatment, recovery, and support for first responders."
+                }
+            ],
+            "para_id": "4b5d9578f278fffc9e1c9b5340ba0452fbc86ba6"
+        },
+        {
+            "para_body": [
+                {
+                    "entity": "enwiki:New%20Hampshire",
+                    "entity_name": "New Hampshire",
+                    "link_section": null,
+                    "text": "New Hampshire"
+                },
+                {
+                    "text": " senator Jeanne Shaheen addressed the New England Council in "
+                },
+                {
+                    "entity": "enwiki:Bedford,%20New%20Hampshire",
+                    "entity_name": "Bedford, New Hampshire",
+                    "link_section": null,
+                    "text": "Bedford, New Hampshire"
+                },
+                {
+                    "text": " in July 2016, arguing against "
+                },
+                {
+                    "entity": "enwiki:Isolationism",
+                    "entity_name": "Isolationism",
+                    "link_section": null,
+                    "text": "isolationism"
+                },
+                {
+                    "text": " in US politics and emphasizing the need to address the heroin and opioid epidemic facing the country, with New England in particular."
+                }
+            ],
+            "para_id": "edc88e230a65fe4a89b8cd896d7b8b7f8e1d71eb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "DuPage County, the bulk of Cullerton\u2019s district, has seen an increase in heroin use in the county. This was accompanied by an epidemic of overdoses and at one point the county was averaging one overdose death per week. In 2014, DuPage County began to train officers in the use of "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "Narcan"
+                },
+                {
+                    "text": ", a medication that reverses the effect of opioids like heroin in overdoses. Since the start of the program, twenty five overdose deaths have been prevented through the use of Narcan by first responders."
+                }
+            ],
+            "para_id": "bcf87376967ca1fc78a42eb93d778e3fe074adc7"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Throughout the decades, Malvern expanded to operate several inpatient treatment centers and outpatient locations. They've had locations in towns including Malvern, Pottstown, Berwyn, Trevose, Philadelphia, and Allentown. Starting in 2013, a Willow Grove facility was opened to respond to the growing opioid epidemic in both Pennsylvania and the United States as a whole."
+                }
+            ],
+            "para_id": "33bf72d5baa6fbd63681f7f9ef9df62da59fe6cb"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "A flooding relief package totals $4.1 billion, including $1.8 billion in community rebuilding grants, $1 billion to prevent storm damage and $1 billion for damaged highways. Also, the bill funds the "
+                },
+                {
+                    "entity": "enwiki:21st%20Century%20Cures%20Act",
+                    "entity_name": "21st Century Cures Act",
+                    "link_section": null,
+                    "text": "21st Century Cures Act"
+                },
+                {
+                    "text": ". $872 million goes toward medical research, "
+                },
+                {
+                    "entity": "enwiki:Food%20and%20Drug%20Administration",
+                    "entity_name": "Food and Drug Administration",
+                    "link_section": null,
+                    "text": "Food and Drug Administration"
+                },
+                {
+                    "text": " reforms, as well as state grants meant to address the "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " epidemic."
+                }
+            ],
+            "para_id": "e6c9f9269c9fbe2bad0e425dc0c1c7f3aff13714"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Lofexidine is not an opioid, whereas methadone is. Some opioid detox programs use methadone in decreasing amounts in their detox protocol, whereas other detox programs use lofexidine. The drugs are completely chemically unrelated, and their physiological effects are completely unrelated, although both are used as part of an opioid detoxification protocol. Whereas lofexidine cannot stop opioid withdrawal and merely eases some symptoms of withdrawal, methadone\u2014being an opioid itself\u2014will completely ameliorate all withdrawal symptoms in a sufficient dose. Indeed, one suggested use for lofexidine is to ease withdrawal symptoms of methadone dependence. While abstaining from opiates and taking lofexidine, effective detoxification can succeed in as little as 3 days, although the standard duration of detoxification using lofexidine is 10 days. The  of lofexidine is 77 mg/kg. Lofexidine is not currently available in the "
+                },
+                {
+                    "entity": "enwiki:United%20States",
+                    "entity_name": "United States",
+                    "link_section": null,
+                    "text": "United States"
+                },
+                {
+                    "text": ".  Britannia Pharmaceuticals has licensed lofexidine to be sold by US World Meds for sale in North America, and clinical trials are currently underway to secure approval for sale in the United States by the "
+                },
+                {
+                    "entity": "enwiki:Food%20and%20Drug%20Administration",
+                    "entity_name": "Food and Drug Administration",
+                    "link_section": null,
+                    "text": "U.S. Food and Drug Administration"
+                },
+                {
+                    "text": " (FDA)."
+                }
+            ],
+            "para_id": "fea3db3de824a4d80bd661c1884f24f58f248606"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Projects of this type are under way in many North American cities. CDC estimates that the US programs for drug users and their caregivers prescribing take-home doses of naloxone and training on its use have prevented 10,000 opioid overdose deaths. Healthcare institution-based naloxone prescription programs have also helped reduce rates of opioid overdose in "
+                },
+                {
+                    "entity": "enwiki:North%20Carolina",
+                    "entity_name": "North Carolina",
+                    "link_section": null,
+                    "text": "North Carolina"
+                },
+                {
+                    "text": ", and have been replicated in the US military. Programs training police and fire personnel in opioid overdose response using naloxone have also shown promise in the US, and effort is increasing to integrate opioid fatality prevention in the overall response to the overdose crisis."
+                }
+            ],
+            "para_id": "ea9930af3b8e2b7697a7804d3faa626a9c8bc3e9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The distribution of "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " to "
+                },
+                {
+                    "entity": "enwiki:Drug%20injection",
+                    "entity_name": "Drug injection",
+                    "link_section": null,
+                    "text": "injection drug users"
+                },
+                {
+                    "text": " and other "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " drug users decreases the risk of death from overdose. The "
+                },
+                {
+                    "entity": "enwiki:Centers%20for%20Disease%20Control%20and%20Prevention",
+                    "entity_name": "Centers for Disease Control and Prevention",
+                    "link_section": null,
+                    "text": "Centers for Disease Control and Prevention"
+                },
+                {
+                    "text": " (CDC) estimates that U.S. programs for drug users and their caregivers prescribing take-home doses of naloxone and training on its utilization are estimated to have prevented 10,000 opioid overdose deaths. Healthcare institution-based naloxone prescription programs have also helped reduce rates of opioid overdose in the "
+                },
+                {
+                    "entity": "enwiki:U.S.%20state",
+                    "entity_name": "U.S. state",
+                    "link_section": null,
+                    "text": "U.S. state"
+                },
+                {
+                    "text": " of "
+                },
+                {
+                    "entity": "enwiki:North%20Carolina",
+                    "entity_name": "North Carolina",
+                    "link_section": null,
+                    "text": "North Carolina"
+                },
+                {
+                    "text": ", and have been replicated in the U.S. military. Nevertheless, scale-up of healthcare-based opioid overdose interventions is limited by providers' insufficient knowledge and negative attitudes towards prescribing take-home naloxone to prevent opioid overdose. Programs training police and fire personnel in opioid overdose response using naloxone have also shown promise in the US."
+                }
+            ],
+            "para_id": "f903daa33f65a54d005184dd615901915ff53a79"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Programs to provide drug users and their caregivers with "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " are recommended. In the United States its use is estimated to have prevented 10,000 opioid overdose deaths. Healthcare institution-based naloxone prescription programs have also helped reduce rates of opioid overdose in the US state of North Carolina, and have been replicated in the US military. Nevertheless, scale-up of healthcare-based opioid overdose interventions are limited by providers\u2019 insufficient knowledge and negative attitudes towards prescribing take-home naloxone to prevent opioid overdose. Programs training police and fire personnel in opioid overdose response using naloxone have also shown promise."
+                }
+            ],
+            "para_id": "bbad54e48ff86875df38cfb1a326273e45e4e048"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Opioid overdose is an "
+                },
+                {
+                    "entity": "enwiki:Acute%20(medicine)",
+                    "entity_name": "Acute (medicine)",
+                    "link_section": null,
+                    "text": "acute"
+                },
+                {
+                    "text": " condition due to excessive "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioids"
+                },
+                {
+                    "text": ". Examples of opioids are: "
+                },
+                {
+                    "entity": "enwiki:Morphine",
+                    "entity_name": "Morphine",
+                    "link_section": null,
+                    "text": "morphine"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Heroin",
+                    "entity_name": "Heroin",
+                    "link_section": null,
+                    "text": "heroin"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Tramadol",
+                    "entity_name": "Tramadol",
+                    "link_section": null,
+                    "text": "tramadol"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Oxycodone",
+                    "entity_name": "Oxycodone",
+                    "link_section": null,
+                    "text": "oxycodone"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Methadone",
+                    "entity_name": "Methadone",
+                    "link_section": null,
+                    "text": "methadone"
+                },
+                {
+                    "text": ". It differs from "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": null,
+                    "text": "opioid dependency"
+                },
+                {
+                    "text": ". Although opioid overdose does not constitute a majority of the overdoses seen in the emergency department it is important to rule out in people given its potential for mortality and the ease of reversal. Dependence on prescription opioids can stem from treatment of chronic pain and in recent years is the cause of the increased number of opioid overdoses."
+                }
+            ],
+            "para_id": "09d72d3804520c8ec0117c7b5abfd9b10b48d382"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Finally, opioid effects (adverse or otherwise) can be reversed with an opioid antagonist such as "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Naltrexone",
+                    "entity_name": "Naltrexone",
+                    "link_section": null,
+                    "text": "naltrexone"
+                },
+                {
+                    "text": ".  These "
+                },
+                {
+                    "entity": "enwiki:Competitive%20antagonist",
+                    "entity_name": "Competitive antagonist",
+                    "link_section": null,
+                    "text": "competitive antagonist"
+                },
+                {
+                    "text": "s bind to the opioid receptors with higher affinity than agonists but do not activate the receptors. This displaces the agonist, attenuating or reversing the agonist effects. However, the "
+                },
+                {
+                    "entity": "enwiki:Biological%20half-life",
+                    "entity_name": "Biological half-life",
+                    "link_section": null,
+                    "text": "elimination half-life"
+                },
+                {
+                    "text": " of naloxone can be shorter than that of the opioid itself, so repeat dosing or continuous infusion may be required, or a longer acting antagonist such as "
+                },
+                {
+                    "entity": "enwiki:Nalmefene",
+                    "entity_name": "Nalmefene",
+                    "link_section": null,
+                    "text": "nalmefene"
+                },
+                {
+                    "text": " may be used. In patients taking opioids regularly it is essential that the opioid is only partially reversed to avoid a severe and distressing reaction of waking in excruciating pain. This is achieved by not giving a full dose but giving this in small doses until the respiratory rate has improved. An infusion is then started to keep the reversal at that level, while maintaining pain relief. Opioid antagonists remain the standard treatment for respiratory depression following opioid overdose, with naloxone being by far the most commonly used, although the longer acting antagonist nalmefene may be used for treating overdoses of long-acting opioids such as methadone, and diprenorphine is used for reversing the effects of extremely potent opioids used in veterinary medicine such as etorphine and carfentanil. However, since opioid antagonists also block the beneficial effects of opioid analgesics, they are generally useful only for treating overdose, with use of opioid antagonists alongside opioid analgesics to reduce side effects, requiring careful dose titration and often being poorly effective at doses low enough to allow analgesia to be maintained."
+                }
+            ],
+            "para_id": "4e737df49b0bb37c835a5708355eea4889ef3bd8"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "One notable example of drug repurposing is taking the partial mu-opioid receptor agonist "
+                },
+                {
+                    "entity": "enwiki:Buprenorphine",
+                    "entity_name": "Buprenorphine",
+                    "link_section": null,
+                    "text": "buprenorphine"
+                },
+                {
+                    "text": " - which has been prescribed for control of moderate pain for decades in low dosages in the form of Temgesic 200mcg sublingual tablets, Buprenex 300mcg/mL ampoules - and marketing a high-dosage formulation (Subutex 2 mg and 8 mg) for the interruption and maintenance of "
+                },
+                {
+                    "entity": "enwiki:Heroin",
+                    "entity_name": "Heroin",
+                    "link_section": null,
+                    "text": "heroin"
+                },
+                {
+                    "text": " and other "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " addictions, which it has proven very beneficial for, with over 200,000 people in the United States alone on buprenorphine maintenance. Some of the reasons for this are that the drug has a ceiling effect - higher doses do not cause further activation of opioid receptors - and a very long "
+                },
+                {
+                    "entity": "enwiki:Half-life",
+                    "entity_name": "Half-life",
+                    "link_section": null,
+                    "text": "half-life"
+                },
+                {
+                    "text": " in >2 mg dosages. It also has an extremely high "
+                },
+                {
+                    "entity": "enwiki:Ligand%20(biochemistry)",
+                    "entity_name": "Ligand (biochemistry)",
+                    "link_section": "Receptor.2Fligand binding affinity",
+                    "text": "binding affinity"
+                },
+                {
+                    "text": " for opioid receptors, which keeps the drug from being displaced by opioids like "
+                },
+                {
+                    "entity": "enwiki:Hydromorphone",
+                    "entity_name": "Hydromorphone",
+                    "link_section": null,
+                    "text": "Dilaudid"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Heroin",
+                    "entity_name": "Heroin",
+                    "link_section": null,
+                    "text": "heroin"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Morphine",
+                    "entity_name": "Morphine",
+                    "link_section": null,
+                    "text": "morphine"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Oxycodone",
+                    "entity_name": "Oxycodone",
+                    "link_section": null,
+                    "text": "oxycodone"
+                },
+                {
+                    "text": ", with the result that a user maintained on it can not get high no matter what dosage taken of most opioids. The only opioids that may be able to break through the buprenorphine blockade (which are required in an acute care setting if a buprenorphine patient requires pain relief, as no standard opioids are strong enough) - drugs with similar or higher binding affinities to buprenorphine itself - are the "
+                },
+                {
+                    "entity": "enwiki:Fentanyl",
+                    "entity_name": "Fentanyl",
+                    "link_section": null,
+                    "text": "fentanil"
+                },
+                {
+                    "text": "-class opioids, and the Bentley-series opioids (cf. "
+                },
+                {
+                    "entity": "enwiki:Etorphine",
+                    "entity_name": "Etorphine",
+                    "link_section": null,
+                    "text": "etorphine"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Dihydroetorphine",
+                    "entity_name": "Dihydroetorphine",
+                    "link_section": null,
+                    "text": "dihydroetorphine"
+                },
+                {
+                    "text": "), which are rarely primary drugs of abuse and not often found on the streets. Buprenorphine itself is a modified Bentley-series opioid."
+                }
+            ],
+            "para_id": "6d6d0f487fd8080b06c6f38fc3230db64104b5ec"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Section 303 contains official definitions for security countermeasure, qualified countermeasure and qualified pandemic or epidemic product that will be added to the Federal Food, Drug and Cosmetic Act."
+                }
+            ],
+            "para_id": "6738e416ebe2a80401a65378997cae246a92923b"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Section 102 then requires the Assistant Secretary for Preparedness and Response, with respect to overseeing advanced research, development, and procurement of qualified countermeasures, security countermeasures, and qualified "
+                },
+                {
+                    "entity": "enwiki:Pandemic",
+                    "entity_name": "Pandemic",
+                    "link_section": null,
+                    "text": "pandemic"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Epidemic",
+                    "entity_name": "Epidemic",
+                    "link_section": null,
+                    "text": "epidemic"
+                },
+                {
+                    "text": " products, to:"
+                }
+            ],
+            "para_id": "ca0a10e06721e83f0ba85f50909bd96b696a4e4c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Section 402 also extends the "
+                },
+                {
+                    "entity": "enwiki:Freedom%20of%20Information%20Act%20(United%20States)",
+                    "entity_name": "Freedom of Information Act (United States)",
+                    "link_section": null,
+                    "text": "Freedom of Information Act (FOIA)"
+                },
+                {
+                    "text": " exemption for specific technical data or scientific information that is created or obtained during countermeasure and product advanced research and development under the "
+                },
+                {
+                    "entity": "enwiki:Public%20Health%20Service%20Act",
+                    "entity_name": "Public Health Service Act",
+                    "link_section": null,
+                    "text": "Public Health Service Act"
+                },
+                {
+                    "text": " that reveals significant and not otherwise known vulnerabilities of existing medical or public health defenses against biological, chemical, nuclear, or radiological threats.  It likewise extends the "
+                },
+                {
+                    "entity": "enwiki:United%20States%20antitrust%20law",
+                    "entity_name": "United States antitrust law",
+                    "link_section": null,
+                    "text": "antitrust exemption"
+                },
+                {
+                    "text": " to permit meetings and consultations to discuss the development of security countermeasures, qualified countermeasures, or qualified pandemic or epidemic products."
+                }
+            ],
+            "para_id": "0ec220df60cd219858c94314d378c5a2c3961684"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The "
+                },
+                {
+                    "entity": "enwiki:Pandemic%20and%20All-Hazards%20Preparedness%20Reauthorization%20Act%20of%202013",
+                    "entity_name": "Pandemic and All-Hazards Preparedness Reauthorization Act of 2013",
+                    "link_section": null,
+                    "text": "Pandemic and All-Hazards Preparedness Reauthorization Act of 2013 (H.R. 307; 113th Congress)"
+                },
+                {
+                    "text": "  improved and reauthorized the provisions of the PAHPA.  The primary portion of the bill dealing with this office is Section 102.  Among other things, the bill requires the Assistant Secretary for Preparedness and Response, with respect to overseeing advanced research, development, and procurement of qualified countermeasures, security countermeasures, and qualified "
+                },
+                {
+                    "entity": "enwiki:Pandemic",
+                    "entity_name": "Pandemic",
+                    "link_section": null,
+                    "text": "pandemic"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Epidemic",
+                    "entity_name": "Epidemic",
+                    "link_section": null,
+                    "text": "epidemic"
+                },
+                {
+                    "text": " products, to:"
+                }
+            ],
+            "para_id": "b9f3216cc3e19665a895780717ca1c962b6ee98c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In June 2012, Emergent, along with "
+                },
+                {
+                    "entity": "enwiki:Novartis",
+                    "entity_name": "Novartis",
+                    "link_section": null,
+                    "text": "Novartis"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Texas%20A&M%20University%20System",
+                    "entity_name": "Texas A&M University System",
+                    "link_section": null,
+                    "text": "Texas A&M University System"
+                },
+                {
+                    "text": " was selected by the U.S. Department of Health and Human Services as one of the three Centers for Innovation in Advanced Development and Manufacturing. The public-private partnership granted Emergent $163 million over eight years to assist in the development of countermeasures for health, nuclear and radiological epidemics. The point of the sites is to produce medical countermeasures in the event of a national pandemic. Emergent's site is located in Maryland. The company expects the site to be operational by the year 2020."
+                }
+            ],
+            "para_id": "248ffbb6a7173941db0483b86ff2482deda41559"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "This program may compensate individuals for serious physical injuries or deaths as a result ofa pandemic, epidemic or security countermeasures, such as a vaccine. To date, no funds havebeen appropriated for this function."
+                }
+            ],
+            "para_id": "2ebcf6a7bf00565cead7f5c752c9cf7f94de5b91"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Secretary is required to provide final guidance to industry within one year after enactment of the Act regarding the development of animal models to support approval, clearance, or licensure of countermeasures and epidemic and pandemic products when human efficacy studies are not ethical or feasible.  The Secretary must also establish a procedure by which a sponsor or applicant developing a countermeasure for which human efficacy studies are not ethical or practicable, and that has an approved investigational new drug application or investigational device exemption, may request and receive: (1) a meeting to discuss proposed animal model development activities, and (2) a meeting before initiating pivotal animal studies. The Act also requires such meetings to include discussion of animal models for pediatric populations, as appropriate."
+                }
+            ],
+            "para_id": "9b0580e974ed0cfbbd55a49492a1cd30b441004c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The Pandemic and All-Hazards Preparedness Reauthorization Act of 2013 () is a law enacted by the "
+                },
+                {
+                    "entity": "enwiki:113th%20United%20States%20Congress",
+                    "entity_name": "113th United States Congress",
+                    "link_section": null,
+                    "text": "113th United States Congress"
+                },
+                {
+                    "text": ".  The Act amends the "
+                },
+                {
+                    "entity": "enwiki:Public%20Health%20Service%20Act",
+                    "entity_name": "Public Health Service Act",
+                    "link_section": null,
+                    "text": "Public Health Service Act"
+                },
+                {
+                    "text": " in order to extend, fund, and improve several programs designed to prepare the United States and health professionals in the event of a "
+                },
+                {
+                    "entity": "enwiki:Pandemic",
+                    "entity_name": "Pandemic",
+                    "link_section": null,
+                    "text": "pandemic"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Epidemic",
+                    "entity_name": "Epidemic",
+                    "link_section": null,
+                    "text": "epidemic"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Biological%20warfare",
+                    "entity_name": "Biological warfare",
+                    "link_section": null,
+                    "text": "biological"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Chemical%20warfare",
+                    "entity_name": "Chemical warfare",
+                    "link_section": null,
+                    "text": "chemical"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Radiological%20warfare",
+                    "entity_name": "Radiological warfare",
+                    "link_section": null,
+                    "text": "radiological"
+                },
+                {
+                    "text": ", or "
+                },
+                {
+                    "entity": "enwiki:Nuclear%20and%20radiation%20accidents%20and%20incidents",
+                    "entity_name": "Nuclear and radiation accidents and incidents",
+                    "link_section": null,
+                    "text": "nuclear accident"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Nuclear%20warfare",
+                    "entity_name": "Nuclear warfare",
+                    "link_section": null,
+                    "text": "attack"
+                },
+                {
+                    "text": ". The Act clarifies the authority of different American officials, makes it easier to temporarily reassign personnel to respond to emergency situations, and alters the process for testing and producing medical countermeasures.  The Act is focused on improving "
+                },
+                {
+                    "entity": "enwiki:Preparedness",
+                    "entity_name": "Preparedness",
+                    "link_section": null,
+                    "text": "preparedness"
+                },
+                {
+                    "text": " for any "
+                },
+                {
+                    "entity": "enwiki:Public%20health%20emergency%20(United%20States)",
+                    "entity_name": "Public health emergency (United States)",
+                    "link_section": null,
+                    "text": "public health emergency"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "79765ad4a2bab2ab3cbab9c99707e3c56d57522a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Gears of War 4 takes place 25 years after the Imulsion Countermeasure weapon destroyed all Imulsion on the planet Sera, taking the Locust and the Lambent with them as well. Unfortunately, this also knocked out the use of "
+                },
+                {
+                    "entity": "enwiki:Fossil%20fuel",
+                    "entity_name": "Fossil fuel",
+                    "link_section": null,
+                    "text": "fossil fuel"
+                },
+                {
+                    "text": "s, forcing humanity to adapt new ways for survival. The countermeasure also brought the advent of \"Windflares\", powerful windstorms that form across the planet. Following the aftermath of the Lambent Epidemic, the reformed Coalition of Ordered Governments estimated that only hundreds of thousands of humans are left on Sera. To prevent the population from declining, walled-off cities were built to protect the citizens from the dangers outside. The COG also declared "
+                },
+                {
+                    "entity": "enwiki:Martial%20law",
+                    "entity_name": "Martial law",
+                    "link_section": null,
+                    "text": "martial law"
+                },
+                {
+                    "text": ", preventing any travel from outside of city walls. Some human survivors rejected the viewpoints of the COG and formed a group called the \"Outsiders\" that live outside of the COG jurisdiction, conducting raids on COG territory to gather resources."
+                }
+            ],
+            "para_id": "f3ffdd58d85f33cb8a3b1332c0e897e3c6961a5a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Toll-like receptor 4 has been shown to be important for the long-term side-effects of "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Analgesic",
+                    "entity_name": "Analgesic",
+                    "link_section": null,
+                    "text": "analgesic"
+                },
+                {
+                    "text": " drugs. Various "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Receptor%20(biochemistry)",
+                    "entity_name": "Receptor (biochemistry)",
+                    "link_section": null,
+                    "text": "receptor"
+                },
+                {
+                    "text": " ligands have been tested and found to also possess action as agonists or antagonists of TLR4, with opioid agonists such as "
+                },
+                {
+                    "entity": "enwiki:Morphine",
+                    "entity_name": "Morphine",
+                    "link_section": null,
+                    "text": "morphine"
+                },
+                {
+                    "text": " being TLR4 agonists, while opioid antagonists such as naloxone were found to be TLR4 antagonists. Activation of TLR4 leads to downstream release of inflammatory modulators including "
+                },
+                {
+                    "entity": "enwiki:Tumor%20necrosis%20factor%20alpha",
+                    "entity_name": "Tumor necrosis factor alpha",
+                    "link_section": null,
+                    "text": "TNF-\u03b1"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Interleukin%201%20beta",
+                    "entity_name": "Interleukin 1 beta",
+                    "link_section": null,
+                    "text": "Interleukin-1"
+                },
+                {
+                    "text": ", and constant low-level release of these modulators is thought to reduce the efficacy of opioid drug treatment with time, and be involved in both the development of "
+                },
+                {
+                    "entity": "enwiki:Drug%20tolerance",
+                    "entity_name": "Drug tolerance",
+                    "link_section": null,
+                    "text": "tolerance"
+                },
+                {
+                    "text": " to opioid analgesic drugs, and in the emergence of side-effects such as "
+                },
+                {
+                    "entity": "enwiki:Hyperalgesia",
+                    "entity_name": "Hyperalgesia",
+                    "link_section": null,
+                    "text": "hyperalgesia"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Allodynia",
+                    "entity_name": "Allodynia",
+                    "link_section": null,
+                    "text": "allodynia"
+                },
+                {
+                    "text": " that can become a problem following extended use of opioid drugs. Drugs that block the action of TNF-\u03b1 or IL-1\u03b2 have been shown to increase the analgesic effects of opioids and reduce the development of tolerance and other side-effects, and this has also been demonstrated with drugs that block TLR4 itself. Interestingly the response of TLR4 to opioid drugs has been found to be "
+                },
+                {
+                    "entity": "enwiki:Enantiomer",
+                    "entity_name": "Enantiomer",
+                    "link_section": null,
+                    "text": "enantiomer"
+                },
+                {
+                    "text": "-independent, so the \"unnatural\" enantiomers of opioid drugs such as morphine and "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": ", which lack affinity for opioid receptors, still produce the same activity at TLR4 as their \"normal\" enantiomers. This means that the unnatural enantiomers of opioid antagonists, such as (+)-naloxone, can be used to block the TLR4 activity of opioid analgesic drugs, while leaving the \u03bc-opioid receptor mediated analgesic activity unaffected.) This may also be the mechanism behind the beneficial effect of ultra-low dose naltrexone on opioid analgesia."
+                }
+            ],
+            "para_id": "ee023c8009adc1dc2cf7659ddcd66e085146c3dd"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Side effects such as hyperalgesia and "
+                },
+                {
+                    "entity": "enwiki:Allodynia",
+                    "entity_name": "Allodynia",
+                    "link_section": null,
+                    "text": "allodynia"
+                },
+                {
+                    "text": ", sometimes accompanied by a worsening of "
+                },
+                {
+                    "entity": "enwiki:Neuropathic%20pain",
+                    "entity_name": "Neuropathic pain",
+                    "link_section": null,
+                    "text": "neuropathic pain"
+                },
+                {
+                    "text": ", may be consequences of long-term treatment with opioid analgesics, especially when increasing tolerance has resulted in loss of efficacy and consequent progressive dose escalation over time. This appears to largely be a result of actions of opioid drugs at targets other than the three classic opioid receptors, including the "
+                },
+                {
+                    "entity": "enwiki:Nociceptin%20receptor",
+                    "entity_name": "Nociceptin receptor",
+                    "link_section": null,
+                    "text": "nociceptin receptor"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Sigma%20receptor",
+                    "entity_name": "Sigma receptor",
+                    "link_section": null,
+                    "text": "sigma receptor"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:TLR4",
+                    "entity_name": "TLR4",
+                    "link_section": null,
+                    "text": "Toll-like receptor 4"
+                },
+                {
+                    "text": ", and can be counteracted in animal models by antagonists at these targets such as "
+                },
+                {
+                    "entity": "enwiki:J-113,397",
+                    "entity_name": "J-113,397",
+                    "link_section": null,
+                    "text": "J-113,397"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:BD-1047",
+                    "entity_name": "BD-1047",
+                    "link_section": null,
+                    "text": "BD-1047"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:(+)-Naloxone",
+                    "entity_name": "(+)-Naloxone",
+                    "link_section": null,
+                    "text": "(+)-naloxone"
+                },
+                {
+                    "text": " respectively. No drugs are currently approved specifically for counteracting opioid-induced hyperalgesia in humans and in severe cases the only solution may be to discontinue use of opioid analgesics and replace them with non-opioid analgesic drugs. However, since individual sensitivity to the development of this side effect is highly dose dependent and may vary depending which opioid analgesic is used, many patients can avoid this side effect simply through dose reduction of the opioid drug (usually accompanied by the addition of a supplemental non-opioid analgesic), rotating between different opioid drugs, or by switching to a milder opioid with a mixed mode of action that also counteracts neuropathic pain, particularly "
+                },
+                {
+                    "entity": "enwiki:Tramadol",
+                    "entity_name": "Tramadol",
+                    "link_section": null,
+                    "text": "tramadol"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Tapentadol",
+                    "entity_name": "Tapentadol",
+                    "link_section": null,
+                    "text": "tapentadol"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "6d6effad8af27cd8f38c365c387d2cbdfb862373"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Several opioid antagonist drugs were found to act as antagonists for TLR4, including naloxone and "
+                },
+                {
+                    "entity": "enwiki:Naltrexone",
+                    "entity_name": "Naltrexone",
+                    "link_section": null,
+                    "text": "naltrexone"
+                },
+                {
+                    "text": ". However it was found that not only the \"normal\" (-) enantiomers, but also the \"unnatural\" (+) enantiomers of these drugs acted as TLR4 antagonists (though (+)-"
+                },
+                {
+                    "entity": "enwiki:Nalmefene",
+                    "entity_name": "Nalmefene",
+                    "link_section": null,
+                    "text": "nalmefene"
+                },
+                {
+                    "text": " was inactive). Since (+)-naloxone and (+)-naltrexone lack affinity for opioid receptors, they do not block the effects of opioid analgesic drugs, and so can be used to counteract the TLR4-mediated side effects of opioid agonists without affecting analgesia, though (+)-naloxone does reduce the reinforcing effects of opioid drugs. (+)-Naloxone was also found to be "
+                },
+                {
+                    "entity": "enwiki:Neuroprotection",
+                    "entity_name": "Neuroprotection",
+                    "link_section": null,
+                    "text": "neuroprotective"
+                },
+                {
+                    "text": ", and both (+)-naloxone and (+)-naltrexone are effective in their own right at treating symptoms of neuropathic pain in animal models. However (+)-naloxone was also found to reduce the effects of "
+                },
+                {
+                    "entity": "enwiki:Stimulant",
+                    "entity_name": "Stimulant",
+                    "link_section": null,
+                    "text": "stimulant"
+                },
+                {
+                    "text": " drugs, suggesting additional actions beyond TLR4 antagonism (possibly as a "
+                },
+                {
+                    "entity": "enwiki:Sigma%20receptor",
+                    "entity_name": "Sigma receptor",
+                    "link_section": null,
+                    "text": "sigma receptor"
+                },
+                {
+                    "text": " antagonist), that might potentially result in unwanted side effects or drug interactions."
+                }
+            ],
+            "para_id": "41655a787078542207d1f4f3bbd47ff296757fc3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Some opioid antagonists are not pure antagonists but in fact do produce some weak opioid "
+                },
+                {
+                    "entity": "enwiki:Partial%20agonist",
+                    "entity_name": "Partial agonist",
+                    "link_section": null,
+                    "text": "partial agonist"
+                },
+                {
+                    "text": " effects, and can produce "
+                },
+                {
+                    "entity": "enwiki:Analgesic",
+                    "entity_name": "Analgesic",
+                    "link_section": null,
+                    "text": "analgesic"
+                },
+                {
+                    "text": " effects when administered in high doses to opioid-naive individuals. Examples of such compounds include "
+                },
+                {
+                    "entity": "enwiki:Nalorphine",
+                    "entity_name": "Nalorphine",
+                    "link_section": null,
+                    "text": "nalorphine"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Levallorphan",
+                    "entity_name": "Levallorphan",
+                    "link_section": null,
+                    "text": "levallorphan"
+                },
+                {
+                    "text": ". However, the analgesic effects from these specific drugs are limited and tend to be accompanied by "
+                },
+                {
+                    "entity": "enwiki:Dysphoria",
+                    "entity_name": "Dysphoria",
+                    "link_section": null,
+                    "text": "dysphoria"
+                },
+                {
+                    "text": ", most likely due to additional agonist action at the "
+                },
+                {
+                    "entity": "enwiki:%CE%9A-opioid%20receptor",
+                    "entity_name": "\u039a-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03ba-opioid receptor"
+                },
+                {
+                    "text": ". As they induce "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": "Symptoms of withdrawal",
+                    "text": "opioid withdrawal"
+                },
+                {
+                    "text": " effects in people who are taking, or have recently used, opioid full agonists, these drugs are considered to be antagonists for practical purposes."
+                }
+            ],
+            "para_id": "44ccdebc45778c3885836b183ea8e940dc2fb165"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Clinical studies have consistently associated medical and recreational opioid use with "
+                },
+                {
+                    "entity": "enwiki:Hypogonadism",
+                    "entity_name": "Hypogonadism",
+                    "link_section": null,
+                    "text": "hypogonadism"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Endocrine%20disease",
+                    "entity_name": "Endocrine disease",
+                    "link_section": null,
+                    "text": "hormone imbalance"
+                },
+                {
+                    "text": " in different sexes. The effect is "
+                },
+                {
+                    "entity": "enwiki:Dose%E2%80%93response%20relationship",
+                    "entity_name": "Dose\u2013response relationship",
+                    "link_section": null,
+                    "text": "dose-dependent"
+                },
+                {
+                    "text": ". Most studies suggest that the majority (perhaps as much as 90%) of chronic opioid users suffer hormone imbalances. Opioids can also interfere with menstruation in women by limiting the production of "
+                },
+                {
+                    "entity": "enwiki:Luteinizing%20hormone",
+                    "entity_name": "Luteinizing hormone",
+                    "link_section": null,
+                    "text": "luteinizing hormone"
+                },
+                {
+                    "text": " (LH). Opioid-induced endocrinopathy likely causes the strong association of opioid use with "
+                },
+                {
+                    "entity": "enwiki:Osteoporosis",
+                    "entity_name": "Osteoporosis",
+                    "link_section": null,
+                    "text": "osteoporosis"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Bone%20fracture",
+                    "entity_name": "Bone fracture",
+                    "link_section": null,
+                    "text": "bone fracture"
+                },
+                {
+                    "text": ". It also may increase pain and thereby interfere with the intended clinical effect of opioid treatment. Opioid-induced endocrinopathy is likely caused their agonism of opioid receptors in the "
+                },
+                {
+                    "entity": "enwiki:Hypothalamus",
+                    "entity_name": "Hypothalamus",
+                    "link_section": null,
+                    "text": "hypothalamus"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Pituitary%20gland",
+                    "entity_name": "Pituitary gland",
+                    "link_section": null,
+                    "text": "pituitary gland"
+                },
+                {
+                    "text": ". One study found that the depressed testosterone levels of heroin addicts returned to normal within one month of abstinence, suggesting that the effect is not permanent. , the effect of low-dose or acute opiate use on the endocrine system is unclear."
+                }
+            ],
+            "para_id": "8ff1cf6d53911216f2400d996dc18acf1a5f620a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Nalorphine ("
+                },
+                {
+                    "entity": "enwiki:International%20nonproprietary%20name",
+                    "entity_name": "International nonproprietary name",
+                    "link_section": null,
+                    "text": "INN"
+                },
+                {
+                    "text": ") (brand names Lethidrone, Nalline), also known as N-allyl-normorphine, is a mixed "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Agonist-antagonist",
+                    "entity_name": "Agonist-antagonist",
+                    "link_section": null,
+                    "text": "agonist\u2013antagonist"
+                },
+                {
+                    "text": " with "
+                },
+                {
+                    "entity": "enwiki:Opioid%20antagonist",
+                    "entity_name": "Opioid antagonist",
+                    "link_section": null,
+                    "text": "opioid antagonist"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Analgesic",
+                    "entity_name": "Analgesic",
+                    "link_section": null,
+                    "text": "analgesic"
+                },
+                {
+                    "text": " properties. It was introduced in 1954 and was used as an "
+                },
+                {
+                    "entity": "enwiki:Antidote",
+                    "entity_name": "Antidote",
+                    "link_section": null,
+                    "text": "antidote"
+                },
+                {
+                    "text": " to reverse "
+                },
+                {
+                    "entity": "enwiki:Opioid%20overdose",
+                    "entity_name": "Opioid overdose",
+                    "link_section": null,
+                    "text": "opioid overdose"
+                },
+                {
+                    "text": " and in a challenge test to determine "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": null,
+                    "text": "opioid dependence"
+                },
+                {
+                    "text": ". It acts at two "
+                },
+                {
+                    "entity": "enwiki:Opioid%20receptor",
+                    "entity_name": "Opioid receptor",
+                    "link_section": null,
+                    "text": "opioid receptor"
+                },
+                {
+                    "text": "s \u2014 the "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid receptor"
+                },
+                {
+                    "text": " (MOR) where it has "
+                },
+                {
+                    "entity": "enwiki:Receptor%20antagonist",
+                    "entity_name": "Receptor antagonist",
+                    "link_section": null,
+                    "text": "antagonist"
+                },
+                {
+                    "text": "ic effects, and at the "
+                },
+                {
+                    "entity": "enwiki:%CE%9A-opioid%20receptor",
+                    "entity_name": "\u039a-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03ba-opioid receptor"
+                },
+                {
+                    "text": " (KOR) (K = 1.6 nM; "
+                },
+                {
+                    "entity": "enwiki:EC50",
+                    "entity_name": "EC50",
+                    "link_section": null,
+                    "text": "EC"
+                },
+                {
+                    "text": " = 483 nM; "
+                },
+                {
+                    "entity": "enwiki:Intrinsic%20activity",
+                    "entity_name": "Intrinsic activity",
+                    "link_section": null,
+                    "text": "E"
+                },
+                {
+                    "text": " = 95%) where it exerts high-"
+                },
+                {
+                    "entity": "enwiki:Intrinsic%20activity",
+                    "entity_name": "Intrinsic activity",
+                    "link_section": null,
+                    "text": "efficacy"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Partial%20agonist",
+                    "entity_name": "Partial agonist",
+                    "link_section": null,
+                    "text": "partial agonist"
+                },
+                {
+                    "text": "/near-"
+                },
+                {
+                    "entity": "enwiki:Agonist",
+                    "entity_name": "Agonist",
+                    "link_section": "Full agonist",
+                    "text": "full agonist"
+                },
+                {
+                    "text": " characteristics. Nalorphine was the second opioid antagonist to be introduced, preceded by "
+                },
+                {
+                    "entity": "enwiki:Nalodeine",
+                    "entity_name": "Nalodeine",
+                    "link_section": null,
+                    "text": "nalodeine"
+                },
+                {
+                    "text": " (N-allylnorcodeine) in 1915 and followed by "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " in 1960 and "
+                },
+                {
+                    "entity": "enwiki:Naltrexone",
+                    "entity_name": "Naltrexone",
+                    "link_section": null,
+                    "text": "naltrexone"
+                },
+                {
+                    "text": " in 1963. Due to potent activation of the KOR, nalorphine produces "
+                },
+                {
+                    "entity": "enwiki:Side%20effect",
+                    "entity_name": "Side effect",
+                    "link_section": null,
+                    "text": "side effect"
+                },
+                {
+                    "text": "s such as "
+                },
+                {
+                    "entity": "enwiki:Dysphoria",
+                    "entity_name": "Dysphoria",
+                    "link_section": null,
+                    "text": "dysphoria"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Anxiety",
+                    "entity_name": "Anxiety",
+                    "link_section": null,
+                    "text": "anxiety"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Confusion",
+                    "entity_name": "Confusion",
+                    "link_section": null,
+                    "text": "confusion"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Hallucination",
+                    "entity_name": "Hallucination",
+                    "link_section": null,
+                    "text": "hallucination"
+                },
+                {
+                    "text": "s, and for this reason, is no longer used medically."
+                }
+            ],
+            "para_id": "c6db7c79d16bfcd4be051abc46947cda23b00412"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Primarily used for pain relief, including "
+                },
+                {
+                    "entity": "enwiki:Anesthesia",
+                    "entity_name": "Anesthesia",
+                    "link_section": null,
+                    "text": "anesthesia"
+                },
+                {
+                    "text": " they are also used to suppress "
+                },
+                {
+                    "entity": "enwiki:Cough",
+                    "entity_name": "Cough",
+                    "link_section": null,
+                    "text": "cough"
+                },
+                {
+                    "text": ", suppress "
+                },
+                {
+                    "entity": "enwiki:Diarrhea",
+                    "entity_name": "Diarrhea",
+                    "link_section": null,
+                    "text": "diarrhea"
+                },
+                {
+                    "text": ", treat addiction, reverse "
+                },
+                {
+                    "entity": "enwiki:Opioid%20overdose",
+                    "entity_name": "Opioid overdose",
+                    "link_section": null,
+                    "text": "opioid overdose"
+                },
+                {
+                    "text": ", and suppress opioid induced constipation. "
+                },
+                {
+                    "entity": "enwiki:Etorphine",
+                    "entity_name": "Etorphine",
+                    "link_section": null,
+                    "text": "Extremely strong opioids"
+                },
+                {
+                    "text": " are approved only for veterinary use such as immobilizing large mammals. Opioids act by binding to "
+                },
+                {
+                    "entity": "enwiki:Opioid%20receptor",
+                    "entity_name": "Opioid receptor",
+                    "link_section": null,
+                    "text": "opioid receptor"
+                },
+                {
+                    "text": "s, which are found principally in the "
+                },
+                {
+                    "entity": "enwiki:Central%20nervous%20system",
+                    "entity_name": "Central nervous system",
+                    "link_section": null,
+                    "text": "central"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Peripheral%20nervous%20system",
+                    "entity_name": "Peripheral nervous system",
+                    "link_section": null,
+                    "text": "peripheral nervous system"
+                },
+                {
+                    "text": " and the "
+                },
+                {
+                    "entity": "enwiki:Gastrointestinal%20tract",
+                    "entity_name": "Gastrointestinal tract",
+                    "link_section": null,
+                    "text": "gastrointestinal tract"
+                },
+                {
+                    "text": ". These receptors mediate both the "
+                },
+                {
+                    "entity": "enwiki:Psychoactive%20drug",
+                    "entity_name": "Psychoactive drug",
+                    "link_section": null,
+                    "text": "psychoactive"
+                },
+                {
+                    "text": " and the somatic effects of opioids. Opioid drugs include "
+                },
+                {
+                    "entity": "enwiki:Agonist",
+                    "entity_name": "Agonist",
+                    "link_section": null,
+                    "text": "partial agonists"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Receptor%20antagonist",
+                    "entity_name": "Receptor antagonist",
+                    "link_section": null,
+                    "text": "antagonists"
+                },
+                {
+                    "text": ", which produce moderate or no effect (respectively) but displace other opioids from binding in those receptors."
+                }
+            ],
+            "para_id": "f8b629e5326b42c78968e32ec29fccbe0fabde6c"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "The analgesic effects of  are linked to the interaction between the "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": "Endogenous opioids",
+                    "text": "endogenous opioid"
+                },
+                {
+                    "text": " system and the descending "
+                },
+                {
+                    "entity": "enwiki:Norepinephrine",
+                    "entity_name": "Norepinephrine",
+                    "link_section": null,
+                    "text": "noradrenergic"
+                },
+                {
+                    "text": " system. When animals are given "
+                },
+                {
+                    "entity": "enwiki:Morphine",
+                    "entity_name": "Morphine",
+                    "link_section": null,
+                    "text": "morphine"
+                },
+                {
+                    "text": " chronically they develop tolerance to its pain-killing effects, and this also renders the animals tolerant to the analgesic effects of . Administration of "
+                },
+                {
+                    "entity": "enwiki:Antibody",
+                    "entity_name": "Antibody",
+                    "link_section": null,
+                    "text": "antibodies"
+                },
+                {
+                    "text": " which bind and block the activity of some endogenous opioids (not "
+                },
+                {
+                    "entity": "enwiki:Beta-Endorphin",
+                    "entity_name": "Beta-Endorphin",
+                    "link_section": null,
+                    "text": "\u03b2-endorphin"
+                },
+                {
+                    "text": ") also block the antinociceptive effects of . Drugs which inhibit the breakdown of endogenous opioids also potentiate the antinociceptive effects of . Several experiments have shown that opioid receptor antagonists applied directly to the brain block the antinociceptive effects of , but these drugs have no effect when injected into the "
+                },
+                {
+                    "entity": "enwiki:Spinal%20cord",
+                    "entity_name": "Spinal cord",
+                    "link_section": null,
+                    "text": "spinal cord"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "c8784d5b0b79c2640b74abb4628ec8787b9928f6"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "-BC-2605) is an "
+                },
+                {
+                    "entity": "enwiki:Opioid%20antagonist",
+                    "entity_name": "Opioid antagonist",
+                    "link_section": null,
+                    "text": "opioid antagonist"
+                },
+                {
+                    "text": " of the "
+                },
+                {
+                    "entity": "enwiki:Morphinan",
+                    "entity_name": "Morphinan",
+                    "link_section": null,
+                    "text": "morphinan"
+                },
+                {
+                    "text": " family that was never marketed. It acts as a "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid receptor"
+                },
+                {
+                    "text": " (MOR) "
+                },
+                {
+                    "entity": "enwiki:Receptor%20antagonist",
+                    "entity_name": "Receptor antagonist",
+                    "link_section": null,
+                    "text": "antagonist"
+                },
+                {
+                    "text": " but a "
+                },
+                {
+                    "entity": "enwiki:%CE%9A-opioid%20receptor",
+                    "entity_name": "\u039a-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03ba-opioid receptor"
+                },
+                {
+                    "text": " (KOR) "
+                },
+                {
+                    "entity": "enwiki:Partial%20agonist",
+                    "entity_name": "Partial agonist",
+                    "link_section": null,
+                    "text": "partial agonist"
+                },
+                {
+                    "text": ", and has similar effects to "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " and around the same potency as an MOR antagonist. Oxilorphan has some weak "
+                },
+                {
+                    "entity": "enwiki:Partial%20agonist",
+                    "entity_name": "Partial agonist",
+                    "link_section": null,
+                    "text": "partial agonist"
+                },
+                {
+                    "text": " actions at the MOR (with "
+                },
+                {
+                    "entity": "enwiki:Miosis",
+                    "entity_name": "Miosis",
+                    "link_section": null,
+                    "text": "miosis"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Nausea",
+                    "entity_name": "Nausea",
+                    "link_section": null,
+                    "text": "nausea"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Dizziness",
+                    "entity_name": "Dizziness",
+                    "link_section": null,
+                    "text": "dizziness"
+                },
+                {
+                    "text": ", and some "
+                },
+                {
+                    "entity": "enwiki:Euphoria",
+                    "entity_name": "Euphoria",
+                    "link_section": null,
+                    "text": "euphoria"
+                },
+                {
+                    "text": " observed) and can produce "
+                },
+                {
+                    "entity": "enwiki:Hallucinogen",
+                    "entity_name": "Hallucinogen",
+                    "link_section": null,
+                    "text": "hallucinogen"
+                },
+                {
+                    "text": "ic/"
+                },
+                {
+                    "entity": "enwiki:Dissociative",
+                    "entity_name": "Dissociative",
+                    "link_section": null,
+                    "text": "dissociative"
+                },
+                {
+                    "text": " effects at sufficient doses, indicative of KOR activation. It was trialed for the treatment of "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": null,
+                    "text": "opioid addiction"
+                },
+                {
+                    "text": ", but was not developed commercially. The KOR agonist effects of oxilorphan are associated with "
+                },
+                {
+                    "entity": "enwiki:Dysphoria",
+                    "entity_name": "Dysphoria",
+                    "link_section": null,
+                    "text": "dysphoria"
+                },
+                {
+                    "text": ", which combined with its hallucinogenic effects, serve to limit its clinical usefulness; indeed, many patients who experienced these side effects refused to take additional doses in clinical trials."
+                }
+            ],
+            "para_id": "6a16779bec82ebc56d6e225b693d6a86f03df46d"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "WAY-100,635 has also been found to increase the analgesic effects of "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": " drugs in a dose-dependent manner, in contrast to 5-HT agonists such as "
+                },
+                {
+                    "entity": "enwiki:8-OH-DPAT",
+                    "entity_name": "8-OH-DPAT",
+                    "link_section": null,
+                    "text": "8-OH-DPAT"
+                },
+                {
+                    "text": " which were found to reduce opioid analgesia. However, since 5-HT agonists were also found to reduce opioid-induced "
+                },
+                {
+                    "entity": "enwiki:Hypoventilation",
+                    "entity_name": "Hypoventilation",
+                    "link_section": null,
+                    "text": "respiratory depression"
+                },
+                {
+                    "text": " and WAY-100,635 was found to block this effect, it is likely that 5-HT antagonists might worsen this side effect of opioids. Paradoxically, chronic administration of the very high efficacy 5-HT agonist "
+                },
+                {
+                    "entity": "enwiki:Befiradol",
+                    "entity_name": "Befiradol",
+                    "link_section": null,
+                    "text": "befiradol"
+                },
+                {
+                    "text": " results in potent analgesia following an initial period of "
+                },
+                {
+                    "entity": "enwiki:Hyperalgesia",
+                    "entity_name": "Hyperalgesia",
+                    "link_section": null,
+                    "text": "hyperalgesia"
+                },
+                {
+                    "text": ", an effect most likely linked to desensitisation and/or downregulation of 5-HT receptors (i.e. analogous to a 5-HT antagonist-like effect)."
+                }
+            ],
+            "para_id": "0d2c5cc1212e1ab59ef215fe2c29ef3723def6d0"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Morphine is a "
+                },
+                {
+                    "entity": "enwiki:Phenanthrene",
+                    "entity_name": "Phenanthrene",
+                    "link_section": null,
+                    "text": "phenanthrene"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Opioid%20receptor",
+                    "entity_name": "Opioid receptor",
+                    "link_section": null,
+                    "text": "opioid receptor"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Agonist",
+                    "entity_name": "Agonist",
+                    "link_section": null,
+                    "text": "agonist"
+                },
+                {
+                    "text": " \u2013 its main effect is binding to and activating the "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid"
+                },
+                {
+                    "text": " receptors in the "
+                },
+                {
+                    "entity": "enwiki:Central%20nervous%20system",
+                    "entity_name": "Central nervous system",
+                    "link_section": null,
+                    "text": "central nervous system"
+                },
+                {
+                    "text": ". In clinical settings, morphine exerts its principal pharmacological effect on the central nervous system and "
+                },
+                {
+                    "entity": "enwiki:Gastrointestinal%20tract",
+                    "entity_name": "Gastrointestinal tract",
+                    "link_section": null,
+                    "text": "gastrointestinal tract"
+                },
+                {
+                    "text": ". Its primary actions of therapeutic value are analgesia and sedation. Activation of the "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid"
+                },
+                {
+                    "text": " receptors is associated with analgesia, sedation, "
+                },
+                {
+                    "entity": "enwiki:Euphoria",
+                    "entity_name": "Euphoria",
+                    "link_section": null,
+                    "text": "euphoria"
+                },
+                {
+                    "text": ", physical "
+                },
+                {
+                    "entity": "enwiki:Substance%20dependence",
+                    "entity_name": "Substance dependence",
+                    "link_section": null,
+                    "text": "dependence"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Hypoventilation",
+                    "entity_name": "Hypoventilation",
+                    "link_section": null,
+                    "text": "respiratory depression"
+                },
+                {
+                    "text": ". Morphine is a rapid-acting narcotic, and it is known to bind very strongly to the "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid"
+                },
+                {
+                    "text": " receptors, and for this reason, it often has a higher incidence of euphoria/dysphoria, respiratory depression, sedation, pruritus, tolerance, and physical and psychological dependence when compared to other opioids at equianalgesic doses. Morphine is also a "
+                },
+                {
+                    "entity": "enwiki:%CE%9A-opioid%20receptor",
+                    "entity_name": "\u039a-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03ba-opioid"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:%CE%94-opioid%20receptor",
+                    "entity_name": "\u0394-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03b4-opioid"
+                },
+                {
+                    "text": " receptor agonist, \u03ba-opioid's action is associated with spinal analgesia, "
+                },
+                {
+                    "entity": "enwiki:Miosis",
+                    "entity_name": "Miosis",
+                    "link_section": null,
+                    "text": "miosis"
+                },
+                {
+                    "text": " (pinpoint pupils) and "
+                },
+                {
+                    "entity": "enwiki:Psychotomimetic",
+                    "entity_name": "Psychotomimetic",
+                    "link_section": null,
+                    "text": "psychotomimetic"
+                },
+                {
+                    "text": " effects. \u03b4-Opioid is thought to play a role in analgesia. Although morphine does not bind to the "
+                },
+                {
+                    "entity": "enwiki:Sigma%20receptor",
+                    "entity_name": "Sigma receptor",
+                    "link_section": null,
+                    "text": "\u03c3-receptor"
+                },
+                {
+                    "text": ", it has been shown that \u03c3-agonists, such as (+)-"
+                },
+                {
+                    "entity": "enwiki:Pentazocine",
+                    "entity_name": "Pentazocine",
+                    "link_section": null,
+                    "text": "pentazocine"
+                },
+                {
+                    "text": ", inhibit morphine analgesia, and \u03c3-antagonists enhance morphine analgesia, suggesting downstream involvement of the \u03c3-receptor in the actions of morphine."
+                }
+            ],
+            "para_id": "d9d6b53b17d8d2e36c20ef6d0863651b85a03038"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Naldemedine ("
+                },
+                {
+                    "entity": "enwiki:International%20nonproprietary%20name",
+                    "entity_name": "International nonproprietary name",
+                    "link_section": null,
+                    "text": "INN"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:United%20States%20Adopted%20Name",
+                    "entity_name": "United States Adopted Name",
+                    "link_section": null,
+                    "text": "USAN"
+                },
+                {
+                    "text": "; S-297,995) is a "
+                },
+                {
+                    "entity": "enwiki:Peripheral",
+                    "entity_name": "Peripheral",
+                    "link_section": null,
+                    "text": "peripheral"
+                },
+                {
+                    "text": "ly-"
+                },
+                {
+                    "entity": "enwiki:Binding%20selectivity",
+                    "entity_name": "Binding selectivity",
+                    "link_section": null,
+                    "text": "selective"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:%CE%9C-opioid%20receptor",
+                    "entity_name": "\u039c-opioid receptor",
+                    "link_section": null,
+                    "text": "\u03bc-opioid receptor"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Receptor%20antagonist",
+                    "entity_name": "Receptor antagonist",
+                    "link_section": null,
+                    "text": "antagonist"
+                },
+                {
+                    "text": " under development by "
+                },
+                {
+                    "entity": "enwiki:Shionogi",
+                    "entity_name": "Shionogi",
+                    "link_section": null,
+                    "text": "Shionogi"
+                },
+                {
+                    "text": " for the treatment of "
+                },
+                {
+                    "entity": "enwiki:Opioid",
+                    "entity_name": "Opioid",
+                    "link_section": null,
+                    "text": "opioid"
+                },
+                {
+                    "text": "-induced "
+                },
+                {
+                    "entity": "enwiki:Adverse%20effect",
+                    "entity_name": "Adverse effect",
+                    "link_section": null,
+                    "text": "adverse effect"
+                },
+                {
+                    "text": "s including "
+                },
+                {
+                    "entity": "enwiki:Constipation",
+                    "entity_name": "Constipation",
+                    "link_section": null,
+                    "text": "constipation"
+                },
+                {
+                    "text": ", "
+                },
+                {
+                    "entity": "enwiki:Nausea",
+                    "entity_name": "Nausea",
+                    "link_section": null,
+                    "text": "nausea"
+                },
+                {
+                    "text": ", and "
+                },
+                {
+                    "entity": "enwiki:Vomiting",
+                    "entity_name": "Vomiting",
+                    "link_section": null,
+                    "text": "vomiting"
+                },
+                {
+                    "text": ". "
+                },
+                {
+                    "entity": "enwiki:Clinical%20trial",
+                    "entity_name": "Clinical trial",
+                    "link_section": null,
+                    "text": "Clinical studies"
+                },
+                {
+                    "text": " have thus far found it to possess "
+                },
+                {
+                    "entity": "enwiki:Statistical%20significance",
+                    "entity_name": "Statistical significance",
+                    "link_section": null,
+                    "text": "statistically significant"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Efficacy",
+                    "entity_name": "Efficacy",
+                    "link_section": null,
+                    "text": "effective"
+                },
+                {
+                    "text": "ness for these indications and to be generally "
+                },
+                {
+                    "entity": "enwiki:Tolerability",
+                    "entity_name": "Tolerability",
+                    "link_section": null,
+                    "text": "well-tolerated"
+                },
+                {
+                    "text": " with predominantly mild to moderate "
+                },
+                {
+                    "entity": "enwiki:Gastrointestinal%20tract",
+                    "entity_name": "Gastrointestinal tract",
+                    "link_section": null,
+                    "text": "gastrointestinal"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Side%20effect",
+                    "entity_name": "Side effect",
+                    "link_section": null,
+                    "text": "side effect"
+                },
+                {
+                    "text": "s.<ref name=\"Sprawls1997\" / No effects indicative of "
+                },
+                {
+                    "entity": "enwiki:Central%20nervous%20system",
+                    "entity_name": "Central nervous system",
+                    "link_section": null,
+                    "text": "central"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Opioid%20use%20disorder",
+                    "entity_name": "Opioid use disorder",
+                    "link_section": "Symptoms of withdrawal",
+                    "text": "opioid withdrawal"
+                },
+                {
+                    "text": " or impact on the "
+                },
+                {
+                    "entity": "enwiki:Analgesic",
+                    "entity_name": "Analgesic",
+                    "link_section": null,
+                    "text": "analgesic"
+                },
+                {
+                    "text": " or "
+                },
+                {
+                    "entity": "enwiki:Mydriasis",
+                    "entity_name": "Mydriasis",
+                    "link_section": null,
+                    "text": "mydriatic"
+                },
+                {
+                    "text": " effects of co-administered opioids have been observed. As of July 2014, naldemedine is in "
+                },
+                {
+                    "entity": "enwiki:Phases%20of%20clinical%20research",
+                    "entity_name": "Phases of clinical research",
+                    "link_section": null,
+                    "text": "phase III"
+                },
+                {
+                    "text": " "
+                },
+                {
+                    "entity": "enwiki:Clinical%20trial",
+                    "entity_name": "Clinical trial",
+                    "link_section": null,
+                    "text": "clinical trial"
+                },
+                {
+                    "text": "s in the "
+                },
+                {
+                    "entity": "enwiki:United%20States",
+                    "entity_name": "United States",
+                    "link_section": null,
+                    "text": "United States"
+                },
+                {
+                    "text": " and "
+                },
+                {
+                    "entity": "enwiki:Japan",
+                    "entity_name": "Japan",
+                    "link_section": null,
+                    "text": "Japan"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "b74596a94ac579ca24fc2689babb3b4477eeb128"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Like pure \u00b5-opioids, the mixed agonists-antagonist opioid class of drugs can cause side effects with initial administration of the drug but which lessen over time (\u201ctolerance\u201d).  This is particularly true for the side effects of nausea, sedation and cognitive symptoms (Jovey et al. 2003).  These side effects can in many instances be ameliorated or avoided at the time of drug initiation by titrating the drug from a tolerable starting dose up to the desired therapeutic dose. An important difference between nalbuphine and the pure mu opioid analgesic drugs is the \u201cceiling effect\u201d on respiration.  Respiratory depression is a potentially fatal side effect from the use of pure mu opioids.  Nalbuphine has limited ability to depress respiratory function (Gal et al. 1982)."
+                }
+            ],
+            "para_id": "7c0eb4eef6cb13260bb6cf4ee7eed9737f79d2c9"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Deaths due to opioid use also tend to skew at older ages than deaths from use of other illicit drugs. This does not reflect opioid use as a whole, which includes individuals in younger age demographics. Overdoses from opioids are highest among individuals who are between the ages of 40 and 50, in contrast to heroin overdoses, which are highest among individuals who are between the ages of 20 and 30. 21 to 35-year olds represent 77% of individuals who enter treatment for opioid use disorder, however, the average age of first-time use of prescription painkillers was 21.2 years of age in 2013."
+                }
+            ],
+            "para_id": "875e10a22af610cbb8378c4978e93069c2ab863e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "C-EDGE CO-STAR showed high SVR after 24-weeks. This studied reaffirmed results from studies of the previous year. The study was double-blind and placebo-controlled. Patients had HCV GT1, GT4, or GT6 and were on opioid therapy. Upwards of 96% of the patients achieved SVR24. This study contributed to the knowledge of the incidence of HCV reinfection in patients who receive drug injection of opioid treatments. This is a demographic that the medical community is typically reluctant to treat due to concerns of reinfection and compliance."
+                }
+            ],
+            "para_id": "e6dc8dc9ec4fa3099364f4af93c6e96407e7e94a"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "According to the Encyclopedia of Population, Caldwell's work on demographic and health transition is \"cited almost de rigueur by those in these fields\". He is particularly noted for his \"wealth flows\" theory, which relates demographic transition to changes in intergenerational transfers within the family. This theory has been criticised for its lack of testability, but it has \"captured the imagination of many researchers\" and stimulated micro-demographic research in the field.  He worked on many areas of demographic theory, including the importance of education and the status of women in determining demographic change, and the study of the AIDS epidemic, particularly in Africa. The first global survey of demographers carried out in 2000 reported that Caldwell and "
+                },
+                {
+                    "entity": "enwiki:Ansley%20J.%20Coale",
+                    "entity_name": "Ansley J. Coale",
+                    "link_section": null,
+                    "text": "Ansley J. Coale"
+                },
+                {
+                    "text": " were recorded as being in approximately equal first place in their impact on demographic teaching, research and policy formulation over the second half of the 20th century."
+                }
+            ],
+            "para_id": "d696c5b03f7744bce375c43bb66c9cb4de0a75af"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "During the colonial period, smallpox remained a scourge, especially on the indigenous population. There was a major epidemic between 1790 and 1791 that started in "
+                },
+                {
+                    "entity": "enwiki:Valley%20of%20Mexico",
+                    "entity_name": "Valley of Mexico",
+                    "link_section": null,
+                    "text": "Valley of Mexico"
+                },
+                {
+                    "text": ", principally affecting children. More people recovered than died. In "
+                },
+                {
+                    "entity": "enwiki:Mexico%20City",
+                    "entity_name": "Mexico City",
+                    "link_section": null,
+                    "text": "Mexico City"
+                },
+                {
+                    "text": ", of 5400 cases admitted to the hospital, 4431 recovered and 1,331 died. This epidemic coincided with the rise of prices of corn and a "
+                },
+                {
+                    "entity": "enwiki:Typhus",
+                    "entity_name": "Typhus",
+                    "link_section": null,
+                    "text": "typhus"
+                },
+                {
+                    "text": " epidemic, which caused a slight demographic decrease in central Mexico."
+                }
+            ],
+            "para_id": "a2393d15279e6caeb1df070a7eac28e6b2abf6b3"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In 2012, Donovan challenged incumbent Vermont Attorney General "
+                },
+                {
+                    "entity": "enwiki:William%20Sorrell",
+                    "entity_name": "William Sorrell",
+                    "link_section": null,
+                    "text": "William Sorrell"
+                },
+                {
+                    "text": " in the Democratic Party primary.  Donovan campaigned, among other things, for access under the Access to Public Records Act to police investigations and the decriminalization of small amounts of marijuana. One of his focuses in the campaign was to highlight the opioid epidemic afflicting Vermont communities.  Donovan lost the hotly contested primary by 714 votes, with Sorrell receiving 21,124 votes to Donovan's 20,410.   During the last weeks of the primary, a super PAC with unknown donors ran advertisements for the incumbent narrated by former Governor "
+                },
+                {
+                    "entity": "enwiki:Howard%20Dean",
+                    "entity_name": "Howard Dean",
+                    "link_section": null,
+                    "text": "Howard Dean"
+                },
+                {
+                    "text": "."
+                }
+            ],
+            "para_id": "874333629a451f86c272c5a30d1f0a3750d48f5e"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Because of their high potential for abuse and high overdose rates, prescribing opioids for mental health issues is very uncommon and frowned upon within the medical community. Safer opioids which are less likely to be abused, have less deadly drug interactions, and are less likely to cause overdose are the ones that are being looked into the most for their anxiolytic-type properties. Given that many anxiety sufferers are more prone to alcohol and opioid addiction, the potential danger in prescribing opioids is apparent. Benzodiazepines are very similar to alcohol in how they impact the user and the brain, and even though anxiety sufferers are more prone to alcohol addiction these drugs are still prescribed.  The same logic is being used in the push to get opioids used for anxiety treatment. Opioids and benzodiazepines are very dangerous to use together, and using them together is one of the most common reasons for accidental mixed drug overdose in the United States, so great caution should be taken if opioid prescriptions for anxiety become more accepted."
+                }
+            ],
+            "para_id": "ce07b472cd331839e0925bd5994006d255831767"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "In the clinical setting excessive secretion of tears, yawning and dilation of pupils are helpful presentations in diagnosing opioid withdrawal.Hydromorphone is a rapid acting pain killer, however some formulations can last up to several hours, patients who stop taking this drug abruptly might experience withdrawal symptoms. These can start within hours of taking the last dose of hydromorphone and can last up to several weeks. Withdrawal symptoms in people who stopped taking the opioid can be managed by using opioids or non-opioid adjuncts."
+                },
+                {
+                    "entity": "enwiki:Methadone",
+                    "entity_name": "Methadone",
+                    "link_section": null,
+                    "text": "Methadone"
+                },
+                {
+                    "text": " is an opioid commonly used for this kind of therapy. However, the selection of therapy should be tailored to each specific person. Methadone is also used for detoxification in people who have opioid addiction such as heroin or drugs similar to morphine.It can be given orally or intramuscularly. There is controversy regarding the use of opioids for people experiencing withdrawal symptoms since these agents can themselves cause relapse on patients when they suspend therapy Clonidineis a non-opioid adjunct that can be used in situations where opioid use isnot desired such as in patients with high blood pressure."
+                }
+            ],
+            "para_id": "65783b5cddf19a4fe4d0ace293be5455f57b2854"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Heroin overdose is usually treated with an "
+                },
+                {
+                    "entity": "enwiki:Opioid%20antagonist",
+                    "entity_name": "Opioid antagonist",
+                    "link_section": null,
+                    "text": "opioid antagonist"
+                },
+                {
+                    "text": ", such as "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "naloxone"
+                },
+                {
+                    "text": " (Narcan), or "
+                },
+                {
+                    "entity": "enwiki:Naltrexone",
+                    "entity_name": "Naltrexone",
+                    "link_section": null,
+                    "text": "naltrexone"
+                },
+                {
+                    "text": ". This reverses the effects of heroin and other opioids and causes an immediate return of consciousness but may result in "
+                },
+                {
+                    "entity": "enwiki:Drug%20withdrawal",
+                    "entity_name": "Drug withdrawal",
+                    "link_section": null,
+                    "text": "withdrawal"
+                },
+                {
+                    "text": " symptoms. The "
+                },
+                {
+                    "entity": "enwiki:Half-life",
+                    "entity_name": "Half-life",
+                    "link_section": null,
+                    "text": "half-life"
+                },
+                {
+                    "text": " of naloxone is shorter than most opioids, so that it has to be administered multiple times until the opioid has been metabolized by the body."
+                }
+            ],
+            "para_id": "18750ad84e57a629538aa61eb7411391cde33230"
+        },
+        {
+            "para_body": [
+                {
+                    "text": "Death can be prevented in opioid overdoses if patients receive basic life support and the administration of naloxone soon after opioid overdose is suspected. "
+                },
+                {
+                    "entity": "enwiki:Naloxone",
+                    "entity_name": "Naloxone",
+                    "link_section": null,
+                    "text": "Naloxone"
+                },
+                {
+                    "text": " is effective at reversing the cause, rather than just the symptoms, of an opioid overdose. A longer-acting variant is "
+                },
+                {
+                    "entity": "enwiki:Naltrexone",
+                    "entity_name": "Naltrexone",
+                    "link_section": null,
+                    "text": "naltrexone"
+                },
+                {
+                    "text": ". Naltrexone is primarily meant to treat opioid and alcohol dependence."
+                }
+            ],
+            "para_id": "a6e17bd59164f935ac5f651b9982b96834c46ae2"
+        }
+    ],
+    "query_facets": [
+        {
+            "heading": "History in North America",
+            "heading_id": "enwiki:Opioid%20epidemic/History%20in%20North%20America"
+        },
+        {
+            "heading": "Causes",
+            "heading_id": "enwiki:Opioid%20epidemic/Causes"
+        },
+        {
+            "heading": "Effects",
+            "heading_id": "enwiki:Opioid%20epidemic/Effects"
+        },
+        {
+            "heading": "Demographics",
+            "heading_id": "enwiki:Opioid%20epidemic/Demographics"
+        },
+        {
+            "heading": "Outside North America",
+            "heading_id": "enwiki:Opioid%20epidemic/Outside%20North%20America"
+        },
+        {
+            "heading": "Countermeasures",
+            "heading_id": "enwiki:Opioid%20epidemic/Countermeasures"
+        }
+    ],
+    "run_id": "UNH-p-l2r",
+    "squid": "enwiki:Opioid%20epidemic",
+    "title": "Opioid epidemic"
+}
