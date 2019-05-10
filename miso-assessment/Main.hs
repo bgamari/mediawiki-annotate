@@ -63,10 +63,14 @@ prettyTransition ToNonRelTransition = "ToNonRel"
 prettyTransition UnsetTransition = "x"
 
 
-data DisplayConfig = DisplayConfig { displayAssessments :: Bool}
+data DisplayConfig = DisplayConfig { displayAssessments :: Bool
+                                   , viewOnly :: Bool
+                                   }
   deriving (Eq, Show)
 defaultDisplayConfig :: DisplayConfig
-defaultDisplayConfig = DisplayConfig {displayAssessments = False}
+defaultDisplayConfig = DisplayConfig { displayAssessments = False
+                                     , viewOnly = False
+                                     }
 
 data ParaSpan = QuerySpan T.Text
               | FacetSpan T.Text
@@ -101,8 +105,8 @@ uploadUrl = "/assessment"
 
 -- | Sum type for application events
 data Action
-  = FetchAssessmentPage String
-  | SetAssessmentPage AssessmentPage UTCTime
+  = FetchAssessmentPage String Bool
+  | SetAssessmentPage AssessmentPage UTCTime Bool
   | ReportError MisoString
   | Initialize
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
@@ -186,8 +190,13 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
     loc <- getWindowLocation >>= getSearch
     params <- newURLSearchParams loc
     maybeQ <- get params ("q" :: MisoString)
+    maybeViewOnly <- get params ("viewOnly" :: MisoString)
+                     :: IO (Maybe MisoString)
     let query = fromMaybe "default" maybeQ
-    return $ FetchAssessmentPage query
+        viewOnly' :: Bool
+        viewOnly' = Debug.traceShowId $ read $ fromMisoString $ fromMaybe "False" maybeViewOnly
+         -- todo Fix FetchAssessmentPage query viewOnly'
+    return $ FetchAssessmentPage query viewOnly'
   where newModel =
             let stopwords :: S.Set T.Text
                 stopwords = S.fromList $ T.lines $ decodeByteString stopwordList
@@ -199,22 +208,22 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
 
 
 
-updateModel (FetchAssessmentPage pageName) m = m <# do
+updateModel (FetchAssessmentPage pageName viewOnly) m = m <# do
     page <- fetchJson $ getAssessmentPageFilePath pageName
     now' <- getCurrentTime
     return $ case page of
-      Right p -> SetAssessmentPage p now'
+      Right p -> SetAssessmentPage p now' viewOnly
       Left e  -> ReportError $ ms $ show e
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 
-updateModel (SetAssessmentPage page now') m =
+updateModel (SetAssessmentPage page now' viewOnly) m =
         case m of
             AssessmentModel {stopwords = stopwords, username = username} ->
                     return LoadAssessmentsFromLocalStorage #>
                                    AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
-                                     , config = defaultDisplayConfig
+                                     , config = defaultDisplayConfig { viewOnly = viewOnly }
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
                                      , stopwords = stopwords  -- todo load from storage
@@ -226,7 +235,7 @@ updateModel (SetAssessmentPage page now') m =
                     return LoadAssessmentsFromLocalStorage #>
                                     AssessmentModel  { page=page'
                                      , state=emptyAssessmentState
-                                     , config = defaultDisplayConfig
+                                     , config = defaultDisplayConfig  { viewOnly = viewOnly }
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
                                      , stopwords = stopwords  -- todo load from storage
@@ -349,10 +358,10 @@ updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryI
     alert $ "Uploaded annotations for page " <> (ms $ unQueryId queryId)
     return Noop
 
-updateModel ClearAssessments m@AssessmentModel{ page=page} = m <# do
+updateModel ClearAssessments m@AssessmentModel{ page=page, config = DisplayConfig {viewOnly=viewOnly}} = m <# do
     now' <- getCurrentTime
     -- remove from browser data
-    return $ SetAssessmentPage page now'
+    return $ SetAssessmentPage page now' viewOnly
 
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
@@ -363,8 +372,8 @@ updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displa
               }
 
 
-updateModel (SetAssessmentPage x1 x2) m = m <# do
-    return $ ReportError $ ms ("unreachable: updateModel SetAssessmentPage "<> show x1 <>" "<> show x2 <> " " <> show m)
+updateModel (SetAssessmentPage x1 x2 x3) m = m <# do
+    return $ ReportError $ ms ("unreachable: updateModel SetAssessmentPage "<> show x1 <>" "<> show x2 <>" "<> show x3 <> " " <> show m)
 
 updateModel x m = m <# do
     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
@@ -501,7 +510,13 @@ viewModel m@AssessmentModel{
             , username = username
           } =
 
-    div_ []
+    if viewOnly then div_ []
+       [ h1_ [] [text $ ms apTitle]
+       , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
+       , p_ [] [text "Run: ", text $ ms apRunId]
+       , ol_ [] $ paragraphsViewOnly apParagraphs
+       ]
+    else div_ []
        [ h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
@@ -579,6 +594,17 @@ viewModel m@AssessmentModel{
                     in optTransition
                          <> [renderParagraph para2]
                          <> go rest prevPara'
+
+        paragraphsViewOnly :: [Paragraph] -> [View Action]
+        paragraphsViewOnly apParagraphs =
+            fmap renderParagraphViewOnly apParagraphs
+        renderParagraphViewOnly :: Paragraph -> View Action
+        renderParagraphViewOnly p@Paragraph{..} =
+            li_ [class_ "entity-snippet-li"] [
+                    p_ [class_ "entity-snippet-li-text"] $ renderParaBodies paraId
+                ]
+
+
 
 
         isHidden Paragraph{paraId = paraId} =
@@ -731,13 +757,18 @@ viewModel m@AssessmentModel{
                 renderWord (PlainSpan str) =
                     [text $ ms str]
                 renderWord (EntitySpan Link{..}) =
-                    [a_ [ href_ $ ms $ unpackPageName linkTarget] [text $ ms linkAnchor]]
+                    [a_ [ href_ $ toWikiUrl linkTarget] [text $ ms linkAnchor]]
 
 
 
 viewModel LoadingPageModel { .. } = viewErrorMessage $ "Loading Page"
 viewModel FileNotFoundErrorModel { .. }= viewErrorMessage $ "File not Found " <> ms filename
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
+
+
+toWikiUrl :: PageName -> MisoString
+toWikiUrl pagename =
+    "https://en.wikipedia.org/wiki/" <> (ms $ unpackPageName pagename)
 
 
 viewErrorMessage :: MisoString -> View Action
