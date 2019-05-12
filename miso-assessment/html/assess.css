@@ -9,9 +9,10 @@
 
 #toolbar-container { 
     position: fixed;
+    top: 0;
+    right: 0;
     margin-left: auto;
-    margin-right: 100px;
-    width: 100%;
+    margin-right: 10px;
     z-index: 1;
 }
 
@@ -21,6 +22,14 @@
     padding: 4px;
     clear: both;
     background-color: #fff;
+}
+
+.toolbar-btn {
+    float:right;
+}
+
+.infopanel {
+    background-color:white;
 }
 
 .annotate .btn {
@@ -35,7 +44,7 @@
 
 .entity-snippet-li {
     display: inline-table;
-    width: 1000px;
+    width: 100%;
     text-align: left;
     background-color: #dce7f1;
     border-style: solid;

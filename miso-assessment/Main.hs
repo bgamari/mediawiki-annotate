@@ -5,6 +5,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric#-}
 {-# LANGUAGE DuplicateRecordFields#-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 -- | Haskell module declaration
 module Main where
@@ -40,6 +41,8 @@ import Types
 
 import qualified Debug.Trace as Debug
 
+mss :: Show a => a -> MisoString
+mss = ms . show
 
 
 prettyLabel :: AssessmentLabel -> MisoString
@@ -55,9 +58,9 @@ prettyLabel UnsetLabel = "x"
 
 prettyTransition :: AssessmentTransitionLabel -> MisoString
 prettyTransition RedundantTransition = "Redundant"
-prettyTransition SameTransition = "Same"
-prettyTransition AppropriateTransition = "Coherent"
-prettyTransition SwitchTransition = "Switch"
+prettyTransition SameTransition = "Same Topic"
+prettyTransition AppropriateTransition = "Coherent Transition"
+prettyTransition SwitchTransition = "Topic Switch"
 prettyTransition OfftopicTransition = "ToOfftopic"
 prettyTransition ToNonRelTransition = "ToNonRel"
 prettyTransition UnsetTransition = "x"
@@ -76,6 +79,8 @@ data ParaSpan = QuerySpan T.Text
               | FacetSpan T.Text
               | PlainSpan T.Text
               | EntitySpan Link
+              | QueryEntitySpan Link
+              | FacetEntitySpan Link
   deriving (Eq, Show)
 type AnnotatedSpans = [ParaSpan]   -- todo inline type
 
@@ -133,8 +138,11 @@ emptyAssessmentModel = LoadingPageModel { maybeStopwords = Nothing
                                         , maybeUsername = Nothing
                                         }
 
-noneFacet =  AssessmentFacet { apHeading=(SectionHeading "NONE OF THESE")
+noneFacet =  AssessmentFacet { apHeading=(SectionHeading "OTHER RELEVANT FACET")
                                , apHeadingId=packHeadingId "NONE_OF_THESE"
+                               }
+introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION")
+                               , apHeadingId=packHeadingId "INTRODUCTION"
                                }
 -- | Type synonym for an application model
 type Model = AssessmentModel
@@ -158,14 +166,14 @@ saveLocalState tag userId queryId paraId label = do
     let key = storageKey tag userId queryId paraId
         value = label
     putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+--     setLocalStorage key value
 
 saveLocalTransition :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> ParagraphId -> a -> JSM ()
 saveLocalTransition tag userId queryId paraId1 paraId2 label = do
     let key = storageKeyTransition tag userId queryId paraId1 paraId2
         value = label
     putStrLn $ show key <> "   " <> show value
-    setLocalStorage key value
+--     setLocalStorage key value
 
 
 
@@ -245,57 +253,59 @@ updateModel (SetAssessmentPage page now' viewOnly) m =
 
   where   page' = page{apQueryFacets = facets'}
           facets' = (apQueryFacets $ page)
-                  <> [ noneFacet
+                  <> [ noneFacet, introFacet
                      ]
           viewCache stopwords = buildViewTable page stopwords
           timeCache = now'
 
 -- Initialization completed. React to user events.
 
-updateModel LoadAssessmentsFromLocalStorage m@AssessmentModel{page=page@AssessmentPage{..}, state=state, username=username} = m <# do
-    let AssessmentState {..} = state
+updateModel LoadAssessmentsFromLocalStorage m = noEff m
 
-    facetState' <- fetchLocalState FacetTag
-    labelState' <- fetchLocalState LabelTag
-    notesState' <- fetchLocalState NotesTag
-    hiddenState' <- fetchLocalState HiddenTag
-    transitionState' <- fetchLocalTransition TransitionTag
-
-
-    return $ Debug.traceShowId $ SetState
-           $ state { facetState = tomap facetState'
-                   , labelState = tomap labelState'
-                   , notesState = tomap notesState'
-                   , hiddenState = tomap hiddenState'
-                   , transitionLabelState = tomap transitionState'
-                   }
-  where tomap s = M.fromList $ catMaybes s
-        queryId = apSquid
-        userId = username
-        fetchLocalState tag =
-           forM apParagraphs
-           $ \(Paragraph {paraId = paraId}) -> do
-                let key = storageKey tag userId queryId paraId
-                    assessmentKey = AssessmentKey {userId=userId, queryId=queryId, paragraphId=paraId}
-                value <- getLocalStorage key
-                return $ case value of
-                            (Left _) ->  Debug.trace (".") $ Nothing
-                            Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
-
-        -- Todo problem: we don't know which transitions we will render,
-        -- this may create new phantom transition assessments to which the user may not have access to in the interface
-        -- also we create quadratic effort
-
-        fetchLocalTransition tag =
-           forM [ (p1 , p2) | p1 <- apParagraphs, p2 <- apParagraphs, p1 /= p2 ]
-           $ \((Paragraph {paraId = paraId1}),(Paragraph {paraId = paraId2})) -> do
-                let key = storageKeyTransition tag userId queryId paraId1 paraId2
-                    assessmentKey = AssessmentTransitionKey {userId=userId, queryId=queryId, paragraphId1=paraId1, paragraphId2=paraId2}
-                value <- getLocalStorage key
-                return $ case value of
-                            (Left _) ->  Debug.trace (".") $ Nothing
-                            Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
-
+-- updateModel LoadAssessmentsFromLocalStorage m@AssessmentModel{page=page@AssessmentPage{..}, state=state, username=username} = m <# do
+--     let AssessmentState {..} = state
+--
+--     facetState' <- fetchLocalState FacetTag
+--     labelState' <- fetchLocalState LabelTag
+--     notesState' <- fetchLocalState NotesTag
+--     hiddenState' <- fetchLocalState HiddenTag
+--     transitionState' <- fetchLocalTransition TransitionTag
+--
+--
+--     return $ Debug.traceShowId $ SetState
+--            $ state { facetState = tomap facetState'
+--                    , labelState = tomap labelState'
+--                    , notesState = tomap notesState'
+--                    , hiddenState = tomap hiddenState'
+--                    , transitionLabelState = tomap transitionState'
+--                    }
+--   where tomap s = M.fromList $ catMaybes s
+--         queryId = apSquid
+--         userId = username
+--         fetchLocalState tag =
+--            forM apParagraphs
+--            $ \(Paragraph {paraId = paraId}) -> do
+--                 let key = storageKey tag userId queryId paraId
+--                     assessmentKey = AssessmentKey {userId=userId, queryId=queryId, paragraphId=paraId}
+--                 value <- getLocalStorage key
+--                 return $ case value of
+--                             (Left _) ->  Debug.trace (".") $ Nothing
+--                             Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
+--
+--         -- Todo problem: we don't know which transitions we will render,
+--         -- this may create new phantom transition assessments to which the user may not have access to in the interface
+--         -- also we create quadratic effort
+--
+--         fetchLocalTransition tag =
+--            forM [ (p1 , p2) | p1 <- apParagraphs, p2 <- apParagraphs, p1 /= p2 ]
+--            $ \((Paragraph {paraId = paraId1}),(Paragraph {paraId = paraId2})) -> do
+--                 let key = storageKeyTransition tag userId queryId paraId1 paraId2
+--                     assessmentKey = AssessmentTransitionKey {userId=userId, queryId=queryId, paragraphId1=paraId1, paragraphId2=paraId2}
+--                 value <- getLocalStorage key
+--                 return $ case value of
+--                             (Left _) ->  Debug.trace (".") $ Nothing
+--                             Right value -> Debug.trace ("key found" <> show key) $ Just $ (assessmentKey, value)
+--
 
 updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
 
@@ -520,16 +530,19 @@ viewModel m@AssessmentModel{
        [ h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
-       , div_ [class_ "infopanel"] $ createInfoPanel m
-       , button_ [onClick SaveAssessments] [text "Upload"]
-       , button_ [onClick DisplayAssessments, class_ hiddenDisplayBtn] [text "Display"]
-       , button_ [onClick ClearAssessments] [text "Clear"]
+       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear"]
+       , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
        , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
-            text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache
-       ]
+                text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache
+         ]
+       , div_ [id_ "toolbar-container"][
+           p_ [] [
+               button_ [class_ "toolbar-btn", onClick SaveAssessments] [text "Upload"]
+            ]
+           , div_ [class_ "infopanel toolbar", id_ "toolbar"] $ createInfoPanel m
+         ]
        , hr_ []
        , ol_ [] $ paragraphsAndTransitions apParagraphs
-
        ]
   where
         createInfoPanel :: AssessmentModel -> [View Action]
@@ -543,12 +556,13 @@ viewModel m@AssessmentModel{
                                       }
             , username = username
           } =
-            [ p_ [] [text "You logged on as user: ", text $ ms $ username]
-            , p_ [] [text "Remaining assessments on this page:"]
+            [ p_ [] [text "Topic: ", text $ ms $ apTitle]
+            , p_ [] [text "You logged on as user: ", text $ ms $ username]
+            , p_ [] [text "Remaining assessments:"]
             , ul_ [] [
-                li_ [] [text $ "facets: " <> (ms $ show numMissingFacetAsessments )]
-                , li_ [] [text $ "relevance: " <> (ms $ show numMissingLabelAsessments) ]
-                , li_ [] [text $ "transitions: " <> (ms $ show numMissingTransitionAsessments) ]
+                li_ [] [text $ "Facets: " <> (ms $ show numMissingFacetAsessments )]
+                , li_ [] [text $ "Relevance: " <> (ms $ show numMissingLabelAsessments) ]
+                , li_ [] [text $ "Transitions: " <> (ms $ show numMissingTransitionAsessments) ]
               ]
             ]
           where totalParas = S.fromList $ fmap paraId apParagraphs
@@ -618,22 +632,23 @@ viewModel m@AssessmentModel{
 -- todo delete
 --         facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
 
-        mkHidable className _key paraId =
+        mkHidable hidden _key paraId =
             div_[] [
-                button_ [class_ ("hider annotate btn btn-sm "<> className), onClick (ToggleHidden username queryId paraId)] [text "Hide from Article"]
+                button_ [class_ ("hider annotate btn btn-sm "<> hideableClass), onClick (ToggleHidden username queryId paraId)] [text hideableText]
             ]
+          where hideableClass = if hidden then "active hidable-hidden" else ""
+                hideableText = if hidden then "Removed (click to show)" else "Remove"
 
         mkButtons key paraId =
             div_[] [
-            label_ [for_ "relevance"] [text ""] -- Relevance Assessments:"
-            ,span_ [class_ "btn-group", id_ "relevance"] [         --  , role_ "toolbar"
+            span_ [class_ "btn-group"] [         --  , role_ "toolbar"
                     mkButton paraId MustLabel
                   , mkButton paraId ShouldLabel
                   , mkButton paraId CanLabel
-                  , mkButton paraId TopicLabel
-                  , mkButton paraId NonRelLabel
-                  , mkButton paraId TrashLabel
-                  , mkButton paraId DuplicateLabel
+--                   , mkButton paraId TopicLabel
+--                   , mkButton paraId NonRelLabel
+--                   , mkButton paraId TrashLabel
+--                   , mkButton paraId DuplicateLabel
                   , mkButton paraId UnsetLabel
                 ]
             ]
@@ -665,14 +680,14 @@ viewModel m@AssessmentModel{
                 selectedFacets =  fromMaybe [] $ key `M.lookup` facetState'
 
             in div_ [] [
-                label_ [for_ idStr ] [text "Best fitting query facet:"
+                label_ [for_ idStr ] [text "Best fitting query facet(s):"
                     , select_ [ class_ "facet-select"
                                , multiple_ True
+                               , size_ "8"
                                , id_ idStr
                                , onChange (\str -> SetFacet username queryId paraId str)
                                ]
-                        $ [ option_ ([ class_ "facet-option", value_ $ ""]) [text $ "Not Selected"]]
-                        <> (fmap (renderFacet selectedFacets) facetList)
+                        $ fmap (renderFacet selectedFacets) facetList
                     ]
                 ]
 
@@ -687,14 +702,14 @@ viewModel m@AssessmentModel{
 
 
         mkTransitionButtons key paraId1 paraId2 =
-                    label_ [] [text "Transition Quality:"
-                        ,div_ [class_ "trans-group"] [
-                            mkButton RedundantTransition
-                          , mkButton SameTransition
+                    label_ [for_ $ mss key] [text "Topical coherence of transition:"
+                        ,div_ [class_ "trans-group", id_ $ mss key] [
+--                             mkButton RedundantTransition
+                          mkButton SameTransition
                           , mkButton AppropriateTransition
                           , mkButton SwitchTransition
-                          , mkButton OfftopicTransition
-                          , mkButton ToNonRelTransition
+--                           , mkButton OfftopicTransition
+--                           , mkButton ToNonRelTransition
                           , mkButton UnsetTransition
                         ]
                     ]
@@ -722,22 +737,24 @@ viewModel m@AssessmentModel{
             let assessmentKey = AssessmentKey username queryId paraId
                 hidden = isHidden p -- fromMaybe False $ assessmentKey `M.lookup` hiddenState
                 hiddenStateClass = if hidden then "hidden-panel" else "shown-panel"
-                hidableClass = if hidden then "active hidable-hidden" else ""
+
 --                 hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
             in li_ [class_ "entity-snippet-li"] [
                 p_ [] [
-                 mkHidable hidableClass assessmentKey paraId
+                 mkHidable hidden assessmentKey paraId
                 , div_ [class_ hiddenStateClass] [
                     section_ [class_ "container"] [
                     div_ [class_ "container-annotate"] [
                             mkNotesField assessmentKey paraId
                             , mkQueryFacetField assessmentKey paraId
-                            ,  span_ [class_ "annotation"][ -- data-item  data-query
+                            , label_ [] [text "Relevance for selected facet(s):"] -- Relevance Assessments:"
+                            , span_ [class_ "annotation"][ -- data-item  data-query
                                 div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
                                     mkButtons assessmentKey paraId
                                 ]
                             ]
-                            , p_ [class_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
+                            , label_ [for_ "paragraph-id"][text "Paragraph Id:"]
+                            , p_ [class_ "paragraph-id", id_ "paragraph-id"] [text $ ms $ unpackParagraphId paraId]
                     ], div_ [class_ "container-content"][
                              p_ [class_ "entity-snippet-li-text"] $ renderParaBodies paraId
                     ]
@@ -758,6 +775,14 @@ viewModel m@AssessmentModel{
                     [text $ ms str]
                 renderWord (EntitySpan Link{..}) =
                     [a_ [ href_ $ toWikiUrl linkTarget] [text $ ms linkAnchor]]
+                renderWord (QueryEntitySpan Link{..}) =
+                    [span_ [class_ "queryterm-span"]
+                       [a_ [ href_ $ toWikiUrl linkTarget] [text $ ms linkAnchor]]
+                    ]
+                renderWord (FacetEntitySpan Link{..}) =
+                    [span_ [class_ "facetterm-span"]
+                       [a_ [ href_ $ toWikiUrl linkTarget] [text $ ms linkAnchor]]
+                    ]
 
 
 
@@ -804,7 +829,21 @@ buildViewTable AssessmentPage{..} stopwords =
                       else if  stemmed `S.member` facetWords
                            then FacetSpan word
                            else PlainSpan word
-        annotatedTextSpans (ParaLink link) = [EntitySpan link]
+        annotatedTextSpans (ParaLink link) =
+             fmap toSpan $ tokenizeStemmer stopwords (linkAnchor link)
+           where toSpan :: Term -> ParaSpan
+                 toSpan Punct{surface = word} =
+                      EntitySpan $ link {linkAnchor = word}
+                 toSpan Term{surface = word, stemmed = Nothing} =
+                      EntitySpan $ link {linkAnchor = word}
+                 toSpan Term{surface = word, stemmed = Just stemmed} =
+                      if (stemmed `S.member` queryWords)
+                      then QueryEntitySpan $ link {linkAnchor = word}
+                      else if  stemmed `S.member` facetWords
+                           then FacetEntitySpan $ link {linkAnchor = word}
+                           else EntitySpan $ link {linkAnchor = word}
+
+--         annotatedTextSpans (ParaLink link) = [EntitySpan link]
 
     in M.fromList $ [ (paraId p, spans)
                     | p <- apParagraphs
