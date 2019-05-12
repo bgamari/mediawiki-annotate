@@ -391,11 +391,6 @@ updateModel x m = m <# do
 
 
 
-
-
-
-
-
 storageKey :: StorageTag -> UserId -> QueryId -> ParagraphId -> MisoString
 storageKey tag userId queryId paraId =
     (ms $ show tag) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
@@ -408,12 +403,7 @@ storageKeyTransition tag userId queryId paraId1 paraId2 =
     <> (ms $ unpackParagraphId paraId1)  <> "-"
     <> (ms $ unpackParagraphId paraId2)
 
--- updateModel Home m = m <# do
---                h <- windowInnerHeight
---                return $ UpdateModelWithWindow h
--- updateModel (UpdateModelWithWindow h) m = noEff (h)
--- updateModel SayHelloWorld m = m <# do
---   putStrLn "Hello World" >> pure NoOp
+
 
 
 getUsernameUrl :: MisoString
@@ -427,8 +417,7 @@ getAssessmentPageFilePath pageName =
     ms
     $ "/data/" <> pageName <> ".json"
 
---     $ "http://trec-car2.cs.unh.edu:8080/data/" <> pageName <> ".json"
---     $ "http://localhost:8000/data/" <> pageName <> ".json"
+
 
 uploadAssessments ::  AssessmentModel -> IO (Either FetchJSONError ())
 uploadAssessments m = do
@@ -629,8 +618,6 @@ viewModel m@AssessmentModel{
         hiddenDisplayBtn = if displayAssessments then "active-display-btn" else "display-btn"
         queryId = apSquid
 
--- todo delete
---         facetMap = M.fromList [ (hid, facet)  |  facet@AssessmentFacet{apHeadingId=hid} <- apQueryFacets]
 
         mkHidable hidden _key paraId =
             div_[] [
@@ -641,14 +628,10 @@ viewModel m@AssessmentModel{
 
         mkButtons key paraId =
             div_[] [
-            span_ [class_ "btn-group"] [         --  , role_ "toolbar"
+            span_ [class_ "btn-group"] [
                     mkButton paraId MustLabel
                   , mkButton paraId ShouldLabel
                   , mkButton paraId CanLabel
---                   , mkButton paraId TopicLabel
---                   , mkButton paraId NonRelLabel
---                   , mkButton paraId TrashLabel
---                   , mkButton paraId DuplicateLabel
                   , mkButton paraId UnsetLabel
                 ]
             ]
@@ -704,12 +687,9 @@ viewModel m@AssessmentModel{
         mkTransitionButtons key paraId1 paraId2 =
                     label_ [for_ $ mss key] [text "Topical coherence of transition:"
                         ,div_ [class_ "trans-group", id_ $ mss key] [
---                             mkButton RedundantTransition
                           mkButton SameTransition
                           , mkButton AppropriateTransition
                           , mkButton SwitchTransition
---                           , mkButton OfftopicTransition
---                           , mkButton ToNonRelTransition
                           , mkButton UnsetTransition
                         ]
                     ]
@@ -725,7 +705,6 @@ viewModel m@AssessmentModel{
         renderTransition:: Paragraph -> Paragraph -> View Action
         renderTransition Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = AssessmentTransitionKey username queryId paraId1 paraId2
---                 idStr = storageKey TransitionTag username queryId paraId1
                 hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
             in  span_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
@@ -738,7 +717,6 @@ viewModel m@AssessmentModel{
                 hidden = isHidden p -- fromMaybe False $ assessmentKey `M.lookup` hiddenState
                 hiddenStateClass = if hidden then "hidden-panel" else "shown-panel"
 
---                 hidableClass = if isHidden then "hidable-hidden" else "hidable-shown"
             in li_ [class_ "entity-snippet-li"] [
                 p_ [] [
                  mkHidable hidden assessmentKey paraId
@@ -749,7 +727,7 @@ viewModel m@AssessmentModel{
                             , mkQueryFacetField assessmentKey paraId
                             , label_ [] [text "Relevance for selected facet(s):"] -- Relevance Assessments:"
                             , span_ [class_ "annotation"][ -- data-item  data-query
-                                div_ [class_ "btn-toolbar annotate" ] [ -- data_ann role_ "toolbar"
+                                div_ [class_ "btn-toolbar annotate" ] [
                                     mkButtons assessmentKey paraId
                                 ]
                             ]
@@ -842,8 +820,6 @@ buildViewTable AssessmentPage{..} stopwords =
                       else if  stemmed `S.member` facetWords
                            then FacetEntitySpan $ link {linkAnchor = word}
                            else EntitySpan $ link {linkAnchor = word}
-
---         annotatedTextSpans (ParaLink link) = [EntitySpan link]
 
     in M.fromList $ [ (paraId p, spans)
                     | p <- apParagraphs
