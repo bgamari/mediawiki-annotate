@@ -36,3 +36,25 @@ executable app
                        trec-car-types
   default-language:    Haskell2010
 --  ghc-options:         -Wall -Werror
+
+
+executable list
+  main-is:             List.hs
+  build-depends:       base,
+                       bytestring,
+                       ghcjs-base,
+                       miso,
+                       aeson,
+                       aeson-pretty,
+                       app,
+                       jsaddle-dom,
+                       text,
+                       hashable,
+                       containers,
+                       time,
+                       filepath,
+                       porter,
+                       miso-types,
+                       trec-car-types
+  default-language:    Haskell2010
+--  ghc-options:         -Wall -Werror

@@ -42,30 +42,37 @@ let
       src = pkgs.nix-gitignore.gitignoreSource ["default.nix" "html"] ./.;
     in haskellPackages.callCabal2nix "app" src { };
 
-  combined = pkgs.stdenv.mkDerivation {
+  combined = minify app "app";
+
+  minify = src: name: pkgs.stdenv.mkDerivation {
     name = "app-minified";
     nativeBuildInputs = [ pkgs.closurecompiler ];
-    src = app;
+    inherit src;
     buildPhase = ''
-      cd bin/app.jsexe
-      closure-compiler all.js \
-        --externs=all.js.externs > all.min.js
+      for i in bin/*.jsexe; do
+        pushd $i
+        closure-compiler all.js \
+          --externs=all.js.externs > all.min.js
+        popd
+      done
     '';
     installPhase = ''
       mkdir -p $out
-      cp all.min.js $out
+      cp -R * $out
     '';
   };
-in 
-  pkgs.stdenv.mkDerivation {
+
+  app2 = pkgs.stdenv.mkDerivation {
     name = "app2";
     src = combined;
     installPhase = ''
       mkdir $out
-      cp all.min.js $out/all.js
+      cp bin/app.jsexe/all.min.js $out/all.js
+      cp bin/list.jsexe/all.min.js $out/list.js
       cp ${./html/assess.css} $out/assess.css
       cp ${app}/bin/app.jsexe/runmain.js $out/
       cp ${./html/assess.html} $out/assess.html
+      cp ${./html/list.html} $out/list.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data
@@ -74,4 +81,6 @@ in
       env = app.env;
       raw = app;
     };
-  }
+  };
+in
+  app2
