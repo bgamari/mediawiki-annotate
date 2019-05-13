@@ -156,7 +156,7 @@ type UserId = T.Text
 data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
     deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
-data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
+data AssessmentTransitionLabel = RedundantTransition | SameTransition | CoherentTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
     deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 
@@ -181,21 +181,26 @@ data AssessmentTransitionKey = AssessmentTransitionKey {
 
 
 data AssessmentState = AssessmentState {
-                    labelState :: M.Map AssessmentKey AssessmentLabel
-                    , notesState :: M.Map AssessmentKey T.Text
-                    , facetState :: M.Map AssessmentKey [AssessmentFacet]
+                    notesState :: M.Map AssessmentKey T.Text
+                    , facetState :: M.Map AssessmentKey [FacetValue]
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
-                    , hiddenState :: M.Map AssessmentKey Bool
+                    , nonrelevantState :: M.Map AssessmentKey Bool
     }
   deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
-emptyAssessmentState = AssessmentState { labelState = mempty
-                                       , notesState = mempty
+data FacetValue = FacetValue {
+    facet :: AssessmentFacet
+    , relevance :: AssessmentLabel
+  }
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
+
+
+emptyAssessmentState = AssessmentState { notesState = mempty
                                        , facetState = mempty
                                        , transitionLabelState = mempty
                                        , transitionNotesState = mempty
-                                       , hiddenState = mempty
+                                       , nonrelevantState = mempty
                                        }
 
 data AssessmentMetaData = AssessmentMetaData {

@@ -28,19 +28,19 @@ library
                        trec-car-types
   default-language:    Haskell2010
 
-executable fix-assessments
-  main-is:             FixAssessments.hs
-  build-depends:       base,
-                       bytestring,
-                       optparse-applicative >= 0.12,
-                       aeson,
-                       aeson-pretty,
-                       text,
-                       hashable,
-                       containers,
-                       trec-car-types,
-                       miso-types
-  default-language:    Haskell2010
+--executable fix-assessments
+--  main-is:             FixAssessments.hs
+--  build-depends:       base,
+--                       bytestring,
+--                       optparse-applicative >= 0.12,
+--                       aeson,
+--                       aeson-pretty,
+--                       text,
+--                       hashable,
+--                       containers,
+--                       trec-car-types,
+--                       miso-types
+--  default-language:    Haskell2010
 
 executable test-load-pages
   main-is:             TestLoadPage.hs

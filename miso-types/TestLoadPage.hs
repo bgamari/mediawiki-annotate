@@ -34,7 +34,7 @@ opts :: Parser (IO ())
 opts = subparser
     $ cmd "page" loadPage'
     <> cmd "old-assessments" loadOldAssessments'
-    <> cmd "assessments" loadOldAssessments'
+    <> cmd "assessments" loadAssessments'
     <> cmd "merge-pages" mergePages'
   where cmd name action = command name (info (helper <*> action) fullDesc)
         loadPage' = loadPage
@@ -58,11 +58,17 @@ loadOldAssessments assessmentFile = do
     page <- either error id . Aeson.eitherDecode <$> BSL.readFile assessmentFile
          :: IO OldTypes.SavedAssessments
 
+--     print "facetState (OldType)"
+--     print $ OldTypes.facetState $ OldTypes.savedData page
+
     Data.ByteString.Lazy.Char8.putStrLn $ AesonPretty.encodePretty page
 
 loadAssessments assessmentFile = do
     page <- either error id . Aeson.eitherDecode <$> BSL.readFile assessmentFile
-         :: IO SavedAssessments
+         :: IO Types.SavedAssessments
+
+--     print "facetState (NewType)"
+--     print $ Types.facetState $ Types.savedData page
 
     Data.ByteString.Lazy.Char8.putStrLn $ AesonPretty.encodePretty page
 
