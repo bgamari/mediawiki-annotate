@@ -32,15 +32,33 @@ import Types
 opts :: Parser (IO ())
 opts = subparser
     $ cmd "page" loadPage'
+    <> cmd "merge-pages" mergePages'
   where cmd name action = command name (info (helper <*> action) fullDesc)
         loadPage' = loadPage
                   <$> option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "Page definition file (JSON file)")
+        mergePages' = mergePages
+                  <$> some (argument str (metavar "PageFILE" <> help "Page definition file (JSON file)"))
+                  <*> option str (short 'o' <> long "output" <> metavar "JSON" <> help "Json file to write the merged paged to")
 
 loadPage pageFile = do
     page <- either error id . Aeson.eitherDecode <$> BSL.readFile pageFile
          :: IO AssessmentPage
 
     Data.ByteString.Lazy.Char8.putStrLn $ AesonPretty.encodePretty page
+
+mergePages :: [FilePath] -> FilePath -> IO ()
+mergePages pageFiles outFile = do
+    pages <- mapM load pageFiles
+             :: IO [AssessmentPage]
+    let out = SubmissionRun pages
+    BSL.writeFile outFile $ Aeson.encode out
+
+  where load :: FilePath -> IO AssessmentPage
+        load pageFile = do
+            page <- either error id . Aeson.eitherDecode <$> BSL.readFile pageFile
+                 :: IO AssessmentPage
+            return page
+
 
 
 
