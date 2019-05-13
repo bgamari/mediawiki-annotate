@@ -160,7 +160,7 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 viewModel :: Model -> View Action
 viewModel m@ListModel{..} =
     div_ []
-       [ h1_ [] [text $ "File List"]
+       [ h1_ [] [text $ "Topic List"]
        , ul_ [] $ fmap renderFile filenames
        ]
   where renderFile :: MisoString -> View Action
