@@ -103,7 +103,7 @@ data AssessmentTransitionKey = AssessmentTransitionKey {
 data AssessmentState = AssessmentState {
                     labelState :: M.Map AssessmentKey AssessmentLabel
                     , notesState :: M.Map AssessmentKey T.Text
-                    , facetState :: M.Map AssessmentKey [AssessmentFacet]
+                    , facetState :: M.Map AssessmentKey AssessmentFacet
                     , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
                     , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
                     , hiddenState :: M.Map AssessmentKey Bool
