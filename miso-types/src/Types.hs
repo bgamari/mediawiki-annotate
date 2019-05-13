@@ -81,6 +81,16 @@ instance ToJSON ParaBody where
     toJSON (ParaText txt) = object [ "text" .= txt ]
 
 
+data SubmissionRun =
+    SubmissionRun {
+        apSubmissionData :: [AssessmentPage]
+    }
+  deriving (Eq, Show, Generic)
+instance FromJSON SubmissionRun where
+    parseJSON = genericParseJSON jsonOptions
+instance ToJSON SubmissionRun where
+    toJSON = genericToJSON jsonOptions
+    toEncoding = genericToEncoding jsonOptions
 
 data AssessmentPage =
     AssessmentPage {
@@ -192,6 +202,7 @@ data AssessmentMetaData = AssessmentMetaData {
      assessmentRuns :: [AssessmentRun]
    , userId :: UserId
    , timeStamp :: UTCTime
+   , sessionId :: Maybe T.Text
    }
   deriving (Eq, FromJSON, ToJSON, Generic, Show)
 

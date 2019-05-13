@@ -12,6 +12,7 @@ import Data.Aeson as Aeson
 import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import Data.Text.Encoding
 
+import Options.Applicative
 import Control.Monad
 import GHC.Generics
 import Control.Exception
@@ -28,18 +29,24 @@ import qualified Data.Text as T
 import CAR.Types
 import Types
 
+opts :: Parser (IO ())
+opts = subparser
+    $ cmd "page" loadPage'
+  where cmd name action = command name (info (helper <*> action) fullDesc)
+        loadPage' = loadPage
+                  <$> option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "Page definition file (JSON file)")
 
-options :: Parser (FilePath)
-options =
---     ()
---       <$>
-      option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "Page definition file (JSON file)")
-
-main :: IO ()
-main = do
-    (pageFile) <- execParser $ info options mempty
-
+loadPage pageFile = do
     page <- either error id . Aeson.eitherDecode <$> BSL.readFile pageFile
          :: IO AssessmentPage
 
     Data.ByteString.Lazy.Char8.putStrLn $ AesonPretty.encodePretty page
+
+
+
+main :: IO ()
+main = join $ execParser' (helper <*> opts) mempty
+
+execParser' :: Parser a -> InfoMod a -> IO a
+execParser' parser pinfo =
+    execParser $ info (parser) pinfo
