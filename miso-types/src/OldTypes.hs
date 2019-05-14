@@ -21,16 +21,12 @@ import Data.Time
 
 import CAR.Types
 
-newtype QueryId = QueryId { unQueryId :: T.Text }
-                deriving (Eq, Ord, Show)
-                deriving newtype (Hashable, FromJSON, ToJSON)
+
+import Types (QueryId, UserId, AssessmentLabel, AssessmentTransitionLabel)
 
 jsonOptions :: Options
 jsonOptions = defaultOptions { fieldLabelModifier = camelTo2 '_' . drop 2}     -- drop "ap" from field accessor
 json2Options = defaultOptions { fieldLabelModifier = camelTo2 '_' }     -- camel case -> snake case
-
-
-type UserId = T.Text
 
 
 data AssessmentFacet =
@@ -44,43 +40,33 @@ instance FromJSON AssessmentFacet where
 instance ToJSON AssessmentFacet where
     toJSON = genericToJSON jsonOptions
     toEncoding = genericToEncoding jsonOptions
-
-data ParagraphAssessments =
-    ParagraphAssessments {
-        apParaId :: ParagraphId,
-        apFacet :: HeadingId,
-        apAssessment :: AssessmentLabel
-    }
-  deriving (Eq, Show, Generic)
-instance FromJSON ParagraphAssessments where
-    parseJSON = genericParseJSON jsonOptions
-instance ToJSON ParagraphAssessments where
-    toJSON = genericToJSON jsonOptions
-    toEncoding = genericToEncoding jsonOptions
-
-data ParagraphOrgins =
-    ParagraphOrgins {
-        apParaId :: ParagraphId,
-        apSectionPath ::  T.Text, -- HeadingId,
-        apRankScore :: Double,
-        apRank :: Int
-    }
-  deriving (Eq, Show, Generic)
-instance FromJSON ParagraphOrgins where
-    parseJSON = genericParseJSON jsonOptions
-instance ToJSON ParagraphOrgins where
-    toJSON = genericToJSON jsonOptions
-    toEncoding = genericToEncoding jsonOptions
-
-
-data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
-
-data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
-
-
-
+--
+-- data ParagraphAssessments =
+--     ParagraphAssessments {
+--         apParaId :: ParagraphId,
+--         apFacet :: HeadingId,
+--         apAssessment :: AssessmentLabel
+--     }
+--   deriving (Eq, Show, Generic)
+-- instance FromJSON ParagraphAssessments where
+--     parseJSON = genericParseJSON jsonOptions
+-- instance ToJSON ParagraphAssessments where
+--     toJSON = genericToJSON jsonOptions
+--     toEncoding = genericToEncoding jsonOptions
+--
+-- data ParagraphOrgins =
+--     ParagraphOrgins {
+--         apParaId :: ParagraphId,
+--         apSectionPath ::  T.Text, -- HeadingId,
+--         apRankScore :: Double,
+--         apRank :: Int
+--     }
+--   deriving (Eq, Show, Generic)
+-- instance FromJSON ParagraphOrgins where
+--     parseJSON = genericParseJSON jsonOptions
+-- instance ToJSON ParagraphOrgins where
+--     toJSON = genericToJSON jsonOptions
+--     toEncoding = genericToEncoding jsonOptions
 
 
 data AssessmentKey = AssessmentKey {
@@ -122,7 +108,6 @@ data AssessmentMetaData = AssessmentMetaData {
      assessmentRuns :: [AssessmentRun]
    , userId :: UserId
    , timeStamp :: UTCTime
-   , sessionId :: Maybe T.Text
    }
   deriving (Eq, FromJSON, ToJSON, Generic, Show)
 

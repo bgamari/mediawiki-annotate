@@ -19,6 +19,7 @@ import Control.Applicative
 import qualified Data.Text as T
 import Data.Hashable
 import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import Data.Time
 
 import CAR.Types
@@ -156,7 +157,7 @@ type UserId = T.Text
 data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
     deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
-data AssessmentTransitionLabel = RedundantTransition | SameTransition | CoherentTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
+data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | CoherentTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
     deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 
@@ -164,63 +165,102 @@ data AssessmentTransitionLabel = RedundantTransition | SameTransition | Coherent
 
 
 data AssessmentKey = AssessmentKey {
-        userId :: UserId
-        , queryId :: QueryId
+        queryId :: QueryId
         , paragraphId :: ParagraphId
     }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic, Show)
+  deriving (Eq, Hashable, Ord, FromJSONKey, ToJSONKey, Generic, Show)
+instance FromJSON AssessmentKey where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON AssessmentKey where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
+
 
 data AssessmentTransitionKey = AssessmentTransitionKey {
-        userId :: UserId
-        , queryId :: QueryId
+        queryId :: QueryId
         , paragraphId1 :: ParagraphId
         , paragraphId2 :: ParagraphId
     }
-  deriving (Eq, Hashable, Ord, FromJSON, ToJSON, FromJSONKey, ToJSONKey, Generic, Show)
+  deriving (Eq, Hashable, Ord, FromJSONKey, ToJSONKey, Generic, Show)
+instance FromJSON AssessmentTransitionKey where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON AssessmentTransitionKey where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
 
 
 
 data AssessmentState = AssessmentState {
-                    notesState :: M.Map AssessmentKey T.Text
-                    , facetState :: M.Map AssessmentKey [FacetValue]
-                    , transitionLabelState :: M.Map AssessmentTransitionKey AssessmentTransitionLabel
-                    , transitionNotesState :: M.Map AssessmentTransitionKey T.Text
-                    , nonrelevantState :: M.Map AssessmentKey Bool
+                    notesState :: M.Map AssessmentKey [(AnnotationValue T.Text)]
+                    , facetState :: M.Map AssessmentKey [(AnnotationValue FacetValue)]
+                    , transitionLabelState :: M.Map AssessmentTransitionKey (AnnotationValue AssessmentTransitionLabel)
+                    , nonrelevantState :: M.Map AssessmentKey (AnnotationValue ())
     }
-  deriving (Eq, FromJSON, ToJSON, Generic, Show)
+  deriving (Eq, Generic, Show)
+instance FromJSON AssessmentState where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON AssessmentState where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
+
+
+data AnnotationValue a = AnnotationValue {
+    annotatorId :: UserId
+    , timeStamp :: UTCTime
+    , sessionId :: T.Text
+    , runIds :: [T.Text]
+    , value :: a
+  }
+  deriving (Eq, Generic, Show)
+instance FromJSON a => FromJSON (AnnotationValue a) where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON a =>  ToJSON (AnnotationValue a) where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
 
 data FacetValue = FacetValue {
     facet :: AssessmentFacet
     , relevance :: AssessmentLabel
+
   }
-  deriving (Eq, FromJSON, ToJSON, Generic, Show)
+  deriving (Eq, Generic, Show)
+instance FromJSON FacetValue where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON FacetValue where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
 
 
 emptyAssessmentState = AssessmentState { notesState = mempty
                                        , facetState = mempty
                                        , transitionLabelState = mempty
-                                       , transitionNotesState = mempty
                                        , nonrelevantState = mempty
                                        }
 
 data AssessmentMetaData = AssessmentMetaData {
-     assessmentRuns :: [AssessmentRun]
-   , userId :: UserId
-   , timeStamp :: UTCTime
+     runIds :: [T.Text]
+   , annotatorIds :: [UserId]
+   , timeStamp :: Maybe UTCTime
    , sessionId :: Maybe T.Text
    }
-  deriving (Eq, FromJSON, ToJSON, Generic, Show)
+  deriving (Eq, Generic, Show)
+instance FromJSON AssessmentMetaData where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON AssessmentMetaData where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
 
 
-data AssessmentRun = AssessmentRun {
-          runId :: T.Text
-        , squid :: QueryId
-    }
-  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 data SavedAssessments = SavedAssessments {
         savedData :: AssessmentState
        , metaData :: AssessmentMetaData
     }
-  deriving (Eq, FromJSON, ToJSON, Generic, Show)
+  deriving (Eq, Generic, Show)
+instance FromJSON SavedAssessments where
+    parseJSON = genericParseJSON json2Options
+instance ToJSON SavedAssessments where
+    toJSON = genericToJSON json2Options
+    toEncoding = genericToEncoding json2Options
+
 
