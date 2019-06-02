@@ -13,7 +13,7 @@ import Data.Aeson
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 
-newtype LessonId = LessonId Text
+newtype LessonId = LessonId { getLessonId :: Text }
                  deriving stock (Show, Eq, Ord, Generic)
                  deriving newtype (FromJSON, ToJSON, FromJSONKey, ToJSONKey, Hashable)
                  deriving anyclass (Serialise)
@@ -30,7 +30,7 @@ instance FromJSON Lesson where
              <*> o .: "lessonName"
              <*> o .: "topics"
 
-newtype TopicId = TopicId Text
+newtype TopicId = TopicId { getTopicId :: Text }
                 deriving stock (Show, Eq, Ord, Generic)
                 deriving newtype (FromJSON, ToJSON, FromJSONKey, ToJSONKey, Hashable)
                 deriving anyclass (Serialise)
