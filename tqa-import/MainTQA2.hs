@@ -47,12 +47,26 @@ lessonToPage l =
          , pageId =  packPageId $ T.unpack $ encodeLessonId siteId (lessonGlobalId l)-- pageNameToId siteId pageName
          , pageType = ArticlePage
          , pageMetadata = emptyPageMetadata
-         , pageSkeleton = intro <> vocabulary <> sections
+         , pageSkeleton = intro
+                        <> vocabulary
+                        <> summary
+                        <> recall
+                        <> think
+                        <> points
+                        <> objectives
+                        <> concepts
+                        <> sections
          }
   where
     pageName = packPageName $ T.unpack $ lessonName l
     sections = map topicToSection $ toList $ lessonTopics l
     intro = maybe [] (pure . adjunctTopicToSkel) $ lessonIntroduction l
+    summary = maybe [] (pure . adjunctTopicToSkel) $ lessonSummary l
+    points = maybe [] (pure . adjunctTopicToSkel) $ lessonPoints l
+    recall = maybe [] (pure . adjunctTopicToSkel) $ lessonRecall l
+    think = maybe [] (pure . adjunctTopicToSkel) $ lessonThink l
+    objectives = maybe [] (pure . adjunctTopicToSkel) $ lessonObjectives l
+    concepts = maybe [] (pure . adjunctTopicToSkel) $ lessonConcepts l
     vocabulary = vocabularyToSkel $ lessonVocabulary l
 
 

@@ -30,6 +30,30 @@ lessonIntroduction :: Lesson -> Maybe AdjunctTopic
 lessonIntroduction (Lesson{adjunctTopic=m}) =
     "Introduction" `HM.lookup` m
 
+lessonSummary :: Lesson -> Maybe AdjunctTopic
+lessonSummary (Lesson{adjunctTopic=m}) =
+    "Lesson Summary" `HM.lookup` m
+
+lessonPoints :: Lesson -> Maybe AdjunctTopic
+lessonPoints (Lesson{adjunctTopic=m}) =
+    "Points to Consider" `HM.lookup` m
+
+lessonObjectives :: Lesson -> Maybe AdjunctTopic
+lessonObjectives (Lesson{adjunctTopic=m}) =
+    "Lesson Objectives" `HM.lookup` m
+
+lessonConcepts :: Lesson -> Maybe AdjunctTopic
+lessonConcepts (Lesson{adjunctTopic=m}) =
+    "Apply Concepts" `HM.lookup` m
+
+lessonRecall :: Lesson -> Maybe AdjunctTopic
+lessonRecall (Lesson{adjunctTopic=m}) =
+    "Recall" `HM.lookup` m
+
+lessonThink :: Lesson -> Maybe AdjunctTopic
+lessonThink (Lesson{adjunctTopic=m}) =
+    "Think Critically" `HM.lookup` m
+
 lessonVocabulary :: Lesson -> Maybe AdjunctTopic
 lessonVocabulary (Lesson{adjunctTopic=m}) =
     "Vocabulary" `HM.lookup` m
