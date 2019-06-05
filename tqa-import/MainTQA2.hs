@@ -90,7 +90,10 @@ vocabularyToSkel (Just (VocabularyTopic vocab)) =
   where vocabList (key,v) =
             List 1 $ Paragraph paraId [ParaText t]
               where paraId = packParagraphId $ show $ hash t
-                    t = key <> ": "<> v
+                    t = if T.length v == 0 then
+                            key
+                        else
+                            key <> "(" <> v <> ")"
 vocabularyToSkel Nothing =
     []
 vocabularyToSkel  _ = error ("can only be applied to VocabularyTopic")
