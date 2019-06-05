@@ -44,10 +44,12 @@ lessonToPage l =
          , pageId =  packPageId $ T.unpack $ encodeLessonId siteId (lessonGlobalId l)-- pageNameToId siteId pageName
          , pageType = ArticlePage
          , pageMetadata = emptyPageMetadata
-         , pageSkeleton = map topicToSection $ toList $ lessonTopics l
+         , pageSkeleton = intro <> sections
          }
   where
     pageName = packPageName $ T.unpack $ lessonName l
+    sections = map topicToSection $ toList $ lessonTopics l
+    intro = maybe [] (pure . adjunctTopicToSkel) $ lessonIntroduction l
 
 
 encodeLessonId :: SiteId -> LessonId -> T.Text
@@ -68,6 +70,11 @@ topicToSection t =
 --     headingId = sectionHeadingToId heading
     headingId = packHeadingId $ T.unpack $ getTopicId $ topicId t
     content = Para $ Paragraph paraId [ParaText $ topicText t]
-      where paraId = packParagraphId $ show $ hash headingId
+      where paraId = packParagraphId $ show $ hash $ topicText t
+
+adjunctTopicToSkel :: AdjunctTopic -> PageSkeleton
+adjunctTopicToSkel (AdjunctTopic t) =
+    Para $ Paragraph paraId [ParaText t]
+      where paraId = packParagraphId $ show $ hash t
 
 
