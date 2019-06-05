@@ -101,7 +101,8 @@ adjunctTopicToSkel _ = error ("can only be applied to AdjunctTopic")
 
 vocabularyToSkel :: Maybe AdjunctTopic -> [PageSkeleton]
 vocabularyToSkel (Just (VocabularyTopic vocab)) =
-    fmap vocabList $ HM.toList vocab
+    ([Para $ Paragraph (packParagraphId "0") [ParaText "Vocabulary"]])
+    <>  (fmap vocabList $ HM.toList vocab)
   where vocabList (key,v) =
             List 1 $ Paragraph paraId [ParaText t]
               where paraId = packParagraphId $ show $ hash t
