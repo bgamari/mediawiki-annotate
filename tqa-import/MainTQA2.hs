@@ -93,7 +93,7 @@ vocabularyToSkel (Just (VocabularyTopic vocab)) =
                     t = if T.length v == 0 then
                             key
                         else
-                            key <> "(" <> v <> ")"
+                            key <> " (" <> v <> ")"
 vocabularyToSkel Nothing =
     []
 vocabularyToSkel  _ = error ("can only be applied to VocabularyTopic")
