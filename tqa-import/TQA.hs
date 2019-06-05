@@ -30,6 +30,10 @@ lessonIntroduction :: Lesson -> Maybe AdjunctTopic
 lessonIntroduction (Lesson{adjunctTopic=m}) =
     "Introduction" `HM.lookup` m
 
+lessonVocabulary :: Lesson -> Maybe AdjunctTopic
+lessonVocabulary (Lesson{adjunctTopic=m}) =
+    "Vocabulary" `HM.lookup` m
+
 instance FromJSON Lesson where
     parseJSON = withObject "lesson" $ \o ->
       Lesson <$> o .: "globalID"

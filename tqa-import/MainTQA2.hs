@@ -9,6 +9,9 @@ import Data.Foldable
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BSL
 import Options.Applicative
+import qualified Data.HashMap.Strict as HM
+import Data.Maybe
+
 
 import CAR.Types
 import TQA
@@ -44,12 +47,13 @@ lessonToPage l =
          , pageId =  packPageId $ T.unpack $ encodeLessonId siteId (lessonGlobalId l)-- pageNameToId siteId pageName
          , pageType = ArticlePage
          , pageMetadata = emptyPageMetadata
-         , pageSkeleton = intro <> sections
+         , pageSkeleton = intro <> vocabulary <> sections
          }
   where
     pageName = packPageName $ T.unpack $ lessonName l
     sections = map topicToSection $ toList $ lessonTopics l
     intro = maybe [] (pure . adjunctTopicToSkel) $ lessonIntroduction l
+    vocabulary = vocabularyToSkel $ lessonVocabulary l
 
 
 encodeLessonId :: SiteId -> LessonId -> T.Text
@@ -76,5 +80,19 @@ adjunctTopicToSkel :: AdjunctTopic -> PageSkeleton
 adjunctTopicToSkel (AdjunctTopic t) =
     Para $ Paragraph paraId [ParaText t]
       where paraId = packParagraphId $ show $ hash t
+
+adjunctTopicToSkel _ = error ("can only be applied to AdjunctTopic")
+
+
+vocabularyToSkel :: Maybe AdjunctTopic -> [PageSkeleton]
+vocabularyToSkel (Just (VocabularyTopic vocab)) =
+    fmap vocabList $ HM.toList vocab
+  where vocabList (key,v) =
+            List 1 $ Paragraph paraId [ParaText t]
+              where paraId = packParagraphId $ show $ hash t
+                    t = key <> ": "<> v
+vocabularyToSkel Nothing =
+    []
+vocabularyToSkel  _ = error ("can only be applied to VocabularyTopic")
 
 
