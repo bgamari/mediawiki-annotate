@@ -48,13 +48,14 @@ lessonToPage l =
          , pageType = ArticlePage
          , pageMetadata = emptyPageMetadata
          , pageSkeleton = intro
-                        <> vocabulary
+                        <> objectives
                         <> summary
                         <> recall
+                        <> concepts
                         <> think
                         <> points
-                        <> objectives
-                        <> concepts
+                        <> vocabulary
+
                         <> sections
          }
   where
