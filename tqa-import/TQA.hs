@@ -23,8 +23,86 @@ data Lesson = Lesson { lessonGlobalId :: LessonId
                      , lessonName :: Text
                      , lessonTopics :: HM.HashMap TopicId Topic
                      , adjunctTopic :: HM.HashMap Text AdjunctTopic
+                     , questions :: [QuestionChoice]
                      }
             deriving (Show)
+
+
+
+instance FromJSON Lesson where
+    parseJSON = withObject "lesson" $ \o ->
+      Lesson <$> o .: "globalID"
+             <*> o .: "lessonName"
+             <*> o .: "topics"
+             <*> o .: "adjunctTopics"
+             <*> ((o .: "questions") >>= (.: "nonDiagramQuestions"))
+
+newtype TopicId = TopicId { getTopicId :: Text }
+                deriving stock (Show, Eq, Ord, Generic)
+                deriving newtype (FromJSON, ToJSON, FromJSONKey, ToJSONKey, Hashable)
+                deriving anyclass (Serialise)
+
+data Topic = Topic { topicId   :: TopicId
+                   , topicName :: Text
+                   , topicText :: Text
+                   }
+           deriving (Show)
+
+instance FromJSON Topic where
+    parseJSON = withObject "topic" $ \o ->
+      Topic <$> o .: "globalID"
+            <*> o .: "topicName"
+            <*> ((o .: "content") >>= (.: "text"))
+
+data AdjunctTopic = AdjunctTopic { adjunctTopicText :: Text
+                                 }
+                  | VocabularyTopic { vocabulary :: HM.HashMap Text Text }
+           deriving (Show)
+
+instance FromJSON AdjunctTopic where
+    parseJSON v = adjunctTopic v <|> vocabularyTopic v
+      where
+        adjunctTopic = withObject "adjunctTopic" $ \o ->
+          AdjunctTopic <$> ((o .: "content") >>= (.: "text"))
+        vocabularyTopic v = VocabularyTopic <$> parseJSON v
+
+
+newtype QuestionId = QuestionId { getQuestionId :: Text }
+                deriving stock (Show, Eq, Ord, Generic)
+                deriving newtype (FromJSON, ToJSON, FromJSONKey, ToJSONKey, Hashable)
+                deriving anyclass (Serialise)
+
+data QuestionSubType = QuestionTrueOrFalse | QuestionMatching | QuestionMultipleChoice
+                deriving (Show, Eq)
+instance FromJSON QuestionSubType where
+    parseJSON = withText "questionSubType" $ \t ->
+      case t of
+        "True or False" -> return QuestionTrueOrFalse
+        "Multiple Choice" -> return QuestionMultipleChoice
+        "Matching" -> return QuestionMatching
+
+newtype QuestionChoice = QuestionChoice { getQuestionChoice :: Text }
+                deriving stock (Show, Eq, Ord, Generic)
+                deriving anyclass (Serialise)
+instance FromJSON QuestionChoice where
+    parseJSON = withObject "answerChoices" $ \o ->
+      QuestionChoice <$> o .: "processedText"
+
+
+data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
+                                             , beingAsked :: Text
+                                             , answerChoices :: HM.HashMap Text QuestionChoice
+                                             , questionSubType :: QuestionSubType
+                                             }
+
+instance FromJSON NonDiagramQuestion where
+    parseJSON = withObject "nonDiagramQuestion" $ \o ->
+      NonDiagramQuestion <$> o .: "globalID"
+                         <*>  ((o .: "beingAsked") >>= (.: "processedText"))
+                         <*> o .: "answerChoices"  -- todo
+                         <*> o .: "questionSubType"
+
+
 
 lessonIntroduction :: Lesson -> Maybe AdjunctTopic
 lessonIntroduction (Lesson{adjunctTopic=m}) =
@@ -57,39 +135,3 @@ lessonThink (Lesson{adjunctTopic=m}) =
 lessonVocabulary :: Lesson -> Maybe AdjunctTopic
 lessonVocabulary (Lesson{adjunctTopic=m}) =
     "Vocabulary" `HM.lookup` m
-
-instance FromJSON Lesson where
-    parseJSON = withObject "lesson" $ \o ->
-      Lesson <$> o .: "globalID"
-             <*> o .: "lessonName"
-             <*> o .: "topics"
-             <*> o .: "adjunctTopics"
-
-newtype TopicId = TopicId { getTopicId :: Text }
-                deriving stock (Show, Eq, Ord, Generic)
-                deriving newtype (FromJSON, ToJSON, FromJSONKey, ToJSONKey, Hashable)
-                deriving anyclass (Serialise)
-
-data Topic = Topic { topicId   :: TopicId
-                   , topicName :: Text
-                   , topicText :: Text
-                   }
-           deriving (Show)
-
-instance FromJSON Topic where
-    parseJSON = withObject "topic" $ \o ->
-      Topic <$> o .: "globalID"
-            <*> o .: "topicName"
-            <*> ((o .: "content") >>= (.: "text"))
-
-data AdjunctTopic = AdjunctTopic { adjunctTopicText :: Text
-                                 }
-                  | VocabularyTopic { vocabulary :: HM.HashMap Text Text }
-           deriving (Show)
-
-instance FromJSON AdjunctTopic where
-    parseJSON v = adjunctTopic v <|> vocabularyTopic v
-      where
-        adjunctTopic = withObject "adjunctTopic" $ \o ->
-          AdjunctTopic <$> ((o .: "content") >>= (.: "text"))
-        vocabularyTopic v = VocabularyTopic <$> parseJSON v
