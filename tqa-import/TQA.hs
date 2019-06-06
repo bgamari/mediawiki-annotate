@@ -86,7 +86,7 @@ newtype QuestionChoice = QuestionChoice { getQuestionChoice :: Text }
                 deriving anyclass (Serialise)
 instance FromJSON QuestionChoice where
     parseJSON = withObject "answerChoices" $ \o ->
-      QuestionChoice <$> pure "" -- o .: "processedText"
+      QuestionChoice <$> o .: "processedText"
 
 
 data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
@@ -99,9 +99,7 @@ instance FromJSON NonDiagramQuestion where
     parseJSON = withObject "nonDiagramQuestion" $ \o ->
       NonDiagramQuestion <$> o .: "globalID"
                          <*>  ((o .: "beingAsked") >>= (.: "processedText"))
---                          <*> pure ""
                          <*> o .: "answerChoices"
-                         -- <*> mempty
                          <*> o .: "questionSubType"
 
 
