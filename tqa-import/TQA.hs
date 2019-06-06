@@ -86,7 +86,7 @@ newtype QuestionChoice = QuestionChoice { getQuestionChoice :: Text }
                 deriving anyclass (Serialise)
 instance FromJSON QuestionChoice where
     parseJSON = withObject "answerChoices" $ \o ->
-      QuestionChoice <$> o .: "processedText"
+      QuestionChoice <$> pure "" -- o .: "processedText"
 
 
 data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
