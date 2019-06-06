@@ -23,7 +23,7 @@ data Lesson = Lesson { lessonGlobalId :: LessonId
                      , lessonName :: Text
                      , lessonTopics :: HM.HashMap TopicId Topic
                      , adjunctTopic :: HM.HashMap Text AdjunctTopic
-                     , questions :: HM.HashMap Text QuestionChoice
+                     , questions :: HM.HashMap Text NonDiagramQuestion
                      }
             deriving (Show)
 
@@ -94,6 +94,7 @@ data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
                                              , answerChoices :: HM.HashMap Text QuestionChoice
                                              , questionSubType :: QuestionSubType
                                              }
+  deriving (Show)
 
 instance FromJSON NonDiagramQuestion where
     parseJSON = withObject "nonDiagramQuestion" $ \o ->
