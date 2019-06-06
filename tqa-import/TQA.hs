@@ -23,7 +23,7 @@ data Lesson = Lesson { lessonGlobalId :: LessonId
                      , lessonName :: Text
                      , lessonTopics :: HM.HashMap TopicId Topic
                      , adjunctTopic :: HM.HashMap Text AdjunctTopic
-                     , questions :: HM.HashMap Text NonDiagramQuestion
+                     , lessonQuestions :: HM.HashMap Text NonDiagramQuestion
                      }
             deriving (Show)
 

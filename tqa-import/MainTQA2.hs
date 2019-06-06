@@ -57,6 +57,7 @@ lessonToPage l =
                         <> vocabulary
 
                         <> sections
+                        <> questions
          }
   where
     pageName = packPageName $ T.unpack $ lessonName l
@@ -69,6 +70,7 @@ lessonToPage l =
     objectives = maybe [] (pure . adjunctTopicToSkel) $ lessonObjectives l
     concepts = maybe [] (pure . adjunctTopicToSkel) $ lessonConcepts l
     vocabulary = vocabularyToSkel $ lessonVocabulary l
+    questions = foldMap questionsToSkel $  toList $ lessonQuestions l
 
 
 encodeLessonId :: SiteId -> LessonId -> T.Text
@@ -90,6 +92,13 @@ topicToSection t =
     headingId = packHeadingId $ T.unpack $ getTopicId $ topicId t
     content = Para $ Paragraph paraId [ParaText $ topicText t]
       where paraId = packParagraphId $ show $ hash $ topicText t
+
+questionsToSkel :: NonDiagramQuestion -> [PageSkeleton]
+questionsToSkel q =
+    [Para $ Paragraph paraId [ParaText content]]
+  where
+    content = beingAsked q
+    paraId = packParagraphId $ T.unpack $ getQuestionId $ questionId q
 
 adjunctTopicToSkel :: AdjunctTopic -> PageSkeleton
 adjunctTopicToSkel (AdjunctTopic t) =
