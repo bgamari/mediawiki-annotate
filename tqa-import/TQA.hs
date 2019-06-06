@@ -100,8 +100,8 @@ instance FromJSON NonDiagramQuestion where
       NonDiagramQuestion <$> o .: "globalID"
                          <*>  ((o .: "beingAsked") >>= (.: "processedText"))
 --                          <*> pure ""
-                         -- <*> o .: "answerChoices"
-                         <*> mempty
+                         <*> o .: "answerChoices"
+                         -- <*> mempty
                          <*> o .: "questionSubType"
 
 
