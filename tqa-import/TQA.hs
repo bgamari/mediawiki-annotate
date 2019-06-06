@@ -98,8 +98,8 @@ data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
 instance FromJSON NonDiagramQuestion where
     parseJSON = withObject "nonDiagramQuestion" $ \o ->
       NonDiagramQuestion <$> o .: "globalID"
-                         -- <*>  ((o .: "beingAsked") >>= (.: "processedText"))
-                         <*> pure ""
+                         <*>  ((o .: "beingAsked") >>= (.: "processedText"))
+--                          <*> pure ""
                          -- <*> o .: "answerChoices"
                          <*> mempty
                          <*> o .: "questionSubType"
