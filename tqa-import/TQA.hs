@@ -92,6 +92,7 @@ instance FromJSON QuestionChoice where
 data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
                                              , beingAsked :: Text
                                              , answerChoices :: HM.HashMap Text QuestionChoice
+                                             , correctAnswer :: QuestionChoice
                                              , questionSubType :: QuestionSubType
                                              }
   deriving (Show)
@@ -101,6 +102,7 @@ instance FromJSON NonDiagramQuestion where
       NonDiagramQuestion <$> o .: "globalID"
                          <*>  ((o .: "beingAsked") >>= (.: "processedText"))
                          <*> o .: "answerChoices"
+                         <*> o .: "correctAnswer"
                          <*> o .: "questionSubType"
 
 

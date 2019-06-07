@@ -57,7 +57,7 @@ lessonToPage l =
                         <> vocabulary
 
                         <> sections
-                        <> questions
+                        <> [questions]
          }
   where
     pageName = packPageName $ T.unpack $ lessonName l
@@ -70,7 +70,8 @@ lessonToPage l =
     objectives = maybe [] (pure . adjunctTopicToSkel) $ lessonObjectives l
     concepts = maybe [] (pure . adjunctTopicToSkel) $ lessonConcepts l
     vocabulary = vocabularyToSkel $ lessonVocabulary l
-    questions = foldMap questionsToSkel $  toList $ lessonQuestions l
+    questions =  Section (SectionHeading "Questions") (packHeadingId "Questions")
+                 $ foldMap questionsToSkel $  toList $ lessonQuestions l
 
 
 encodeLessonId :: SiteId -> LessonId -> T.Text
@@ -97,8 +98,17 @@ questionsToSkel :: NonDiagramQuestion -> [PageSkeleton]
 questionsToSkel q =
     [Para $ Paragraph paraId [ParaText content]]
   where
-    content = beingAsked q
+    content = beingAsked q <> "\n" <> answer
     paraId = packParagraphId $ T.unpack $ getQuestionId $ questionId q
+    answer =
+        let correctAnswerKey :: T.Text
+            correctAnswerKey = getQuestionChoice $ correctAnswer q
+            ans :: Maybe QuestionChoice
+            ans = correctAnswerKey `HM.lookup` (answerChoices q)
+            correctAnswer' = fmap getQuestionChoice ans
+
+        in fromMaybe "no correct answer " correctAnswer'
+
 
 adjunctTopicToSkel :: AdjunctTopic -> PageSkeleton
 adjunctTopicToSkel (AdjunctTopic t) =
