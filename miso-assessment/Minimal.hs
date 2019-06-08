@@ -13,9 +13,7 @@ module Main where
 -- | Miso framework import
 import Miso
 import Miso.String hiding (concatMap, filter, length, zip)
-import Data.Aeson
 import GHC.Generics
-import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
 import Control.Exception
@@ -32,7 +30,7 @@ mss = ms . show
 
 
 data StringModel =
-    StringModel {text :: T.Text}
+    StringModel {displayText :: T.Text}
   deriving (Eq, Show)
 
 
@@ -78,7 +76,7 @@ updateModel (Initialize) m = noEff $ StringModel "OK, Computer!"
 viewModel :: Model -> View Action
 viewModel m@StringModel{..} =
     div_ []
-       [ h1_ [] [text $ displayText ]
+       [ h1_ [] [text $ ms $ displayText ]
        ]
 
 

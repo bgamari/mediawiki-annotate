@@ -9,7 +9,7 @@ let
   };
   result = import misoSrc {};
 
-  haskellPackages = pkgs.haskell.packages.ghcjs84.override {
+  haskellPackages = pkgs.haskell.packages.ghcjs.override {
     overrides = self: super: let lib = pkgs.haskell.lib; in {
       trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../trec-car-types { };
       miso-types = haskellPackages.callCabal2nix "miso-types" ../miso-types { };
@@ -33,6 +33,8 @@ let
       http-types = lib.dontCheck super.http-types;
       http-media = lib.dontCheck super.http-media;
       servant = lib.dontCheck super.servant;
+      ghcjs-dom = self.callHackage "ghcjs-dom" "0.9.4.0" {};
+      ghcjs-dom-jsffi = self.callHackage "ghcjs-dom-jsffi" "0.9.2.0" {};
       jsaddle = self.callHackage "jsaddle" "0.9.6.0" {};
       porter = self.callCabal2nix "porter" ../vendor/porter {};
       jsaddle-warp = super.callPackage "${misoSrc}/jsaddle-warp-ghcjs.nix" {};
