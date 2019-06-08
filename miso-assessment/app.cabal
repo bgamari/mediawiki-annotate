@@ -1,8 +1,9 @@
 name:                app
 version:             0.1.0.0
-synopsis:            First miso app
+synopsis:            TREC CAR Assessment interface
 category:            Web
 build-type:          Simple
+license:             BSD3
 cabal-version:       >=1.10
 
 library
@@ -35,7 +36,7 @@ executable app
                        miso-types,
                        trec-car-types
   default-language:    Haskell2010
---  ghc-options:         -Wall -Werror
+  ghc-options:         -O0 -Wall -Werror
 
 
 executable list

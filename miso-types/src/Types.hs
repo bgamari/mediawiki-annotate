@@ -154,11 +154,11 @@ instance ToJSON ParagraphOrgins where
 type UserId = T.Text
 
 
-data AssessmentLabel = MustLabel | ShouldLabel | CanLabel | TopicLabel | NonRelLabel | TrashLabel  |DuplicateLabel |UnsetLabel
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+data AssessmentLabel = UnsetLabel | TrashLabel | DuplicateLabel | NonRelLabel | TopicLabel | CanLabel | ShouldLabel | MustLabel
+    deriving (Eq, Ord, FromJSON, ToJSON, Generic, Show)
 
-data AssessmentTransitionLabel = RedundantTransition | SameTransition | AppropriateTransition | CoherentTransition | SwitchTransition | OfftopicTransition | ToNonRelTransition | UnsetTransition
-    deriving (Eq, FromJSON, ToJSON, Generic, Show)
+data AssessmentTransitionLabel = UnsetTransition |  ToNonRelTransition | OfftopicTransition | SwitchTransition | CoherentTransition |   AppropriateTransition | SameTransition | RedundantTransition
+    deriving (Eq, Ord, FromJSON, ToJSON, Generic, Show)
 
 
 
