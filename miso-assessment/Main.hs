@@ -379,10 +379,6 @@ updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displa
                       }
               }
 
-
-updateModel (SetAssessmentPage x1 x2 x3) m = m <# do
-    return $ ReportError $ ms ("unreachable: updateModel SetAssessmentPage "<> show x1 <>" "<> show x2 <>" "<> show x3 <> " " <> show m)
-
 updateModel x m = m <# do
     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
 
@@ -819,8 +815,8 @@ buildViewTable AssessmentPage{..} stopwords =
                     , let spans = foldMap annotatedTextSpans $ paraBody p
                     ]
 
-  where traceShowPrefix :: Show x => String -> x -> x
-        traceShowPrefix pref x = Debug.traceShow (pref <> ": " <> show x) x
+  where _traceShowPrefix :: Show x => String -> x -> x
+        _traceShowPrefix pref x = Debug.traceShow (pref <> ": " <> show x) x
 
 data Term = Term { surface :: T.Text, stemmed :: Maybe T.Text }
           | Punct { surface :: T.Text }

@@ -1,14 +1,15 @@
 { pkgs ? (import ../simplir/nixpkgs.nix {}) }:
 
 let
-  result = import (pkgs.fetchFromGitHub {
+  misoSrc = pkgs.fetchFromGitHub {
     owner = "dmjio";
     repo = "miso";
     sha256 = "1wvdizaq81a50jd121qlk47hnix0q0r1pnq2jqkwyy5ssfq6hpb6";
     rev = "8b5249b966f1406badbada3feebcfbbeab8afa87";
-  }) {};
+  };
+  result = import misoSrc {};
 
-  haskellPackages = pkgs.haskell.packages.ghcjs.override {
+  haskellPackages = pkgs.haskell.packages.ghcjs84.override {
     overrides = self: super: let lib = pkgs.haskell.lib; in {
       trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../trec-car-types { };
       miso-types = haskellPackages.callCabal2nix "miso-types" ../miso-types { };
@@ -34,6 +35,7 @@ let
       servant = lib.dontCheck super.servant;
       jsaddle = self.callHackage "jsaddle" "0.9.6.0" {};
       porter = self.callCabal2nix "porter" ../vendor/porter {};
+      jsaddle-warp = super.callPackage "${misoSrc}/jsaddle-warp-ghcjs.nix" {};
     };
   };
 
