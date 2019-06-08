@@ -1,15 +1,15 @@
 module Main where
 
 import Miso
-import Miso.String hiding (concatMap, filter, length, zip)
+import Miso.String
 
 import qualified Data.Text as T
 
 data StringModel =
-    StringModel {displayText :: T.Text}
+    StringModel
   deriving (Eq)
 
-emptyModel = StringModel {displayText = T.pack "Initializing..."}
+emptyModel = StringModel
 
 data Action
   = Initialize
@@ -30,13 +30,9 @@ main = startApp App {
 updateModel :: Action -> Model -> Effect Action Model
 
 
-updateModel (Initialize) m = noEff $ StringModel {displayText = T.pack "OK, Computer!"}
+updateModel (Initialize) m = noEff $ StringModel
 
 viewModel :: Model -> View Action
-viewModel m@StringModel{displayText=displayText} =
-    div_ []
-       [ h1_ [] [text $ ms $ displayText ]
-       ]
-
-
+viewModel StringModel =
+    div_ [] [p_ [] [text $ ms "hello"]]
 
