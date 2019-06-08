@@ -46,9 +46,9 @@ let
       src = pkgs.nix-gitignore.gitignoreSource ["default.nix" "html"] ./.;
     in haskellPackages.callCabal2nix "app" src { };
 
-  combined = minify app "app";
+  combined = minify "app" app;
 
-  minify = src: name: pkgs.stdenv.mkDerivation {
+  minify = name: src: pkgs.stdenv.mkDerivation {
     name = "app-minified";
     nativeBuildInputs = [ pkgs.closurecompiler ];
     inherit src;
@@ -73,10 +73,12 @@ let
       mkdir $out
       cp bin/app.jsexe/all.min.js $out/all.js
       cp bin/list.jsexe/all.min.js $out/list.js
+      cp bin/minimal.jsexe/all.js $out/minimal.js
       cp ${./html/assess.css} $out/assess.css
       cp ${app}/bin/app.jsexe/runmain.js $out/
       cp ${./html/assess.html} $out/assess.html
       cp ${./html/list.html} $out/list.html
+      cp ${./html/minimal.html} $out/minimal.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data

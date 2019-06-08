@@ -1,80 +1,39 @@
--- | Haskell language pragma
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE DeriveGeneric#-}
-{-# LANGUAGE DuplicateRecordFields#-}
-
--- | Haskell module declaration
 module Main where
 
--- | Miso framework import
 import Miso
 import Miso.String hiding (concatMap, filter, length, zip)
-import GHC.Generics
-import JavaScript.Web.XMLHttpRequest
-
-import Control.Exception
-import Control.Monad
 
 import qualified Data.Text as T
 
-import JSDOM.URLSearchParams
-import JavaScript.Web.Location
-
-
-mss :: Show a => a -> MisoString
-mss = ms . show
-
-
 data StringModel =
     StringModel {displayText :: T.Text}
-  deriving (Eq, Show)
+  deriving (Eq)
 
+emptyModel = StringModel {displayText = T.pack "Initializing..."}
 
-emptyModel = StringModel {displayText = "Initializing..."}
-
-
--- | Sum type for application events
 data Action
   = Initialize
-  deriving (Show)
 
-
--- | Type synonym for an application model
 type Model = StringModel
 
-
--- | Entry point for a miso application
 main :: IO ()
-main = startApp App {..}
-  where
-    initialAction = Initialize -- FetchAssessmentPage "water-distribution" -- initial action to be executed on application load
-    model  = emptyModel -- initial model
-    update = updateModel          -- update function
-    view   = viewModel            -- view function
-    events = defaultEvents        -- default delegated events
-    subs   = []                   -- empty subscription list
-    mountPoint = Nothing          -- mount point for application (Nothing defaults to 'body')
+main = startApp App {
+    initialAction = Initialize
+    , model  = emptyModel
+    , update = updateModel
+    , view   = viewModel
+    , events = defaultEvents
+    , subs   = []
+    , mountPoint = Just $ ms "body"
+  }
 
-
-
-
--- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
 
 
-updateModel (Initialize) m = noEff $ StringModel "OK, Computer!"
+updateModel (Initialize) m = noEff $ StringModel {displayText = T.pack "OK, Computer!"}
 
-
-
--- ------------- Presentation ----------------------
-
--- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel m@StringModel{..} =
+viewModel m@StringModel{displayText=displayText} =
     div_ []
        [ h1_ [] [text $ ms $ displayText ]
        ]
