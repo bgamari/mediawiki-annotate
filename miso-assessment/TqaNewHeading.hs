@@ -68,7 +68,9 @@ emptyModel = Initialize
 
 -- | Sum type for application events
 data Action
-  = Annotate
+  = IncludePage PageName Bool
+  | IncludeSection SectionPathId Bool
+  | ChangeSection SectionPathId MisoString
   | LoadCbor JSString
   | SetTqaPages [Page]
   | ReportError MisoString
@@ -104,9 +106,11 @@ updateModel (LoadCbor filename) m = m <# do
       Left e  -> ReportError $ mss e
 
 updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages mempty
-
-
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
+updateModel (IncludePage pageName active) m = noEff $ m
+updateModel (IncludeSection sp active) m = noEff $ m
+updateModel (ChangeSection sp val) m = noEff $ m
+
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
 fetchCbor url = do
@@ -177,7 +181,11 @@ viewModel m@TqaModel{..} =
             ([ h2_ [] [text $ ms $ getSectionHeading sectionHeading]
             , p_ [] [text $ ms $ unpackHeadingId headingid]
             , renderIncludeSectionCheckbox sp'
-            , input_ []
+            , input_ [ type_ "text"
+                     , size_ "50"
+                     , value_ (ms $ getSectionHeading sectionHeading)
+                     , onInput (\val -> ChangeSection sp' val)
+                     ]
             ] <> foldMap (renderSkel sp') skeleton
             )
           where sp' = sp <> [Right headingid]
@@ -196,15 +204,28 @@ viewModel m@TqaModel{..} =
         renderIncludePageCheckbox :: PageName -> View Action
         renderIncludePageCheckbox pageName =
             div_ [class_ "custom-control custom-checkbox"] [
-                  input_ [type_ "checkbox", class_ "custom-control-input", id_ "defaultUnchecked"]
-                , label_ [class_ "custom-control-label", for_ "defaultUnchecked"] [text $  ms ( "Include page? "<> (unpackPageName pageName))]
+                  input_ ([ type_ "checkbox"
+                         , class_ "custom-control-input"
+                         , id_ "defaultUnchecked"
+                         , onChecked (\(Checked val) -> IncludePage pageName val)
+                         ])
+                , label_ [ class_ "custom-control-label"
+                         , for_ "defaultUnchecked"
+                         ] [text $  ms ( "Include page? "<> (unpackPageName pageName))]
             ]
+--           where active = True
 
         renderIncludeSectionCheckbox :: SectionPathId -> View Action
         renderIncludeSectionCheckbox sp =
             div_ [class_ "custom-control custom-checkbox"] [
-                  input_ [type_ "checkbox", class_ "custom-control-input", id_ "defaultUnchecked"]
-                , label_ [class_ "custom-control-label", for_ "defaultUnchecked"] [text $  ms ( "Include section? "<> (unpackSectionPathId sp))]
+                  input_ [ type_ "checkbox"
+                         , class_ "custom-control-input"
+                         , id_ "defaultUnchecked"
+                         , onChecked (\(Checked val) -> IncludeSection sp val)
+                         ]
+                , label_ [ class_ "custom-control-label"
+                         , for_ "defaultUnchecked"
+                         ] [text $  ms ( "Include section? "<> (unpackSectionPathId sp))]
             ]
 
 
