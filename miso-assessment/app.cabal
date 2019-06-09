@@ -61,6 +61,29 @@ executable list
 --  ghc-options:         -Wall -Werror
 
 
+executable tqa-new-heading
+  main-is:             TqaNewHeading.hs
+  build-depends:       base,
+                       bytestring,
+                       ghcjs-base,
+                       miso,
+                       aeson,
+                       aeson-pretty,
+                       app,
+                       jsaddle-dom,
+                       text,
+                       hashable,
+                       containers,
+                       time,
+                       filepath,
+                       serialise,
+                       porter>=0.1.0.2,
+                       miso-types,
+                       trec-car-types
+  default-language:    Haskell2010
+--  ghc-options:         -Wall -Werror
+
+
 executable minimal
   main-is:             Minimal.hs
   build-depends:       base,

@@ -74,11 +74,18 @@ let
       cp bin/app.jsexe/all.min.js $out/all.js
       cp bin/list.jsexe/all.min.js $out/list.js
       cp bin/minimal.jsexe/all.js $out/minimal.js
+      cp bin/tqa-new-heading.jsexe/all.js $out/tqa-new-heading.js
+      cat >> $out/tqa-new-heading.js <<EOF
+      function h\$hs_text_short_is_valid_utf8(a, b, c) {
+        return 0;
+      }
+      EOF
       cp ${./html/assess.css} $out/assess.css
       cp ${app}/bin/app.jsexe/runmain.js $out/
       cp ${./html/assess.html} $out/assess.html
       cp ${./html/list.html} $out/list.html
       cp ${./html/minimal.html} $out/minimal.html
+      cp ${./html/tqa.html} $out/tqa.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data
