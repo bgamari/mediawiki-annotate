@@ -66,6 +66,8 @@ let
     '';
   };
 
+  # symlinkJoin
+
   app2 = pkgs.stdenv.mkDerivation {
     name = "app2";
     src = combined;

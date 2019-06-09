@@ -105,24 +105,8 @@ updateModel (LoadCbor filename) m = m <# do
 
 updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages mempty
 
---
---
--- updateModel (Initialize) m = m <# do
---     lst <- fetchJson @FileListing getFileListingPath
--- --     now' <- getCurrentTime
---     return $ case lst of
---       Right byteStr -> SetListing byteStr
---       Left e  -> ReportError $ mss e
---
--- updateModel (SetListing FileListing{filenames = files, pathname = path}) m = noEff $ TqaModel {filenames = fmap ms files}
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
-
--- updateModel x m = m <# do
---     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
-
-
-
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
 fetchCbor url = do
@@ -135,16 +119,8 @@ fetchCbor url = do
 
 
 data FetchJSONError = XHRFailed XHRError
---                     | InvalidJSON String
                     | BadResponse { badRespStatus :: Int, badRespContents :: Maybe BS.ByteString }
                     deriving (Eq, Show)
-
--- fetchJson :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError a)
--- fetchJson url = do
---     result <- fetchByteString url
---     case result of
---         Left err          -> pure $ Left err
---         Right byteStr -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict byteStr
 
 
 fetchByteString:: JSString -> IO (Either FetchJSONError BS.ByteString)
@@ -173,6 +149,13 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 
 -- ------------- Presentation ----------------------
 
+type SectionPathId = [Either PageName HeadingId]
+unpackSectionPathId :: SectionPathId -> T.Text
+unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
+  where unpackElem :: Either PageName HeadingId -> T.Text
+        unpackElem (Left pageName ) =  T.pack $ unpackPageName pageName
+        unpackElem (Right headingId) =  T.pack $ unpackHeadingId headingId
+
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
@@ -183,29 +166,47 @@ viewModel m@TqaModel{..} =
 
   where renderPage :: Page -> View Action
         renderPage Page{..} =
-            liKeyed_  (Key ms $ unpackPageId pageId) []
-                ([
-                 h1_ [][text $ ms $ unpackPageName pageName]
+            li_ [] -- liKeyed_  (Key $ ms $ unpackPageId pageId)
+                ([ renderIncludePageCheckbox pageName
+                 , h1_ [][text $ ms $ unpackPageName pageName]
                  ] <>
-                 (foldMap renderSkel pageSkeleton)
+                 (foldMap (renderSkel [Left pageName]) pageSkeleton)
                 )
-        renderSkel :: PageSkeleton -> [View Action]
-        renderSkel (Section sectionHeading headingid skeleton) =
+        renderSkel :: SectionPathId -> PageSkeleton -> [View Action]
+        renderSkel sp (Section sectionHeading headingid skeleton) =
             ([ h2_ [] [text $ ms $ getSectionHeading sectionHeading]
             , p_ [] [text $ ms $ unpackHeadingId headingid]
+            , renderIncludeSectionCheckbox sp'
             , input_ []
-            ] <> foldMap renderSkel skeleton)
-        renderSkel (Para p) =
+            ] <> foldMap (renderSkel sp') skeleton
+            )
+          where sp' = sp <> [Right headingid]
+        renderSkel sp (Para p) =
             [p_ [] [text $ ms $ getText p]]
-        renderSkel  (Image txt _ ) =
+        renderSkel sp (Image txt _ ) =
             [p_ [] [text $ ms txt]]
-        renderSkel (Infobox _ _) = mempty
-        renderSkel (List _ para) =
+        renderSkel sp (Infobox _ _) = mempty
+        renderSkel sp (List _ para) =
             [br_ [], text $ ms $ getText para]
 
         getText (Paragraph {..}) = foldMap getParaBodyTxt paraBody
         getParaBodyTxt (ParaText txt) = txt
         getParaBodyTxt (ParaLink Link{..}) = linkAnchor
+
+        renderIncludePageCheckbox :: PageName -> View Action
+        renderIncludePageCheckbox pageName =
+            div_ [class_ "custom-control custom-checkbox"] [
+                  input_ [type_ "checkbox", class_ "custom-control-input", id_ "defaultUnchecked"]
+                , label_ [class_ "custom-control-label", for_ "defaultUnchecked"] [text $  ms ( "Include page? "<> (unpackPageName pageName))]
+            ]
+
+        renderIncludeSectionCheckbox :: SectionPathId -> View Action
+        renderIncludeSectionCheckbox sp =
+            div_ [class_ "custom-control custom-checkbox"] [
+                  input_ [type_ "checkbox", class_ "custom-control-input", id_ "defaultUnchecked"]
+                , label_ [class_ "custom-control-label", for_ "defaultUnchecked"] [text $  ms ( "Include section? "<> (unpackSectionPathId sp))]
+            ]
+
 
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
 viewModel Initialize = viewErrorMessage $ "Initializing..."

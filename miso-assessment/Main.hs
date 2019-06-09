@@ -592,6 +592,7 @@ viewModel m@AssessmentModel{
             fmap renderParagraphViewOnly paragraphs
         renderParagraphViewOnly :: Paragraph -> View Action
         renderParagraphViewOnly Paragraph{..} =
+            -- liKeyed_ (Key ( ms (unpackParagraphId paraId)))
             li_ [class_ "entity-snippet-li"] [
                     p_ [class_ "entity-snippet-li-text"] $ renderParaBodies paraId
                 ]
