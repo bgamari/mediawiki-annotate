@@ -51,10 +51,19 @@ mss :: Show a => a -> MisoString
 mss = ms . show
 
 
+data TqaStatus = TqaStatus { headings :: M.Map SectionPathId T.Text
+                             , includePages :: S.Set PageName
+                             , includeSections :: S.Set SectionPathId
+                            }
+  deriving (Eq, Show, Generic, ToJSON)
+
+emptyTqaStatus = TqaStatus mempty mempty mempty
+
+
 data TqaModel =
     Initialize
     | TqaModel { pages :: [Page]
-               , headings :: M.Map SectionPath T.Text
+               , modelStatus :: TqaStatus
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
@@ -100,16 +109,27 @@ updateModel :: Action -> Model -> Effect Action Model
 updateModel (LoadCbor filename) m = m <# do
     cbor <- fetchCbor filename
             :: IO (Either FetchJSONError [Page])
---     now' <- getCurrentTime
     return $ case cbor of
       Right pages -> SetTqaPages pages
       Left e  -> ReportError $ mss e
 
-updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages mempty
+updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
-updateModel (IncludePage pageName active) m = noEff $ m
-updateModel (IncludeSection sp active) m = noEff $ m
-updateModel (ChangeSection sp val) m = noEff $ m
+
+updateModel (IncludePage pageName active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
+  where m' = m {modelStatus = s { includePages = pageSet'}}
+        pageSet' = if active then  pageName `S.insert` pageSet
+                             else pageName `S.delete` pageSet
+
+updateModel (IncludeSection sp active) m@TqaModel{modelStatus = s@TqaStatus{includeSections = sectionSet}} = noEff $ m'
+  where m' = m {modelStatus= s{includeSections = sectionSet'}}
+        sectionSet' = if active then sp `S.insert` sectionSet
+                                else sp `S.delete` sectionSet
+
+updateModel (ChangeSection sp val) m@TqaModel{modelStatus = s@TqaStatus{headings = headingMap}} = noEff $ m'
+  where m' = m {modelStatus = s{headings = headingMap'}}
+        headingMap' = M.insert sp (T.pack $ fromMisoString val) headingMap
+
 
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
@@ -153,28 +173,35 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 
 -- ------------- Presentation ----------------------
 
-type SectionPathId = [Either PageName HeadingId]
+type SectionPathId = [SectionPathElem]
+
+data SectionPathElem = SectionPathPage PageName  | SectionPathHeading HeadingId
+  deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON)
+
 unpackSectionPathId :: SectionPathId -> T.Text
 unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
-  where unpackElem :: Either PageName HeadingId -> T.Text
-        unpackElem (Left pageName ) =  T.pack $ unpackPageName pageName
-        unpackElem (Right headingId) =  T.pack $ unpackHeadingId headingId
+  where unpackElem :: SectionPathElem -> T.Text
+        unpackElem (SectionPathPage pageName ) =  T.pack $ unpackPageName pageName
+        unpackElem (SectionPathHeading headingId) =  T.pack $ unpackHeadingId headingId
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ []
-       [ h1_ [] [text $ "TQA Pages"]
+       [ textarea_ [] [text $ ms $ show (headings modelStatus)]
+       , textarea_ [] [text $ ms $  show (includePages modelStatus)]
+       , textarea_ [] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       , h1_ [] [text $ "TQA Pages"]
        , ol_ [] $ fmap renderPage pages
        ]
 
   where renderPage :: Page -> View Action
         renderPage Page{..} =
-            li_ [] -- liKeyed_  (Key $ ms $ unpackPageId pageId)
+            li_ [] -- liKeyed_  (Key $ ms $ unpackPageName pageName)
                 ([ renderIncludePageCheckbox pageName
                  , h1_ [][text $ ms $ unpackPageName pageName]
                  ] <>
-                 (foldMap (renderSkel [Left pageName]) pageSkeleton)
+                 (foldMap (renderSkel [SectionPathPage pageName]) pageSkeleton)
                 )
         renderSkel :: SectionPathId -> PageSkeleton -> [View Action]
         renderSkel sp (Section sectionHeading headingid skeleton) =
@@ -188,7 +215,7 @@ viewModel m@TqaModel{..} =
                      ]
             ] <> foldMap (renderSkel sp') skeleton
             )
-          where sp' = sp <> [Right headingid]
+          where sp' = sp <> [SectionPathHeading headingid]
         renderSkel sp (Para p) =
             [p_ [] [text $ ms $ getText p]]
         renderSkel sp (Image txt _ ) =
