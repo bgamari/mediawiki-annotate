@@ -196,7 +196,7 @@ unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ []
-       [ textarea_ [onInput PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       [ textarea_ [onChange PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
        , h1_ [] [text $ "TQA Pages"]
        , ol_ [] $ fmap renderPage pages
        ]
@@ -218,7 +218,7 @@ viewModel m@TqaModel{..} =
             , input_ [ type_ "text"
                      , size_ "50"
                      , value_ (ms $ headingText)
-                     , onInput (\val -> ChangeSection sp' val)
+                     , onChange (\val -> ChangeSection sp' val)
                      ]
             ] <> foldMap (renderSkel sp') skeleton
             )
