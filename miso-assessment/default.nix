@@ -27,7 +27,14 @@ let
       scientific = lib.dontCheck super.scientific;
       aeson = lib.dontCheck super.aeson;
       cryptohash-sha1 = lib.dontCheck super.cryptohash-sha1;
-      text-short = lib.dontCheck super.text-short;
+      text-short = let
+                     src = pkgs.fetchFromGitHub {
+                       owner = "bgamari";
+                       repo = "text-short";
+                       rev = "551d2cbaf9b2e345c9811dad8e637d271bdc91c1";
+                       sha256 = "sha256:0z30zalsdjly7qwl4j43iq2z7wg30v9qrwd5b3l5228kl1g9spk4";
+                     };
+                   in lib.dontCheck (super.callCabal2nix "text-short" src {});
       cborg = lib.dontCheck super.cborg;
       serialise = lib.dontCheck super.serialise;
       http-types = lib.dontCheck super.http-types;

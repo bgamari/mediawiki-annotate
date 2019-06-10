@@ -52,7 +52,7 @@ mss = ms . show
 
 
 data TqaStatus = TqaStatus { headings :: M.Map SectionPathId T.Text
-                             , includePages :: S.Set PageName
+                             , includePages :: S.Set PageId
                              , includeSections :: S.Set SectionPathId
                             }
   deriving (Eq, Show, Generic, ToJSON, FromJSON)
@@ -77,7 +77,7 @@ emptyModel = Initialize
 
 -- | Sum type for application events
 data Action
-  = IncludePage PageName Bool
+  = IncludePage PageId Bool
   | IncludeSection SectionPathId Bool
   | ChangeSection SectionPathId MisoString
   | PasteJSON MisoString
@@ -117,10 +117,10 @@ updateModel (LoadCbor filename) m = m <# do
 updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
-updateModel (IncludePage pageName active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
+updateModel (IncludePage pageId active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
   where m' =Debug.trace "IncludePage" $ m {modelStatus = s { includePages = pageSet'}}
-        pageSet' = if active then  pageName `S.insert` pageSet
-                             else pageName `S.delete` pageSet
+        pageSet' = if active then  pageId `S.insert` pageSet
+                             else pageId `S.delete` pageSet
 
 updateModel (IncludeSection sp active) m@TqaModel{modelStatus = s@TqaStatus{includeSections = sectionSet}} = noEff $ m'
   where m' = Debug.trace "IncludeSection" $ m {modelStatus= s{includeSections = sectionSet'}}
@@ -183,13 +183,13 @@ encodeByteString = Data.Text.Encoding.encodeUtf8
 
 type SectionPathId = [SectionPathElem]
 
-data SectionPathElem = SectionPathPage PageName  | SectionPathHeading HeadingId
+data SectionPathElem = SectionPathPage PageId  | SectionPathHeading HeadingId
   deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON, FromJSONKey, FromJSON)
 
 unpackSectionPathId :: SectionPathId -> T.Text
 unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
   where unpackElem :: SectionPathElem -> T.Text
-        unpackElem (SectionPathPage pageName ) =  T.pack $ unpackPageName pageName
+        unpackElem (SectionPathPage pageId ) =  T.pack $ unpackPageId pageId
         unpackElem (SectionPathHeading headingId) =  T.pack $ unpackHeadingId headingId
 
 -- | Constructs a virtual DOM from a model
@@ -204,11 +204,12 @@ viewModel m@TqaModel{..} =
   where renderPage :: Page -> View Action
         renderPage Page{..} =
 --             li_ [] --
-            liKeyed_  (Key $ ms $ unpackPageName pageName) []
-                ([ renderIncludePageCheckbox pageName
+            liKeyed_  (Key $ ms $ unpackPageId pageId) []
+                ([ renderIncludePageCheckbox pageId
                  , h1_ [][text $ ms $ unpackPageName pageName]
+                 , p_ [][text $ ms $ unpackPageId pageId]
                  ] <>
-                 (foldMap (renderSkel [SectionPathPage pageName]) pageSkeleton)
+                 (foldMap (renderSkel [SectionPathPage pageId]) pageSkeleton)
                 )
         renderSkel :: SectionPathId -> PageSkeleton -> [View Action]
         renderSkel sp (Section sectionHeading headingid skeleton) =
@@ -237,18 +238,18 @@ viewModel m@TqaModel{..} =
         getParaBodyTxt (ParaText txt) = txt
         getParaBodyTxt (ParaLink Link{..}) = linkAnchor
 
-        renderIncludePageCheckbox :: PageName -> View Action
-        renderIncludePageCheckbox pageName =
+        renderIncludePageCheckbox :: PageId -> View Action
+        renderIncludePageCheckbox pageId =
             div_ [class_ "custom-control custom-checkbox"] [
                   input_ ([ type_ "checkbox"
                          , class_ "custom-control-input"
                          , id_ "defaultUnchecked"
-                         , checked_ (pageName `S.member` (includePages modelStatus))
-                         , onChecked (\(Checked val) -> IncludePage pageName val)
+                         , checked_ (pageId `S.member` (includePages modelStatus))
+                         , onChecked (\(Checked val) -> IncludePage pageId val)
                          ])
                 , label_ [ class_ "custom-control-label"
                          , for_ "defaultUnchecked"
-                         ] [text $  ms ( "Include page? "<> (unpackPageName pageName))]
+                         ] [text $  ms ( "Include page? "<> (unpackPageId pageId))]
             ]
 --           where active = True
 
