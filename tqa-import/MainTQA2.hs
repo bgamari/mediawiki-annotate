@@ -51,6 +51,7 @@ lessonToPage l =
                         <> objectives
                         <> summary
                         <> recall
+                        <> review
                         <> concepts
                         <> think
                         <> points
@@ -66,6 +67,7 @@ lessonToPage l =
     summary = maybe [] (pure . adjunctTopicToSkel) $ lessonSummary l
     points = maybe [] (pure . adjunctTopicToSkel) $ lessonPoints l
     recall = maybe [] (pure . adjunctTopicToSkel) $ lessonRecall l
+    review = maybe [] (pure . adjunctTopicToSkel) $ lessonReview l
     think = maybe [] (pure . adjunctTopicToSkel) $ lessonThink l
     objectives = maybe [] (pure . adjunctTopicToSkel) $ lessonObjectives l
     concepts = maybe [] (pure . adjunctTopicToSkel) $ lessonConcepts l

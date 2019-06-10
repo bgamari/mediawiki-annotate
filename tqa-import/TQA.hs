@@ -114,7 +114,9 @@ lessonIntroduction (Lesson{adjunctTopic=m}) =
 
 lessonSummary :: Lesson -> Maybe AdjunctTopic
 lessonSummary (Lesson{adjunctTopic=m}) =
-    "Lesson Summary" `M.lookup` m
+    case "Lesson Summary" `M.lookup` m of
+    Just x -> Just x
+    Nothing ->  "Summary" `M.lookup` m
 
 lessonPoints :: Lesson -> Maybe AdjunctTopic
 lessonPoints (Lesson{adjunctTopic=m}) =
@@ -139,3 +141,10 @@ lessonThink (Lesson{adjunctTopic=m}) =
 lessonVocabulary :: Lesson -> Maybe AdjunctTopic
 lessonVocabulary (Lesson{adjunctTopic=m}) =
     "Vocabulary" `M.lookup` m
+
+----
+
+
+lessonReview :: Lesson -> Maybe AdjunctTopic
+lessonReview (Lesson{adjunctTopic=m}) =
+    "Review" `M.lookup` m
