@@ -188,16 +188,15 @@ unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ []
-       [ textarea_ [] [text $ ms $ show (headings modelStatus)]
-       , textarea_ [] [text $ ms $  show (includePages modelStatus)]
-       , textarea_ [] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       [ textarea_ [] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
        , h1_ [] [text $ "TQA Pages"]
        , ol_ [] $ fmap renderPage pages
        ]
 
   where renderPage :: Page -> View Action
         renderPage Page{..} =
-            li_ [] -- liKeyed_  (Key $ ms $ unpackPageName pageName)
+--             li_ [] --
+            liKeyed_  (Key $ ms $ unpackPageName pageName) []
                 ([ renderIncludePageCheckbox pageName
                  , h1_ [][text $ ms $ unpackPageName pageName]
                  ] <>
