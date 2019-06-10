@@ -12,7 +12,8 @@ import Codec.Serialise
 import Data.Text (Text)
 import Data.Aeson
 import Data.Hashable
-import qualified Data.HashMap.Strict as HM
+-- import qualified Data.HashMap.Strict as HM
+import qualified Data.Map.Strict as M
 
 newtype LessonId = LessonId { getLessonId :: Text }
                  deriving stock (Show, Eq, Ord, Generic)
@@ -21,9 +22,9 @@ newtype LessonId = LessonId { getLessonId :: Text }
 
 data Lesson = Lesson { lessonGlobalId :: LessonId
                      , lessonName :: Text
-                     , lessonTopics :: HM.HashMap TopicId Topic
-                     , adjunctTopic :: HM.HashMap Text AdjunctTopic
-                     , lessonQuestions :: HM.HashMap Text NonDiagramQuestion
+                     , lessonTopics :: M.Map TopicId Topic
+                     , adjunctTopic :: M.Map Text AdjunctTopic
+                     , lessonQuestions :: M.Map Text NonDiagramQuestion
                      }
             deriving (Show)
 
@@ -56,7 +57,7 @@ instance FromJSON Topic where
 
 data AdjunctTopic = AdjunctTopic { adjunctTopicText :: Text
                                  }
-                  | VocabularyTopic { vocabulary :: HM.HashMap Text Text }
+                  | VocabularyTopic { vocabulary :: M.Map Text Text }
            deriving (Show)
 
 instance FromJSON AdjunctTopic where
@@ -91,7 +92,7 @@ instance FromJSON QuestionChoice where
 
 data NonDiagramQuestion = NonDiagramQuestion { questionId :: QuestionId
                                              , beingAsked :: Text
-                                             , answerChoices :: HM.HashMap Text QuestionChoice
+                                             , answerChoices :: M.Map Text QuestionChoice
                                              , correctAnswer :: QuestionChoice
                                              , questionSubType :: QuestionSubType
                                              }
@@ -109,32 +110,32 @@ instance FromJSON NonDiagramQuestion where
 
 lessonIntroduction :: Lesson -> Maybe AdjunctTopic
 lessonIntroduction (Lesson{adjunctTopic=m}) =
-    "Introduction" `HM.lookup` m
+    "Introduction" `M.lookup` m
 
 lessonSummary :: Lesson -> Maybe AdjunctTopic
 lessonSummary (Lesson{adjunctTopic=m}) =
-    "Lesson Summary" `HM.lookup` m
+    "Lesson Summary" `M.lookup` m
 
 lessonPoints :: Lesson -> Maybe AdjunctTopic
 lessonPoints (Lesson{adjunctTopic=m}) =
-    "Points to Consider" `HM.lookup` m
+    "Points to Consider" `M.lookup` m
 
 lessonObjectives :: Lesson -> Maybe AdjunctTopic
 lessonObjectives (Lesson{adjunctTopic=m}) =
-    "Lesson Objectives" `HM.lookup` m
+    "Lesson Objectives" `M.lookup` m
 
 lessonConcepts :: Lesson -> Maybe AdjunctTopic
 lessonConcepts (Lesson{adjunctTopic=m}) =
-    "Apply Concepts" `HM.lookup` m
+    "Apply Concepts" `M.lookup` m
 
 lessonRecall :: Lesson -> Maybe AdjunctTopic
 lessonRecall (Lesson{adjunctTopic=m}) =
-    "Recall" `HM.lookup` m
+    "Recall" `M.lookup` m
 
 lessonThink :: Lesson -> Maybe AdjunctTopic
 lessonThink (Lesson{adjunctTopic=m}) =
-    "Think Critically" `HM.lookup` m
+    "Think Critically" `M.lookup` m
 
 lessonVocabulary :: Lesson -> Maybe AdjunctTopic
 lessonVocabulary (Lesson{adjunctTopic=m}) =
-    "Vocabulary" `HM.lookup` m
+    "Vocabulary" `M.lookup` m

@@ -9,7 +9,7 @@ import Data.Foldable
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BSL
 import Options.Applicative
-import qualified Data.HashMap.Strict as HM
+import qualified Data.Map.Strict as M
 import Data.Maybe
 
 
@@ -104,7 +104,7 @@ questionsToSkel q =
         let correctAnswerKey :: T.Text
             correctAnswerKey = getQuestionChoice $ correctAnswer q
             ans :: Maybe QuestionChoice
-            ans = correctAnswerKey `HM.lookup` (answerChoices q)
+            ans = correctAnswerKey `M.lookup` (answerChoices q)
             correctAnswer' = fmap getQuestionChoice ans
 
         in fromMaybe "no correct answer " correctAnswer'
@@ -121,7 +121,7 @@ adjunctTopicToSkel _ = error ("can only be applied to AdjunctTopic")
 vocabularyToSkel :: Maybe AdjunctTopic -> [PageSkeleton]
 vocabularyToSkel (Just (VocabularyTopic vocab)) =
     ([Para $ Paragraph (packParagraphId "0") [ParaText "Vocabulary"]])
-    <>  (fmap vocabList $ HM.toList vocab)
+    <>  (fmap vocabList $ M.toList vocab)
   where vocabList (key,v) =
             List 1 $ Paragraph paraId [ParaText t]
               where paraId = packParagraphId $ show $ hash t
