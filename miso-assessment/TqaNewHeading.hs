@@ -55,7 +55,7 @@ data TqaStatus = TqaStatus { headings :: M.Map SectionPathId T.Text
                              , includePages :: S.Set PageName
                              , includeSections :: S.Set SectionPathId
                             }
-  deriving (Eq, Show, Generic, ToJSON)
+  deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
 emptyTqaStatus = TqaStatus mempty mempty mempty
 
@@ -80,6 +80,7 @@ data Action
   = IncludePage PageName Bool
   | IncludeSection SectionPathId Bool
   | ChangeSection SectionPathId MisoString
+  | PasteJSON MisoString
   | LoadCbor JSString
   | SetTqaPages [Page]
   | ReportError MisoString
@@ -117,20 +118,24 @@ updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
 updateModel (IncludePage pageName active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
-  where m' = m {modelStatus = s { includePages = pageSet'}}
+  where m' =Debug.trace "IncludePage" $ m {modelStatus = s { includePages = pageSet'}}
         pageSet' = if active then  pageName `S.insert` pageSet
                              else pageName `S.delete` pageSet
 
 updateModel (IncludeSection sp active) m@TqaModel{modelStatus = s@TqaStatus{includeSections = sectionSet}} = noEff $ m'
-  where m' = m {modelStatus= s{includeSections = sectionSet'}}
+  where m' = Debug.trace "IncludeSection" $ m {modelStatus= s{includeSections = sectionSet'}}
         sectionSet' = if active then sp `S.insert` sectionSet
                                 else sp `S.delete` sectionSet
 
 updateModel (ChangeSection sp val) m@TqaModel{modelStatus = s@TqaStatus{headings = headingMap}} = noEff $ m'
-  where m' = m {modelStatus = s{headings = headingMap'}}
+  where m' = Debug.trace "ChangeSection" $ m {modelStatus = s{headings = headingMap'}}
         headingMap' = M.insert sp (T.pack $ fromMisoString val) headingMap
 
-
+updateModel (PasteJSON val) m@TqaModel{modelStatus = s} = noEff $ m'
+  where m' = Debug.trace "PasteJSON" $ m { modelStatus = s'}
+        s' =  case (Data.Aeson.decodeStrict $ encodeByteString $ T.pack $ fromMisoString val) of
+              Just status -> status
+              Nothing -> s -- old Status
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
 fetchCbor url = do
@@ -171,12 +176,15 @@ fetchByteString url = do
 decodeByteString :: BS.ByteString -> T.Text
 decodeByteString = Data.Text.Encoding.decodeUtf8
 
+encodeByteString :: T.Text ->  BS.ByteString
+encodeByteString = Data.Text.Encoding.encodeUtf8
+
 -- ------------- Presentation ----------------------
 
 type SectionPathId = [SectionPathElem]
 
 data SectionPathElem = SectionPathPage PageName  | SectionPathHeading HeadingId
-  deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON)
+  deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON, FromJSONKey, FromJSON)
 
 unpackSectionPathId :: SectionPathId -> T.Text
 unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
@@ -188,7 +196,7 @@ unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ []
-       [ textarea_ [] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       [ textarea_ [onInput PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
        , h1_ [] [text $ "TQA Pages"]
        , ol_ [] $ fmap renderPage pages
        ]
@@ -209,12 +217,14 @@ viewModel m@TqaModel{..} =
             , renderIncludeSectionCheckbox sp'
             , input_ [ type_ "text"
                      , size_ "50"
-                     , value_ (ms $ getSectionHeading sectionHeading)
+                     , value_ (ms $ headingText)
                      , onInput (\val -> ChangeSection sp' val)
                      ]
             ] <> foldMap (renderSkel sp') skeleton
             )
           where sp' = sp <> [SectionPathHeading headingid]
+                headingText = fromMaybe (getSectionHeading sectionHeading)
+                            $ sp' `M.lookup` (headings modelStatus)
         renderSkel sp (Para p) =
             [p_ [] [text $ ms $ getText p]]
         renderSkel sp (Image txt _ ) =
@@ -233,6 +243,7 @@ viewModel m@TqaModel{..} =
                   input_ ([ type_ "checkbox"
                          , class_ "custom-control-input"
                          , id_ "defaultUnchecked"
+                         , checked_ (pageName `S.member` (includePages modelStatus))
                          , onChecked (\(Checked val) -> IncludePage pageName val)
                          ])
                 , label_ [ class_ "custom-control-label"
@@ -247,6 +258,7 @@ viewModel m@TqaModel{..} =
                   input_ [ type_ "checkbox"
                          , class_ "custom-control-input"
                          , id_ "defaultUnchecked"
+                         , checked_ (sp `S.member` (includeSections modelStatus))
                          , onChecked (\(Checked val) -> IncludeSection sp val)
                          ]
                 , label_ [ class_ "custom-control-label"
