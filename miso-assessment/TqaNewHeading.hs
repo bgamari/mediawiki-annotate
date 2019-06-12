@@ -52,18 +52,20 @@ mss = ms . show
 
 
 data TqaStatus = TqaStatus { headings :: M.Map SectionPathId T.Text
+                             , notes :: M.Map SectionPathId T.Text
                              , includePages :: S.Set PageId
                              , includeSections :: S.Set SectionPathId
                             }
   deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
-emptyTqaStatus = TqaStatus mempty mempty mempty
+emptyTqaStatus = TqaStatus mempty mempty mempty mempty
 
 
 data TqaModel =
     Initialize
     | TqaModel { pages :: [Page]
                , modelStatus :: TqaStatus
+               , hideOtherPages :: Bool
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
@@ -80,9 +82,11 @@ data Action
   = IncludePage PageId Bool
   | IncludeSection SectionPathId Bool
   | ChangeSection SectionPathId MisoString
+  | NotesSection SectionPathId MisoString
   | PasteJSON MisoString
   | LoadCbor JSString
   | SetTqaPages [Page]
+  | HideOtherPages Bool
   | ReportError MisoString
 --   | Initialize
   deriving (Show)
@@ -114,7 +118,7 @@ updateModel (LoadCbor filename) m = m <# do
       Right pages -> SetTqaPages pages
       Left e  -> ReportError $ mss e
 
-updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus
+updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus False
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
 updateModel (IncludePage pageId active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
@@ -131,11 +135,19 @@ updateModel (ChangeSection sp val) m@TqaModel{modelStatus = s@TqaStatus{headings
   where m' = Debug.trace "ChangeSection" $ m {modelStatus = s{headings = headingMap'}}
         headingMap' = M.insert sp (T.pack $ fromMisoString val) headingMap
 
+updateModel (NotesSection sp val) m@TqaModel{modelStatus = s@TqaStatus{notes = notesMap}} = noEff $ m'
+  where m' = Debug.trace "NotesSection" $ m {modelStatus = s{notes = notesMap'}}
+        notesMap' = M.insert sp (T.pack $ fromMisoString val) notesMap
+
 updateModel (PasteJSON val) m@TqaModel{modelStatus = s} = noEff $ m'
   where m' = Debug.trace "PasteJSON" $ m { modelStatus = s'}
         s' =  case (Data.Aeson.decodeStrict $ encodeByteString $ T.pack $ fromMisoString val) of
               Just status -> status
               Nothing -> s -- old Status
+
+updateModel (HideOtherPages val) m@TqaModel{hideOtherPages = s} = noEff $ m'
+  where m' = Debug.trace "HideOtherPages" $ m {hideOtherPages = (not s)}
+
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
 fetchCbor url = do
@@ -196,12 +208,17 @@ unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ []
-       [ textarea_ [onChange PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       [ textarea_ [onChange PasteJSON, value_ (ms $  AesonPretty.encodePretty $  modelStatus)] []
+--        [ textarea_ [onChange PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
+       , renderHideOtherPagesCheckbox hideOtherPages
        , h1_ [] [text $ "TQA Pages"]
-       , ol_ [] $ fmap renderPage pages
+       , ol_ [] $ fmap renderPage $ filter (filterHideOtherPages) pages
        ]
 
-  where renderPage :: Page -> View Action
+  where filterHideOtherPages page =
+            (not hideOtherPages) || (pageId page  `S.member` includePages modelStatus)
+
+        renderPage :: Page -> View Action
         renderPage Page{..} =
 --             li_ [] --
             liKeyed_  (Key $ ms $ unpackPageId pageId) []
@@ -221,11 +238,19 @@ viewModel m@TqaModel{..} =
                      , value_ (ms $ headingText)
                      , onChange (\val -> ChangeSection sp' val)
                      ]
+            , input_ [ type_ "text"
+                     , size_ "100"
+                     , value_ (ms $ notesText)
+                     , placeholder_ "relevant keywords and notes"
+                     , onChange (\val -> NotesSection sp' val)
+                     ]
             ] <> foldMap (renderSkel sp') skeleton
             )
           where sp' = sp <> [SectionPathHeading headingid]
                 headingText = fromMaybe (getSectionHeading sectionHeading)
                             $ sp' `M.lookup` (headings modelStatus)
+                notesText = fromMaybe ""
+                            $ sp' `M.lookup` (notes modelStatus)
         renderSkel sp (Para p) =
             [p_ [] [text $ ms $ getText p]]
         renderSkel sp (Image txt _ ) =
@@ -266,6 +291,21 @@ viewModel m@TqaModel{..} =
                          , for_ "defaultUnchecked"
                          ] [text $  ms ( "Include section? "<> (unpackSectionPathId sp))]
             ]
+
+        renderHideOtherPagesCheckbox :: Bool -> View Action
+        renderHideOtherPagesCheckbox s =
+            div_ [class_ "custom-control custom-checkbox"] [
+                  input_ ([ type_ "checkbox"
+                         , class_ "custom-control-input"
+                         , id_ "defaultUnchecked"
+                         , checked_ (s)
+                         , onChecked (\(Checked val) -> HideOtherPages val)
+                         ])
+                , label_ [ class_ "custom-control-label"
+                         , for_ "defaultUnchecked"
+                         ] [text $  "Hide unselected Pages?"]
+            ]
+--           where active = True
 
 
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
