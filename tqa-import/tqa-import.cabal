@@ -56,8 +56,8 @@ executable tqa-import2
                        trec-car-types
   default-language:    Haskell2010
 
-executable tqa-import2
-  main-is:             YqaY3TopicsMain.hs
+executable tqa-y3
+  main-is:             TqaY3TopicsMain.hs
   other-modules:       TQA
   other-extensions:    DeriveAnyClass, DerivingStrategies
   build-depends:       base,
