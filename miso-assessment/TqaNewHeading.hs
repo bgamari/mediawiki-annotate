@@ -45,20 +45,13 @@ import qualified Codec.Serialise as CBOR
 import qualified CAR.Types.CborList as CBOR
 import qualified CAR.Types.Files as CAR
 
+import TqaTopics
+
 import qualified Debug.Trace as Debug
 
 mss :: Show a => a -> MisoString
 mss = ms . show
 
-
-data TqaStatus = TqaStatus { headings :: M.Map SectionPathId T.Text
-                             , notes :: M.Map SectionPathId T.Text
-                             , includePages :: S.Set PageId
-                             , includeSections :: S.Set SectionPathId
-                            }
-  deriving (Eq, Show, Generic, ToJSON, FromJSON)
-
-emptyTqaStatus = TqaStatus mempty mempty mempty mempty
 
 
 data TqaModel =
@@ -83,6 +76,7 @@ data Action
   = IncludePage PageId Bool
   | IncludeSection SectionPathId Bool
   | ChangeSection SectionPathId MisoString
+  | ChangeTitle PageId MisoString
   | NotesSection SectionPathId MisoString
   | PasteJSON MisoString
   | LoadCbor JSString
@@ -132,6 +126,10 @@ updateModel (IncludeSection sp active) m@TqaModel{modelStatus = s@TqaStatus{incl
   where m' = Debug.trace "IncludeSection" $ m {modelStatus= s{includeSections = sectionSet'}}
         sectionSet' = if active then sp `S.insert` sectionSet
                                 else sp `S.delete` sectionSet
+
+updateModel (ChangeTitle p val) m@TqaModel{modelStatus = s@TqaStatus{titles = titleMap}} = noEff $ m'
+  where m' = Debug.trace "ChangeTitle" $ m {modelStatus = s{titles = titleMap'}}
+        titleMap' = M.insert p (T.pack $ fromMisoString val) titleMap
 
 updateModel (ChangeSection sp val) m@TqaModel{modelStatus = s@TqaStatus{headings = headingMap}} = noEff $ m'
   where m' = Debug.trace "ChangeSection" $ m {modelStatus = s{headings = headingMap'}}
@@ -198,10 +196,6 @@ encodeByteString = Data.Text.Encoding.encodeUtf8
 
 -- ------------- Presentation ----------------------
 
-type SectionPathId = [SectionPathElem]
-
-data SectionPathElem = SectionPathPage PageId  | SectionPathHeading HeadingId
-  deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON, FromJSONKey, FromJSON)
 
 unpackSectionPathId :: SectionPathId -> T.Text
 unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
@@ -231,9 +225,18 @@ viewModel m@TqaModel{..} =
                 ([ renderIncludePageCheckbox pageId
                  , h1_ [][text $ ms $ unpackPageName pageName]
                  , p_ [][text $ ms $ unpackPageId pageId]
+                 , input_ [ type_ "text"
+                          , size_ "50"
+                          , value_ (ms $ titleText)
+                          , onChange (\val -> ChangeTitle pageId val)
+                          ]
+
                  ] <>
                  (foldMap (renderSkel [SectionPathPage pageId]) pageSkeleton)
                 )
+          where titleText = fromMaybe (T.pack $ unpackPageName pageName)
+                            $ pageId `M.lookup` (titles modelStatus)
+
         renderSkel :: SectionPathId -> PageSkeleton -> [View Action]
         renderSkel sp (Section sectionHeading headingid skeleton) =
             ([ h2_ [] [text $ ms $ getSectionHeading sectionHeading]

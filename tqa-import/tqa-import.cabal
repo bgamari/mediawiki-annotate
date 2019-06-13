@@ -12,6 +12,18 @@ category:            Data
 build-type:          Simple
 cabal-version:       >=1.10
 
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     TqaTopics
+  build-depends:       base,
+                       aeson,
+                       text,
+                       containers,
+                       hashable,
+                       trec-car-types
+  default-language:    Haskell2010
+
 executable tqa-import
   main-is:             Main.hs
   other-modules:       TQA
@@ -25,7 +37,7 @@ executable tqa-import
                        serialise,
                        aeson >=1.2 && <1.5,
                        optparse-applicative >= 0.14,
-                       trec-car-tools
+                       trec-car-types
   default-language:    Haskell2010
 
 executable tqa-import2
@@ -41,7 +53,24 @@ executable tqa-import2
                        serialise,
                        aeson >=1.2 && <1.5,
                        optparse-applicative >= 0.14,
-                       trec-car-tools
+                       trec-car-types
+  default-language:    Haskell2010
+
+executable tqa-import2
+  main-is:             YqaY3TopicsMain.hs
+  other-modules:       TQA
+  other-extensions:    DeriveAnyClass, DerivingStrategies
+  build-depends:       base,
+                       text >=1.2 && <1.3,
+                       bytestring >= 0.10,
+                       unordered-containers >= 0.2,
+                       containers,
+                       hashable >= 1.2,
+                       serialise,
+                       aeson >=1.2 && <1.5,
+                       optparse-applicative >= 0.14,
+                       trec-car-types,
+                       tqa-import
   default-language:    Haskell2010
 
 executable topic-import
@@ -57,5 +86,5 @@ executable topic-import
                        serialise,
                        aeson >=1.2 && <1.5,
                        optparse-applicative >= 0.14,
-                       trec-car-tools
+                       trec-car-types
   default-language:    Haskell2010

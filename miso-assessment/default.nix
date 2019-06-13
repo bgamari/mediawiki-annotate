@@ -13,6 +13,7 @@ let
     overrides = self: super: let lib = pkgs.haskell.lib; in {
       trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../trec-car-types { };
       miso-types = haskellPackages.callCabal2nix "miso-types" ../miso-types { };
+      tqa-import = haskellPackages.callCabal2nix "tqa-import" ../tqa-import { };
       mediawiki-parser = lib.dontCheck (haskellPackages.callCabal2nix "mediawiki-parser" ../mediawiki-parser { tasty-silver = null; });
 
       doctest = null;
