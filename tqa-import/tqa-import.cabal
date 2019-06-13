@@ -56,8 +56,25 @@ executable tqa-import2
                        trec-car-types
   default-language:    Haskell2010
 
-executable tqa-y3
-  main-is:             TqaY3TopicsMain.hs
+executable tqa-y3-bulk-rewrite
+  main-is:             TqaY3BulkRewriteMain.hs
+  other-modules:       TQA
+  other-extensions:    DeriveAnyClass, DerivingStrategies
+  build-depends:       base,
+                       text >=1.2 && <1.3,
+                       bytestring >= 0.10,
+                       unordered-containers >= 0.2,
+                       containers,
+                       hashable >= 1.2,
+                       serialise,
+                       aeson >=1.2 && <1.5,
+                       optparse-applicative >= 0.14,
+                       trec-car-types,
+                       tqa-import
+  default-language:    Haskell2010
+
+executable tqa-y3-export
+  main-is:             TqaY3ExportMain.hs
   other-modules:       TQA
   other-extensions:    DeriveAnyClass, DerivingStrategies
   build-depends:       base,
