@@ -66,6 +66,7 @@ data TqaModel =
     | TqaModel { pages :: [Page]
                , modelStatus :: TqaStatus
                , hideOtherPages :: Bool
+               , hideContent :: Bool
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
@@ -87,6 +88,7 @@ data Action
   | LoadCbor JSString
   | SetTqaPages [Page]
   | HideOtherPages Bool
+  | HideContent Bool
   | ReportError MisoString
 --   | Initialize
   deriving (Show)
@@ -118,7 +120,7 @@ updateModel (LoadCbor filename) m = m <# do
       Right pages -> SetTqaPages pages
       Left e  -> ReportError $ mss e
 
-updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus False
+updateModel (SetTqaPages pages) _ = noEff $ TqaModel pages emptyTqaStatus False False
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
 updateModel (IncludePage pageId active) m@TqaModel{modelStatus = s@TqaStatus{includePages = pageSet }} = noEff $ m'
@@ -147,6 +149,9 @@ updateModel (PasteJSON val) m@TqaModel{modelStatus = s} = noEff $ m'
 
 updateModel (HideOtherPages val) m@TqaModel{hideOtherPages = s} = noEff $ m'
   where m' = Debug.trace "HideOtherPages" $ m {hideOtherPages = (not s)}
+
+updateModel (HideContent val) m@TqaModel{hideContent = s} = noEff $ m'
+  where m' = Debug.trace "HideContent" $ m {hideContent = (not s)}
 
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
@@ -211,6 +216,7 @@ viewModel m@TqaModel{..} =
        [ textarea_ [onChange PasteJSON, value_ (ms $  AesonPretty.encodePretty $  modelStatus)] []
 --        [ textarea_ [onChange PasteJSON] [text $  ms $  AesonPretty.encodePretty $  modelStatus]
        , renderHideOtherPagesCheckbox hideOtherPages
+       , renderHideContentCheckbox hideContent
        , h1_ [] [text $ "TQA Pages"]
        , ol_ [] $ fmap renderPage $ filter (filterHideOtherPages) pages
        ]
@@ -252,12 +258,15 @@ viewModel m@TqaModel{..} =
                 notesText = fromMaybe ""
                             $ sp' `M.lookup` (notes modelStatus)
         renderSkel sp (Para p) =
-            [p_ [] [text $ ms $ getText p]]
+            if hideContent then []
+            else [p_ [] [text $ ms $ getText p]]
         renderSkel sp (Image txt _ ) =
-            [p_ [] [text $ ms txt]]
+            if hideContent then []
+            else [p_ [] [text $ ms txt]]
         renderSkel sp (Infobox _ _) = mempty
         renderSkel sp (List _ para) =
-            [br_ [], text $ ms $ getText para]
+            if hideContent then []
+            else [br_ [], text $ ms $ getText para]
 
         getText (Paragraph {..}) = foldMap getParaBodyTxt paraBody
         getParaBodyTxt (ParaText txt) = txt
@@ -304,6 +313,19 @@ viewModel m@TqaModel{..} =
                 , label_ [ class_ "custom-control-label"
                          , for_ "defaultUnchecked"
                          ] [text $  "Hide unselected Pages?"]
+            ]
+        renderHideContentCheckbox :: Bool -> View Action
+        renderHideContentCheckbox s =
+            div_ [class_ "custom-control custom-checkbox"] [
+                  input_ ([ type_ "checkbox"
+                         , class_ "custom-control-input"
+                         , id_ "defaultUnchecked"
+                         , checked_ (s)
+                         , onChecked (\(Checked val) -> HideContent val)
+                         ])
+                , label_ [ class_ "custom-control-label"
+                         , for_ "defaultUnchecked"
+                         ] [text $  "Hide content?"]
             ]
 --           where active = True
 
