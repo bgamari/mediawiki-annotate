@@ -37,6 +37,7 @@ opts = subparser
     <> cmd "outlines"      dumpOutlines
     <> cmd "hist-headings" histogramHeadings
     <> cmd "dump-header"   dumpHeader
+    <> cmd "provenance"   dumpHeader
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
     dumpHeader =
