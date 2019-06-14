@@ -9,6 +9,7 @@
 module Main where
 
 import GHC.Generics
+import Control.Monad
 
 import Data.Hashable
 import Data.Semigroup ((<>))
@@ -33,14 +34,14 @@ data Subset = TrainSubset | TestSubset
 data ProcessContent = OnlyStubContent | OrigContent | NotesContent
   deriving (Eq)
 
-options :: Parser (FilePath, FilePath, FilePath, Subset, ProcessContent, FilePath)
+options :: Parser (FilePath, FilePath, FilePath, Subset, ProcessContent, Maybe FilePath)
 options =
     (,,,,,) <$> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output CBOR file")
         <*> argument str (metavar "FILE" <> help "Input TqaStatus JSON file")
         <*> argument str (metavar "CBOR FILE" <> help "Input Tqa CBOR file")
         <*> (trainParser <|> testParser)
         <*> (onlyStubContentParser <|> origContentParser <|> keywordContentParser)
-        <*> (option str (short 'c' <> long "compat-out" <> metavar "JSON" <> help "File for Y2/Y3 compatibility info"))
+        <*> optional (option str (short 'c' <> long "compat-out" <> metavar "JSON" <> help "File for Y2/Y3 compatibility info"))
   where trainParser = flag' TrainSubset (short 't' <> long "train" <> help "Only export training subset")
         testParser = flag' TestSubset (short 'T' <> long "test" <> help "Only export test subset")
         onlyStubContentParser = flag' OnlyStubContent (short 's' <> long "only-stub-content" <> help "Only export stub content")
@@ -74,7 +75,10 @@ main = do
           writeCarFile outputPath prov' pages'
 
     let compats = convertCompatFile subset status pages
-    BSL.writeFile compatFile $ Aeson.encode compats
+
+    if (compatFile /= Nothing)
+    then BSL.writeFile (fromJust compatFile) $ Aeson.encode compats
+    else return ()
 
 selectPages :: Subset -> TqaStatus ->  [Page] -> [Page]
 selectPages subset status@TqaStatus{..}  pages =
