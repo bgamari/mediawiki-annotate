@@ -196,13 +196,6 @@ encodeByteString = Data.Text.Encoding.encodeUtf8
 
 -- ------------- Presentation ----------------------
 
-
-unpackSectionPathId :: SectionPathId -> T.Text
-unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
-  where unpackElem :: SectionPathElem -> T.Text
-        unpackElem (SectionPathPage pageId ) =  T.pack $ unpackPageId pageId
-        unpackElem (SectionPathHeading headingId) =  T.pack $ unpackHeadingId headingId
-
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =

@@ -25,6 +25,16 @@ data SectionPathElem = SectionPathPage PageId  | SectionPathHeading HeadingId
   deriving (Eq, Ord, Show, Generic, ToJSONKey, ToJSON, FromJSONKey, FromJSON)
 
 
+unpackSectionPathId :: SectionPathId -> T.Text
+unpackSectionPathId sp = T.intercalate "/" $ fmap unpackElem sp
+  where unpackElem :: SectionPathElem -> T.Text
+        unpackElem (SectionPathPage pageId ) =  T.pack $ unpackPageId pageId
+        unpackElem (SectionPathHeading headingId) =  T.pack $ unpackHeadingId headingId
+
+
+
+
+
 data TqaStatus = TqaStatus { titles :: M.Map PageId T.Text
                              , headings :: M.Map SectionPathId T.Text
                              , notes :: M.Map SectionPathId T.Text
@@ -35,3 +45,4 @@ data TqaStatus = TqaStatus { titles :: M.Map PageId T.Text
   deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
 emptyTqaStatus = TqaStatus mempty mempty mempty mempty mempty mempty
+
