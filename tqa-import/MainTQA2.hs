@@ -14,6 +14,7 @@ import Data.Maybe
 
 
 import CAR.Types
+import CAR.Types.AST
 import TQA
 
 options :: Parser (FilePath, FilePath)
@@ -93,8 +94,9 @@ topicToSection t =
     heading = SectionHeading (topicName t)
 --     headingId = sectionHeadingToId heading
     headingId = packHeadingId $ T.unpack $ getTopicId $ topicId t
-    content = Para $ Paragraph paraId [ParaText $ topicText t]
-      where paraId = packParagraphId $ show $ hash $ topicText t
+    content = Para $ Paragraph paraId paraBodies
+      where paraBodies = [ParaText $ topicText t]
+            paraId = paraBodiesToId paraBodies
 
 questionsToSkel :: NonDiagramQuestion -> [PageSkeleton]
 questionsToSkel q =
@@ -114,8 +116,9 @@ questionsToSkel q =
 
 adjunctTopicToSkel :: AdjunctTopic -> PageSkeleton
 adjunctTopicToSkel (AdjunctTopic t) =
-    Para $ Paragraph paraId [ParaText t]
-      where paraId = packParagraphId $ show $ hash t
+    Para $ Paragraph paraId paraBodies
+      where paraBodies = [ParaText t]
+            paraId = paraBodiesToId paraBodies
 
 adjunctTopicToSkel _ = error ("can only be applied to AdjunctTopic")
 

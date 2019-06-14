@@ -87,6 +87,7 @@ executable tqa-y3-export
                        aeson >=1.2 && <1.5,
                        optparse-applicative >= 0.14,
                        trec-car-types,
+--                       trec-car-tools,
                        tqa-import
   default-language:    Haskell2010
 
