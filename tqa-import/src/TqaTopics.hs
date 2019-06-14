@@ -30,7 +30,8 @@ data TqaStatus = TqaStatus { titles :: M.Map PageId T.Text
                              , notes :: M.Map SectionPathId T.Text
                              , includePages :: S.Set PageId
                              , includeSections :: S.Set SectionPathId
+                             , trainTitles :: S.Set PageId
                             }
   deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
-emptyTqaStatus = TqaStatus mempty mempty mempty mempty mempty
+emptyTqaStatus = TqaStatus mempty mempty mempty mempty mempty mempty

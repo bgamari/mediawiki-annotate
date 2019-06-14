@@ -51,13 +51,17 @@ main = do
     status <- either error id . Aeson.eitherDecode <$> BSL.readFile inputJsonPath
               :: IO TqaStatus
     (prov, pages) <- readPagesFileWithProvenance inputCborPath
-    let prov' = prov {dataReleaseName = "benchmarkY3" <>
-                       (case subset of
-                              TestSubset -> "test"
-                              TrainSubset -> "train"
-                       )
+    let subsetStr = (case subset of
+                          TestSubset -> "test"
+                          TrainSubset -> "train"
+                    )
+
+        prov' = prov {dataReleaseName = "benchmarkY3" <> subsetStr
+                     , comments = ["TREC-CAR Dataset by Laura Dietz, Ben Gamari is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License. Based on a work at http://data.allenai.org/tqa/ ."
+                                  , ("Used as "<> subsetStr<> " data for year 3 of the TREC Complex Answer Retrieval track.")
+                                  ]
                      }
-    let pages' = convertPages processContent status pages
+    let pages' = convertPages subset processContent status pages
     case processContent of
       OnlyStubContent ->
           writeCarFile outputPath prov' $ fmap toStubSkeleton pages'
@@ -66,10 +70,16 @@ main = do
       NotesContent ->
           writeCarFile outputPath prov' pages'
 
-convertPages :: ProcessContent -> TqaStatus ->  [Page] -> [Page]
-convertPages processContent status@TqaStatus{..}  pages =
+convertPages :: Subset -> ProcessContent -> TqaStatus ->  [Page] -> [Page]
+convertPages subset processContent status@TqaStatus{..}  pages =
     fmap rewritePage selectedPages
-  where selectedPages = filter (\p -> pageId p `S.member` includePages) pages
+  where selectedPages = filter includePage pages
+        includePage Page{..} =
+            (pageId `S.member` includePages) &&
+            case subset of
+                TrainSubset -> pageId `S.member` trainTitles
+                TestSubset -> not $ pageId `S.member` trainTitles
+
 
         rewritePage :: Page -> Page
         rewritePage page@Page{..} =
