@@ -1,0 +1,15 @@
+This data set is part of the TREC CAR dataset version v2.3, to be used
+in TREC CAR Year 3.
+
+
+The included TREC CAR data sets by Laura Dietz, Ben Gamari, available 
+at trec-car.cs.unh.edu are provided under a <a rel="license"
+href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative
+Commons Attribution-ShareAlike 3.0 Unported License</a>. The data is
+based on content extracted from http://data.allenai.org/tqa/  that is 
+licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported
+License.
+
+mediawiki-annotate: 68d685df3912308869c0dfaeca050cd50bb96118 
+ in git repos git@github.com:bgamari/mediawiki-annotate
+
