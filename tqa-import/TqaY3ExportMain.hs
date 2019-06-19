@@ -68,7 +68,7 @@ main = do
     let pages' = convertPages subset processContent status pages
     case processContent of
       OnlyStubContent ->
-          writeCarFile outputPath prov' $ fmap toStubSkeleton pages'
+          writeCarFile @Stub outputPath prov' $ fmap toStubSkeleton pages'
       OrigContent ->
           writeCarFile outputPath prov' pages'
       NotesContent ->
