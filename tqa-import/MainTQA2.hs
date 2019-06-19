@@ -17,14 +17,15 @@ import CAR.Types
 import CAR.Types.AST
 import TQA
 
-options :: Parser (FilePath, FilePath)
+options :: Parser (FilePath, FilePath, Bool)
 options =
-    (,) <$> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output CAR pages file")
+    (,,) <$> option str (short 'o' <> long "output" <> metavar "FILE" <> help "Output CAR pages file")
         <*> argument str (metavar "FILE" <> help "Input TQA JSON file")
+        <*> flag False True (long "introduction-only" <> help "if set, only include introduction, otherwise all top-level content.")
 
 main :: IO ()
 main = do
-    (outputPath, inputPath) <- execParser $ info (helper <*> options) mempty
+    (outputPath, inputPath, introductionOnly) <- execParser $ info (helper <*> options) mempty
     lessons <- either error id . Aeson.eitherDecode <$> BSL.readFile inputPath
     --print $ map lessonToPage lessons
     let siteProv = SiteProvenance { provSiteId = siteId
@@ -37,31 +38,36 @@ main = do
                           , comments = []
                           , transforms = []
                           }
-    writeCarFile outputPath prov $ map lessonToPage lessons
+    writeCarFile outputPath prov $ map (lessonToPage introductionOnly) lessons
 
 siteId :: SiteId
 siteId = "tqa2"
 
-lessonToPage :: Lesson -> Page
-lessonToPage l =
+lessonToPage :: Bool -> Lesson -> Page
+lessonToPage introOnly l =
     Page { pageName = pageName
          , pageId =  packPageId $ T.unpack $ encodeLessonId siteId (lessonGlobalId l)-- pageNameToId siteId pageName
          , pageType = ArticlePage
          , pageMetadata = emptyPageMetadata
-         , pageSkeleton = intro
-                        <> objectives
-                        <> summary
-                        <> recall
-                        <> review
-                        <> concepts
-                        <> think
-                        <> points
-                        <> vocabulary
-
+         , pageSkeleton =
+                        (if introOnly then introOnlyContent else allTopLevelContent)
                         <> sections
                         <> [questions]
          }
   where
+    allTopLevelContent =
+        intro
+        <> objectives
+        <> summary
+        <> recall
+        <> review
+        <> concepts
+        <> think
+        <> points
+        <> vocabulary
+    introOnlyContent =
+        intro
+        <> summary
     pageName = packPageName $ T.unpack $ lessonName l
     sections = map topicToSection $ toList $ lessonTopics l
     intro = maybe [] (pure . adjunctTopicToSkel) $ lessonIntroduction l
