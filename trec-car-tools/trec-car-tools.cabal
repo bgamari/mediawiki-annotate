@@ -350,6 +350,18 @@ executable test-entity-passage-parsing
                        trec-car-tools
   default-language:    Haskell2010
 
+executable trec-car-split-paragraphs
+  main-is:             SplitParagraphs.hs
+  ghc-options:         -Wall
+  build-depends:       base,
+                       containers,
+                       serialise,
+                       optparse-applicative >= 0.12,
+                       unordered-containers >= 0.2,
+                       split,
+                       trec-car-tools
+  default-language:    Haskell2010
+
 
 test-suite tests
   main-is:             Test.hs
