@@ -66,7 +66,6 @@ import GridFeatures
 import EdgeDocCorpus
 import DenseMapping
 import PageRank
-import qualified SimplIR.SimpleIndex as Index
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
@@ -98,12 +97,7 @@ import Debug.Trace  as Debug
 
 type NumResults = Int
 
-type EntityIndex = Index.OnDiskIndex Term PageId Int
-
-data SeedDerivation = SeedsFromLeadSection
-                    | SeedsFromEntityIndex EntityIndex
-
-data QuerySource = QueriesFromCbor FilePath QueryDerivation SeedDerivation
+data QuerySource = QueriesFromCbor FilePath QueryDerivation
                  | QueriesFromJson FilePath
 
 data RankingType = EntityRanking | EntityPassageRanking
@@ -132,22 +126,12 @@ data ExperimentSettings = AllExp | NoEdgeFeats | NoEntityFeats | AllEdgeWeightsO
                         | Graex3
                         | OnlyBm25 | OnlySdm | OnlyQl
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
---
+
 data PageRankExperimentSettings = PageRankNormal | PageRankJustStructure | PageRankWeightOffset1 | PageRankWeightOffset01
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
 
--- data PageRankConvergence = L2Convergence | Iteration10 | Iteration2 | Iteration1
---   deriving (Show, Read, Ord, Eq, Enum, Bounded)
---
 data PosifyEdgeWeights = Exponentiate | ExpDenormWeight | Linear | Logistic | CutNegative
   deriving (Show, Read, Ord, Eq, Enum, Bounded)
---
--- data GraphWalkModel = PageRankWalk | BiasedPersPageRankWalk
---   deriving (Show, Read, Ord, Eq, Enum, Bounded)
-
-
--- | PageRank teleportation \(\alpha\)
--- type TeleportationProb = Double
 
 
 data FlowParser = NormalFlowArguments' NormalFlowArguments | FlowTrainOnly' FlowTrainOnly
@@ -201,7 +185,7 @@ normalArgs = NormalFlowArguments
       querySource =
               fromCborTitle
           <|> option (fmap QueriesFromJson str) (short 'j' <> long "queries-json" <> metavar "JSON" <> help "Queries from JSON")
-          <|> fromEntityIndex
+--           <|> fromEntityIndex
         where
           queryDeriv =
               flag QueryFromPageTitle QueryFromSectionPaths
@@ -210,14 +194,13 @@ normalArgs = NormalFlowArguments
               QueriesFromCbor
                 <$> option str (short 'q' <> long "queries" <> metavar "CBOR" <> help "Queries from CBOR pages")
                 <*> queryDeriv
-                <*> pure SeedsFromLeadSection
 
-          fromEntityIndex =
-              QueriesFromCbor
-                <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
-                <*> queryDeriv
-                <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
-
+--           fromEntityIndex =
+--               QueriesFromCbor
+--                 <$> option str (short 'Q' <> long "queries-nolead" <> metavar "CBOR" <> help "Queries from CBOR pages taking seed entities from entity retrieval")
+--                 <*> queryDeriv
+--                 <*> option (SeedsFromEntityIndex . Index.OnDiskIndex <$> str) (long "entity-index" <> metavar "INDEX" <> help "Entity index path")
+--
 
       trainDataSource :: Parser TrainDataSource
       trainDataSource =
@@ -433,7 +416,7 @@ normalFlow NormalFlowArguments {..}  = do
 
     queries' <-
         case querySrc of
-          QueriesFromCbor queryFile queryDeriv _seedDeriv -> do
+          QueriesFromCbor queryFile queryDeriv  -> do
               pagesToQueryDocs queryDeriv <$> readPagesOrOutlinesAsPages queryFile
 
           QueriesFromJson queryFile -> do
