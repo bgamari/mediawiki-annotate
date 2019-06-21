@@ -23,8 +23,7 @@ library
                        GraphExpansionExperiments,
                        GridFeatures,
                        WriteRanking,
-                       TrainAndStore,
-                       AspectUtils
+                       TrainAndStore
   build-depends:       base,
                        async,
                        bytestring,
@@ -61,6 +60,7 @@ library
                        split,
                        graph-algorithms,
                        simplir-word-embedding,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
