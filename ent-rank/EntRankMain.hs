@@ -60,12 +60,9 @@ import CAR.Retrieve as Retrieve
 import qualified CAR.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
-import AspectUtils
-import GridFeatures
 
-import EdgeDocCorpus
-import DenseMapping
-import PageRank
+-- import DenseMapping
+-- import PageRank
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
@@ -77,7 +74,7 @@ import qualified CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile
-import PageRank
+-- import PageRank
 import Graph
 
 import qualified Data.GraphViz as Dot
@@ -86,6 +83,7 @@ import qualified Data.GraphViz.Commands.IO as Dot
 import qualified Data.GraphViz.Attributes.Colors.SVG as DotSvg
 import Control.Monad
 
+import AspectUtils
 import GridFeatures
 import EdgeDocCorpus
 import LookupWrapper

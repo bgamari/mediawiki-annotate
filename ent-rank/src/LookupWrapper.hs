@@ -28,8 +28,6 @@ import Data.Maybe
 
 import AspectUtils
 
-import qualified Data.SmallUtf8 as Utf8
-
 
 data WhichNeighbors = NeighborsFromOutlinks | NeighborsFromInlinks | NeighborsFromBidilinks
     deriving (Show, Read, Ord, Eq, Enum, Bounded, Generic, Serialise, Hashable)
