@@ -6,6 +6,7 @@ import qualified Data.HashMap.Strict as HM
 
 import Options.Applicative
 
+import Data.List
 import CAR.Types
 import CAR.ToolVersion
 import CAR.CarExports as Exports
@@ -37,7 +38,7 @@ main = do
                                       maxAnnotation  ann1@(Annotation _ _ relevance1) ann2@( Annotation _ _ relevance2) =
                                           if relevance1 > relevance2 then ann1
                                                                      else ann2
-        topLevelAnnotations' = HM.elems topLevelAnnotations
+        topLevelAnnotations' = sortOn (\(Annotation sp _ _)-> sp) $ HM.elems topLevelAnnotations
     writeParagraphQRel outPath topLevelAnnotations'
 
 
@@ -53,5 +54,5 @@ main = do
                                           if relevance1 > relevance2 then ann1
                                                                      else ann2
 
-        articleAnnotations' = HM.elems articleAnnotations
+        articleAnnotations' = sortOn (\(Annotation sp _ _)-> sp) $ HM.elems articleAnnotations
     writeParagraphQRel outArticlePath articleAnnotations'
