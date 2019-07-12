@@ -57,6 +57,7 @@ library
                        graph-algorithms,
                        trec-car-tools,
                        simplir,
+                       simplir-learning-to-rank,
                        ent-rank-tools,
                        trec-car-graph-expansion
   default-language:    Haskell2010
