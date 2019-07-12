@@ -37,6 +37,7 @@ library
                        serialise,
                        aeson,
 
+                       simplir-learning-to-rank,
                        simplir,
                        trec-car-tools
   hs-source-dirs:      src
