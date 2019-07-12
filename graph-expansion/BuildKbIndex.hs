@@ -79,13 +79,13 @@ queryHelpDesc = "Retrieve entities from entity index `index`." <$$>
                       , ",...]}"
                       ])
 
-data Opts = Opts { output :: FilePath
-                 , query :: QuerySource
-                 , selectedQueries :: HS.HashSet TrecRun.QueryId
-                 , entityIndexFile :: Index.OnDiskIndex Term PageId Int
-                 , topK :: Int
-                 , methodName :: T.Text
-                 }
+-- data Opts = Opts { output :: FilePath
+--                  , query :: QuerySource
+--                  , selectedQueries :: HS.HashSet TrecRun.QueryId
+--                  , entityIndexFile :: Index.OnDiskIndex Term PageId Int
+--                  , topK :: Int
+--                  , methodName :: T.Text
+--                  }
 
 data QueryDoc = QueryDoc { queryDocQueryId      :: !TrecRun.QueryId
                          , queryDocPageId       :: !PageId
@@ -239,7 +239,7 @@ entityModes = subparser
            <*> flag FullText LeadText (long "lead" <> help "Index only lead text (if not set, index full text)")
       where
         go outputPath articlesPath textPart = do
-            (prov, pages) <- readPagesFileWithProvenance articlesPath
+--             (prov, pages) <- readPagesFileWithProvenance articlesPath
 
 --             !inlinkInfo <- collectInlinkInfo <$> readPagesFile articlesPath
             pages2 <- readPagesFile articlesPath
@@ -377,6 +377,7 @@ paragraphModes = subparser
             queryIndexToTrecRun getDocName indexFile queries output selectedQuery methodName topK (T.pack retrievalModelName)
               where getDocName = T.pack . unpackParagraphId
 
+modes :: Parser (IO ())
 modes = subparser
     $ command "entity"  (info (helper <*> entityModes) mempty)
    <> command "edgedoc" (info (helper <*> edgeDocModes) mempty)
@@ -419,8 +420,8 @@ pagesToQueryDocs deriv pages  =
           , (sectionPath, headings, _) <- pageSections page
           ]
 
-queryDocRawTerms :: QueryDoc -> [Term]
-queryDocRawTerms = textToTokens' . queryDocQueryText
+-- queryDocRawTerms :: QueryDoc -> [Term]
+-- queryDocRawTerms = textToTokens' . queryDocQueryText
 
 
 

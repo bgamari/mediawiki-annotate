@@ -31,7 +31,7 @@ import Graph
 import GraphExpansionExperiments
 import DenseMapping
 import Dijkstra
-import GraphExpansion
+-- import GraphExpansion
 import SimplIR.Histogram
 import CAR.RunFile as Run
 import CAR.Types
@@ -211,7 +211,7 @@ dumpIt =
         xs <- readDistances inPath
         mapM_ print
             [ Foldl.fold ((,) <$> Foldl.length <*> Foldl.mean)
-              [ realToFrac n :: Double | (bin, n) <- ys ]
+              [ realToFrac n :: Double | (_bin, n) <- ys ]
             | (_, ys) <- xs
             ]
         --print $ Foldl.fold ((,) <$> Foldl.length <*> Foldl.mean) [ realToFrac n :: Double | Just n <- xs >>= snd ]

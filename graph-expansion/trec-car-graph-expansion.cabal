@@ -17,13 +17,9 @@ cabal-version:       >=1.10
 library
   ghc-options:         -Wall
   hs-source-dirs:      src
-  exposed-modules:     EdgeDocCorpus,
-                       GraphExpansion,
-                       MultiTrecRunFile,
+  exposed-modules:     GraphExpansion,
                        GraphExpansionExperiments,
-                       GridFeatures,
-                       WriteRanking,
-                       TrainAndStore
+                       WriteRanking
   build-depends:       base,
                        async,
                        bytestring,
@@ -49,13 +45,13 @@ library
                        pipes-safe,
                        pipes,
                        foldl,
-                       parallel,
+--                       parallel,
                        serialise,
                        filepath,
                        log-domain,
                        snowball,
                        time,
-                       dlist,
+--                       dlist,
                        random,
                        split,
                        graph-algorithms,
@@ -99,6 +95,7 @@ executable graph-retrieval
                        simplir-word-embedding,
                        trec-car-graph-expansion,
                        graph-algorithms,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
   
@@ -139,6 +136,7 @@ executable trec-car-graph-expansion
                        graph-algorithms,
                        simplir-word-embedding,
                        trec-car-graph-expansion,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -178,6 +176,7 @@ executable trec-car-paragraph-retrieval
                        time,
                        simplir-word-embedding,
                        trec-car-graph-expansion,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -218,6 +217,7 @@ executable trec-car-edgedoc-retrieval
                        graph-algorithms,
                        trec-car-graph-expansion,
                        simplir-word-embedding,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -250,6 +250,7 @@ executable trec-car-seeds
                        time,
                        graph-algorithms,
                        trec-car-graph-expansion,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
   
@@ -283,6 +284,7 @@ executable trec-car-remove-seeds-from-qrels
                        log-domain,
                        time,
                        trec-car-graph-expansion,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -328,6 +330,7 @@ executable graph-expansion-build-kb-index
                        trec-car-tools,
                        trec-car-graph-expansion,
                        ansi-wl-pprint,
+                       ent-rank-tools,
                        hashable
   default-language:    Haskell2010
 
@@ -374,6 +377,7 @@ executable graph-expansion-edge-doc
                        trec-car-tools,
                        trec-car-graph-expansion,
                        ansi-wl-pprint,
+                       ent-rank-tools,
                        hashable
   default-language:    Haskell2010
 
@@ -422,6 +426,7 @@ executable graph-expansion-supervised-grid-run
                        graph-algorithms,
                        trec-car-graph-expansion,
                        simplir-word-embedding,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -466,5 +471,6 @@ executable graph-expansion-pagerank-on-all
                        trec-car-graph-expansion,
                        graph-algorithms,
                        simplir-word-embedding,
+                       ent-rank-tools,
                        trec-car-tools
   default-language:    Haskell2010

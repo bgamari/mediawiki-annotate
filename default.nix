@@ -38,6 +38,7 @@ let
         epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" (localDir ./epfl-section-recommendation) {};
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
         ent-rank             = self.callCabal2nix "ent-rank" (localDir ./ent-rank) {};
+        ent-rank-tools       = self.callCabal2nix "ent-rank-tools" (localDir ./ent-rank-tools) {};
         learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
         miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
