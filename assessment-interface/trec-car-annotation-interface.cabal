@@ -28,7 +28,7 @@ executable trec-car-annotation-interface
                        aeson >= 1.0,
                        dlist,
                        text >= 1.2,
-                       simplir,
+                       simplir-io,
                        random,
                        random-shuffle,
                        MonadRandom,

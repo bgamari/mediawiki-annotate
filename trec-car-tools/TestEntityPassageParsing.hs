@@ -11,11 +11,6 @@ import Data.Maybe
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Text.Regex as TR
-import qualified Data.Map.Strict as M
-import qualified Data.Sequence as Seq
-import qualified SimplIR.Format.TrecRunFile as Run
-import qualified Data.SmallUtf8 as Utf8
-
 
 import Debug.Trace
 

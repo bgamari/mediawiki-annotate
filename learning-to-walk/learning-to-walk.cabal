@@ -39,6 +39,7 @@ executable learn2walk-feature-generation
                        transformers,
                        aeson,
                        simplir,
+                       simplir-io,
                        simplir-disk-index,
                        pipes,
                        parallel,

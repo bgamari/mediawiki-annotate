@@ -39,5 +39,6 @@ executable trec-news-load
                        optparse-applicative >= 0.14,
                        trec-car-tools,
                        simplir,
+                       simplir-io,
                        simplir-trec
   default-language:    Haskell2010

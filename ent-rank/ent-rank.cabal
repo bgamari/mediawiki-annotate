@@ -57,6 +57,7 @@ library
                        graph-algorithms,
                        trec-car-tools,
                        simplir,
+                       simplir-io,
                        simplir-learning-to-rank,
                        ent-rank-tools,
                        trec-car-graph-expansion
@@ -104,6 +105,7 @@ executable graph-expansion-feature-generation
 
                        graph-algorithms,
                        simplir,
+                       simplir-io,
                        simplir-learning-to-rank,
                        trec-car-graph-expansion,
                        trec-car-tools,

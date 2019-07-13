@@ -63,6 +63,7 @@ library
                        text-short,
                        regex-compat,
                        simplir,
+                       simplir-io,
                        simplir-stop-words,
                        optparse-applicative,
                        mediawiki-parser >= 0.1,
@@ -220,7 +221,7 @@ executable trec-car-trec-run-filter
                        deepseq,
                        trec-car-tools,
                        optparse-applicative,
-                       simplir,
+                       simplir-io,
                        text,
                        hashable,
                        serialise
@@ -236,7 +237,7 @@ executable trec-car-trec-run-modify
                        optparse-applicative,
                        text,
                        unordered-containers,
-                       simplir,
+                       simplir-io,
                        hashable,
                        serialise
   default-language:    Haskell2010
@@ -250,7 +251,7 @@ executable trec-car-qrels-modify
                        optparse-applicative,
                        text,
                        unordered-containers,
-                       simplir,
+                       simplir-io,
                        hashable,
                        serialise
   default-language:    Haskell2010
@@ -263,7 +264,6 @@ executable trec-car-fill-metadata
                        trec-car-tools,
                        optparse-applicative,
                        unordered-containers,
-                       simplir,
                        text,
                        hashable,
                        serialise
@@ -332,22 +332,19 @@ executable trec-car-validate-benchmark
                        serialise,
                        optparse-applicative >= 0.12,
                        trec-car-tools,
-                       simplir
+                       simplir-io
   default-language:    Haskell2010
 
 executable test-entity-passage-parsing
   main-is:             TestEntityPassageParsing.hs
   ghc-options:         -Wall
   build-depends:       base,
-                       bytestring,
                        containers,
                        unordered-containers,
                        text,
                        serialise,
                        optparse-applicative >= 0.12,
-                       simplir,
                        regex-compat,
-                       unordered-containers >= 0.2,
                        trec-car-tools
   default-language:    Haskell2010
 
