@@ -154,6 +154,7 @@ executable qrelsInterset
                        transformers,
                        aeson,
                        simplir,
+                       simplir-io,
                        simplir-disk-index,
                        pipes,
                        serialise,

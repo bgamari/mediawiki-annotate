@@ -42,6 +42,7 @@ let
         learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
         miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
+        benchquality         = self.callCabal2nix "benchquality" (localDir ./benchquality) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         graphviz = self.callCabal2nix "graphviz" (nixpkgs.fetchFromGitHub {
