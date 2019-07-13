@@ -9,6 +9,6 @@ in stdenv.mkDerivation {
   buildInputs = [
     curl binutils-unwrapped leveldb
     zlib icu icu.out expat lzma trec-eval kyotocabinet
-    postgresql
+    postgresql ghc cabal-install
   ];
 }
