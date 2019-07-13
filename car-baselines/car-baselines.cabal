@@ -94,6 +94,7 @@ executable car-galago-query
                        dlist >= 0.7,
                        log-domain,
                        simplir,
+                       simplir-stop-words,
                        simplir-disk-index,
                        trec-car-tools,
                        profunctors,

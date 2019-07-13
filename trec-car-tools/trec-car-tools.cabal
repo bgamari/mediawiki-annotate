@@ -63,6 +63,7 @@ library
                        text-short,
                        regex-compat,
                        simplir,
+                       simplir-stop-words,
                        optparse-applicative,
                        mediawiki-parser >= 0.1,
                        trec-car-types

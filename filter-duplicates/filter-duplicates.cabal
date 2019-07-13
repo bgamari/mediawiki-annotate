@@ -36,6 +36,7 @@ library
                        parallel >= 3.2,
                        deepseq,
                        simplir,
+                       simplir-stop-words,
                        intset,
                        trec-car-tools
   ghc-options:         -optc=-march=skylake -optc=-g3
