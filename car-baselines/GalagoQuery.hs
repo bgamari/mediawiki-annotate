@@ -40,7 +40,7 @@ import SimplIR.TopK
 import SimplIR.Types
 import SimplIR.Term as Term
 import qualified SimplIR.Format.TrecRunFile as TrecRun
-import SimplIR.Utils
+import SimplIR.Pipes.Utils
 import SimplIR.DiskIndex.Posting.Collect (collectPostings)
 import qualified SimplIR.DiskIndex.Build as DiskIdx
 import qualified SimplIR.DiskIndex as DiskIdx

@@ -43,7 +43,7 @@ import CAR.Retrieve
 import CAR.KnowledgeBase
 import CAR.Utils
 import CAR.ToolVersion
-import SimplIR.Utils
+import SimplIR.Pipes.Utils
 import SimplIR.Term as Term
 import SimplIR.SimpleIndex as Index
 import Data.Warc as Warc

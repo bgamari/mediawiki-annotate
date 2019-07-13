@@ -34,6 +34,7 @@ executable car-retrieval
                        aeson,
                        bytestring,
                        optparse-applicative >= 0.12,
+                       simplir-pipes-utils,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -94,6 +95,7 @@ executable car-galago-query
                        dlist >= 0.7,
                        log-domain,
                        simplir,
+                       simplir-pipes-utils,
                        simplir-stop-words,
                        simplir-disk-index,
                        trec-car-tools,
