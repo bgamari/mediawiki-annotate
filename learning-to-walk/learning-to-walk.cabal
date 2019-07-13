@@ -56,6 +56,7 @@ executable learn2walk-feature-generation
                        graph-algorithms,
                        trec-car-graph-expansion,
                        simplir-word-embedding,
+                       simplir-learning-to-rank,
                        trec-car-graph-expansion,
                        trec-car-tools,
                        ent-rank-tools,
