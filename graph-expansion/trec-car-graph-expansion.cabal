@@ -30,7 +30,6 @@ library
                        containers,
                        stm,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        heaps,
@@ -45,13 +44,11 @@ library
                        pipes-safe,
                        pipes,
                        foldl,
---                       parallel,
                        serialise,
                        filepath,
                        log-domain,
                        snowball,
                        time,
---                       dlist,
                        random,
                        split,
                        graph-algorithms,
@@ -63,7 +60,6 @@ library
 
 executable graph-retrieval
   main-is:             GraphRetrieval.hs
---  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base,
                        async,
@@ -75,7 +71,6 @@ executable graph-retrieval
                        containers,
                        stm,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        graphviz,
@@ -102,7 +97,6 @@ executable graph-retrieval
   
 executable trec-car-graph-expansion
   main-is:             GraphExpansionMain.hs
---  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base,
                        async,
@@ -114,7 +108,6 @@ executable trec-car-graph-expansion
                        containers,
                        stm,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        heaps,
@@ -144,7 +137,6 @@ executable trec-car-graph-expansion
 
 executable trec-car-paragraph-retrieval
   main-is:             ParagraphRetrieval.hs
---  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base,
                        async,
@@ -156,7 +148,6 @@ executable trec-car-paragraph-retrieval
                        containers,
                        stm,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        heaps,
@@ -184,7 +175,6 @@ executable trec-car-paragraph-retrieval
 
 executable trec-car-edgedoc-retrieval
   main-is:             EdgeDocRetrieval.hs
---  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base,
                        async,
@@ -196,7 +186,6 @@ executable trec-car-edgedoc-retrieval
                        containers,
                        stm,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        heaps,
@@ -224,72 +213,6 @@ executable trec-car-edgedoc-retrieval
   default-language:    Haskell2010
 
 
-executable trec-car-seeds
-  main-is:             SeedEntities.hs
---  other-modules:       WriteRanking
-  ghc-options:         -Wall -threaded -rtsopts
-  build-depends:       base,
-                       async,
-                       bytestring,
-                       unordered-containers,
-                       text,
-                       vector,
-                       containers,
-                       stm,
-                       deepseq,
-                       simplir-galago,
-                       simplir-word-embedding,
-                       optparse-applicative >= 0.12,
-                       hashable,
-                       aeson,
-                       transformers,
-                       simplir,
-                       simplir-disk-index,
-                       pipes,
-                       serialise,
-                       foldl,
-                       log-domain,
-                       time,
-                       graph-algorithms,
-                       trec-car-graph-expansion,
-                       ent-rank-tools,
-                       trec-car-tools
-  default-language:    Haskell2010
-  
-executable trec-car-remove-seeds-from-qrels
-  main-is:             RemoveSeedsFromQrels.hs
---  other-modules:       WriteRanking
-  ghc-options:         -Wall -threaded -rtsopts
-  build-depends:       base,
-                       async,
-                       bytestring,
-                       unordered-containers,
-                       text,
-                       vector,
-                       indexed-vector,
-                       containers,
-                       stm,
-                       deepseq,
-                       simplir-galago,
-                       simplir-word-embedding,
-                       optparse-applicative >= 0.12,
-                       hashable,
-                       heaps,
-                       psqueues,
-                       aeson,
-                       transformers,
-                       simplir,
-                       simplir-io,
-                       simplir-disk-index,
-                       pipes,
-                       serialise,
-                       foldl,
-                       log-domain,
-                       time,
-                       trec-car-graph-expansion,
-                       ent-rank-tools,
-                       trec-car-tools
-  default-language:    Haskell2010
 
 executable graph-expansion-build-kb-index
   main-is:             BuildKbIndex.hs
@@ -391,7 +314,6 @@ executable graph-expansion-edge-doc
 
 executable graph-expansion-supervised-grid-run
   main-is:             SupervisedGridRun.hs
---  other-modules:       WriteRanking
   ghc-options:         -Wall -threaded -rtsopts -eventlog
   build-depends:       base,
                        async,
@@ -404,7 +326,6 @@ executable graph-expansion-supervised-grid-run
                        stm,
                        random,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        wl-pprint-text,
                        hashable,
@@ -450,7 +371,6 @@ executable graph-expansion-pagerank-on-all
                        stm,
                        random,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        hashable,
                        heaps,
