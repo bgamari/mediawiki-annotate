@@ -29,7 +29,6 @@ executable learn2walk-feature-generation
                        random,
                        lens,
                        deepseq,
-                       simplir-galago,
                        optparse-applicative >= 0.12,
                        wl-pprint-text,
                        hashable,
