@@ -21,7 +21,7 @@ library
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
-                       optparse-applicative >=0.14 && <0.15,
+                       optparse-applicative >=0.14 && <0.16,
                        time,
                        simplir-io
   default-language:    Haskell2010
@@ -35,7 +35,7 @@ executable agreement
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
-                       optparse-applicative >=0.14 && <0.15,
+                       optparse-applicative >=0.14 && <0.16,
                        assessment-eval,
                        tabular,
                        simplir,
@@ -50,7 +50,7 @@ executable merge-annotations
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
-                       optparse-applicative >=0.14 && <0.15,
+                       optparse-applicative >=0.14 && <0.16,
                        assessment-eval,
                        time,
                        simplir-io
@@ -64,7 +64,7 @@ executable split-psg-entity-annotations
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
-                       optparse-applicative >=0.14 && <0.15,
+                       optparse-applicative >=0.14 && <0.16,
                        assessment-eval,
                        time,
                        simplir-io
@@ -78,7 +78,7 @@ executable change-graded-scale
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
                        filepath >= 1.4,
-                       optparse-applicative >=0.14 && <0.15,
+                       optparse-applicative >=0.14 && <0.16,
                        assessment-eval,
                        simplir-io
   default-language:    Haskell2010
