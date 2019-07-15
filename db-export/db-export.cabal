@@ -29,5 +29,6 @@ executable db-export
                        deepseq >= 1.4,
                        postgresql-simple,
                        trec-car-tools,
+                       trec-car-types,
                        simplir
   default-language:    Haskell2010

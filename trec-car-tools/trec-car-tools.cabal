@@ -24,7 +24,7 @@ library
                        CAR.CarExports
                        CAR.QRelFile
                        CAR.ToolVersion
-                       CAR.Utils
+--                       CAR.Utils
                        CAR.Utils.Redirects
                        CAR.TocFile
                        CAR.Retrieve
@@ -43,6 +43,7 @@ library
                        lens,
                        serialise >= 0.1,
                        bytestring >= 0.10,
+                       deepseq,
                        deepseq,
                        filepath >=1.4 && <1.5,
                        unordered-containers >=0.2 && <0.3,
