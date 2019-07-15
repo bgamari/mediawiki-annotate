@@ -38,13 +38,13 @@ import Control.Concurrent.Map
 import Control.DeepSeq
 
 import CAR.Types hiding (Entity)
-import qualified CAR.RunFile as CarRun
+import qualified Clone.RunFile as CarRun
 
 import SimplIR.LearningToRank
 import SimplIR.LearningToRankWrapper
 import SimplIR.FeatureSpace (FeatureSpace, FeatureVec)
 
-import qualified CAR.RunFile as CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import SimplIR.TrainUtils

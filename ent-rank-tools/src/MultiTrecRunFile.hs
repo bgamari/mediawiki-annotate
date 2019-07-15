@@ -17,7 +17,7 @@ import Data.Monoid
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
-import qualified CAR.RunFile as RunFile
+import qualified Clone.RunFile as RunFile
 
 import qualified Debug.Trace as Debug
 

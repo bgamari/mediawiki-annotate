@@ -32,7 +32,7 @@ import System.IO.MMap
 import System.FilePath
 import Prelude hiding (lookup)
 
-import SimplIR.Utils.Compact
+import CAR.Utils.Compact
 import CAR.Types.CborList
 
 type Offset = Int

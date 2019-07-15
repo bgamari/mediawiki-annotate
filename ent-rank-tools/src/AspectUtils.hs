@@ -43,7 +43,7 @@ import Data.List.NonEmpty ( NonEmpty ((:|)))
 -- import Data.Hashable--import Data.List.Split
 
 import CAR.Types hiding (Entity)
-import qualified CAR.RunFile as CarRun
+import qualified Clone.RunFile as CarRun
 import qualified SimplIR.Format.TrecRunFile  as Run
 data AspectId = AspectFromTuple PageId HeadingId
               | AspectFromString T.Text

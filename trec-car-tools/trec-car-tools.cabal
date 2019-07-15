@@ -26,7 +26,6 @@ library
                        CAR.ToolVersion
 --                       CAR.Utils
                        CAR.Utils.Redirects
-                       CAR.TocFile
                        CAR.Retrieve
                        CAR.KnowledgeBase
                        CAR.FillMetadata
@@ -56,7 +55,7 @@ library
                        dlist,
                        vector,
                        vector-algorithms,
-                       mmap,
+--                       mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
@@ -80,7 +79,8 @@ executable trec-car-cat
                        unordered-containers,
                        optparse-applicative,
                        text,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-export
@@ -95,6 +95,7 @@ executable trec-car-export
                        optparse-applicative,
                        filepath,
                        trec-car-tools,
+                       trec-car-types,
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
 
@@ -110,6 +111,7 @@ executable trec-car-build-toc
                        containers,
                        text,
                        trec-car-tools,
+                       trec-car-types,
                        optparse-applicative,
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
@@ -128,7 +130,8 @@ executable trec-car-filter
                        optparse-applicative >= 0.12,
                        binary-serialise-cbor,
                        hashable,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-transform-content
@@ -143,7 +146,8 @@ executable trec-car-transform-content
                        text,
                        optparse-applicative >= 0.12,
                        hashable,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-legal-entity-ids
@@ -157,7 +161,8 @@ executable trec-car-legal-entity-ids
                        optparse-applicative >= 0.12,
                        hashable,
                        filepath,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-extract-kb
@@ -170,7 +175,8 @@ executable trec-car-extract-kb
                        containers,
                        optparse-applicative >= 0.12,
                        hashable,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-dump
@@ -183,7 +189,8 @@ executable trec-car-dump
                        text,
                        serialise,
                        optparse-applicative >= 0.12,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-detect-duplicate-paragraphs 
@@ -195,7 +202,8 @@ executable trec-car-detect-duplicate-paragraphs
                        unordered-containers,
                        text,
                        optparse-applicative >= 0.12,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -209,7 +217,8 @@ executable trec-car-trec-run-filter
                        simplir-io,
                        text,
                        hashable,
-                       serialise
+                       serialise,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -224,7 +233,8 @@ executable trec-car-trec-run-modify
                        unordered-containers,
                        simplir-io,
                        hashable,
-                       serialise
+                       serialise,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-qrels-modify
@@ -238,7 +248,8 @@ executable trec-car-qrels-modify
                        unordered-containers,
                        simplir-io,
                        hashable,
-                       serialise
+                       serialise,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -251,7 +262,8 @@ executable trec-car-fill-metadata
                        unordered-containers,
                        text,
                        hashable,
-                       serialise
+                       serialise,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -268,6 +280,7 @@ executable trec-car-derive-toplevel
                        unordered-containers,
                        filepath,
                        trec-car-tools,
+                       trec-car-types,
                        mediawiki-parser >= 0.1
   default-language:    Haskell2010
 
@@ -284,7 +297,8 @@ executable trec-car-remove-duplicate-pages
                        text,
                        optparse-applicative >= 0.12,
                        binary-serialise-cbor,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -302,7 +316,8 @@ executable trec-car-merge-duplicate-sections
                        binary-serialise-cbor,
                        unordered-containers,
                        hashable,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -317,6 +332,7 @@ executable trec-car-validate-benchmark
                        serialise,
                        optparse-applicative >= 0.12,
                        trec-car-tools,
+                       trec-car-types,
                        simplir-io
   default-language:    Haskell2010
 
@@ -330,7 +346,8 @@ executable test-entity-passage-parsing
                        serialise,
                        optparse-applicative >= 0.12,
                        regex-compat,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 executable trec-car-split-paragraphs
@@ -342,7 +359,8 @@ executable trec-car-split-paragraphs
                        optparse-applicative >= 0.12,
                        unordered-containers >= 0.2,
                        split,
-                       trec-car-tools
+                       trec-car-tools,
+                       trec-car-types
   default-language:    Haskell2010
 
 
@@ -356,6 +374,7 @@ test-suite tests
                        tasty-hunit,
                        unordered-containers,
                        trec-car-tools,
+                       trec-car-types,
                        tagged
   hs-source-dirs:      ./, tests
   default-language:    Haskell2010

@@ -42,7 +42,7 @@ import SimplIR.LearningToRank
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace (FeatureSpace, FeatureVec, featureNames, mkFeatureSpace)
 
-import qualified CAR.RunFile as CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import MultiTrecRunFile
 
 import qualified Debug.Trace as Debug

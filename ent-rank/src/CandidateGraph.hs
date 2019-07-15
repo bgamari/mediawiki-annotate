@@ -25,13 +25,13 @@ import Data.Text as T
 import CAR.Types hiding (Entity)
 import CAR.Utils
 import AspectUtils
-import qualified CAR.RunFile as CarRun
+import qualified Clone.RunFile as CarRun
 import GridFeatures
 
 import EdgeDocCorpus
 import LookupWrapper
 
-import qualified CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import MultiTrecRunFile
 
 

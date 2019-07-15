@@ -45,7 +45,7 @@ import GraphExpansion
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace.Normalise
 
-import qualified CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import MultiTrecRunFile
 import Graph
