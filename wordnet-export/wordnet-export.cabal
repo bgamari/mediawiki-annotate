@@ -29,6 +29,7 @@ executable wordnet-export
                        pipes,
                        pipes-concurrency,
                        stm,
+                       trec-car-types,
                        trec-car-tools,
                        ukb,
                        wordnet-parse

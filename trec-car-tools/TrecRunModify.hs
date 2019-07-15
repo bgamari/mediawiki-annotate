@@ -14,7 +14,7 @@ import qualified Data.HashMap.Strict as HM
 
 import CAR.Types
 import CAR.ToolVersion
-import Clone.RunFile as RF
+import CAR.RunFile as RF
 import qualified SimplIR.Format.TrecRunFile as Run
 
 import CAR.AnnotationsFile as CAR

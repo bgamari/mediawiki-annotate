@@ -18,6 +18,7 @@ library
                        GridFeatures,
                        MultiTrecRunFile,
                        TrainAndStore
+                       Clone.RunFile
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <5,
@@ -27,6 +28,9 @@ library
                        containers,
                        dlist,
                        text,
+                       text-short,
+                       regex-compat,
+                       lens,
                        bytestring,
                        random,
                        deepseq,

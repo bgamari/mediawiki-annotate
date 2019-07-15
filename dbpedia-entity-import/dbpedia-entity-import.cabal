@@ -30,6 +30,7 @@ executable dbpedia-entity-import
                        aeson >=1.2 && <1.5,
                        optparse-applicative >= 0.14,
                        simplir-io,
+                       trec-car-types,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -54,6 +55,7 @@ executable hazymemory-import
                        simplir,
                        simplir-io,
                        tag-me,
+                       trec-car-types,
                        trec-car-tools
   default-language:    Haskell2010
 
@@ -83,6 +85,7 @@ executable toponym-tagme
                        simplir-io,
                        tag-me,
                        evalmetrics,
+                       trec-car-types,
                        trec-car-tools
   default-language:    Haskell2010
 

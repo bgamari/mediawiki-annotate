@@ -33,7 +33,7 @@ import Data.Maybe
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
 import CAR.Retrieve as Retrieve
-import qualified CAR.RunFile as CarRun
+import qualified Clone.RunFile as CarRun
 import CAR.Utils
 import GridFeatures
 import TrainAndStore
@@ -44,7 +44,7 @@ import SimplIR.LearningToRankWrapper
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace.Normalise
 
-import qualified CAR.RunFile as CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import MultiTrecRunFile
 

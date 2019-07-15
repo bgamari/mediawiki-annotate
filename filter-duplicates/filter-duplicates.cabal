@@ -38,6 +38,7 @@ library
                        simplir,
                        simplir-stop-words,
                        intset,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -optc=-march=skylake -optc=-g3
   default-language:    Haskell2010
@@ -56,6 +57,7 @@ executable trec-car-find-duplicates
                        parallel >= 3.2,
                        intset,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded -with-rtsopts=-N -with-rtsopts=-A64M -optc=-march=skylake
   default-language:    Haskell2010
@@ -68,6 +70,7 @@ executable trec-car-rewrite-duplicates
                        bytestring >=0.10 && <0.11,
                        optparse-applicative >= 0.13,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
@@ -81,6 +84,7 @@ executable trec-car-map-paragraphids
                        optparse-applicative >= 0.13,
                        text >= 1.2,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
@@ -94,6 +98,7 @@ executable trec-car-duplicates-rewrite-table
                        optparse-applicative >= 0.13,
                        simplir,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
@@ -120,6 +125,7 @@ executable trec-car-minhash-duplicates
                        snowball,
                        simplir-word-embedding,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010
@@ -146,6 +152,7 @@ executable test-duplicates
                        snowball,
                        simplir-word-embedding,
                        trec-car-filter-duplicates,
+                       trec-car-types,
                        trec-car-tools
   ghc-options:         -rtsopts -threaded
   default-language:    Haskell2010

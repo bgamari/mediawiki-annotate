@@ -57,7 +57,7 @@ import qualified Codec.Serialise as CBOR
 import CAR.Types hiding (Entity)
 import CAR.ToolVersion
 import CAR.Retrieve as Retrieve
-import qualified CAR.RunFile as CarRun
+import qualified Clone.RunFile as CarRun
 import CAR.TocFile as Toc
 import CAR.Utils
 import AspectUtils
@@ -74,7 +74,7 @@ import SimplIR.FeatureSpace (FeatureSpace, FeatureVec)
 import SimplIR.FeatureSpace.Normalise
 import SimplIR.Intern
 
-import qualified CAR.RunFile
+import qualified Clone.RunFile as CAR.RunFile
 import qualified SimplIR.Format.QRel as QRel
 import qualified SimplIR.Ranking as Ranking
 import MultiTrecRunFile

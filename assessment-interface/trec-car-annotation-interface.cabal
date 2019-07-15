@@ -21,6 +21,7 @@ executable trec-car-annotation-interface
                        filepath >= 1.4,
                        directory,
                        trec-car-tools >=0.1 && <0.2,
+                       trec-car-types,
                        unordered-containers >=0.2 && <0.3,
                        bytestring >=0.10 && <0.11,
                        blaze-html >=0.8 && <0.10,
