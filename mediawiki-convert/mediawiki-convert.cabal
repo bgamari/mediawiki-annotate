@@ -290,3 +290,4 @@ test-suite tests
                        tagged
   hs-source-dirs:      ./, tests
   default-language:    Haskell2010
+  buildable:           False
