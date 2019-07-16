@@ -15,7 +15,8 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Aeson
 
-import Data.MediaWiki.Markup
+import Data.MediaWiki.Markup hiding (PageName(..))
+import CAR.Types (PageName(..))
 import CAR.Import.Utils
 import CAR.Import.Templates
 import CAR.Import

@@ -74,9 +74,45 @@ import Data.String
 import qualified Control.Lens as L
 import Data.Text.Short (ShortText)
 import qualified Data.Text.Short as Short
+import Data.Char
 
-import Data.MediaWiki.Markup
-import CAR.Types.Orphans ()
+-- import CAR.Types.Orphans ()
+
+
+newtype PageName = PageName { getPageName :: T.Text }
+                 deriving (Show, Generic, IsString)
+
+-- | Respects Wikimedia title equality rules: first character is
+-- case-insensitive, remaining title case-sensitive.
+instance Eq PageName where
+    PageName a == PageName b =
+        T.toCaseFold (T.take 1 a) == T.toCaseFold (T.take 1 b)
+        && T.drop 1 a == T.drop 1 b
+
+instance Ord PageName where
+    PageName a `compare` PageName b =
+        case T.toCaseFold (T.take 1 a) `compare` T.toCaseFold (T.take 1 b) of
+          EQ -> T.drop 1 a `compare` T.drop 1 b
+          x -> x
+
+instance Hashable PageName where
+    hashWithSalt salt (PageName t)
+      | T.null t  = salt
+      | otherwise = hashWithSalt (hashWithSalt salt (T.drop 1 t))
+                                 (toLower $ T.head t)
+
+
+deriving instance CBOR.Serialise PageName
+deriving instance FromJSON PageName
+instance NFData PageName
+instance FromJSONKey PageName where
+    fromJSONKey = fmap PageName fromJSONKey
+deriving instance ToJSON PageName
+instance ToJSONKey PageName where
+    toJSONKey = contramapToJSONKeyFunction (\(PageName n) -> n) toJSONKey
+
+
+
 
 unpackSBS :: SBS.ShortByteString -> String
 unpackSBS = map (chr . fromIntegral) . SBS.unpack

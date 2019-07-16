@@ -5,11 +5,6 @@ import qualified Data.Text as T
 
 import Data.MediaWiki.Markup
 
-normPageName :: PageName -> PageName
-normPageName (PageName target) =
-    PageName $ normFirst target
-  where
-    normFirst t = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 t
 
 type TemplateTag = T.Text
 

@@ -25,7 +25,7 @@ import qualified Data.DList as DList
 import qualified Data.Text as T
 import qualified Data.Set as S
 
-import Data.MediaWiki.Markup (PageName(..))
+-- import Data.MediaWiki.Markup (PageName(..))
 import CAR.Types hiding (paraId)
 import CAR.Utils
 import CAR.QRelFile

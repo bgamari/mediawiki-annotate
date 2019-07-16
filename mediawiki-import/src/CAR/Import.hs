@@ -15,8 +15,9 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
 import Data.MediaWiki.XmlDump (WikiDoc(..))
-import Data.MediaWiki.Markup as Markup
-import CAR.Types hiding (pageNameToId)
+import Data.MediaWiki.Markup hiding (PageName(..), pageNameToId, getPageName, Link(..) )
+import qualified Data.MediaWiki.Markup as Markup
+import CAR.Types
 import CAR.Utils hiding (pageRedirect)
 
 import CAR.Import.Entities
@@ -40,17 +41,19 @@ defaultConfig =
            , isInfoboxTemplate = (== "infobox settlement")
            , resolveTemplate = defaultTemplateHandler
            }
+--
+-- pageNameToId :: SiteId -> Markup.PageName -> PageId
+-- pageNameToId (SiteId s) (Markup.PageName n) =
+--     PageId
+--     $ fromMaybe (error "pageNameToId: invalid UTF-8 encoding")
+--     $ Short.fromShortByteString
+--     $ urlEncodeText
+--     $ T.unpack s ++ ":" ++ T.unpack n
+--   where urlEncodeText :: String -> SBS.ShortByteString
+--         urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
 
-pageNameToId :: SiteId -> PageName -> PageId
-pageNameToId (SiteId s) (PageName n) =
-    PageId
-    $ fromMaybe (error "pageNameToId: invalid UTF-8 encoding")
-    $ Short.fromShortByteString
-    $ urlEncodeText
-    $ T.unpack s ++ ":" ++ T.unpack n
-  where urlEncodeText :: String -> SBS.ShortByteString
-        urlEncodeText = SBS.pack . map (fromIntegral . ord) . escapeURIString isAllowedInURI
-
+convertPageName :: Markup.PageName -> CAR.Types.PageName
+convertPageName (Markup.PageName str) = CAR.Types.PageName str
 
 toPage :: Config -> SiteId -> WikiDoc -> Either String Page
 toPage config@Config{..} site WikiDoc{..} =
@@ -66,7 +69,7 @@ toPage config@Config{..} site WikiDoc{..} =
                     , pageType     = pageType
                     , pageMetadata = metadata
                     }
-        pageId   = pageNameToId site name
+        pageId   = pageNameToId site  name
         name     = normPageName $ PageName $ TE.decodeUtf8 docTitle
         skeleton = docsToSkeletons config site pageId contents
         categories =  filter (isCategory . linkTarget)
@@ -128,7 +131,7 @@ isImage (InternalLink target parts)
   | Just name <- "image:" `T.stripPrefix` page
   = image name
   where
-    page = T.toCaseFold $ getPageName $ linkTargetPage target
+    page = T.toCaseFold $ getPageName $ convertPageName $ linkTargetPage target
     image name
       | [] <- parts = Just (name, [])
       | otherwise   = Just (name, last parts)
@@ -150,14 +153,14 @@ toParaBody siteId thisPage = go
       | otherwise      =
             let linkTarget   = normPageName page
                 linkSection  = linkTargetAnchor target
-                isSelfLink   = null $ unpackPageName $ linkTargetPage target
+                isSelfLink   = null $ unpackPageName $ convertPageName $ linkTargetPage target
                 linkTargetId
                   | isSelfLink = thisPage
-                  | otherwise  = pageNameToId siteId linkTarget
+                  | otherwise  = pageNameToId siteId  linkTarget
                 linkAnchor   = resolveEntities t
             in Just [ParaLink $ Link {..}]
       where
-        page = linkTargetPage target
+        page = convertPageName $ linkTargetPage target
         t = case parts of
               [anchor] -> T.pack $ getAllText anchor
               _        -> getPageName page
@@ -234,3 +237,9 @@ toSkeleton config siteId thisPage = go
         f (Just key, val) = Just (key, go val)
         f _               = Nothing
     go (_ : docs) = go docs
+
+normPageName :: PageName -> PageName
+normPageName (PageName target) =
+    PageName $ normFirst target
+  where
+    normFirst t = (\(a,b) -> T.toUpper a `T.append` b) $ T.splitAt 1 t
