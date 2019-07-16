@@ -10,6 +10,7 @@ packages:
     assessment-eval/
     mediawiki-parser/
     mediawiki-import/
+    mediawiki-convert/
     db-export/
     graph-expansion/
     ent-rank-tools/

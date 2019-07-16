@@ -14,7 +14,7 @@ import Text.PrettyPrint.ANSI.Leijen ((<$$>))
 
 import CAR.ToolVersion
 import CAR.Types
-import FilterPred
+import CAR.FilterPred as FilterPred
 import WikiData
 
 helpDescr :: PP.Doc

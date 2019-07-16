@@ -94,6 +94,7 @@ executable entityranking-with-lead
                        optparse-applicative >= 0.12,
                        unordered-containers >= 0.2,
                        trec-car-tools,
+                       mediawiki-convert,
                        trec-car-types
 
 executable car-galago-query

@@ -56,7 +56,8 @@ library
                        simplir-learning-to-rank,
                        ent-rank-tools,
                        trec-car-types,
-                       trec-car-tools
+                       trec-car-tools,
+                       mediawiki-convert
   default-language:    Haskell2010
 
 executable graph-retrieval
@@ -260,6 +261,7 @@ executable graph-expansion-build-kb-index
                        optparse-applicative >= 0.12,
                        trec-car-tools,
                        trec-car-types,
+                       mediawiki-convert,
                        trec-car-graph-expansion,
                        ansi-wl-pprint,
                        ent-rank-tools,

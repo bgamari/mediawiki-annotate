@@ -22,6 +22,7 @@ let
         trec-car-tools       = dontCheck (self.callCabal2nix "trec-car-tools" (localDir ./trec-car-tools) {});
         mediawiki-parser     = self.callCabal2nix "mediawiki-parser" (localDir ./mediawiki-parser) {};
         mediawiki-import     = self.callCabal2nix "mediawiki-import" (localDir ./mediawiki-import) {};
+	mediawiki-convert    = self.callCabal2nix "mediawiki-convert" (localDir ./mediawiki-convert) {};
         car-baselines        = self.callCabal2nix "car-baselines" (localDir ./car-baselines) {};
         filter-duplicates    = self.callCabal2nix "filter-duplicates" (localDir ./filter-duplicates) {};
         assessment-interface = self.callCabal2nix "trec-car-annotation-interface" (localDir ./assessment-interface) {};

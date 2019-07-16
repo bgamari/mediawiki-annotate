@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveTraversable #-}
 
-module FilterPred where
+module CAR.FilterPred where
 
 import Data.Maybe
 import Data.Void
