@@ -51,8 +51,7 @@ library
                        dlist,
                        graph-algorithms,
                        simplir-word-embedding,
-                       trec-car-types,
-                       trec-car-tools
+                       trec-car-types
   default-language:    Haskell2010
 
 executable kendall
@@ -91,7 +90,6 @@ executable kendall
                        trec-car-graph-expansion,
                        graph-algorithms,
                        trec-car-types,
-                       trec-car-tools,
                        benchquality
   default-language:    Haskell2010
 
@@ -131,7 +129,6 @@ executable chronbachsalpha
                        trec-car-graph-expansion,
                        graph-algorithms,
                        trec-car-types,
-                       trec-car-tools,
                        benchquality
   default-language:    Haskell2010
 
@@ -174,8 +171,7 @@ executable qrelsInterset
                        graph-algorithms,
                        trec-car-graph-expansion,
                        simplir-word-embedding,
-                       trec-car-types,
-                       trec-car-tools
+                       trec-car-types
   default-language:    Haskell2010
 
 executable appendix-table
@@ -210,7 +206,6 @@ executable appendix-table
                        time,
                        Glob,
                        trec-car-types,
-                       trec-car-tools,
                        pandoc-types >= 1.17,
                        tabular >= 0.2,
                        split,
@@ -252,7 +247,6 @@ executable appendix-desc
                        time,
                        Glob,
                        trec-car-types,
-                       trec-car-tools,
                        pandoc-types >= 1.17,
                        tabular >= 0.2,
                        split,
