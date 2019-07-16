@@ -19,7 +19,6 @@ library
                        CAR.Types.Files,
                        CAR.Types.Provenance,
                        CAR.Types.AST,
-                       CAR.Types.Orphans,
                        CAR.Types.AST.Pretty,
                        CAR.TocFile,
                        CAR.Utils.Compact,

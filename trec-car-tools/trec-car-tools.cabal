@@ -17,8 +17,7 @@ library
                        CAR.Types.AST,
                        CAR.Types.AST.Pretty,
                        CAR.Types.CborList,
-                       CAR.Types.Files,
-                       CAR.Types.Orphans
+                       CAR.Types.Files
   exposed-modules:     CAR.RunFile
                        CAR.AnnotationsFile
                        CAR.NameToIdMap
