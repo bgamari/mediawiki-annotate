@@ -49,7 +49,6 @@ library
                        dlist,
                        vector,
                        vector-algorithms,
---                       mmap,
                        hashable >= 1.2,
                        base16-bytestring >= 0.1,
                        cryptohash-sha1,
@@ -60,7 +59,6 @@ library
                        simplir-io,
                        simplir-stop-words,
                        optparse-applicative,
-                       mediawiki-parser >= 0.1,
                        trec-car-types
 
 executable trec-car-cat
@@ -90,8 +88,7 @@ executable trec-car-build-toc
                        text,
                        trec-car-tools,
                        trec-car-types,
-                       optparse-applicative,
-                       mediawiki-parser >= 0.1
+                       optparse-applicative
   default-language:    Haskell2010
 
 
