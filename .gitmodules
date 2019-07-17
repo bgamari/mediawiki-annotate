@@ -37,3 +37,6 @@
 [submodule "vendor/porter"]
 	path = vendor/porter
 	url = git@github.com:laura-dietz/porter.git
+[submodule "trec-car-tools-haskell"]
+	path = trec-car-tools-haskell
+	url = git@github.com:TREMA-UNH/trec-car-tools-haskell.git

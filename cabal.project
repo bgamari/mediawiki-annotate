@@ -4,8 +4,8 @@ allow-newer:
     profunctors
 
 packages:
-    trec-car-tools/
-    trec-car-types/
+    trec-car-tools-haskell/trec-car-tools/
+    trec-car-tools-haskell/trec-car-types/
     multilang-car/
     assessment-eval/
     mediawiki-parser/
