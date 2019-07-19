@@ -4,8 +4,8 @@ allow-newer:
     profunctors
 
 packages:
-    trec-car-tools-haskell/trec-car-tools/
-    trec-car-tools-haskell/trec-car-types/
+    ENT-rank/trec-car-tools-haskell/trec-car-tools/
+    ENT-rank/trec-car-tools-haskell/trec-car-types/
     multilang-car/
     assessment-eval/
     mediawiki-parser/
@@ -13,12 +13,12 @@ packages:
     mediawiki-convert/
     db-export/
     graph-expansion/
-    ent-rank-tools/
-    ent-rank/
+    ENT-rank/ent-rank-tools/
+    ENT-rank/ent-rank/
     learning-to-walk/
-    graph-algorithms/
-    simplir/*/*.cabal
-    simplir/vendor/*/*.cabal
+    ENT-rank/graph-algorithms/
+    ENT-rank/trec-car-tools-haskell/simplir/*/*.cabal
+    ENT-rank/trec-car-tools-haskell/simplir/vendor/*/*.cabal
     car-baselines/
     assessment-interface/
     assessment-interface/annotation/server
