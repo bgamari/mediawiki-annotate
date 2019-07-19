@@ -58,10 +58,8 @@ library
                        trec-car-types,
                        trec-car-tools,
                        ent-rank-tools,
-                       simplir,
                        simplir-io,
-                       simplir-learning-to-rank,
-                       trec-car-graph-expansion
+                       simplir-learning-to-rank
   default-language:    Haskell2010
 
 
@@ -108,7 +106,6 @@ executable graph-expansion-feature-generation
                        simplir,
                        simplir-io,
                        simplir-learning-to-rank,
-                       trec-car-graph-expansion,
                        trec-car-types,
                        trec-car-tools,
                        ent-rank-tools,

@@ -41,7 +41,7 @@ import CAR.Types hiding (Entity)
 import AspectUtils
 import GridFeatures
 
-import GraphExpansion
+-- import GraphExpansion
 import qualified SimplIR.FeatureSpace as F
 import SimplIR.FeatureSpace.Normalise
 
@@ -91,15 +91,6 @@ mkFeatureSpaces fspace f = runIdentity $ do
     modelToCombinedFeatureVec <- pure $ fromMaybe (error "mkFeatureSpaces: impossible") $ F.mapFeaturesInto fspace combinedFSpace Just
     pure $ f modelToCombinedFeatureVec FeatureSpaces{..}
 
---
--- stackFeatures :: forall entityPh edgePh.
---                    FeatureSpaces entityPh edgePh
---                 -> EntityFeatureVec entityPh
---                 -> EdgeFeatureVec edgePh
---                 -> CombinedFeatureVec entityPh edgePh
--- stackFeatures FeatureSpaces{..} uFeats eFeats =
---     F.fromList combinedFSpace $ map (first Left) (F.toList uFeats) ++ map (first Right) (F.toList eFeats)
---
 
 keySet :: HM.HashMap k v -> HS.HashSet k
 keySet m = HS.fromMap $ fmap ( const () ) m
@@ -550,48 +541,6 @@ edgeScoreVec source edgedocsRankEntry edgeDoc
                                     ++ concat [ rankEdgeFeatures source (GridRun' g) entry
                                        | (g, entry) <- multiRankingEntryAll edgedocsRankEntry
                                       ]
-{-
-  where
-
-        connectedEdgeDocs :: ParagraphId -> [EdgeDoc]
-        connectedEdgeDocs = undefined
-
-        edgeDocKullbackLeibler :: [EdgeDoc] -> EdgeDoc -> Double
-        edgeDocKullbackLeibler otherEdgeDocsOfConnectedEntities edgeDoc =
-
-          let (backTermCounts, backTotal) =
-                termCountsAndTotal
-                $ fmap edgeDocContent
-                $ HS.toList $ HS.fromList
-                $ otherEdgeDocsOfConnectedEntities
-
-              (termCounts, total) =
-                termCountsAndTotal [(edgeDocContent edgeDoc)]
-          in kullbackLeibler (termCounts, total) (backTermCounts, backTotal)
-
-
-        kullbackLeibler :: (TermCounts, Int) -> (TermCounts, Int) -> Double
-        kullbackLeibler (termCounts, total) (backTermCounts, backTotal) =
-                            Foldable.sum $ [ pi * (log pi - log qi)
-                                            | (term,count) <- HM.toList (getTermCounts termCounts)
-                                            , let pi = (realToFrac count) / (realToFrac total)
-                                            , let bcount = fromJust $ term `HM.lookup` (getTermCounts backTermCounts)
-                                            , let qi = (realToFrac bcount) / (realToFrac backTotal)
-                                            ]
-
-        termCountsAndTotal :: [T.Text] -> (Retrieve.TermCounts, Int)
-        termCountsAndTotal texts =
-                              let termCounts =
-                                    foldMap (textToTokens) texts
-                                  total = Foldable.sum $ HM.elems $ getTermCounts $ termCounts
-                              in (termCounts, total)
-
-
-textToTokens :: T.Text -> Retrieve.TermCounts
-textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
--}
-
--- --------------------------------
 
 
 edgeDocKullbackLeibler :: [T.Text] -> [T.Text] -> Double
@@ -620,4 +569,15 @@ termCountsAndTotal texts =
 
 textToTokens :: T.Text -> Retrieve.TermCounts
 textToTokens = foldMap Retrieve.oneTerm . Retrieve.textToTokens'
+
+
+edgeDocsToUniverseGraph :: [EdgeDoc] -> HM.HashMap PageId [EdgeDoc]
+edgeDocsToUniverseGraph edgeDocs =
+    HM.fromListWith (flip (++))
+    $ foldMap symmetrizeEdge edgeDocs
+  where
+    symmetrizeEdge :: EdgeDoc -> [(PageId, [EdgeDoc])]
+    symmetrizeEdge edgeDoc =
+           [ (target, [edgeDoc])
+           | target <- HS.toList $ edgeDocNeighbors edgeDoc]
 
