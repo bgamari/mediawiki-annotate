@@ -106,7 +106,6 @@ executable graph-expansion-feature-generation
                        simplir,
                        simplir-io,
                        simplir-learning-to-rank,
-                       trec-car-graph-expansion,
                        trec-car-types,
                        trec-car-tools,
                        ent-rank-tools,
