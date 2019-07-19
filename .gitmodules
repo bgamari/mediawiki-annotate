@@ -43,3 +43,6 @@
 [submodule "ent-rank-repos/trec-car-tools-haskell"]
 	path = ent-rank-repos/trec-car-tools-haskell
 	url = git@github.com:TREMA-UNH/trec-car-tools-haskell.git
+[submodule "ENT-rank"]
+	path = ENT-rank
+	url = git@github.com:TREMA-UNH/ENT-rank.git
