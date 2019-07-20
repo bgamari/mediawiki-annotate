@@ -10,11 +10,6 @@
 [submodule "b-tree"]
 	path = b-tree
 	url = git://github.com/bgamari/b-tree
-[submodule "simplir"]
-	path = simplir
-	urlGithub = git@github.com:bgamari/simplir.git
-	urlGitlab = https://git@git.smart-cactus.org/ben/simpl-ir
-	url = ../simpl-ir
 [submodule "vendor/xml"]
 	path = vendor/xml
 	url = git://github.com/snoyberg/xml
@@ -37,12 +32,6 @@
 [submodule "vendor/porter"]
 	path = vendor/porter
 	url = git@github.com:laura-dietz/porter.git
-[submodule "trec-car-tools-haskell"]
-	path = trec-car-tools-haskell
-	url = git@github.com:TREMA-UNH/trec-car-tools-haskell.git
-[submodule "ent-rank-repos/trec-car-tools-haskell"]
-	path = ent-rank-repos/trec-car-tools-haskell
-	url = git@github.com:TREMA-UNH/trec-car-tools-haskell.git
 [submodule "ENT-rank"]
 	path = ENT-rank
 	url = git@github.com:TREMA-UNH/ENT-rank.git
