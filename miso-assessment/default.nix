@@ -1,4 +1,4 @@
-{ pkgs ? (import ../simplir/nixpkgs.nix {}) }:
+{ pkgs ? (import ../ENT-rank/trec-car-tools-haskell/simplir/nixpkgs.nix {}) }:
 
 let
   misoSrc = pkgs.fetchFromGitHub {
@@ -11,8 +11,8 @@ let
 
   haskellPackages = pkgs.haskell.packages.ghcjs.override {
     overrides = self: super: let lib = pkgs.haskell.lib; in {
-      trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../trec-car-types { };
-      # trec-car-tools = haskellPackages.callCabal2nix "trec-car-tools" ../trec-car-tools { };
+      trec-car-types = haskellPackages.callCabal2nix "trec-car-types" ../ENT-rank/trec-car-tools-haskell/trec-car-types { };
+      # trec-car-tools = haskellPackages.callCabal2nix "trec-car-tools" ../ENT-rank/trec-car-tools-haskell/trec-car-tools { };
       miso-types = haskellPackages.callCabal2nix "miso-types" ../miso-types { };
       tqa-import = haskellPackages.callCabal2nix "tqa-import" ../tqa-import { };
       mediawiki-parser = lib.dontCheck (haskellPackages.callCabal2nix "mediawiki-parser" ../mediawiki-parser { tasty-silver = null; });

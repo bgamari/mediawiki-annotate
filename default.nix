@@ -1,4 +1,4 @@
-{ nixpkgs ? (import simplir/nixpkgs.nix {}) }:
+{ nixpkgs ? (import ENT-rank/trec-car-tools-haskell/simplir/nixpkgs.nix {}) }:
 
 let
   inherit (nixpkgs.haskell.lib) dontCheck doJailbreak;
@@ -13,23 +13,23 @@ let
 
   localDir = nixpkgs.nix-gitignore.gitignoreSourcePure [ ./.gitignore ];
 
-  simplirNix = import ./simplir { inherit nixpkgs; };
+  simplirNix = import ./ENT-rank/trec-car-tools-haskell/simplir { inherit nixpkgs; };
 
   haskellOverrides = self: super:
     let
       trecCarPackages = {
-        trec-car-types       = dontCheck (self.callCabal2nix "trec-car-types" (localDir ./trec-car-tools-haskell/trec-car-types) {});
-        :Q!qtrec-car-tools       = dontCheck (self.callCabal2nix "trec-car-tools" (localDir ./trec-car-tools-haskell/trec-car-tools) {});
+        trec-car-types       = dontCheck (self.callCabal2nix "trec-car-types" (localDir ./ENT-rank/trec-car-tools-haskell/trec-car-types) {});
+        trec-car-tools       = dontCheck (self.callCabal2nix "trec-car-tools" (localDir ./ENT-rank/trec-car-tools-haskell/trec-car-tools) {});
         mediawiki-parser     = self.callCabal2nix "mediawiki-parser" (localDir ./mediawiki-parser) {};
         mediawiki-import     = self.callCabal2nix "mediawiki-import" (localDir ./mediawiki-import) {};
-	mediawiki-convert    = self.callCabal2nix "mediawiki-convert" (localDir ./mediawiki-convert) {};
+	    mediawiki-convert    = self.callCabal2nix "mediawiki-convert" (localDir ./mediawiki-convert) {};
         car-baselines        = self.callCabal2nix "car-baselines" (localDir ./car-baselines) {};
         filter-duplicates    = self.callCabal2nix "filter-duplicates" (localDir ./filter-duplicates) {};
         assessment-interface = self.callCabal2nix "trec-car-annotation-interface" (localDir ./assessment-interface) {};
         assessment-eval      = self.callCabal2nix "assessment-eval" (localDir ./assessment-eval) {};
         annotate-server      = self.callCabal2nix "annotate-server" (localDir ./assessment-interface/annotation/server) {};
         trec-car-graph-expansion = self.callCabal2nix "trec-car-graph-expansion" (localDir ./graph-expansion) {};
-        graph-algorithms     = self.callCabal2nix "graph-algorithms" (localDir ./graph-algorithms) {};
+        graph-algorithms     = self.callCabal2nix "graph-algorithms" (localDir ./ENT-rank/graph-algorithms) {};
         db-export            = self.callCabal2nix "db-export" (localDir ./db-export) {};
         evalmetrics          = self.callCabal2nix "evalmetrics" (localDir ./evalmetrics) {};
         wordnet-export       = nixpkgs.callPackage (import ./wordnet-export) { haskellPackages = self; };
@@ -38,8 +38,8 @@ let
         trec-news            = self.callCabal2nix "trec-news" (localDir ./trec-news) {};
         epfl-section-recommendation = self.callCabal2nix "epfl-section-recommendation" (localDir ./epfl-section-recommendation) {};
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
-        ent-rank             = self.callCabal2nix "ent-rank" (localDir ./ent-rank) {};
-        ent-rank-tools       = self.callCabal2nix "ent-rank-tools" (localDir ./ent-rank-tools) {};
+        ent-rank             = self.callCabal2nix "ent-rank" (localDir ./ENT-rank/ent-rank) {};
+        ent-rank-tools       = self.callCabal2nix "ent-rank-tools" (localDir ./ENT-rank/ent-rank-tools) {};
         learning-to-walk     = self.callCabal2nix "learning-to-walk" (localDir ./learning-to-walk) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
         miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
