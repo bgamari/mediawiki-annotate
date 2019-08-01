@@ -19,7 +19,7 @@ import JavaScript.Web.XMLHttpRequest
 
 import Control.Exception
 import qualified Data.ByteString as BS
--- import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
@@ -102,6 +102,12 @@ data AssessmentModel =
   deriving (Eq, Show)
 
 
+newtype FormatString = FormatString MisoString
+    deriving (Show, Eq)
+jsonFormat :: FormatString
+jsonFormat = FormatString "json"
+jsonLFormat :: FormatString
+jsonLFormat = FormatString "jsonl"
 
 
 uploadUrl :: JSString
@@ -109,7 +115,7 @@ uploadUrl = "/assessment"
 
 -- | Sum type for application events
 data Action
-  = FetchAssessmentPage String Bool
+  = FetchAssessmentPage FormatString String Bool
   | SetAssessmentPage AssessmentPage UTCTime Bool
   | ReportError MisoString
   | Initialize
@@ -218,13 +224,15 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
     loc <- getWindowLocation >>= getSearch
     params <- newURLSearchParams loc
     maybeQ <- get params ("q" :: MisoString)
+    maybeFormat <- get params ("format" :: MisoString)
     maybeViewOnly <- get params ("viewOnly" :: MisoString)
                      :: IO (Maybe MisoString)
     let query = fromMaybe "default" maybeQ
+        format = FormatString $ fromMaybe "json" maybeFormat
         viewOnly' :: Bool
         viewOnly' = Debug.traceShowId $ read $ fromMisoString $ fromMaybe "False" maybeViewOnly
-         -- todo Fix FetchAssessmentPage query viewOnly'
-    return $ FetchAssessmentPage query viewOnly'
+         -- todo Fix FetchAssessmentPage format query viewOnly'
+    return $ FetchAssessmentPage format query viewOnly'
   where newModel =
             let stopwords :: S.Set T.Text
                 stopwords = S.fromList $ T.lines $ decodeByteString stopwordList
@@ -236,12 +244,20 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
 
 
 
-updateModel (FetchAssessmentPage pageName viewOnly) m = m <# do
-    page <- fetchJson $ getAssessmentPageFilePath pageName
+updateModel (FetchAssessmentPage format@(FormatString "json") pageName viewOnly) m = m <# do
+    page <- fetchJson $ getAssessmentPageFilePath format pageName
     now' <- getCurrentTime
     return $ case page of
       Right p -> SetAssessmentPage p now' viewOnly
       Left e  -> ReportError $ ms $ show e
+
+updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly) m = m <# do
+    now' <- getCurrentTime
+    pages <- fetchJsonL $ getAssessmentPageFilePath format pageName
+    return $ case pages of
+                  Right pages' -> let page : _ = pages'
+                                  in SetAssessmentPage page now' viewOnly
+                  Left e  -> ReportError $ ms $ show e
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 
@@ -406,10 +422,10 @@ getUsernameUrl = "/username"
 getStopwordUrl :: MisoString
 getStopwordUrl = "/inquery-en.txt"
 
-getAssessmentPageFilePath :: String -> MisoString
-getAssessmentPageFilePath pageName =
+getAssessmentPageFilePath :: FormatString -> String -> MisoString
+getAssessmentPageFilePath (FormatString ext) pageName =
     ms
-    $ "/data/" <> pageName <> ".json"
+    $ "/data/" <> pageName <> "." <> (fromMisoString ext)
 
 
 
@@ -460,6 +476,13 @@ fetchJson url = do
     case result of
         Left err          -> pure $ Left err
         Right byteStr -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict byteStr
+
+fetchJsonL :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError [a])
+fetchJsonL url = do
+    result <- fetchByteString url
+    case result of
+        Left err          -> pure $ Left err
+        Right byteStr -> pure $ mapM (either (Left . InvalidJSON) Right . eitherDecodeStrict) $ BS.lines byteStr
 
 
 fetchByteString:: JSString -> IO (Either FetchJSONError BS.ByteString)
