@@ -164,6 +164,9 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 
 -- ------------- Presentation ----------------------
 
+squid:: QueryId
+squid = QueryId "tqa2:L_0092"
+
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@ListModel{..} =
@@ -176,11 +179,11 @@ viewModel m@ListModel{..} =
             let fname = T.pack $ System.FilePath.dropExtension $ fromMisoString f
             in li_ [] [
                   p_ [] [
-                    a_ [href_ $ toAssessUrl fname ] [text $ ms fname]
+                    a_ [href_ $ toAssessUrl fname (unQueryId squid) ] [text $ ms fname]
                   ]
               ]
-        toAssessUrl f =
-            ms $ "/assess.html?format=jsonl&q="<>f
+        toAssessUrl f squid =
+            ms $ "/assess.html?format=jsonl&q="<>f<>"&squid="<>squid
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
 
 

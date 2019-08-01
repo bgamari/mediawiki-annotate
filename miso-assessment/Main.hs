@@ -115,7 +115,7 @@ uploadUrl = "/assessment"
 
 -- | Sum type for application events
 data Action
-  = FetchAssessmentPage FormatString String Bool
+  = FetchAssessmentPage FormatString String Bool (Maybe QueryId)
   | SetAssessmentPage AssessmentPage UTCTime Bool
   | ReportError MisoString
   | Initialize
@@ -225,14 +225,17 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
     params <- newURLSearchParams loc
     maybeQ <- get params ("q" :: MisoString)
     maybeFormat <- get params ("format" :: MisoString)
+    maybeSquid <- get params ("squid" :: MisoString)
     maybeViewOnly <- get params ("viewOnly" :: MisoString)
                      :: IO (Maybe MisoString)
     let query = fromMaybe "default" maybeQ
         format = FormatString $ fromMaybe "json" maybeFormat
+        squid :: Maybe QueryId
+        squid = Debug.traceShow ("maybeSquid = "<> show maybeSquid) $ fmap (QueryId . T.pack . fromMisoString) maybeSquid
         viewOnly' :: Bool
         viewOnly' = Debug.traceShowId $ read $ fromMisoString $ fromMaybe "False" maybeViewOnly
          -- todo Fix FetchAssessmentPage format query viewOnly'
-    return $ FetchAssessmentPage format query viewOnly'
+    return $ FetchAssessmentPage format query viewOnly' squid
   where newModel =
             let stopwords :: S.Set T.Text
                 stopwords = S.fromList $ T.lines $ decodeByteString stopwordList
@@ -244,20 +247,28 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
 
 
 
-updateModel (FetchAssessmentPage format@(FormatString "json") pageName viewOnly) m = m <# do
+updateModel (FetchAssessmentPage format@(FormatString "json") pageName viewOnly _maybeSquid) m = m <# do
     page <- fetchJson $ getAssessmentPageFilePath format pageName
     now' <- getCurrentTime
     return $ case page of
       Right p -> SetAssessmentPage p now' viewOnly
       Left e  -> ReportError $ ms $ show e
 
-updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly) m = m <# do
+updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly maybeSquid) m = m <# do
     now' <- getCurrentTime
     pages <- fetchJsonL $ getAssessmentPageFilePath format pageName
+             :: IO (Either FetchJSONError [AssessmentPage])
     return $ case pages of
-                  Right pages' -> let page : _ = pages'
-                                  in SetAssessmentPage page now' viewOnly
+                  Right pages' -> SetAssessmentPage (selectPage pages') now' viewOnly
                   Left e  -> ReportError $ ms $ show e
+  where selectPage :: [AssessmentPage] -> AssessmentPage
+        selectPage pages =
+            Debug.traceShow ("squid = "<> show maybeSquid) $ case maybeSquid of
+                Nothing -> let p : _ = pages  in Debug.traceShow (T.pack "no squid given") (p)
+                Just squid ->
+                    case [ p | p <- pages, apSquid p == squid] of
+                            []  -> let p':_ = pages in Debug.traceShow ("squid "<> (unQueryId squid) <> " not in jsonl") (p')
+                            (p:_) -> p
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 
