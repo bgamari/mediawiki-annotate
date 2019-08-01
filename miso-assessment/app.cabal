@@ -60,7 +60,28 @@ executable list
                        trec-car-types
   default-language:    Haskell2010
 --  ghc-options:         -Wall -Werror
---  buildable:           false
+
+executable list-l
+  main-is:             ListL.hs
+  build-depends:       base,
+                       bytestring,
+                       ghcjs-base,
+                       miso,
+                       aeson,
+                       aeson-pretty,
+                       app,
+                       jsaddle-dom,
+                       text,
+                       hashable,
+                       containers,
+                       time,
+                       filepath,
+                       porter>=0.1.0.2,
+                       miso-types,
+                       trec-car-types
+  default-language:    Haskell2010
+--  ghc-options:         -Wall -Werror
+
 
 
 executable tqa-new-heading
