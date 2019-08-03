@@ -194,7 +194,7 @@ clearLocalModel userId queryId = do
 
 
 saveLocalModel :: UserId -> QueryId -> AssessmentModel -> JSM ()
-saveLocalModel userId queryId AssessmentModel{state = m} = do
+saveLocalModel userId queryId model@AssessmentModel{state = m} = do
     let key = storageKeyQuery userId queryId
     oldStateMaybe <- getLocalStorage key
     let mergedState =
@@ -202,9 +202,30 @@ saveLocalModel userId queryId AssessmentModel{state = m} = do
                  Right oldState ->
                     Debug.traceShow ("merging old assessment state"::String) $ mergeAssessmentState m oldState
                  Left _msg -> Debug.traceShow (("cannot get old assessment state" ::String) <> show _msg) m
-    setLocalStorage key mergedState
+        mergedState' = mergeAssessorData userId model mergedState
 
+    setLocalStorage key mergedState'
 saveLocalModel _userId _queryId _m = return ()  -- don't save models for other states
+
+
+mergeAssessorData :: UserId -> AssessmentModel -> AssessmentState -> AssessmentState
+mergeAssessorData userId (model@AssessmentModel{page = AssessmentPage{apRunId = runId}}) mergedState =
+    mergedState {assessorData = M.alter mergeValue userId (assessorData mergedState) }
+  where mergeValue :: Maybe (AnnotationValue ()) -> Maybe (AnnotationValue ())
+        mergeValue Nothing =
+            Just $ wrapValue model ()
+        mergeValue (Just (AnnotationValue {runIds = oldRunIds})) =
+            let newValue :: AnnotationValue ()
+                newValue = wrapValue model ()
+                runIds' :: [T.Text]
+                runIds' = L.nub (oldRunIds <> [runId])
+                newValue' :: AnnotationValue ()
+                newValue' = newValue { runIds = runIds' }
+            in Just newValue'
+
+mergeAssessorData _userId _model _state = emptyAssessmentState
+
+
 
 
 loadLocalModel :: UserId -> QueryId -> JSM AssessmentState
