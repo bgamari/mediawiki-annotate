@@ -129,6 +129,7 @@ data Action
   | SaveAssessments
   | DisplayAssessments
   | ClearAssessments
+  | ClearAllAssessments
   | LoadStopWordList BS.ByteString
   | FetchedAuthUsername T.Text
   | LoadAssessmentsFromLocalStorage
@@ -225,9 +226,6 @@ mergeAssessorData userId (model@AssessmentModel{page = AssessmentPage{apRunId = 
 
 mergeAssessorData _userId _model _state = emptyAssessmentState
 
-
-
-
 loadLocalModel :: UserId -> QueryId -> JSM AssessmentState
 loadLocalModel userId queryId = do
     let key = storageKeyQuery userId queryId
@@ -315,6 +313,7 @@ updateModel (FetchAssessmentPage format@(FormatString "json") pageName viewOnly 
       Left e  -> return $ ReportError $ ms $ show e
       Right page -> do
         loadedAssessmentState <- loadLocalModel username (apSquid page)
+--        let loadedAssessmentState' = mergeAssessorData username m loadedAssessmentState   -- does not work like this
         return $ SetAssessmentPage page now' viewOnly loadedAssessmentState
 
 updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly maybeSquid) m = m <# do
@@ -328,6 +327,7 @@ updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly
         Right pages' -> do
             let page = selectPage pages'
             loadedAssessmentState <- loadLocalModel username (apSquid page)
+--            let loadedAssessmentState' = mergeAssessorData username m loadedAssessmentState -- does not work like this
             return $ SetAssessmentPage page now' viewOnly loadedAssessmentState
   where selectPage :: [AssessmentPage] -> AssessmentPage
         selectPage pages =
@@ -468,9 +468,12 @@ updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryI
 updateModel ClearAssessments m@AssessmentModel{ page=page, config = DisplayConfig {viewOnly=viewOnly}} = m <# do
     now' <- getCurrentTime
     let username = getUserName m
-
     clearLocalModel username (apSquid page)
-    -- remove from browser data
+    return $ SetAssessmentPage page now' viewOnly emptyAssessmentState
+
+updateModel ClearAllAssessments m@AssessmentModel{ page=page, config = DisplayConfig {viewOnly=viewOnly}} = m <# do
+    now' <- getCurrentTime
+    clearLocalStorage
     return $ SetAssessmentPage page now' viewOnly emptyAssessmentState
 
 
@@ -634,7 +637,8 @@ viewModel m@AssessmentModel{
        [ h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
-       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear"]
+       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
+       , button_ [class_ "btn-sm", onClick ClearAllAssessments] [text "Clear All"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
        , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
                 text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache
