@@ -109,4 +109,6 @@ let
     };
   };
 in
-  app2
+  if pkgs.lib.inNixShell
+  then app2.env
+  else app2
