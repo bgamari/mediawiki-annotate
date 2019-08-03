@@ -15,6 +15,7 @@ module Types where
 import GHC.Generics
 import Data.Aeson
 import Data.Aeson.Types
+import Data.List
 import Control.Applicative
 import qualified Data.Text as T
 import Data.Hashable
@@ -195,6 +196,7 @@ data AssessmentState = AssessmentState {
                     , facetState :: M.Map AssessmentKey [(AnnotationValue FacetValue)]
                     , transitionLabelState :: M.Map AssessmentTransitionKey (AnnotationValue AssessmentTransitionLabel)
                     , nonrelevantState :: M.Map AssessmentKey (AnnotationValue ())
+                    , assessorData :: M.Map UserId (AnnotationValue ())
     }
   deriving (Eq, Generic, Show)
 instance FromJSON AssessmentState where
@@ -203,6 +205,17 @@ instance ToJSON AssessmentState where
     toJSON = genericToJSON json2Options
     toEncoding = genericToEncoding json2Options
 
+mergeAssessmentState :: AssessmentState -> AssessmentState -> AssessmentState
+mergeAssessmentState newState oldState =
+    AssessmentState { notesState = M.union (notesState newState) (notesState oldState)
+                    , facetState = M.union (facetState newState) (facetState oldState)
+                    , transitionLabelState = M.union (transitionLabelState newState) (transitionLabelState oldState)
+                    , nonrelevantState = M.union (nonrelevantState newState) (nonrelevantState oldState)
+                    , assessorData = M.unionWith mergeAssessorData (assessorData newState) (assessorData oldState)
+                    }
+  where mergeAssessorData :: (AnnotationValue ()) -> (AnnotationValue ()) -> (AnnotationValue ())
+        mergeAssessorData av@AnnotationValue{runIds=val1} AnnotationValue{runIds=val2} =
+            av {runIds = nub (val1 <> val2)}
 
 data AnnotationValue a = AnnotationValue {
     annotatorId :: UserId
@@ -235,6 +248,7 @@ emptyAssessmentState = AssessmentState { notesState = mempty
                                        , facetState = mempty
                                        , transitionLabelState = mempty
                                        , nonrelevantState = mempty
+                                       , assessorData = mempty
                                        }
 
 data AssessmentMetaData = AssessmentMetaData {

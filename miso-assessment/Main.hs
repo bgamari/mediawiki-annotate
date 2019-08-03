@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric#-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields#-}
 {-# LANGUAGE StandaloneDeriving #-}
 
@@ -13,7 +13,7 @@ module Main where
 -- | Miso framework import
 import Miso hiding (go)
 import Miso.String hiding (concatMap, filter, length, zip)
-import Data.Aeson
+import Data.Aeson as Aeson
 import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
@@ -116,7 +116,7 @@ uploadUrl = "/assessment"
 -- | Sum type for application events
 data Action
   = FetchAssessmentPage FormatString String Bool (Maybe QueryId)
-  | SetAssessmentPage AssessmentPage UTCTime Bool
+  | SetAssessmentPage AssessmentPage UTCTime Bool AssessmentState
   | ReportError MisoString
   | Initialize
   | SetAssessment UserId QueryId ParagraphId AssessmentLabel
@@ -187,20 +187,61 @@ maxLabel (Just []) = UnsetLabel
 maxLabel (Just lst) = L.maximum [label |  AnnotationValue{value=FacetValue{relevance=label}}  <- lst]
 
 
-saveLocalState :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> a -> JSM ()
-saveLocalState tag userId queryId paraId label = do
-    let key = storageKey tag userId queryId paraId
-        value = label
-    putStrLn $ show key <> "   " <> show value
---     setLocalStorage key value
+clearLocalModel :: UserId -> QueryId -> JSM ()
+clearLocalModel userId queryId = do
+    let key = storageKeyQuery userId queryId
+    removeLocalStorage key
 
-saveLocalTransition :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> ParagraphId -> a -> JSM ()
-saveLocalTransition tag userId queryId paraId1 paraId2 label = do
-    let key = storageKeyTransition tag userId queryId paraId1 paraId2
-        value = label
-    putStrLn $ show key <> "   " <> show value
---     setLocalStorage key value
 
+saveLocalModel :: UserId -> QueryId -> AssessmentModel -> JSM ()
+saveLocalModel userId queryId AssessmentModel{state = m} = do
+    let key = storageKeyQuery userId queryId
+    oldStateMaybe <- getLocalStorage key
+    let mergedState =
+            case oldStateMaybe of
+                 Right oldState ->
+                    Debug.traceShow ("merging old assessment state"::String) $ mergeAssessmentState m oldState
+                 Left _msg -> Debug.traceShow (("cannot get old assessment state" ::String) <> show _msg) m
+    setLocalStorage key mergedState
+
+saveLocalModel _userId _queryId _m = return ()  -- don't save models for other states
+
+
+loadLocalModel :: UserId -> QueryId -> JSM AssessmentState
+loadLocalModel userId queryId = do
+    let key = storageKeyQuery userId queryId
+    oldStateMaybe <- getLocalStorage key
+                        :: JSM (Either String AssessmentState)
+
+    let oldState =
+            case oldStateMaybe of
+                Right old -> old
+                Left _msg -> Debug.traceShow (("Could not load old assessment state: "::String) <> show _msg) $ emptyAssessmentState
+    return oldState
+
+
+
+
+saveLocalState :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> a -> AssessmentModel -> JSM ()
+saveLocalState _tag userId queryId _paraId _label m = do
+    saveLocalModel userId queryId m
+
+
+saveLocalTransition :: (ToJSON a, Show a) => StorageTag ->  UserId -> QueryId -> ParagraphId -> ParagraphId -> a -> AssessmentModel -> JSM ()
+saveLocalTransition _tag userId queryId _paraId1 _paraId2 _label m = do
+    saveLocalModel userId queryId m
+
+
+defaultUserId :: UserId
+defaultUserId = ""
+
+getUserName :: AssessmentModel -> UserId
+getUserName m =
+    case m of
+        AssessmentModel{username = username}            -> username
+        LoadingPageModel{maybeUsername = Just username} -> username
+        LoadingPageModel{maybeUsername = Nothing}       -> Debug.traceShow ("Username not yet set in LoadingPageModel"::String) $ defaultUserId
+        _                                               -> Debug.traceShow (("Could not find username in model "<> show m)::String) $ defaultUserId
 
 
 -- | Updates model, optionally introduces side effects
@@ -244,23 +285,29 @@ updateModel (LoadStopWordList stopwordList) m = newModel <# do
                 AssessmentModel{} -> m {stopwords = stopwords}
                 _ -> m
 
-
-
-
 updateModel (FetchAssessmentPage format@(FormatString "json") pageName viewOnly _maybeSquid) m = m <# do
-    page <- fetchJson $ getAssessmentPageFilePath format pageName
+    pageOrErr <- fetchJson $ getAssessmentPageFilePath format pageName
+    let username = getUserName m
+
     now' <- getCurrentTime
-    return $ case page of
-      Right p -> SetAssessmentPage p now' viewOnly
-      Left e  -> ReportError $ ms $ show e
+    case pageOrErr of
+      Left e  -> return $ ReportError $ ms $ show e
+      Right page -> do
+        loadedAssessmentState <- loadLocalModel username (apSquid page)
+        return $ SetAssessmentPage page now' viewOnly loadedAssessmentState
 
 updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly maybeSquid) m = m <# do
+    let username = getUserName m
     now' <- getCurrentTime
     pages <- fetchJsonL $ getAssessmentPageFilePath format pageName
              :: IO (Either FetchJSONError [AssessmentPage])
-    return $ case pages of
-                  Right pages' -> SetAssessmentPage (selectPage pages') now' viewOnly
-                  Left e  -> ReportError $ ms $ show e
+
+    case pages of
+        Left e  -> return $ ReportError $ ms $ show e
+        Right pages' -> do
+            let page = selectPage pages'
+            loadedAssessmentState <- loadLocalModel username (apSquid page)
+            return $ SetAssessmentPage page now' viewOnly loadedAssessmentState
   where selectPage :: [AssessmentPage] -> AssessmentPage
         selectPage pages =
             Debug.traceShow ("squid = "<> show maybeSquid) $ case maybeSquid of
@@ -272,12 +319,14 @@ updateModel (FetchAssessmentPage format@(FormatString "jsonl") pageName viewOnly
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e m
 
-updateModel (SetAssessmentPage page now' viewOnly) m =
-        case m of
+updateModel (SetAssessmentPage page now' viewOnly loadedAssessmentState) m =
+    let loadedAssessmentState' = loadedAssessmentState
+     -- initAssessmentState username (apRunId page)
+     in case m of
             AssessmentModel {stopwords = stopwords, username = username} ->
                     return LoadAssessmentsFromLocalStorage #>
                                    AssessmentModel  { page=page'
-                                     , state=emptyAssessmentState
+                                     , state=loadedAssessmentState'
                                      , config = defaultDisplayConfig { viewOnly = viewOnly }
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
@@ -289,7 +338,7 @@ updateModel (SetAssessmentPage page now' viewOnly) m =
                              } ->
                     return LoadAssessmentsFromLocalStorage #>
                                     AssessmentModel  { page=page'
-                                     , state=emptyAssessmentState
+                                     , state=loadedAssessmentState'
                                      , config = defaultDisplayConfig  { viewOnly = viewOnly }
                                      , viewCache = viewCache stopwords
                                      , timeCache = timeCache
@@ -305,6 +354,8 @@ updateModel (SetAssessmentPage page now' viewOnly) m =
           viewCache stopwords = buildViewTable page stopwords
           timeCache = now'
 
+
+
 -- Initialization completed. React to user events.
 
 updateModel LoadAssessmentsFromLocalStorage m = noEff m
@@ -315,7 +366,7 @@ updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
 
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state} =  newModel <# do
-    saveLocalState LabelTag userId queryId paraId label
+    saveLocalState LabelTag userId queryId paraId label m
     return Noop
   where newModel =
             let key = (AssessmentKey queryId paraId)
@@ -334,7 +385,7 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
 
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state, page=AssessmentPage{apQueryFacets =facetList}} = newModel <# do
-    saveLocalState FacetTag userId queryId paraId headingIdStr
+    saveLocalState FacetTag userId queryId paraId headingIdStr m
     return Noop
   where newModel =
             let key = (AssessmentKey queryId paraId)
@@ -355,7 +406,7 @@ updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {sta
 
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalState NotesTag userId queryId paraId txt
+    saveLocalState NotesTag userId queryId paraId txt m
     return Noop
   where newModel =
             let value = [ wrapValue m (T.pack $ fromMisoString txt)]
@@ -363,7 +414,7 @@ updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@
             in m {state = state{notesState = notesState'}}
 
 updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{nonrelevantState=hiddenState}} =  newModel <# do
-    saveLocalState HiddenTag userId queryId paraId newState
+    saveLocalState HiddenTag userId queryId paraId newState  m
     return Noop
   where key =  (AssessmentKey queryId paraId)
         oldState = isJust $ key `M.lookup` hiddenState
@@ -373,7 +424,7 @@ updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@
         newModel = m {state = state{nonrelevantState = hiddenState'}}
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalTransition TransitionTag userId queryId paraId1 paraId2 label
+    saveLocalTransition TransitionTag userId queryId paraId1 paraId2 label m
     return Noop
   where newModel =
             let value = wrapValue m label
@@ -395,8 +446,11 @@ updateModel FlagSaveSuccess m@AssessmentModel{page=AssessmentPage{apSquid=queryI
 
 updateModel ClearAssessments m@AssessmentModel{ page=page, config = DisplayConfig {viewOnly=viewOnly}} = m <# do
     now' <- getCurrentTime
+    let username = getUserName m
+
+    clearLocalModel username (apSquid page)
     -- remove from browser data
-    return $ SetAssessmentPage page now' viewOnly
+    return $ SetAssessmentPage page now' viewOnly emptyAssessmentState
 
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
@@ -410,6 +464,11 @@ updateModel x m = m <# do
     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
 
 
+
+
+storageKeyQuery :: UserId -> QueryId -> MisoString
+storageKeyQuery userId queryId =
+    (ms $ userId) <> "-" <> (ms $ unQueryId queryId)
 
 
 storageKey :: StorageTag -> UserId -> QueryId -> ParagraphId -> MisoString
@@ -459,7 +518,7 @@ uploadAssessments m = do
                   , reqLogin = Nothing
                   , reqHeaders = []
                   , reqWithCredentials = False
-                  , reqData = StringData $ ms $  Data.Aeson.encode $  makeSavedAssessments m now'
+                  , reqData = StringData $ ms $  Aeson.encode $  makeSavedAssessments m now'
                   }
 
 makeSavedAssessments :: AssessmentModel -> UTCTime -> SavedAssessments
@@ -519,6 +578,12 @@ fetchByteString url = do
 
 decodeByteString :: BS.ByteString -> T.Text
 decodeByteString = Data.Text.Encoding.decodeUtf8
+
+decodeMisoByteString :: BS.ByteString -> MisoString
+decodeMisoByteString = Miso.String.toMisoString
+
+encodeMisoByteString :: MisoString -> BS.ByteString
+encodeMisoByteString = Miso.String.fromMisoString
 
 -- ------------- Presentation ----------------------
 
