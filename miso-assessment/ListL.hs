@@ -43,6 +43,7 @@ import qualified Data.Text as T
 import JSDOM.URLSearchParams
 import JavaScript.Web.Location
 
+
 import CAR.Types
 import Types
 
@@ -51,26 +52,45 @@ import qualified Debug.Trace as Debug
 mss :: Show a => a -> MisoString
 mss = ms . show
 
+
+
+getFileListingPath :: MisoString
+getFileListingPath  =
+    "/list-l"
+
+getAssignmentsPath :: MisoString
+getAssignmentsPath  =
+    "/data/assessor_assignments.json"
+
+
+cborFileName :: MisoString
+cborFileName =
+    "benchmarkY3test.cbor"
+
+getUsernameUrl :: MisoString
+getUsernameUrl = "/username"
+
+
+
 instance Eq Page where
     p1 == p2 = (pageId p1) == (pageId p2)
-
-
 
 data ListModel =
     ListModel { filenames :: [MisoString]
               , pages :: [Page]
+              , assessorSquids :: [QueryId]
+              , username :: Maybe UserId
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
   deriving (Eq, Show)
 
 
-emptyModel = ListModel {filenames = [], pages = [] }
-
+emptyModel = ListModel {filenames = [], pages = [], assessorSquids = [], username = Nothing }
 
 -- | Sum type for application events
 data Action
-  = SetListing FileListing
+  = SetListing FileListing [QueryId] (Maybe UserId)
   | ReportError MisoString
   | Initialize
   | LoadCbor JSString
@@ -86,7 +106,7 @@ type Model = ListModel
 main :: IO ()
 main = startApp App {..}
   where
-    initialAction =  LoadCbor "./data/tqa2.cbor"
+    initialAction =  LoadCbor ("./data/" <> cborFileName)
     model  = emptyModel -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
@@ -94,6 +114,13 @@ main = startApp App {..}
     subs   = []                   -- empty subscription list
     mountPoint = Nothing          -- mount point for application (Nothing defaults to 'body')
 
+
+getUserName :: IO (Maybe UserId)
+getUserName = do
+    username' <- fetchByteString $ getUsernameUrl
+    return $ case username' of
+      Right username -> Just $ decodeByteString username
+      Left _e -> Nothing
 
 
 
@@ -107,17 +134,36 @@ updateModel (LoadCbor filename) m = m <# do
       Right pages -> SetTqaPages pages
       Left e  -> ReportError $ mss e
 
-updateModel (SetTqaPages pages) _ =  ListModel { pages = pages, filenames = mempty}  <# return Initialize
+updateModel (SetTqaPages pages) _ =  ListModel { pages = pages, filenames = mempty, assessorSquids = mempty, username = Nothing}  <# return Initialize
 
 updateModel (Initialize) m = m <# do
-    lst <- fetchJson @FileListing getFileListingPath
---     now' <- getCurrentTime
-    return $ case lst of
-      Right byteStr -> SetListing byteStr
-      Left e  -> ReportError $ mss e
+    loc <- getWindowLocation >>= getSearch
+    params <- newURLSearchParams loc
+    maybeUserName <- get params ("username" :: MisoString)
 
-updateModel (SetListing FileListing{filenames = files, pathname = path}) m@ListModel{} = noEff $ (m {filenames = fmap ms files} :: ListModel)
-updateModel (SetListing _ ) m = noEff $ m
+    authenticatedUsername <- getUserName
+    let username = Debug.traceShowId $ case maybeUserName of
+                        Just _ -> maybeUserName
+                        Nothing -> authenticatedUsername
+    assessorData' <- fetchJson @AssessorAssignmentData getAssignmentsPath
+    case assessorData' of
+        Left e -> return $ ReportError $ mss e
+        Right assessorData -> do
+            let assessorSquids = L.nub
+                               $ L.concat [ squids
+                                          | AssessorAssignments{ user_id = assessor, squids = squids } <- assignments assessorData
+                                          , let Just username' = username
+                                          , assessor == username'
+                                          ]
+            lst <- fetchJson @FileListing getFileListingPath
+        --     now' <- getCurrentTime
+            return $ Debug.traceShow ("assessorSquids "<> show assessorSquids) $ case lst of
+              Right byteStr -> SetListing byteStr assessorSquids username
+              Left e  -> ReportError $ mss e
+
+updateModel (SetListing FileListing{filenames = files, pathname = path} assessorSquids username) m@ListModel{} =
+    noEff $ (m {filenames = fmap ms files, assessorSquids = assessorSquids, username = username} :: ListModel)
+updateModel (SetListing _ _ _ ) m = noEff $ m
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
@@ -125,12 +171,16 @@ updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 --     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
 
 
+data AssessorAssignmentData = AssessorAssignmentData {
+        assignments :: [AssessorAssignments]
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
-getFileListingPath :: MisoString
-getFileListingPath  =
-    "/list-l"
-
-
+data AssessorAssignments = AssessorAssignments {
+        user_id :: UserId,
+        squids :: [QueryId]
+    }
+  deriving (Eq, FromJSON, ToJSON, Generic, Show)
 
 data FileListing = FileListing {
         filenames :: [T.Text]
@@ -190,19 +240,24 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 
 -- ------------- Presentation ----------------------
 
-squid:: QueryId
-squid = QueryId "tqa2:L_0092"
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@ListModel{..} =
-    div_ []
-       [ h1_ [] [text $ "Run List"]
-       , ul_ [] $ fmap renderTopics  pages
-       ]
+    let selectedPages =
+            case assessorSquids of
+                []     -> pages
+                squids -> let pageMap =  M.fromList [(QueryId $ T.pack $ unpackPageId $ pageId page , page) | page <- pages]
+                          in catMaybes $ [ squid `M.lookup` pageMap | squid <- squids ]
+
+    in div_ []
+           [ h1_ [] [text $ (runListTitle username)]
+           , ul_ [] $ fmap renderTopics  selectedPages
+           ]
   where renderTopics page =
             li_ [] [ h2_ [] [text $ ms $ unpackPageName $ pageName page]
-                   , ul_ [] $ fmap (renderFile (pageId page) ) filenames
+                   , p_ [] [text $ ms $ unpackPageId $ pageId page]
+                   , ul_ [] $ (renderGold (pageId page)  : fmap (renderFile (pageId page) ) filenames)
                    ]
 
         renderFile :: PageId -> MisoString -> View Action
@@ -213,8 +268,21 @@ viewModel m@ListModel{..} =
                     a_ [href_ $ toAssessUrl fname (T.pack $ unpackPageId pageId) ] [text $ ms fname]
                   ]
               ]
+        renderGold :: PageId -> View Action
+        renderGold pageId =
+            li_ [] [
+                  p_ [] [
+                    a_ [href_ $ toGoldUrl (ms $ unpackPageId pageId) ] [text $ ("gold article"::MisoString)]
+                  ]
+              ]
         toAssessUrl f squid =
             ms $ "/assess.html?format=jsonl&q="<>f<>"&squid="<>squid
+        toGoldUrl squid =
+            ms $ "/gold.html?&cbor="<>cborFileName<>"&squid="<>squid
+
+        runListTitle :: Maybe UserId -> MisoString
+        runListTitle Nothing = "Topics and Runs for Assessment"
+        runListTitle (Just name) = "Topics and Runs for Assessment for "<> (ms $ name)
 viewModel ErrorMessageModel { .. }= viewErrorMessage $ ms errorMessage
 
 

@@ -71,9 +71,9 @@ emptyModel = Initialize
 
 -- | Sum type for application events
 data Action
-  = IncludePage PageId Bool
+  = Initial
   | LoadCbor JSString
-  | SetTqaPages [Page]
+  | SetTqaPages [Page] (Maybe PageId)
   | ReportError MisoString
   deriving (Show)
 
@@ -86,7 +86,7 @@ type Model = TqaModel
 main :: IO ()
 main = startApp App {..}
   where
-    initialAction = LoadCbor "./data/tqa2.cbor"  -- -- initial action to be executed on application load
+    initialAction = Initial -- LoadCbor "./data/tqa2.cbor"  -- -- initial action to be executed on application load
     model  = emptyModel -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
@@ -97,17 +97,40 @@ main = startApp App {..}
 -- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
 
+updateModel Initial m = m <# do
+    loc <- getWindowLocation >>= getSearch
+    params <- newURLSearchParams loc
+    maybeCbor <- get params ("cbor" :: MisoString)
+    let cborFile = fromMaybe "tqa2.cbor" maybeCbor
+    return $ LoadCbor $ "./data/"<>cborFile
+
 updateModel (LoadCbor filename) m = m <# do
+    loc <- getWindowLocation >>= getSearch
+    params <- newURLSearchParams loc
+    maybeSquid <- get params ("squid" :: MisoString)
+    let msquid :: Maybe PageId
+        msquid = Debug.traceShow ("maybeSquid = "<> show maybeSquid) $ fmap (packPageId . fromMisoString) maybeSquid
     cbor <- fetchCbor filename
             :: IO (Either FetchJSONError [Page])
     return $ case cbor of
-      Right pages -> SetTqaPages pages
+      Right pages -> SetTqaPages pages msquid
       Left e  -> ReportError $ mss e
 
-updateModel (SetTqaPages pages) _ =
-    let page:_ = pages
-    in noEff $ TqaModel{pages= pages, page= page} -- todo select page
+updateModel (SetTqaPages pages maybeSquid) _ =
+    noEff $ TqaModel{pages= pages, page= selectPage pages} -- todo select page
+  where selectPage :: [Page] -> Page
+        selectPage pages =
+            Debug.traceShow ("squid = "<> show maybeSquid) $ case maybeSquid of
+                Nothing -> let p : _ = pages  in Debug.traceShow (T.pack "no squid given") (p)
+                Just squid ->
+                    case [ p | p <- pages, pageId p == squid] of
+                            []  -> let p':_ = pages in Debug.traceShow ("squid "<> (show squid) <> " not in cbor") (p')
+                            (p:_) -> p
+
+
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
+
+
 
 fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
 fetchCbor url = do
@@ -156,8 +179,7 @@ encodeByteString = Data.Text.Encoding.encodeUtf8
 viewModel :: Model -> View Action
 viewModel m@TqaModel{..} =
     div_ [ ]
-       [ h1_ [] [text $ "Gold Article"]
-       , ol_ [] $ fmap renderPage [page]
+       [ renderPage page
        ]
 
   where

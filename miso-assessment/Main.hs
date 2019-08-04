@@ -155,6 +155,20 @@ introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION"
 -- | Type synonym for an application model
 type Model = AssessmentModel
 
+toGoldUrl :: MisoString -> MisoString
+toGoldUrl squid =
+    "/gold.html?&cbor=benchmarkY3test.cbor&squid="<>squid
+
+toAllRunListUrl ::  MisoString
+toAllRunListUrl =
+    "/list-l.html"
+
+toAssessorRunListUrl :: UserId ->  MisoString
+toAssessorRunListUrl userId =
+    ms $ "/list-assessor-"<>userId<>".html"
+
+
+
 
 -- | Entry point for a miso application
 main :: IO ()
@@ -267,8 +281,8 @@ getUserName m =
 updateModel :: Action -> Model -> Effect Action Model
 
 updateModel (Initialize) m@LoadingPageModel{} = m <# do
-    userresponse <- fetchByteString $ getUsernameUrl
-    return $ case userresponse of
+    username' <- fetchByteString $ getUsernameUrl
+    return $ case username' of
       Right username -> FetchedAuthUsername $ decodeByteString username
       Left e -> ReportError $ ms $ show e
 
@@ -637,6 +651,9 @@ viewModel m@AssessmentModel{
        [ h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
+       , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text "Gold Article"]]
+       , p_ [] [a_ [href_ $ toAllRunListUrl] [text "Back to Start"]]
+       , p_ [] [a_ [href_ $ toAssessorRunListUrl username] [text "Back to Assessor's List"]]
        , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "btn-sm", onClick ClearAllAssessments] [text "Clear All"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
@@ -654,15 +671,7 @@ viewModel m@AssessmentModel{
        ]
   where
         createInfoPanel :: AssessmentModel -> [View Action]
-        createInfoPanel AssessmentModel{
---             page= AssessmentPage{..}
---             state = AssessmentState { transitionLabelState = transitionState'
---                                       , nonrelevantState = hiddenState'
---                                       , notesState = notesState'
---                                       , facetState = facetState'
---                                       }
---             , username = username
-          } =
+        createInfoPanel AssessmentModel{ } =
             [ p_ [] [text "Topic: ", text $ ms $ apTitle]
             , p_ [] [text "You logged on as user: ", text $ ms $ username]
             , p_ [] [text "Remaining assessments:"]

@@ -13,13 +13,13 @@
     function logout() {
           $.ajax({
               async: false,
-              url: '/list-l.html',
+              url: '/logout-success.html',
               type: 'GET',
               username: 'logout'
           });
         setTimeout(function () {
             window.location.href = "/logout-success.html";
-        }, 200);
+        }, 1000);
     }
 
     </script>

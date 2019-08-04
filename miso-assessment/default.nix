@@ -99,6 +99,7 @@ let
       EOF
       cp ${./html/assess.css} $out/assess.css
       cp ${app}/bin/app.jsexe/runmain.js $out/
+      cp ${./html/index.html} $out/index.html
       cp ${./html/assess.html} $out/assess.html
       cp ${./html/list.html} $out/list.html
       cp ${./html/list-l.html} $out/list-l.html
@@ -106,6 +107,9 @@ let
       cp ${./html/tqa.html} $out/tqa.html
       cp ${./html/gold.html} $out/gold.html
       cp ${./html/logout.html} $out/logout.html
+      cp ${./html/logout.html} $out/logout1.html
+      cp ${./html/logout.html} $out/logout2.html
+      cp ${./html/logout.html} $out/logout3.html
       cp ${./html/logout-success.html} $out/logout-success.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
