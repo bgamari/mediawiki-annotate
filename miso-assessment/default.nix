@@ -87,7 +87,12 @@ let
       cp bin/list-l.jsexe/all.min.js $out/list-l.js
       cp bin/minimal.jsexe/all.js $out/minimal.js
       cp bin/tqa-new-heading.jsexe/all.js $out/tqa-new-heading.js
+      cp bin/gold-article.jsexe/all.js $out/gold-article.js
       cat >> $out/tqa-new-heading.js <<EOF
+      function h\$hs_text_short_is_valid_utf8(a, b, c) {
+        return 0;
+      }
+      cat >> $out/gold-article.js <<EOF
       function h\$hs_text_short_is_valid_utf8(a, b, c) {
         return 0;
       }
@@ -99,6 +104,7 @@ let
       cp ${./html/list-l.html} $out/list-l.html
       cp ${./html/minimal.html} $out/minimal.html
       cp ${./html/tqa.html} $out/tqa.html
+      cp ${./html/gold.html} $out/gold.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data
