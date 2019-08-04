@@ -105,6 +105,8 @@ let
       cp ${./html/minimal.html} $out/minimal.html
       cp ${./html/tqa.html} $out/tqa.html
       cp ${./html/gold.html} $out/gold.html
+      cp ${./html/logout.html} $out/logout.html
+      cp ${./html/logout-success.html} $out/logout-success.html
       cp ${./html/inquery-en.txt} $out/inquery-en.txt
       cp -R ${./data} $out/data
       chmod 755 $out/data

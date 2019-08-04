@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="cache-control" content="max-age=0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="-1">
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 11:00:00 GMT">
+    <meta http-equiv="pragma" content="no-cache">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" language="javascript"></script>
+    <script language="javascript">
+    function logout() {
+          $.ajax({
+              async: false,
+              url: '/list-l.html',
+              type: 'GET',
+              username: 'logout'
+          });
+        setTimeout(function () {
+            window.location.href = "/logout-success.html";
+        }, 200);
+    }
+
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/assess.css">
+  </head>
+  <body onload="logout();">
+  <h1>Logging out user ... stay tuned for login screen.</h1>
+  </body>
+</html>
