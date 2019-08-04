@@ -21,6 +21,7 @@ import JavaScript.Web.XMLHttpRequest
 import Control.Exception
 import Control.Monad
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy
 -- import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
@@ -32,6 +33,10 @@ import Data.Char
 import Data.String
 import Language.Porter
 import qualified System.FilePath
+
+import qualified Codec.Serialise as CBOR
+import qualified CAR.Types.CborList as CBOR
+import qualified CAR.Types.Files as CAR
 
 import qualified Data.Text as T
 
@@ -46,16 +51,21 @@ import qualified Debug.Trace as Debug
 mss :: Show a => a -> MisoString
 mss = ms . show
 
+instance Eq Page where
+    p1 == p2 = (pageId p1) == (pageId p2)
+
+
 
 data ListModel =
     ListModel { filenames :: [MisoString]
+              , pages :: [Page]
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
   deriving (Eq, Show)
 
 
-emptyModel = ListModel {filenames = [] }
+emptyModel = ListModel {filenames = [], pages = [] }
 
 
 -- | Sum type for application events
@@ -63,6 +73,8 @@ data Action
   = SetListing FileListing
   | ReportError MisoString
   | Initialize
+  | LoadCbor JSString
+  | SetTqaPages [Page]
   deriving (Show)
 
 
@@ -74,7 +86,7 @@ type Model = ListModel
 main :: IO ()
 main = startApp App {..}
   where
-    initialAction = Initialize -- FetchAssessmentPage "water-distribution" -- initial action to be executed on application load
+    initialAction =  LoadCbor "./data/tqa2.cbor"
     model  = emptyModel -- initial model
     update = updateModel          -- update function
     view   = viewModel            -- view function
@@ -88,6 +100,15 @@ main = startApp App {..}
 -- | Updates model, optionally introduces side effects
 updateModel :: Action -> Model -> Effect Action Model
 
+updateModel (LoadCbor filename) m = m <# do
+    cbor <- fetchCbor filename
+            :: IO (Either FetchJSONError [Page])
+    return $ case cbor of
+      Right pages -> SetTqaPages pages
+      Left e  -> ReportError $ mss e
+
+updateModel (SetTqaPages pages) _ =  ListModel { pages = pages, filenames = mempty}  <# return Initialize
+
 updateModel (Initialize) m = m <# do
     lst <- fetchJson @FileListing getFileListingPath
 --     now' <- getCurrentTime
@@ -95,7 +116,8 @@ updateModel (Initialize) m = m <# do
       Right byteStr -> SetListing byteStr
       Left e  -> ReportError $ mss e
 
-updateModel (SetListing FileListing{filenames = files, pathname = path}) m = noEff $ ListModel {filenames = fmap ms files}
+updateModel (SetListing FileListing{filenames = files, pathname = path}) m@ListModel{} = noEff $ (m {filenames = fmap ms files} :: ListModel)
+updateModel (SetListing _ ) m = noEff $ m
 
 updateModel (ReportError e) m = noEff $ ErrorMessageModel e
 
@@ -122,13 +144,6 @@ data FetchJSONError = XHRFailed XHRError
                     | BadResponse { badRespStatus :: Int, badRespContents :: Maybe BS.ByteString }
                     deriving (Eq, Show)
 
---fetchJsonL :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError a)  -- todo Either FetchJSONError [a]
---fetchJsonL url = do
---    result <- fetchByteString url
---    case result of
---        Left err          -> pure $ Left err
---        Right byteStr -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict byteStr    -- todo: decode multiple lines
---
 
 fetchJson :: forall a. FromJSON a => JSString -> IO (Either FetchJSONError a)
 fetchJson url = do
@@ -136,6 +151,17 @@ fetchJson url = do
     case result of
         Left err          -> pure $ Left err
         Right byteStr -> pure $ either (Left . InvalidJSON) Right $ eitherDecodeStrict byteStr
+
+
+fetchCbor :: forall a. CBOR.Serialise a => JSString -> IO (Either FetchJSONError [a])
+fetchCbor url = do
+    result <- fetchByteString url
+    case result of
+        Left err        -> pure $ Left err
+        Right byteStr   -> let hdr ::  CAR.Header
+                               (hdr, pages) = CBOR.decodeCborList $ Data.ByteString.Lazy.fromStrict byteStr
+                           in pure $ Right pages
+
 
 
 fetchByteString:: JSString -> IO (Either FetchJSONError BS.ByteString)
@@ -171,15 +197,20 @@ squid = QueryId "tqa2:L_0092"
 viewModel :: Model -> View Action
 viewModel m@ListModel{..} =
     div_ []
-       [ h1_ [] [text $ "Topic List"]
-       , ul_ [] $ fmap renderFile filenames
+       [ h1_ [] [text $ "Run List"]
+       , ul_ [] $ fmap renderTopics  pages
        ]
-  where renderFile :: MisoString -> View Action
-        renderFile f =
+  where renderTopics page =
+            li_ [] [ h2_ [] [text $ ms $ unpackPageName $ pageName page]
+                   , ul_ [] $ fmap (renderFile (pageId page) ) filenames
+                   ]
+
+        renderFile :: PageId -> MisoString -> View Action
+        renderFile pageId f =
             let fname = T.pack $ System.FilePath.dropExtension $ fromMisoString f
             in li_ [] [
                   p_ [] [
-                    a_ [href_ $ toAssessUrl fname (unQueryId squid) ] [text $ ms fname]
+                    a_ [href_ $ toAssessUrl fname (T.pack $ unpackPageId pageId) ] [text $ ms fname]
                   ]
               ]
         toAssessUrl f squid =

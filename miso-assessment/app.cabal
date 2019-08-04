@@ -71,6 +71,7 @@ executable list-l
                        aeson-pretty,
                        app,
                        jsaddle-dom,
+                       serialise,
                        text,
                        hashable,
                        containers,
