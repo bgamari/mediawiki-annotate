@@ -129,7 +129,6 @@ data Action
   | SaveAssessments
   | DisplayAssessments
   | ClearAssessments
-  | ClearAllAssessments
   | LoadStopWordList BS.ByteString
   | FetchedAuthUsername T.Text
   | LoadAssessmentsFromLocalStorage
@@ -485,10 +484,6 @@ updateModel ClearAssessments m@AssessmentModel{ page=page, config = DisplayConfi
     clearLocalModel username (apSquid page)
     return $ SetAssessmentPage page now' viewOnly emptyAssessmentState
 
-updateModel ClearAllAssessments m@AssessmentModel{ page=page, config = DisplayConfig {viewOnly=viewOnly}} = m <# do
-    now' <- getCurrentTime
-    clearLocalStorage
-    return $ SetAssessmentPage page now' viewOnly emptyAssessmentState
 
 
 updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displayAssessments=display}} =
@@ -647,15 +642,15 @@ viewModel m@AssessmentModel{
        , p_ [] [text "Run: ", text $ ms apRunId]
        , ol_ [] $ paragraphsViewOnly apParagraphs
        ]
+
     else div_ []
-       [ h1_ [] [text $ ms apTitle]
+       [ p_ [] [a_[href_ "/index.html"][text $ "To Start Page..."]]
+       , h1_ [] [text $ ms apTitle]
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
-       , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text "Gold Article"]]
-       , p_ [] [a_ [href_ $ "/index.html"] [text "Back to Start"]]
-       , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "Back to Assessor's List"]]
-       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
-       , button_ [class_ "btn-sm", onClick ClearAllAssessments] [text "Clear All"]
+       , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text " --> Gold Article <-- "]]
+       , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "--> Back Assessment List <-- "]]
+--       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
        , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
                 text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache

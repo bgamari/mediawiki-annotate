@@ -88,6 +88,7 @@ let
       cp bin/minimal.jsexe/all.js $out/minimal.js
       cp bin/tqa-new-heading.jsexe/all.js $out/tqa-new-heading.js
       cp bin/gold-article.jsexe/all.js $out/gold-article.js
+      cp bin/admin.jsexe/all.js $out/admin.js
       cat >> $out/tqa-new-heading.js <<EOF
       function h\$hs_text_short_is_valid_utf8(a, b, c) {
         return 0;
@@ -106,6 +107,7 @@ let
       cp ${./html/minimal.html} $out/minimal.html
       cp ${./html/tqa.html} $out/tqa.html
       cp ${./html/gold.html} $out/gold.html
+      cp ${./html/admin.html} $out/admin.html
       cp ${./html/logout.html} $out/logout.html
       cp ${./html/logout.html} $out/logout1.html
       cp ${./html/logout.html} $out/logout2.html

@@ -143,6 +143,28 @@ executable minimal
   default-language:    Haskell2010
 --  ghc-options:         -Wall -Werror
 
+
+executable admin
+  main-is:             Admin.hs
+  build-depends:       base,
+                       bytestring,
+                       ghcjs-base,
+                       miso,
+                       aeson,
+                       aeson-pretty,
+                       app,
+                       jsaddle-dom,
+                       text,
+                       hashable,
+                       containers,
+                       time,
+                       filepath,
+                       porter>=0.1.0.2,
+                       miso-types,
+                       trec-car-types
+  default-language:    Haskell2010
+--  ghc-options:         -Wall -Werror
+
 --executable tst
 --  main-is:             Test.hs
 --  build-depends:       base,
