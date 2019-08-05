@@ -1,13 +1,54 @@
 {
   "assignments": [
-    {"user_id":  "a",
-      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0257"]
+    {"user_id":  "judge1",
+      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0004", "tqa2:L_0006"]
     }
-    , {"user_id":  "x",
-      "squids" : ["tqa2:L_0006", "tqa2:L_0345", "tqa2:L_0257"]
+    , {"user_id":  "judge2",
+      "squids" : ["tqa2:L_0020","tqa2:L_0521","tqa2:L_0474","tqa2:L_0262"]
     }
-    , {"user_id":  "laura",
-      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0257"]
+  , {"user_id":  "judge3",
+      "squids" : ["tqa2:L_0432","tqa2:L_0260","tqa2:L_0261","tqa2:L_0199"]
+    }
+  , {"user_id":  "judge4",
+      "squids" : ["tqa2:L_0384","tqa2:L_0385","tqa2:L_0502","tqa2:L_0402","tqa2:L_0662","tqa2:L_0398"]
+    }
+  , {"user_id":  "judge5",
+      "squids" : ["tqa2:L_0040","tqa2:L_0052","tqa2:L_0264","tqa2:L_0311"]
+    }
+  , {"user_id":  "judge6",
+      "squids" : ["tqa2:L_0074","tqa2:L_0109","tqa2:L_0043","tqa2:L_0257"]
+    }
+  , {"user_id":  "nist",
+      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0004", "tqa2:L_0006"
+        ,  "tqa2:L_0020","tqa2:L_0521","tqa2:L_0474","tqa2:L_0262"
+        , "tqa2:L_0432","tqa2:L_0260","tqa2:L_0261","tqa2:L_0199"
+        , "tqa2:L_0384","tqa2:L_0385","tqa2:L_0502","tqa2:L_0402","tqa2:L_0662","tqa2:L_0398"
+        , "tqa2:L_0040","tqa2:L_0052","tqa2:L_0264","tqa2:L_0311"
+        ,"tqa2:L_0074","tqa2:L_0109","tqa2:L_0043","tqa2:L_0257"]
+    }
+  , {"user_id":  "laura",
+      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0004", "tqa2:L_0006"
+        ,  "tqa2:L_0020","tqa2:L_0521","tqa2:L_0474","tqa2:L_0262"
+        , "tqa2:L_0432","tqa2:L_0260","tqa2:L_0261","tqa2:L_0199"
+        , "tqa2:L_0384","tqa2:L_0385","tqa2:L_0502","tqa2:L_0402","tqa2:L_0662","tqa2:L_0398"
+        , "tqa2:L_0040","tqa2:L_0052","tqa2:L_0264","tqa2:L_0311"
+        ,"tqa2:L_0074","tqa2:L_0109","tqa2:L_0043","tqa2:L_0257"]
+    }
+  , {"user_id":  "jeff",
+      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0004", "tqa2:L_0006"
+        ,  "tqa2:L_0020","tqa2:L_0521","tqa2:L_0474","tqa2:L_0262"
+        , "tqa2:L_0432","tqa2:L_0260","tqa2:L_0261","tqa2:L_0199"
+        , "tqa2:L_0384","tqa2:L_0385","tqa2:L_0502","tqa2:L_0402","tqa2:L_0662","tqa2:L_0398"
+        , "tqa2:L_0040","tqa2:L_0052","tqa2:L_0264","tqa2:L_0311"
+        ,"tqa2:L_0074","tqa2:L_0109","tqa2:L_0043","tqa2:L_0257"]
+    }
+  , {"user_id":  "john",
+      "squids" : ["tqa2:L_0002", "tqa2:L_0003", "tqa2:L_0004", "tqa2:L_0006"
+        ,  "tqa2:L_0020","tqa2:L_0521","tqa2:L_0474","tqa2:L_0262"
+        , "tqa2:L_0432","tqa2:L_0260","tqa2:L_0261","tqa2:L_0199"
+        , "tqa2:L_0384","tqa2:L_0385","tqa2:L_0502","tqa2:L_0402","tqa2:L_0662","tqa2:L_0398"
+        , "tqa2:L_0040","tqa2:L_0052","tqa2:L_0264","tqa2:L_0311"
+        ,"tqa2:L_0074","tqa2:L_0109","tqa2:L_0043","tqa2:L_0257"]
     }
   ]
 }

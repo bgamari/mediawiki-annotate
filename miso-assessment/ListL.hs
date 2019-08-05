@@ -241,6 +241,7 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 -- ------------- Presentation ----------------------
 
 
+
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@ListModel{..} =
@@ -251,7 +252,8 @@ viewModel m@ListModel{..} =
                           in catMaybes $ [ squid `M.lookup` pageMap | squid <- squids ]
 
     in div_ []
-           [ h1_ [] [text $ (runListTitle username)]
+           [ p_ [] [a_[href_ "/index.html"][text $ "To Start Page..."]]
+           , h1_ [] [text $ (runListTitle username)]
            , ul_ [] $ fmap renderTopics  selectedPages
            ]
   where renderTopics page =

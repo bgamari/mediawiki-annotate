@@ -161,11 +161,11 @@ toGoldUrl squid =
 
 toAllRunListUrl ::  MisoString
 toAllRunListUrl =
-    "/list-l.html"
+    "/list-l.html?username=all"
 
-toAssessorRunListUrl :: UserId ->  MisoString
-toAssessorRunListUrl userId =
-    ms $ "/list-assessor-"<>userId<>".html"
+toAssessorRunListUrl :: MisoString
+toAssessorRunListUrl =
+    "/list-l.html"
 
 
 
@@ -652,8 +652,8 @@ viewModel m@AssessmentModel{
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
        , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text "Gold Article"]]
-       , p_ [] [a_ [href_ $ toAllRunListUrl] [text "Back to Start"]]
-       , p_ [] [a_ [href_ $ toAssessorRunListUrl username] [text "Back to Assessor's List"]]
+       , p_ [] [a_ [href_ $ "/index.html"] [text "Back to Start"]]
+       , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "Back to Assessor's List"]]
        , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "btn-sm", onClick ClearAllAssessments] [text "Clear All"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]

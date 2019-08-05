@@ -185,7 +185,7 @@ viewModel m@TqaModel{..} =
   where
         renderPage :: Page -> View Action
         renderPage Page{..} =
-            liKeyed_  (Key $ ms $ unpackPageId pageId) []
+            div_ []
                 ([ h1_ [][text $ ms $ unpackPageName pageName]
                  , p_ [][text $ ms $ unpackPageId pageId]
                  ] <>
