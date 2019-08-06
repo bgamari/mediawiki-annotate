@@ -24,6 +24,7 @@ import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.List as L
+import qualified Data.List.Split as L
 import Data.Maybe
 import Data.Time
 import Data.Char
@@ -42,6 +43,8 @@ import qualified Debug.Trace as Debug
 mss :: Show a => a -> MisoString
 mss = ms . show
 
+version:: MisoString
+version = "2019-08-06 15:00"
 
 prettyLabel :: AssessmentLabel -> MisoString
 prettyLabel MustLabel = "Must"
@@ -133,6 +136,8 @@ data Action
   | FetchedAuthUsername T.Text
   | LoadAssessmentsFromLocalStorage
   | SetState AssessmentState
+  | PasteJSON MisoString
+  | SaveLocalModel UserId QueryId
   deriving (Show)
 
 data StorageTag = LabelTag | FacetTag | NotesTag | HiddenTag | TransitionTag
@@ -400,8 +405,9 @@ updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
 
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state} =  newModel <# do
-    saveLocalState LabelTag userId queryId paraId label m
-    return Noop
+--    saveLocalState LabelTag userId queryId paraId label m
+--    return Noop
+    return $ SaveLocalModel userId queryId
   where newModel =
             let key = (AssessmentKey queryId paraId)
                 facetState' :: [AnnotationValue FacetValue]
@@ -419,8 +425,9 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
 
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state, page=AssessmentPage{apQueryFacets =facetList}} = newModel <# do
-    saveLocalState FacetTag userId queryId paraId headingIdStr m
-    return Noop
+--    saveLocalState FacetTag userId queryId paraId headingIdStr m
+--    return Noop
+    return $ SaveLocalModel userId queryId
   where newModel =
             let key = (AssessmentKey queryId paraId)
                 facets' :: [AssessmentFacet]
@@ -440,16 +447,18 @@ updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {sta
 
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalState NotesTag userId queryId paraId txt m
-    return Noop
+--    saveLocalState NotesTag userId queryId paraId txt m
+--    return Noop
+    return $ SaveLocalModel userId queryId
   where newModel =
             let value = [ wrapValue m (T.pack $ fromMisoString txt)]
                 notesState' = M.insert (AssessmentKey queryId paraId) value notesState
             in m {state = state{notesState = notesState'}}
 
 updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{nonrelevantState=hiddenState}} =  newModel <# do
-    saveLocalState HiddenTag userId queryId paraId newState  m
-    return Noop
+--    saveLocalState HiddenTag userId queryId paraId newState  m
+--    return Noop
+    return $ SaveLocalModel userId queryId
   where key =  (AssessmentKey queryId paraId)
         oldState = isJust $ key `M.lookup` hiddenState
         newState = not oldState
@@ -465,6 +474,11 @@ updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@Ass
                 transitionLabelState' = M.insert (AssessmentTransitionKey queryId paraId1 paraId2) value transitionLabelState
             in m {state = state{transitionLabelState = transitionLabelState'}}
 
+updateModel (SaveLocalModel userId queryId) m@AssessmentModel{} = m <# do
+    saveLocalModel userId queryId m
+    return Noop
+
+updateModel (SaveLocalModel _userId _queryId) m = noEff m
 
 updateModel Noop m = noEff m
 
@@ -493,10 +507,16 @@ updateModel DisplayAssessments m@AssessmentModel{ config=c@DisplayConfig {displa
                       }
               }
 
+
+updateModel (PasteJSON val) m@AssessmentModel{state = s} = noEff $ m'
+  where m' = Debug.trace "PasteJSON" $ m { state = s'}
+        s' =
+            case (Aeson.decodeStrict $ encodeByteString $ T.pack $ fromMisoString val) of
+              Just SavedAssessments{savedData=savedData} -> savedData
+              Nothing -> s -- old Status
+
 updateModel x m = m <# do
     return $ ReportError $ ms ("Unhandled case for updateModel "<> show x <> " " <> show m)
-
-
 
 
 storageKeyQuery :: UserId -> QueryId -> MisoString
@@ -612,6 +632,9 @@ fetchByteString url = do
 decodeByteString :: BS.ByteString -> T.Text
 decodeByteString = Data.Text.Encoding.decodeUtf8
 
+encodeByteString :: T.Text -> BS.ByteString
+encodeByteString = Data.Text.Encoding.encodeUtf8
+
 decodeMisoByteString :: BS.ByteString -> MisoString
 decodeMisoByteString = Miso.String.toMisoString
 
@@ -649,10 +672,13 @@ viewModel m@AssessmentModel{
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
        , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text " --> Gold Article <-- "]]
-       , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "--> Back Assessment List <-- "]]
+       , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "--> Back to Assessment List <-- "]]
 --       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
-       , textarea_ [readonly_ True, class_ ("assessment-display "<> hiddenDisplay), id_ "assessment-display"] [
+       , textarea_ [class_ ("assessment-display "<> hiddenDisplay)
+                   , id_ "assessment-display"
+                   , onChange PasteJSON
+                   ] [
                 text $  ms $  AesonPretty.encodePretty $  makeSavedAssessments m timeCache
          ]
        , div_ [id_ "toolbar-container"][
@@ -672,24 +698,56 @@ viewModel m@AssessmentModel{
             , p_ [] [text "Remaining assessments:"]
             , ul_ [] [
                 li_ [] [text $ "Facets: " <> (ms $ show numMissingFacetAsessments )]
-                , li_ [] [text $ "Transitions: " <> (ms $ show numMissingTransitionAsessments) ]
+                , li_ [] [text $ "Transitions: " <> (ms $ show numMissingTransitionAssessments) ]
               ]
+            , p_ [] [text $ "Interface update: "<> version]
             ]
-          where totalParas = S.fromList $ fmap paraId apParagraphs
-                visParas =
-                    (totalParas `S.difference`)
-                    $ S.fromList
-                    $ [p | (AssessmentKey {paragraphId=p}, _ ) <- M.toList hiddenState']
-                facetAssessments =
-                    S.map (\AssessmentKey {paragraphId=p}-> p) $ M.keysSet facetState'
-                visTransitionAssessments =
-                    S.filter (\(p1,p2)-> p1 `S.member` visParas && p2 `S.member` visParas)
-                    $ S.map (\AssessmentTransitionKey {paragraphId1=p1, paragraphId2=p2} -> (p1,p2))
-                    $ M.keysSet transitionState'
-                numMissingFacetAsessments = length $ visParas `S.difference` facetAssessments
-                numMissingTransitionAsessments =
-                    let numTransitions = (length visParas)-1
-                    in numTransitions - (length visTransitionAssessments)
+          where visibleParas =  [ paraId
+                                | Paragraph{paraId = paraId}  <- apParagraphs
+                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` hiddenState'
+                                , hiddenEntry == Nothing
+--                                , hiddenEntry == Nothing || value (fromJust hiddenEntry) == UnsetLabel
+                                ]
+--                queryId = apSquid
+
+                numMissingFacetAsessments :: Int
+                numMissingFacetAsessments = length
+                                          $ [ paraId
+                                            | paraId  <- L.nub visibleParas
+                                            , not $ AssessmentKey{paragraphId = paraId, queryId = queryId} `S.member` M.keysSet facetState'
+                                            ]
+                numMissingTransitionAssessments :: Int
+                numMissingTransitionAssessments = length
+                                                $ [x
+                                                | x@[paraId1, paraId2] <- L.nub $ L.chunksOf 2 visibleParas
+                                                , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = queryId} `M.lookup` transitionState')
+                                                , (transitionEntry == Nothing)  || (value (fromJust transitionEntry) == UnsetTransition)
+                                                ]
+
+--                isTransitionAssessed :: ParagraphId -> ParagraphId -> Bool
+--                isTransitionAssessed para1 para2 = not $ L.null
+--                                                [x
+--                                                | x@AssessmentTransitionKey{paragraphId1=paraId1', paragraphId2=paraId2'} <- M.keysSet transitionState'
+--                                                , paraId1 == paraId1'
+--                                                , paraId2 == paraId2'
+--                                                ]
+
+
+--          where totalParas = S.fromList $ fmap paraId apParagraphs
+--                visParas =
+--                    (totalParas `S.difference`)
+--                    $ S.fromList
+--                    $ [p | (AssessmentKey {paragraphId=p}, _ ) <- M.toList hiddenState']
+--                facetAssessments =
+--                    S.map (\AssessmentKey {paragraphId=p}-> p) $ M.keysSet facetState'
+--                visTransitionAssessments =
+--                    S.filter (\(p1,p2)-> p1 `S.member` visParas && p2 `S.member` visParas)
+--                    $ S.map (\AssessmentTransitionKey {paragraphId1=p1, paragraphId2=p2} -> (p1,p2))
+--                    $ M.keysSet transitionState'
+--                numMissingFacetAsessments = length $ visParas `S.difference` facetAssessments
+--                numMissingTransitionAsessments =
+--                    let numTransitions = (length visParas)-1
+--                    in numTransitions - (length visTransitionAssessments)
         createInfoPanel _ = []
 
         paragraphsAndTransitions :: [Paragraph] -> [View Action]
