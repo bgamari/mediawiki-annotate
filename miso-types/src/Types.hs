@@ -208,14 +208,19 @@ instance ToJSON AssessmentState where
 
 mergeAssessmentState :: AssessmentState -> AssessmentState -> AssessmentState
 mergeAssessmentState newState oldState =
-    AssessmentState { notesState = M.union (notesState newState) (notesState oldState)
-                    , facetState = M.union (facetState newState) (facetState oldState)
-                    , transitionLabelState = M.union (transitionLabelState newState) (transitionLabelState oldState)
+    AssessmentState { notesState = M.unionWith unionWithTimestamp (notesState newState) (notesState oldState)
+                    , facetState = M.unionWith unionWithTimestamp (facetState newState) (facetState oldState)
+                    , transitionLabelState = M.unionWith unionWithTimestamp (transitionLabelState newState) (transitionLabelState oldState)
                     , nonrelevantState = nonrelevantState newState --  we merge the oldstate into nonrelevantState2
                     , nonrelevantState2 = mergeNonrelevantState (nonrelevantState2 newState) (nonrelevantState2 oldState) (nonrelevantState oldState)
                     , assessorData = M.unionWith mergeAssessorData (assessorData newState) (assessorData oldState)
                     }
-  where mergeAssessorData :: (AnnotationValue ()) -> (AnnotationValue ()) -> (AnnotationValue ())
+  where unionWithTimestamp :: AnnotationValue a -> AnnotationValue a -> AnnotationValue a
+        unionWithTimestamp v1@AnnotationValue{timeStamp = time1} v2@AnnotationValue{timestamp = time2} =
+            if time1 < time2 then v2 else v1
+
+
+        mergeAssessorData :: (AnnotationValue ()) -> (AnnotationValue ()) -> (AnnotationValue ())
         mergeAssessorData av@AnnotationValue{runIds=val1} AnnotationValue{runIds=val2} =
             av {runIds = nub (val1 <> val2)}
         convertNonrelevantState ::    M.Map AssessmentKey (AnnotationValue ())  ->  (M.Map AssessmentKey (AnnotationValue Bool))
@@ -239,10 +244,10 @@ mergeAssessmentState newState oldState =
                               -> Maybe (M.Map AssessmentKey (AnnotationValue Bool))
                               ->  M.Map AssessmentKey (AnnotationValue ())
                               -> Maybe (M.Map AssessmentKey (AnnotationValue Bool))
-        mergeNonrelevantState new2 (Just old2) _ = Just $ M.union (readOrInitializeNonrelevantState new2) old2  -- ignore old values, because they were already converted
+        mergeNonrelevantState new2 (Just old2) _ = Just $ M.unionWith unionWithTimestamp (readOrInitializeNonrelevantState new2) old2  -- ignore old values, because they were already converted
         mergeNonrelevantState new2 Nothing old | null old  = new2
         mergeNonrelevantState new2 Nothing old =
-            Just $ M.union (readOrInitializeNonrelevantState new2) (convertNonrelevantState old)
+            Just $ M.unionWith unionWithTimestamp (readOrInitializeNonrelevantState new2) (convertNonrelevantState old)
 
 
 data AnnotationValue a = AnnotationValue {
@@ -266,6 +271,10 @@ unwrapAnnotationValue (AnnotationValue {value = v}) = v
 unwrapMaybeAnnotationValue :: a -> Maybe (AnnotationValue a) -> a
 unwrapMaybeAnnotationValue _defVal (Just (AnnotationValue {value = v})) = v
 unwrapMaybeAnnotationValue defVal Nothing = defVal
+
+unwrapMaybeAnnotationValueList :: [a] -> Maybe [(AnnotationValue a)] -> [a]
+unwrapMaybeAnnotationValueList _defVal (Just annotationValues) = [v | (AnnotationValue {value = v}) <- annotationValues]
+unwrapMaybeAnnotationValueList defVal Nothing = defVal
 
 
 data FacetValue = FacetValue {

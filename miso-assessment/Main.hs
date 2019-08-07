@@ -24,7 +24,7 @@ import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.List as L
-import qualified Data.List.Split as L
+--import qualified Data.List.Split as L
 import Data.Maybe
 import Data.Time
 import Data.Char
@@ -44,7 +44,7 @@ mss :: Show a => a -> MisoString
 mss = ms . show
 
 version:: MisoString
-version = "2019-08-06 15:00"
+version = "2019-08-06 22:00"
 
 prettyLabel :: AssessmentLabel -> MisoString
 prettyLabel MustLabel = "Must"
@@ -156,6 +156,11 @@ introFacet :: AssessmentFacet
 introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION")
                                , apHeadingId=packHeadingId "INTRODUCTION"
                                }
+
+defaultFacetValue :: FacetValue
+defaultFacetValue = FacetValue {facet = noneFacet, relevance = UnsetLabel}
+defaultFacetValues :: [FacetValue]
+defaultFacetValues = [defaultFacetValue]
 -- | Type synonym for an application model
 type Model = AssessmentModel
 
@@ -412,16 +417,17 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
             let key = (AssessmentKey queryId paraId)
                 facetState' :: [AnnotationValue FacetValue]
                 facetState' =
-                    case key `M.lookup` (facetState state) of
-                        Nothing -> [wrapValue m (FacetValue {facet= noneFacet , relevance= label})]
-                        Just (lst) -> [ a {value = FacetValue f label}
-                                      | a@AnnotationValue{value= (FacetValue f _ )} <- lst
-                                      ]
+                    [ wrapValue m (FacetValue {relevance = label, facet = facet})
+                    | FacetValue{facet = facet} <- unwrapMaybeAnnotationValueList defaultFacetValues (key `M.lookup` (facetState state))
+                    ]
+--                    case key `M.lookup` (facetState state) of
+--                        Nothing -> [wrapValue m defaultFacetValue]
+--                        Just (lst) -> [ a {value = FacetValue f label}
+--                                      | a@AnnotationValue{value= (FacetValue f _ )} <- lst
+--                                      ]
 
 --                         Just (a@AnnotationValue{value = lst}) -> a { value = [ FacetValue f label | FacetValue f r <- lst] }
-
-
-            in m {state = state{facetState = M.insert key facetState' (facetState state)}}
+           in m {state = state{facetState = M.insert key facetState' (facetState state)}}
 
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state, page=AssessmentPage{apQueryFacets =facetList}} = newModel <# do
@@ -640,6 +646,15 @@ decodeMisoByteString = Miso.String.toMisoString
 encodeMisoByteString :: MisoString -> BS.ByteString
 encodeMisoByteString = Miso.String.fromMisoString
 
+slidingWindow :: Int -> [a] -> [[a]]
+slidingWindow chunkSize lst =
+    go lst
+  where go :: [a] -> [[a]]
+        go lst' | length lst' <= chunkSize = [lst']
+        go lst' = (L.take chunkSize lst': go (L.drop 1 lst'))
+
+
+
 -- ------------- Presentation ----------------------
 
 -- | Constructs a virtual DOM from a model
@@ -668,6 +683,7 @@ viewModel m@AssessmentModel{
     else div_ []
        [ p_ [] [a_[href_ "/index.html"][text $ "To Start Page..."]]
        , h1_ [] [text $ ms apTitle]
+
        , p_ [] [text "Query Id: ", text $ ms $ unQueryId apSquid]
        , p_ [] [text "Run: ", text $ ms apRunId]
        , p_ [] [a_ [href_ $ toGoldUrl $ ms $ unQueryId apSquid] [text " --> Gold Article <-- "]]
@@ -701,52 +717,30 @@ viewModel m@AssessmentModel{
               ]
             , p_ [] [text $ "Interface update: "<> version]
             ]
-          where visibleParas =  [ paraId
+          where visibleParas = -- Debug.traceShowId $
+                               [ paraId
                                 | Paragraph{paraId = paraId}  <- apParagraphs
                                 , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` (fromMaybe mempty hiddenState2')
---                                , hiddenEntry == Nothing
-                                , hiddenEntry == Nothing || value (fromJust hiddenEntry) == False
+                                , unwrapMaybeAnnotationValue False hiddenEntry == False
                                 ]
---                queryId = apSquid
 
                 numMissingFacetAsessments :: Int
                 numMissingFacetAsessments = length
                                           $ [ paraId
                                             | paraId  <- L.nub visibleParas
-                                            , not $ AssessmentKey{paragraphId = paraId, queryId = queryId} `S.member` M.keysSet facetState'
+                                            , let entry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` facetState'
+                                            , let facetValues = unwrapMaybeAnnotationValueList defaultFacetValues entry
+                                            , L.all (\FacetValue{relevance = rel} -> rel == UnsetLabel) facetValues
                                             ]
                 numMissingTransitionAssessments :: Int
                 numMissingTransitionAssessments = length
+--                                                $ Debug.traceShowId
                                                 $ [x
-                                                | x@[paraId1, paraId2] <- L.nub $ L.chunksOf 2 visibleParas
+                                                | x@[paraId1, paraId2] <- L.nub $ slidingWindow 2 visibleParas
                                                 , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = queryId} `M.lookup` transitionState')
-                                                , (transitionEntry == Nothing)  || (value (fromJust transitionEntry) == UnsetTransition)
+                                                , unwrapMaybeAnnotationValue UnsetTransition transitionEntry == UnsetTransition
                                                 ]
 
---                isTransitionAssessed :: ParagraphId -> ParagraphId -> Bool
---                isTransitionAssessed para1 para2 = not $ L.null
---                                                [x
---                                                | x@AssessmentTransitionKey{paragraphId1=paraId1', paragraphId2=paraId2'} <- M.keysSet transitionState'
---                                                , paraId1 == paraId1'
---                                                , paraId2 == paraId2'
---                                                ]
-
-
---          where totalParas = S.fromList $ fmap paraId apParagraphs
---                visParas =
---                    (totalParas `S.difference`)
---                    $ S.fromList
---                    $ [p | (AssessmentKey {paragraphId=p}, _ ) <- M.toList hiddenState']
---                facetAssessments =
---                    S.map (\AssessmentKey {paragraphId=p}-> p) $ M.keysSet facetState'
---                visTransitionAssessments =
---                    S.filter (\(p1,p2)-> p1 `S.member` visParas && p2 `S.member` visParas)
---                    $ S.map (\AssessmentTransitionKey {paragraphId1=p1, paragraphId2=p2} -> (p1,p2))
---                    $ M.keysSet transitionState'
---                numMissingFacetAsessments = length $ visParas `S.difference` facetAssessments
---                numMissingTransitionAsessments =
---                    let numTransitions = (length visParas)-1
---                    in numTransitions - (length visTransitionAssessments)
         createInfoPanel _ = []
 
         paragraphsAndTransitions :: [Paragraph] -> [View Action]
