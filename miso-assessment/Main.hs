@@ -455,16 +455,15 @@ updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@
                 notesState' = M.insert (AssessmentKey queryId paraId) value notesState
             in m {state = state{notesState = notesState'}}
 
-updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{nonrelevantState=hiddenState}} =  newModel <# do
+updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{nonrelevantState2=hiddenState2}} =  newModel <# do
 --    saveLocalState HiddenTag userId queryId paraId newState  m
 --    return Noop
     return $ SaveLocalModel userId queryId
   where key =  (AssessmentKey queryId paraId)
-        oldState = isJust $ key `M.lookup` hiddenState
+        oldState = unwrapMaybeAnnotationValue False $ key `M.lookup` (fromMaybe mempty hiddenState2)
         newState = not oldState
-        hiddenState' = if newState then  M.insert key (wrapValue m ()) hiddenState
-                       else M.delete key hiddenState
-        newModel = m {state = state{nonrelevantState = hiddenState'}}
+        hiddenState2' = Just $ M.insert key (wrapValue m newState) (fromMaybe mempty hiddenState2)
+        newModel = m {state = state{nonrelevantState2 = hiddenState2'}}
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
     saveLocalTransition TransitionTag userId queryId paraId1 paraId2 label m
@@ -648,7 +647,7 @@ viewModel :: Model -> View Action
 viewModel m@AssessmentModel{
             page= AssessmentPage{..}
             , state = AssessmentState { transitionLabelState = transitionState'
-                                      , nonrelevantState = hiddenState'
+                                      , nonrelevantState2 = hiddenState2'
                                       , notesState = notesState'
                                       , facetState = facetState'
                                       }
@@ -704,9 +703,9 @@ viewModel m@AssessmentModel{
             ]
           where visibleParas =  [ paraId
                                 | Paragraph{paraId = paraId}  <- apParagraphs
-                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` hiddenState'
-                                , hiddenEntry == Nothing
---                                , hiddenEntry == Nothing || value (fromJust hiddenEntry) == UnsetLabel
+                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` (fromMaybe mempty hiddenState2')
+--                                , hiddenEntry == Nothing
+                                , hiddenEntry == Nothing || value (fromJust hiddenEntry) == False
                                 ]
 --                queryId = apSquid
 
@@ -788,7 +787,7 @@ viewModel m@AssessmentModel{
 
         isHidden Paragraph{paraId = paraId} =
                 let assessmentKey = AssessmentKey queryId paraId
-                in isJust $ assessmentKey `M.lookup` hiddenState'
+                in unwrapMaybeAnnotationValue False $ assessmentKey `M.lookup` (fromMaybe mempty hiddenState2')
 
         hiddenDisplay = if displayAssessments then "active-display" else "hidden-display"
 --         hiddenDisplayBtn = if displayAssessments then "active-display-btn" else "display-btn"
@@ -890,7 +889,7 @@ viewModel m@AssessmentModel{
         renderParagraph :: Paragraph -> View Action
         renderParagraph p@Paragraph{..} =
             let assessmentKey = AssessmentKey queryId paraId
-                hidden = isHidden p -- fromMaybe False $ assessmentKey `M.lookup` hiddenState
+                hidden = isHidden p
                 hiddenStateClass = if hidden then "hidden-panel" else "shown-panel"
 
             in li_ [class_ "entity-snippet-li"] [

@@ -196,6 +196,7 @@ data AssessmentState = AssessmentState {
                     , facetState :: M.Map AssessmentKey [(AnnotationValue FacetValue)]
                     , transitionLabelState :: M.Map AssessmentTransitionKey (AnnotationValue AssessmentTransitionLabel)
                     , nonrelevantState :: M.Map AssessmentKey (AnnotationValue ())
+                    , nonrelevantState2 :: Maybe (M.Map AssessmentKey (AnnotationValue Bool))
                     , assessorData :: M.Map UserId (AnnotationValue ())
     }
   deriving (Eq, Generic, Show)
@@ -210,12 +211,39 @@ mergeAssessmentState newState oldState =
     AssessmentState { notesState = M.union (notesState newState) (notesState oldState)
                     , facetState = M.union (facetState newState) (facetState oldState)
                     , transitionLabelState = M.union (transitionLabelState newState) (transitionLabelState oldState)
-                    , nonrelevantState = M.union (nonrelevantState newState) (nonrelevantState oldState)
+                    , nonrelevantState = nonrelevantState newState --  we merge the oldstate into nonrelevantState2
+                    , nonrelevantState2 = mergeNonrelevantState (nonrelevantState2 newState) (nonrelevantState2 oldState) (nonrelevantState oldState)
                     , assessorData = M.unionWith mergeAssessorData (assessorData newState) (assessorData oldState)
                     }
   where mergeAssessorData :: (AnnotationValue ()) -> (AnnotationValue ()) -> (AnnotationValue ())
         mergeAssessorData av@AnnotationValue{runIds=val1} AnnotationValue{runIds=val2} =
             av {runIds = nub (val1 <> val2)}
+        convertNonrelevantState ::    M.Map AssessmentKey (AnnotationValue ())  ->  (M.Map AssessmentKey (AnnotationValue Bool))
+        convertNonrelevantState old =
+            let old2 = M.fromList
+                     $ [(key, AnnotationValue {annotatorId = annotatorId
+                                              , timeStamp = timeStamp
+                                              , sessionId = sessionId
+                                              , runIds = runIds
+                                              , value = True})
+                     | (key, AnnotationValue{..}) <- M.toList old
+                     ]
+            in old2
+
+        readOrInitializeNonrelevantState :: Maybe (M.Map AssessmentKey (AnnotationValue Bool)) -> (M.Map AssessmentKey (AnnotationValue Bool))
+        readOrInitializeNonrelevantState ( Just new2 ) = new2
+        readOrInitializeNonrelevantState Nothing = mempty
+
+
+        mergeNonrelevantState :: Maybe (M.Map AssessmentKey (AnnotationValue Bool))
+                              -> Maybe (M.Map AssessmentKey (AnnotationValue Bool))
+                              ->  M.Map AssessmentKey (AnnotationValue ())
+                              -> Maybe (M.Map AssessmentKey (AnnotationValue Bool))
+        mergeNonrelevantState new2 (Just old2) _ = Just $ M.union (readOrInitializeNonrelevantState new2) old2  -- ignore old values, because they were already converted
+        mergeNonrelevantState new2 Nothing old | null old  = new2
+        mergeNonrelevantState new2 Nothing old =
+            Just $ M.union (readOrInitializeNonrelevantState new2) (convertNonrelevantState old)
+
 
 data AnnotationValue a = AnnotationValue {
     annotatorId :: UserId
@@ -230,6 +258,15 @@ instance FromJSON a => FromJSON (AnnotationValue a) where
 instance ToJSON a =>  ToJSON (AnnotationValue a) where
     toJSON = genericToJSON json2Options
     toEncoding = genericToEncoding json2Options
+
+
+unwrapAnnotationValue :: AnnotationValue a -> a
+unwrapAnnotationValue (AnnotationValue {value = v}) = v
+
+unwrapMaybeAnnotationValue :: a -> Maybe (AnnotationValue a) -> a
+unwrapMaybeAnnotationValue _defVal (Just (AnnotationValue {value = v})) = v
+unwrapMaybeAnnotationValue defVal Nothing = defVal
+
 
 data FacetValue = FacetValue {
     facet :: AssessmentFacet
@@ -248,6 +285,7 @@ emptyAssessmentState = AssessmentState { notesState = mempty
                                        , facetState = mempty
                                        , transitionLabelState = mempty
                                        , nonrelevantState = mempty
+                                       , nonrelevantState2 = Just mempty
                                        , assessorData = mempty
                                        }
 
