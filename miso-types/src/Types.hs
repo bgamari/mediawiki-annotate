@@ -208,17 +208,20 @@ instance ToJSON AssessmentState where
 
 mergeAssessmentState :: AssessmentState -> AssessmentState -> AssessmentState
 mergeAssessmentState newState oldState =
-    AssessmentState { notesState = M.unionWith unionWithTimestamp (notesState newState) (notesState oldState)
-                    , facetState = M.unionWith unionWithTimestamp (facetState newState) (facetState oldState)
+    AssessmentState { notesState = M.unionWith unionListsWithTimestamp (notesState newState) (notesState oldState)
+                    , facetState = M.unionWith unionListsWithTimestamp (facetState newState) (facetState oldState)
                     , transitionLabelState = M.unionWith unionWithTimestamp (transitionLabelState newState) (transitionLabelState oldState)
                     , nonrelevantState = nonrelevantState newState --  we merge the oldstate into nonrelevantState2
                     , nonrelevantState2 = mergeNonrelevantState (nonrelevantState2 newState) (nonrelevantState2 oldState) (nonrelevantState oldState)
                     , assessorData = M.unionWith mergeAssessorData (assessorData newState) (assessorData oldState)
                     }
   where unionWithTimestamp :: AnnotationValue a -> AnnotationValue a -> AnnotationValue a
-        unionWithTimestamp v1@AnnotationValue{timeStamp = time1} v2@AnnotationValue{timestamp = time2} =
+        unionWithTimestamp v1@AnnotationValue{timeStamp = time1} v2@AnnotationValue{timeStamp = time2} =
             if time1 < time2 then v2 else v1
 
+        unionListsWithTimestamp :: [AnnotationValue a] -> [AnnotationValue a] -> [AnnotationValue a]
+        unionListsWithTimestamp v1@(AnnotationValue{timeStamp = time1}:_) v2@(AnnotationValue{timeStamp = time2}:_) =
+            if time1 < time2 then v2 else v1
 
         mergeAssessorData :: (AnnotationValue ()) -> (AnnotationValue ()) -> (AnnotationValue ())
         mergeAssessorData av@AnnotationValue{runIds=val1} AnnotationValue{runIds=val2} =

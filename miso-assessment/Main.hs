@@ -44,7 +44,7 @@ mss :: Show a => a -> MisoString
 mss = ms . show
 
 version:: MisoString
-version = "2019-08-06 22:00"
+version = "2019-08-06 23:30"
 
 prettyLabel :: AssessmentLabel -> MisoString
 prettyLabel MustLabel = "Must"
@@ -128,6 +128,8 @@ data Action
   | ToggleHidden UserId QueryId ParagraphId
   | SetTransitionAssessment UserId QueryId ParagraphId ParagraphId AssessmentTransitionLabel
   | Noop
+  | UpdateTime Action
+  | UpdateTimeCache UTCTime Action
   | FlagSaveSuccess
   | SaveAssessments
   | DisplayAssessments
@@ -138,6 +140,8 @@ data Action
   | SetState AssessmentState
   | PasteJSON MisoString
   | SaveLocalModel UserId QueryId
+  | SyncLocalModel UserId QueryId
+  | MergeState AssessmentState
   deriving (Show)
 
 data StorageTag = LabelTag | FacetTag | NotesTag | HiddenTag | TransitionTag
@@ -402,7 +406,11 @@ updateModel (SetAssessmentPage page now' viewOnly loadedAssessmentState) m =
 
 -- Initialization completed. React to user events.
 
+updateModel LoadAssessmentsFromLocalStorage m@AssessmentModel{username = username, page = AssessmentPage{apSquid = queryId}} = m <# do-- noEff m
+    return $ SyncLocalModel username queryId
+
 updateModel LoadAssessmentsFromLocalStorage m = noEff m
+
 
 
 updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
@@ -410,8 +418,6 @@ updateModel (SetState state') m@AssessmentModel{} = noEff $ m { state = state' }
 
 
 updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state=state} =  newModel <# do
---    saveLocalState LabelTag userId queryId paraId label m
---    return Noop
     return $ SaveLocalModel userId queryId
   where newModel =
             let key = (AssessmentKey queryId paraId)
@@ -420,19 +426,10 @@ updateModel (SetAssessment userId queryId paraId label) m@AssessmentModel {state
                     [ wrapValue m (FacetValue {relevance = label, facet = facet})
                     | FacetValue{facet = facet} <- unwrapMaybeAnnotationValueList defaultFacetValues (key `M.lookup` (facetState state))
                     ]
---                    case key `M.lookup` (facetState state) of
---                        Nothing -> [wrapValue m defaultFacetValue]
---                        Just (lst) -> [ a {value = FacetValue f label}
---                                      | a@AnnotationValue{value= (FacetValue f _ )} <- lst
---                                      ]
-
---                         Just (a@AnnotationValue{value = lst}) -> a { value = [ FacetValue f label | FacetValue f r <- lst] }
            in m {state = state{facetState = M.insert key facetState' (facetState state)}}
 
 
 updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {state=state, page=AssessmentPage{apQueryFacets =facetList}} = newModel <# do
---    saveLocalState FacetTag userId queryId paraId headingIdStr m
---    return Noop
     return $ SaveLocalModel userId queryId
   where newModel =
             let key = (AssessmentKey queryId paraId)
@@ -453,8 +450,6 @@ updateModel (SetFacet userId queryId paraId headingIdStr) m@AssessmentModel {sta
 
 
 updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
---    saveLocalState NotesTag userId queryId paraId txt m
---    return Noop
     return $ SaveLocalModel userId queryId
   where newModel =
             let value = [ wrapValue m (T.pack $ fromMisoString txt)]
@@ -462,8 +457,6 @@ updateModel (SetNotes userId queryId paraId txt) m@AssessmentModel {state=state@
             in m {state = state{notesState = notesState'}}
 
 updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@AssessmentState{nonrelevantState2=hiddenState2}} =  newModel <# do
---    saveLocalState HiddenTag userId queryId paraId newState  m
---    return Noop
     return $ SaveLocalModel userId queryId
   where key =  (AssessmentKey queryId paraId)
         oldState = unwrapMaybeAnnotationValue False $ key `M.lookup` (fromMaybe mempty hiddenState2)
@@ -472,8 +465,7 @@ updateModel (ToggleHidden userId queryId paraId) m@AssessmentModel {state=state@
         newModel = m {state = state{nonrelevantState2 = hiddenState2'}}
 
 updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@AssessmentModel {state=state@AssessmentState{..}} =  newModel <# do
-    saveLocalTransition TransitionTag userId queryId paraId1 paraId2 label m
-    return Noop
+    return $ SaveLocalModel userId queryId
   where newModel =
             let value = wrapValue m label
                 transitionLabelState' = M.insert (AssessmentTransitionKey queryId paraId1 paraId2) value transitionLabelState
@@ -485,7 +477,32 @@ updateModel (SaveLocalModel userId queryId) m@AssessmentModel{} = m <# do
 
 updateModel (SaveLocalModel _userId _queryId) m = noEff m
 
+
+updateModel (SyncLocalModel userId queryId) m@AssessmentModel{} = m <# do
+    oldState <- loadLocalModel userId queryId
+    return $ MergeState oldState
+
+updateModel (SyncLocalModel _userId _queryId) m = noEff m
+
+updateModel (MergeState oldState) m@AssessmentModel{state = state} = noEff newModel
+  where newModel =
+            m { state = (mergeAssessmentState oldState state)}
+
+updateModel (MergeState _oldModel) m = noEff m
+
+
 updateModel Noop m = noEff m
+
+
+updateModel (UpdateTime action) m  = m <# do
+    now' <- getCurrentTime
+    return $ UpdateTimeCache now' action
+
+updateModel (UpdateTimeCache timeStamp action) m@AssessmentModel{} = m {timeCache = timeStamp} <# do
+    return action
+updateModel (UpdateTimeCache _timeStamp action) m = m <# do
+    return action
+
 
 updateModel SaveAssessments m = m <# do
     res <- uploadAssessments m
@@ -690,6 +707,7 @@ viewModel m@AssessmentModel{
        , p_ [] [a_ [href_ $ toAssessorRunListUrl] [text "--> Back to Assessment List <-- "]]
 --       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
+       , button_ [class_ "hiddenDisplayBtn btn-sm", onClick (SyncLocalModel username queryId)] [text "Sync Cached Assessments"]
        , textarea_ [class_ ("assessment-display "<> hiddenDisplay)
                    , id_ "assessment-display"
                    , onChange PasteJSON
@@ -698,7 +716,7 @@ viewModel m@AssessmentModel{
          ]
        , div_ [id_ "toolbar-container"][
            p_ [] [
-               button_ [class_ "toolbar-btn", onClick SaveAssessments] [text "Upload"]
+               button_ [class_ "toolbar-btn", onClick (UpdateTime SaveAssessments)] [text "Upload"]
             ]
            , div_ [class_ "infopanel toolbar", id_ "toolbar"] $ createInfoPanel m
          ]
@@ -790,7 +808,7 @@ viewModel m@AssessmentModel{
 
         mkHidable hidden _key paraId =
             div_[] [
-                button_ [class_ ("hider annotate btn btn-sm "<> hideableClass), onClick (ToggleHidden username queryId paraId)] [text hideableText]
+                button_ [class_ ("hider annotate btn btn-sm "<> hideableClass), onClick (UpdateTime (ToggleHidden username queryId paraId))] [text hideableText]
             ]
           where hideableClass = if hidden then "active hidable-hidden" else ""
                 hideableText = if hidden then "Removed (click to show)" else "Remove"
@@ -809,7 +827,7 @@ viewModel m@AssessmentModel{
             mkButton paraId' label =
               let active = if label==currentLabel then "active" else ""
               in button_ [ class_ ("btn btn-sm "<> active)
-                         , onClick (SetAssessment username queryId paraId' label) ]
+                         , onClick (UpdateTime (SetAssessment username queryId paraId' label)) ]
                          [text $ prettyLabel label]
         mkNotesField key paraId =
             let notesValue = [ value_ (ms $ txt) | Just vs <- pure $ key `M.lookup` notesState', let txt = T.unlines $ fmap unwrapValue vs ]
@@ -820,7 +838,7 @@ viewModel m@AssessmentModel{
                                 , wrap_ "true"
                                 , cols_ "100"
                                 , placeholder_ "This text relevant, because..."
-                                , onChange (\str -> SetNotes username queryId paraId str)
+                                , onChange (\str -> (UpdateTime (SetNotes username queryId paraId str)))
                       ]<> notesValue)[]
                 ]
             ]
@@ -837,7 +855,7 @@ viewModel m@AssessmentModel{
                                , multiple_ True
                                , size_ "8"
                                , id_ idStr
-                               , onChange (\str -> SetFacet username queryId paraId str)
+                               , onChange (\str -> (UpdateTime (SetFacet username queryId paraId str)))
                                ]
                         $ fmap (renderFacet selectedFacets) facetList
                     ]
@@ -867,7 +885,7 @@ viewModel m@AssessmentModel{
                     mkButton label =
                       let active = if label==current then "active" else ""
                       in button_ [ class_ ("btn btn-sm "<> active)
-                                 , onClick (SetTransitionAssessment username queryId paraId1 paraId2 label) ]
+                                 , onClick (UpdateTime (SetTransitionAssessment username queryId paraId1 paraId2 label)) ]
                                  [text $ prettyTransition label]
 
 
