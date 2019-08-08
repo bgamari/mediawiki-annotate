@@ -97,7 +97,7 @@ instance ToJSON SubmissionRun where
 data AssessmentPage =
     AssessmentPage {
         apTitle :: T.Text,
-        apRunId :: T.Text,
+        apRunId :: RunId,
         apSquid :: QueryId,
         apQueryFacets :: [AssessmentFacet],
         apParagraphs :: [Paragraph],
@@ -154,6 +154,7 @@ instance ToJSON ParagraphOrgins where
 
 type UserId = T.Text
 
+type RunId = T.Text
 
 data AssessmentLabel = UnsetLabel | TrashLabel | DuplicateLabel | NonRelLabel | TopicLabel | CanLabel | ShouldLabel | MustLabel
     deriving (Eq, Ord, FromJSON, ToJSON, Generic, Show)

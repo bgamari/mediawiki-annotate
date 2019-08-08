@@ -37,6 +37,7 @@ import JavaScript.Web.Location
 
 import CAR.Types
 import Types
+import PageStats
 
 import qualified Debug.Trace as Debug
 
@@ -152,19 +153,11 @@ emptyAssessmentModel = LoadingPageModel { maybeStopwords = Nothing
                                         , maybeUsername = Nothing
                                         }
 
-noneFacet :: AssessmentFacet
-noneFacet =  AssessmentFacet { apHeading=(SectionHeading "OTHER RELEVANT FACET")
-                               , apHeadingId=packHeadingId "NONE_OF_THESE"
-                               }
 introFacet :: AssessmentFacet
 introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION")
                                , apHeadingId=packHeadingId "INTRODUCTION"
                                }
 
-defaultFacetValue :: FacetValue
-defaultFacetValue = FacetValue {facet = noneFacet, relevance = UnsetLabel}
-defaultFacetValues :: [FacetValue]
-defaultFacetValues = [defaultFacetValue]
 -- | Type synonym for an application model
 type Model = AssessmentModel
 
@@ -546,17 +539,19 @@ storageKeyQuery userId queryId =
     (ms $ userId) <> "-" <> (ms $ unQueryId queryId)
 
 
-storageKey :: StorageTag -> UserId -> QueryId -> ParagraphId -> MisoString
-storageKey tag userId queryId paraId =
-    (ms $ show tag) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
-
-storageKeyTransition :: StorageTag -> UserId -> QueryId -> ParagraphId -> ParagraphId -> MisoString
-storageKeyTransition tag userId queryId paraId1 paraId2 =
-    (ms $ show tag) <> "-"
-    <> (ms $ userId) <> "-"
-    <> (ms $ unQueryId queryId) <> "-"
-    <> (ms $ unpackParagraphId paraId1)  <> "-"
-    <> (ms $ unpackParagraphId paraId2)
+--
+--
+--storageKey :: StorageTag -> UserId -> QueryId -> ParagraphId -> MisoString
+--storageKey tag userId queryId paraId =
+--    (ms $ show tag) <> "-" <> (ms $ userId) <> "-" <> (ms $ unQueryId queryId) <> "-" <> (ms $ unpackParagraphId paraId)
+--
+--storageKeyTransition :: StorageTag -> UserId -> QueryId -> ParagraphId -> ParagraphId -> MisoString
+--storageKeyTransition tag userId queryId paraId1 paraId2 =
+--    (ms $ show tag) <> "-"
+--    <> (ms $ userId) <> "-"
+--    <> (ms $ unQueryId queryId) <> "-"
+--    <> (ms $ unpackParagraphId paraId1)  <> "-"
+--    <> (ms $ unpackParagraphId paraId2)
 
 
 
@@ -663,12 +658,6 @@ decodeMisoByteString = Miso.String.toMisoString
 encodeMisoByteString :: MisoString -> BS.ByteString
 encodeMisoByteString = Miso.String.fromMisoString
 
-slidingWindow :: Int -> [a] -> [[a]]
-slidingWindow chunkSize lst =
-    go lst
-  where go :: [a] -> [[a]]
-        go lst' | length lst' <= chunkSize = [lst']
-        go lst' = (L.take chunkSize lst': go (L.drop 1 lst'))
 
 
 
@@ -677,8 +666,8 @@ slidingWindow chunkSize lst =
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
 viewModel m@AssessmentModel{
-            page= AssessmentPage{..}
-            , state = AssessmentState { transitionLabelState = transitionState'
+            page= pa@AssessmentPage{..}
+            , state = s@AssessmentState { transitionLabelState = transitionState'
                                       , nonrelevantState2 = hiddenState2'
                                       , notesState = notesState'
                                       , facetState = facetState'
@@ -735,29 +724,32 @@ viewModel m@AssessmentModel{
               ]
             , p_ [] [text $ "Interface update: "<> version]
             ]
-          where visibleParas = -- Debug.traceShowId $
-                               [ paraId
-                                | Paragraph{paraId = paraId}  <- apParagraphs
-                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` (fromMaybe mempty hiddenState2')
-                                , unwrapMaybeAnnotationValue False hiddenEntry == False
-                                ]
-
-                numMissingFacetAsessments :: Int
-                numMissingFacetAsessments = length
-                                          $ [ paraId
-                                            | paraId  <- L.nub visibleParas
-                                            , let entry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` facetState'
-                                            , let facetValues = unwrapMaybeAnnotationValueList defaultFacetValues entry
-                                            , L.all (\FacetValue{relevance = rel} -> rel == UnsetLabel) facetValues
-                                            ]
-                numMissingTransitionAssessments :: Int
-                numMissingTransitionAssessments = length
---                                                $ Debug.traceShowId
-                                                $ [x
-                                                | x@[paraId1, paraId2] <- L.nub $ slidingWindow 2 visibleParas
-                                                , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = queryId} `M.lookup` transitionState')
-                                                , unwrapMaybeAnnotationValue UnsetTransition transitionEntry == UnsetTransition
-                                                ]
+          where MissingAssessmentStats{ numMissingFacetAsessments = numMissingFacetAsessments
+                                      , numMissingTransitionAssessments = numMissingTransitionAssessments}
+                                      = pageStats s pa
+--                visibleParas = -- Debug.traceShowId $
+--                               [ paraId
+--                                | Paragraph{paraId = paraId}  <- apParagraphs
+--                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` (fromMaybe mempty hiddenState2')
+--                                , unwrapMaybeAnnotationValue False hiddenEntry == False
+--                                ]
+--
+--                numMissingFacetAsessments :: Int
+--                numMissingFacetAsessments = length
+--                                          $ [ paraId
+--                                            | paraId  <- L.nub visibleParas
+--                                            , let entry = AssessmentKey{paragraphId = paraId, queryId = queryId} `M.lookup` facetState'
+--                                            , let facetValues = unwrapMaybeAnnotationValueList defaultFacetValues entry
+--                                            , L.all (\FacetValue{relevance = rel} -> rel == UnsetLabel) facetValues
+--                                            ]
+--                numMissingTransitionAssessments :: Int
+--                numMissingTransitionAssessments = length
+----                                                $ Debug.traceShowId
+--                                                $ [x
+--                                                | x@[paraId1, paraId2] <- L.nub $ slidingWindow 2 visibleParas
+--                                                , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = queryId} `M.lookup` transitionState')
+--                                                , unwrapMaybeAnnotationValue UnsetTransition transitionEntry == UnsetTransition
+--                                                ]
 
         createInfoPanel _ = []
 
@@ -844,17 +836,16 @@ viewModel m@AssessmentModel{
             ]
 
         mkQueryFacetField key paraId =
-            let idStr = storageKey TransitionTag username queryId paraId
-                facetList :: [AssessmentFacet]
+            let facetList :: [AssessmentFacet]
                 facetList = apQueryFacets
                 selectedFacets =  fmap (facet . unwrapValue) $ fromMaybe [] $ key `M.lookup` facetState'
 
             in div_ [] [
-                label_ [for_ idStr ] [text "Best fitting query facet(s):"
+                label_ [for_ "transition" ] [text "Best fitting query facet(s):"
                     , select_ [ class_ "facet-select"
                                , multiple_ True
                                , size_ "8"
-                               , id_ idStr
+                               , id_ "transition"
                                , onChange (\str -> (UpdateTime (SetFacet username queryId paraId str)))
                                ]
                         $ fmap (renderFacet selectedFacets) facetList
