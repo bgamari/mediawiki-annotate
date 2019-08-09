@@ -399,7 +399,7 @@ viewModel ListModel{..} =
         renderMissingStats :: Maybe MissingAssessmentStats -> MisoString
         renderMissingStats (Just MissingAssessmentStats{..}) =
             if numMissingFacetAsessments == 0 && numMissingTransitionAssessments == 0 then
-                (" complete" :: MisoString)
+                (" [complete]" :: MisoString)
             else
                 ms $ "  [ missing facets: "<> (show $ numMissingFacetAsessments )<> " / missing transitions: "<> (show $ numMissingTransitionAssessments) <> " ]"
         renderMissingStats Nothing =

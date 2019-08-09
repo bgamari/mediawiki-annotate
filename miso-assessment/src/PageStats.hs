@@ -57,6 +57,7 @@ convertToParagraphIds AssessmentPage{..} =
 
 pageStats ::  QueryId -> [ParagraphId] -> AssessmentState -> MissingAssessmentStats
 pageStats queryId' paragraphIds (AssessmentState { transitionLabelState = transitionState'
+                          , nonrelevantState = hiddenState'
                           , nonrelevantState2 = hiddenState2'
                           , notesState = notesState'
                           , facetState = facetState'
@@ -68,9 +69,19 @@ pageStats queryId' paragraphIds (AssessmentState { transitionLabelState = transi
           where visibleParas = -- Debug.traceShowId $
                                [ paraId
                                 | paraId  <- paragraphIds
-                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId'} `M.lookup` (fromMaybe mempty hiddenState2')
-                                , unwrapMaybeAnnotationValue False hiddenEntry == False
+--                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId'} `M.lookup` (fromMaybe mempty hiddenState2')
+--                                , unwrapMaybeAnnotationValue False hiddenEntry == False
+                                , isVisible  (AssessmentKey{paragraphId = paraId, queryId = queryId'})
                                 ]
+                isVisible :: AssessmentKey -> Bool
+                isVisible key =
+                    if (null hiddenState2') && (not $ null hiddenState') then
+                        -- this is still an old model.
+                        not $ key `M.member` hiddenState'
+                    else
+                        -- this is the new hidden model
+                        let hiddenEntry = key `M.lookup` (fromMaybe mempty hiddenState2')
+                        in unwrapMaybeAnnotationValue False hiddenEntry == False
 
                 numMissingFacetAsessments :: Int
                 numMissingFacetAsessments = length
