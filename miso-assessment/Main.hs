@@ -45,7 +45,7 @@ mss :: Show a => a -> MisoString
 mss = ms . show
 
 version:: MisoString
-version = "2019-08-06 23:30"
+version = "2019-08-08 23:15"
 
 prettyLabel :: AssessmentLabel -> MisoString
 prettyLabel MustLabel = "Must"
