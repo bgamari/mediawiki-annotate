@@ -50,21 +50,25 @@ data MissingAssessmentStats =
                            }
     deriving (Eq, Show)
 
-pageStats :: AssessmentState -> AssessmentPage -> MissingAssessmentStats
-pageStats (AssessmentState { transitionLabelState = transitionState'
+
+convertToParagraphIds :: AssessmentPage -> [ParagraphId]
+convertToParagraphIds AssessmentPage{..} =
+    [ paraId |  Paragraph{paraId = paraId}  <- apParagraphs]
+
+pageStats ::  QueryId -> [ParagraphId] -> AssessmentState -> MissingAssessmentStats
+pageStats queryId' paragraphIds (AssessmentState { transitionLabelState = transitionState'
                           , nonrelevantState2 = hiddenState2'
                           , notesState = notesState'
                           , facetState = facetState'
-                          })
-           (AssessmentPage{..})  =
+                          }) =
     MissingAssessmentStats { --queryId = apSquid
                            numMissingFacetAsessments = numMissingFacetAsessments
                            , numMissingTransitionAssessments = numMissingTransitionAssessments
                            }
           where visibleParas = -- Debug.traceShowId $
                                [ paraId
-                                | Paragraph{paraId = paraId}  <- apParagraphs
-                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = apSquid} `M.lookup` (fromMaybe mempty hiddenState2')
+                                | paraId  <- paragraphIds
+                                , let hiddenEntry = AssessmentKey{paragraphId = paraId, queryId = queryId'} `M.lookup` (fromMaybe mempty hiddenState2')
                                 , unwrapMaybeAnnotationValue False hiddenEntry == False
                                 ]
 
@@ -72,7 +76,7 @@ pageStats (AssessmentState { transitionLabelState = transitionState'
                 numMissingFacetAsessments = length
                                           $ [ paraId
                                             | paraId  <- L.nub visibleParas
-                                            , let entry = AssessmentKey{paragraphId = paraId, queryId = apSquid} `M.lookup` facetState'
+                                            , let entry = AssessmentKey{paragraphId = paraId, queryId = queryId'} `M.lookup` facetState'
                                             , let facetValues = unwrapMaybeAnnotationValueList defaultFacetValues entry
                                             , L.all (\FacetValue{relevance = rel} -> rel == UnsetLabel) facetValues
                                             ]
@@ -81,6 +85,6 @@ pageStats (AssessmentState { transitionLabelState = transitionState'
 --                                                $ Debug.traceShowId
                                                 $ [x
                                                 | x@[paraId1, paraId2] <- L.nub $ slidingWindow 2 visibleParas
-                                                , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = apSquid} `M.lookup` transitionState')
+                                                , let transitionEntry =  (AssessmentTransitionKey {paragraphId1 = paraId1, paragraphId2=paraId2, queryId = queryId'} `M.lookup` transitionState')
                                                 , unwrapMaybeAnnotationValue UnsetTransition transitionEntry == UnsetTransition
                                                 ]

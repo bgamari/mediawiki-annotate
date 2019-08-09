@@ -15,11 +15,9 @@ import Miso
 import Miso.String hiding (concatMap, filter, length, zip)
 import Data.Aeson
 import GHC.Generics
-import qualified Data.Aeson.Encode.Pretty as AesonPretty
 import JavaScript.Web.XMLHttpRequest
 
 import Control.Exception
-import Control.Monad
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy
@@ -28,10 +26,6 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.List as L
 import Data.Maybe
-import Data.Time
-import Data.Char
-import Data.String
-import Language.Porter
 import qualified System.FilePath
 
 import qualified Codec.Serialise as CBOR
@@ -82,15 +76,16 @@ data ListModel =
               , pages :: [Page]
               , assessorSquids :: [QueryId]
               , username :: Maybe UserId
-              , missingStatsMap :: M.Map (QueryId,RunId) MissingAssessmentStats
+              , missingStatsMap :: M.Map (QueryId,MisoString) MissingAssessmentStats
+              , dataForMissingStats :: M.Map (QueryId, MisoString) [ParagraphId]
               }
     | ErrorMessageModel { errorMessage :: MisoString
                         }
   deriving (Eq, Show)
 
 
-
-emptyModel = ListModel {filenames = [], pages = [], assessorSquids = [], username = Nothing, missingStatsMap = mempty }
+emptyModel :: ListModel
+emptyModel = ListModel {filenames = [], pages = [], assessorSquids = [], username = Nothing, missingStatsMap = mempty, dataForMissingStats = mempty }
 
 -- | Sum type for application events
 data Action
@@ -99,7 +94,9 @@ data Action
   | Initialize
   | LoadCbor JSString
   | SetCborPages [Page]
-  | LoadRuns [MisoString] (M.Map (QueryId, RunId) MissingAssessmentStats)
+  | LoadRuns [MisoString] (M.Map (QueryId, MisoString) MissingAssessmentStats) (M.Map (QueryId, MisoString) [ParagraphId])
+  | SyncMissingStats
+  | UpdateMissingStats (M.Map (QueryId, MisoString) MissingAssessmentStats)
   | Noop
 --  | SyncLocalModel
 --  | SetMissingState (M.Map (PageId, RunId) MissingAssessmentStats)
@@ -190,7 +187,7 @@ updateModel (Initialize) m = m <# do
               Left e  -> ReportError $ mss e
 
 
-updateModel (SetListing FileListing{filenames = files, pathname = path} assessorSquids username) m@ListModel{} =
+updateModel (SetListing FileListing{filenames = files} assessorSquids username) m@ListModel{} =
     (m {filenames = fmap ms files, assessorSquids = assessorSquids, username = username} :: ListModel) <# do
     return $ LoadCbor ("./data/" <> cborFileName)
 
@@ -210,50 +207,64 @@ updateModel (LoadCbor filename) m@ListModel{..} = m <# do
       Left e  -> ReportError $ mss e
 
 updateModel (SetCborPages pages') m@ListModel{..} =  newModel <# do
-    return $ LoadRuns filenames mempty
+    return $ LoadRuns filenames mempty mempty
 
   where newModel = m { pages = pages'}
 
 
 
-updateModel (LoadRuns files prevMissingStats) m@ListModel{..} = newModel <#
+updateModel (LoadRuns files prevMissingStats prevDataForMissingStats) m@ListModel{..} = newModel <#
     case files of
         []            -> return Noop
-        pageName:rest -> do
-                apPages <- fetchJsonL $ getAssessmentPageFilePath  $ fromMisoString pageName
+        fname:rest -> do
+                apPages <- fetchJsonL $ getAssessmentPageFilePath  $ fromMisoString fname
                          :: IO (Either FetchJSONError [AssessmentPage])
 
                 case apPages of
                     Left e  -> return $ ReportError $ ms $ show e
                     Right apPages' -> do
                         let queryIds = S.fromList [ pageIdToQueryId $ pageId p | p <- pages]
-                            filteredPages =
-                                [ ap
+                            dataForMissingStats' :: [((QueryId, MisoString), [ParagraphId])]
+                            dataForMissingStats' =
+                                [ ((queryId, fname), [ paraId para | para <- apParagraphs ap])
                                 | ap <- apPages'
                                 , let queryId = apSquid ap
                                 , queryId `S.member` queryIds
                                 ]
-                        missingStats <- mapM loadMissingStats filteredPages
-                                        :: JSM [Maybe ((QueryId, RunId), MissingAssessmentStats)]
-                        return $ LoadRuns rest (M.fromList $ catMaybes missingStats)
+                        missingStats <- mapM (loadMissingStats username) dataForMissingStats'
+                                        :: JSM [Maybe ((QueryId, MisoString), MissingAssessmentStats)]
+                        let missingStatsMap' :: M.Map (QueryId, MisoString) MissingAssessmentStats
+                            missingStatsMap' = M.fromList $ catMaybes missingStats
+                        return $ LoadRuns rest missingStatsMap' ((M.fromList dataForMissingStats') `M.union` prevDataForMissingStats)
+
+  where newModel = Debug.traceShow ("LoadRuns "<> show files <> " " <> show prevMissingStats)
+                $ m { missingStatsMap = prevMissingStats `M.union` missingStatsMap, dataForMissingStats = prevDataForMissingStats }
+
+updateModel SyncMissingStats m@ListModel{dataForMissingStats = dataForMissingStats, username = username} = m <# do
+    missingStats <- mapM (loadMissingStats username) $ M.toList dataForMissingStats
+                                        :: JSM [Maybe ((QueryId, MisoString), MissingAssessmentStats)]
+    return $ UpdateMissingStats $ M.fromList $ catMaybes missingStats
 
 
-  where loadMissingStats :: AssessmentPage -> JSM (Maybe ((QueryId, RunId), MissingAssessmentStats))
-        loadMissingStats page = do
-            maybeState <- loadLocalModel (fromJust username) (apSquid page)
-                        :: JSM (Maybe AssessmentState)
-            return $ case maybeState of
-                    Nothing -> Nothing
-                    Just state -> let missingStats =  pageStats state page
-                                  in Just $ ((apSquid page, apRunId page), missingStats)
-
-        newModel = Debug.traceShow ("LoadRuns "<> show files <> " " <> show prevMissingStats) $ m { missingStatsMap = prevMissingStats `M.union` missingStatsMap }
-
+updateModel (UpdateMissingStats missingStatsMap') m@ListModel{} = noEff newModel
+  where newModel = m { missingStatsMap = missingStatsMap'}
 
 updateModel Noop m =  noEff m
 
+updateModel _ m@ErrorMessageModel{} =  noEff m
 
-updateModel (ReportError e) m = noEff $ ErrorMessageModel e
+updateModel (ReportError e) _m = noEff $ ErrorMessageModel e
+
+
+
+loadMissingStats :: Maybe UserId -> ((QueryId, MisoString), [ParagraphId]) -> JSM (Maybe ((QueryId,MisoString), MissingAssessmentStats))
+loadMissingStats username ((queryId', fname),  paragraphIds) = do
+    maybeLocalModel <- loadLocalModel (fromJust username) (queryId')
+                :: JSM (Maybe AssessmentState)
+    return $ case maybeLocalModel of
+            Nothing -> Nothing
+            Just state -> let missingStats =  pageStats queryId' paragraphIds state
+                          in Just $ ((queryId', fname) , missingStats)
 
 
 
@@ -325,8 +336,8 @@ fetchCbor url = do
     result <- fetchByteString url
     case result of
         Left err        -> pure $ Left err
-        Right byteStr   -> let hdr ::  CAR.Header
-                               (hdr, pages) = CBOR.decodeCborList $ Data.ByteString.Lazy.fromStrict byteStr
+        Right byteStr   -> let _hdr ::  CAR.Header
+                               (_hdr, pages) = CBOR.decodeCborList $ Data.ByteString.Lazy.fromStrict byteStr
                            in pure $ Right pages
 
 
@@ -338,7 +349,7 @@ fetchByteString url = do
       Right (Response{..})
         | status == 200
         , Just c <- contents -> pure $ Right c
-      Right resp             -> pure $ Left $ BadResponse (status resp) (contents resp)
+      Right resp'             -> pure $ Left $ BadResponse (status resp') (contents resp')
       Left err               -> pure $ Left $ XHRFailed err
   where
     onError :: XHRError -> IO (Either XHRError (Response BS.ByteString))
@@ -361,31 +372,36 @@ decodeByteString = Data.Text.Encoding.decodeUtf8
 
 -- | Constructs a virtual DOM from a model
 viewModel :: Model -> View Action
-viewModel m@ListModel{..} =
+viewModel ListModel{..} =
     div_ []
            [ p_ [] [a_[href_ "/index.html"][text $ "To Start Page..."]]
            , h1_ [] [text $ (runListTitle username)]
-           , ul_ [] $ fmap renderTopics  pages
+           , button_ [class_ "hiddenDisplayBtn btn-sm", onClick SyncMissingStats] [text "Update Missing Judgments"]
+           , ul_ [] $ fmap renderTopics  pages :: View Action
            ]
-  where renderTopics page =
+  where renderTopics :: Page -> View Action
+        renderTopics page =
             li_ [] [ h2_ [] [text $ ms $ unpackPageName $ pageName page]
                    , p_ [] [text $ ms $ unpackPageId $ pageId page]
-                   , ul_ [] $ (renderGold (pageId page)  : fmap (renderFile (pageId page) page ) filenames)
+                   , ul_ [] $ renderGold (pageId page) : fmap (renderFile (pageId page)) filenames
                    ]
 
-        renderFile :: PageId -> Page -> MisoString -> View Action
-        renderFile pageId' page f =
-            let fname = T.pack $ System.FilePath.dropExtension $ fromMisoString f
+        renderFile :: PageId -> MisoString -> View Action
+        renderFile pageId' fname =
+            let fname' = T.pack $ System.FilePath.dropExtension $ fromMisoString fname
             in li_ [] [
                   p_ [] [
-                    a_ [href_ $ toAssessUrl fname (T.pack $ unpackPageId pageId') ] [text $ ms fname]
-                    , text $ renderMissingStats $ (pageIdToQueryId pageId', fname) `M.lookup` missingStatsMap
+                    a_ [href_ $ toAssessUrl fname' (T.pack $ unpackPageId pageId') ] [text fname]
+                  , text $ renderMissingStats $ (pageIdToQueryId pageId', fname) `M.lookup` missingStatsMap
                   ]
               ]
 
         renderMissingStats :: Maybe MissingAssessmentStats -> MisoString
-        renderMissingStats (Just missing) =
-            ms $ "  [ missing facets: "<> (show $ numMissingFacetAsessments missing )<> " / missing transitions: "<> (show $ numMissingTransitionAssessments missing <> " ]")
+        renderMissingStats (Just MissingAssessmentStats{..}) =
+            if numMissingFacetAsessments == 0 && numMissingTransitionAssessments == 0 then
+                (" complete" :: MisoString)
+            else
+                ms $ "  [ missing facets: "<> (show $ numMissingFacetAsessments )<> " / missing transitions: "<> (show $ numMissingTransitionAssessments) <> " ]"
         renderMissingStats Nothing =
             ""
 

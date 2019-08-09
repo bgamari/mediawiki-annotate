@@ -726,7 +726,7 @@ viewModel m@AssessmentModel{
             ]
           where MissingAssessmentStats{ numMissingFacetAsessments = numMissingFacetAsessments
                                       , numMissingTransitionAssessments = numMissingTransitionAssessments}
-                                      = pageStats s pa
+                                      = pageStats queryId (convertToParagraphIds pa) s
 --                visibleParas = -- Debug.traceShowId $
 --                               [ paraId
 --                                | Paragraph{paraId = paraId}  <- apParagraphs
