@@ -12,13 +12,7 @@ module PageStats where
 import CAR.Types
 import Types
 
-
-
---import qualified Data.ByteString as BS
---import qualified Data.ByteString.Char8 as BS
---import qualified Data.Text.Encoding
 import qualified Data.Map.Strict as M
---import qualified Data.Set as S
 import qualified Data.List as L
 import Data.Maybe
 

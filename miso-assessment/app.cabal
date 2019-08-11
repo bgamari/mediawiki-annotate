@@ -8,7 +8,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     PageStats
+--  exposed-modules:
 --  ghc-options:         -Wall -Werror
   build-depends:       base,
                        aeson,

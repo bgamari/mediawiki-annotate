@@ -16,6 +16,7 @@ import GHC.Generics
 import Data.Aeson
 import Data.Aeson.Types
 import Data.List
+import Data.Maybe
 import Control.Applicative
 import qualified Data.Text as T
 import Data.Hashable
@@ -191,6 +192,90 @@ instance ToJSON AssessmentTransitionKey where
     toEncoding = genericToEncoding json2Options
 
 
+assessmentStateSize :: AssessmentState -> String
+assessmentStateSize (AssessmentState{..}) =
+    "notesState="<> (show $ M.size notesState)
+    <> " facetState="<> (show $ M.size facetState)
+    <> " transitionLabelState="<> (show $ M.size transitionLabelState)
+    <> " nonrelevantState="<> (show $ M.size nonrelevantState)
+    <> " nonrelevantState2="<> (show $ M.size $ fromMaybe mempty nonrelevantState2)
+
+assessmentStateQueryIds :: AssessmentState -> S.Set QueryId
+assessmentStateQueryIds (AssessmentState{..}) =
+    let queriesFromKeys = S.map (\AssessmentKey{..} -> queryId)
+                          $  M.keysSet notesState
+                          <> M.keysSet facetState
+                          <> M.keysSet nonrelevantState
+                          <> (M.keysSet $ fromMaybe mempty $  nonrelevantState2)
+
+        queriesFromTransitionKeys = S.map (\AssessmentTransitionKey{..} -> queryId)
+                                   $ M.keysSet transitionLabelState
+    in queriesFromKeys `S.union` queriesFromTransitionKeys
+
+assessmentStateRunIds :: AssessmentState -> S.Set RunId
+assessmentStateRunIds (AssessmentState{..}) =
+    foldMap (foldMap S.fromList)
+      $ [ (fmap runIds' $ concat $ M.elems notesState  :: [[RunId]])
+      , ( fmap runIds' $ concat $ M.elems facetState  :: [[RunId]])
+      , (fmap runIds' $ M.elems transitionLabelState  :: [[RunId]])
+      , (fmap runIds' $ M.elems nonrelevantState  :: [[RunId]])
+      , (fmap runIds' $ M.elems $ fromMaybe mempty $ nonrelevantState2  :: [[RunId]])
+      ]
+  where runIds' :: AnnotationValue a -> [RunId]
+        runIds' = runIds
+
+
+filterAssessmentStateByRunId :: [RunId] -> AssessmentState -> AssessmentState
+filterAssessmentStateByRunId searchRunIds a@AssessmentState{} =
+     a { notesState = filterMapOfLists $ notesState a
+       , facetState = filterMapOfLists $ facetState a
+       , transitionLabelState = filterMap $ transitionLabelState a
+       , nonrelevantState = filterMap $ nonrelevantState a
+       , nonrelevantState2 = fmap (filterMap) $ nonrelevantState2 a
+       }
+  where filterMapOfLists :: Ord k => M.Map k [(AnnotationValue a)] -> M.Map k [(AnnotationValue a)]
+        filterMapOfLists mapOfLists =
+             M.fromList $ [ (k,lst2)
+                          | (k,lst) <- M.toList mapOfLists
+                          , let lst2 = [a
+                                       | a@AnnotationValue{runIds = runIds} <- lst
+                                       , or [searchRunId `elem` runIds | searchRunId <- searchRunIds]
+                                       ]
+                          , not $ null lst2
+                          ]
+
+        filterMap :: Ord k => M.Map k (AnnotationValue a) -> M.Map k (AnnotationValue a)
+        filterMap mapOf =
+             M.fromList $ [ (k,v)
+                          | (k,v@a@AnnotationValue{runIds = runIds}) <- M.toList mapOf
+                          , or [searchRunId `elem` runIds | searchRunId <- searchRunIds]
+                          ]
+
+filterAssessmentStateByTimeStamp :: UTCTime -> AssessmentState -> AssessmentState
+filterAssessmentStateByTimeStamp afterTime a@AssessmentState{} =
+     a { notesState = filterMapOfLists $ notesState a
+       , facetState = filterMapOfLists $ facetState a
+       , transitionLabelState = filterMap $ transitionLabelState a
+       , nonrelevantState = filterMap $ nonrelevantState a
+       , nonrelevantState2 = fmap (filterMap) $ nonrelevantState2 a
+       }
+  where filterMapOfLists :: Ord k => M.Map k [(AnnotationValue a)] -> M.Map k [(AnnotationValue a)]
+        filterMapOfLists mapOfLists =
+             M.fromList $ [ (k,lst2)
+                          | (k,lst) <- M.toList mapOfLists
+                          , let lst2 = [a
+                                       | a@AnnotationValue{timeStamp = thisTime} <- lst
+                                       , thisTime > afterTime
+                                       ]
+                          , not $ null lst2
+                          ]
+
+        filterMap :: Ord k => M.Map k (AnnotationValue a) -> M.Map k (AnnotationValue a)
+        filterMap mapOf =
+             M.fromList $ [ (k,v)
+                          | (k,v@a@AnnotationValue{timeStamp = thisTime}) <- M.toList mapOf
+                          , thisTime > afterTime
+                          ]
 
 data AssessmentState = AssessmentState {
                     notesState :: M.Map AssessmentKey [(AnnotationValue T.Text)]
@@ -212,7 +297,7 @@ mergeAssessmentState newState oldState =
     AssessmentState { notesState = M.unionWith unionListsWithTimestamp (notesState newState) (notesState oldState)
                     , facetState = M.unionWith unionListsWithTimestamp (facetState newState) (facetState oldState)
                     , transitionLabelState = M.unionWith unionWithTimestamp (transitionLabelState newState) (transitionLabelState oldState)
-                    , nonrelevantState = nonrelevantState newState --  we merge the oldstate into nonrelevantState2
+                    , nonrelevantState = mempty --  we merge the oldstate into nonrelevantState2
                     , nonrelevantState2 = mergeNonrelevantState (nonrelevantState2 newState) (nonrelevantState2 oldState) (nonrelevantState oldState)
                     , assessorData = M.unionWith mergeAssessorData (assessorData newState) (assessorData oldState)
                     }
@@ -261,7 +346,7 @@ data AnnotationValue a = AnnotationValue {
     , runIds :: [T.Text]
     , value :: a
   }
-  deriving (Eq, Generic, Show)
+  deriving (Eq, Generic, Show, Ord)
 instance FromJSON a => FromJSON (AnnotationValue a) where
     parseJSON = genericParseJSON json2Options
 instance ToJSON a =>  ToJSON (AnnotationValue a) where
@@ -327,5 +412,4 @@ instance FromJSON SavedAssessments where
 instance ToJSON SavedAssessments where
     toJSON = genericToJSON json2Options
     toEncoding = genericToEncoding json2Options
-
 

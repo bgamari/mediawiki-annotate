@@ -121,6 +121,8 @@ convertAssessments oldAssessFile outFile = do
                                                   | (k,v) <- M.toList hiddenState
                                                   , v  --  drop entries with value "False"
                                                   ]
+                    , nonrelevantState2 = mempty
+                    , assessorData = mempty
                 }
             convertAssessmentKey (OldTypes.AssessmentKey{..}) =
                 Types.AssessmentKey {queryId = queryId
