@@ -97,6 +97,8 @@ data Action
   | LoadRuns [MisoString] (M.Map (QueryId, MisoString) MissingAssessmentStats) (M.Map (QueryId, MisoString) [ParagraphId])
   | SyncMissingStats
   | UpdateMissingStats (M.Map (QueryId, MisoString) MissingAssessmentStats)
+  | LoadMergedModelFromServer (Maybe UserId) QueryId
+  | LoadAllMergedModelFromServer (Maybe UserId)
   | Noop
 --  | SyncLocalModel
 --  | SetMissingState (M.Map (PageId, RunId) MissingAssessmentStats)
@@ -128,6 +130,9 @@ getUserName = do
       Left _e -> Nothing
 
 
+getMergedModelUrl :: QueryId -> UserId -> MisoString
+getMergedModelUrl queryId userId =
+    ms $ "/data/merged/"<> userId <>"-"<> (unQueryId queryId)<> ".json"
 
 pageIdToQueryId :: PageId -> QueryId
 pageIdToQueryId pageId =  QueryId $ T.pack $ unpackPageId $ pageId
@@ -151,6 +156,14 @@ loadLocalModel userId queryId = do
                 Right old -> Just old
                 Left _msg -> Nothing
     return oldState
+
+-- synch with Main
+saveLocalModel :: UserId -> QueryId -> AssessmentState -> JSM ()
+saveLocalModel userId queryId state = do
+    let key = storageKeyQuery userId queryId
+    setLocalStorage key state
+
+
 
 
 
@@ -239,6 +252,40 @@ updateModel (LoadRuns files prevMissingStats prevDataForMissingStats) m@ListMode
 
   where newModel = Debug.traceShow ("LoadRuns "<> show files <> " " <> show prevMissingStats)
                 $ m { missingStatsMap = prevMissingStats `M.union` missingStatsMap, dataForMissingStats = prevDataForMissingStats }
+
+
+
+updateModel (LoadAllMergedModelFromServer maybeUser) m@ListModel{username = username} = m <# do
+    mapM_ loadForQuery (assessorSquids m)
+    alert $ "All available merged models loaded from server."
+    return SyncMissingStats
+
+
+  where loadForQuery queryId' = do
+            let url = getMergedModelUrl queryId' (fromMaybe (fromJust username) maybeUser)
+            state <- fetchJson $ url
+            case state of
+                Left _msg ->
+                    return ()
+                Right state' -> do
+                    saveLocalModel (fromJust username) queryId' state'
+                    return ()
+
+
+
+
+
+updateModel (LoadMergedModelFromServer maybeUser queryId) m@ListModel{username=username} = m <# do
+    let url = getMergedModelUrl queryId (fromMaybe (fromJust username) maybeUser)
+    state <- fetchJson $ url
+    case state of
+        Left msg -> do
+            alert $ "Model not yet available ("<> (ms url) <> " yielded error: "<> (mss msg) <> ")."
+            return Noop
+        Right state' -> do
+            saveLocalModel (fromJust username) queryId state'
+            return SyncMissingStats
+
 
 updateModel SyncMissingStats m@ListModel{dataForMissingStats = dataForMissingStats, username = username} = m <# do
     missingStats <- mapM (loadMissingStats username) $ M.toList dataForMissingStats
@@ -376,13 +423,22 @@ viewModel ListModel{..} =
     div_ []
            [ p_ [] [a_[href_ "/index.html"][text $ "To Start Page..."]]
            , h1_ [] [text $ (runListTitle username)]
-           , button_ [class_ "hiddenDisplayBtn btn-sm", onClick SyncMissingStats] [text "Update Missing Judgments"]
+           ,p_ [] [
+                 button_ [class_ "hiddenDisplayBtn btn-sm", onClick SyncMissingStats] [text "Update Missing Judgments"]
+               , span_ [] [text $ " "]
+               , button_ [class_ "hiddenDisplayBtn btn-sm", onClick (LoadAllMergedModelFromServer Nothing)] [text "Sync All Judgments"]
+               , span_ [] [text $ " (overwrites browser cache with merged assessments) "]
+           ]
            , ul_ [] $ fmap renderTopics  pages :: View Action
            ]
   where renderTopics :: Page -> View Action
         renderTopics page =
             li_ [] [ h2_ [] [text $ ms $ unpackPageName $ pageName page]
-                   , p_ [] [text $ ms $ unpackPageId $ pageId page]
+                   , p_ [] [text $ ms $ unpackPageId $ pageId page
+                           , button_ [class_ "hiddenDisplayBtn btn-sm"
+                                     , onClick (LoadMergedModelFromServer Nothing (pageIdToQueryId $ pageId page )) ]
+                                     [text $ ms $ "Sync Judgments for Topic "<> (unpackPageId $ pageId page) <>""]
+                           ]
                    , ul_ [] $ renderGold (pageId page) : fmap (renderFile (pageId page)) filenames
                    ]
 

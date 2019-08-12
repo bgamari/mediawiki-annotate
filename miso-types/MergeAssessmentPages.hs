@@ -143,7 +143,8 @@ mergeAssessmentsAndSave outDir ((userId, queryId), asQList)  = do
     mergedState <- if (and [ isJust nrs2 | SavedAssessments{savedData=AssessmentState{nonrelevantState2=nrs2}} <- asQList]) then
                         foldM accumulateNew (emptyAssessmentState) asQList
                    else
-                        foldlM accumulateThisRun (emptyAssessmentState) asQList
+                        foldM accumulateNew (emptyAssessmentState) asQList
+--                        foldlM accumulateThisRun (emptyAssessmentState) asQList
 
     BSL.writeFile outFile $ Aeson.encode mergedState
 
@@ -155,7 +156,7 @@ mergeAssessmentsAndSave outDir ((userId, queryId), asQList)  = do
 accumulateNew :: (AssessmentState) -> SavedAssessments -> IO (AssessmentState)
 accumulateNew (a@AssessmentState{}) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = thisRunIds, timeStamp =ts}}) = do
     let a2 = mergeAssessmentState s a
-    putStrLn $  "accumNew    timeStamp" <> (show ts) <>  " thisRunIds:" <> (show thisRunIds)
+    putStrLn $  "accumNew    timeStamp" <> (show ts) <> " " <> (show $ assessmentStateQueryIds s) <> " thisRunIds:" <> (show thisRunIds)
     return (a2)
 
 accumulateThisRun :: (AssessmentState) -> SavedAssessments -> IO (AssessmentState)
@@ -167,7 +168,7 @@ accumulateThisRun (a@AssessmentState{}) (SavedAssessments{savedData = s@Assessme
     return (a2)
   where debug s filteredS a2 allRuns2 = do
             let allRuns = assessmentStateRunIds s
-            putStrLn $  "accumOld timeStamp" <> (show ts) <>  " thisRunIds:" <> (show thisRunIds)
+            putStrLn $  "accumOld timeStamp" <> (show ts) <> " " <> (show $ assessmentStateQueryIds s) <> " thisRunIds:" <> (show thisRunIds)
                      <> "   Difference in runIds = "<> show (allRuns `S.difference` allRuns2) <> "   and   " <>  show (allRuns2 `S.difference` allRuns)
                      <> "\n  origSize: "<> (show $ assessmentStateSize s)
                      <> "\n  diffSize: "<> (show $ assessmentStateSize filteredS)
