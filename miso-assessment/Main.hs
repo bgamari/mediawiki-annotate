@@ -71,11 +71,13 @@ prettyTransition UnsetTransition = "x"
 
 data DisplayConfig = DisplayConfig { displayAssessments :: Bool
                                    , viewOnly :: Bool
+                                   , highlightMissing :: Bool
                                    }
   deriving (Eq, Show)
 defaultDisplayConfig :: DisplayConfig
 defaultDisplayConfig = DisplayConfig { displayAssessments = False
                                      , viewOnly = False
+                                     , highlightMissing = False
                                      }
 
 data ParaSpan = QuerySpan T.Text
@@ -143,6 +145,7 @@ data Action
   | SaveLocalModel UserId QueryId
   | SyncLocalModel UserId QueryId
   | MergeState AssessmentState
+  | HighlightMissing
   deriving (Show)
 
 data StorageTag = LabelTag | FacetTag | NotesTag | HiddenTag | TransitionTag
@@ -464,6 +467,9 @@ updateModel (SetTransitionAssessment userId queryId paraId1 paraId2 label) m@Ass
                 transitionLabelState' = M.insert (AssessmentTransitionKey queryId paraId1 paraId2) value transitionLabelState
             in m {state = state{transitionLabelState = transitionLabelState'}}
 
+updateModel HighlightMissing  m@(AssessmentModel {config = d@DisplayConfig{highlightMissing = isHi}}) = noEff newModel
+  where newModel = m {config = d {highlightMissing = not isHi} }
+
 updateModel (SaveLocalModel userId queryId) m@AssessmentModel{} = m <# do
     saveLocalModel userId queryId m
     return Noop
@@ -697,6 +703,8 @@ viewModel m@AssessmentModel{
 --       , button_ [class_ "btn-sm", onClick ClearAssessments] [text "Clear Topic"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick DisplayAssessments] [text "Show Assessment Data"]
        , button_ [class_ "hiddenDisplayBtn btn-sm", onClick (SyncLocalModel username queryId)] [text "Sync Cached Assessments"]
+       , button_ [class_ ("hiddenDisplayBtn btn-sm "<> (if highlightMissing then " active active-display-btn " else ""))
+                 , onClick (HighlightMissing)] [text "Hilight Missing"]
        , textarea_ [class_ ("assessment-display "<> hiddenDisplay)
                    , id_ "assessment-display"
                    , onChange PasteJSON
@@ -879,12 +887,25 @@ viewModel m@AssessmentModel{
                                  , onClick (UpdateTime (SetTransitionAssessment username queryId paraId1 paraId2 label)) ]
                                  [text $ prettyTransition label]
 
+        transitionUnjudged :: AssessmentTransitionKey -> Bool
+        transitionUnjudged key =
+            (unwrapMaybeAnnotationValue UnsetTransition $ key `M.lookup` transitionState') == UnsetTransition
+
+        facetUnjudged :: AssessmentKey -> Bool
+        facetUnjudged key =
+            let isHid = unwrapMaybeAnnotationValue False $ key `M.lookup` (fromMaybe mempty hiddenState2')
+                allUnset = and [ r == UnsetLabel
+                               | FacetValue{relevance=r} <- (unwrapMaybeAnnotationValueList defaultFacetValues
+                                                            $ key `M.lookup` facetState')
+                               ]
+            in (not isHid) && allUnset
 
         renderTransition:: Paragraph -> Paragraph -> View Action
         renderTransition Paragraph{paraId = paraId1} p2@Paragraph{paraId=paraId2} =
             let assessmentKey = AssessmentTransitionKey queryId paraId1 paraId2
-                hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else "displayed-transition-annotation"
-            in  span_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
+                hiddenTransitionClass = if (isHidden p2) then "hidden-transition-annotation" else
+                                            ( if (highlightMissing && transitionUnjudged assessmentKey) then "unjudged-transition-annotation" else "displayed-transition-annotation")
+            in  div_ [class_ ("transition-annotation annotation " <> hiddenTransitionClass)] [
                     div_ [class_ ("btn-toolbar annotate") ] [
                         mkTransitionButtons assessmentKey paraId1 paraId2
                     ]
@@ -895,7 +916,9 @@ viewModel m@AssessmentModel{
                 hidden = isHidden p
                 hiddenStateClass = if hidden then "hidden-panel" else "shown-panel"
 
-            in li_ [class_ "entity-snippet-li"] [
+                unjudgedClass = ( if (highlightMissing && facetUnjudged assessmentKey) then " unjudged-facet-annotation" else "")
+
+            in li_ [class_ ("entity-snippet-li" <> unjudgedClass)] [
                 p_ [] [
                  mkHidable hidden assessmentKey paraId
                 , div_ [class_ hiddenStateClass] [
