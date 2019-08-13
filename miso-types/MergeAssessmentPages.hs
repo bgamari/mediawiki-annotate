@@ -38,7 +38,6 @@ opts :: Parser (IO ())
 opts = subparser
     $ cmd "page" loadPage'
     <> cmd "doIt" doIt'
---    <> cmd "merge-pages" mergePages'
   where cmd name action = command name (info (helper <*> action) fullDesc)
         loadPage' = loadPage
                   <$> option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "Page definition file (JSON file)")
@@ -46,11 +45,6 @@ opts = subparser
                   <$> many (argument str (metavar "AssessmentFILE" <> help "assessmentFile"))
                   <*> many (option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "page File in JsonL format"))
                   <*> (option str (short 'o' <> long "outdir" <> metavar "DIR" <> help "directory to write merge results to") )
---                  <*> (option (fmap T.pack str) (short 'u' <> long "user" <> metavar "UserId" <> help "user id to consolidate") )
---                  <*> (option (fmap (QueryId . T.pack) str) (short 'q' <> long "squid" <> metavar "Query" <> help "queryId/Squid to merge") )
---        mergePages' = mergePages
---                  <$> some (argument str (metavar "PageFILE" <> help "Page definition file (JSON file)"))
---                  <*> option str (short 'o' <> long "output" <> metavar "JSON" <> help "Json file to write the merged paged to")
 
 loadPage pageFile = do
     pages <- loadJsonL pageFile
@@ -58,13 +52,6 @@ loadPage pageFile = do
 
     forM_ pages (\page -> BSLC.putStrLn $ AesonPretty.encodePretty page)
 
-
---mergePages :: [FilePath] -> FilePath -> IO ()
---mergePages pageFiles outFile = do
---    pages <- mapM loadJsonL pageFiles
---             :: IO [[AssessmentPage]]
---    let out = SubmissionRun pages
---    BSL.writeFile outFile $ Aeson.encode out
 
 loadJson :: FilePath -> IO AssessmentPage
 loadJson pageFile = do
@@ -174,70 +161,6 @@ accumulateThisRun (a@AssessmentState{}) (SavedAssessments{savedData = s@Assessme
                      <> "\n  diffSize: "<> (show $ assessmentStateSize filteredS)
                      <> "\n  accumSize: "<> (show $ assessmentStateSize a2)
                      <> "\n  which are lost? "<> ( unlines $ fmap show $ whichAreLost a2 s)
-
-
-
---  where accumulateThisRun :: (AssessmentState) -> SavedAssessments -> IO (AssessmentState)
---        accumulateThisRun (a@AssessmentState{}) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = thisRunIds, timeStamp =ts}}) = do
---            let filteredA = filterAssessmentStateByRunId (thisRunIds) s
---                a2 = filteredA `mergeAssessmentState` a
---                allRuns2 = assessmentStateRunIds a2
---            debug s filteredA a2 allRuns2
---            return (a2)
---          where debug s filteredA a2 allRuns2 = do
---                    let allRuns = assessmentStateRunIds s
---                    putStrLn $  "timeStamp" <> (show ts) <>  " thisRunIds:" <> (show thisRunIds)
---                             <> "   Difference in runIds = "<> show (allRuns `S.difference` allRuns2) <> "   and   " <>  show (allRuns2 `S.difference` allRuns)
---                             <> "\n  origSize: "<> (show $ assessmentStateSize s)
---                             <> "\n  diffSize: "<> (show $ assessmentStateSize filteredA)
---                             <> "\n  accumSize: "<> (show $ assessmentStateSize a2)
---                             <> "\n  which are lost? "<> ( unlines $ fmap show $ whichAreLost a2 s)
---
-
-
---  where accumulateNewRuns :: (AssessmentState, S.Set RunId) -> SavedAssessments -> IO (AssessmentState, S.Set RunId)
---        accumulateNewRuns (a@AssessmentState{}, prevRuns) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = runIds, timeStamp =ts}}) = do
---            let -- newRuns :: S.Set RunId
-----                newRuns = (S.fromList runIds) `S.difference` (prevRuns)
---                allRuns = assessmentStateRunIds s
---                theseRunIds = allRuns `S.difference` prevRuns  -- at this state there is only one runId per assessment
---
---
---            let filteredA = filterAssessmentStateByRunId (S.toList theseRunIds) s
---                a2 = filteredA `mergeAssessmentState` a
---                allRuns2 = assessmentStateRunIds a2
---            putStrLn $  "timeStamp" <> (show ts) <>  " theseRuns:" <> (show theseRunIds)
---                     <> "   Difference in runIds = "<> show (allRuns `S.difference` allRuns2) <> "   and   " <>  show (allRuns2 `S.difference` allRuns)
---            return (a2, (allRuns))
---
---        accumulateByTimeStamp :: (AssessmentState, Maybe UTCTime) -> SavedAssessments -> IO (AssessmentState, Maybe UTCTime)
---        accumulateByTimeStamp (a@AssessmentState{}, maybeTimeStamp) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = runIds, timeStamp =ts}}) = do
---
---            let allRuns = assessmentStateRunIds s
-----                theseRunIds = allRuns `S.difference` prevRuns  -- at this state there is only one runId per assessment
---
---
---            let filteredA =
---                    case maybeTimeStamp of
---                        Nothing -> s
---                        Just (prevTime) -> filterAssessmentStateByTimeStamp prevTime s
---                diffRuns = assessmentStateRunIds filteredA
-----                a2 = s `mergeAssessmentState` a
---                a2 = filteredA `mergeAssessmentState` a
---                allRuns2 = assessmentStateRunIds a2
---
---
---                lostRemoved = whichAreLost a2 s
---
---
---            putStrLn $  "timeStamp" <> (show ts)   <>  " diffRuns:" <> (show diffRuns)
---                     <> "   Difference in runIds = "<> show (allRuns `S.difference` allRuns2) <> "   and   " <>  show (allRuns2 `S.difference` allRuns)
---                     <> "\n  origSize: "<> (show $ assessmentStateSize s)
---                     <> "\n  diffSize: "<> (show $ assessmentStateSize filteredA)
---                     <> "\n  accumSize: "<> (show $ assessmentStateSize a2)
---                     <> "\n  which are lost? "<> ( unlines $ fmap show $ whichAreLost a2 s)
---
---            return (a2, ts)
 
 whichAreLost AssessmentState{nonrelevantState = lost1}  AssessmentState{nonrelevantState = lost2} =
             let lost = (S.fromList $ M.toList lost2) `S.difference` (S.fromList $ M.toList lost1)
