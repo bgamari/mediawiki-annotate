@@ -8,16 +8,11 @@
 
 module Main where
 
---import Data.Aeson as Aeson
---import qualified Data.Aeson.Encode.Pretty as AesonPretty
---import Data.Text.Encoding
 
 import Options.Applicative
 import Control.Monad
 import GHC.Generics
 import Control.Exception
---import qualified Data.ByteString.Lazy as BSL
---import qualified Data.ByteString.Lazy.Char8 as BSLC
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.List

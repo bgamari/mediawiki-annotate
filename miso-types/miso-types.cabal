@@ -18,10 +18,11 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Types, OldTypes, PageStats
+  exposed-modules:     Types, OldTypes, PageStats, Utils
   build-depends:       base,
                        aeson,
                        text,
+                       bytestring,
                        containers,
                        hashable,
                        time,
