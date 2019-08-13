@@ -8,16 +8,10 @@
 
 module Main where
 
---import Data.Aeson as Aeson
---import qualified Data.Aeson.Encode.Pretty as AesonPretty
---import Data.Text.Encoding
-
 import Options.Applicative
 import Control.Monad
 import GHC.Generics
 import Control.Exception
---import qualified Data.ByteString.Lazy as BSL
---import qualified Data.ByteString.Lazy.Char8 as BSLC
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.List
@@ -36,6 +30,8 @@ import PageStats
 
 import Utils
 
+data SaveAs = SaveAsState | SaveAsSavedAssessments
+
 opts :: Parser (IO ())
 opts = subparser
     $ cmd "page" loadPage'
@@ -47,14 +43,15 @@ opts = subparser
                   <$> many (argument str (metavar "AssessmentFILE" <> help "assessmentFile"))
                   <*> many (option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "page File in JsonL format"))
                   <*> (option str (short 'o' <> long "outdir" <> metavar "DIR" <> help "directory to write merge results to") )
+                  <*> (flag SaveAsState SaveAsSavedAssessments (long "saved-assessments" <> help "Save as SavedAssessments, otherwise save as AssessmentState"))
 
 
-doIt :: [FilePath] -> [FilePath] -> FilePath -> IO ()
-doIt assessmentFiles pageFiles outDir = do
-    user2Assessment <- loadAssessments assessmentFiles
+doIt :: [FilePath] -> [FilePath] -> FilePath -> SaveAs -> IO ()
+doIt assessmentFiles pageFiles outDir saveAs = do
+    user2Assessment <- loadUserAssessments assessmentFiles
     allRuns <- loadRuns pageFiles
 
-    results <- mapM (mergeAssessmentsAndSave outDir) $ M.toList user2Assessment
+    results <- mapM (mergeAssessmentsAndSave outDir saveAs) $ M.toList user2Assessment
 
     putStrLn $ unlines
           $ [ (show userId) <> " " <> (show queryId)  <> "  " <> (show $ apRunId page) <> ": "  <> (show $ pageStats queryId paragraphIds mergedState)
@@ -67,8 +64,8 @@ doIt assessmentFiles pageFiles outDir = do
 
 
 
-mergeAssessmentsAndSave :: FilePath -> ((UserId, QueryId), [SavedAssessments]) ->  IO (((QueryId, UserId), AssessmentState))
-mergeAssessmentsAndSave outDir ((userId, queryId), asQList)  = do
+mergeAssessmentsAndSave :: FilePath -> SaveAs -> ((UserId, QueryId), [SavedAssessments]) ->  IO (((QueryId, UserId), AssessmentState))
+mergeAssessmentsAndSave outDir saveAs ((userId, queryId), asQList)  = do
     let outFile = outDir </> (T.unpack userId) <> "-" <> (T.unpack $ unQueryId queryId) <.> "json"
 
     mergedState <- if (and [ isJust nrs2 | SavedAssessments{savedData=AssessmentState{nonrelevantState2=nrs2}} <- asQList]) then
@@ -76,7 +73,19 @@ mergeAssessmentsAndSave outDir ((userId, queryId), asQList)  = do
                    else
                         foldM accumulateNew (emptyAssessmentState) asQList
 --                        foldlM accumulateThisRun (emptyAssessmentState) asQList
-    writeAssessmentState outFile mergedState
+
+    case saveAs of
+        SaveAsState ->
+            writeAssessmentState outFile mergedState
+        SaveAsSavedAssessments -> do
+            now <- getCurrentTime
+            let meta = AssessmentMetaData {runIds = S.toList $ assessmentStateRunIds mergedState
+                                          , annotatorIds = [userId]
+                                          , timeStamp = Just now
+                                          , sessionId = Nothing  -- todo ignored currently
+                                          }
+            let savedAssessments = SavedAssessments {savedData = mergedState, metaData = meta}
+            writeAssessment outFile savedAssessments
 
 
 

@@ -69,8 +69,8 @@ loadAssessment file =
     either error id . Aeson.eitherDecode <$> BSL.readFile file
 --       :: IO SavedAssessments
 
-loadAssessments :: [FilePath] -> IO (M.Map (UserId, QueryId) [SavedAssessments]) -- sorted list
-loadAssessments filePaths = do
+loadUserAssessments :: [FilePath] -> IO (M.Map (UserId, QueryId) [SavedAssessments]) -- sorted list
+loadUserAssessments filePaths = do
     multiAssessments <- mapM (loadAssessment) filePaths
     let userToAssessment =
             M.fromListWith (<>)
@@ -86,6 +86,10 @@ loadAssessments filePaths = do
 
 writeAssessmentState :: FilePath -> AssessmentState -> IO()
 writeAssessmentState outFile state =
+    BSL.writeFile outFile $ Aeson.encode state
+
+writeAssessment :: FilePath -> SavedAssessments -> IO()
+writeAssessment outFile state =
     BSL.writeFile outFile $ Aeson.encode state
 
 
