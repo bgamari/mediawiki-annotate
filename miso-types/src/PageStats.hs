@@ -30,12 +30,6 @@ defaultFacetValue = FacetValue {facet = noneFacet, relevance = UnsetLabel}
 defaultFacetValues :: [FacetValue]
 defaultFacetValues = [defaultFacetValue]
 
-noneFacet :: AssessmentFacet
-noneFacet =  AssessmentFacet { apHeading=(SectionHeading "OTHER RELEVANT FACET")
-                               , apHeadingId=packHeadingId "NONE_OF_THESE"
-                               }
-
-
 
 data MissingAssessmentStats =
     MissingAssessmentStats { --queryId :: QueryId

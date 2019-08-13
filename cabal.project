@@ -24,6 +24,7 @@ packages:
     assessment-interface/annotation/server
     filter-duplicates/
     miso-types/
+    miso-postprocessing/
     vendor/*
     benchquality/
     tqa-import/

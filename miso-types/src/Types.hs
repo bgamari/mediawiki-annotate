@@ -164,6 +164,19 @@ data AssessmentTransitionLabel = UnsetTransition |  ToNonRelTransition | Offtopi
     deriving (Eq, Ord, FromJSON, ToJSON, Generic, Show)
 
 
+noneFacetId = packHeadingId "NONE_OF_THESE"
+introFacetId = packHeadingId "INTRODUCTION"
+
+noneFacet :: AssessmentFacet
+noneFacet =  AssessmentFacet { apHeading=(SectionHeading "OTHER RELEVANT FACET")
+                               , apHeadingId= noneFacetId
+                               }
+
+introFacet :: AssessmentFacet
+introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION")
+                               , apHeadingId= introFacetId
+                               }
+
 
 
 
