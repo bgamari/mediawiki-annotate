@@ -7,7 +7,7 @@
 module AssessmentEval where
 
 import Data.Maybe
-import Data.Semigroup
+--import Data.Semigroup
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
