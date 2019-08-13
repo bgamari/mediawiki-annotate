@@ -90,4 +90,3 @@ executable assessments-to-qrels
                        trec-car-tools,
                        miso-types
   default-language:    Haskell2010
-  buildable:           false

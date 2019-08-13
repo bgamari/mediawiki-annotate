@@ -25,85 +25,96 @@ import System.FilePath.Posix
 import Options.Applicative
 import qualified Data.Text as T
 
+--import QRel as Q
+import CAR.QRelFile as Q
+
 import CAR.Types
 import Types
 import PageStats
+import CAR.QRelFile
 
 import Utils
 
+import SimplIR.Types.Relevance
+type QrelEntry = Q.Annotation GradedRelevance
+
+
+
 opts :: Parser (IO ())
 opts = subparser
-    $ cmd "page" loadPage'
-    <> cmd "doIt" doIt'
+    $ cmd "doIt" doIt'
   where cmd name action = command name (info (helper <*> action) fullDesc)
-        loadPage' = loadPage
-                  <$> option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "Page definition file (JSON file)")
         doIt' = doIt
                   <$> many (argument str (metavar "AssessmentFILE" <> help "assessmentFile"))
-                  <*> many (option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "page File in JsonL format"))
-                  <*> (option str (short 'o' <> long "outdir" <> metavar "DIR" <> help "directory to write merge results to") )
+                  <*> (option str (short 'o' <> long "out" <> metavar "Qrels" <> help "File where Qrels are written to") )
 
 
-doIt :: [FilePath] -> [FilePath] -> FilePath -> IO ()
-doIt assessmentFiles pageFiles outDir = do
-    user2Assessment <- loadAssessments assessmentFiles
-    allRuns <- loadRuns pageFiles
+doIt :: [FilePath] -> FilePath -> IO ()
+doIt assessmentFiles outQrels = do
+    user2Assessment <- loadUserAssessments assessmentFiles
+    when (or [length lst > 1 | ((u,q), lst) <- M.toList user2Assessment])
+        $ fail "More than one assessment status per user/query. Please use merge-assessment-pages to merge multiple assessment files."
 
-    results <- mapM (mergeAssessmentsAndSave outDir) $ M.toList user2Assessment
+    let user2Assessment' = fmap head user2Assessment
 
-    putStrLn $ unlines
-          $ [ (show userId) <> " " <> (show queryId)  <> "  " <> (show $ apRunId page) <> ": "  <> (show $ pageStats queryId paragraphIds mergedState)
-            | ((queryId, userId), mergedState) <- results
-            , ((queryId2, _runId2), page ) <- M.toList allRuns
-            , apSquid page == queryId
-            , queryId2 == queryId
-            , let paragraphIds = convertToParagraphIds page
-            ]
+    let qrelData = concat $ fmap assessment2FacetQrels $ M.elems user2Assessment'
+    writeParagraphQRel outQrels qrelData
+  where  assessment2FacetQrels (SavedAssessments { savedData = AssessmentState {facetState=facetState', nonrelevantState2=nonrelevantState2'}}) =
+--            let nrEntries =
+--                [ QrelEntry sq p rel
+--                | (key@AssessmentKey{queryId = q, paragraphId = p}
+--                  , AnnotationValue { value = v}
+--                  ) <- HM.toList $ fromMaybe mempty nonrelevantState2'
+--                , v  -- discard entries with value "False"
+--                , let rel = assessmentLabelToGradedRelevance NonRelLabel
+--                , facetId <- pageFacets -- non relevant for page -> not relevant for any facet
+--                , let pageId = squidToQueryId q
+--                , sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = facetId }    -- build SectionPath
+--                ]
+            let nrEntries = []
+                relEntries =
+                    [ CAR.QRelFile.Annotation sq p rel'
+                    | ( key@AssessmentKey{queryId = q, paragraphId = p}
+                      , annValueList
+                      ) <- M.toList facetState'
+                    , AnnotationValue{ value = (FacetValue { facet = AssessmentFacet{apHeadingId = facetId}
+                                                           , relevance = rel})
+                                     } <- annValueList
+                    , not $ isNotRelevant key
+                    , Just rel' <- pure $ assessmentLabelToGradedRelevance rel
+                    , let pageId = squidToQueryId q
+                    , let sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = [facetId] }    -- build SectionPath
+                    ]
+
+                entries = sortBy entriesOrdering $ nrEntries <> relEntries
+            in entries
+
+           where isNotRelevant :: AssessmentKey -> Bool
+                 isNotRelevant key =
+                    let nrMap = fromMaybe mempty nonrelevantState2'
+                    in unwrapMaybeAnnotationValue False $ key `M.lookup` nrMap
+
+         entriesOrdering :: QrelEntry -> QrelEntry -> Ordering
+         entriesOrdering (CAR.QRelFile.Annotation q1 d1 r1) (CAR.QRelFile.Annotation q2 d2 r2)  =
+            case compare q1 q2 of
+                EQ -> case compare d1 d2 of
+                        EQ -> compare r1 r2
+                        y -> y
+                x -> x
 
 
+squidToQueryId :: QueryId -> PageId
+squidToQueryId squid = packPageId $ T.unpack $ unQueryId squid
 
-mergeAssessmentsAndSave :: FilePath -> ((UserId, QueryId), [SavedAssessments]) ->  IO (((QueryId, UserId), AssessmentState))
-mergeAssessmentsAndSave outDir ((userId, queryId), asQList)  = do
-    let outFile = outDir </> (T.unpack userId) <> "-" <> (T.unpack $ unQueryId queryId) <.> "json"
-
-    mergedState <- if (and [ isJust nrs2 | SavedAssessments{savedData=AssessmentState{nonrelevantState2=nrs2}} <- asQList]) then
-                        foldM accumulateNew (emptyAssessmentState) asQList
-                   else
-                        foldM accumulateNew (emptyAssessmentState) asQList
---                        foldlM accumulateThisRun (emptyAssessmentState) asQList
-    writeAssessmentState outFile mergedState
-
-
-
-    print $ "Written "<> outFile
-    return $ ((queryId, userId), mergedState)
-
-
-accumulateNew :: (AssessmentState) -> SavedAssessments -> IO (AssessmentState)
-accumulateNew (a@AssessmentState{}) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = thisRunIds, timeStamp =ts}}) = do
-    let a2 = mergeAssessmentState s a
-    putStrLn $  "accumNew    timeStamp" <> (show ts) <> " " <> (show $ assessmentStateQueryIds s) <> " thisRunIds:" <> (show thisRunIds)
-    return (a2)
-
-accumulateThisRun :: (AssessmentState) -> SavedAssessments -> IO (AssessmentState)
-accumulateThisRun (a@AssessmentState{}) (SavedAssessments{savedData = s@AssessmentState{..}, metaData = AssessmentMetaData{runIds = thisRunIds, timeStamp =ts}}) = do
-    let filteredS = filterAssessmentStateByRunId (thisRunIds) s
-        a2 = mergeAssessmentState filteredS a
-        allRuns2 = assessmentStateRunIds a2
-    debug s filteredS a2 allRuns2
-    return (a2)
-  where debug s filteredS a2 allRuns2 = do
-            let allRuns = assessmentStateRunIds s
-            putStrLn $  "accumOld timeStamp" <> (show ts) <> " " <> (show $ assessmentStateQueryIds s) <> " thisRunIds:" <> (show thisRunIds)
-                     <> "   Difference in runIds = "<> show (allRuns `S.difference` allRuns2) <> "   and   " <>  show (allRuns2 `S.difference` allRuns)
-                     <> "\n  origSize: "<> (show $ assessmentStateSize s)
-                     <> "\n  diffSize: "<> (show $ assessmentStateSize filteredS)
-                     <> "\n  accumSize: "<> (show $ assessmentStateSize a2)
-                     <> "\n  which are lost? "<> ( unlines $ fmap show $ whichAreLost a2 s)
-
-whichAreLost AssessmentState{nonrelevantState = lost1}  AssessmentState{nonrelevantState = lost2} =
-            let lost = (S.fromList $ M.toList lost2) `S.difference` (S.fromList $ M.toList lost1)
-            in [ (ts1, para1, runIds1) | (AssessmentKey{paragraphId=para1}, AnnotationValue{timeStamp= ts1, runIds=runIds1}) <- S.toList lost]
+assessmentLabelToGradedRelevance :: AssessmentLabel -> Maybe GradedRelevance
+assessmentLabelToGradedRelevance UnsetLabel = Nothing
+assessmentLabelToGradedRelevance TrashLabel = Just $ GradedRelevance (-2)
+assessmentLabelToGradedRelevance DuplicateLabel = Nothing
+assessmentLabelToGradedRelevance NonRelLabel = Just $ GradedRelevance 0
+assessmentLabelToGradedRelevance TopicLabel = Just $ GradedRelevance 0
+assessmentLabelToGradedRelevance CanLabel = Just $ GradedRelevance 1
+assessmentLabelToGradedRelevance ShouldLabel = Just $ GradedRelevance 2
+assessmentLabelToGradedRelevance MustLabel = Just $ GradedRelevance 3
 
 
 main :: IO ()
