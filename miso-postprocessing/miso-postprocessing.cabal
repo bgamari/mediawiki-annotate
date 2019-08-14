@@ -15,13 +15,17 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
---library
-  -- exposed-modules:
+library
+  exposed-modules: MisoPostprocessing.Utils
   -- other-modules:
   -- other-extensions:
-  -- build-depends:       base >=4.11 && <4.12
-  -- hs-source-dirs:      src
-  -- default-language:    Haskell2010
+  build-depends:       base >=4.11 && <5,
+                       text,
+                       simplir-io,
+                       miso-types,
+                       trec-car-types
+  hs-source-dirs:      src
+  default-language:    Haskell2010
 
 
 
@@ -38,7 +42,8 @@ executable merge-assessment-pages
                        hashable,
                        containers,
                        trec-car-types,
-                       miso-types
+                       miso-types,
+                       miso-postprocessing
   default-language:    Haskell2010
 
 executable assessments-to-qrels
@@ -56,5 +61,26 @@ executable assessments-to-qrels
                        simplir-io,
                        trec-car-types,
                        trec-car-tools,
-                       miso-types
+                       miso-types,
+                       miso-postprocessing
+  default-language:    Haskell2010
+
+executable car-y3-assessment-page-eval
+  main-is:             CarY3AssessmentPageEval.hs
+  build-depends:       base,
+                       bytestring,
+                       optparse-applicative >= 0.12,
+                       aeson,
+                       aeson-pretty,
+                       text,
+                       time,
+                       filepath,
+                       hashable,
+                       containers,
+                       simplir-io,
+                       simplir-eval,
+                       trec-car-types,
+                       trec-car-tools,
+                       miso-types,
+                       miso-postprocessing
   default-language:    Haskell2010

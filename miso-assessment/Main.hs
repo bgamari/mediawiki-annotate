@@ -201,12 +201,6 @@ unwrapValue :: AnnotationValue v -> v
 unwrapValue AnnotationValue {value = v} = v
 
 
-maxLabel :: Maybe [AnnotationValue FacetValue] -> AssessmentLabel
-maxLabel Nothing = UnsetLabel
-maxLabel (Just []) = UnsetLabel
-maxLabel (Just lst) = L.maximum [label |  AnnotationValue{value=FacetValue{relevance=label}}  <- lst]
-
-
 clearLocalModel :: UserId -> QueryId -> JSM ()
 clearLocalModel userId queryId = do
     let key = storageKeyQuery userId queryId

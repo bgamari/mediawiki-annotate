@@ -34,6 +34,7 @@ import PageStats
 import CAR.QRelFile
 
 import Utils
+import MisoPostprocessing.Utils
 
 import SimplIR.Types.Relevance
 type QrelEntry = Q.Annotation GradedRelevance
@@ -129,18 +130,6 @@ doIt assessmentFiles outQrels sectionOrPageLevel includeFacets = do
                 x -> x
 
 
-squidToQueryId :: QueryId -> PageId
-squidToQueryId squid = packPageId $ T.unpack $ unQueryId squid
-
-assessmentLabelToGradedRelevance :: AssessmentLabel -> Maybe GradedRelevance
-assessmentLabelToGradedRelevance UnsetLabel = Nothing
-assessmentLabelToGradedRelevance TrashLabel = Just $ GradedRelevance (-2)
-assessmentLabelToGradedRelevance DuplicateLabel = Nothing
-assessmentLabelToGradedRelevance NonRelLabel = Just $ GradedRelevance 0
-assessmentLabelToGradedRelevance TopicLabel = Just $ GradedRelevance 0
-assessmentLabelToGradedRelevance CanLabel = Just $ GradedRelevance 1
-assessmentLabelToGradedRelevance ShouldLabel = Just $ GradedRelevance 2
-assessmentLabelToGradedRelevance MustLabel = Just $ GradedRelevance 3
 
 
 main :: IO ()

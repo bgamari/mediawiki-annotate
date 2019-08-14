@@ -178,6 +178,12 @@ introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION"
                                }
 
 
+maxLabel :: Maybe [AnnotationValue FacetValue] -> AssessmentLabel
+maxLabel Nothing = UnsetLabel
+maxLabel (Just []) = UnsetLabel
+maxLabel (Just lst) = Data.List.maximum [label |  AnnotationValue{value=FacetValue{relevance=label}}  <- lst]
+
+
 
 
 data AssessmentKey = AssessmentKey {

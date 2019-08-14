@@ -84,6 +84,17 @@ loadUserAssessments filePaths = do
   where sortList :: [SavedAssessments] -> [SavedAssessments]
         sortList lst = sortOn (\x -> (timeStamp :: AssessmentMetaData -> Maybe UTCTime ) $ metaData x) lst
 
+loadQueryAssessments :: [FilePath] -> IO (M.Map (QueryId) SavedAssessments) -- overwrite duplicate queries
+loadQueryAssessments filePaths = do
+    multiAssessments <- mapM (loadAssessment) filePaths
+    let userToAssessment =
+            M.fromList
+            [ ((queryId), sa)
+            | sa@SavedAssessments{savedData = state } <- multiAssessments
+            , queryId <- S.toList $ assessmentStateQueryIds state
+            ]
+    return userToAssessment
+
 writeAssessmentState :: FilePath -> AssessmentState -> IO()
 writeAssessmentState outFile state =
     BSL.writeFile outFile $ Aeson.encode state
