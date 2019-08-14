@@ -156,10 +156,6 @@ emptyAssessmentModel = LoadingPageModel { maybeStopwords = Nothing
                                         , maybeUsername = Nothing
                                         }
 
-introFacet :: AssessmentFacet
-introFacet =  AssessmentFacet { apHeading=(SectionHeading "GENERAL/INTRODUCTION")
-                               , apHeadingId=packHeadingId "INTRODUCTION"
-                               }
 
 -- | Type synonym for an application model
 type Model = AssessmentModel

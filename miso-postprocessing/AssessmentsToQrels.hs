@@ -38,6 +38,7 @@ import Utils
 import SimplIR.Types.Relevance
 type QrelEntry = Q.Annotation GradedRelevance
 
+data SectionOrPageLevel = SectionLevel | PageLevel
 
 
 opts :: Parser (IO ())
@@ -47,19 +48,20 @@ opts = subparser
         doIt' = doIt
                   <$> many (argument str (metavar "AssessmentFILE" <> help "assessmentFile"))
                   <*> (option str (short 'o' <> long "out" <> metavar "Qrels" <> help "File where Qrels are written to") )
+                  <*> flag PageLevel SectionLevel ( long "section-level" <> help "Write section-level qrels (default: page-level)" )
 
 
-doIt :: [FilePath] -> FilePath -> IO ()
-doIt assessmentFiles outQrels = do
+doIt :: [FilePath] -> FilePath -> SectionOrPageLevel -> IO ()
+doIt assessmentFiles outQrels sectionOrPageLevel = do
     user2Assessment <- loadUserAssessments assessmentFiles
     when (or [length lst > 1 | ((u,q), lst) <- M.toList user2Assessment])
         $ fail "More than one assessment status per user/query. Please use merge-assessment-pages to merge multiple assessment files."
 
     let user2Assessment' = fmap head user2Assessment
 
-    let qrelData = concat $ fmap assessment2FacetQrels $ M.elems user2Assessment'
+    let qrelData = concat $ fmap (assessment2FacetQrels sectionOrPageLevel) $ M.elems user2Assessment'
     writeParagraphQRel outQrels qrelData
-  where  assessment2FacetQrels (SavedAssessments { savedData = AssessmentState {facetState=facetState', nonrelevantState2=nonrelevantState2'}}) =
+  where  assessment2FacetQrels sectionOrPageLevel (SavedAssessments { savedData = AssessmentState {facetState=facetState', nonrelevantState2=nonrelevantState2'}}) =
 --            let nrEntries =
 --                [ QrelEntry sq p rel
 --                | (key@AssessmentKey{queryId = q, paragraphId = p}
@@ -72,20 +74,35 @@ doIt assessmentFiles outQrels = do
 --                , sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = facetId }    -- build SectionPath
 --                ]
             let nrEntries = []
-                relEntries =
-                    [ CAR.QRelFile.Annotation sq p rel'
-                    | ( key@AssessmentKey{queryId = q, paragraphId = p}
-                      , annValueList
-                      ) <- M.toList facetState'
-                    , AnnotationValue{ value = (FacetValue { facet = AssessmentFacet{apHeadingId = facetId}
-                                                           , relevance = rel})
-                                     } <- annValueList
-                    , not $ isNotRelevant key
-                    , Just rel' <- pure $ assessmentLabelToGradedRelevance rel
-                    , let pageId = squidToQueryId q
-                    , let sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = [facetId] }    -- build SectionPath
-                    ]
 
+                relEntries =
+                    case sectionOrPageLevel of
+                      SectionLevel ->
+                        [ CAR.QRelFile.Annotation sq p rel'
+                        | ( key@AssessmentKey{queryId = q, paragraphId = p}
+                          , annValueList
+                          ) <- M.toList facetState'
+                        , not $ isNotRelevant key
+                        , let pageId = squidToQueryId q
+                        , AnnotationValue{ value = (FacetValue { facet = AssessmentFacet{apHeadingId = facetId}
+                                                               , relevance = rel})
+                                         } <- annValueList
+                        , Just rel' <- pure $ assessmentLabelToGradedRelevance rel
+                        , facetId /= noneFacetId
+                        , facetId /= introFacetId
+                        , let sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = [facetId] }    -- build SectionPath
+                        ]
+                      PageLevel ->
+                        [ CAR.QRelFile.Annotation sq p rel'
+                        | ( key@AssessmentKey{queryId = q, paragraphId = p}
+                          , annValueList
+                          ) <- M.toList facetState'
+                        , not $ isNotRelevant key
+                        , let pageId = squidToQueryId q
+                        , let rel = maxRelevance annValueList
+                        , Just rel' <- pure $ assessmentLabelToGradedRelevance rel
+                        , let sq = SectionPath {sectionPathPageId = pageId, sectionPathHeadings = [] }    -- build SectionPath
+                        ]
                 entries = sortBy entriesOrdering $ nrEntries <> relEntries
             in entries
 
@@ -93,6 +110,13 @@ doIt assessmentFiles outQrels = do
                  isNotRelevant key =
                     let nrMap = fromMaybe mempty nonrelevantState2'
                     in unwrapMaybeAnnotationValue False $ key `M.lookup` nrMap
+
+
+         maxRelevance :: [AnnotationValue FacetValue] -> AssessmentLabel
+         maxRelevance annValueList =
+            maximum
+            $ fmap (\AnnotationValue{ value = (FacetValue {relevance = rel})} -> rel)
+            $ annValueList
 
          entriesOrdering :: QrelEntry -> QrelEntry -> Ordering
          entriesOrdering (CAR.QRelFile.Annotation q1 d1 r1) (CAR.QRelFile.Annotation q2 d2 r2)  =
