@@ -33,6 +33,7 @@ packages:
     dbpedia-entity-import/
     tag-me/
     evalmetrics/
+    crate/
 
 package mediawiki-parser
     tests: True
