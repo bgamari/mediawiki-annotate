@@ -47,29 +47,72 @@ main = do
     (pagesCborFile, outFile, crateMode, numPages) <- execParser $ info (helper <*> args) mempty
     pages <- readPagesFile pagesCborFile
 
-    let cratifyPage = relevanceData
-    outData <-  mapM relevanceData $ take numPages pages
+    let cratifyPage = case crateMode of
+            CrateRelevance -> relevanceData
+            CrateCluster -> clusterData
+            CrateTransition  -> transitionData
+            x -> fail ("Not implemented: "++  (show x))
+    outData <-  mapM cratifyPage $ take numPages pages
     writeBert outFile $ concat outData
 
-  where relevanceData :: Page -> IO [BertData]
-        relevanceData page = do
-             let secs :: [(SectionPath, [SectionHeading], [PageSkeleton])]
-                 secs = pageSections page
-                 posData =
-                    [ BertData 1 (sectionPathToId sectionPath) (paragraphToId p) (headingsToText headings) (paragraphToText p)
-                    | (sectionPath, headings, skels) <- secs
-                    , Para p@(Paragraph {})  <- skels
-                    ]
+relevanceData :: Page -> IO [BertData]
+relevanceData page = do
+     let secs :: [(SectionPath, [SectionHeading], [PageSkeleton])]
+         secs = pageSections page
+         posData =
+            [ BertData 1 (sectionPathToId sectionPath) (paragraphToId p) (headingsToText headings) (paragraphToText p)
+            | (sectionPath, headings, skels) <- secs
+            , Para p@(Paragraph {})  <- skels
+            ]
 
-                 negData =
-                    [ BertData 0 (sectionPathToId sectionPath) (paragraphToId p) (headingsToText headings2) (paragraphToText p)
-                    | s1@(sectionPath, _headings, skels) <- secs
-                    , s2@(sectionPath2, headings2, _skels2) <- secs
-                    , sectionPath /= sectionPath2
-                    , Para p@(Paragraph {})  <- skels
-                    ]
+         negData =
+            [ BertData 0 (sectionPathToId sectionPath) (paragraphToId p) (headingsToText headings2) (paragraphToText p)
+            | s1@(sectionPath, _headings, skels) <- secs
+            , s2@(sectionPath2, headings2, _skels2) <- secs
+            , sectionPath /= sectionPath2
+            , Para p@(Paragraph {})  <- skels
+            ]
 
-             balanceData posData negData
+     balanceData posData negData
+
+
+clusterData :: Page -> IO [BertData]
+clusterData page = do
+     let secs :: [(SectionPath, [SectionHeading], [PageSkeleton])]
+         secs = pageSections page
+
+         bothData =
+            [ BertData target (paragraphToId p1) (paragraphToId p2) (paragraphToText p1) (paragraphToText p2)
+            | s1@(sectionPath1, headings1, skels1) <- secs
+            , s2@(sectionPath2, headings2, skels2) <- secs
+            , let target = if (sectionPathToId sectionPath1) /= (sectionPathToId sectionPath2) then 0 else 1
+            , Para p1@(Paragraph {paraId=paraId1})  <- skels1
+            , Para p2@(Paragraph {paraId=paraId2})  <- skels2
+            , paraId1 /= paraId2
+            , paraId1 < paraId2
+            ]
+
+--         (posData, negData) = partition (\BertData {targetLabel = l} -> l == 1) bothData
+--     putStrLn $ show (length posData) <> "  " <> show (length negData)
+--     balanceData posData negData
+     return bothData
+
+
+transitionData :: Page -> IO [BertData]
+transitionData page = do
+     let posData =
+            [ BertData 1 (paragraphToId p1) (paragraphToId p2) (paragraphToText p1) (paragraphToText p2)
+            | [p1@(Paragraph {paraId=paraId1}), p2@(Paragraph {paraId=paraId2})] <- slidingWindow 2 $ pageParas page
+            ]
+
+         negData =
+            [ BertData 0 (paragraphToId p1) (paragraphToId p2) (paragraphToText p1) (paragraphToText p2)
+            | [p1@(Paragraph {paraId=paraId1}), _, _, _, p2@(Paragraph {paraId=paraId2})] <- slidingWindow 5 $ pageParas page
+            ]
+
+     putStrLn $ show (length posData) <> "  " <> show (length negData)
+     balanceData posData negData
+--     return bothData
 
 
 
@@ -112,3 +155,10 @@ paragraphToText (Paragraph  _ bodies) =
     T.concat $ fmap toText bodies
   where toText (ParaText text) = text
         toText (ParaLink link) = linkAnchor link
+
+slidingWindow :: Int -> [a] -> [[a]]
+slidingWindow chunkSize lst =
+    go lst
+  where go :: [a] -> [[a]]
+        go lst' | length lst' <= chunkSize = [lst']
+        go lst' = (take chunkSize lst': go (drop 1 lst'))
