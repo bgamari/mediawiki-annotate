@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 
 import Options.Applicative
@@ -15,11 +16,16 @@ import qualified Data.Text as T
 import Data.String
 import Data.List
 
-args :: Parser (FilePath, FilePath)
+data CrateMode = CrateRelevance | CrateCluster | CrateTransition
+    deriving (Show, Read, Ord, Eq, Enum, Bounded)
+
+args :: Parser (FilePath, FilePath, CrateMode, Int)
 args =
-    (,)
+    (,,,)
       <$> argument str (metavar "CBOR" <> help "Cbor Pages File")
-      <*> argument str (metavar "FILE" <> help "Outut file")
+      <*> argument str (metavar "FILE" <> help "Output file")
+      <*> argument auto (metavar "MODE" <> help ("convertion mode, one of " ++ (show [minBound @CrateMode .. maxBound])))
+      <*> option auto (short 'k' <> long "num-pages" <> metavar "K" <> help "number of pages to convert")
 
 data BertData = BertData { targetLabel :: Int
                          , id1 :: T.Text
@@ -38,11 +44,11 @@ writeBert outputFile bertData =
 
 main :: IO ()
 main = do
-    (pagesCborFile, outFile) <- execParser $ info (helper <*> args) mempty
+    (pagesCborFile, outFile, crateMode, numPages) <- execParser $ info (helper <*> args) mempty
     pages <- readPagesFile pagesCborFile
 
     let cratifyPage = relevanceData
-    outData <-  mapM relevanceData $ take 10 pages
+    outData <-  mapM relevanceData $ take numPages pages
     writeBert outFile $ concat outData
 
   where relevanceData :: Page -> IO [BertData]
