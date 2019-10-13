@@ -136,6 +136,22 @@ relevanceMetric queryId PageAssessmentData{..} =
             ]
             <> [0.0 | paraId <- removedParagraphs] -- removed paragraphs
 
+--
+--coverageMetric :: QueryId -> PageAssessmentData -> TrecEvalResult
+--coverageMetric queryId PageAssessmentData{..} =
+--    TrecEvalResult { trecEvalMetric = Metric $ "coverage"
+--                   , trecEvalQuery = Just $ T.unpack $ unQueryId queryId
+--                   , trecEvalScore = coverageScore }
+--  where coverageScore =
+--        assFacets = ...
+--        coveredFacets = S.fromList
+--            $ [ facetId
+--            | (_, facetValues)  <- facetAssessments
+--            , facetId <-  [  apHeadingId fId
+--               | FacetValue{facet = facetValues} <- facetValues
+--               , FacetValue{facet = fId} <- facetValues]
+--            ]
+
 main :: IO ()
 main = join $ execParser' (helper <*> opts) mempty
 

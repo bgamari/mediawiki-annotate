@@ -31,6 +31,8 @@ import PageStats
 import Utils
 
 data SaveAs = SaveAsState | SaveAsSavedAssessments
+data JudgeInfo = JudgeInfoAnonymized | JudgeInfoPreserved
+data DataClean = DataClean | DataKeepAsIs
 
 opts :: Parser (IO ())
 opts = subparser
@@ -44,14 +46,16 @@ opts = subparser
                   <*> many (option str (short 'p' <> long "page" <> metavar "PageFILE" <> help "page File in JsonL format"))
                   <*> (option str (short 'o' <> long "outdir" <> metavar "DIR" <> help "directory to write merge results to") )
                   <*> (flag SaveAsState SaveAsSavedAssessments (long "saved-assessments" <> help "Save as SavedAssessments, otherwise save as AssessmentState"))
+                  <*> (flag JudgeInfoPreserved  JudgeInfoAnonymized (long "anonymized" <> help "Anonymize assessor information, provenance, and timestamps"))
+                  <*> (flag DataKeepAsIs  DataClean (long "clean" <> help "Clean data, i.e., remove entries with invalid or redundant values"))
 
 
-doIt :: [FilePath] -> [FilePath] -> FilePath -> SaveAs -> IO ()
-doIt assessmentFiles pageFiles outDir saveAs = do
+doIt :: [FilePath] -> [FilePath] -> FilePath -> SaveAs -> JudgeInfo -> DataClean -> IO ()
+doIt assessmentFiles pageFiles outDir saveAs judgeInfo dataClean = do
     user2Assessment <- loadUserAssessments assessmentFiles
     allRuns <- loadRuns pageFiles
-
-    results <- mapM (mergeAssessmentsAndSave outDir saveAs) $ M.toList user2Assessment
+    now <- getCurrentTime
+    results <- mapM (mergeAssessmentsAndSave outDir now saveAs judgeInfo dataClean) $ M.toList user2Assessment
 
     putStrLn $ unlines
           $ [ (show userId) <> " " <> (show queryId)  <> "  " <> (show $ apRunId page) <> ": "  <> (show $ pageStats queryId paragraphIds mergedState)
@@ -64,8 +68,8 @@ doIt assessmentFiles pageFiles outDir saveAs = do
 
 
 
-mergeAssessmentsAndSave :: FilePath -> SaveAs -> ((UserId, QueryId), [SavedAssessments]) ->  IO (((QueryId, UserId), AssessmentState))
-mergeAssessmentsAndSave outDir saveAs ((userId, queryId), asQList)  = do
+mergeAssessmentsAndSave :: FilePath -> UTCTime -> SaveAs -> JudgeInfo -> DataClean -> ((UserId, QueryId), [SavedAssessments]) ->  IO (((QueryId, UserId), AssessmentState))
+mergeAssessmentsAndSave outDir now saveAs judgeInfo dataClean ((userId, queryId), asQList)  = do
     let outFile = outDir </> (T.unpack userId) <> "-" <> (T.unpack $ unQueryId queryId) <.> "json"
 
     mergedState <- if (and [ isJust nrs2 | SavedAssessments{savedData=AssessmentState{nonrelevantState2=nrs2}} <- asQList]) then
@@ -74,17 +78,44 @@ mergeAssessmentsAndSave outDir saveAs ((userId, queryId), asQList)  = do
                         foldM accumulateNew (emptyAssessmentState) asQList
 --                        foldlM accumulateThisRun (emptyAssessmentState) asQList
 
+    let mergedStateAnonymized = anonymizeAssessmentState now mergedState
+        mergedState' =
+            case judgeInfo of
+                JudgeInfoPreserved ->
+                       mergedState
+                JudgeInfoAnonymized ->
+                       anonymizeAssessmentState now mergedState
+
+        mergedState'' =
+            case dataClean of
+                DataKeepAsIs ->
+                    mergedState'
+                DataClean ->
+                    cleanAssessmentState mergedState'
+
+
     case saveAs of
         SaveAsState ->
-            writeAssessmentState outFile mergedState
+            writeAssessmentState outFile mergedState''
         SaveAsSavedAssessments -> do
             now <- getCurrentTime
-            let meta = AssessmentMetaData {runIds = S.toList $ assessmentStateRunIds mergedState
+            let meta = AssessmentMetaData {runIds = S.toList $ assessmentStateRunIds mergedState'
                                           , annotatorIds = [userId]
                                           , timeStamp = Just now
                                           , sessionId = Nothing  -- todo ignored currently
                                           }
-            let savedAssessments = SavedAssessments {savedData = mergedState, metaData = meta}
+                anonmeta = AssessmentMetaData {runIds = []
+                                          , annotatorIds = ["NIST"]
+                                          , timeStamp = Just now
+                                          , sessionId = Just "CAR-Y3"  -- todo ignored currently
+                                          }
+                meta' =
+                    case judgeInfo of
+                        JudgeInfoPreserved ->
+                               meta
+                        JudgeInfoAnonymized ->
+                               anonmeta
+            let savedAssessments = SavedAssessments {savedData = mergedState', metaData = meta'}
             writeAssessment outFile savedAssessments
 
 

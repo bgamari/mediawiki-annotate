@@ -296,6 +296,65 @@ filterAssessmentStateByTimeStamp afterTime a@AssessmentState{} =
                           , thisTime > afterTime
                           ]
 
+
+
+anonymizeAssessmentState :: UTCTime -> AssessmentState -> AssessmentState
+anonymizeAssessmentState now a@AssessmentState{} =
+     a { notesState = anonMapOfLists $ notesState a
+       , facetState = anonMapOfLists $ facetState a
+       , transitionLabelState = anonMap $ transitionLabelState a
+       , nonrelevantState = anonMap $ nonrelevantState a
+       , nonrelevantState2 = fmap (anonMap) $ nonrelevantState2 a
+       , assessorData =  mempty
+       }
+  where anonMapOfLists :: Ord k => M.Map k [(AnnotationValue a)] -> M.Map k [(AnnotationValue a)]
+        anonMapOfLists mapOfLists =
+             M.fromList $ [ (k, fmap anonymize lst)
+                          | (k,lst) <- M.toList mapOfLists
+                          ]
+
+        anonMap :: Ord k => M.Map k (AnnotationValue a) -> M.Map k (AnnotationValue a)
+        anonMap mapOf =
+             M.fromList $ [ (k,anonymize v)
+                          | (k,v@a@AnnotationValue{}) <- M.toList mapOf
+                          ]
+        anonymize :: AnnotationValue a -> AnnotationValue a
+        anonymize a =
+            a{ runIds = [], timeStamp = now, sessionId = "CAR-Y3", annotatorId = "NIST" }
+
+
+cleanAssessmentState :: AssessmentState -> AssessmentState
+cleanAssessmentState a@AssessmentState{} =
+     a { facetState = defaultFacetMapOfLists $ facetState a
+       , transitionLabelState = M.filter isValidTransition $  transitionLabelState a
+       , nonrelevantState = mempty
+       , nonrelevantState2 = fmap deleteFalse $ nonrelevantState2 a
+      }
+  where defaultFacetMapOfLists :: Ord k => M.Map k [(AnnotationValue FacetValue)] -> M.Map k [(AnnotationValue FacetValue)]
+        defaultFacetMapOfLists mapOfLists =
+             M.fromList $ [ (k, mapMaybe defaultFacetItem lst)
+                          | (k,lst) <- M.toList mapOfLists
+                          ]
+
+        defaultFacetItem :: AnnotationValue FacetValue -> Maybe (AnnotationValue FacetValue)
+        defaultFacetItem a@AnnotationValue{value=FacetValue {facet = facet, relevance = UnsetLabel}} | facet == noneFacet =
+            Nothing
+        defaultFacetItem a@AnnotationValue{value=v@FacetValue {relevance = UnsetLabel}} =
+            Just $ a {value = v {relevance = ShouldLabel}}
+        defaultFacetItem a =
+            Just a
+
+        isValidTransition :: AnnotationValue AssessmentTransitionLabel -> Bool
+        isValidTransition (AnnotationValue{value = transition}) =
+            transition /= UnsetTransition
+
+
+        deleteFalse :: M.Map AssessmentKey (AnnotationValue Bool) -> M.Map AssessmentKey (AnnotationValue Bool)
+        deleteFalse m =
+               M.filter (\AnnotationValue{value=val} -> val) m
+
+
+
 data AssessmentState = AssessmentState {
                     notesState :: M.Map AssessmentKey [(AnnotationValue T.Text)]
                     , facetState :: M.Map AssessmentKey [(AnnotationValue FacetValue)]
