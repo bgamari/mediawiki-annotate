@@ -6,6 +6,8 @@
 {-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
+module Main where
+
 import Control.Concurrent
 import Control.Exception
 import Control.DeepSeq
