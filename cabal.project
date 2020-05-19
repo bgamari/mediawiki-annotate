@@ -4,7 +4,6 @@ allow-newer:
     profunctors
 
 packages:
-    vendor/pinch/
     trec-car-tools-haskell/trec-car-tools/
     trec-car-tools-haskell/trec-car-types/
     trec-car-tools-haskell/simplir/*/*.cabal
@@ -15,11 +14,13 @@ packages:
     mediawiki-import/
     mediawiki-convert/
     db-export/
+    -- deactivated because they are intertwined with or evil twins of ENT-rank. Todo cut into a different project
     --graph-expansion/
     --ENT-rank/ent-rank-tools/
     --ENT-rank/ent-rank/
     --learning-to-walk/
-    --ENT-rank/graph-algorithms/
+    --benchquality/
+
     car-baselines/
     assessment-interface/
     assessment-interface/annotation/server
@@ -27,7 +28,6 @@ packages:
     miso-types/
     miso-postprocessing/
     vendor/*
-    --benchquality/
     tqa-import/
     trec-news/
     epfl-section-recommendation/
@@ -46,3 +46,8 @@ source-repository-package
   type: git
   location: https://github.com/recursion-ninja/fgl.git
   tag: d49cd7b0cd766d9f4647e140e263de1b94ace0c5
+
+source-repository-package
+  type: git
+  location: https://github.com/bgamari/wordnet-parse
+  tag: 329a67ad994cf299e292db645420f645f8fe6440

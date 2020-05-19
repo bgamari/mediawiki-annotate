@@ -25,7 +25,6 @@
 [submodule "vendor/frisby"]
 	path = vendor/frisby
 	url = git://github.com/bgamari/frisby
-
 [submodule "miso-library"]
 	path = miso-library
 	url = https://github.com/dmjio/miso.git
