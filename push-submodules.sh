@@ -1,11 +1,11 @@
 cd ENT-rank/trec-car-tools-haskell/simplir/
 
 git push origin HEAD:master
+git push gitlab HEAD:master
 
 cd ..
 
 git commit -a -m "bump simplir"
-git push gitlab HEAD:master
 git push origin HEAD:master
 
 cd ..
