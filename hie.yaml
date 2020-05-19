@@ -1,0 +1,445 @@
+cradle:
+  cabal:
+    - path: "ENT-rank/ent-rank/src"
+      component: "lib:ent-rank"
+
+    - path: "ENT-rank/ent-rank/EntRankMain.hs"
+      component: "ent-rank:exe:graph-expansion-feature-generation"
+
+    - path: "ENT-rank/ent-rank/PageDocCorpusMain.hs"
+      component: "ent-rank:exe:graph-expansion-page-doc"
+
+    - path: "ENT-rank/ent-rank-tools/src"
+      component: "lib:ent-rank-tools"
+
+    - path: "ENT-rank/graph-algorithms/src"
+      component: "lib:graph-algorithms"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir/src"
+      component: "lib:simplir"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir/src"
+      component: "lib:simplir"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir/tests"
+      component: "simplir:test:tests"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-data-source/./"
+      component: "lib:simplir-data-source"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-data-source-s3/./"
+      component: "lib:simplir-data-source-s3"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-disk-index/src"
+      component: "lib:simplir-disk-index"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-disk-index/src"
+      component: "lib:simplir-disk-index"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-disk-index/DumpPostings.hs"
+      component: "simplir-disk-index:exe:dump-postings"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-disk-index/tests"
+      component: "simplir-disk-index:test:tests"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-eval/src"
+      component: "lib:simplir-eval"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-eval/src"
+      component: "lib:simplir-eval"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-eval/Main.hs"
+      component: "simplir-eval:exe:simplir-eval"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-eval/MergeRankings.hs"
+      component: "simplir-eval:exe:simplir-merge-runs"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-eval/tests"
+      component: "simplir-eval:test:vs-trec-eval"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-galago/."
+      component: "lib:simplir-galago"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-html-clean/src"
+      component: "lib:simplir-html-clean"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-html-clean/Main.hs"
+      component: "simplir-html-clean:exe:html-clean"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-io/src"
+      component: "lib:simplir-io"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-kyoto-index/src"
+      component: "lib:simplir-kyoto-index"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-learning-to-rank/src"
+      component: "lib:simplir-learning-to-rank"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-learning-to-rank/Learn2Rank.hs"
+      component: "simplir-learning-to-rank:exe:simplir-learn2rank"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-learning-to-rank/tests"
+      component: "simplir-learning-to-rank:test:tests"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-leveldb-index/src"
+      component: "lib:simplir-leveldb-index"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-pipes-utils/src"
+      component: "lib:simplir-pipes-utils"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-stop-words/src"
+      component: "lib:simplir-stop-words"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-tools/Search.hs"
+      component: "simplir-tools:exe:simplir"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-tools/Search2.hs"
+      component: "simplir-tools:exe:simplir2"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec/./"
+      component: "lib:simplir-trec"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec/Benchmark.hs"
+      component: "simplir-trec:bench:bench"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/src"
+      component: "lib:simplir-trec-streaming"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/ListDocuments.hs"
+      component: "simplir-trec-streaming:exe:trec-streaming-ls-documents"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/IndexFac.hs"
+      component: "simplir-trec-streaming:exe:index-fac"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/Streaming.hs"
+      component: "simplir-trec-streaming:exe:kba-streaming"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/MergeRankings.hs"
+      component: "simplir-trec-streaming:exe:merge-kba-rankings"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-trec-streaming/Extract.hs"
+      component: "simplir-trec-streaming:exe:extract-kba-documents"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/simplir-word-embedding/src"
+      component: "lib:simplir-word-embedding"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/fork-map/src"
+      component: "lib:fork-map"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/fork-map/Test.hs"
+      component: "fork-map:exe:fork-map-test"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/html-parse/"
+      component: "html-parse:bench:ing"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/html-parse/./"
+      component: "lib:html-parse"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/html-parse/Benchmark.hs"
+      component: "html-parse:bench:bench"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/html-parse/tests"
+      component: "html-parse:test:spec"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/http-parsers/./"
+      component: "lib:http-parsers"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/http-parsers/test"
+      component: "http-parsers:test:Test"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/http-parsers/."
+      component: "http-parsers:test:Test"
+
+    - path: "ENT-rank/trec-car-tools-haskell/simplir/vendor/indexed-vector/src"
+      component: "lib:indexed-vector"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/src"
+      component: "lib:trec-car-tools"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/Cat.hs"
+      component: "trec-car-tools:exe:trec-car-cat"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/BuildToc.hs"
+      component: "trec-car-tools:exe:trec-car-build-toc"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/DumpPages.hs"
+      component: "trec-car-tools:exe:trec-car-dump"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/TrecRunFilter.hs"
+      component: "trec-car-tools:exe:trec-car-trec-run-filter"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/TrecRunModify.hs"
+      component: "trec-car-tools:exe:trec-car-trec-run-modify"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-tools/QrelsModify.hs"
+      component: "trec-car-tools:exe:trec-car-qrels-modify"
+
+    - path: "ENT-rank/trec-car-tools-haskell/trec-car-types/src"
+      component: "lib:trec-car-types"
+
+    - path: "assessment-eval/src"
+      component: "lib:assessment-eval"
+
+    - path: "assessment-eval/Agreement.hs"
+      component: "assessment-eval:exe:agreement"
+
+    - path: "assessment-eval/MergeAnnotations.hs"
+      component: "assessment-eval:exe:merge-annotations"
+
+    - path: "assessment-eval/SplitPsgEntityAnnotations.hs"
+      component: "assessment-eval:exe:split-psg-entity-annotations"
+
+    - path: "assessment-eval/ChangeGradedScale.hs"
+      component: "assessment-eval:exe:change-graded-scale"
+
+    - path: "assessment-eval/AssessmentTime.hs"
+      component: "assessment-eval:exe:assessment-time"
+
+    - path: "assessment-interface/annotation/server/Main.hs"
+      component: "annotate-server:exe:annotate-server"
+
+    - path: "assessment-interface/TrecCarAnnotationInterface.hs"
+      component: "trec-car-annotation-interface:exe:trec-car-annotation-interface"
+
+    - path: "benchquality/src"
+      component: "lib:benchquality"
+
+    - path: "benchquality/Kendall.hs"
+      component: "benchquality:exe:kendall"
+
+    - path: "benchquality/ChronbachsAlpha.hs"
+      component: "benchquality:exe:chronbachsalpha"
+
+    - path: "benchquality/QrelsIntersect.hs"
+      component: "benchquality:exe:qrelsInterset"
+
+    - path: "benchquality/AppendixTable.hs"
+      component: "benchquality:exe:appendix-table"
+
+    - path: "benchquality/AppendixDesc.hs"
+      component: "benchquality:exe:appendix-desc"
+
+    - path: "car-baselines/CarBaselines.hs"
+      component: "car-baselines:exe:car-retrieval"
+
+    - path: "car-baselines/EntitySearch.hs"
+      component: "car-baselines:exe:trec-car-entity-search"
+
+    - path: "car-baselines/RankEntities.hs"
+      component: "car-baselines:exe:rank-entities"
+
+    - path: "car-baselines/EntityRankingToEntityLeadPassage.hs"
+      component: "car-baselines:exe:entityranking-with-lead"
+
+    - path: "car-baselines/GalagoQuery.hs"
+      component: "car-baselines:exe:car-galago-query"
+
+    - path: "crate/src"
+      component: "lib:crate"
+
+    - path: "crate/CrateMain.hs"
+      component: "crate:exe:crate"
+
+    - path: "db-export/DbExport.hs"
+      component: "db-export"
+
+    - path: "dbpedia-entity-import/DBpediaEntityMain.hs"
+      component: "dbpedia-entity-import:exe:dbpedia-entity-import"
+
+    - path: "dbpedia-entity-import/HazyMemoryImportMain.hs"
+      component: "dbpedia-entity-import:exe:hazymemory-import"
+
+    - path: "dbpedia-entity-import/ToponymTagMeMain.hs"
+      component: "dbpedia-entity-import:exe:toponym-tagme"
+
+    - path: "epfl-section-recommendation/Main.hs"
+      component: "epfl-section-recommendation:exe:epfl-section-recommendation"
+
+    - path: "evalmetrics/src"
+      component: "lib:evalmetrics"
+
+    - path: "filter-duplicates/src"
+      component: "lib:trec-car-filter-duplicates"
+
+    - path: "filter-duplicates/FindDuplicates.hs"
+      component: "trec-car-filter-duplicates:exe:trec-car-find-duplicates"
+
+    - path: "filter-duplicates/RewriteDuplicates.hs"
+      component: "trec-car-filter-duplicates:exe:trec-car-rewrite-duplicates"
+
+    - path: "filter-duplicates/MapParagraphIds.hs"
+      component: "trec-car-filter-duplicates:exe:trec-car-map-paragraphids"
+
+    - path: "filter-duplicates/DuplicatesRewriteTable.hs"
+      component: "trec-car-filter-duplicates:exe:trec-car-duplicates-rewrite-table"
+
+    - path: "filter-duplicates/MinHash.hs"
+      component: "trec-car-filter-duplicates:exe:trec-car-minhash-duplicates"
+
+    - path: "filter-duplicates/TestDuplicates.hs"
+      component: "trec-car-filter-duplicates:exe:test-duplicates"
+
+    - path: "filter-duplicates/./"
+      component: "trec-car-filter-duplicates:test:word1024-test"
+
+    - path: "graph-expansion/src"
+      component: "lib:trec-car-graph-expansion"
+
+    - path: "graph-expansion/GraphRetrieval.hs"
+      component: "trec-car-graph-expansion:exe:graph-retrieval"
+
+    - path: "graph-expansion/GraphExpansionMain.hs"
+      component: "trec-car-graph-expansion:exe:trec-car-graph-expansion"
+
+    - path: "graph-expansion/ParagraphRetrieval.hs"
+      component: "trec-car-graph-expansion:exe:trec-car-paragraph-retrieval"
+
+    - path: "graph-expansion/EdgeDocRetrieval.hs"
+      component: "trec-car-graph-expansion:exe:trec-car-edgedoc-retrieval"
+
+    - path: "graph-expansion/BuildKbIndex.hs"
+      component: "trec-car-graph-expansion:exe:graph-expansion-build-kb-index"
+
+    - path: "graph-expansion/EdgeDocCorpusMain.hs"
+      component: "trec-car-graph-expansion:exe:graph-expansion-edge-doc"
+
+    - path: "graph-expansion/SupervisedGridRun.hs"
+      component: "trec-car-graph-expansion:exe:graph-expansion-supervised-grid-run"
+
+    - path: "graph-expansion/PageRankOnAll.hs"
+      component: "trec-car-graph-expansion:exe:graph-expansion-pagerank-on-all"
+
+    - path: "learning-to-walk/GraphExpansionFeatureGeneration.hs"
+      component: "learning-to-walk:exe:learn2walk-feature-generation"
+
+    - path: "mediawiki-convert/src"
+      component: "lib:mediawiki-convert"
+
+    - path: "mediawiki-convert/Export.hs"
+      component: "mediawiki-convert:exe:trec-car-export"
+
+    - path: "mediawiki-convert/FilterPages.hs"
+      component: "mediawiki-convert:exe:trec-car-filter"
+
+    - path: "mediawiki-convert/TransformContent.hs"
+      component: "mediawiki-convert:exe:trec-car-transform-content"
+
+    - path: "mediawiki-convert/LegalEntityIds.hs"
+      component: "mediawiki-convert:exe:trec-car-legal-entity-ids"
+
+    - path: "mediawiki-convert/DetectDuplicateParagraphs.hs"
+      component: "mediawiki-convert:exe:trec-car-detect-duplicate-paragraphs"
+
+    - path: "mediawiki-convert/FillMetadataMain.hs"
+      component: "mediawiki-convert:exe:trec-car-fill-metadata"
+
+    - path: "mediawiki-convert/DeriveToplevelQrels.hs"
+      component: "mediawiki-convert:exe:trec-car-derive-toplevel"
+
+    - path: "mediawiki-convert/RemoveDuplicatePages.hs"
+      component: "mediawiki-convert:exe:trec-car-remove-duplicate-pages"
+
+    - path: "mediawiki-convert/MergeDuplicateSections.hs"
+      component: "mediawiki-convert:exe:trec-car-merge-duplicate-sections"
+
+    - path: "mediawiki-convert/ValidateBenchmark.hs"
+      component: "mediawiki-convert:exe:trec-car-validate-benchmark"
+
+    - path: "mediawiki-convert/TestEntityPassageParsing.hs"
+      component: "mediawiki-convert:exe:test-entity-passage-parsing"
+
+    - path: "mediawiki-convert/SplitParagraphs.hs"
+      component: "mediawiki-convert:exe:trec-car-split-paragraphs"
+
+    - path: "mediawiki-convert/./"
+      component: "mediawiki-convert:test:tests"
+
+    - path: "mediawiki-convert/tests"
+      component: "mediawiki-convert:test:tests"
+
+    - path: "mediawiki-import/src"
+      component: "lib:mediawiki-import"
+
+    - path: "mediawiki-import/TrecCarImport.hs"
+      component: "mediawiki-import:exe:trec-car-import"
+
+    - path: "mediawiki-parser/src"
+      component: "lib:mediawiki-parser"
+
+    - path: "mediawiki-parser/test"
+      component: "mediawiki-parser:test:tests"
+
+    - path: "miso-postprocessing/src"
+      component: "lib:miso-postprocessing"
+
+    - path: "miso-postprocessing/MergeAssessmentPages.hs"
+      component: "miso-postprocessing:exe:merge-assessment-pages"
+
+    - path: "miso-postprocessing/AssessmentsToQrels.hs"
+      component: "miso-postprocessing:exe:assessments-to-qrels"
+
+    - path: "miso-postprocessing/CarY3AssessmentPageEval.hs"
+      component: "miso-postprocessing:exe:car-y3-assessment-page-eval"
+
+    - path: "miso-types/src"
+      component: "lib:miso-types"
+
+    - path: "miso-types/TestLoadPage.hs"
+      component: "miso-types:exe:test-load-pages"
+
+    - path: "multilang-car/LangExtract.hs"
+      component: "multilang-car:exe:multilang-car"
+
+    - path: "multilang-car/LangIndex.hs"
+      component: "multilang-car:exe:multilang-car-index"
+
+    - path: "tag-me/src"
+      component: "lib:tag-me"
+
+    - path: "tag-me/TagMeMain.hs"
+      component: "tag-me:exe:tag-me"
+
+    - path: "tqa-import/src"
+      component: "lib:tqa-import"
+
+    - path: "tqa-import/Main.hs"
+      component: "tqa-import:exe:tqa-import"
+
+    - path: "tqa-import/MainTQA2.hs"
+      component: "tqa-import:exe:tqa-import2"
+
+    - path: "tqa-import/TqaY3BulkRewriteMain.hs"
+      component: "tqa-import:exe:tqa-y3-bulk-rewrite"
+
+    - path: "tqa-import/TqaY3ExportMain.hs"
+      component: "tqa-import:exe:tqa-y3-export"
+
+    - path: "tqa-import/TrecTopicImport.hs"
+      component: "tqa-import:exe:topic-import"
+
+    - path: "trec-news/Export.hs"
+      component: "trec-news:exe:trec-news"
+
+    - path: "trec-news/Load.hs"
+      component: "trec-news:exe:trec-news-load"
+
+    - path: "vendor/intset/src"
+      component: "lib:intset"
+
+    - path: "vendor/intset/tests"
+      component: "intset:test:properties"
+
+    - path: "vendor/intset/tests"
+      component: "intset:test:fusion"
+
+    - path: "vendor/intset/bench/Main.hs"
+      component: "intset:bench:benchmarks"
+
+    - path: "vendor/pinch-0.3.5.0/src"
+      component: "lib:pinch"
+
+    - path: "vendor/pinch-0.3.5.0/tests"
+      component: "pinch:test:pinch-spec"
+
+    - path: "vendor/porter/src"
+      component: "lib:porter"
