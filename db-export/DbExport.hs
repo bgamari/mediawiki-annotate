@@ -160,9 +160,9 @@ pagesToFragments pages =
 sectionPathParent :: SectionPath -> Maybe SectionPath
 sectionPathParent (SectionPath _      [])  = Nothing
 sectionPathParent (SectionPath pageId hds) = Just $ SectionPath pageId (init hds)
-
 insertChunks :: ToRow a => [Connection] -> Query -> [[a]] -> IO ()
 insertChunks conns query rowChunks = do
+
     (sq, rq, seal) <- PC.spawn' $ PC.bounded 200
     inserters <- mapM (startInserter rq) conns
     mapM_ link inserters
@@ -279,4 +279,3 @@ toPostgres openConn pagesFile = do
                   FROM (VALUES (?,?,?,?)) AS x, paragraphs
                   WHERE paragraphs.id = x.column4 |]
             (map pagesLinkRows $ chunksOf 1000 pages)
-

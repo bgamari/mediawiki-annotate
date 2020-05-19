@@ -93,7 +93,12 @@ doIt assessmentFiles pageFiles = do
             ]
 
 
-
+-- | facetOverlap: Do neighboring pasages share the same facet?
+-- | Ignore any paragraph that is marked as "remove". Of the remaining ones, count how often two neighboring passages
+-- | are annotated with the same facet. (If passages are annotated with multiple facets, any shared facet will count)
+-- | The relevance label of the facet is ignored, as long as it is at least "CAN"
+-- | Caveat: This metric may indicate a high score, even if the page only covers a single facet, and even if most
+-- | passages are non-relevant (i.e, removed)
 facetOverlapMetric :: QueryId -> PageAssessmentData -> TrecEvalResult
 facetOverlapMetric queryId PageAssessmentData{..} =
     TrecEvalResult { trecEvalMetric = Metric $ "facetOverlap"
@@ -108,6 +113,12 @@ facetOverlapMetric queryId PageAssessmentData{..} =
             , let score = if S.disjoint fV1 fV2 then 0.0 else 1.0
             ]
 
+
+-- | Transition quality: How many transitions are marked as high quality.
+-- | Ignore any paragraph that is marked as "remove". Of the remaining ones, count how often two neighboring passages
+-- | are annotated with the quality Appropriate or Same transition (score 1), otherwise score 0 (for Topic Switch).
+-- | Caveat: This metric may indicate a high score, even if the page only covers a single facet, and even if most
+-- | passages are non-relevant (i.e, removed)
 transitionMetric :: QueryId -> PageAssessmentData -> TrecEvalResult
 transitionMetric queryId PageAssessmentData{..} =
     TrecEvalResult { trecEvalMetric = Metric $ "transition"
@@ -121,6 +132,9 @@ transitionMetric queryId PageAssessmentData{..} =
             , let score = if transitionLabel `L.elem` [AppropriateTransition, SameTransition, CoherentTransition] then 1.0 else 0.0
             ]
 
+-- | Relevance quality: among all paragraphs on the page, the average relevance judgment (Must: 1.0, SHould 0.66, Can 0.33, Not/Remove 0.0)
+-- | Paragraph that is marked as "remove" will be counted as 0
+-- | Caveat: This metric may indicate a high score, even if the page only covers a single facet.
 relevanceMetric :: QueryId -> PageAssessmentData -> TrecEvalResult
 relevanceMetric queryId PageAssessmentData{..} =
     TrecEvalResult { trecEvalMetric = Metric $ "relevance"
@@ -136,7 +150,12 @@ relevanceMetric queryId PageAssessmentData{..} =
             ]
             <> [0.0 | paraId <- removedParagraphs] -- removed paragraphs
 
---
+-- | Facet Coverage: among all paragraphs on the page, (a) count the number of given outline facets that have at least
+-- | one relevant passage;  (b)  is each facet covered with the same number of passages (balance)?
+-- | Ignore any paragraph that is marked as "remove". Of the remaining ones, count how often two neighboring passages
+-- | are annotated with the quality Appropriate or Same transition (score 1), otherwise score 0 (for Topic Switch).
+-- | Caveat: This metric may indicate a high score, even if the page only covers a single facet.
+
 --coverageMetric :: QueryId -> PageAssessmentData -> TrecEvalResult
 --coverageMetric queryId PageAssessmentData{..} =
 --    TrecEvalResult { trecEvalMetric = Metric $ "coverage"
