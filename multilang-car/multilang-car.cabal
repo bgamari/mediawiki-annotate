@@ -18,7 +18,7 @@ executable multilang-car
   other-extensions:    OverloadedStrings, GeneralizedNewtypeDeriving, TypeApplications, DeriveGeneric
   build-depends:       base,
                        aeson >=1.1 && <1.5,
-                       hashable >=1.2 && <1.3,
+                       hashable >=1.2 && <1.4,
                        bytestring >=0.10 && <0.11,
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
@@ -34,7 +34,7 @@ executable multilang-car-index
   other-extensions:    OverloadedStrings, GeneralizedNewtypeDeriving, TypeApplications, DeriveGeneric
   build-depends:       base,
                        aeson,
-                       hashable >=1.2 && <1.3,
+                       hashable >=1.2 && <1.4,
                        bytestring >=0.10 && <0.11,
                        unordered-containers >=0.2 && <0.3,
                        text >=1.2 && <1.3,
