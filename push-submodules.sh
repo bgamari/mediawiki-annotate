@@ -5,6 +5,7 @@ git push origin HEAD:master
 cd ..
 
 git commit -a -m "bump simplir"
+git push github HEAD:master
 git push origin HEAD:master
 
 cd ..
