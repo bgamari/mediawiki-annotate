@@ -4,21 +4,22 @@ allow-newer:
     profunctors
 
 packages:
-    ENT-rank/trec-car-tools-haskell/trec-car-tools/
-    ENT-rank/trec-car-tools-haskell/trec-car-types/
+    vendor/pinch/
+    trec-car-tools-haskell/trec-car-tools/
+    trec-car-tools-haskell/trec-car-types/
+    trec-car-tools-haskell/simplir/*/*.cabal
+    trec-car-tools-haskell/simplir/vendor/*/*.cabal
     multilang-car/
     assessment-eval/
     mediawiki-parser/
     mediawiki-import/
     mediawiki-convert/
     db-export/
-    graph-expansion/
-    ENT-rank/ent-rank-tools/
-    ENT-rank/ent-rank/
-    learning-to-walk/
-    ENT-rank/graph-algorithms/
-    ENT-rank/trec-car-tools-haskell/simplir/*/*.cabal
-    ENT-rank/trec-car-tools-haskell/simplir/vendor/*/*.cabal
+    --graph-expansion/
+    --ENT-rank/ent-rank-tools/
+    --ENT-rank/ent-rank/
+    --learning-to-walk/
+    --ENT-rank/graph-algorithms/
     car-baselines/
     assessment-interface/
     assessment-interface/annotation/server
@@ -26,7 +27,7 @@ packages:
     miso-types/
     miso-postprocessing/
     vendor/*
-    benchquality/
+    --benchquality/
     tqa-import/
     trec-news/
     epfl-section-recommendation/

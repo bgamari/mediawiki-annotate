@@ -63,5 +63,3 @@ executable learn2walk-feature-generation
                        ent-rank-tools,
                        ent-rank
   default-language:    Haskell2010
-
-
