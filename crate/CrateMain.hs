@@ -51,7 +51,7 @@ main = do
             CrateRelevance -> relevanceData
             CrateCluster -> clusterData
             CrateTransition  -> transitionData
-            x -> fail ("Not implemented: "++  (show x))
+            x -> const $ fail ("Not implemented: "++  (show x))
     outData <-  mapM cratifyPage $ take numPages pages
     writeBert outFile $ concat outData
 
