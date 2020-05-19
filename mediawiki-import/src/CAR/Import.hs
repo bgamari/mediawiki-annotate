@@ -15,7 +15,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 
 import Data.MediaWiki.XmlDump (WikiDoc(..))
-import Data.MediaWiki.Markup hiding (PageName(..), pageNameToId, getPageName, Link(..) )
+import Data.MediaWiki.Markup hiding (PageName(..), getPageName)
 import qualified Data.MediaWiki.Markup as Markup
 import CAR.Types
 import CAR.Utils hiding (pageRedirect)
@@ -23,10 +23,6 @@ import CAR.Utils hiding (pageRedirect)
 import CAR.Import.Entities
 import CAR.Import.Templates
 import CAR.Import.Utils
-import Network.URI
-import Data.Char (ord)
-import qualified Data.ByteString.Short as SBS
-import qualified Data.Text.Short as Short
 
 data Config = Config { isCategory :: PageName -> Bool
                      , isDisambiguation :: PageName -> [Doc] -> Bool
