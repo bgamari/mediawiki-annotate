@@ -9,3 +9,7 @@ TAGS
 cabal.project.local
 *.iml
 .idea
+.vscode
+.*.swp
+result-*/
+result/
