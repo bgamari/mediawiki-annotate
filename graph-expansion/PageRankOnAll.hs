@@ -39,12 +39,6 @@ import CAR.Types.CborList
 import SimplIR.Utils.Compact
 import Codec.Serialise
 
-$(derivingUnbox "Sum"
-     [t| forall a. VU.Unbox a => Sum a -> a |]
-     [| \(Sum n) -> n |]
-     [| Sum |]
- )
-
 edgeDocsPath :: Parser FilePath
 edgeDocsPath = argument str (help "input EdgeDoc list path")
 
