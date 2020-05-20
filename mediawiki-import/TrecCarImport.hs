@@ -5,6 +5,8 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
+module Main where
+    
 import Data.Monoid
 import System.IO
 
