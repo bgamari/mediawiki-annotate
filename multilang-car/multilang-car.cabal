@@ -9,7 +9,6 @@ maintainer:          ben@smart-cactus.org
 copyright:           (c) 2017 Ben Gamari
 -- category:            
 build-type:          Simple
-extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 
