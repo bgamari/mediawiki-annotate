@@ -43,7 +43,6 @@ maintainer:          dietz@cs.unh.edu
 copyright:           (c) 2019 Laura Dietz and Ben Gamari
 category:            Text
 build-type:          Simple
-extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 library
