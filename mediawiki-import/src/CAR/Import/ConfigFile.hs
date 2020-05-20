@@ -94,7 +94,12 @@ configFileToConfig :: T.Text -> ConfigFile -> Config
 configFileToConfig categoryNamespaceName c =
     Config { isCategory = \name -> categoryNamespaceName `T.isPrefixOf` getPageName name
            , isDisambiguation = \_ -> any (`elem` disambiguationTemplates c) . mapMaybe isTemplate
-           , isInfoboxTemplate = \tag -> tag `HS.member` infoboxTemplates c
+           , isInfoboxTemplate = 
+               let infoboxTemplates' = map T.toCaseFold $ HS.toList $ infoboxTemplates c
+               in \templateName ->   
+                let templateName' = T.toCaseFold templateName
+                in any (`T.isPrefixOf` templateName') infoboxTemplates'
+                     -- Old Infobox handling: tag `HS.member` infoboxTemplates c
            , resolveTemplate = \tag args -> do
                  res <- HM.lookup tag (templateResolutions c)
                  runTemplateResolution res args

@@ -34,7 +34,7 @@ defaultConfig :: Config
 defaultConfig =
     Config { isCategory = \name -> "Category" `T.isPrefixOf` getPageName name
            , isDisambiguation = \name _ -> "(disambiguation)" `T.isPrefixOf` getPageName name
-           , isInfoboxTemplate = ("infobox" `T.isPrefixOf`)
+           , isInfoboxTemplate = ("infobox" `T.isPrefixOf`) . T.toCaseFold
            , resolveTemplate = defaultTemplateHandler
            }
 --
