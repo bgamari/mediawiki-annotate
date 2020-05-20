@@ -125,11 +125,16 @@ main = do
     let siteId = SiteId $ XmlDump.siteDbName siteInfo
         isInterestingPage = (isInteresting siteInfo)
 
+        raw :: Producer WikiDoc IO ()
+        raw = each (filter isInterestingPage docs)
+              -- >-> PP.tee (PP.map docTitle >-> PP.show >-> PP.toHandle stderr)
+
         parsed :: Producer (Either String (EncodedCbor Page)) IO ()
+        --parsed = raw >-> PP.map (fmap encodedCbor . toPage config siteId)
         parsed =
             CM.map (2*workers) workers
                 (fmap encodedCbor . toPage config siteId)
-                (each $ filter isInterestingPage docs)
+                raw
         putParsed (Left err) = hPutStrLn stderr $ "\n"<>err
         putParsed (Right page) = BSL.putStr (getEncodedCbor page) >> hPutStr stderr "."
 
