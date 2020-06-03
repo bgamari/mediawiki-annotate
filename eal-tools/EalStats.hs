@@ -48,8 +48,8 @@ dumpTargetEntities readExamples cutoff = do
     f :: [AspectLinkExampleOrError] -> [T.Text]
     f eals =
         let histogram = 
-                unionsWith (+)
-                $ [ HM.singleton targetEntity 1
+                HM.fromListWith (+) 
+                  $ [(targetEntity, 1 )
                     | Right AspectLinkExample{context=Context{target_entity=targetEntity}} <- eals
                     ]
             mostFreq = [ pair
@@ -117,7 +117,3 @@ splitAts text offsets =
       lengths = zipWith (-) offsets (0:offsets)
       (last, splits) = mapAccumL (\txt n -> swap $ T.splitAt n txt) text lengths
   in splits ++ [last]
-
-unionsWith :: (Foldable g, Eq k, Hashable k)  => (v -> v -> v) -> g (HM.HashMap k v) -> HM.HashMap k v
-unionsWith f = foldl' (HM.unionWith f) mempty
- 
