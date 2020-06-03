@@ -28,30 +28,56 @@ import Data.Hashable (Hashable)
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "target-entities"    (
-       dumpTargetEntities <$> readEalExamples'
-    ) 
+       dumpTargetEntities 
+       <$> readEalExamples' 
+       <*> option auto (short 'n' <> long "super-frequency" <> help "frequency to count as super-frequent entity"  <> metavar "INT" )
+    )
+    <>  cmd "verify-existing-true-aspect"    (
+       verifyExistingTrueAspect
+       <$> readEalExamples' 
+    )
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
-    dumpTargetEntities :: IO [AspectLinkExampleOrError] -> IO()
-    dumpTargetEntities readExamples = do
-        examples <- readExamples
-        let output = f examples
-        T.putStrLn $ T.unlines output
-      where
-        f :: [AspectLinkExampleOrError] -> [T.Text]
-        f eals =
-            let histogram = 
-                    unionsWith (+)
-                    $ [ HM.singleton targetEntity 1
-                      | Right AspectLinkExample{context=Context{target_entity=targetEntity}} <- eals
-                      ]
-                mostFreq = [ pair
-                           | pair@(entity, count) <- HM.toList histogram
-                           , count > 0
-                           ]
-                topFreq = fmap (\(x,y) -> x <> " "<> (T.pack $ show y)) $ sortOn ( ((-1) *) . snd ) mostFreq
-            in  topFreq
-            -- mapM_ (T.putStrLn . getPageName . pageName) pages
+
+dumpTargetEntities :: IO [AspectLinkExampleOrError] -> Int -> IO()
+dumpTargetEntities readExamples cutoff = do
+    examples <- readExamples
+    let output = f examples
+    T.putStrLn $ T.unlines output
+    where
+    f :: [AspectLinkExampleOrError] -> [T.Text]
+    f eals =
+        let histogram = 
+                unionsWith (+)
+                $ [ HM.singleton targetEntity 1
+                    | Right AspectLinkExample{context=Context{target_entity=targetEntity}} <- eals
+                    ]
+            mostFreq = [ pair
+                        | pair@(entity, count) <- HM.toList histogram
+                        , count >= cutoff
+                        ]
+            topFreq = fmap (\(x,y) -> x <> " "<> (T.pack $ show y)) $ sortOn ( ((-1) *) . snd ) mostFreq
+        in  topFreq
+
+verifyExistingTrueAspect :: IO [AspectLinkExampleOrError] -> IO ()
+verifyExistingTrueAspect readExamples = do
+    examples <- readExamples
+    let output = f examples
+    T.putStrLn $ T.unlines output
+  where
+    f :: [AspectLinkExampleOrError] -> [T.Text]
+    f eals =
+        catMaybes $ fmap verify eals
+
+    verify :: AspectLinkExampleOrError -> Maybe T.Text
+    verify (Left msg) = Just $ T.pack msg
+    verify (Right AspectLinkExample{true_aspect=trueAspectId, candidate_aspects=aspects}) =
+        let found = filter (\Aspect{aspect_id=aspectId} -> trueAspectId == aspectId) aspects    
+        in case (length found) of
+             1 -> Nothing
+             0 -> Just $ "True aspect "<>trueAspectId<> " not found in candidate aspects: " <> (T.unwords $ fmap aspect_id aspects)
+             n -> Just $ "Found "<> (T.pack $ show n) <>" matching aspects: " <> (T.unlines $ fmap (T.pack . show) found)
+         
 
 
 readEalExamples' :: Parser (IO [AspectLinkExampleOrError])
