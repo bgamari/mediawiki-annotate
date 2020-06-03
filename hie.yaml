@@ -254,3 +254,12 @@ cradle:
 
     - path: "vendor/pinch/tests"
       component: "pinch:test:pinch-spec"
+
+    - path: "eal-tools/.//EalVerify.hs"
+      component: "eal-tools:exe:eal-verify"  
+      
+    - path: "eal-tools/.//EalStats.hs"
+      component: "eal-tools:exe:eal-stats"  
+
+    - path: "eal-tools/src"
+      component: "lib:eal-tools" 

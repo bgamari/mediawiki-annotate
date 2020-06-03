@@ -113,7 +113,8 @@ _isEnInteresting WikiDoc{..} = not $
 
 main :: IO ()
 main = do
-    (workers, maybeConfig, prov) <- execParser' 2 (helper <*> opts) mempty
+    (workers, maybeConfig, prov) <- execParser' 2
+     (helper <*> opts) mempty
     (siteInfo, docs) <- parseWikiDocs <$> BSL.getContents
 
     let Just (XmlDump.Namespace categoryNamespaceName) =
