@@ -35,6 +35,7 @@ packages:
     tag-me/
     evalmetrics/
     crate/
+    eal-tools/
 
 package mediawiki-parser
     tests: True
