@@ -72,22 +72,22 @@ dumpVerify readEalExample numExamples numExamplesPerEntityMaybe = do
                            
 
 
-    putStrLn $ unlines $ fmap renderEAL ealVerifications
+    T.putStrLn $ T.unlines $ fmap renderEAL ealVerifications
 
 
-renderEAL :: EalVerification -> String
+renderEAL :: EalVerification -> T.Text
 renderEAL EalVerification{trueAspect = Nothing, ..} =
-    unlines [ "targetEntity " <> show targetEntity <> " | sourcePage" <> show sourcePage
+    T.unlines [ "targetEntity " <> targetEntity <> " | sourcePage" <> sourcePage
             , "missing true aspect"
             ]
 renderEAL EalVerification{trueAspect = Just trueAspect, ..} =
-    unlines 
-        $ fmap (intercalate "\t") 
-        $   [ [" sourcePage", T.unpack sourcePage , " targetEntity ", T.unpack targetEntity]
-            , [" X ", T.unpack id, "correct? Y/N", ""]
-            , [T.unpack $ renderAnnotatedText targetEntity contextParagraph ]
-            , ["  [ trueAspect " <> show (aspect_name $ trueAspect) <> " ]"]
-            , [T.unpack $ renderAnnotatedText targetEntity (aspect_content trueAspect)]
+    T.unlines 
+        $ fmap (T.intercalate "\t") 
+        $   [ [" sourcePage", sourcePage , " targetEntity ", targetEntity]
+            , [" X ", id, "correct? Y/N", ""]
+            , [renderAnnotatedText targetEntity contextParagraph ]
+            , ["  [ trueAspect " <> (aspect_name $ trueAspect) <> " ]"]
+            , [renderAnnotatedText targetEntity (aspect_content trueAspect)]
             , [""]
             ]
 
