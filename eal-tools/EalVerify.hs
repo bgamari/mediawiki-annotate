@@ -80,12 +80,13 @@ renderEAL EalVerification{trueAspect = Nothing, ..} =
     T.unlines [ "targetEntity " <> targetEntity <> " | sourcePage" <> sourcePage
             , "missing true aspect"
             ]
-renderEAL EalVerification{trueAspect = Just trueAspect, ..} =
+renderEAL EalVerification{trueAspect = Just trueAspect, id=exampleId, ..} =
     T.unlines 
         $ fmap (T.intercalate "\t") 
         $   [ [" sourcePage", sourcePage , " targetEntity ", targetEntity]
-            , [" X ", id, "correct? Y/N", ""]
+            , [" X ", exampleId, "correct? Y/N", ""]
             , [renderAnnotatedText targetEntity contextParagraph ]
+            , ["  [ all Aspects: ", (T.intercalate ", " candidateAspects) <> " ]"]
             , ["  [ trueAspect " <> (aspect_name $ trueAspect) <> " ]"]
             , [renderAnnotatedText targetEntity (aspect_content trueAspect)]
             , [""]
@@ -102,7 +103,8 @@ renderAnnotatedText targetEntityId (AnnotatedText {..})  =
         targetOffsets = [[start, end]  | EntityMention{..} <- targetEntityMentions]    
         textSegments :: [T.Text]
         textSegments  = splitAts content $ concat targetOffsets
-    in T.intercalate  " ]*[ " textSegments 
+    in wrapAt 200
+        $ T.intercalate  " ]*[ " textSegments 
 
 
 convertToVerification :: AspectLinkExample -> EalVerification
@@ -136,6 +138,12 @@ readEalExamples' =
     f inputFile = do 
         readAspectExamples inputFile
 
+
+wrapAt :: Int -> T.Text -> T.Text
+wrapAt charsPerLine text =
+    T.intercalate "\n" 
+    $ fmap ((T.intercalate "\n") . (T.chunksOf charsPerLine))
+    $ T.splitOn "\n" text
 
 splitAts ::  T.Text -> [Int] -> [T.Text]
 splitAts text offsets = 

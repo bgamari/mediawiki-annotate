@@ -35,9 +35,34 @@ opts = subparser
     <>  cmd "verify-existing-true-aspect"    (
        verifyExistingTrueAspect
        <$> readEalExamples' 
-    )
+        )
+    <>  cmd "min-candidates"    (
+       verifyMinCandidates
+       <$> readEalExamples' 
+       <*> option auto (short 'n' <> long "candidates" <> help "min number of candidates"  <> metavar "INT" )
+    )  
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
+
+verifyMinCandidates :: IO [AspectLinkExampleOrError] -> Int -> IO ()
+verifyMinCandidates readExamples minCand = do
+    examples <- readExamples
+    let output = f examples
+    T.putStrLn $ T.unlines output
+  where
+    f :: [AspectLinkExampleOrError] -> [T.Text]
+    f eals =
+        catMaybes $ fmap verify eals
+
+    verify :: AspectLinkExampleOrError -> Maybe T.Text
+    verify (Left msg) = Just $ T.pack msg
+    verify (Right AspectLinkExample{true_aspect=trueAspectId, candidate_aspects=aspects}) =
+        let found = length aspects
+        in if (found < minCand) 
+              then Just $ ("" <> trueAspectId <> ": Less than " <> (T.pack  (show minCand)) <>" candidates.")
+              else Nothing
+         
+
 
 dumpTargetEntities :: IO [AspectLinkExampleOrError] -> Int -> IO()
 dumpTargetEntities readExamples cutoff = do
