@@ -19,6 +19,8 @@ import EalData
 import Data.List
 import Data.Tuple
 import Data.Ord (Down)
+import Options.Applicative 
+import Control.Monad (join)
 
 data EalVerification = EalVerification { sourcePage :: PageId
                                        , targetEntity :: PageId
@@ -30,18 +32,48 @@ data EalVerification = EalVerification { sourcePage :: PageId
                                        }
                 deriving (Show, Eq)
 
-main :: IO ()
-main = do
-    let fname = "/home/dietz/trec-car/code/mediawiki-annotate/eal-tools/small-eal-v2.4-en-01-01-2020.jsonl"
-    ealExamples <- readAspectExamples fname
-                :: IO[Either String AspectLinkExample]
-    
-    let ealVerifications :: [EalVerification]
-        ealVerifications = [ convertToVerification eal  
-                           | Right eal <- ealExamples
+
+opts :: Parser (IO ())
+opts = subparser
+    $  cmd "data"    (
+       dumpVerify 
+       <$> readEalExamples' 
+       <*> option auto (short 'n' <> long "number" <> help "number of examples to output"  <> metavar "INT" )
+       <*> optional (option auto (short 'k' <> long "per-entity" <> help "number of examples to output"  <> metavar "INT" ))
+    )
+  where
+    cmd name action = command name (info (helper <*> action) fullDesc)
+
+
+dumpVerify :: IO[AspectLinkExampleOrError ] -> Int -> Maybe Int -> IO()
+dumpVerify readEalExample numExamples numExamplesPerEntityMaybe = do
+    ealExamples <- readEalExample
+
+    let ealsWithCounts :: [(HM.HashMap PageId Int, Maybe AspectLinkExample)]
+        ealsWithCounts = scanl addToAccum (HM.empty, Nothing) ealExamples
+                  where addToAccum :: (HM.HashMap PageId Int, Maybe AspectLinkExample) -> AspectLinkExampleOrError -> (HM.HashMap PageId Int, Maybe AspectLinkExample)
+                        addToAccum (m, _) (Left _) = (m, Nothing)
+                        addToAccum (m,_ ) (Right eal@AspectLinkExample{context = Context{target_entity=entity}}) =
+                            (HM.insertWith (+) entity 1  m, Just eal)
+        eals = catMaybes 
+             $ fmap snd 
+             $ filter lessThan ealsWithCounts
+                   where lessThan :: (HM.HashMap PageId Int, Maybe AspectLinkExample) -> Bool
+                         lessThan (m, Nothing) = False
+                         lessThan (m, Just AspectLinkExample{context = Context{target_entity=entity}}) = 
+                             (fromMaybe 0 $ entity `HM.lookup` m) <= (fromMaybe 1000000 numExamplesPerEntityMaybe)
+                         
+
+        ealVerifications :: [EalVerification]
+        ealVerifications = take numExamples
+                         $ [ convertToVerification eal  
+                           | eal <- eals
                            ]                 
+                           
+
 
     putStrLn $ unlines $ fmap renderEAL ealVerifications
+
 
 renderEAL :: EalVerification -> String
 renderEAL EalVerification{trueAspect = Nothing, ..} =
@@ -49,11 +81,14 @@ renderEAL EalVerification{trueAspect = Nothing, ..} =
             , "missing true aspect"
             ]
 renderEAL EalVerification{trueAspect = Just trueAspect, ..} =
-    unlines [ " sourcePage" <> show sourcePage <> " >> targetEntity " <> show targetEntity
-            , T.unpack $ renderAnnotatedText targetEntity contextParagraph
-            , "  [ trueAspect " <> show (aspect_name $ trueAspect) <> " ]"
-            , T.unpack $ renderAnnotatedText targetEntity (aspect_content trueAspect)
-            , ""
+    unlines 
+        $ fmap (intercalate "\t") 
+        $   [ [" sourcePage", T.unpack sourcePage , " targetEntity ", T.unpack targetEntity]
+            , [" X ", T.unpack id, "correct? Y/N", ""]
+            , [T.unpack $ renderAnnotatedText targetEntity contextParagraph ]
+            , ["  [ trueAspect " <> show (aspect_name $ trueAspect) <> " ]"]
+            , [T.unpack $ renderAnnotatedText targetEntity (aspect_content trueAspect)]
+            , [""]
             ]
 
 renderAnnotatedText :: PageId -> AnnotatedText -> T.Text
@@ -93,9 +128,22 @@ convertToVerification AspectLinkExample{ id=id
                     } 
 
 
+readEalExamples' :: Parser (IO [AspectLinkExampleOrError])
+readEalExamples' =
+    f <$> argument str (help "input file" <> metavar "FILE")
+  where
+    f :: FilePath -> IO [AspectLinkExampleOrError]
+    f inputFile = do 
+        readAspectExamples inputFile
+
+
 splitAts ::  T.Text -> [Int] -> [T.Text]
 splitAts text offsets = 
   let lengths :: [Int]
       lengths = zipWith (-) offsets (0:offsets)
       (last, splits) = mapAccumL (\txt n -> swap $ T.splitAt n txt) text lengths
   in splits ++ [last]
+
+
+main :: IO ()
+main = join $ execParser (info (helper <*> opts) mempty)

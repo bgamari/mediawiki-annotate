@@ -90,7 +90,6 @@ readEalExamples' =
 
 
 main :: IO ()
--- main = join $ execParser' 1 (helper <*> opts) mempty
 main = join $ execParser (info (helper <*> opts) mempty)
 
 
