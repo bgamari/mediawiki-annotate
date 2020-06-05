@@ -42,8 +42,13 @@ data EalRenders = EalRenders { sourcePageName :: PageName
 
 opts :: Parser (IO ())
 opts = subparser
-    $  cmd "data"    (
-       renderLatex 
+    $  cmd "context"    (
+       renderContext 
+       <$> readEalExamples' 
+       <*> option auto (short 'n' <> long "number" <> help "number of examples to output"  <> metavar "INT" )
+    )
+    <>  cmd "aspect"    (
+       renderAspect 
        <$> readEalExamples' 
        <*> option auto (short 'n' <> long "number" <> help "number of examples to output"  <> metavar "INT" )
     )
@@ -51,19 +56,40 @@ opts = subparser
     cmd name action = command name (info (helper <*> action) fullDesc)
 
 
-renderLatex :: IO [AspectLinkExampleOrError] -> Int -> IO()
-renderLatex readEalExample numExamples  = do
+renderContext :: IO [AspectLinkExampleOrError] -> Int -> IO()
+renderContext readEalExample numExamples  = do
     ealExamples <- readEalExample
     let 
         ealRenders :: [EalRenders]
-        ealRenders = fmap convertToRender $ snd $ partitionEithers ealExamples
+        ealRenders = take numExamples
+                   $ fmap convertToRender $ snd $ partitionEithers ealExamples
 
 
-    T.putStrLn $ T.unlines $ fmap renderView ealRenders
+    T.putStrLn $ escapeLatex $ T.unlines $ fmap renderContextView ealRenders
 
 
-renderView :: EalRenders -> T.Text
-renderView EalRenders{trueAspect = Just trueAspect, ..} =
+
+renderAspect :: IO [AspectLinkExampleOrError] -> Int -> IO()
+renderAspect readEalExample numExamples  = do
+    ealExamples <- readEalExample
+    let 
+        ealRenders :: [EalRenders]
+        ealRenders = take numExamples
+                   $ fmap convertToRender $ snd $ partitionEithers ealExamples
+
+
+    T.putStrLn $ escapeLatex $ T.unlines $ fmap renderAspectView ealRenders
+
+escapeLatex :: T.Text -> T.Text
+escapeLatex text =
+    T.replace "&" "\\&"
+    $ T.replace "#" "\\#"
+    $ T.replace "%" "\\%"
+    $ T.replace "$" "\\$"
+    $ text
+
+renderContextView :: EalRenders -> T.Text
+renderContextView EalRenders{trueAspect = Just trueAspect, ..} =
         T.unlines 
         $ fmap (T.intercalate "") 
         $   [ [ "\\begin{description}" ]
@@ -72,6 +98,22 @@ renderView EalRenders{trueAspect = Just trueAspect, ..} =
             , [ "\\end{description}" ]
             , [ "\\begin{quote}" ]
             , [ renderAnnotatedText targetEntity contextParagraph ]
+            , [ "\\end{quote}" ]
+            , [ "\\bigskip" ]
+            , [ "" ]
+            ]
+
+renderAspectView :: EalRenders -> T.Text
+renderAspectView EalRenders{trueAspect = Just trueAspect, candidateAspects = candidateAspects, ..} =
+        T.unlines $ fmap (renderSingleAspectView targetEntity) candidateAspects
+
+renderSingleAspectView :: PageId -> Aspect -> T.Text
+renderSingleAspectView targetEntity Aspect{..} =
+        T.unlines 
+        $ fmap (T.intercalate "") 
+        $   [ [ "\\paragraph{",  (pageIdToTitle targetEntity),"/", aspect_name, "}" ]
+            , [ "\\begin{quote}" ]
+            , [ renderAnnotatedText targetEntity aspect_content ]
             , [ "\\end{quote}" ]
             , [ "\\bigskip" ]
             , [ "" ]
@@ -86,9 +128,10 @@ renderAnnotatedText targetEntityId (AnnotatedText {..})  =
             ]
         targetOffsets :: [[Int]]    
         targetOffsets = [[start, end]  | EntityMention{..} <- targetEntityMentions]    
+        entityOffsets = [[start, end]  | EntityMention{..}  <- entities ] 
         textSegments :: [T.Text]
-        textSegments  = splitAts content $ concat targetOffsets
-    in interspace "\\entity{" "}" textSegments
+        textSegments  = splitAts content $ concat entityOffsets
+    in T.replace "\n" "\n\n" $ interspace "\\entity{" "}" textSegments
     where interspace:: T.Text -> T.Text -> [T.Text] -> T.Text
           interspace beforeStr afterStr (headSegment:textSegments) =
             let textChunks :: [[T.Text]]
@@ -144,8 +187,10 @@ wrapAt charsPerLine text =
 
 splitAts ::  T.Text -> [Int] -> [T.Text]
 splitAts text offsets = 
-  let lengths :: [Int]
-      lengths = zipWith (-) offsets (0:offsets)
+  let offsets' :: [Int]
+      offsets' = sort offsets
+      lengths :: [Int]
+      lengths = zipWith (-) offsets' (0:offsets')
       (last, splits) = mapAccumL (\txt n -> swap $ T.splitAt n txt) text lengths
   in splits ++ [last]
 
