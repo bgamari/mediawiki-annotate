@@ -29,7 +29,6 @@ let
         assessment-interface = self.callCabal2nix "trec-car-annotation-interface" (localDir ./assessment-interface) {};
         assessment-eval      = self.callCabal2nix "assessment-eval" (localDir ./assessment-eval) {};
         annotate-server      = self.callCabal2nix "annotate-server" (localDir ./assessment-interface/annotation/server) {};
-        #trec-car-graph-expansion = self.callCabal2nix "trec-car-graph-expansion" (localDir ./graph-expansion) {};
         graph-algorithms     = self.callCabal2nix "graph-algorithms" (localDir ./trec-car-tools-haskell/simplir/graph-algorithms) {};
         db-export            = self.callCabal2nix "db-export" (localDir ./db-export) {};
         evalmetrics          = self.callCabal2nix "evalmetrics" (localDir ./evalmetrics) {};
@@ -43,12 +42,12 @@ let
         miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
-        hpc-coveralls = self.callCabal2nix "hpc-coveralls" (nixpkgs.fetchFromGitHub {
+        hpc-coveralls = doJailbreak (self.callCabal2nix "hpc-coveralls" (nixpkgs.fetchFromGitHub {
           owner = "bgamari";
           repo = "hpc-coveralls";
           rev = "a2d500316fecb8ee49c034e2781862c8606b96af";
           sha256 = "17d3ljibsdsxbsqrdjx6rn0ww8ck0lycp2pwfh71ilvwbm5wlbyb";
-        }) {};
+        }) {});
 
         frisby = self.callHackage "frisby" "0.2.4" {};
         http-media = doJailbreak (self.callHackage "http-media" "0.8.0.0" {});

@@ -5,8 +5,8 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "ukb-hs";
-        rev = "4605b1d1b8acd2232b58bbe9fd970a0437432795";
-        sha256 = "0c3qnz7s80zf80v5k0x14yd2qmyp8s2919ds560jm1jcwzf9nzsx";
+        rev = "c63896a592b8063ff589648ea9e24736f777cf02";
+        sha256 = "17v2c3mbv02lvsskkd75dihwf0difk1ln3zs04ilps2dbnifzf3k";
       };
     in import src { inherit haskellPackages; };
 
