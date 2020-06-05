@@ -1,5 +1,8 @@
 cradle:
   cabal:
+    - path: "."
+      component: "lib:mediawiki-convert"
+
     - path: "assessment-eval/src"
       component: "lib:assessment-eval"
 
