@@ -20,6 +20,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import GHC.Generics (Generic)
 
+
 type PageId = T.Text
 type LocationId = T.Text
 type ParagraphId = T.Text

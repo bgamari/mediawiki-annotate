@@ -35,7 +35,7 @@ opts = subparser
     <>  cmd "verify-existing-true-aspect"    (
        verifyExistingTrueAspect
        <$> readEalExamples' 
-        )
+    )
     <>  cmd "min-candidates"    (
        verifyMinCandidates
        <$> readEalExamples' 
@@ -59,7 +59,7 @@ verifyMinCandidates readExamples minCand = do
     verify (Right AspectLinkExample{true_aspect=trueAspectId, candidate_aspects=aspects}) =
         let found = length aspects
         in if (found < minCand) 
-              then Just $ ("" <> trueAspectId <> ": Less than " <> (T.pack  (show minCand)) <>" candidates.")
+              then Just $ ("" <> trueAspectId <> ": Less than " <> (T.pack  (show minCand))) --  <>" candidates.")
               else Nothing
          
 
