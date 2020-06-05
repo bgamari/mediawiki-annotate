@@ -14,8 +14,8 @@ let
     let src = fetchFromGitHub {
         owner = "bgamari";
         repo = "wordnet-parse";
-        rev = "96f90c1e2d9924f3c65fc454bb9237ca38b83dd0";
-        sha256 = "0877219fwdccn75xizfgc112lf4ygx5xflp1drvwrlxrsiyr7hn7";
+        rev = "3c530a48cdb9eb003f27486839543427bba08896";
+        sha256 = "1h2kcp210k2hnpscjhywi5lk7f9v2zgkzyh33j7f3qgldqchjkz7";
       };
     in haskellPackages.callCabal2nix "wordnet-parse" src {};
 in
