@@ -21,7 +21,7 @@ library
   hs-source-dirs:      src
   -- Modules exported by the library.
   exposed-modules:     EalData
-  build-depends:       base  >=4.13 && <5,
+  build-depends:       base  >=4.12 && <5,
                        bytestring,
                        hashable >=1.2 && <1.4,
                        unordered-containers >=0.2 && <0.3,
@@ -34,7 +34,7 @@ executable eal-verify
   main-is:             EalVerify.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.13 && <5,
+  build-depends:       base,
                        bytestring,
                        hashable >=1.2 && <1.4,
                        unordered-containers >=0.2 && <0.3,
@@ -50,7 +50,7 @@ executable eal-stats
   main-is:             EalStats.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.13 && <5,
+  build-depends:       base,
                        bytestring,
                        hashable >=1.2 && <1.4,
                        unordered-containers >=0.2 && <0.3,
@@ -68,7 +68,7 @@ executable eal-render
   main-is:             EalRender.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.13 && <5,
+  build-depends:       base,
                        bytestring,
                        hashable >=1.2 && <1.4,
                        unordered-containers >=0.2 && <0.3,
