@@ -40,6 +40,8 @@ let
         dbpedia-entity-import= self.callCabal2nix "dbpedia-entity-import" (localDir ./dbpedia-entity-import) {};
         tag-me               = self.callCabal2nix "tag-me" (localDir ./tag-me) {};
         miso-types           = self.callCabal2nix "miso-types" (localDir ./miso-types) {};
+        eal-tools            = self.callCabal2nix "eal-tools" (localDir ./eal-tools) {};
+        rank-lips            = self.callCabal2nix "rank-lips" (localDir ./rank-lips) {};
 
         intset = self.callCabal2nix "intset" ./vendor/intset {};
         hpc-coveralls = doJailbreak (self.callCabal2nix "hpc-coveralls" (nixpkgs.fetchFromGitHub {
