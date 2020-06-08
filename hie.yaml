@@ -275,3 +275,4 @@ cradle:
 
     - path: "rank-lips/src"
       component: "lib:rank-lips"
+      
