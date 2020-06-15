@@ -52,10 +52,11 @@ static-dist:
         -fstatic --ghc-options='-optl=-static' \
         --installdir=out --overwrite-policy=always \
         rank-lips
+    - rm -Rf result; cp -Lr out/ result
   cache:
     paths:
       - .cabal-store
   artifacts:
     expire_in: 8 weeks
     paths:
-      - out
+      - result
