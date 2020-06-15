@@ -32,7 +32,7 @@ before_script:
     }
     EOF
 
-validate:
+nix-build:
   image: nixos/nix
   script:
     - nix-build . -A env --cores 1 -j $THREADS | cachix push trec-car-tools
