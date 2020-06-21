@@ -9,7 +9,7 @@ cache:
 before_script:
   - |
     if [ -e ./cache.nar ]; then
-        nix-store --import < ./cache.nar
+        nix-store --import < ./cache.nar || true
     fi
 
     nix-env -iA git -f '<nixpkgs>'
