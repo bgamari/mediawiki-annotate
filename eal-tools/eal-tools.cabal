@@ -8,13 +8,11 @@ version:             0.1.0.0
 -- description:
 -- bug-reports:
 -- license:
-license-file:        LICENSE
 author:              Laura Dietz
 maintainer:          dietz@cs.unh.edu
 -- copyright:
 -- category:
 build-type:          Simple
-extra-source-files:  CHANGELOG.md
 
 
 library
