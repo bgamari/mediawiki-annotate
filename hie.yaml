@@ -270,9 +270,4 @@ cradle:
     - path: "eal-tools/src"
       component: "lib:eal-tools" 
 
-    - path: "rank-lips/.//RankLips.hs"
-      component: "rank-lips:exe:rank-lips"
-
-    - path: "rank-lips/src"
-      component: "lib:rank-lips"
       

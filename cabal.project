@@ -36,7 +36,6 @@ packages:
     evalmetrics/
     crate/
     eal-tools/
-    rank-lips/
 
 package mediawiki-parser
     tests: True
