@@ -101,6 +101,20 @@ aspectToAspectRankData fromAspectField toAspectFieldOpt entityFieldOpt a1 a2 e =
     in RankData $ M.fromList (entityData <> aspectData)
 
 
+
+targetAspectRankData :: Maybe RankDataField -> Maybe RankDataField -> AspectId -> PageId -> RankData
+targetAspectRankData toAspectFieldOpt entityFieldOpt a1 e =
+    let entityData = 
+         case entityFieldOpt of
+                Just field -> [ (field, RankDataText $ T.pack $ unpackPageId e) ]
+                Nothing -> []
+        aspectData =         
+         case toAspectFieldOpt of
+                Just field -> [(field, RankDataText (T.pack $ unpackPageId a1))]
+                Nothing -> []
+    in RankData $ M.fromList (entityData <> aspectData)
+
+
 convertToRunEntries :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> JointAspectFeatures -> [(Feature, [SimplirRun.RankingEntry' T.Text RankData])]
 convertToRunEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAspectFeatures {..} )=
     let queryId = primary_link_example_id
@@ -122,7 +136,44 @@ convertToRunEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAspe
                     | (feature, CompatibilityFeatureMapping {..}) <- M.toList primary_link_example_to_compatability_feature_mapping
                     ]
     in entries                
-  where notSameEntity a1 a2 =
+
+
+notSameEntity :: AspectId -> AspectId -> Bool
+notSameEntity a1 a2 =
           let (e1, _) = T.span (/= '/') $ T.pack $ unpackPageId a1  
               (e2, _) = T.span (/= '/') $ T.pack $ unpackPageId a2
           in e1 /= e2
+
+convertToAssocEntries :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> JointAspectFeatures -> [SimplirRun.RankingEntry' T.Text RankData]
+convertToAssocEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAspectFeatures {..} )=
+    let queryId = primary_link_example_id
+        rankDataName = aspectToAspectRankData fromAspectField toAspectFieldOpt entityFieldOpt
+        singleRankDataName = targetAspectRankData toAspectFieldOpt entityFieldOpt
+  
+        ((feature, CompatibilityFeatureMapping {..}):_) = M.toList primary_link_example_to_compatability_feature_mapping
+        entries1 =      [   SimplirRun.RankingEntry {
+                                queryId = queryId
+                            , documentName = rankDataName a1 a2 entityId
+                            , documentRank = 1
+                            , documentScore = 1.0
+                            , methodName = "assocs"
+                            } 
+                        | (entityId, AspectMapping {..}) <- M.toList compatability_feature_to_co_link_example_mapping
+                        , (a1, CompatibilityMapping{..}) <- M.toList co_aspect_to_primary_aspect_mapping
+                        , (a2, _score) <- M.toList compatability_mapping
+                        , notSameEntity a1 a2
+                        ] 
+        entries2 =      [   SimplirRun.RankingEntry {
+                                queryId = queryId
+                            , documentName = singleRankDataName a2 entityId
+                            , documentRank = 1
+                            , documentScore = 1.0
+                            , methodName = "assocs"
+                            } 
+                        | (entityId, AspectMapping {..}) <- M.toList compatability_feature_to_co_link_example_mapping
+                        , (a1, CompatibilityMapping{..}) <- M.toList co_aspect_to_primary_aspect_mapping
+                        , (a2, _score) <- M.toList compatability_mapping
+                        , not $ notSameEntity a1 a2
+                        ]
+                   
+    in entries1 <> entries2                

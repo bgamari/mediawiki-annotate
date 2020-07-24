@@ -73,8 +73,9 @@ data ModelVersion = ModelVersionV10 | ModelVersionV11
 opts :: Parser (IO ())
 opts = subparser
     $  cmd "version"        doPrintVersion
-    <>  cmd "conv-features"   convertFeatures'
+    <> cmd "export-features"   doExportFeatures'
     <> cmd "conv-runs" doConvMethodRuns'
+    <> cmd "export-assocs" doExportAssocs'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
      
@@ -86,7 +87,7 @@ opts = subparser
                                     -- , gitMsg
                                     ]
         
-    convertFeatures' =
+    doExportFeatures' =
         f <$> argument str (help "Features in Jordan's jsonl.gz format")
           <*> option str (long "out-dir" <> short 'O' <> help "directory to write runfiles to" <> metavar "FILE")     
           <*> option str (long "out" <> short 'o' <> help "output prefix " <> metavar "PREFIX" )
@@ -129,6 +130,23 @@ opts = subparser
                 case methodFieldOpt of
                       Just methodField -> fromListRankData [(runField, (RankDataText doc)), (methodField,  (RankDataText method))]
                       Nothing -> fromListRankData [(runField, (RankDataText doc))]
+
+
+
+    doExportAssocs' =
+        f <$> argument str (help "Features in Jordan's jsonl.gz format")
+          <*> option str (long "out" <> short 'o' <> help "output file " <> metavar "FILE" )
+          <*> option ( RankDataField . T.pack <$> str) (long "from-aspect-field" <> metavar "FIELD" <> help "json field representing the first aspect in file" )
+          <*> optional (option ( RankDataField . T.pack <$> str) (long "to-aspect-field" <> metavar "FIELD" <> help "json field representing the second aspect in file" ))
+          <*> optional (option ( RankDataField . T.pack <$> str) (long "entity-field" <> metavar "FIELD" <> help "json field representing the entity in file" ))
+      where
+        f :: FilePath -> FilePath -> RankDataField -> Maybe RankDataField -> Maybe RankDataField -> IO()
+        f inputJson outFile fromAspectField toAspectField entityField = do
+            inFeatures <- readJordanJointAspectFormat inputJson
+            let entries = concat $ fmap (convertToAssocEntries  fromAspectField toAspectField entityField)  inFeatures
+
+            writeGzJsonLRunFile outFile entries
+            putStrLn $ "Written to "<> outFile
 
 
 readTrecEvalRunFile' :: (SimplirRun.QueryId -> q ) -> (SimplirRun.DocumentName -> SimplirRun.MethodName -> d)
