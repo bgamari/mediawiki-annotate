@@ -74,6 +74,7 @@ opts :: Parser (IO ())
 opts = subparser
     $  cmd "version"        doPrintVersion
     <>  cmd "conv-features"   convertFeatures'
+    <> cmd "conv-runs" doConvMethodRuns'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
      
