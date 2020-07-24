@@ -163,17 +163,19 @@ convertToAssocEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAs
                         , (a2, _score) <- M.toList compatability_mapping
                         , notSameEntity a1 a2
                         ] 
-        entries2 =      [   SimplirRun.RankingEntry {
+        entries2 =  fmap snd $ M.toList $ M.fromList   -- nub duplicate entries
+                    $   [   (docName , SimplirRun.RankingEntry {
                                 queryId = queryId
-                            , documentName = singleRankDataName a2 entityId
+                            , documentName = docName
                             , documentRank = 1
                             , documentScore = 1.0
                             , methodName = "assocs"
-                            } 
+                            } )
                         | (entityId, AspectMapping {..}) <- M.toList compatability_feature_to_co_link_example_mapping
                         , (a1, CompatibilityMapping{..}) <- M.toList co_aspect_to_primary_aspect_mapping
                         , (a2, _score) <- M.toList compatability_mapping
                         , not $ notSameEntity a1 a2
+                        , let docName = singleRankDataName a2 entityId
                         ]
                    
     in entries1 <> entries2                
