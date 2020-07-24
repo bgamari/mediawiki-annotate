@@ -34,3 +34,6 @@
 [submodule "trec-car-tools-haskell"]
 	path = trec-car-tools-haskell
 	url = https://github.com/TREMA-UNH/trec-car-tools-haskell.git
+[submodule "rank-lips"]
+	path = rank-lips
+	url = git@git.smart-cactus.org:dietz/rank-lips.git

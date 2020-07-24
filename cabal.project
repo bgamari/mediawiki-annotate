@@ -4,6 +4,7 @@ allow-newer:
     profunctors
 
 packages:
+    rank-lips/
     trec-car-tools-haskell/trec-car-tools/
     trec-car-tools-haskell/trec-car-types/
     trec-car-tools-haskell/simplir/*/*.cabal
