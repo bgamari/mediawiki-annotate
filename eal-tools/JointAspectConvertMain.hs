@@ -89,14 +89,17 @@ opts = subparser
         f <$> argument str (help "Features in Jordan's jsonl.gz format")
           <*> option str (long "out-dir" <> short 'O' <> help "directory to write runfiles to" <> metavar "FILE")     
           <*> option str (long "out" <> short 'o' <> help "output prefix " <> metavar "PREFIX" )
+          <*> option ( RankDataField . T.pack <$> str) (long "from-aspect-field" <> metavar "FIELD" <> help "json field representing the first aspect in file" )
+          <*> optional (option ( RankDataField . T.pack <$> str) (long "to-aspect-field" <> metavar "FIELD" <> help "json field representing the second aspect in file" ))
+          <*> optional (option ( RankDataField . T.pack <$> str) (long "entity-field" <> metavar "FIELD" <> help "json field representing the entity in file" ))
       where
-        f :: FilePath -> FilePath -> FilePath -> IO()
-        f inputJson outputDir outputFile = do
+        f :: FilePath -> FilePath -> FilePath -> RankDataField -> Maybe RankDataField -> Maybe RankDataField -> IO()
+        f inputJson outputDir outputFile fromAspectField toAspectField entityField = do
             inFeatures <- readJordanJointAspectFormat inputJson
             let entries = M.fromListWith (<>)
                           [ (feature, entries)
                           | jointAspectFeature <- inFeatures
-                          , (feature, entries)  <- convertToRunEntries jointAspectFeature
+                          , (feature, entries)  <- convertToRunEntries  fromAspectField toAspectField entityField  jointAspectFeature
                           ]
 
 

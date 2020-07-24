@@ -85,19 +85,30 @@ readJordanJointAspectFormat filename = do
 
 
 
-aspectToAspectRankData :: AspectId -> AspectId -> PageId -> RankData
-aspectToAspectRankData a1 a2 e =
-    RankData $ M.fromList [ (RankDataField "entity", RankDataText $ T.pack $ unpackPageId e)
-                          , (RankDataField "aspect", RankDataList [T.pack $ unpackPageId a1, T.pack $ unpackPageId a2]) ]
+aspectToAspectRankData :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> AspectId -> AspectId -> PageId -> RankData
+aspectToAspectRankData fromAspectField toAspectFieldOpt entityFieldOpt a1 a2 e =
+    let entityData = 
+         case entityFieldOpt of
+                Just field -> [ (field, RankDataText $ T.pack $ unpackPageId e) ]
+                Nothing -> []
+        aspectData =         
+         if (toAspectFieldOpt == Just fromAspectField)
+            then  [(fromAspectField, RankDataList [T.pack $ unpackPageId a1, T.pack $ unpackPageId a2])]
+            else [(fromAspectField, RankDataText (T.pack $ unpackPageId a1))]
+                 <> case toAspectFieldOpt of
+                      Just field -> [(field, RankDataText (T.pack $ unpackPageId a2))]
+                      Nothing -> []
+    in RankData $ M.fromList (entityData <> aspectData)
 
 
-convertToRunEntries :: JointAspectFeatures -> [(Feature, [SimplirRun.RankingEntry' T.Text RankData])]
-convertToRunEntries (JointAspectFeatures {..} )=
+convertToRunEntries :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> JointAspectFeatures -> [(Feature, [SimplirRun.RankingEntry' T.Text RankData])]
+convertToRunEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAspectFeatures {..} )=
     let queryId = primary_link_example_id
+        rankDataName = aspectToAspectRankData fromAspectField toAspectFieldOpt entityFieldOpt
         entries =   [ (feature, 
                         [   SimplirRun.RankingEntry {
                                 queryId = queryId
-                            , documentName = aspectToAspectRankData a1 a2 entityId
+                            , documentName = rankDataName a1 a2 entityId
                             , documentRank = 1
                             , documentScore = toRealFloat score 
                             , methodName = feature
