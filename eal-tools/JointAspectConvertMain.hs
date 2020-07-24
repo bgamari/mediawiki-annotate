@@ -139,11 +139,12 @@ opts = subparser
           <*> option ( RankDataField . T.pack <$> str) (long "from-aspect-field" <> metavar "FIELD" <> help "json field representing the first aspect in file" )
           <*> optional (option ( RankDataField . T.pack <$> str) (long "to-aspect-field" <> metavar "FIELD" <> help "json field representing the second aspect in file" ))
           <*> optional (option ( RankDataField . T.pack <$> str) (long "entity-field" <> metavar "FIELD" <> help "json field representing the entity in file" ))
+          <*> optional (option ( RankDataField . T.pack <$> str) (long "self-entity-field" <> metavar "FIELD" <> help "json field representing the entity self-referential aspects in file" ))
       where
-        f :: FilePath -> FilePath -> RankDataField -> Maybe RankDataField -> Maybe RankDataField -> IO()
-        f inputJson outFile fromAspectField toAspectField entityField = do
+        f :: FilePath -> FilePath -> RankDataField -> Maybe RankDataField -> Maybe RankDataField -> Maybe RankDataField -> IO()
+        f inputJson outFile fromAspectField toAspectField entityField selfEntityField = do
             inFeatures <- readJordanJointAspectFormat inputJson
-            let entries = concat $ fmap (convertToAssocEntries  fromAspectField toAspectField entityField)  inFeatures
+            let entries = concat $ fmap (convertToAssocEntries  fromAspectField toAspectField entityField selfEntityField)  inFeatures
 
             writeGzJsonLRunFile outFile entries
             putStrLn $ "Written to "<> outFile

@@ -144,11 +144,11 @@ notSameEntity a1 a2 =
               (e2, _) = T.span (/= '/') $ T.pack $ unpackPageId a2
           in e1 /= e2
 
-convertToAssocEntries :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> JointAspectFeatures -> [SimplirRun.RankingEntry' T.Text RankData]
-convertToAssocEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAspectFeatures {..} )=
+convertToAssocEntries :: RankDataField -> Maybe RankDataField -> Maybe RankDataField -> Maybe RankDataField -> JointAspectFeatures -> [SimplirRun.RankingEntry' T.Text RankData]
+convertToAssocEntries  fromAspectField toAspectFieldOpt entityFieldOpt selfEntityFieldOpt  (JointAspectFeatures {..} )=
     let queryId = primary_link_example_id
         rankDataName = aspectToAspectRankData fromAspectField toAspectFieldOpt entityFieldOpt
-        singleRankDataName = targetAspectRankData toAspectFieldOpt entityFieldOpt
+        selfRankDataName = targetAspectRankData toAspectFieldOpt selfEntityFieldOpt
   
         ((feature, CompatibilityFeatureMapping {..}):_) = M.toList primary_link_example_to_compatability_feature_mapping
         entries1 =      [   SimplirRun.RankingEntry {
@@ -175,7 +175,7 @@ convertToAssocEntries  fromAspectField toAspectFieldOpt entityFieldOpt  (JointAs
                         , (a1, CompatibilityMapping{..}) <- M.toList co_aspect_to_primary_aspect_mapping
                         , (a2, _score) <- M.toList compatability_mapping
                         , not $ notSameEntity a1 a2
-                        , let docName = singleRankDataName a2 entityId
+                        , let docName = selfRankDataName a2 entityId
                         ]
                    
     in entries1 <> entries2                
