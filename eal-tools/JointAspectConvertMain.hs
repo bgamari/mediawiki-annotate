@@ -37,6 +37,8 @@ import qualified Data.Set as S
 import qualified Data.Text as T
 import Data.Maybe
 import qualified Data.List.Split as Split
+import Data.Ord
+import Data.List
 import System.Directory
 
 import qualified SimplIR.Format.TrecRunFile as SimplirRun
@@ -76,6 +78,7 @@ opts = subparser
     <> cmd "export-features"   doExportFeatures'
     <> cmd "conv-runs" doConvMethodRuns'
     <> cmd "export-assocs" doExportAssocs'
+    <> cmd "keep-best-entity" keepBestEntity'
   where
     cmd name action = command name (info (helper <*> action) fullDesc)
      
@@ -149,6 +152,49 @@ opts = subparser
             writeGzJsonLRunFile outFile entries
             putStrLn $ "Written to "<> outFile
 
+
+    keepBestEntity' =
+        f <$> option str (long "output" <> short 'o' <> help "location of new run file" <> metavar "FILE")     
+          <*> option str (long "run" <> short 'r' <> help "trec_eval run file " <> metavar "RUN" )
+          <*> option ( RankDataField . T.pack <$> str) (short 'p' <> long "aspect-field" <> metavar "FIELD" <> help "json field representing aspect id" )
+          <*> option ( RankDataField . T.pack <$> str) (short 'P' <> long "entity-field" <> metavar "FIELD" <> help "json field that will be representing entity id" )
+      where
+        f :: FilePath -> FilePath -> RankDataField -> RankDataField ->  IO()
+        f outputFile runFile aspectField entityField = do
+            runData <- readJsonLRunFile @T.Text runFile
+            let runData' =  [ SimplirRun.RankingEntry{documentName=entityDoc ,..} 
+                            | SimplirRun.RankingEntry{..} <- runData
+                            , let entityDoc = augmentEntityDocument documentName
+                            ]
+                runData'' = M.fromListWith (keepBest)
+                             [ ((queryId, entityId), [entry])
+                             | entry@SimplirRun.RankingEntry{..} <- runData'   
+                             , let entityId = rankDataLookup entityField documentName
+                             ]
+                runData''' = M.elems
+                           $ M.map (head) runData''             
+                             
+            writeJsonLRunFile outputFile $ runData'''
+          where
+            augmentEntityDocument :: RankData -> RankData
+            augmentEntityDocument aspectDoc = 
+                let Just aspectId = aspectField `M.lookup` (unData aspectDoc)
+                    entityData = singletonRankData entityField $ extractEntity aspectId
+                in unionRankData aspectDoc entityData
+  
+
+        extractEntity :: RankDataValue -> RankDataValue
+        extractEntity (RankDataText aspectId) = 
+            RankDataText $ T.takeWhile (/= '/')$  aspectId 
+        extractEntity (RankDataList aspectId) = 
+            error $ "Cant support RankDataList for extractEntity"
+            
+        keepBest entries1 entries2 =
+            [
+              maximumOn (\SimplirRun.RankingEntry{..} -> documentRank) (entries1 <> entries2)
+            ]
+       
+maximumOn f = Data.List.maximumBy (comparing f)
 
 readTrecEvalRunFile' :: (SimplirRun.QueryId -> q ) -> (SimplirRun.DocumentName -> SimplirRun.MethodName -> d)
                   -> FilePath  
