@@ -39,7 +39,7 @@ library
                        intset,
                        trec-car-types,
                        trec-car-tools
-  ghc-options:         -optc=-march=skylake -optc=-g3
+  ghc-options:         -optc=-march=skylake -optc=-g3 -Wall
   default-language:    Haskell2010
 
 executable trec-car-find-duplicates
