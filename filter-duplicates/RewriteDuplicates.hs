@@ -58,7 +58,7 @@ rewritePage rewritePara page@(Page{..}) =
     rewriteSkeleton (Para para)         = Para (rewritePara para)
     rewriteSkeleton (Image a skels)     = Image a (map rewriteSkeleton skels)
     rewriteSkeleton (List n para)       = List n (rewritePara para)
-    rewriteSkeleton (Infobox n flds)    = Infobox n [ (a, rewriteSkeleton b)
+    rewriteSkeleton (Infobox n flds)    = Infobox n [ (a, map rewriteSkeleton b)
                                                     | (a,b) <- flds
                                                     ]
 
