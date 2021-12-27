@@ -89,28 +89,6 @@ isInteresting siteInfo  =
               (prefix, rest) | not $ BS.null rest -> not $ prefix `HS.member` uninterestingNameSpaces
               _                                -> True
 
-_isEnInteresting :: WikiDoc -> Bool
-_isEnInteresting WikiDoc{..} = not $
-       "Category talk:" `BS.isPrefixOf` docTitle
-    || "Talk:" `BS.isPrefixOf` docTitle
-    || "File:" `BS.isPrefixOf` docTitle
-    || "File talk:" `BS.isPrefixOf` docTitle
-    || "Special:" `BS.isPrefixOf` docTitle
-    || "User:" `BS.isPrefixOf` docTitle
-    || "User talk:" `BS.isPrefixOf` docTitle
-    || "Wikipedia talk:" `BS.isPrefixOf` docTitle
-    || "Wikipedia:" `BS.isPrefixOf` docTitle
-    || "Template:" `BS.isPrefixOf` docTitle
-    || "Template talk:" `BS.isPrefixOf` docTitle
-    || "Portal:" `BS.isPrefixOf` docTitle
-    || "Module:" `BS.isPrefixOf` docTitle
-    || "Draft:" `BS.isPrefixOf` docTitle
-    || "Help:" `BS.isPrefixOf` docTitle
-    || "Book:" `BS.isPrefixOf` docTitle
-    || "TimedText:" `BS.isPrefixOf` docTitle
-    || "MediaWiki:" `BS.isPrefixOf` docTitle
-
-
 main :: IO ()
 main = do
     (workers, maybeConfig, prov) <- execParser' 2
