@@ -1,6 +1,6 @@
 allow-newer:
     -- for pipes-text
-    pipes-safe
+    pipes-safe,
     profunctors
 
 packages:

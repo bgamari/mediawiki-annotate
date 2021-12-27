@@ -33,6 +33,7 @@ helpDescr =
         "",
         cmd "name-contains SUBSTR"             "matches pages where the page name contains the SUBSTR (case insensitive)",
         cmd "name-has-prefix PREFIX"           "matches pages where the page name starts with PREFIX (case sensitive)",
+        cmd "name-has-suffix SUFFIX"           "matches pages where the page name ends with SUFFIX (case sensitive)",
         cmd "category-contain SUBSTR"          "matches pages that are a member of a category that contains SUBSTR (case insensitive)",
         "",
         cmd "name-in-set [\"P1\", \"P2\", \"P3\"]"  "matches pages whose page names are in the given set {P1,P2,P3}",

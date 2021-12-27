@@ -26,6 +26,7 @@ defaultSalt = -2578643520546668380  -- 0xdc36d1615b7400a4
 
 data Pred a = NameContains T.Text
             | NameHasPrefix T.Text
+            | NameHasSuffix T.Text
             | NameInSet (HS.HashSet PageName)
             | PageIdInSet (HS.HashSet PageId)
             | HasCategoryContaining T.Text
@@ -44,6 +45,7 @@ data Pred a = NameContains T.Text
 runPred :: Applicative m => (a -> m (Pred b)) -> Pred a -> m (Pred b)
 runPred _ (NameContains x)     = pure $ NameContains x
 runPred _ (NameHasPrefix x)    = pure $ NameHasPrefix x
+runPred _ (NameHasSuffix x)    = pure $ NameHasSuffix x
 runPred _ (NameInSet x)        = pure $ NameInSet x
 runPred _ (PageIdInSet x)        = pure $ PageIdInSet x
 runPred _ (HasCategoryContaining x)  = pure $ HasCategoryContaining x
@@ -78,7 +80,8 @@ parsePred inj = term
     term = parens expr <|> simple
 
     simple =
-        asum [ nameContains, nameHasPrefix, nameInSet, hasCategoryContaining, pageHashMod
+        asum [ nameContains, nameHasPrefix, nameHasSuffix
+             , nameInSet, hasCategoryContaining, pageHashMod
              , testSet, trainSet, foldPred, isRedirect, isDisambiguation, isCategory
              , truePred
              , Pure <$> inj
@@ -103,6 +106,10 @@ parsePred inj = term
     nameHasPrefix = do
         void $ textSymbol "name-has-prefix"
         NameHasPrefix <$> string'
+
+    nameHasSuffix = do
+        void $ textSymbol "name-has-suffix"
+        NameHasSuffix <$> string'
 
     nameInSet = do
         void $ textSymbol "name-in-set"
@@ -144,6 +151,7 @@ interpret pageNameTranslate pred page =
     case pred of
       NameContains t                -> t `T.isInfixOf` (T.toCaseFold $ getPageName $ pageNameTranslate $ pageName page)
       NameHasPrefix prefix          -> prefix `T.isPrefixOf` (getPageName $ pageNameTranslate $ pageName page)
+      NameHasSuffix suffix          -> suffix `T.isSuffixOf` (getPageName $ pageNameTranslate $ pageName page)
       NameInSet names               -> (pageNameTranslate $ pageName page) `HS.member` names
       PageIdInSet pageIds           -> (pageId page) `HS.member` pageIds
       HasCategoryContaining s       -> any (s `T.isInfixOf`) $ map (getPageName . pageNameTranslate) $ fromMaybe [] $ getMetadata _CategoryNames (pageMetadata page)
